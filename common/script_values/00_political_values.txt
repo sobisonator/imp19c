@@ -1,0 +1,228 @@
+# VALUES HEREIN TO BE CALCUALTED ON A YEARLY TICK
+
+# Half of state loyalty, for boosting turnout in loyal states.
+half_state_loyalty = {
+	value = state_loyalty
+	multiply = 0.5
+}
+
+### Voter turnout modifiers
+
+tribesemen_turnout_modifier = {
+	value = 0
+	if = {
+		limit = {
+			owner = {
+				has_law = weighted_landed_suffrage
+			}
+		}
+		add = 0.1
+	}
+	else_if = {
+		limit = {
+			owner = {
+				has_law = weighted_equal_suffrage
+			}
+		}
+		add = 0.1
+	}
+	else_if = {
+		limit = {
+			owner = {
+				has_law = universal_suffrage
+			}
+		}
+		add = 1
+	}
+}
+
+proletariat_turnout_modifier = {
+	value = 0
+	if = {
+		limit = {
+			owner = {
+				has_law = weighted_equal_suffrage
+			}
+		}
+		add = 0.25
+	}
+	else_if = {
+		limit = {
+			owner = {
+				has_law = universal_suffrage
+			}
+		}
+		add = 1
+	}
+}
+
+lower_strata_turnout_modifier = {
+	value = 0
+	if = {
+		limit = {
+			owner = {
+				has_law = weighted_equal_suffrage
+			}
+		}
+		add = 0.25
+	}
+	else_if = {
+		limit = {
+			owner = {
+				has_law = universal_suffrage
+			}
+		}
+		add = 1
+	}
+}
+
+middle_strata_turnout_modifier = {
+	value = 0
+	if = {
+		limit = {
+			owner = {
+				has_law = weighted_landed_suffrage
+			}
+		}
+		add = 0.5
+	}
+	else_if = {
+		limit = {
+			owner = {
+				has_law = weighted_equal_suffrage
+			}
+		}
+		add = 0.5
+	}
+	else_if = {
+		limit = {
+			owner = {
+				has_law = universal_suffrage
+			}
+		}
+		add = 1
+	}
+}
+
+upper_strata_turnout_modifier = {
+	value = 1
+}
+
+### Voter turnout values as percentage
+tribesmen_voter_turnout = {
+	value = 0.5
+	multiply = num_of_tribesmen
+	add = half_state_loyalty
+	multiply = tribesmen_turnout_modifier
+	max = 1
+	min = 0.01
+}
+
+proletariat_voter_turnout = {
+	value = 0.4
+	multiply = num_of_proletariat
+	add = half_state_loyalty
+	multiply = proletariat_turnout_modifier
+	max = 1
+	min = 0.01
+}
+
+lower_strata_voter_turnout = {
+	value = 0.66
+	multiply = num_of_lower_strata
+	add = half_state_loyalty
+	multiply = lower_strata_turnout_modifier
+	max = 1
+	min = 0.01
+}
+
+middle_strata_voter_turnout = {
+	value = 0.8
+	multiply = num_of_middle_strata
+	add = half_state_loyalty
+	multiply = middle_strata_turnout_modifier
+	max = 1
+	min = 0.01
+}
+
+upper_strata_voter_turnout = {
+	value = 1
+	multiply = num_of_upper_strata
+	add = half_state_loyalty
+	multiply = upper_strata_turnout_modifier
+	max = 1
+	min = 0.01
+}
+
+### Modifiers from party leaders
+
+conservative_party_leader_bonus = {
+	value = 0
+	add = {
+		conservative_party = {
+			party_leader = {
+				add = popularity
+			}
+		}
+	}
+}
+
+### Support per pop in a province
+
+# CONSERVATIVE PARTIES
+tribesmen_CON_support = {
+	value = 1
+	multiply = num_of_tribesmen
+}
+
+proletariat_CON_support = {
+	value = 1
+	multiply = num_of_proletariat
+}
+
+lower_strata_CON_support = {
+	value = 1
+	multiply = num_of_lower_strata
+}
+
+middle_strata_CON_support = {
+	value = 1
+	multiply = num_of_middle_strata
+	if = {
+		limit = {
+			has_city_status = no
+		}
+		multiply = 5
+	}
+}
+
+upper_strata_CON_support = {
+	value = 1
+	multiply = num_of_upper_strata
+	if = {
+		limit = {
+			has_city_status = no
+		}
+		multiply = 6
+	}
+}
+
+# LIBERAL PARTIES
+
+### Total scores from each pop type, for determining percentages
+
+middle_strata_all_support = {
+	value = 0
+	add = middle_strata_CON_support
+	add = middle_strata_LIB_support
+	add = middle_strata_REA_support
+	add = middle_strata_RAD_support
+	add = middle_strata_SOC_support
+}
+
+### Percentage of votes doled out by each pop
+
+middle_strata_CON_percentage_vote = {
+	value = middle_strata_CON_support
+	divide = middle_strata_all_support
+}

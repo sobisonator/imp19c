@@ -1,0 +1,97 @@
+import csv, codecs
+
+# These columns may vary depending on what pops you have added to the game
+# Change as necessary
+id_column = 0
+name_column = 15
+culture_column = 1
+religion_column = 2
+tradegoods_column = 3
+civilization_column = 12
+barbarian_column = 13
+province_rank_column = 14
+area_column = 16
+# Pop values
+citizen_column = 4
+freemen_column = 4
+slaves_column = 9
+tribesmen_column = 10
+# Pops for the 1815 mod
+lower_strata_column = 6
+middle_strata_column = 7
+upper_strata_column = 11
+proletariat_column = 8
+
+terrain_file = open("province_terrain/00_province_terrain.txt",encoding="utf=8")
+
+def create_terrain_dict(terrain_file):
+    terrain_txt = terrain_file.read()
+    terrain_dict = {}
+    for line in terrain_txt.splitlines(True):
+        if line:
+            key, value = map(str.strip, line.split("="))
+            terrain_dict[key] = value
+    return terrain_dict
+    # This makes a VERY BIG DICT. Do NOT try to look at it
+    # or you will unleash a cosmic terror
+
+terrain_dict = create_terrain_dict(terrain_file)
+
+def find_terrain(province_id):
+    pass
+
+setup_csv = open("province_setup.csv")
+reader = csv.reader(setup_csv, delimiter=";")
+
+generated_setup = codecs.open("GENERATED_SETUP.txt", "w", "utf-8-sig")
+
+with generated_setup as f:
+    for row in reader:
+        # Only do this for land provinces
+        # Land provinces presumptively have an area set, so use that
+        if row[area_column] != "":
+            if row[id_column] in terrain_dict:
+                terrain = terrain_dict[row[id_column]]
+            else:
+                terrain = ""
+            province_rank = row[province_rank_column]
+            if province_rank == "":
+                province_rank = "settlement"
+            
+            f.write(
+        row[id_column] + '={ #' + row[name_column] + '\n' +
+        '   terrain="' + terrain + '"\n' +
+        '   culture="' + row[culture_column] + '"\n' +
+        '   religion="' + row[religion_column] + '"\n' +
+        '   trade_goods="' + row[tradegoods_column] + '"\n' +
+        '   civilization_value=' + row[civilization_column] + '\n' +
+        '   barbarian_power=' + row[barbarian_column] + '\n' +
+        '   province_rank="' + province_rank + '"\n' +
+        '   citizen={\n' +
+        '      amount=' + row[citizen_column] + '\n'
+        '   }\n' +
+        '   freemen={\n' +
+        '      amount=' + row[freemen_column] + '\n'
+        '   }\n' +
+        '   slaves={\n' +
+        '      amount=' + row[slaves_column] + '\n'
+        '   }\n' +
+        '   tribesmen={\n' +
+        '      amount=' + row[tribesmen_column] + '\n'
+        '   }\n' +
+        # Below special for 1815 mod
+        '   lower_strata={\n' +
+        '      amount=' + row[lower_strata_column] + '\n'
+        '   }\n' +
+        '   middle_strata={\n' +
+        '      amount=' + row[middle_strata_column] + '\n'
+        '   }\n' +
+        '   upper_strata={\n' +
+        '      amount=' + row[upper_strata_column] + '\n'
+        '   }\n' +
+        '   proletariat={\n' +
+        '      amount=' + row[proletariat_column] + '\n'
+        '   }\n' +
+        # Remove above if not using this for the 1815 mod
+        '}\n\n'
+            )

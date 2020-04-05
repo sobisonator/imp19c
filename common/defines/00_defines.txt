@@ -1,6 +1,6 @@
 ﻿NGame = {
-	START_DATE = "1815.7.9"
-	END_DATE = "1999.1.1"
+	START_DATE = "450.10.1"
+	END_DATE = "727.2.17"
 	GAME_SPEED_TICKS = {	 #how many seconds should a day take in every game speed
 		1
 		0.75
@@ -18,7 +18,7 @@
 	MIN_MERCENARIES_PER_REGION = 3
 	MERCENARIES_CITY_THRESHOLD = 50
 	MERCENARIES_PER_CITY = 0.1
-		
+	
 	MERCENARY_BASE_AMOUNT = 2
 	MERCENARY_PER_POP_SCALE = 0.05
 	MERCENARY_AMOUNT_DEVIATION = 0.25 
@@ -68,8 +68,7 @@ NCountry = {
 	DISBAND_PAYOFF_FACTOR = 0.125
 	MERCENARY_DEBT_THRESHOLD = 1.0
 	
-	SLAVE_DISTRO_PER_STATES_DIV = 10
-
+	SLAVE_DISTRO_MIN_NUM_OF_STATES = 3  #Slaves captured will be distributed to these number of states near the capital plus capital unless there are less states 
 
 	RETINUE_FOR_CLAN_LEADER_MAINTENANCE = 0.05
 	MAX_RETINUE_MAN_POWER_ALLOCATION = 0.33 #How much percentage of max manpower of a country is allocated to retinues
@@ -82,7 +81,7 @@ NCountry = {
 	
 	MAX_INVENTIONS_SAME_TYPE = 3
 	
-	STATE_LOYALTY_CONQUEST_MODIFIER = 100
+	STATE_LOYALTY_CONQUEST_MODIFIER = 10
 	
 	MOVE_POP_TO_EMPTY_MONTHS_COOLDOWN = 12
 	
@@ -155,16 +154,38 @@ NCountry = {
 	BASE_NAVAL_RANGE = 650
 
 	POTENTIAL_MISSION_COUNT = 3 # Number of random missions to pick between
+
+	EXPECTED_DEITY_COUNT = 4 # Number of deities each country is expected to have at game start. 
+
+	CHANGE_PANTHEON_OMEN_COOLDOWN_MONTHS = 36 # Cooldown period in months after a country changes it's pantheon. No omens can be called on that deity during this cooldown period. 
+	
+	DEIFIED_RULERS_EXPIRE = 20 # Years before a deified ruler that has not been in a pantheon is forgotten and removed
 }  
+
+
+NPowerBase = {
+	FROM_TITLE = 2
+	LOYAL_COHORTS = 100
+	LOYAL_VETERANS = 100
+	NON_LOYAL_COHORTS = 100
+	SHIPS = 10
+	GOVERNOR_POP = 100
+	RULER_POP = 20
+	HOLDINGS = 50
+	HEAD_OF_FAMILY = 120
+	MIN_EMPLOYER_UNIT_THRESHOLD = 15 # when country is too small, this will be the smallest threshold with which the powerbase will be calculated
+	MIN_EMPLOYER_SHIP_THRESHOLD = 5 # when scountry is too small, this will be the smallest threshold with which the powerbase will be calculated
+}
 
 NPop = {
 	PROMOTE_DEMOTE_THRESHOLD = 0.005	#percentage above desired ratio before demote.
 	HAPPYNESS_FOR_UNREST_THRESHOLD = 0.5
 	WRONG_CULTURE_GROUP_HAPPYNESS = -0.3
 	WRONG_CULTURE_HAPPYNESS = -0.1
-	WRONG_RELIGION_HAPPNESS = -0.05
-	WRONG_GOVERNOR_RELIGION_HAPPYNESS = -0.1
-		
+	WRONG_RELIGION_HAPPNESS = 0
+	WRONG_GOVERNOR_RELIGION_HAPPYNESS = -0.05
+	DEITY_SAME_RELIGION_HAPPINESS = 0.05
+	
 	UNREST_GENERATION = 0.5
 	UNREST_SCALE = 20 #Basically UNREST_GENERATION * UNREST_SCALE..
 	
@@ -178,8 +199,8 @@ NPop = {
 	ASSIMILATE_DIFF_RELIGION_PENALTY = -0.33
 	CONVERT_DIFF_CULTURE_PENALTY = -0.20
 	POP_FOOD_REQUIREMENT = 0.2
-	DEFAULT_FOOD_CAPACITY = 500
-	
+
+	CONVERSION_SCALE_PER_MISMATCHED_DEITY = -0.2;
 }
 
 
@@ -205,11 +226,13 @@ NCombat = {
 	BASE_MORALE_DAMAGE = 2.0
 
 	RETREAT_STRENGTH_DAMAGE = 0.5
-	
 
-	
+	# Percentage of total Unit Morale
+	MORALE_HIT_FOR_LATE_DEPLOYMENT = 0.10 # Applied to all units that are instantly deployed to the battlefield AFTER your army is already able to retreat
+	MORALE_HIT_FOR_NON_SECONDARY_REINFORCEMENT = 0.05 # Applied to all units that reinforce a battle from behind, but are not designated as the secondary rank unit type
+
 	DAYS_PER_PHASE = 5
-	DAYS_PER_SIEGE_PHASE = 30
+	DAYS_PER_SIEGE_PHASE = 25
 	DAYS_PER_SIEGE_PHASE_WITHOUT_FORT = 15
 	COMBAT_DICE_SIDE = 6
 	COMBAT_BASE = 5
@@ -234,7 +257,7 @@ NCombat = {
 	GARRISON_SIZE = 1
 	ASSAULT_WIDTH_LIMIT = 3
 	
-	SIEGE_FORCE_NEEDED_MULTIPLIER  = 5
+	SIEGE_FORCE_NEEDED_MULTIPLIER  = 4
 	
 	EXPERIENCE_GAIN = 200.0
 	
@@ -249,8 +272,8 @@ NCombat = {
 	POSITIONING_CHANGE_TARGET_CHANCE = 20
 	CHAOS_CHANCE = 10
 
-	WAR_EXHAUTION_FROM_LOSSES = 2.0
-	MAX_WAR_EXHAUSTION_FROM_BATTLE = 5.0
+	WAR_EXHAUTION_FROM_LOSSES = 4.0 #Multiplier on losses
+	MAX_WAR_EXHAUSTION_FROM_BATTLE = 5.0 
 	
 	SIEGE_SUPPLY_SHORTAGE_LOSS = 0.02
 	SIEGE_SUPPLY_SHORTAGE_IMPACT = 1
@@ -399,7 +422,7 @@ NDiplomacy = {
 	EXECUTION_RELATION_MODIFIER = -200
 	BASE_CHARACTER_SPY_CHANCE = 0.5
 	
-	DIPLOMATIC_RANGE = 8000
+	DIPLOMATIC_RANGE = 800
 
 	OPINION_MIN = -200
 	OPINION_MAX = 200
@@ -489,20 +512,19 @@ NSuccession = {
 	
 }
 
-NCharacter = {	
-	
+NCharacter = {
 	TRAIT_GENERATION_CAP = 2
 	TRAIT_MILITARY_LIMIT = 1
 	TRAIT_PERSONALITY_LIMIT = 2
 	
 	MIN_HOLDINGS_FOR_POWER_BASE = 5
 
-
+	HOLDING_BASE_MULTIPLIER = 0.25 # % of Provincial income that a holding will grant to its owner
+	
 	BASE_LOYALTY_GAIN_CHANCE = 0.5
 	LOYALTY_GAIN_OUTSIDE_COMBAT = 0.1
 	
 	INITIAL_MARRIAGE_COUNT = 2;
-	
 	
 	DISLOYALTY_THRESHOLD = 50
 	INFANCY_MAX_AGE = 5
@@ -515,32 +537,33 @@ NCharacter = {
 	MAX_CHILD_BIRTH_AGE = 45
 	CHILD_BIRTH_TO_PREGNANCY_WAIT = 24
 	
-	BASE_NR_OF_CHILDREN_PER_COUPLE = 1
+	BASE_NR_OF_CHILDREN_PER_COUPLE = 2
 	
 	ADDITIONAL_CHILD_PROMINENCE_THRESHOLD_1 = 20
 	ADDITIONAL_CHILDREN_FOR_PROMINENCE_THRESHOLD_1 = 1
 	
-	ADDITIONAL_CHILD_PROMINENCE_THRESHOLD_2 = 80
+	ADDITIONAL_CHILD_PROMINENCE_THRESHOLD_2 = 90
 	ADDITIONAL_CHILDREN_FOR_PROMINENCE_THRESHOLD_2 = 1
 	
 	ADDITIONAL_CHILDREN_FOR_KING = 2
 	ADDITIONAL_CHILDREN_FOR_HEIR = 1
 	
-	ADDITIONAL_CHILDREN_FOREIGN_FAMILY = -2
-	
 	IDEAL_CHILD_PER_FAMILY = 4
 	
+	# If court isze is bigger than threshold, reduce the number of children per couple by the define below
 	COURT_SIZE_CHILD_PENALTY_THRESHOLD = 120
-	
-	SUBTRACTION_CHILDREN_COURT_SIZE_PENALTY = 1 #in code it uses -= so keep this number 'positive'
-	
+	SUBTRACTION_CHILDREN_COURT_SIZE_PENALTY = 1
+
+	# Make sure we always have a base minimum of characters for each gender. Only creates new characters however if the number of children is below the threshold
+	MIN_ADULT_CHARACTERS_PER_GENDER = 2
+	MIN_ADULT_CHARACTERS_PER_GENDER_CREATION_CHILDREN_THRESHOLD = 4
+
 	DAYS_COMPLETE_MISSION = 30
 	MONTHS_BATTLE_TO_TRIUMPH = 12
-	
-	
+
 	PRIME_MARRY_MIN = 18
 	PRIME_MARRY_MAX = 35
-	SPOUSE_CREATION_MAXIMUM_AGE = 40
+	SPOUSE_CREATION_MAXIMUM_AGE = 40 # Only applies to women. If the female character is above this age, they will never be considered for automatic marriage
 	SPOUSE_CREATION_PROMINENCE_THRESHOLD = 0 #minimum prominence needed for marriage
 	SPOUSE_MOURNING_DURATION = 90 #in days
 	
@@ -548,8 +571,8 @@ NCharacter = {
 	
 	TOO_DISLOYAL_THRESHOLD = 33
 	
-	MINIMUM_COURT_SIZE = 24
-	MINIMUM_JOB_ELIGIBLES = 16 
+	MINIMUM_COURT_SIZE = 16
+	MINIMUM_JOB_ELIGIBLES = 9 
 	COURT_SIZE_AGE_FILL = { 16 60 } #when filling the initial court, characters get created using this age range
 	COURT_SIZE_AGE_CHECK = { 14 60 } #characters in this age range is considered suitable for court
 	BASE_FERTILITY = 0.07
@@ -577,31 +600,31 @@ NCharacter = {
 }
 
 NFamily = {
-	EXPECTED_JOB_PERCENTAGE = 0.1 #(TOTAL_JOBS / NUM_FAMILIES) * EXPECTED_JOBS_PERCENTAGE
+	EXPECTED_JOB_PERCENTAGE = 0.7 #(TOTAL_JOBS / NUM_FAMILIES) * EXPECTED_JOBS_PERCENTAGE
 	GRATEFUL_JOB_PERCENTAGE = 2 #current jobs > (expected jobs * GRATEFUL_JOBS_PERCENTAGE)
 
 	MIN_SIZE = 4; #below this size the family will look desperately into adopting minor characters
 	MAX_SIZE = 18; #above this size the family won't look into adopting minor characters anymore
 
 	# FAMILY COUNT
-	FAMILY_COUNT_MIGRANT_HORDE	= 0;
-	FAMILY_COUNT_CITY_POWER		= 0;
-	FAMILY_COUNT_LOCAL_POWER	= 0;
-	FAMILY_COUNT_REGIONAL_POWER = 0;
-	FAMILY_COUNT_MAJOR_POWER	= 0;
-	FAMILY_COUNT_GREAT_POWER	= 0;
+	FAMILY_COUNT_MIGRANT_HORDE	= 3;
+	FAMILY_COUNT_CITY_POWER		= 3;
+	FAMILY_COUNT_LOCAL_POWER	= 3;
+	FAMILY_COUNT_REGIONAL_POWER = 4;
+	FAMILY_COUNT_MAJOR_POWER	= 4;
+	FAMILY_COUNT_GREAT_POWER	= 5;
 
 	# MINOR FAMILY SIZE
-	MINOR_POOL_MIGRANT_HORDE	= 7;
-	MINOR_POOL_CITY_POWER		= 8;
-	MINOR_POOL_LOCAL_POWER		= 9;
-	MINOR_POOL_REGIONAL_POWER	= 10;
-	MINOR_POOL_MAJOR_POWER		= 14;
-	MINOR_POOL_GREAT_POWER		= 18;
+	MINOR_POOL_MIGRANT_HORDE	= 5;
+	MINOR_POOL_CITY_POWER		= 6;
+	MINOR_POOL_LOCAL_POWER		= 6;
+	MINOR_POOL_REGIONAL_POWER	= 8;
+	MINOR_POOL_MAJOR_POWER		= 12;
+	MINOR_POOL_GREAT_POWER		= 17;
 
 	# MINOR FAMILY GROWTH
 	MAX_MINOR_CHARACTER_YEARLY_GROWTH = 1;
-	MINOR_FAMILY_COURT_MULTIPLIER = 1.5 #creates a larger minor pool
+	MINOR_FAMILY_COURT_MULTIPLIER = 0.15 #creates a larger minor pool
 
 	# FAMILY COLORS
 	COLOR_DEFAULT = { 0.85490 0.81569 0.80784 0.3 } #grey
@@ -615,6 +638,12 @@ NFamily = {
 	COLOR_8 = { 1.0 0.75 0.0 1.0 }   #amber
 	COLOR_9 = { 0.5 0.85 0.0 0.85 }  #chartreuse
 	COLOR_10 = { 0.5 0.0 1.0 1.0 }   #violet
+}
+
+NReligion = {
+	#deities
+	HOLY_SITE_INCREASED_EFFECT = 0.25
+	MAX_ACTIVE_TREASURE_SLOTS = 3
 }
 
 NTrade = {
@@ -634,6 +663,8 @@ NProvince = {
 	DESTROY_BUILDING_MONEY_RETURN = 0.25
 	
 
+	GOVERNOR_WAGE_TO_WEALTH = 1.0
+
 	#additional efficiency for supply limit. BaseSupplyLimit() * (1.0 + efficiency)
 	#THESE ARE MUTUALLy EXCLUSIVE
 	SUPPLY_LIMIT_OWNER = 0.25	 #Should be highest of these defines or AI will be confused.
@@ -650,6 +681,10 @@ NProvince = {
 	STARVATION_IMMINENT_WARNING = 100
 	DISLOYAL_STATE_WARN_MONTHS = 3
 	TOO_DISLOYAL_THRESHOLD = 33
+	
+	#Terrain
+	DEFAULT_TERRAIN_LAND = plains
+	DEFAULT_TERRAIN_WATER = ocean
 }
 
 NBuilding = {
@@ -657,7 +692,23 @@ NBuilding = {
 	FAMILY_PRESTIGE_FROM_CONSTRUCTION = 1.0
 }
 
+NJominiMap = {
+	WORLD_EXTENTS_X = 8191
+	WORLD_EXTENTS_Y = 25.5
+	WORLD_EXTENTS_Z = 4095
+	WATERLEVEL = 3.9
+}
+
 NAI = {
+	#Buildings
+	BUILD_DURING_WAR_DELAY = 18					# Months the AI will wait before building buildings while at war
+	BUILD_MONTHS_AWAY_FROM_WAR_THRESHOLD = 24	# If the AI is less than this number of months away from declaring war they will hold building construction	
+	BUILD_TROOPS_DELAY = 60						# Delay added to the build counter if the AI wants to build troops, effectively prioritizing troop construction
+	BUILD_REPEAT_TIME = 100						# Time window ( in days ) since last build date that the AI has to quickly queue another building to the front of the plan ( if it can afford it etc. ), else it will be queued at the end
+	BUILD_INSTANT_GOLD_THRESHOLD = 1000.0		# If the AI has more than this much gold left after construction it will try to instantly queue another build
+	BUILD_DELAY = 30							# Default time the AI will wait before trying to build another building unless it decides to do so instantly
+	DESTROY_THRESHOLD = 0.0						# If the AI weight of any building is less than or equal to this the AI might destroy it
+
 	#Performance and search
 	MAX_UNITS_PER_TURN = 250 #Higher => more responsive unit AI on average, more CPU. Use "ai.pawns" and "timing show" console commands to tune.
 	TACTICAL_DEPTH = 60 #Depth of tactical search.
@@ -775,6 +826,7 @@ NAI = {
 	
 	#Peace
 	MAX_CALL_FOR_PEACE = 20 #Start worrying about peacing ASAP above this value.
+	PEACE_RESPITE_MONTHS = 36 #Anti-ragequit device applied to human player on Easy and Normal; don't DOW them if they had no time to rest.
 	PEACE_ACCEPTANCE_SEPARATE_PEACE = -25 #Modifier for peacing out separatately in the cases that's despicable.
 	PEACE_ACCEPTANCE_MONTHS_OF_WAR = 48 #Maximum months of war (and coincidentally, maximum modifier).
 	PEACE_ACCEPTANCE_EXHAUSTION = -10
@@ -821,18 +873,24 @@ NAI = {
 	WAR_NEIGHBOR_FACTOR = 10 #Scaled weight to declare war on neighbors.
 	WAR_TARGET_NEIGHBOR_FACTOR = 7 #Weight to declare on a target adjacent to a past or present target.
 	WAR_INNER_FACTOR = 40 #Scaled weight to declare war on inner countries (e.g. OPMs) inside AI country.
+	WAR_NEXT_TO_ENEMY_FACTOR = 5 #Scaling weight for target next to enemy being fought.
 	WAR_EASY_FACTOR = 500 #Actually a term, but w/e.. The easier war is expected to be, the more likely AI is to schedule it. Even war will be about 0.5^2 of this value.
 	WAR_QUICK_FACTOR = 100 #To be extra confusing, here is another factor for the (not quite) same thing.
 	WAR_DECISIVE_FACTOR = 10 #Extra extra confusing (but a decisive war is not as good as a quick war, but this could be erroneous ;-)).
 	WAR_ACCESSIBLE_FACTOR = 20 #Scaled weight to declare war on accessible countries.
+	WAR_BORDERGORE_FACTOR = 0.1 #The higher this value is the more AI prioritizes targets based on how less likely conquering their provinces is to cause bordergore and snakes. Not really a factor in the multiplicative sense.
 	WAR_CASUS_BELLI_FACTOR = 4 #Scaled weight for having temporary CB.
 	WAR_CLAIM_FACTOR = 3 #Scaled weight for having permanent CB/claim.
 	WAR_OPPORTUNISM_FACTOR = 0.5 #Separate code path for reactive war declarations.
 	EAGERNESS_EXTERNAL_MANPOWER_FACTOR = 0.85 #How much manpower advantage over neighbors matters vs. %MP of max for eagerness to declare war.
-	WAR_EXHAUSTION_RECOVERY_MONTHS  = 36 #AI will not actively reduce war exhaustion if it can reach 0 W.E. at the current rate
-	WAR_EXHAUSTION_DESIRED = 5 #How much WE should the AI have before declaring war
-	WAR_DESIRED_STABILITY = 40 #How much Stability should the AI have before declaring war
-	
+	WAR_EXHAUSTION_RECOVERY_MONTHS = 18 #AI will not actively reduce war exhaustion if it can reach WAR_EXHAUSTION_DESIRED at the current rate during war.
+	WAR_EXHAUSTION_RECOVERY_MONTHS_PEACE = 36 #AI will not actively reduce war exhaustion if it can reach WAR_EXHAUSTION_DESIRED at the current rate during peace.
+	WAR_EXHAUSTION_TYRANNY_MONTHS = 60 #Hardcoded way to make AI spend tyranny (up to this number of months when tyranny is decreasing) to decrease WE.
+	WAR_EXHAUSTION_DESIRED = 5 #How much WE is the AI allowed to have before declaring war?
+	WAR_DESIRED_STABILITY = 40 #How much Stability should the AI have before declaring war?
+	LOW_AGGRESSIVE_NO_WAR = 25 #Aggressive lower than this threshold means AI will not declare wars
+	HIGH_AGGRESSIVE_ALWAYS_WAR = 500 #Aggressive higher than this threshold means AI will always declare wars when it can
+
 	#Barbarians!
 	BARBARIAN_PAY_OFF_SCALE = 0.8 #The lower this value is, the more reluctant AI will be to pay off barbarians. (In reality, this value is compared to strongest own army that can reach the barbarians.)
 	BARBARIAN_HANDLE_RANGE = 1000 #Armies further than this will not be counted for purposes of killing a barbarian army.
@@ -847,16 +905,18 @@ NAI = {
 	ANTAGONISM_PEACE_ACCEPT_BONUS_VS_OTHER_AI = 20
 
 	# Job assignment weights
-	ASSIGN_OFFICE_SCORNED_WEIGHT = 4.0   # Multiplicative: How much more important is it to fill an office position with a scorned character? The inverse is also true.
-	ASSIGN_UNIT_SCORNED_WEIGHT = 2.0     # Multiplicative: How much more important is it to fill a general position with a scorned character?
+	ASSIGN_OFFICE_SCORNED_WEIGHT = 4.0 # Multiplicative: How much more important is it to fill an office position with a scorned character? The inverse is also true.
+	ASSIGN_UNIT_SCORNED_WEIGHT = 2.0 # Multiplicative: How much more important is it to fill a general position with a scorned character?
+	
+	#Migration:
+	MIGRATION_TARGET_RANDOMNESS = 10 #Larger means there's more randomness in where AI decides to migrate as opposed to calculated "best" culture provinces.
+	MIGRATION_TARGET_DISTANCE_OFFSET = 33 #Larger => distance becomes relatively less important. Should be more than zero as it's used for a divisor of the form MIGRATION_TARGET_DISTANCE_OFFSET + distance.
+
+	#Religion:
+	PANTHEON_HOLY_SITE_WEIGHT = 0.5 #Additive Value: Additional Weight for selecting a deity with a Holy Site within our borders
+	PANTHEON_HAPPINESS_WEIGHT = 0.1 #Weight for happiness, might be necessary to rescale this in case modifier values change a lot in your mod.
+	PANTHEON_STICKINESS_WEIGHT = 0.01 #Extra stickiness for currently selected Jesus to discourage strobing.
+	HOLY_SITE_RANDOMNESS = 40 #The larger this is, the less likely the AI are to check for building holy sites.
+	DEIFICATION_RANDOMNESS = 200 #The larger this is, the less likely AI are to deify their ruler.
 }
-
-NJominiMap = {
-	WORLD_EXTENTS_X = 8191
-	WORLD_EXTENTS_Y = 25.5
-	WORLD_EXTENTS_Z = 4095
-	WATERLEVEL = 3.9
-}
-
-
 

@@ -1,4 +1,4 @@
-import csv, codecs
+import csv, codecs, re
 
 # These columns may vary depending on what pops you have added to the game
 # Change as necessary
@@ -37,19 +37,40 @@ def create_terrain_dict(terrain_file):
 
 terrain_dict = create_terrain_dict(terrain_file)
 
-def find_terrain(province_id):
-    pass
-
 setup_csv = open("province_setup.csv")
 reader = csv.reader(setup_csv, delimiter=";")
 
 generated_setup = codecs.open("GENERATED_SETUP.txt", "w", "utf-8-sig")
 
+non_habitable_provinces = open("../map_data/default.map")
+non_habitable_provinces_data = non_habitable_provinces.read()
+pattern = "RANGE {(.*)}"
+non_habitable_ranges = re.findall(pattern, non_habitable_provinces_data)
+non_habitable_ranges = [i.split(" ") for i in non_habitable_ranges]
+new_non_habitable_ranges = []
+for x in non_habitable_ranges:
+    x = [i for i in x if i]
+    new_non_habitable_ranges.append(x)
+non_habitable_ranges = new_non_habitable_ranges
+
+def check_if_habitable(province_id):
+    # Check if the province ID is any of the ranges specified
+    try:
+        province_id = int(province_id)
+    except:
+        return False
+    for province_range in non_habitable_ranges:
+        if province_id >= int(province_range[0]) and province_id <= int(province_range[1]):
+            return True
+    if " " + str(province_id) not in non_habitable_provinces:
+        return True
+    else:
+        return False
+
 with generated_setup as f:
     for row in reader:
-        # Only do this for land provinces
-        # Land provinces presumptively have an area set, so use that
-        if row[area_column] != "":
+        # Ignore seazones, wastelands, impassables, lakes, rivers etc.
+        if check_if_habitable(row[id_column]):
             if row[id_column] in terrain_dict:
                 terrain = terrain_dict[row[id_column]]
             else:

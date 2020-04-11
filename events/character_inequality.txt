@@ -10,8 +10,8 @@ character_inequality.1 = { # Adding cultural office-holding restrictions
 	}
 
 	immediate = {
-		culture_group = {
-			save_temporary_scope_as = character_culture_group
+		employer.culture_group = {
+			save_scope_as = employer_culture_group
 		}
 		if = {
 			limit = {
@@ -20,10 +20,12 @@ character_inequality.1 = { # Adding cultural office-holding restrictions
 						has_law = dominant_culture_primacy
 						has_law = limited_cultural_recognition
 					}
-					NOT = { country_culture_group = character_culture_group }
+					#NOT = { THIS.country_culture_group = character_culture_group }
 				}
+				NOT = { has_same_culture_group_as = employer.current_ruler }
 			}
 			remove_all_offices = yes
+			remove_party_leadership_effect = yes
 			add_trait = "discriminated"
 		}
 		
@@ -71,6 +73,7 @@ character_inequality.3 = { # Removing potential for jobs from women
 				is_female = yes
 			}
 			remove_all_offices = yes
+			remove_party_leadership_effect = yes
 			add_trait = "discriminated"
 		}
 		
@@ -111,6 +114,36 @@ character_inequality.5 = { # Run on game init
 			}
 			trigger_event = {
 				id = character_inequality.3 # Removing potential for jobs from women
+			}
+			trigger_event = {
+				id = character_inequality.6 # Removing ineligible party leaders
+			}
+		}
+	}
+
+}
+
+character_inequality.6 = { # Run on party change of leadership, and on startup
+	type = country_event
+	hidden = yes
+	
+	trigger = {
+	}
+
+	immediate = {
+		while = {
+			limit = {
+				any_character = {
+					is_party_leader = yes
+					has_trait = discriminated
+				}
+			}
+			every_character = {
+				limit = {
+					is_party_leader = yes
+					has_trait = discriminated
+				}
+				remove_party_leadership_effect = yes
 			}
 		}
 	}

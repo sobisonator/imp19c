@@ -41,7 +41,7 @@ def find_terrain(province_id):
     pass
 
 setup_csv = open("province_setup.csv")
-reader = csv.reader(setup_csv, delimiter=";")
+reader = csv.reader(setup_csv, delimiter=",")
 
 generated_setup = codecs.open("GENERATED_SETUP.txt", "w", "utf-8-sig")
 

@@ -18,7 +18,7 @@
 	MIN_MERCENARIES_PER_REGION = 0
 	MERCENARIES_CITY_THRESHOLD = 50
 	MERCENARIES_PER_CITY = 0.001
-		
+	
 	MERCENARY_BASE_AMOUNT = 0
 	MERCENARY_PER_POP_SCALE = 0.0005
 	MERCENARY_AMOUNT_DEVIATION = 0.025 
@@ -160,6 +160,15 @@ NCountry = {
 	CHANGE_PANTHEON_OMEN_COOLDOWN_MONTHS = 36 # Cooldown period in months after a country changes it's pantheon. No omens can be called on that deity during this cooldown period. 
 	
 	DEIFIED_RULERS_EXPIRE = 20 # Years before a deified ruler that has not been in a pantheon is forgotten and removed
+
+	CULTURAL_INTEGRATION_MIN_SPEED = 0.0005
+	CULTURAL_INTEGRATION_MAX_SPEED = 0.004
+	
+	CULTURAL_INTEGRATION_FACTOR = 0.02 # Multiplied by percentage of integrating culture pops in country to make monthly progress towards cultural integration (1.0)
+
+	REVOLT_ALERT_MONTHS_THRESHOLD = 60 # highest monthly time until predicted revolts are considered relevant
+	REVOLT_IMMINENT_MONTHS_THRESHOLD = 24 # highest monthly time until predicted revolts are considered relevant
+	REVOLT_MINIMUM_TREASURY = 200 # smallest stash a single revolting state starts with.
 }  
 
 
@@ -180,6 +189,7 @@ NPowerBase = {
 NPop = {
 	PROMOTE_DEMOTE_THRESHOLD = 0.005	#percentage above desired ratio before demote.
 	HAPPYNESS_FOR_UNREST_THRESHOLD = 0.5
+	PRIMARY_CULTURE_HAPPINESS = 0.5
 	WRONG_CULTURE_GROUP_HAPPYNESS = -0.3
 	WRONG_CULTURE_HAPPYNESS = -0.1
 	WRONG_RELIGION_HAPPNESS = 0
@@ -384,22 +394,21 @@ NUnit = {
 
 NPolitics = {
 	SENATE_SIZE = 100
-	
-	ENDORSE_PARTY_SEATS = 1
+	PARTY_DEFAULT_APPROVAL = 50
+	SENATE_REQUIRED_APPROVAL = 0.30
+	SENATE_REQUIRED_APPROVAL_WITHOUT_PENALTIES = 0.60
+	NEUTRAL_SENATE_APPROVAL = 0.50
+
+	ENDORSE_PARTY_SEATS = 10
 	ENDORSE_PARTY_CAP = 50
 
 	LEGITIMACY_ENDORSEMENT_DURATION = 1825
-	
 
-	SENATE_RED_THRESHOLD = 40
-	SENATE_GREEN_THRESHOLD = 60
-	
 	SENATE_YELLOW_TYRANNY = 5
 
-	
 	STAB_HIT_BARB_TAKEOVER = 20
 	STAB_HIT_GOOD_PEACE = 5
-	
+
 	#Pretender support: Max(0, (PRETENDER_LOYALTY_BASE - GetLoyalty()) * PRETENDER_LOYALTY_MULTIPLIER)
 	#Example: 50 / 0.5 with Loyalty: 30 = (50 - 30) * 0.5 = 10
 	#Example: 50 / 0.5 with Loyalty: 80 = (50 - 80) * 0.5 = 0 ( -15 )
@@ -473,6 +482,7 @@ NDiplomacy = {
 	OPINION_NO_WAR = 100 #Threshold for being unable to declare war because one's own opinion of enemy is too high.
 	
 	IMPROVE_RELATION_SUBJECT_FACTOR = 2 #Subjects have a maximum this times higher.
+	MIN_WARSCORE_REDUCTION = 0.05 # Warscore reduction cannot go below -95%
 }
 
 NSuccession = {	
@@ -508,7 +518,7 @@ NSuccession = {
 	TRIBAL_CHILD_PENALTY = -0.9
 	TRIBAL_FEMALE_PENALTY = -0.9
 	TRIBAL_SAME_FAMILY_PENALTY = -0.5
-	
+	TRIBAL_MINOR_CHARACTER_PENALTY = -1.0
 	
 }
 
@@ -593,10 +603,17 @@ NCharacter = {
 	
 	FRIEND_WITH_PARTY_LEADER_PARTY_CONVICTION = 0.1
 	RIVAL_WITH_PARTY_LEADER_PARTY_CONVICTION = 0.1
+	
+	INITIAL_CONVICTION_TICKS_IN_MONTHS = 120
 
 	MIN_STATESMANSHIP_EFFECT = 20
 	MIN_STATESMANSHIP_OFFSET = 0
 	MAX_STATESMANSHIP_OFFSET = 10;
+
+	CULTURE_HAPPINESS_UPPER_THRESHOLD = 0.3 #Upper threshold for culture happiness. If Culture happiness > CULTURE_HAPPINESS_UPPER_THRESHOLD + CULTURE_HAPPINESS_THRESHOLD , character loyalty will be positively affected
+	CULTURE_HAPPINESS_LOWER_THRESHOLD = 0.3 #Lower threshold for culture happiness. If Culture happiness < CULTURE_HAPPINESS_LOWER_THRESHOLD - CULTURE_HAPPINESS_THRESHOLD , character loyalty will be negatively affected
+	CULTURE_HAPPINESS_FACTOR = 3 #Scale culture happiness to loyalty after exceeding threshold
+	CULTURE_HAPPINESS_LOYALTY_MAX = 12 #Max/min values that culture happiness can have on loyalty
 }
 
 NFamily = {
@@ -649,8 +666,9 @@ NReligion = {
 NTrade = {
 	SLAVE_POPS_TO_PRODUCE_EXTRA = 20
 	MINIMUM_SLAVES_PER_GOOD = 5
-	ROUTE_BASE_INTERNAL_COMMERCE = 0.05
-	ROUTE_BASE_EXTERNAL_COMMERCE = 0.2
+	ROUTE_BASE_INTERNAL_COMMERCE = 0.2
+	ROUTE_BASE_EXPORTING_COMMERCE = 1
+	ROUTE_BASE_IMPORTING_COMMERCE = 0.35
 }
 
 NProvince = {
@@ -681,6 +699,7 @@ NProvince = {
 	STARVATION_IMMINENT_WARNING = 100
 	DISLOYAL_STATE_WARN_MONTHS = 3
 	TOO_DISLOYAL_THRESHOLD = 33
+	REVOLT_LOYALTY_THRESHOLD = 0
 	
 	#Terrain
 	DEFAULT_TERRAIN_LAND = plains
@@ -735,12 +754,14 @@ NAI = {
 	OVERCROWD_LIMIT = 5.5 #AI tries to heavily avoid a ratio of friendly units to enemies above this. Recommend to keep above STRIKE_TEAM_ADVANTAGE.
 	REGION_PROVINCE_TARGET_LAND = 40 #This sets a target size for land AI regions. ("ai.map region", "mapmode ai" in console to see these.) Greatly impacts how AI plays so edit with care.
 	REGION_PROVINCE_TARGET_SEA = 20 #This sets a target size for sea AI regions. ("ai.map region", "mapmode ai" in console to see these.) Greatly impacts how AI plays so edit with care.
+	OPERATIONAL_DEPTH = 3 #How far from existing controlled territory AI normally considers starting sieges (exceptions such as war goal excluded).
 	
 	#Objectives
 	MAX_RECON_DISTANCE_ARMY = 900000
 	MAX_RECON_DISTANCE_NAVY = 400
 	INVASION_REGRET_YEARS = 4 #Number of years that AI feels regret over a failed invasion and vows to use more forces.
 	INVASION_REGRET_BOOST = 300 #Additional % of troops AI will try to send as the result of a failed invasion.
+	INVASION_MIN_LAND_PATH_FOR_NAVAL_TRANSPORT = 1400 #If an army can walk less than this distance to goal, don't use naval transport.
 	
 	#Planning
 	PLAN_LATENCY_WEIGHT = 0.5 #Plan value weight is always 1 in comparison. I.e. a value 1 here makes latency have as much weight as final value of plan when it has been executed.
@@ -797,6 +818,8 @@ NAI = {
 	PLACE_FORT_RIVER_FACTOR = 1 #River 1/0 multiplied by this.
 	PLACE_FORT_LEVEL_FACTOR = 0.5 #Existing fort level multiplied by this.
 	PLACE_FORT_PROVINCE_CAPITAL_FACTOR = 3 #Forts in province capitals.
+	PLACE_FORT_PROVINCE_VALUE_FACTOR = 10 #Forts in province capitals relative to value of province.
+	PLACE_FORT_LOCAL_UNREST_FACTOR = 1 #Multiplied by local unrest
 	PLACE_ROAD_MIN_DISTANCE = 2 #Minimum distance from one road endpoint to another.
 	DISBAND_FORTS_CAPITAL_BIAS = 2 # More likely to choose Forts in capital city to disband first
 	
@@ -808,11 +831,10 @@ NAI = {
 	RECRUIT_WAR_TARGET_FACTOR_BASE = 500.0 #Base distance for above. Factor = Max( RECRUIT_WAR_TARGET_FACTOR, 1 / (RECRUIT_WAR_TARGET_FACTOR_BASE + Distance) ).
 	RECRUIT_TO_DISTANCE = 300 #AI will not use Recruit to Unit over distances longer than this.
 	RECRUIT_UNITS_PERCENTAGE = 0.125 # Percentage of total number of units to recruit in a single action
-	RECRUIT_SUPPORT_FOOD_MONTHS = 60 #Target months of food for an army.
+	RECRUIT_SUPPORT_FOOD_MONTHS = 18 #Target months of food for an army.
 	
 	#Unit composition
-	MAX_FLANK = 25 #Max % flanking units (to be kept at country wide basis and if possible on army basis)
-	MAX_RANGED = 25 #Max % second line units (to be kept at country wide basis and if possible on army basis)
+	MAX_FLANK = 0.25 #Max % flanking units (to be kept at country wide basis and if possible on army basis)
 	
 	#Diplomacy
 	AE_MIN = 5 #AI starts being hawkish when AE has reached this value plus its own AE value.
@@ -882,14 +904,17 @@ NAI = {
 	WAR_CASUS_BELLI_FACTOR = 4 #Scaled weight for having temporary CB.
 	WAR_CLAIM_FACTOR = 3 #Scaled weight for having permanent CB/claim.
 	WAR_OPPORTUNISM_FACTOR = 0.5 #Separate code path for reactive war declarations.
+	WAR_POWER_FACTOR = 0.002 #Separate code path for power block balancing war declarations.
+	WAR_POWER_FACTOR_ACTIVE = 0.05 #If power war flag has already been raised.
+	WAR_POWER_DISTANCE = 300 #Maximum distance countries may consider engaging in power wars.
 	EAGERNESS_EXTERNAL_MANPOWER_FACTOR = 0.85 #How much manpower advantage over neighbors matters vs. %MP of max for eagerness to declare war.
 	WAR_EXHAUSTION_RECOVERY_MONTHS = 18 #AI will not actively reduce war exhaustion if it can reach WAR_EXHAUSTION_DESIRED at the current rate during war.
 	WAR_EXHAUSTION_RECOVERY_MONTHS_PEACE = 36 #AI will not actively reduce war exhaustion if it can reach WAR_EXHAUSTION_DESIRED at the current rate during peace.
 	WAR_EXHAUSTION_TYRANNY_MONTHS = 60 #Hardcoded way to make AI spend tyranny (up to this number of months when tyranny is decreasing) to decrease WE.
 	WAR_EXHAUSTION_DESIRED = 5 #How much WE is the AI allowed to have before declaring war?
 	WAR_DESIRED_STABILITY = 40 #How much Stability should the AI have before declaring war?
-	LOW_AGGRESSIVE_NO_WAR = 25 #Aggressive lower than this threshold means AI will not declare wars
-	HIGH_AGGRESSIVE_ALWAYS_WAR = 500 #Aggressive higher than this threshold means AI will always declare wars when it can
+	LOW_AGGRESSIVE_NO_WAR = 25 #Aggressiveness lower than this threshold means AI will not declare wars
+	HIGH_AGGRESSIVE_ALWAYS_WAR = 500 #Aggressiveness higher than this threshold means AI will always declare wars when it can
 
 	#Barbarians!
 	BARBARIAN_PAY_OFF_SCALE = 0.8 #The lower this value is, the more reluctant AI will be to pay off barbarians. (In reality, this value is compared to strongest own army that can reach the barbarians.)
@@ -914,9 +939,14 @@ NAI = {
 
 	#Religion:
 	PANTHEON_HOLY_SITE_WEIGHT = 0.5 #Additive Value: Additional Weight for selecting a deity with a Holy Site within our borders
-	PANTHEON_HAPPINESS_WEIGHT = 0.1 #Weight for happiness, might be necessary to rescale this in case modifier values change a lot in your mod.
-	PANTHEON_STICKINESS_WEIGHT = 0.01 #Extra stickiness for currently selected Jesus to discourage strobing.
+	PANTHEON_HAPPINESS_WEIGHT = 0.1 #Weight for happiness, based on percentage of pops matching the deity's religion, might be necessary to rescale this in case modifier values change a lot in your mod.
+	PANTHEON_STICKINESS_WEIGHT = 1.0 #Additive Value: Extra stickiness for currently selected deities to discourage strobing.
 	HOLY_SITE_RANDOMNESS = 40 #The larger this is, the less likely the AI are to check for building holy sites.
 	DEIFICATION_RANDOMNESS = 200 #The larger this is, the less likely AI are to deify their ruler.
+
+	#Culture:
+	CULTURE_CHANGE_HAPPINESS_THRESHOLD = 0.3 # dont change if primary culture happiness modifier is beneath this
+	CULTURE_CHANGE_POPCOUNT_THRESHOLD = 100 # cultures beneath this pop count will be ignored for integration
+	CULTURE_CHANGE_THRESHOLD = 0.1 # how large amount of the population a culture needs to be considered for integration
 }
 

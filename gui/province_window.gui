@@ -1,3 +1,6 @@
+@ui_highlight_length = 0.15
+@ui_dehighlight_length = 0.05
+
 window = {
 	gfxtype = windowgfx
 	name = "province_window"
@@ -5,11 +8,12 @@ window = {
 	parentanchor = bottom|left
 	widgetanchor = bottom|left
 	movable = no
-	#using = small_window_type
 	visible = "[ProvinceWindow.HasProvince]"
 	alwaystransparent = yes
 	allow_outside = yes
-	
+
+	using = advice_trigger_highlights
+
 	state = {
 		name = _show
 		
@@ -31,7 +35,7 @@ window = {
 		
 		widget = {
 			name = "state_widget"
-			size = { 766 256 }
+			size = { 716 256 }
 			alwaystransparent = no
 			
 			state = {
@@ -75,7 +79,7 @@ window = {
 					spriteborder = { 0 0 }
 					#shaderfile = "gfx/FX/pdxgui_default.shader"
 					position = { 9 5 }
-					size = { 752 294 }
+					size = { 704 294 }
 				}
 				
 				#icon = {
@@ -99,7 +103,7 @@ window = {
 				icon = {
 					texture = "gfx/interface/tiles/marble_divider_vertical.dds"
 					spriteType = Corneredtiled
-					position = { 758 10 }
+					position = { 708 10 }
 					size = { 9 280 }
 					spriteborder = { 19 16 }
 					shaderfile = "gfx/FX/pdxgui_default.shader"
@@ -114,7 +118,7 @@ window = {
 					texture = "gfx/interface/buttons/category_button2_a.dds"
 					spriteType = Corneredtiled
 					position = { 2 0 }
-					size = { 728 44 }
+					size = { 678 44 }
 					spriteborder = { 56 0 }
 					#shaderfile = "gfx/FX/pdxgui_default.shader"
 					onclick = "[PdxGuiWidget.AccessParent.FindChild('state_details').Hide]"
@@ -140,7 +144,7 @@ window = {
 					texture = "gfx/interface/buttons/category_button2_b.dds"
 					spriteType = Corneredtiled
 					position = { 2 2 }
-					size = { 728 44 }
+					size = { 678 44 }
 					spriteborder = { 56 0 }
 					
 					onclick = "[PdxGuiWidget.AccessParent.FindChild('hide_header').Show]"
@@ -173,7 +177,6 @@ window = {
 				
 				container = {
 					name = "state_details"
-					position = { 0 0 }
 					
 					square_close_button = {
 						name = "close_button"
@@ -188,7 +191,7 @@ window = {
 					widget = {
 						name = "governor_portrait_widget"
 						position = { 15 66 }
-						size = { 750 150 }
+						size = { 700 150 }
 						container = {
 							position = { 0 0 }
 							
@@ -236,13 +239,22 @@ window = {
 					button = {
 						position = { 144 43 }
 						visible = "[ProvinceWindow.IsPlayerProvince]"
+						onclick = "[ClickHighlight('btn_province_change_governor')]"
 						onclick = "[ProvinceWindow.ChangeGovernor]"
 						enabled = "[ProvinceWindow.CanChangeGovernor]"
 						tooltip = "[ProvinceWindow.GetChangeGovernorTooltip]"
-						texture = "gfx/interface/buttons/button_select_new_person.dds"
+						texture = "gfx/interface/buttons/button_round_46.dds"
+						icon = {
+							texture = "gfx/interface/icons/shared_icons/change.dds"
+							parentanchor = center
+							size = { 34 34 }
+						}
 						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
 						oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-					#size = { 43 43 }
+						icon = {
+							using = highlight_button_circle_45
+							visible = "[ShouldHighlight('btn_province_change_governor')]"
+						}
 					}
 					
 					button = {
@@ -250,6 +262,7 @@ window = {
 						texture = "gfx/interface/buttons/button_square_42.dds"
 						enabled = "[ProvinceWindow.CanChangePolicy]"
 						tooltip = "[GetChangeGovernorPoliciesTooltip(ProvinceWindow.GetState)]"
+						onclick = "[ClickHighlight('btn_province_change_governor_policy')]"
 						onclick = "[ProvinceWindow.ChangePolicy]"
 						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
 						oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
@@ -263,6 +276,11 @@ window = {
 							tooltip = "GOVPOL_TOOLTIP"
 							size = { 42 42 }
 							texture = "[GetGovernorPolicyIcon(ProvinceWindow.GetState.GetGovernorPolicy)]"
+						}
+
+						icon = {
+							using = highlight_button_square_45
+							visible = "[ShouldHighlight('btn_province_change_governor_policy')]"
 						}
 					}
 					
@@ -291,10 +309,21 @@ window = {
 							progressbar = {
 								name = "loyaltybar"
 								position = { 2 2 }
-								size = { 136 22 }
+								size = { 136 21 } 
 								using = state_loyalty_progressbar_bar
 								value = "[FixedPointToFloat(ProvinceWindow.GetState.GetStateLoyalty)]"
 								tooltip = "[ProvinceWindow.GetState.GetLoyaltyTooltip]"
+								visible = "[GreaterThan_CFixedPoint(ProvinceWindow.GetState.GetStateLoyalty,GetDefine('NProvince','TOO_DISLOYAL_THRESHOLD'))]"
+							}
+
+							progressbar = {
+								name = "loyaltybar_red"
+								position = { 2 2 }
+								size = { 136 21 }
+								using = state_loyalty_progressbar_bar_red
+								value = "[FixedPointToFloat(ProvinceWindow.GetState.GetStateLoyalty)]"
+								tooltip = "[ProvinceWindow.GetState.GetLoyaltyTooltip]"
+								visible = "[LessThanOrEqualTo_CFixedPoint(ProvinceWindow.GetState.GetStateLoyalty,GetDefine('NProvince','TOO_DISLOYAL_THRESHOLD'))]"
 							}
 						}
 						
@@ -320,7 +349,7 @@ window = {
 							texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
 							spriteType = Corneredtiled
 							spriteborder = { 8 8 }
-							size = { 115 42 }
+							size = { 90 42 }
 							
 							
 							
@@ -329,7 +358,7 @@ window = {
 							icon = {
 								position = { 0 0 }
 								size = { 38 38 }
-								using = icon_wealth_pool
+								using = icon_treasury
 							}
 							
 							textbox = {
@@ -345,14 +374,14 @@ window = {
 							texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
 							spriteType = Corneredtiled
 							spriteborder = { 8 8 }
-							size = { 119 42 }
+							size = { 94 42 }
 							
 							tooltip = "[ProvinceWindow.GetState.GetCurrentCommerceIncomeInfo]"
 							
 							icon = {
-								position = { 4 0 }
+								position = { 4 2 }
 								size = { 38 38 }
-								texture = "gfx/interface/icons/modifiers/global_commerce_modifier.dds"
+								texture = "gfx/interface/icons/modifiers/commerce_value.dds"
 							}
 							
 							textbox = {
@@ -452,21 +481,21 @@ window = {
 						}
 						
 						icon = {
-							size = { 132 62 }
+							size = { 112 62 }
 							texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
 							spriteType = Corneredtiled
 							spriteborder = { 28 20 }
 							
 							container = {
 								icon = {
-									position = { 8 6 }
+									position = { 2 6 }
 									texture = "gfx/interface/icons/shared_icons/pop_type.dds"
 									tooltip = "POPTYPEPIECHART"
 								}
 								
 								piechart = {
 									size = { 50 50 }
-									position = { 67 6 }
+									position = { 55 6 }
 									
 									datamodel = "[ProvinceWindow.GetPopTypes]"
 									
@@ -482,10 +511,9 @@ window = {
 							
 							}
 							container = {
-								position = { 0 0 }
 								icon = {
 									name = "frame"
-									position = { 64 4 }
+									position = { 52 4 }
 									texture = "gfx/interface/tiles/pie_chart_overlay_100.dds"
 									size = { 55 55 }
 								}
@@ -503,94 +531,128 @@ window = {
 								direction = horizontal
 								position = { 8 3 }
 								spacing = 4
+								ignoreinvisible = yes
 								
-								container = {
-									button = {
-										name = "invest_in_state_button_military_button"
-										datacontext = "[GetScriptedGui('invest_in_state_button_military')]"
-										texture = "gfx/interface/buttons/button_square_42.dds"
-										visible = "[ProvinceWindow.IsPlayerProvince]"
-										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										size = { 45 45 }
-										clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
-										#position = { 200 150 }
-										
-										icon = {
-											size = { 38 38 }
-											texture = "gfx/interface/icons/shared_icons/install_provincial_procurators.dds"
-											parentanchor = vcenter|hcenter
-											widgetanchor = vcenter|hcenter
-										}
+								button = {
+									name = "invest_in_state_button_military_button"
+									datacontext = "[GetScriptedGui('invest_in_state_button_military')]"
+									texture = "gfx/interface/buttons/button_square_42.dds"
+									visible = "[And( ProvinceWindow.IsPlayerProvince, ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End ))]"
+									enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									tooltip = "INVEST_IN_STATE_BUTTON_MILITARY_BUTTON_TOOLTIP"
+									size = { 45 45 }
+									clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
+									#position = { 200 150 }
+									
+									icon = {
+										size = { 38 38 }
+										texture = "gfx/interface/icons/shared_icons/install_provincial_procurators.dds"
+										parentanchor = vcenter|hcenter
+										widgetanchor = vcenter|hcenter
 									}
 								}
 								
-								container = {
-									button = {
-										name = "invest_in_state_button_civic_button"
-										datacontext = "[GetScriptedGui('invest_in_state_button_civic')]"
-										texture = "gfx/interface/buttons/button_square_42.dds"
-										visible = "[ProvinceWindow.IsPlayerProvince]"
-										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										size = { 45 45 }
-										clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
-										#position = { 200 150 }
-										
-										icon = {
-											size = { 38 38 }
-											texture = "gfx/interface/icons/shared_icons/promote_infrastructure_spending.dds"
-											parentanchor = vcenter|hcenter
-											widgetanchor = vcenter|hcenter
-										}
+								button = {
+									name = "invest_in_state_button_military_button_SPA"
+									datacontext = "[GetScriptedGui('invest_in_state_button_military_SPA')]"
+									texture = "gfx/interface/buttons/button_square_42.dds"
+									visible = "[And( ProvinceWindow.IsPlayerProvince, ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End ))]"
+									enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									tooltip = "INVEST_IN_STATE_BUTTON_MILITARY_BUTTON_SPA_TOOLTIP" 
+									size = { 45 45 }
+									clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
+									#position = { 200 150 }
+									
+									icon = {
+										size = { 38 38 }
+										texture = "gfx/interface/icons/shared_icons/install_provincial_procurators.dds"
+										parentanchor = vcenter|hcenter
+										widgetanchor = vcenter|hcenter
 									}
 								}
 								
-								container = {
-									button = {
-										name = "invest_in_state_button_oratory_button"
-										datacontext = "[GetScriptedGui('invest_in_state_button_oratory')]"
-										texture = "gfx/interface/buttons/button_square_42.dds"
-										visible = "[ProvinceWindow.IsPlayerProvince]"
-										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										size = { 45 45 }
-										clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
-										#position = { 200 150 }
-										
-										icon = {
-											size = { 38 38 }
-											texture = "gfx/interface/icons/shared_icons/entice_business_investments.dds"
-											parentanchor = vcenter|hcenter
-											widgetanchor = vcenter|hcenter
-										}
+								button = {
+									name = "invest_in_state_button_civic_button"
+									datacontext = "[GetScriptedGui('invest_in_state_button_civic')]"
+									texture = "gfx/interface/buttons/button_square_42.dds"
+									visible = "[And( ProvinceWindow.IsPlayerProvince, ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End ))]"
+									enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									tooltip = "INVEST_IN_STATE_BUTTON_CIVIC_BUTTON_TOOLTIP"
+									size = { 45 45 }
+									clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
+									#position = { 200 150 }
+									
+									icon = {
+										size = { 38 38 }
+										texture = "gfx/interface/icons/shared_icons/promote_infrastructure_spending.dds"
+										parentanchor = vcenter|hcenter
+										widgetanchor = vcenter|hcenter
 									}
 								}
 								
-								container = {
-									button = {
-										name = "invest_in_state_button_religious_button"
-										datacontext = "[GetScriptedGui('invest_in_state_button_religious')]"
-										texture = "gfx/interface/buttons/button_square_42.dds"
-										visible = "[ProvinceWindow.IsPlayerProvince]"
-										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-										size = { 45 45 }
-										clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
-										#position = { 200 150 }
-										
-										icon = {
-											size = { 38 38 }
-											texture = "gfx/interface/icons/shared_icons/direct_creation_of_mystery_cults.dds"
-											parentanchor = vcenter|hcenter
-											widgetanchor = vcenter|hcenter
-										}
+								button = {
+									name = "invest_in_state_button_oratory_button"
+									datacontext = "[GetScriptedGui('invest_in_state_button_oratory')]"
+									texture = "gfx/interface/buttons/button_square_42.dds"
+									visible = "[And( ProvinceWindow.IsPlayerProvince, ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End ))]"
+									enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									tooltip = "INVEST_IN_STATE_BUTTON_ORATORY_BUTTON_TOOLTIP"
+									size = { 45 45 }
+									clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
+									#position = { 200 150 }
+									
+									icon = {
+										size = { 38 38 }
+										texture = "gfx/interface/icons/shared_icons/entice_business_investments.dds"
+										parentanchor = vcenter|hcenter
+										widgetanchor = vcenter|hcenter
 									}
 								}
+								
+								button = {
+									name = "invest_in_state_button_religious_button"
+									datacontext = "[GetScriptedGui('invest_in_state_button_religious')]"
+									texture = "gfx/interface/buttons/button_square_42.dds"
+									visible = "[And( ProvinceWindow.IsPlayerProvince, ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End ))]"
+									enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									tooltip = "INVEST_IN_STATE_BUTTON_RELIGIOUS_BUTTON_TOOLTIP"
+									size = { 45 45 }
+									clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
+									#position = { 200 150 }
+									
+									icon = {
+										size = { 38 38 }
+										texture = "gfx/interface/icons/shared_icons/direct_creation_of_mystery_cults.dds"
+										parentanchor = vcenter|hcenter
+										widgetanchor = vcenter|hcenter
+									}
+								}
+								
+								button = {
+									name = "invest_in_state_button_religious_button_SPA"
+									datacontext = "[GetScriptedGui('invest_in_state_button_religious_SPA')]"
+									texture = "gfx/interface/buttons/button_square_42.dds"
+									visible = "[And( ProvinceWindow.IsPlayerProvince, ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End ))]" 
+									enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetState.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									tooltip = "INVEST_IN_STATE_BUTTON_RELIGIOUS_BUTTON_SPA_TOOLTIP"  
+									size = { 45 45 } 
+									clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
+									#position = { 200 150 }
+									
+									icon = {
+										size = { 38 38 }
+										texture = "gfx/interface/icons/shared_icons/direct_creation_of_mystery_cults.dds"
+										parentanchor = vcenter|hcenter
+										widgetanchor = vcenter|hcenter
+									}
+								}
+								
 							}
 							
 							container = {
@@ -663,7 +725,7 @@ window = {
 						texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
 						spriteborder = { 12 12 }
 						spriteType = Corneredtiled
-						size = { 552 92 }
+						size = { 502 92 }
 						position = { 2 0 }
 					}
 					
@@ -751,20 +813,27 @@ window = {
 						using = MarbleButtonFont
 						text = "TRADE_GOODS_BUTTON"
 						enabled = "[ProvinceWindow.CanOpenTradeWindow]"
+						onclick = "[ClickHighlight('btn_province_import')]"
 						onclick = "[ProvinceWindow.CreateTradeRoute]"
 						tooltip = "[ProvinceWindow.GetTradeRouteTooltip]"
 						parentanchor = top|right
+
+						icon = {
+							using = highlight_button_import
+							visible = "[ShouldHighlight('btn_province_import')]"
+						}
 					}
 				}
+
 				
 				container = {
-					position = { 702 46 }
+					position = { 652 46 }
 					icon = {
-						texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-						spriteborder = { 12 12 }
-						spriteType = Corneredtiled
-						size = { 50 208 }
-						position = { 2 0 }
+							texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+							spriteborder = { 12 12 }
+							spriteType = Corneredtiled
+							size = { 50 208 }
+							position = { 2 0 }
 					}
 					
 					icon = {
@@ -778,7 +847,7 @@ window = {
 						frame = "[ProvinceWindow.GetState.GetFoodFrame]"
 					}
 					
-					icon = {
+					icon = { 
 						name = "food_bar_frame"
 						position = { 20 38 }
 						spriteborder = { 2 5 }
@@ -808,7 +877,7 @@ window = {
 						position = { 4 160 }
 						size = { 45 45 }
 						texture = "gfx/interface/icons/shared_icons/food_capacity.dds"
-					}
+					} 
 					
 					tooltip = "[ProvinceWindow.GetState.GetFoodTooltip][ProvinceWindow.GetState.GetFoodModifierEffect]"
 				}
@@ -828,7 +897,7 @@ window = {
 			flowcontainer = {
 				ignoreinvisible = yes
 				position = { 14 0 }
-				minimumsize = { 64 52 }
+				minimumsize = { 52 52 }
 				
 				button = {
 					size = { 36 36 }
@@ -938,6 +1007,7 @@ window = {
 					size = { 40 40 }
 					parentanchor = vcenter
 					visible = "[ProvinceWindow.GetProvince.IsCapital]"
+					tooltip = "[ProvinceWindow.GetProvince.GetCapitalTooltip]"
 				}
 				
 				container = {
@@ -949,27 +1019,27 @@ window = {
 						size = { 40 40 }
 					}
 					tooltip = "RANK_TOOLTIP"
-				
-				#button = {
-				#	position = { 34 1 }
-				#	texture = "gfx/interface/buttons/button_square_42.dds"
-				#	#spriteborder = { 12 12 }
-				#	#spriteType = corneredstretched
-				#	parentanchor = top|right
-				#	size = { 36 36 }
-				#	visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-				#	datacontext = "[GetScriptedGui('revoke_city_status_button')]"
-				#	enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-				#	onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-				#	tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-				#
-				#	icon = {
-				#		parentanchor = center
-				#		texture = "gfx/interface/icons/shared_icons/settlement.dds"
-				#		size = { 34 34 }
-				#		position = { 1 0 }
-				#	}
-				#}
+					
+					#button = {
+					#	position = { 34 1 }
+					#	texture = "gfx/interface/buttons/button_square_42.dds"
+					#	#spriteborder = { 12 12 }
+					#	#spriteType = corneredstretched
+					#	parentanchor = top|right
+					#	size = { 36 36 }
+					#	visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+					#	datacontext = "[GetScriptedGui('revoke_city_status_button')]"
+					#	enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+					#	onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+					#	tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+					#	
+					#	icon = {
+					#		parentanchor = center
+					#		texture = "gfx/interface/icons/shared_icons/settlement.dds"
+					#		size = { 34 34 }
+					#		position = { 1 0 }
+					#	}
+					#}
 				}
 				
 				icon = {
@@ -979,6 +1049,14 @@ window = {
 					visible = "[And(ProvinceWindow.GetProvince.IsStateCapital, Not(ProvinceWindow.GetProvince.IsCapital))]"
 					tooltip = "[ProvinceWindow.GetProvince.GetStateCapitalTooltip]"
 				}
+				
+				icon = {
+					texture = "[GetHolySiteRankIcon( ProvinceWindow.GetProvince.GetRank )]"
+					size = { 36 36 }
+					parentanchor = vcenter
+					visible = "[ProvinceWindow.GetProvince.IsHolySite]"
+					tooltip = "[ProvinceWindow.GetHolySiteTooltip]"
+				}
 			}
 			
 			############################
@@ -986,7 +1064,7 @@ window = {
 			############################
 			widget = {
 				name = "all_province_data"
-				size = { 766 458 }
+				size = { 716 428 }
 				allow_outside = yes
 				position = { 4 0 }
 				
@@ -1004,7 +1082,7 @@ window = {
 				###########################################################
 				
 				flowcontainer = {
-					position = { 569 69 }
+					position = { 508 88 }
 					widgetanchor = vcenter|left
 					ignoreinvisible = yes
 					direction = vertical
@@ -1019,6 +1097,11 @@ window = {
 						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
 						oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
 						size = { 184 38 }
+
+						icon = {
+							using = highlight_button_184
+							visible = "[ShouldHighlight('build_armies')]"
+						}
 					}
 					
 					button_standard_white_marble_s = {
@@ -1038,9 +1121,15 @@ window = {
 						#using = MarbleButtonFont
 						text = "COLONIZE"
 						enabled = "[ProvinceWindow.CanBeColonized]"
+						onclick = "[ClickHighlight('btn_province_colonize')]"
 						onclick = "[ProvinceWindow.QuickColonize]"
 						tooltip = "[ProvinceWindow.GetColonizeTooltip]"
 						size = { 184 38 }
+
+						icon = {
+							using = highlight_button_184
+							visible = "[ShouldHighlight('btn_province_colonize')]"
+						}
 					}
 					
 					button_standard_white_marble_s = {
@@ -1084,7 +1173,7 @@ window = {
 					name = "state_buttons_contain"
 					ignoreinvisible = yes
 					#position = { 303 7 }
-					position = { 755 7 }
+					position = { 705 7 }
 					direction = horizontal
 					widgetanchor = top|right
 					spacing = 4
@@ -1095,11 +1184,11 @@ window = {
 						spriteType = corneredstretched
 						size = { 36 36 }
 						alwaystransparent = no
-						visible = "[ProvinceWindow.IsPlayerProvince]"
+						visible = "[And(ProvinceWindow.IsPlayerProvince, Not(ProvinceWindow.GetProvince.IsStateCapital))]"
 						datacontext = "[GetScriptedGui('move_province_capital_button')]"
 						enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
 						onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
-						tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
+						tooltip = "MOVE_PROVINCE_CAPITAL_BUTTON_TOOLTIP"
 						
 						icon = {
 							position = { 0 -1 }
@@ -1115,11 +1204,11 @@ window = {
 						spriteType = corneredstretched
 						size = { 36 36 }
 						alwaystransparent = no
-						visible = "[ProvinceWindow.IsPlayerProvince]"
+						visible = "[And(ProvinceWindow.IsPlayerProvince, Not(ProvinceWindow.GetProvince.IsCapital))]"
 						datacontext = "[GetScriptedGui('move_capital_button')]"
 						enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
 						onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
-						tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
+						tooltip = "MOVE_CAPITAL_BUTTON_TOOLTIP"
 						clicksound = "event:/SFX/UI/Province/sfx_ui_province_move_capital"
 						
 						icon = {
@@ -1130,7 +1219,27 @@ window = {
 							texture = "gfx/interface/icons/shared_icons/country_capital.dds"
 						}
 					}
-					
+
+					button = {
+						name = "enact_holy_site_button"
+						texture = "gfx/interface/buttons/button_square_42.dds"
+						spriteType = corneredstretched
+						size = { 36 36 }
+						alwaystransparent = no
+						visible = "[And( ProvinceWindow.IsPlayerProvince, Not( ProvinceWindow.GetProvince.IsHolySite ) )]"
+						enabled = "[ProvinceWindow.CanEnactHolySite]"
+						onclick = "[ProvinceWindow.ToggleSelectHolySiteWindow]"
+						tooltip = "[ProvinceWindow.GetEnactHolySiteTooltip]"
+						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_click"						
+						icon = {
+							position = { 0 -1 }
+							size = { 34 34 }
+							texture = "gfx/interface/icons/shared_icons/holy_site_any.dds"
+							parentanchor = vcenter|hcenter
+							widgetanchor = vcenter|hcenter
+						}
+					}
+
 					widget = {
 						size = { 232 30 }
 						parentanchor = left|vcenter
@@ -1155,8 +1264,8 @@ window = {
 							item = {
 								modifier_icon = {
 									size = { 26 26 }
-									datacontext = "[ProvinceViewModifierItem.GetModifier.GetModifier]"
-									tooltip = "[ProvinceViewModifierItem.GetModifier.GetTooltip]"
+									datacontext = "[TimedModifier.GetModifier]"
+									tooltip = "[TimedModifier.GetTooltip]"
 								}
 							}
 						}
@@ -1229,102 +1338,22 @@ window = {
 					}
 				}
 				
-				flowcontainer = {
-					position = { 500 62 }
-					spacing = 4
-					
-					container = {
-						name = "trade_goods"
-						
-						icon = {
-							name = "frame"
-							texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-							spriteType = Corneredtiled
-							spriteborder = { 12 12 }
-							size = { 50 50 }
-							
-							icon = {
-								name = "tradegood_highlight_frame"
-								texture = "gfx/interface/tiles/highlight_tile_green.dds"
-								widgetanchor = top|right
-								parentanchor = top|right
-								position = { 0 -1 }
-								size = { 60 72 }
-								scale = 0.8
-								alpha = 0
-								
-								state = {
-									name = tradegood_show
-									
-									animation = {
-										alpha = 1
-									}
-									
-									duration = 0.15
-								
-								}
-								
-								state = {
-									name = tradegood_hide
-									
-									animation = {
-										alpha = 0
-									}
-									
-									duration = 0.05
-								
-								}
-							
-							}
-							
-							icon = {
-								name = "Trade_Good"
-								size = { 50 50 }
-								texture = "[GetTradeGoodsIcon(ProvinceWindow.GetProvince.GetTradeGoods)]"
-								tooltip = "[ProvinceWindow.GetProducedTradeGoodsInfo]"
-								parentanchor = center
-								
-								widget = {
-									name = "surplus_in_province"
-									parentanchor = hcenter|vcenter
-									position = { 30 30 }
-									icon = {
-										texture = "gfx/interface/buttons/button_round_40.dds"
-										parentanchor = bottom|right
-										size = { 30 30 }
-										
-										visible = "[GreaterThan_int32(ProvinceWindow.GetProvince.GetNumGoodsProduced, '(int32)1')]"
-										textbox = {
-											using = MarbleButtonFontS
-											autoresize = yes
-											text = "[ProvinceWindow.GetProvince.GetNumGoodsProduced]"
-											parentanchor = center
-											position = { 1 -1 }
-										
-										}
-									}
-								}
-							}
-						}
-					}
-				
-				}
-				
 				###################################
 				# Province Overview Details
 				###################################
 				
-				container = {
-					position = { 210 54 }
+				flowcontainer = {
+					position = { 12 56 }
+					spacing = 4
 					
-					
-					container = {# Bottom bar stuff
-						
-						position = { 2 72 }
+					flowcontainer = {
+						name = "Religion and Culture"
+						direction = vertical
+						spacing = 4
 						
 						widget = {
-							size = { 176 30 }
-							position = { 0 0 }
+							name = "Religion"
+							size = { 186 30 }
 							
 							icon = {
 								name = "frame"
@@ -1341,53 +1370,134 @@ window = {
 							}
 							
 							textbox = {
-								size = { 100% 24 }
+								#size = { 100% 24 }
+								#minimumsize = { 140 24 }
+								maximumsize = { 140 26 }
 								using = MarbleButtonFont
+								parentanchor = vcenter|right
+								autoresize = yes
 								text = "[ProvinceWindow.GetProvince.GetReligion.GetName]"
 								tooltip = "[ProvinceWindow.GetProvince.GetReligion.GetTooltip]"
 								align = right
 								elide = right
-								margin_left = 37
-								margin_right = 10
+								#margin_left = 37
+								margin_bottom = 4
+								margin_right = 8
 							}
 						}
 						
-						widget = {
-							size = { 176 30 }
-							position = { 185 0 }
-							#position = { 14 310 }
+						flowcontainer = {
+							spacing = 0
+							ignoreinvisible = yes
 							
-							icon = {
-								name = "frame"
-								position = { 0 2 }
-								texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-								spriteType = Corneredtiled
-								spriteborder = { 12 12 }
-								size = { 100% 30 }
+							widget = {
+								name =  "Culture"
+								size = { 152 30 }
+								
+								icon = {
+									name = "frame"
+									position = { 0 2 }
+									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+									spriteType = Corneredtiled
+									spriteborder = { 12 12 }
+									size = { 100% 30 }
+								}
+								
+								icon = {
+									position = { 5 3 }
+									texture = "gfx/interface/icons/governor_policies/cultural_assimilation.dds"
+									size = { 28 28 }
+								}
+
+								textbox = {
+									#minimumsize = { 140 24 }
+									maximumsize = { 118 26 }
+									autoresize = yes
+									using = MarbleButtonFont
+									parentanchor = vcenter|right
+									text = "[ProvinceWindow.GetProvince.GetCulture.GetName]"
+									tooltip = "[ProvinceWindow.GetProvince.GetCulture.GetTooltip]"
+									visible = "[ProvinceWindow.GetProvince.HasOwner]"
+									align = right
+									elide = right
+									#margin_left = 37
+									margin_right = 6
+									margin_bottom = 4
+								}
+								
+								textbox = {
+									#minimumsize = { 140 24 }
+									maximumsize = { 118 26 }
+									autoresize = yes
+									using = MarbleButtonFont
+									parentanchor = vcenter|right
+									text = "[ProvinceWindow.GetProvince.GetCulture.GetName]"
+									tooltip = "[ProvinceWindow.GetProvince.GetCulture.GetTooltip]"
+									visible = "[Not(ProvinceWindow.GetProvince.HasOwner)]"
+									align = right
+									elide = right
+									#margin_left = 37
+									margin_right = 6
+									margin_bottom = 4
+								}
 							}
 							
-							icon = {
-								position = { 5 2 }
-								texture = "gfx/interface/icons/governor_policies/cultural_assimilation.dds"
+							widget = { size = { 4 2 } }
+							
+							widget = {
 								size = { 30 30 }
+								visible = "[ProvinceWindow.GetProvince.HasOwner]"
+								
+								icon = {
+									name = "frame"
+									position = { 0 2 }
+									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+									spriteType = Corneredtiled
+									spriteborder = { 12 12 }
+									size = { 100% 30 }
+								}
+								
+								icon = {
+									parentanchor = center
+									texture = "gfx/interface/icons/integrated.dds"
+									position = { 0 2 }
+									size = { 24 24 }
+									visible = "[ProvinceWindow.GetProvince.GetCountryCulture.IsIntegrated]"
+									tooltip = "[ProvinceWindow.GetProvince.GetCountryCulture.GetDescriptionTooltip]"
+								}
+								
+								icon = {
+									parentanchor = center
+									texture = "gfx/interface/icons/font_icons/font_icon_cross.dds"
+									position = { 0 2 }
+									size = { 20 20 }
+									visible = "[Not( ProvinceWindow.GetProvince.GetCountryCulture.IsIntegrated )]"
+									tooltip = "[ProvinceWindow.GetProvince.GetCountryCulture.GetDescriptionTooltip]"
+								}
+								
 							}
 							
-							textbox = {
-								size = { 100% 24 }
-								using = MarbleButtonFont
-								text = "[ProvinceWindow.GetProvince.GetCulture.GetName]"
-								tooltip = "[ProvinceWindow.GetProvince.GetCulture.GetTooltip]"
-								align = right
-								elide = right
-								margin_left = 37
-								margin_right = 10
-								position = { 0 2 }
+							widget = {
+								size = { 30 30 }
+								visible = "[Not( ProvinceWindow.GetProvince.HasOwner )]"
+								
+								icon = {
+									name = "frame"
+									position = { 0 2 }
+									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+									spriteType = Corneredtiled
+									spriteborder = { 12 12 }
+									size = { 100% 30 }
+								}
+								
 							}
+							
 						}
 					}
 					
-					container = {
-						position = { 112 0 }
+					flowcontainer = {
+						direction = vertical
+						spacing = 6
 						
 						container = {
 							name = "Gold"
@@ -1401,7 +1511,7 @@ window = {
 								texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
 								spriteType = Corneredtiled
 								spriteborder = { 8 8 }
-								size = { 100 30 }
+								size = { 92 30 }
 								
 								
 								icon = {
@@ -1410,7 +1520,7 @@ window = {
 									widgetanchor = top|right
 									parentanchor = top|right
 									position = { 0 -1 }
-									size = { 106 42 }
+									size = { 106 42 } 
 									scale = 0.8
 									alpha = 0
 									
@@ -1421,8 +1531,8 @@ window = {
 											alpha = 1
 										}
 										
-										duration = 0.15
-									
+										duration = @ui_highlight_length
+										
 									}
 									
 									state = {
@@ -1432,16 +1542,16 @@ window = {
 											alpha = 0
 										}
 										
-										duration = 0.05
-									
+										duration = @ui_dehighlight_length
+										
 									}
-								
+									
 								}
 								
 								icon = {
 									position = { 4 -1 }
 									size = { 30 30 }
-									using = icon_wealth_pool
+									using = icon_treasury
 								}
 								
 								textbox = {
@@ -1453,7 +1563,7 @@ window = {
 								
 								}
 							}
-						
+
 						}
 						
 						container = {
@@ -1461,7 +1571,6 @@ window = {
 							widgetid = manpower_inherit
 							tooltip = "[ProvinceWindow.GetProvince.GetCurrentManpowerIncomeDescription]"
 							tooltip_verticalbehavior = flip
-							position = { 2 32 }
 							
 							#position = { 448 304 }
 							
@@ -1470,16 +1579,16 @@ window = {
 								texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
 								spriteType = Corneredtiled
 								spriteborder = { 8 8 }
-								size = { 100 30 }
+								size = { 92 30 }
 								tooltip = "[ProvinceWindow.GetProvince.GetCurrentManpowerIncomeDescription]"
-								
+							
 								icon = {
 									name = "manpower_highlight_frame"
 									texture = "gfx/interface/tiles/highlight_tile_green.dds"
 									widgetanchor = top|right
 									parentanchor = top|right
 									position = { 0 -1 }
-									size = { 106 42 }
+									size = { 106 42 } 
 									scale = 0.8
 									alpha = 0
 									
@@ -1490,8 +1599,8 @@ window = {
 											alpha = 1
 										}
 										
-										duration = 0.15
-									
+										duration = @ui_highlight_length
+										
 									}
 									
 									state = {
@@ -1501,12 +1610,12 @@ window = {
 											alpha = 0
 										}
 										
-										duration = 0.05
-									
+										duration = @ui_dehighlight_length
+										
 									}
-								
+									
 								}
-							
+								
 							}
 							
 							
@@ -1518,102 +1627,29 @@ window = {
 								using = icon_manpower
 								
 								parentanchor = vcenter
-							
+								
 							}
 							
 							textbox = {
-								position = { 20 1 }
+								position = { 20 1 } 
 								autoresize = yes
 								using = MarbleButtonFont
 								text = "+[GetManpowerDisplay(ProvinceWindow.GetProvince.GetCurrentManpowerIncome)]"
 								parentanchor = top|hcenter
 							}
-						
+							
 						}
 					}
 					
-					container = {
-						position = { 2 0 }
-						
-						
-						container = {
-							widgetid = commerce_inherit
-							name = "Commerce"
-							tooltip = "[ProvinceWindow.GetProvince.GetCommerceDescription]"
-							tooltip_verticalbehavior = flip
-							position = { 0 0 }
-							
-							#position = { 318 340 }
-							
-							
-							icon = {
-								name = "frame"
-								texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-								spriteType = Corneredtiled
-								spriteborder = { 8 8 }
-								size = { 100 30 }
-								
-								icon = {
-									name = "commerce_highlight_frame"
-									texture = "gfx/interface/tiles/highlight_tile_green.dds"
-									widgetanchor = top|right
-									parentanchor = top|right
-									position = { 0 -1 }
-									size = { 106 42 }
-									scale = 0.8
-									alpha = 0
-									
-									state = {
-										name = commerce_show
-										
-										animation = {
-											alpha = 1
-										}
-										
-										duration = 0.15
-									
-									}
-									
-									state = {
-										name = commerce_hide
-										
-										animation = {
-											alpha = 0
-										}
-										
-										duration = 0.05
-									
-									}
-								
-								}
-								
-								textbox = {
-									position = { 20 0 }
-									autoresize = yes
-									using = MarbleButtonFont
-									text = "[ProvinceWindow.GetProvince.GetCommerce|2=]"
-									parentanchor = top|hcenter
-								}
-								
-								icon = {
-									position = { 4 -1 }
-									size = { 30 30 }
-									texture = "gfx/interface/icons/modifiers/global_commerce_modifier.dds"
-								}
-							
-							}
-						
-						
-						
-						}
-						
+					flowcontainer = {
+						direction = vertical
+						spacing = 6
 						
 						container = {
 							name = "Research"
 							widgetid = research_inherit
 							tooltip = "[ProvinceWindow.GetProvince.GetCurrentResearchDescription]"
 							tooltip_verticalbehavior = flip
-							position = { 0 32 }
 							
 							#position = { 448 340 }
 							
@@ -1623,7 +1659,7 @@ window = {
 								texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
 								spriteType = Corneredtiled
 								spriteborder = { 8 8 }
-								size = { 100 30 }
+								size = { 88 30 }
 								
 								icon = {
 									name = "research_highlight_frame"
@@ -1631,7 +1667,7 @@ window = {
 									widgetanchor = top|right
 									parentanchor = top|right
 									position = { 0 -1 }
-									size = { 106 42 }
+									size = { 106 42 } 
 									scale = 0.8
 									alpha = 0
 									
@@ -1642,8 +1678,8 @@ window = {
 											alpha = 1
 										}
 										
-										duration = 0.15
-									
+										duration = @ui_highlight_length
+										
 									}
 									
 									state = {
@@ -1653,14 +1689,14 @@ window = {
 											alpha = 0
 										}
 										
-										duration = 0.05
-									
+										duration = @ui_dehighlight_length
+										
 									}
-								
+									
 								}
 								
 								textbox = {
-									position = { 20 0 }
+									position = { 18 0 }
 									autoresize = yes
 									using = MarbleButtonFont
 									text = "[ProvinceWindow.GetProvince.GetCurrentResearch|2=]"
@@ -1668,37 +1704,177 @@ window = {
 								}
 								
 								icon = {
-									position = { 4 -1 }
+									position = { 4 0 }
 									size = { 30 30 }
 									using = icon_research
 								}
-							
+								
 							}
 						
 						}
+						
+						container = {
+							name = "trade_routes_pr"
+							
+							icon = {
+								name = "frame"
+								texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+								spriteType = Corneredtiled
+								spriteborder = { 12 12 }
+								size = { 88 30 }
+								
+								icon = {
+									name = "tradegood_highlight_frame"
+									texture = "gfx/interface/tiles/highlight_tile_green.dds"
+									widgetanchor = top|right
+									parentanchor = top|right
+									position = { 0 -1 }
+									size = { 100% 41 } 
+									scale = 0.8
+									alpha = 0
+									
+									state = {
+										name = traderoutes_show
+										
+										animation = {
+											alpha = 1
+										}
+										
+										duration = @ui_highlight_length
+										
+									}
+									
+									state = {
+										name = traderoutes_hide
+										
+										animation = {
+											alpha = 0
+										}
+										
+										duration = @ui_dehighlight_length
+										
+									}
+									
+								}
+								tooltip = "[ProvinceWindow.GetProvince.GetTradeRoutesFromPopsTooltip]"
+								icon = {
+									name = "Route"
+									size = { 28 28 }
+									texture = "gfx/interface/icons/modifiers/local_state_trade_routes.dds"
+									parentanchor = left
+									position = { 4 2 }
+									
+									widget = {
+										name = "tradeoutesinprovince"
+										parentanchor = hcenter|vcenter
+										position = { 45 -2 }
+										textbox = {
+											using = MarbleButtonFont
+											autoresize = yes
+											text = "[ProvinceWindow.GetProvince.GetTradeRoutesFromPopsValue|=2]"
+											parentanchor = center
+											position = { -2 -2 }
+										}
+									}
+								}
+							}
+						}
 					}
+				}
+				
+				flowcontainer = {
+					position = { 390 56 }
+					spacing = 5
+					direction = vertical
+					
+					container = {
+						name = "trade_goods"
+						
+						icon = {
+							name = "frame"
+							texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+							spriteType = Corneredtiled
+							spriteborder = { 12 12 }
+							size = { 56 66 }
+							
+							icon = {
+								name = "tradegood_highlight_frame"
+								texture = "gfx/interface/tiles/highlight_tile_green.dds"
+								parentanchor = center
+								position = { 0 2 }
+								size = { 50 84 } 
+								scale = 1
+								alpha = 0
+								
+								state = {
+									name = tradegood_show
+									
+									animation = {
+										alpha = 1
+									}
+									
+									duration = @ui_highlight_length
+									
+								}
+								
+								state = {
+									name = tradegood_hide
+									
+									animation = {
+										alpha = 0
+									}
+									
+									duration = @ui_dehighlight_length
+									
+								}
+								
+							}
+							tooltip = "[ProvinceWindow.GetProducedTradeGoodsInfo]"
+							icon = {
+								name = "Trade_Good"
+								size = { 42 42 }
+								texture = "[GetTradeGoodsIcon(ProvinceWindow.GetProvince.GetTradeGoods)]"
+								parentanchor = hcenter
+								position = { 0 0 }
+								
+								widget = {
+									name = "surplus_in_province"
+									parentanchor = bottom|hcenter
+									position = { -2 -3 }
+									textbox = {
+										using = MarbleButtonFont
+										autoresize = yes
+										text = "[ProvinceWindow.GetProvince.GetNumGoodsProduced]"
+										
+										position = { 1 -3 }
+									}
+								}
+							}
+						}
+					}	
 				}
 				container = {
 					name = "food"
-					position = { 440 54 }
+					position = { 450 56 }
 					icon = {
 						name = "frame"
 						texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
 						spriteType = Corneredtiled
 						spriteborder = { 12 12 }
-						size = { 50 66 }
+						size = { 56 66 }
 						
 						icon = {
 							name = "food_icon"
 							size = { 40 40 }
 							texture = "gfx/interface/icons/shared_icons/food.dds"
-							position = { 5 2 }
+							position = { 9 2 }
 						}
 						textbox = {
 							using = MarbleButtonFontS
 							#autoresize = yes
 							text = "[ProvinceWindow.GetProvince.GetFoodIncome|2]"
-							position = { 10 50 }
+							align = center
+							position = { 31 50 } 
 						
 						}
 						tooltip = "[ProvinceWindow.GetProvince.GetFoodValueTooltip]"
@@ -1714,7 +1890,7 @@ window = {
 					flowcontainer = {
 						name = "Domestic"
 						direction = vertical
-						position = { 210 162 }
+						position = { 12 124 }
 						spacing = 4
 						
 						widget = {
@@ -1776,7 +1952,7 @@ window = {
 								datacontext = "[GetScriptedGui('increase_civilization_cap_button')]"
 								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
 								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-								tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+								tooltip = "INCREASE_CIVILIZATION_CAP_BUTTON_TOOLTIP"
 								
 								icon = {
 									parentanchor = center
@@ -1856,31 +2032,6 @@ window = {
 							texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
 							spriteType = Corneredtiled
 							spriteborder = { 28 20 }
-							tooltip = "[ProvinceWindow.GetHoldingsOwners]"
-							
-							icon = {
-								position = { 4 1 }
-								size = { 28 28 }
-								texture = "gfx/interface/icons/shared_icons/holdings.dds"
-							}
-							
-							textbox = {
-								alpha = "[TransparentIfZero_int32(ProvinceWindow.GetHoldingsCount)]"
-								size = { 118 20 }
-								position = { 87 3 }
-								multiline = no
-								using = MarbleButtonFont
-								text = "[ProvinceWindow.GetProvince.GetNumOfCurrentHoldings]/[ProvinceWindow.GetProvince.GetNumOfPossibleHoldings]"
-								widgetanchor = top|hcenter
-								align = center
-							}
-						}
-						
-						icon = {
-							size = { 150 32 }
-							texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-							spriteType = Corneredtiled
-							spriteborder = { 28 20 }
 							tooltip = "[ProvinceWindow.GetProvince.GetBarbarianPowerTooltip]"
 							
 							icon = {
@@ -1928,31 +2079,55 @@ window = {
 						}
 						
 						icon = {
-							size = { 150 32 }
-							texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+							size = { 150 78 }
+							#texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
 							spriteType = Corneredtiled
 							spriteborder = { 28 20 }
-							
-							tooltip = "[ProvinceWindow.GetProvince.GetModifierTooltip('local_migration_attraction')]"
-							
-							icon = {
-								position = { 2 0 }
-								size = { 30 30 }
-								texture = "gfx/interface/icons/modifiers/citizen_move_cost_modifier.dds"
+							tooltip = "[ProvinceWindow.GetHoldingsOwners]"
+
+							portrait_button = {
+								using = portrait_50
+								name = "holding_portrait"
+								parentanchor = bottom|left
+								
+								datacontext = "[ProvinceWindow.GetHoldingsOwners]"
+								
+								blockoverride "portrait_button_template_onclick"
+								{
+									onclick = "[DefaultOnCharacterClick(Character.GetID)]"
+								}
+								widgetanchor = bottom|left
 							}
 							
-							textbox = {
-								name = "civilization_value"
-								autoresize = yes
-								position = { 82 3 }
-								multiline = no
-								using = MarbleButtonFont
-								text = "[ProvinceWindow.GetProvince.GetModifierValue('local_migration_attraction')]"
-								widgetanchor = top|hcenter
-								align = center
+							button = {
+								name = "revoke_holding_button"
+								datacontext = "[GetScriptedGui('revoke_holding_button')]"
+								texture = "gfx/interface/buttons/button_square_42.dds"
+								visible = "[And( ProvinceWindow.IsPlayerProvince, ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope( 'player', Player.MakeScope ).End ))]"
+								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+								position = { 70 28 }
+								size = { 45 45 }
+								clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
+								
+								tooltip = "HOLDING_OWNER_HERE"
+								icon = {
+									size = { 38 38 }
+									texture = "gfx/interface/icons/shared_icons/holdings.dds"
+									parentanchor = vcenter|hcenter
+									widgetanchor = vcenter|hcenter
+								}
+								
+								icon = {
+									size = { 22 22 }
+									texture = "gfx/interface/icons/font_icons/font_icon_cross.dds"
+									parentanchor = top|right
+									position = { -3 4 }
+								}
 							}
+							
 						}
-					
+						
 					}
 					
 					########################
@@ -1961,14 +2136,14 @@ window = {
 					
 					container = {
 						name = "Pops"
-						position = { 10 50 }
+						position = { 165 124 }
 						
 						widget = {
-							size = { 182 40 }
+							size = { 162 40 }
 							
 							DefaultHeaderBackground = {
 								position = { -4 0 }
-								size = { 182 46 }
+								size = { 162 46 }
 								
 								blockoverride "text"
 								{
@@ -1996,17 +2171,17 @@ window = {
 						
 						icon = {
 							name = "progressbar_frame"
-							position = { 162 48 }
+							position = { 142 44 }
 							spriteType = Corneredtiled
 							spriteborder = { 2 5 }
-							size = { 11 292 }
+							size = { 11 210 }
 							texture = "gfx/interface/tiles/progressbar_green_frame.dds"
 							
 							progressbar = {
 								using = progressbar_green_vertical
 								position = { 2 2 }
-								size = { 7 290 }
-								visible = "[ProvinceWindow.GetProvince.IsPopGrowing('upper_strata')]"
+								size = { 7 206 }
+								visible = "[ProvinceWindow.GetProvince.IsPopGrowing('nobles')]"
 								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
 								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
 							}
@@ -2014,8 +2189,8 @@ window = {
 							progressbar = {
 								using = progressbar_red_vertical
 								position = { 2 2 }
-								size = { 7 290 }
-								visible = "[ProvinceWindow.GetProvince.IsPopDeclining('upper_strata')]"
+								size = { 7 206 }
+								visible = "[ProvinceWindow.GetProvince.IsPopDeclining('nobles')]"
 								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
 								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
 							}
@@ -2023,8 +2198,8 @@ window = {
 							progressbar = {
 								using = progressbar_green_vertical
 								position = { 2 2 }
-								size = { 7 290 }
-								visible = "[ProvinceWindow.GetProvince.IsPopGrowing('middle_strata')]"
+								size = { 7 206 }
+								visible = "[ProvinceWindow.GetProvince.IsPopGrowing('citizen')]"
 								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
 								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
 							}
@@ -2032,8 +2207,8 @@ window = {
 							progressbar = {
 								using = progressbar_red_vertical
 								position = { 2 2 }
-								size = { 7 290 }
-								visible = "[ProvinceWindow.GetProvince.IsPopDeclining('middle_strata')]"
+								size = { 7 206 }
+								visible = "[ProvinceWindow.GetProvince.IsPopDeclining('citizen')]"
 								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
 								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
 							}
@@ -2041,8 +2216,8 @@ window = {
 							progressbar = {
 								using = progressbar_green_vertical
 								position = { 2 2 }
-								size = { 7 290 }
-								visible = "[ProvinceWindow.GetProvince.IsPopGrowing('lower_strata')]"
+								size = { 7 206 }
+								visible = "[ProvinceWindow.GetProvince.IsPopGrowing('freemen')]"
 								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
 								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
 							}
@@ -2050,8 +2225,8 @@ window = {
 							progressbar = {
 								using = progressbar_red_vertical
 								position = { 2 2 }
-								size = { 7 290 }
-								visible = "[ProvinceWindow.GetProvince.IsPopDeclining('lower_strata')]"
+								size = { 7 206 }
+								visible = "[ProvinceWindow.GetProvince.IsPopDeclining('freemen')]"
 								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
 								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
 							}
@@ -2059,25 +2234,7 @@ window = {
 							progressbar = {
 								using = progressbar_green_vertical
 								position = { 2 2 }
-								size = { 7 290 }
-								visible = "[ProvinceWindow.GetProvince.IsPopGrowing('proletariat')]"
-								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
-								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
-							}
-							
-							progressbar = {
-								using = progressbar_red_vertical
-								position = { 2 2 }
-								size = { 7 290 }
-								visible = "[ProvinceWindow.GetProvince.IsPopDeclining('proletariat')]"
-								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
-								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
-							}
-							
-							progressbar = {
-								using = progressbar_green_vertical
-								position = { 2 2 }
-								size = { 7 290 }
+								size = { 7 206 }
 								visible = "[ProvinceWindow.GetProvince.IsPopGrowing('tribesmen')]"
 								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
 								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
@@ -2086,7 +2243,7 @@ window = {
 							progressbar = {
 								using = progressbar_red_vertical
 								position = { 2 2 }
-								size = { 7 290 }
+								size = { 7 206 }
 								visible = "[ProvinceWindow.GetProvince.IsPopDeclining('tribesmen')]"
 								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
 								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
@@ -2095,7 +2252,7 @@ window = {
 							progressbar = {
 								using = progressbar_green_vertical
 								position = { 2 2 }
-								size = { 7 290 }
+								size = { 7 206 }
 								visible = "[ProvinceWindow.GetProvince.IsPopGrowing('slaves')]"
 								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
 								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
@@ -2104,570 +2261,613 @@ window = {
 							progressbar = {
 								using = progressbar_red_vertical
 								position = { 2 2 }
-								size = { 7 290 }
+								size = { 7 206 }
 								visible = "[ProvinceWindow.GetProvince.IsPopDeclining('slaves')]"
 								tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
 								value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetCurrentPopGrowthStatus)]"
 							}
-						
-						
-						
-						
 						}
 						
 						flowcontainer = {
-							position = { 0 48 }
+							position = { 0 50 }
 							direction = vertical
-							spacing = 6
+							spacing = 2
 							
-							container = {
-								name = "upper_strata"
-								
-								#alpha = "[TransparentIfZero_int32(ProvinceWindow.GetProvince.GetPopulation('upper_strata'))]"
-								
-								icon = {
-									name = "Pop Number"
-									position = { 50 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 46 38 }
-									
-									textbox = {
-										position = { 0 4 }
-										autoresize = yes
-										using = MarbleButtonFont
-										text = "[ProvinceWindow.GetProvince.GetPopulation('upper_strata')]"
-										widgetanchor = top|hcenter
-										parentanchor = top|hcenter
-									}
-									tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('upper_strata')]"
+							widget = {
+								size = { 140 40 }
+								using = pop_happiness_item
+								name = "nobles"								
+								blockoverride "PopulationTooltip" { tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('nobles')]" }
+								blockoverride "PopulationNumber" { 
+									text = "[ProvinceWindow.GetProvince.GetPopulation('nobles')]"
+									alpha = "[TransparentIfZero_int32( ProvinceWindow.GetProvince.GetPopulation('nobles'))]"
 								}
-								
-								icon = {
-									position = { 102 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 52 38 }
-									
-									icon = {
-										framesize = { 50 50 }
-										size = { 40 40 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										visible = "[ProvinceWindow.GetProvince.HasPopulation('upper_strata')]"
-										texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
-										frame = "[ProvinceWindow.GetProvince.GetPopHappyFrame('upper_strata')]"
-										tooltip = "[ProvinceWindow.GetProvince.GetPopHappyInformation('upper_strata')]"
-									}
-								}
-								
-								button = {
-									using = button_nohighlight
-									position = { 0 -1 }
-									size = { 44 42 }
-									texture = "gfx/interface/buttons/button_square_42.dds"
-									parentanchor = top|left
-									#clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-									#oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-									#onclick = "[ProvinceWindow.ShowPopDetails('upper_strata')]"
-									tooltip = "UPPER_STRATA_TOOLTIP_SIMPLIFIED"
-									
-									icon = {
-										position = { -1 -1 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										size = { 32 32 }
-										using = icon_pop_upper_starta
-									}
-									
+								blockoverride "IconDetails"
+								{
+									using = icon_pop_nobles
+									tooltip = "NOBLES_TOOLTIP_SIMPLIFIED"
 									state = {
 										name = _mouse_enter
-										on_start = "[PdxGuiTriggerAllAnimations('research_show')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_show')]"
+										on_start = "[PdxGuiTriggerAllAnimations('traderoutes_show')]" 
+										on_start = "[PdxGuiTriggerAllAnimations('research_show')]" 
 									}
 									state = {
 										name = _mouse_hierarchy_leave
+										on_start = "[PdxGuiInterruptAllAnimations('traderoutes_show')]"
 										on_start = "[PdxGuiInterruptAllAnimations('research_show')]"
-										on_start = "[PdxGuiInterruptAllAnimations('commerce_show')]"
+										on_start = "[PdxGuiTriggerAllAnimations('traderoutes_hide')]" 
 										on_start = "[PdxGuiTriggerAllAnimations('research_hide')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_hide')]"
 									}
 								}
-								
-								
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopGrowing('upper_strata')]"
-									#tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
-									using = icon_plus
-									position = { -2 0 }
+								blockoverride "PlusVisible" { visible = "[ProvinceWindow.GetProvince.IsPopGrowing('nobles')]" }
+								blockoverride "MinusVisible" { visible = "[ProvinceWindow.GetProvince.IsPopDeclining('nobles')]" }
+								blockoverride "ProgressBarDetails"
+								{
+									visible = "[GreaterThan_int32( ProvinceWindow.GetProvince.GetPopulation('nobles'), '(int32)0' )]"
+									value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetPopTypeHappiness('nobles'))]" 
+									tooltip = "NOBLE_AVERAGE_HAPPINESS_TT"
 								}
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopDeclining('upper_strata')]"
-									using = icon_minus
-									position = { -2 0 }
-								}
+								blockoverride "HappyVisible" { visible = "[GreaterThanOrEqualTo_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('nobles'),  '(CFixedPoint)50' )]" }
+								blockoverride "SadVisible" { visible = "[LessThan_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('nobles'),  '(CFixedPoint)50' )]" }
 							}
-							container = {
-								name = "middle_strata"
-								
-								#alpha = "[TransparentIfZero_int32(ProvinceWindow.GetProvince.GetPopulation('middle_strata'))]"
-								
-								icon = {
-									name = "Pop Number"
-									position = { 50 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 46 38 }
-									
-									textbox = {
-										position = { 0 4 }
-										autoresize = yes
-										using = MarbleButtonFont
-										text = "[ProvinceWindow.GetProvince.GetPopulation('middle_strata')]"
-										widgetanchor = top|hcenter
-										parentanchor = top|hcenter
-									}
-									tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('middle_strata')]"
+							
+							widget = {
+								using = pop_happiness_item
+								size = { 140 40 }
+								name = "citizens"								
+								blockoverride "PopulationTooltip" { tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('citizen')]" }
+								blockoverride "PopulationNumber" { 
+									text = "[ProvinceWindow.GetProvince.GetPopulation('citizen')]"
+									alpha = "[TransparentIfZero_int32( ProvinceWindow.GetProvince.GetPopulation('citizen'))]"
 								}
-								
-								icon = {
-									position = { 102 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 52 38 }
-									
-									icon = {
-										framesize = { 50 50 }
-										size = { 40 40 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										visible = "[ProvinceWindow.GetProvince.HasPopulation('middle_strata')]"
-										texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
-										frame = "[ProvinceWindow.GetProvince.GetPopHappyFrame('middle_strata')]"
-										tooltip = "[ProvinceWindow.GetProvince.GetPopHappyInformation('middle_strata')]"
-									}
-								}
-								
-								button = {
-									using = button_nohighlight
-									position = { 0 -1 }
-									size = { 44 42 }
-									texture = "gfx/interface/buttons/button_square_42.dds"
-									parentanchor = top|left
-									#clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-									#oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-									#onclick = "[ProvinceWindow.ShowPopDetails('middle_strata')]"
-									tooltip = "MIDDLE_STRATA_TOOLTIP_SIMPLIFIED"
-									
-									icon = {
-										position = { -1 -1 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										size = { 32 32 }
-										using = icon_pop_middle_starta
-									}
-									
+								blockoverride "IconDetails"
+								{
+									using = icon_pop_citizens
+									tooltip = "CITIZEN_TOOLTIP_SIMPLIFIED"
 									state = {
 										name = _mouse_enter
-										on_start = "[PdxGuiTriggerAllAnimations('research_show')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_show')]"
+										on_start = "[PdxGuiTriggerAllAnimations('traderoutes_show')]"
+										on_start = "[PdxGuiTriggerAllAnimations('research_show')]" 
+										on_start = "[PdxGuiTriggerAllAnimations('manpower_show')]" 
 									}
 									state = {
 										name = _mouse_hierarchy_leave
+										on_start = "[PdxGuiInterruptAllAnimations('traderoutes_show')]"
 										on_start = "[PdxGuiInterruptAllAnimations('research_show')]"
-										on_start = "[PdxGuiInterruptAllAnimations('commerce_show')]"
-										on_start = "[PdxGuiTriggerAllAnimations('research_hide')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_hide')]"
+										on_start = "[PdxGuiInterruptAllAnimations('manpower_show')]" 
+										on_start = "[PdxGuiTriggerAllAnimations('research_hide')]" 
+										on_start = "[PdxGuiTriggerAllAnimations('traderoutes_hide')]"
+										on_start = "[PdxGuiTriggerAllAnimations('manpower_hide')]" 
 									}
 								}
-								
-								
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopGrowing('middle_strata')]"
-									#tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
-									using = icon_plus
-									position = { -2 0 }
+								blockoverride "PlusVisible" { visible = "[ProvinceWindow.GetProvince.IsPopGrowing('citizen')]" }
+								blockoverride "MinusVisible" { visible = "[ProvinceWindow.GetProvince.IsPopDeclining('citizen')]" }
+								blockoverride "ProgressBarDetails"
+								{
+									visible = "[GreaterThan_int32( ProvinceWindow.GetProvince.GetPopulation('citizen'), '(int32)0' )]"
+									value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetPopTypeHappiness('citizen'))]" 
+									tooltip = "CITIZEN_AVERAGE_HAPPINESS_TT"
 								}
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopDeclining('middle_strata')]"
-									using = icon_minus
-									position = { -2 0 }
-								}
+								blockoverride "HappyVisible" { visible = "[GreaterThanOrEqualTo_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('citizen'),  '(CFixedPoint)50' )]" }
+								blockoverride "SadVisible" { visible = "[LessThan_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('citizen'),  '(CFixedPoint)50' )]" }
 							}
-							container = {
-								name = "lower_strata"
-								
-								#alpha = "[TransparentIfZero_int32(ProvinceWindow.GetProvince.GetPopulation('lower_strata'))]"
-								
-								icon = {
-									name = "Pop Number"
-									position = { 50 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 46 38 }
-									
-									textbox = {
-										position = { 0 4 }
-										autoresize = yes
-										using = MarbleButtonFont
-										text = "[ProvinceWindow.GetProvince.GetPopulation('lower_strata')]"
-										widgetanchor = top|hcenter
-										parentanchor = top|hcenter
-									}
-									tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('lower_strata')]"
+							
+							widget = {
+								using = pop_happiness_item
+								size = { 140 40 }
+								name = "freemen"
+								blockoverride "PopulationTooltip" { tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('freemen')]" }
+								blockoverride "PopulationNumber" { 
+									text = "[ProvinceWindow.GetProvince.GetPopulation('freemen')]"
+									alpha = "[TransparentIfZero_int32( ProvinceWindow.GetProvince.GetPopulation('freemen'))]"
 								}
-								
-								icon = {
-									position = { 102 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 52 38 }
-									
-									icon = {
-										framesize = { 50 50 }
-										size = { 40 40 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										visible = "[ProvinceWindow.GetProvince.HasPopulation('lower_strata')]"
-										texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
-										frame = "[ProvinceWindow.GetProvince.GetPopHappyFrame('lower_strata')]"
-										tooltip = "[ProvinceWindow.GetProvince.GetPopHappyInformation('lower_strata')]"
-									}
-								}
-								
-								button = {
-									using = button_nohighlight
-									position = { 0 -1 }
-									size = { 44 42 }
-									texture = "gfx/interface/buttons/button_square_42.dds"
-									parentanchor = top|left
-									#clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-									#oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-									#onclick = "[ProvinceWindow.ShowPopDetails('lower_strata')]"
-									tooltip = "LOWER_STRATA_TOOLTIP_SIMPLIFIED"
-									
-									icon = {
-										position = { -1 -1 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										size = { 32 32 }
-										using = icon_pop_lower_starta
-									}
-									
+								blockoverride "IconDetails"
+								{
+									using = icon_pop_freemen
+									tooltip = "FREEMEN_TOOLTIP_SIMPLIFIED"
 									state = {
 										name = _mouse_enter
-										on_start = "[PdxGuiTriggerAllAnimations('research_show')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_show')]"
+										on_start = "[PdxGuiTriggerAllAnimations('manpower_show')]" 
+										on_start = "[PdxGuiTriggerAllAnimations('tax_show')]" 
 									}
 									state = {
 										name = _mouse_hierarchy_leave
-										on_start = "[PdxGuiInterruptAllAnimations('research_show')]"
-										on_start = "[PdxGuiInterruptAllAnimations('commerce_show')]"
-										on_start = "[PdxGuiTriggerAllAnimations('research_hide')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_hide')]"
+										on_start = "[PdxGuiInterruptAllAnimations('manpower_show')]"
+										on_start = "[PdxGuiInterruptAllAnimations('tax_show')]"
+										on_start = "[PdxGuiTriggerAllAnimations('manpower_hide')]" 
+										on_start = "[PdxGuiTriggerAllAnimations('tax_hide')]"
 									}
 								}
-								
-								
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopGrowing('lower_strata')]"
-									#tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
-									using = icon_plus
-									position = { -2 0 }
+								blockoverride "PlusVisible" { visible = "[ProvinceWindow.GetProvince.IsPopGrowing('freemen')]" }
+								blockoverride "MinusVisible" { visible = "[ProvinceWindow.GetProvince.IsPopDeclining('freemen')]" }
+								blockoverride "ProgressBarDetails"
+								{
+									visible = "[GreaterThan_int32( ProvinceWindow.GetProvince.GetPopulation('freemen'), '(int32)0' )]"
+									value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetPopTypeHappiness('freemen'))]" 
+									tooltip = "FREEMEN_AVERAGE_HAPPINESS_TT"
 								}
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopDeclining('lower_strata')]"
-									using = icon_minus
-									position = { -2 0 }
-								}
+								blockoverride "HappyVisible" { visible = "[GreaterThanOrEqualTo_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('freemen'),  '(CFixedPoint)50' )]" }
+								blockoverride "SadVisible" { visible = "[LessThan_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('freemen'),  '(CFixedPoint)50' )]" }
 							}
-							container = {
-								name = "proletariat"
-								
-								#alpha = "[TransparentIfZero_int32(ProvinceWindow.GetProvince.GetPopulation('proletariat'))]"
-								
-								icon = {
-									name = "Pop Number"
-									position = { 50 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 46 38 }
-									
-									textbox = {
-										position = { 0 4 }
-										autoresize = yes
-										using = MarbleButtonFont
-										text = "[ProvinceWindow.GetProvince.GetPopulation('proletariat')]"
-										widgetanchor = top|hcenter
-										parentanchor = top|hcenter
-									}
-									tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('proletariat')]"
-								}
-								
-								icon = {
-									position = { 102 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 52 38 }
-									
-									icon = {
-										framesize = { 50 50 }
-										size = { 40 40 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										visible = "[ProvinceWindow.GetProvince.HasPopulation('proletariat')]"
-										texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
-										frame = "[ProvinceWindow.GetProvince.GetPopHappyFrame('proletariat')]"
-										tooltip = "[ProvinceWindow.GetProvince.GetPopHappyInformation('proletariat')]"
-									}
-								}
-								
-								button = {
-									using = button_nohighlight
-									position = { 0 -1 }
-									size = { 44 42 }
-									texture = "gfx/interface/buttons/button_square_42.dds"
-									parentanchor = top|left
-									#clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-									#oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-									#onclick = "[ProvinceWindow.ShowPopDetails('proletariat')]"
-									tooltip = "PROLETARIAT_TOOLTIP_SIMPLIFIED"
-									
-									icon = {
-										position = { -1 -1 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										size = { 32 32 }
-										using = icon_pop_proletariat
-									}
-									
-									state = {
-										name = _mouse_enter
-										on_start = "[PdxGuiTriggerAllAnimations('research_show')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_show')]"
-									}
-									state = {
-										name = _mouse_hierarchy_leave
-										on_start = "[PdxGuiInterruptAllAnimations('research_show')]"
-										on_start = "[PdxGuiInterruptAllAnimations('commerce_show')]"
-										on_start = "[PdxGuiTriggerAllAnimations('research_hide')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_hide')]"
-									}
-								}
-								
-								
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopGrowing('proletariat')]"
-									#tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
-									using = icon_plus
-									position = { -2 0 }
-								}
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopDeclining('proletariat')]"
-									using = icon_minus
-									position = { -2 0 }
-								}
-							}
-							container = {
+							
+							widget = {
+								using = pop_happiness_item
+								size = { 140 40 }
 								name = "tribesmen"
-								
-								#alpha = "[TransparentIfZero_int32(ProvinceWindow.GetProvince.GetPopulation('tribesmen'))]"
-								
-								icon = {
-									name = "Pop Number"
-									position = { 50 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 46 38 }
-									
-									textbox = {
-										position = { 0 4 }
-										autoresize = yes
-										using = MarbleButtonFont
-										text = "[ProvinceWindow.GetProvince.GetPopulation('tribesmen')]"
-										widgetanchor = top|hcenter
-										parentanchor = top|hcenter
-									}
-									tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('tribesmen')]"
+								blockoverride "PopulationTooltip" { tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('tribesmen')]" }
+								blockoverride "PopulationNumber" { 
+									text = "[ProvinceWindow.GetProvince.GetPopulation('tribesmen')]"
+									alpha = "[TransparentIfZero_int32( ProvinceWindow.GetProvince.GetPopulation('tribesmen'))]"
 								}
-								
-								icon = {
-									position = { 102 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 52 38 }
-									
-									icon = {
-										framesize = { 50 50 }
-										size = { 40 40 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										visible = "[ProvinceWindow.GetProvince.HasPopulation('tribesmen')]"
-										texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
-										frame = "[ProvinceWindow.GetProvince.GetPopHappyFrame('tribesmen')]"
-										tooltip = "[ProvinceWindow.GetProvince.GetPopHappyInformation('tribesmen')]"
-									}
-								}
-								
-								button = {
-									using = button_nohighlight
-									position = { 0 -1 }
-									size = { 44 42 }
-									texture = "gfx/interface/buttons/button_square_42.dds"
-									parentanchor = top|left
-									#clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-									#oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-									#onclick = "[ProvinceWindow.ShowPopDetails('tribesmen')]"
+								blockoverride "IconDetails"
+								{
+									using = icon_pop_tribal
 									tooltip = "TRIBESMEN_TOOLTIP_SIMPLIFIED"
-									
-									icon = {
-										position = { -1 -1 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										size = { 32 32 }
-										using = icon_pop_tribal
-									}
-									
 									state = {
 										name = _mouse_enter
-										on_start = "[PdxGuiTriggerAllAnimations('research_show')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_show')]"
+										on_start = "[PdxGuiTriggerAllAnimations('manpower_show')]" 
+										on_start = "[PdxGuiTriggerAllAnimations('tax_show')]" 
 									}
 									state = {
 										name = _mouse_hierarchy_leave
-										on_start = "[PdxGuiInterruptAllAnimations('research_show')]"
-										on_start = "[PdxGuiInterruptAllAnimations('commerce_show')]"
-										on_start = "[PdxGuiTriggerAllAnimations('research_hide')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_hide')]"
+										on_start = "[PdxGuiInterruptAllAnimations('manpower_show')]"
+										on_start = "[PdxGuiInterruptAllAnimations('tax_show')]"
+										on_start = "[PdxGuiTriggerAllAnimations('manpower_hide')]" 
+										on_start = "[PdxGuiTriggerAllAnimations('tax_hide')]"
 									}
 								}
-								
-								
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopGrowing('tribesmen')]"
-									#tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
-									using = icon_plus
-									position = { -2 0 }
+								blockoverride "PlusVisible" { visible = "[ProvinceWindow.GetProvince.IsPopGrowing('tribesmen')]" }
+								blockoverride "MinusVisible" { visible = "[ProvinceWindow.GetProvince.IsPopDeclining('tribesmen')]" }
+								blockoverride "ProgressBarDetails"
+								{
+									visible = "[GreaterThan_int32( ProvinceWindow.GetProvince.GetPopulation('tribesmen'), '(int32)0' )]"
+									value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetPopTypeHappiness('tribesmen'))]" 
+									tooltip = "TRIBESMEN_AVERAGE_HAPPINESS_TT"
 								}
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopDeclining('tribesmen')]"
-									using = icon_minus
-									position = { -2 0 }
-								}
+								blockoverride "HappyVisible" { visible = "[GreaterThanOrEqualTo_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('tribesmen'),  '(CFixedPoint)50' )]" }
+								blockoverride "SadVisible" { visible = "[LessThan_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('tribesmen'),  '(CFixedPoint)50' )]" }
 							}
-							container = {
+							
+							widget = {
+								using = pop_happiness_item
+								size = { 140 40 }
 								name = "slaves"
-								
-								#alpha = "[TransparentIfZero_int32(ProvinceWindow.GetProvince.GetPopulation('slaves'))]"
-								
-								icon = {
-									name = "Pop Number"
-									position = { 50 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 46 38 }
-									
-									textbox = {
-										position = { 0 4 }
-										autoresize = yes
-										using = MarbleButtonFont
-										text = "[ProvinceWindow.GetProvince.GetPopulation('slaves')]"
-										widgetanchor = top|hcenter
-										parentanchor = top|hcenter
-									}
-									tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('slaves')]"
+								blockoverride "PopulationTooltip" { tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('slaves')]" }
+								blockoverride "PopulationNumber" { 
+									text = "[ProvinceWindow.GetProvince.GetPopulation('slaves')]" 
+									alpha = "[TransparentIfZero_int32( ProvinceWindow.GetProvince.GetPopulation('slaves'))]"
 								}
-								
-								icon = {
-									position = { 102 0 }
-									texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-									spriteType = Corneredtiled
-									spriteborder = { 12 12 }
-									size = { 52 38 }
-									
-									icon = {
-										framesize = { 50 50 }
-										size = { 40 40 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										visible = "[ProvinceWindow.GetProvince.HasPopulation('slaves')]"
-										texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
-										frame = "[ProvinceWindow.GetProvince.GetPopHappyFrame('slaves')]"
-										tooltip = "[ProvinceWindow.GetProvince.GetPopHappyInformation('slaves')]"
-									}
-								}
-								
-								button = {
-									using = button_nohighlight
-									position = { 0 -1 }
-									size = { 44 42 }
-									texture = "gfx/interface/buttons/button_square_42.dds"
-									parentanchor = top|left
-									#clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-									#oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-									#onclick = "[ProvinceWindow.ShowPopDetails('slaves')]"
+								blockoverride "IconDetails"
+								{
+									using = icon_pop_slaves
 									tooltip = "SLAVES_TOOLTIP_SIMPLIFIED"
-									
-									icon = {
-										position = { -1 -1 }
-										widgetanchor = vcenter|hcenter
-										parentanchor = vcenter|hcenter
-										size = { 32 32 }
-										using = icon_pop_slaves
-									}
-									
 									state = {
 										name = _mouse_enter
-										on_start = "[PdxGuiTriggerAllAnimations('research_show')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_show')]"
+										on_start = "[PdxGuiTriggerAllAnimations('tradegood_show')]" 
+										on_start = "[PdxGuiTriggerAllAnimations('tax_show')]" 
 									}
 									state = {
 										name = _mouse_hierarchy_leave
-										on_start = "[PdxGuiInterruptAllAnimations('research_show')]"
-										on_start = "[PdxGuiInterruptAllAnimations('commerce_show')]"
-										on_start = "[PdxGuiTriggerAllAnimations('research_hide')]"
-										on_start = "[PdxGuiTriggerAllAnimations('commerce_hide')]"
+										on_start = "[PdxGuiInterruptAllAnimations('tradegood_show')]"
+										on_start = "[PdxGuiInterruptAllAnimations('tax_show')]"
+										on_start = "[PdxGuiTriggerAllAnimations('tradegood_hide')]" 
+										on_start = "[PdxGuiTriggerAllAnimations('tax_hide')]"
 									}
 								}
-								
-								
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopGrowing('slaves')]"
-									#tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
-									using = icon_plus
-									position = { -2 0 }
+								blockoverride "PlusVisible" { visible = "[ProvinceWindow.GetProvince.IsPopGrowing('slaves')]" }
+								blockoverride "MinusVisible" { visible = "[ProvinceWindow.GetProvince.IsPopDeclining('slaves')]" }
+								blockoverride "ProgressBarDetails"
+								{
+									visible = "[GreaterThan_int32( ProvinceWindow.GetProvince.GetPopulation('slaves'), '(int32)0' )]"
+									value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetPopTypeHappiness('slaves'))]" 
+									tooltip = "SLAVES_AVERAGE_HAPPINESS_TT"
 								}
-								
-								icon = {
-									visible = "[ProvinceWindow.GetProvince.IsPopDeclining('slaves')]"
-									using = icon_minus
-									position = { -2 0 }
-								}
+								blockoverride "HappyVisible" { visible = "[GreaterThanOrEqualTo_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('slaves'),  '(CFixedPoint)50' )]" }
+								blockoverride "SadVisible" { visible = "[LessThan_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('slaves'),  '(CFixedPoint)50' )]" }
 							}
-						
-						
+							
+							#widget = {
+							#	name = "Nobles Number"
+							#	#texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+							#	#spriteType = Corneredtiled
+							#	#spriteborder = { 10 5 }
+							#	size = { 140 40 }
+							#	
+							#	icon = {
+							#		name = "Slot"
+							#		texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+							#		spriteborder = { 8 8 }
+							#		spriteType = corneredtiled
+							#		size = { 60 26 }
+							#		position = { 14 0 }
+							#		alwaystransparent = no
+							#		tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('nobles')]"
+							#	}
+							#	
+							#	textbox = {
+							#		position = { 40 0 }
+							#		autoresize = yes
+							#		using = MarbleButtonFontS
+							#		text = "[ProvinceWindow.GetProvince.GetPopulation('nobles')]"
+							#		align = center
+							#		#default_format = "#glow_color:{1,1,1,1};glow_offset:{0,0}"
+							#		
+							#	}
+							#	
+							#	icon = {
+							#		position = { 4 -4 }
+							#		size = { 42 42 }
+							#		using = icon_pop_citizens
+							#		tooltip = "NOBLES_TOOLTIP_SIMPLIFIED"
+							#		alwaystransparent = no
+							#		state = {
+							#			name = _mouse_enter
+							#			on_start = "[PdxGuiTriggerAllAnimations('research_show')]" 
+							#			on_start = "[PdxGuiTriggerAllAnimations('commerce_show')]" 
+							#		}
+							#		state = {
+							#			name = _mouse_hierarchy_leave
+							#			on_start = "[PdxGuiInterruptAllAnimations('research_show')]"
+							#			on_start = "[PdxGuiInterruptAllAnimations('commerce_show')]"
+							#			on_start = "[PdxGuiTriggerAllAnimations('research_hide')]" 
+							#			on_start = "[PdxGuiTriggerAllAnimations('commerce_hide')]"
+							#		}
+							#	}
+							#	
+							#	icon = {
+							#		visible = "[ProvinceWindow.GetProvince.IsPopGrowing('nobles')]"
+							#		#tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
+							#		using = icon_plus
+							#		position = { -4 0 }
+							#	}
+							#	
+							#	icon = {
+							#		visible = "[ProvinceWindow.GetProvince.IsPopDeclining('nobles')]"
+							#		using = icon_minus
+							#		position = { -4 0 }
+							#	}
+							#	
+							#	progressbar = {
+							#		using = progressbar_green_horizontal_rb
+							#		position = { 10 28 }
+							#		size = { 128 9 }
+							#		visible = "[GreaterThan_int32( ProvinceWindow.GetProvince.GetPopulation('nobles'), '(int32)0' )]"
+							#		value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetPopTypeHappiness('nobles'))]" 
+							#		datacontext = "[ProvinceWindow]"
+							#		tooltip = "NOBLE_AVERAGE_HAPPINESS_TT"
+							#		
+							#		marker = {
+							#			container = {
+							#				name = "progress_marker"           
+							#				alwaystransparent = yes
+							#				icon = {
+							#					position = { -9 -7 }
+							#					alwaystransparent = yes
+							#					visible = "[GreaterThanOrEqualTo_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('nobles'),  '(CFixedPoint)50' )]"
+							#					texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
+							#					size = { 21 21 }
+							#					framesize = { 50 50 }
+							#					frame = 1
+							#				}
+							#				icon = {
+							#					position = { -9 -7 }
+							#					alwaystransparent = yes
+							#					visible = "[LessThan_CFixedPoint( ProvinceWindow.GetProvince.GetPopTypeHappiness('nobles'),  '(CFixedPoint)50' )]"
+							#					texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
+							#					size = { 21 21 }
+							#					framesize = { 50 50 }
+							#					frame = 2
+							#				}
+							#			}
+							#		}
+							#	}
+							#	
+							#}
+							#
+							#widget = {
+							#	name = "Citizen Number"
+							#	#texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+							#	#spriteType = Corneredtiled
+							#	#spriteborder = { 10 5 }
+							#	size = { 140 40 }
+							#	
+							#	progressbar = {
+							#		using = progressbar_green_horizontal_rb
+							#		position = { 38 21 }
+							#		size = { 100 14 }
+							#		visible = "[GreaterThan_int32( ProvinceWindow.GetProvince.GetPopulation('citizen'), '(int32)0' )]"
+							#		value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetPopTypeHappiness('citizen'))]" 
+							#		datacontext = "[ProvinceWindow]"
+							#		tooltip = "CITIZEN_AVERAGE_HAPPINESS_TT"
+							#		
+							#		marker = {
+							#			container = {
+							#				name = "progress_marker"           
+							#				alwaystransparent = yes
+							#				icon = {
+							#					position = { -9 -10 }
+							#					alwaystransparent = yes
+							#					texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
+							#					size = { 21 21 }
+							#					framesize = { 50 50 }
+							#					frame = 1
+							#				}
+							#			}
+							#		}
+							#	}
+							#
+							#	icon = {
+							#		position = { 4 -4 }
+							#		size = { 36 36 }
+							#		using = icon_pop_citizens
+							#		tooltip = "CITIZEN_TOOLTIP_SIMPLIFIED"
+							#		alwaystransparent = no
+							#		state = {
+							#			name = _mouse_enter
+							#			on_start = "[PdxGuiTriggerAllAnimations('research_show')]" 
+							#			on_start = "[PdxGuiTriggerAllAnimations('commerce_show')]" 
+							#		}
+							#		state = {
+							#			name = _mouse_hierarchy_leave
+							#			on_start = "[PdxGuiInterruptAllAnimations('research_show')]"
+							#			on_start = "[PdxGuiInterruptAllAnimations('commerce_show')]"
+							#			on_start = "[PdxGuiTriggerAllAnimations('research_hide')]" 
+							#			on_start = "[PdxGuiTriggerAllAnimations('commerce_hide')]"
+							#		}
+							#	}
+							#	
+							#	textbox = {
+							#		position = { 14 14 }
+							#		autoresize = yes
+							#		using = MarbleButtonFont
+							#		text = "[ProvinceWindow.GetProvince.GetPopulation('citizen')]"
+							#		tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('citizen')]"
+							#		align = center
+							#		default_format = "#glow_color:{1,1,1,1};glow_offset:{0,0}"
+							#	}
+							#	
+							#	icon = {
+							#		visible = "[ProvinceWindow.GetProvince.IsPopGrowing('citizen')]"
+							#		#tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
+							#		using = icon_plus
+							#		position = { -4 0 }
+							#	}
+							#	
+							#	icon = {
+							#		visible = "[ProvinceWindow.GetProvince.IsPopDeclining('citizen')]"
+							#		using = icon_minus
+							#		position = { -4 0 }
+							#	}
+							#}
+							#
+							#
+							#widget = {
+							#	name = "Freemen Number"
+							#	#texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+							#	#spriteType = Corneredtiled
+							#	#spriteborder = { 10 5 }
+							#	size = { 140 40 }
+							#	
+							#	progressbar = {
+							#		using = progressbar_green_horizontal_rb
+							#		position = { 38 21 }
+							#		size = { 100 14 }
+							#		visible = "[GreaterThan_int32( ProvinceWindow.GetProvince.GetPopulation('freemen'), '(int32)0' )]"
+							#		value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetPopTypeHappiness('freemen'))]" 
+							#		datacontext = "[ProvinceWindow]"
+							#		tooltip = "FREEMEN_AVERAGE_HAPPINESS_TT"
+							#		
+							#		marker = {
+							#			container = {
+							#				name = "progress_marker"           
+							#				alwaystransparent = yes
+							#				icon = {
+							#					position = { -9 -10 }
+							#					alwaystransparent = yes
+							#					texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
+							#					size = { 21 21 }
+							#					framesize = { 50 50 }
+							#					frame = 1
+							#				}
+							#			}
+							#		}
+							#	}
+							#
+							#	icon = {
+							#		position = { 4 -4 }
+							#		size = { 36 36 }
+							#		using = icon_pop_freemen
+							#		tooltip = "FREEMEN_TOOLTIP_SIMPLIFIED"
+							#		alwaystransparent = no
+							#		state = {
+							#			name = _mouse_enter
+							#			on_start = "[PdxGuiTriggerAllAnimations('research_show')]" 
+							#			on_start = "[PdxGuiTriggerAllAnimations('commerce_show')]" 
+							#		}
+							#		state = {
+							#			name = _mouse_hierarchy_leave
+							#			on_start = "[PdxGuiInterruptAllAnimations('research_show')]"
+							#			on_start = "[PdxGuiInterruptAllAnimations('commerce_show')]"
+							#			on_start = "[PdxGuiTriggerAllAnimations('research_hide')]" 
+							#			on_start = "[PdxGuiTriggerAllAnimations('commerce_hide')]"
+							#		}
+							#	}
+							#	
+							#	textbox = {
+							#		position = { 14 14 }
+							#		autoresize = yes
+							#		using = MarbleButtonFont
+							#		text = "[ProvinceWindow.GetProvince.GetPopulation('freemen')]"
+							#		tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('freemen')]"
+							#		align = center
+							#		default_format = "#glow_color:{1,1,1,1};glow_offset:{0,0}"
+							#	}
+							#	
+							#	icon = {
+							#		visible = "[ProvinceWindow.GetProvince.IsPopGrowing('freemen')]"
+							#		#tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
+							#		using = icon_plus
+							#		position = { -4 0 }
+							#	}
+							#	
+							#	icon = {
+							#		visible = "[ProvinceWindow.GetProvince.IsPopDeclining('freemen')]"
+							#		using = icon_minus
+							#		position = { -4 0 }
+							#	}
+							#}
+							#
+							#widget = {
+							#	name = "Tribesmen Number"
+							#	#texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+							#	#spriteType = Corneredtiled
+							#	#spriteborder = { 10 5 }
+							#	size = { 140 40 }
+							#	
+							#	progressbar = {
+							#		using = progressbar_green_horizontal_rb
+							#		position = { 38 21 }
+							#		size = { 100 14 }
+							#		visible = "[GreaterThan_int32( ProvinceWindow.GetProvince.GetPopulation('tribesmen'), '(int32)0' )]"
+							#		value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetPopTypeHappiness('tribesmen'))]" 
+							#		datacontext = "[ProvinceWindow]"
+							#		tooltip = "TRIBESMEN_AVERAGE_HAPPINESS_TT"
+							#		
+							#		marker = {
+							#			container = {
+							#				name = "progress_marker"           
+							#				alwaystransparent = yes
+							#				icon = {
+							#					position = { -9 -10 }
+							#					alwaystransparent = yes
+							#					texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
+							#					size = { 21 21 }
+							#					framesize = { 50 50 }
+							#					frame = 1
+							#				}
+							#			}
+							#		}
+							#	}
+							#
+							#	icon = {
+							#		position = { 3 -4 }
+							#		size = { 36 36 }
+							#		using = icon_pop_tribal
+							#		tooltip = "TRIBESMEN_TOOLTIP_SIMPLIFIED"
+							#		alwaystransparent = no
+							#		state = {
+							#			name = _mouse_enter
+							#			on_start = "[PdxGuiTriggerAllAnimations('research_show')]" 
+							#			on_start = "[PdxGuiTriggerAllAnimations('commerce_show')]" 
+							#		}
+							#		state = {
+							#			name = _mouse_hierarchy_leave
+							#			on_start = "[PdxGuiInterruptAllAnimations('research_show')]"
+							#			on_start = "[PdxGuiInterruptAllAnimations('commerce_show')]"
+							#			on_start = "[PdxGuiTriggerAllAnimations('research_hide')]" 
+							#			on_start = "[PdxGuiTriggerAllAnimations('commerce_hide')]"
+							#		}
+							#	}
+							#	
+							#	textbox = {
+							#		position = { 14 14 }
+							#		autoresize = yes
+							#		using = MarbleButtonFont
+							#		text = "[ProvinceWindow.GetProvince.GetPopulation('tribesmen')]"
+							#		tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('tribesmen')]"
+							#		align = center
+							#		default_format = "#glow_color:{1,1,1,1};glow_offset:{0,0}"
+							#	}
+							#	
+							#	icon = {
+							#		visible = "[ProvinceWindow.GetProvince.IsPopGrowing('tribesmen')]"
+							#		#tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
+							#		using = icon_plus
+							#		position = { -4 0 }
+							#	}
+							#	
+							#	icon = {
+							#		visible = "[ProvinceWindow.GetProvince.IsPopDeclining('tribesmen')]"
+							#		using = icon_minus
+							#		position = { -4 0 }
+							#	}
+							#}
+							#
+							#widget = {
+							#	name = "Slaves Number"
+							#	#texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+							#	#spriteType = Corneredtiled
+							#	#spriteborder = { 10 5 }
+							#	size = { 140 40 }
+							#	
+							#	progressbar = {
+							#		using = progressbar_green_horizontal_rb
+							#		position = { 38 21 }
+							#		size = { 100 14 }
+							#		visible = "[GreaterThan_int32( ProvinceWindow.GetProvince.GetPopulation('slaves'), '(int32)0' )]"
+							#		value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetPopTypeHappiness('slaves'))]" 
+							#		datacontext = "[ProvinceWindow]"
+							#		tooltip = "SLAVES_AVERAGE_HAPPINESS_TT"
+							#		
+							#		marker = {
+							#			container = {
+							#				name = "progress_marker"           
+							#				alwaystransparent = yes
+							#				icon = {
+							#					position = { -9 -10 }
+							#					alwaystransparent = yes
+							#					texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
+							#					size = { 21 21 }
+							#					framesize = { 50 50 }
+							#					frame = 1
+							#				}
+							#			}
+							#		}
+							#	}
+							#
+							#	icon = {
+							#		position = { 4 -4 }
+							#		size = { 36 36 }
+							#		using = icon_pop_slaves
+							#		tooltip = "SLAVES_TOOLTIP_SIMPLIFIED"
+							#		alwaystransparent = no
+							#		state = {
+							#			name = _mouse_enter
+							#			on_start = "[PdxGuiTriggerAllAnimations('research_show')]" 
+							#			on_start = "[PdxGuiTriggerAllAnimations('commerce_show')]" 
+							#		}
+							#		state = {
+							#			name = _mouse_hierarchy_leave
+							#			on_start = "[PdxGuiInterruptAllAnimations('research_show')]"
+							#			on_start = "[PdxGuiInterruptAllAnimations('commerce_show')]"
+							#			on_start = "[PdxGuiTriggerAllAnimations('research_hide')]" 
+							#			on_start = "[PdxGuiTriggerAllAnimations('commerce_hide')]"
+							#		}
+							#	}
+							#	
+							#	textbox = {
+							#		position = { 14 14 }
+							#		autoresize = yes
+							#		using = MarbleButtonFont
+							#		text = "[ProvinceWindow.GetProvince.GetPopulation('slaves')]"
+							#		tooltip = "[ProvinceWindow.GetProvince.GetPopulationTooltip('slaves')]"
+							#		align = center
+							#		default_format = "#glow_color:{1,1,1,1};glow_offset:{0,0}"
+							#	}
+							#	
+							#	icon = {
+							#		visible = "[ProvinceWindow.GetProvince.IsPopGrowing('slaves')]"
+							#		#tooltip = "[ProvinceWindow.GetProvince.GetGrowthInformation]"
+							#		using = icon_plus
+							#		position = { -4 0 }
+							#	}
+							#	
+							#	icon = {
+							#		visible = "[ProvinceWindow.GetProvince.IsPopDeclining('slaves')]"
+							#		using = icon_minus
+							#		position = { -4 0 }
+							#	}
+							#}
 						}
 						
 						button_standard_white_marble_s = {
@@ -2677,9 +2877,9 @@ window = {
 							clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
 							oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
 							size = { 156 38 }
-							position = { 0 356 }
+							position = { -1 256 }
 						}
-					
+						
 					}
 					
 					###################################
@@ -2688,7 +2888,7 @@ window = {
 					
 					container = {
 						name = "Buildings"
-						position = { 371 162 }
+						position = { 321 124 }
 						
 						icon = {
 							position = { 1 48 }
@@ -2704,10 +2904,10 @@ window = {
 							using = small_window_columns_type
 							position = { -4 2 }
 							size = { 290 80 }
-							tooltip = "[ProvinceWindow.GetProvince.GetTerrain.GetTooltip]"
-						
+							tooltip = "[ProvinceWindow.GetProvince.GetTerrain.GetTooltip]" 
+							
 						}
-						
+		
 						scrollarea = {
 							position = { 0 131 }
 							size = { 280 200 }
@@ -2718,8 +2918,8 @@ window = {
 							}
 							
 							scrollwidget = {
-								
-								
+
+							
 								fixedgridbox = {
 									name = "buildings_present_grid"
 									datamodel_wrap = 5
@@ -2732,7 +2932,7 @@ window = {
 									item = {
 										
 										widget = {
-											size = { 50 46 }
+											size = { 50 46}
 											
 											icon = {
 												size = { 40 40 }
@@ -2785,24 +2985,24 @@ window = {
 													}
 												}
 											}
-										#textbox = {
-										#	position = { 54 0 }
-										#	autoresize = yes
-										#	using = MarbleButtonFont
-										#	text = "[CurrentBuildingItem.GetBuilding.GetName]"
-										#	parentanchor = top|left
-										#	widgetanchor = top|left
-										#	fontsize = 14
-										#}
-										#textbox = {
-										#	position = { 54 20 }
-										#	autoresize = yes
-										#	using = MarbleButtonFontS
-										#	text = "[CurrentBuildingItem.GetModifier]"
-										#	parentanchor = top|left
-										#	widgetanchor = top|left
-										#	fontsize = 14
-										#}
+											#textbox = {
+											#	position = { 54 0 }
+											#	autoresize = yes
+											#	using = MarbleButtonFont
+											#	text = "[CurrentBuildingItem.GetBuilding.GetName]"
+											#	parentanchor = top|left
+											#	widgetanchor = top|left
+											#	fontsize = 14
+											#}
+											#textbox = {
+											#	position = { 54 20 }
+											#	autoresize = yes
+											#	using = MarbleButtonFontS
+											#	text = "[CurrentBuildingItem.GetModifier]"
+											#	parentanchor = top|left
+											#	widgetanchor = top|left
+											#	fontsize = 14
+											#}
 										}
 									}
 								}
@@ -2811,11 +3011,11 @@ window = {
 						
 						icon = {
 							position = { 236 76 }
-							size = { 32 32 }
+							size = { 32 32}
 							visible = "[ProvinceWindow.GetProvince.HasBuildingConstruction]"
 							texture = "[GetBuildingIcon(ProvinceWindow.GetProvince.GetNextBuilding)]"
 							tooltip = "[ProvinceWindow.GetProvince.GetBuildFinishedTooltip]"
-						
+							
 						}
 						
 						
@@ -2846,7 +3046,7 @@ window = {
 								margin_left = 0
 								using = BlackMarbleFont
 								position = { 10 4 }
-								size = { 240 30 }
+								size = { 240 30	}
 								elide = right
 							}
 							
@@ -2881,21 +3081,26 @@ window = {
 								value = "[ProvinceWindow.GetProvince.GetBuildingProgress]"
 								tooltip = "[ProvinceWindow.GetProvince.GetBuildFinishedTooltip]"
 							}
-						
+							
 						}
 						
 						button_standard_white_marble_s = {
 							text = "BUID_BUILDINGS_BUTTON"
 							enabled = "[ProvinceWindow.CanBuildBuilding]"
 							tooltip = "[ProvinceWindow.GetBuildBuildingTooltip]"
+							onclick = "[ClickHighlight('btn_province_build')]"
 							onclick = "[ProvinceWindow.BuildBuilding]"
 							clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
 							oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
 							size = { 126 38 }
 							position = { 88 84 }
 							scale = 0.9
+
+							icon = {
+								using = highlight_button_import
+								visible = "[ShouldHighlight('btn_province_build')]"
+							}
 						}
-					
 					}
 					
 					#################
@@ -2904,7 +3109,7 @@ window = {
 					
 					container = {
 						name = "Tactics"
-						position = { 660 162 }
+						position = { 610 124 }
 						ignoreinvisible = yes
 						
 						container = {
@@ -2961,7 +3166,7 @@ window = {
 										name = "progressbar_frame"
 										spriteType = Corneredtiled
 										spriteborder = { 5 2 }
-										size = { 74 11 }
+										size = {74 11 }
 										texture = "gfx/interface/tiles/progressbar_green_frame.dds"
 										position = { 2 0 }
 									}
@@ -2980,9 +3185,7 @@ window = {
 								spriteType = Corneredtiled
 								spriteborder = { 8 8 }
 								size = { 90 32 }
-								tooltip = "[ProvinceWindow.GetProvince.GetModifierTooltip('local_defensive')]"
-								
-								#alpha = "[TransparentIfZero( ProvinceWindow.GetProvince.GetModifierPureValue('local_defensive'))]"
+								tooltip = "[ProvinceWindow.GetProvince.GetLocalDefensiveTooltip]"
 								
 								icon = {
 									texture = "gfx/interface/icons/modifiers/local_defensive.dds"
@@ -2997,7 +3200,7 @@ window = {
 									fontsize = 16
 									using = MarbleButtonFont
 									widgetanchor = top|hcenter
-									text = "[ProvinceWindow.GetProvince.GetModifierValue('local_defensive')]"
+									text = "[ProvinceWindow.GetProvince.GetLocalDefensive|%+=1]"
 								}
 							}
 							
@@ -3051,111 +3254,105 @@ window = {
 									text = "[ProvinceWindow.GetAppliedAttrition|2]"
 								}
 							}
-						
-						#flowcontainer = {
-						#	container = {
-						#		ignoreinvisible = yes
-						#		button = {
-						#			texture = "gfx/interface/buttons/button_square_42.dds"
-						#			spriteborder = { 12 12 }
-						#			spriteType = corneredstretched
-						#			size = { 70 70 }
-						#			parentanchor = hcenter
-						#			visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-						#			datacontext = "[GetScriptedGui('found_city_button')]"
-						#			enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-						#			onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-						#			tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-						#
-						#			icon = {
-						#				parentanchor = center
-						#				texture = "gfx/interface/icons/shared_icons/city.dds"
-						#				size = { 62 62 }
-						#				position = { 2 -1 }
-						#			}
-						#		}
-						#	}
-						#	container = {
-						#		ignoreinvisible = yes
-						#		button = {
-						#			texture = "gfx/interface/buttons/button_square_42.dds"
-						#			spriteborder = { 12 12 }
-						#			spriteType = corneredstretched
-						#			size = { 70 70 }
-						#			parentanchor = hcenter
-						#			visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-						#			datacontext = "[GetScriptedGui('found_metropolis_button')]"
-						#			enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-						#			onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-						#			tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-						#
-						#			icon = {
-						#				parentanchor = center
-						#				texture = "gfx/interface/icons/shared_icons/metropolis.dds"
-						#				size = { 62 62 }
-						#				position = { 2 -1 }
-						#			}
-						#		}
-						#	}
-						#	widget = {
-						#		name = "space_invaders_2"
-						#		size = { 5 0 }
-						#	}
-						#	icon = {
-						#		name = "progressbar_frame"
-						#		spriteType = Corneredtiled
-						#		spriteborder = { 2 5 }
-						#		size = { 10 70 }
-						#		texture = "gfx/interface/tiles/progressbar_green_frame.dds"
-						#		visible = "[ProvinceWindow.IsPlayerProvince)]"
-						#
-						#		progressbar = {
-						#			using = progressbar_green_vertical
-						#			size = { 7 68 }
-						#			position = { 2 2 }
-						#			visible = "[And(ProvinceWindow.GetProvince.HasTimedModifier('founding_city_in_progress'), ProvinceWindow.IsPlayerProvince)]"
-						#			tooltip = "[ProvinceWindow.GetProvince.GetTimedModifier('founding_city_in_progress').GetTooltip]"
-						#			value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetTimedModifier('founding_city_in_progress').GetProgress)]"
-						#		}
-						#		progressbar = {
-						#			using = progressbar_green_vertical
-						#			size = { 7 68 }
-						#			position = { 2 2 }
-						#			visible = "[And(ProvinceWindow.GetProvince.HasTimedModifier('founding_metropolis_in_progress'), ProvinceWindow.IsPlayerProvince)]"
-						#			tooltip = "[ProvinceWindow.GetProvince.GetTimedModifier('founding_metropolis_in_progress').GetTooltip]"
-						#			value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetTimedModifier('founding_metropolis_in_progress').GetProgress)]"
-						#		}
-						#	}
-						#}
+							
+							container = {
+								button = {
+									name = "mercenary_city_button_button"
+									datacontext = "[GetScriptedGui('mercenary_city_button')]"
+									texture = "gfx/interface/buttons/button_round_46.dds"
+									visible = "[And( ProvinceWindow.IsPlayerProvince, ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End ))]"
+									enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+									tooltip = "MERC_CITY_BUTTON" 
+									size = { 52 52 }
+									clicksound = "event:/SFX/UI/Province/sfx_ui_province_improvement"
+									position = { 18 10 }
+									
+									icon = {
+										size = { 36 36 }
+										texture = "gfx/interface/icons/shared_icons/create_mercenary_state.dds"
+										parentanchor = vcenter|hcenter
+										widgetanchor = vcenter|hcenter
+									}
+								}
+							}
+							
+							#flowcontainer = {
+							#	container = {
+							#		ignoreinvisible = yes
+							#		button = {
+							#			texture = "gfx/interface/buttons/button_square_42.dds"
+							#			spriteborder = { 12 12 }
+							#			spriteType = corneredstretched
+							#			size = { 70 70 }
+							#			parentanchor = hcenter
+							#			visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+							#			datacontext = "[GetScriptedGui('found_city_button')]"
+							#			enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+							#			onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+							#			tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+							#			
+							#			icon = {
+							#				parentanchor = center
+							#				texture = "gfx/interface/icons/shared_icons/city.dds"
+							#				size = { 62 62 }
+							#				position = { 2 -1 }
+							#			}
+							#		}
+							#	}
+							#	container = {
+							#		ignoreinvisible = yes
+							#		button = {
+							#			texture = "gfx/interface/buttons/button_square_42.dds"
+							#			spriteborder = { 12 12 }
+							#			spriteType = corneredstretched
+							#			size = { 70 70 }
+							#			parentanchor = hcenter
+							#			visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+							#			datacontext = "[GetScriptedGui('found_metropolis_button')]"
+							#			enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+							#			onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+							#			tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+							#			
+							#			icon = {
+							#				parentanchor = center
+							#				texture = "gfx/interface/icons/shared_icons/metropolis.dds"
+							#				size = { 62 62 }
+							#				position = { 2 -1 }
+							#			}
+							#		}
+							#	}
+							#	widget = {
+							#		name = "space_invaders_2"
+							#		size = { 5 0 }
+							#	}
+							#	icon = {
+							#		name = "progressbar_frame"
+							#		spriteType = Corneredtiled
+							#		spriteborder = { 2 5 }
+							#		size = { 10 70 }
+							#		texture = "gfx/interface/tiles/progressbar_green_frame.dds"
+							#		visible = "[ProvinceWindow.IsPlayerProvince)]"
+							#		
+							#		progressbar = {
+							#			using = progressbar_green_vertical
+							#			size = { 7 68 }
+							#			position = { 2 2 }
+							#			visible = "[And(ProvinceWindow.GetProvince.HasTimedModifier('founding_city_in_progress'), ProvinceWindow.IsPlayerProvince)]"
+							#			tooltip = "[ProvinceWindow.GetProvince.GetTimedModifier('founding_city_in_progress').GetTooltip]"
+							#			value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetTimedModifier('founding_city_in_progress').GetProgress)]"
+							#		}
+							#		progressbar = {
+							#			using = progressbar_green_vertical
+							#			size = { 7 68 }
+							#			position = { 2 2 }
+							#			visible = "[And(ProvinceWindow.GetProvince.HasTimedModifier('founding_metropolis_in_progress'), ProvinceWindow.IsPlayerProvince)]"
+							#			tooltip = "[ProvinceWindow.GetProvince.GetTimedModifier('founding_metropolis_in_progress').GetTooltip]"
+							#			value = "[FixedPointToFloat(ProvinceWindow.GetProvince.GetTimedModifier('founding_metropolis_in_progress').GetProgress)]"
+							#		}
+							#	}
+							#}
 						}
-					}
-					icon = {
-						position = { 350 7 }
-						texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-					    spriteType = Corneredtiled
-					    spriteborder = { 28 20 }
-					    datacontext = "[GetScriptedGui('has_local_wealth_pool_button')]"
-					    tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-					    tooltip_verticalbehavior = flip
-					    visible = "[ScriptedGui.IsShown(GuiScope.SetRoot(ProvinceWindow.GetProvince.MakeScope).End)]"
-
-					    icon = {
-					        position = { 4 1 }
-					        size = { 28 28 }
-					        visible = "[ScriptedGui.IsShown(GuiScope.SetRoot(ProvinceWindow.GetProvince.MakeScope).End)]"
-					        texture = "gfx/interface/icons/shared_icons/treasury.dds"
-					        
-					        textbox = {
-					            name = "city_treasury"
-					            size = { 118 20 }
-					            position = { 87 3 }
-					            multiline = no
-					            using = MarbleButtonFont
-					            text = "[GuiScope.SetRoot(ProvinceWindow.GetProvince.MakeScope).ScriptValue('local_wealth_pool')|2]"
-					            widgetanchor = top|hcenter
-					            align = center
-					        }
-					    }
 					}
 				}
 				
@@ -3167,8 +3364,8 @@ window = {
 				
 				widget = {
 					name = "provinces_in_state"
-					size = { 326 458 }
-					position = { 750 0 }
+					size = { 326 428 }
+					position = { 700 0 }
 					visible = no
 					#resizeparent = yes
 					using = standard_window_type
@@ -3194,7 +3391,7 @@ window = {
 						scrollwidget = {
 							dynamicgridbox = {
 								name = "provinces_grid"
-								size = { 300 370 }
+								size = { 300 320 }
 								
 								datamodel = "[ProvinceWindow.GetProvinceList]"
 								

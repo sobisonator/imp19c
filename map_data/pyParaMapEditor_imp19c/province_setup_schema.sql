@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS province_setup (
 	Civilization INTEGER,
 	Barbarian BOOLEAN,
 	NameRef VARCHAR,
-	AraRef VARCHAR
+	AraRef VARCHAR,
+	isChanged BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS definition (

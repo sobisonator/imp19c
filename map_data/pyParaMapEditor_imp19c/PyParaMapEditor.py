@@ -261,6 +261,17 @@ class database_connection(object):
                 self.db_commit("")
             break
 
+    def export_to_csv(self):
+        print("Exporting to CSV")
+        select_setup = "SELECT * FROM province_setup;"
+        self.query(select_setup, "")
+        with open("pyParaMapEditor_OUTPUT.csv","w", newline="",encoding="UTF-8") as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow([i[0] for i in self.cursor.description])
+            for row in self.cursor:
+                print(row)
+                csv_writer.writerow(row)
+
 db = database_connection()
 if definition_csv:
     db.import_definition()
@@ -287,6 +298,12 @@ yscroll.config(command=canvas.yview)
 editorframe = Frame(frame, bd=2, relief=SUNKEN, padx=110)
 editorframe.grid(row=0, column=2)
 
+def export_to_csv():
+    db.export_to_csv()
+
+export_button = Button(frame, command= lambda: export_to_csv(), text="Export to CSV", bd=4, height=2, padx=2, bg="deep sky blue")
+export_button.grid(row=1, column=2)
+
 def makeentry(parent, caption, rownum, **options):
     Label(parent, text=caption, pady=10).grid(row = rownum, column = 0)
     entry = Entry(parent, width=16, font=("Arial 18"), **options)
@@ -300,12 +317,12 @@ fields = [
     "TradeGoods",
     "Citizens",
     "Freedmen",
-    "Lower Strata",
-    "Middle Strata",
+    "LowerStrata",
+    "MiddleStrata",
     "Proletariat",
     "Slaves",
     "Tribesmen",
-    "Upper Strata",
+    "UpperStrata",
     "Industrialisation",
     "Barbarian",
     "NameRef",

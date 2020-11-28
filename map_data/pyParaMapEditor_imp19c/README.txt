@@ -19,3 +19,9 @@ Instructions:
 	 - Click on any field on the right-hand side to edit that field.
 	 	A changed field which has not yet been submitted will be coloured yellow.
 	 	Press <Return> to submit your change. This will be saved to your file.
+
+Info about fields:
+
+SettlementRank - determines whether a province is a "settlement" (rural) or a "city" (urban)
+
+Industrialisation - This uses the vanilla Civilisation value

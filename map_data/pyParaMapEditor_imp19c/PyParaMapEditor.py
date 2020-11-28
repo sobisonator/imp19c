@@ -7,7 +7,7 @@ event2canvas = lambda e, c: (c.canvasx(e.x), c.canvasy(e.y))
 
 im_land = Image.open('land_input.bmp','r')
 im_sea = Image.open('sea_input.bmp','r')
-im_selector = Image.open("selector.png", "r")
+im_selector = Image.open("selector.gif", "r")
 try:
     province_setup_csv = open('province_setup.csv', 'r',encoding='UTF-8')
 except:
@@ -63,7 +63,7 @@ class database_connection(object):
         self.checksum_query = "INSERT OR IGNORE INTO province_checksums(province_checksum) VALUES (:checksum)"
 
         self.definition_query = "INSERT OR IGNORE INTO definition(Province_id, R, G, B, Name, x) VALUES (?,?,?,?,?,?)"
-        self.setup_query = "INSERT OR IGNORE INTO province_setup(ProvID, Culture, Religion, TradeGoods, Citizens, Freedmen, LowerStrata, MiddleStrata, Proletariat, Slaves, Tribesmen, UpperStrata, Civilization, Barbarian, NameRef, AraRef, isChanged) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+        self.setup_query = "INSERT OR IGNORE INTO province_setup(ProvID, Culture, Religion, TradeGoods, Citizens, Freedmen, LowerStrata, MiddleStrata, Proletariat, Slaves, Tribesmen, UpperStrata, Civilization, SettlementRank, NameRef, AraRef, isChanged) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
         # A list to hold new provinces with checksums not existing in the current save
         self.new_sea_provinces = []
@@ -324,7 +324,7 @@ fields = [
     "Tribesmen",
     "UpperStrata",
     "Industrialisation",
-    "Barbarian",
+    "SettlementRank",
     "NameRef",
     "AraRef"
 ]

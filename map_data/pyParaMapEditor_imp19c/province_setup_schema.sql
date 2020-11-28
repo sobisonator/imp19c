@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS province_setup (
 	Tribesmen INTEGER,
 	UpperStrata INTEGER,
 	Civilization INTEGER,
-	Barbarian BOOLEAN,
+	SettlementRank INTEGER,
 	NameRef VARCHAR,
 	AraRef VARCHAR,
 	isChanged BOOLEAN

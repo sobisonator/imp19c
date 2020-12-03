@@ -138,6 +138,28 @@ class database_connection(object):
     def db_fetchone(self):
         return self.cursor.fetchone()
 
+    def setup_update_query(self, row):
+        for item in row:
+            row[item] = str(row[item])
+            if row[item] == "":
+                row[item] = "0"
+        query = "UPDATE province_setup SET Culture ='" + row["CULTURE"]+"'," \
+        " Religion ='" + row["Religion"]+"'," \
+        " TradeGoods ='" + row["TRADEGOOD"]+"'," \
+        " Citizens =" + row["unused"]+"," \
+        " Freedmen =" + row["unused2"]+"," \
+        " LowerStrata =" + row["lower_strata"]+"," \
+        " MiddleStrata =" + row["middle_strata"]+"," \
+        " Proletariat =" + row["proletariat"]+"," \
+        " Slaves =" + row["slaves"]+"," \
+        " Tribesmen =" + row["tribesmen"]+"," \
+        " UpperStrata =" + row["upper_strata"]+"," \
+        " Civilization =" + row["INDUSTRIALISATION"]+"," \
+        " SettlementRank =" + row["PROVINCE RANK"]+"," \
+        " NameRef ='" + row["NAME"].replace("'","’")+"'," \
+        " AraRef ='" + row["AREA"].replace("'","’")+"' WHERE ProvID = " + row["PROVID"]
+        return self.cursor.execute(query, "")
+
     def db_fetchall(self):
         return self.cursor.fetchall()
 
@@ -261,10 +283,7 @@ class database_connection(object):
             rows = remote_sheet.data[1:]
             for row in rows:
                 print(row)
-                self.query(self.setup_query, (
-                row["PROVID"], row["CULTURE"], row["Religion"], row["TRADEGOOD"], row["unused"], row["unused2"],
-                row["lower_strata"], row["middle_strata"], row["proletariat"], row["slaves"], row["tribesmen"],
-                row["upper_strata"], row["INDUSTRIALISATION"], row["PROVINCE RANK"], row["NAME"], row["AREA"], "FALSE"))
+                self.setup_update_query(row)
             self.connection.commit()
 
     def import_setup(self):
@@ -355,10 +374,11 @@ if remote_sheet_exists:
 elif province_setup_csv:
     db.import_setup()
 
-if definition_csv:
-    db.import_definition()
-else:
-    db.fill_definition()
+if not remote_sheet_exists:
+    if definition_csv:
+        db.import_definition()
+    else:
+        db.fill_definition()
 
 root = Tk()
 

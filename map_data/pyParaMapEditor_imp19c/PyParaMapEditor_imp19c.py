@@ -506,6 +506,7 @@ def getprovince(event):
     colour = px[cx,cy]
     params = colour
     # Clear the canvas and draw a selector where you last clicked
+    canvas.delete("all")
     canvas.create_image(0, 0, image=canvas_img, anchor="nw")
     canvas.create_image((cx, cy), image=selector_img)
     # Look in definition first to get the province ID from RGB

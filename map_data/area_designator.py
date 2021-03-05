@@ -10,7 +10,8 @@ f_region = open("regions_output.txt", "w")
 # Turn the province_setup CSV into a dataframe
 df = pd.read_csv(
     SETUP_CSV,
-    sep=';'
+    sep=';',
+    low_memory=False
 )
 
 # Get a list of all areas in your CSV
@@ -27,7 +28,7 @@ def output_area(area, provinces):
     f_area.write("   }\n}\n\n")
 
 def sanitise_string(input_string):
-    output_string = str(input_string).replace(" ", "_")
+    output_string = str(input_string).replace(" ", "_").replace(".","_")
     return ''.join(c for c in unicodedata.normalize('NFD', output_string)
                   if unicodedata.category(c) != 'Mn')
 

@@ -1,4 +1,4 @@
-import csv, codecs, re
+import csv, codecs, json
 from enum import IntFlag
 
 
@@ -8,7 +8,7 @@ class Col(IntFlag):
     name = 15
     culture = 1
     religion = 2
-    tradegoods = 3
+    trade_goods = 3
     civilization = 12
     barbarian = 13
     province_rank = 14
@@ -24,24 +24,30 @@ class Col(IntFlag):
     upper_strata = 11
     proletariat = 8
 
+
 class ProvinceCollection:
-    def __init__(self, filename :str):
-        self.uninhabitable = []
+    def __init__(self, filename: str):
+        self.uninhabitable = set()
         self._set_uninhabitable(filename)
 
     def _set_uninhabitable(self, filename: str):
-        non_habitable_provinces = open(filename)
-        non_habitable_provinces_data = non_habitable_provinces.read()
-        pattern = "RANGE {(.*)}"
-        found_uninhabitable = re.findall(pattern, non_habitable_provinces_data)
-        non_habitable_ranges = [i.split(" ") for i in found_uninhabitable]
-        self.uninhabitable = [[int(i) for i in x if i] for x in non_habitable_ranges]
+        map_data_file = open(filename)
+        map_data = map_data_file.readlines()
+        map_data_file.close()
+        definitions = {}
+        definitions.update([line.split('=') for line in map_data if line.find('{') > 0])
 
-    def is_habitable(self, province_id: int):
-        for province_range in self.uninhabitable:
-            if province_range[0] <= province_id <= province_range[1]:
-                return True
+        for k, v in definitions.items():
+            kind = v[:v.find('{')].strip()
+            vals = v[v.find('{')+1:v.find('}')].strip().split(" ")
+            if kind == 'RANGE':
+                self.uninhabitable |= set(i for i in range(int(vals[0]), int(vals[1])))
+            else:  # LIST
+                self.uninhabitable |= set(int(i) for i in vals)
+
+    def is_habitable(self, province_id: int) -> bool:
         return province_id not in self.uninhabitable
+
 
 class TerrainCollection:
     def __init__(self, filename: str):
@@ -50,20 +56,29 @@ class TerrainCollection:
 
     def _set_terrains(self, filename: str):
         terrain_file = open(filename, encoding="utf=8")
-        terrain_txt = terrain_file.read()
-        kv_pair_list = [map(str.strip, line.split("=")) for line in terrain_txt.splitlines(True) if line]
-        self.terrains.update(kv_pair_list)
+        terrain_txt = terrain_file.readlines()
+        terrain_file.close()
+        kv_pair_list = [map(str.strip, line.split("=")) for line in terrain_txt]
+        for (k, v) in kv_pair_list:
+            try:
+                k = int(k)
+            except ValueError:
+                pass
+            self.terrains[k] = v
+        self.terrains[1] = self.terrains['default_land']
+        self.terrains[2] = self.terrains['default_water']
 
     def exists(self, t_id: int):
         return t_id in self.terrains
 
-    def get(self, t_id:int):
+    def get(self, t_id: int):
         return self.terrains[t_id] if t_id in self.terrains else None
+
 
 class Thing:
     def __init__(self, row: list, terrains: TerrainCollection, using_1815: bool = True):
         self.t_id = int(row[Col.id])
-        self.area = row[Col.area]
+        # self.area = row[Col.area]
         self.name = row[Col.name]
         self.object = {
             'culture': row[Col.culture],
@@ -72,7 +87,7 @@ class Thing:
             'civilization_value': int(row[Col.civilization]),
             'barbarian_power': int(row[Col.barbarian]),
             'province_rank': row[Col.province_rank],
-            'citizen': { 'amount': int(row[Col.citizen])},
+            'citizen': {'amount': int(row[Col.citizen])},
             'freemen': {'amount': int(row[Col.freemen])},
             'slaves': {'amount': int(row[Col.slaves])},
             'tribesmen': {'amount': int(row[Col.tribesmen])}
@@ -92,6 +107,7 @@ class Thing:
     def __str__(self) -> str:
         return f'{self.t_id} = {self.object}\n'
 
+
 class Generator:
     def __init__(self, provinces: ProvinceCollection, terrains: TerrainCollection):
         self.provinces = provinces
@@ -104,10 +120,11 @@ class Generator:
         generated_setup = codecs.open(out_file, "w", "utf-8-sig")
         with generated_setup as f:
             for row in reader:
-                thing = Thing(row, self.terrains)
-                # Ignore sea zones, wastelands, impassable, lakes, rivers etc.
-                if self.provinces.is_habitable(thing.t_id):
-                    f.write(str(thing))
+                if row[0][0] != '#':
+                    thing = Thing(row, self.terrains)
+                    # Ignore sea zones, wastelands, impassable, lakes, rivers etc.
+                    if self.provinces.is_habitable(thing.t_id):
+                        f.write(str(thing))
         f.close()
 
 def run():
@@ -115,7 +132,8 @@ def run():
         ProvinceCollection("../map_data/default.map"),
         TerrainCollection("province_terrain/00_province_terrain.txt"),
     )
-    generator.generate("province_setup.csv", "GENERATED_SETUP.txt")
+    generator.generate("OLD_province_setup.csv", "GENERATED_SETUP.txt")
+
 
 if __name__ == "__main__":
     run()

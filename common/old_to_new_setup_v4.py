@@ -1,121 +1,122 @@
 import csv, codecs, re
+from enum import IntFlag
 
-# These columns may vary depending on what pops you have added to the game
-# Change as necessary
-id_column = 0
-name_column = 15
-culture_column = 1
-religion_column = 2
-tradegoods_column = 3
-civilization_column = 12
-barbarian_column = 13
-province_rank_column = 14
-area_column = 16
-# Pop values
-citizen_column = 4
-freemen_column = 4
-slaves_column = 9
-tribesmen_column = 10
-# Pops for the 1815 mod
-lower_strata_column = 6
-middle_strata_column = 7
-upper_strata_column = 11
-proletariat_column = 8
 
-terrain_file = open("province_terrain/00_province_terrain.txt",encoding="utf=8")
+class Col(IntFlag):
+    # These columns may vary depending on what pops you have added to the game
+    id = 0
+    name = 15
+    culture = 1
+    religion = 2
+    tradegoods = 3
+    civilization = 12
+    barbarian = 13
+    province_rank = 14
+    area = 16
+    # Pop values
+    citizen = 4
+    freemen = 4
+    slaves = 9
+    tribesmen = 10
+    # Pops for the 1815 mod
+    lower_strata = 6
+    middle_strata = 7
+    upper_strata = 11
+    proletariat = 8
 
-def create_terrain_dict(terrain_file):
-    terrain_txt = terrain_file.read()
-    terrain_dict = {}
-    for line in terrain_txt.splitlines(True):
-        if line:
-            key, value = map(str.strip, line.split("="))
-            terrain_dict[key] = value
-    return terrain_dict
-    # This makes a VERY BIG DICT. Do NOT try to look at it
-    # or you will unleash a cosmic terror
+class ProvinceCollection:
+    def __init__(self, filename :str):
+        self.uninhabitable = []
+        self._set_uninhabitable(filename)
 
-terrain_dict = create_terrain_dict(terrain_file)
+    def _set_uninhabitable(self, filename: str):
+        non_habitable_provinces = open(filename)
+        non_habitable_provinces_data = non_habitable_provinces.read()
+        pattern = "RANGE {(.*)}"
+        found_uninhabitable = re.findall(pattern, non_habitable_provinces_data)
+        non_habitable_ranges = [i.split(" ") for i in found_uninhabitable]
+        self.uninhabitable = [[int(i) for i in x if i] for x in non_habitable_ranges]
 
-def find_terrain(province_id):
-    pass
+    def is_habitable(self, province_id: int):
+        for province_range in self.uninhabitable:
+            if province_range[0] <= province_id <= province_range[1]:
+                return True
+        return province_id not in self.uninhabitable
 
-setup_csv = open("province_setup.csv")
-reader = csv.reader(setup_csv, delimiter=",")
+class TerrainCollection:
+    def __init__(self, filename: str):
+        self.terrains = dict()
+        self._set_terrains(filename)
 
-generated_setup = codecs.open("GENERATED_SETUP.txt", "w", "utf-8-sig")
+    def _set_terrains(self, filename: str):
+        terrain_file = open(filename, encoding="utf=8")
+        terrain_txt = terrain_file.read()
+        kv_pair_list = [map(str.strip, line.split("=")) for line in terrain_txt.splitlines(True) if line]
+        self.terrains.update(kv_pair_list)
 
-non_habitable_provinces = open("../map_data/default.map")
-non_habitable_provinces_data = non_habitable_provinces.read()
-pattern = "RANGE {(.*)}"
-non_habitable_ranges = re.findall(pattern, non_habitable_provinces_data)
-non_habitable_ranges = [i.split(" ") for i in non_habitable_ranges]
-new_non_habitable_ranges = []
-for x in non_habitable_ranges:
-    x = [i for i in x if i]
-    new_non_habitable_ranges.append(x)
-non_habitable_ranges = new_non_habitable_ranges
+    def exists(self, t_id: int):
+        return t_id in self.terrains
 
-def check_if_habitable(province_id):
-    # Check if the province ID is any of the ranges specified
-    try:
-        province_id = int(province_id)
-    except:
-        return False
-    for province_range in non_habitable_ranges:
-        if province_id >= int(province_range[0]) and province_id <= int(province_range[1]):
-            return True
-    if " " + str(province_id) not in non_habitable_provinces:
-        return True
-    else:
-        return False
+    def get(self, t_id:int):
+        return self.terrains[t_id] if t_id in self.terrains else None
 
-with generated_setup as f:
-    for row in reader:
-        # Ignore seazones, wastelands, impassables, lakes, rivers etc.
-        if check_if_habitable(row[id_column]):
-            if row[id_column] in terrain_dict:
-                terrain = terrain_dict[row[id_column]]
-            else:
-                terrain = ""
-            province_rank = row[province_rank_column]
-            if province_rank == "":
-                province_rank = "settlement"
-            
-            f.write(
-        row[id_column] + '={ #' + row[name_column] + '\n' +
-        '   terrain="' + terrain + '"\n' +
-        '   culture="' + row[culture_column] + '"\n' +
-        '   religion="' + row[religion_column] + '"\n' +
-        '   trade_goods="' + row[tradegoods_column] + '"\n' +
-        '   civilization_value=' + row[civilization_column] + '\n' +
-        '   barbarian_power=' + row[barbarian_column] + '\n' +
-        '   province_rank="' + province_rank + '"\n' +
-        '   citizen={\n' +
-        '      amount=' + row[citizen_column] + '\n'
-        '   }\n' +
-        '   freemen={\n' +
-        '      amount=' + row[freemen_column] + '\n'
-        '   }\n' +
-        '   slaves={\n' +
-        '      amount=' + row[slaves_column] + '\n'
-        '   }\n' +
-        '   tribesmen={\n' +
-        '      amount=' + row[tribesmen_column] + '\n'
-        '   }\n' +
-        # Below special for 1815 mod
-        '   lower_strata={\n' +
-        '      amount=' + row[lower_strata_column] + '\n'
-        '   }\n' +
-        '   middle_strata={\n' +
-        '      amount=' + row[middle_strata_column] + '\n'
-        '   }\n' +
-        '   upper_strata={\n' +
-        '      amount=' + row[upper_strata_column] + '\n'
-        '   }\n' +
-        '   proletariat={\n' +
-        '      amount=' + row[proletariat_column] + '\n'
-        '   }\n' +
-        # Remove above if not using this for the 1815 mod
-        '}\n\n'
-            )
+class Thing:
+    def __init__(self, row: list, terrains: TerrainCollection, using_1815: bool = True):
+        self.t_id = int(row[Col.id])
+        self.area = row[Col.area]
+        self.name = row[Col.name]
+        self.object = {
+            'culture': row[Col.culture],
+            'religion': row[Col.religion],
+            'trade_goods': row[Col.trade_goods],
+            'civilization_value': int(row[Col.civilization]),
+            'barbarian_power': int(row[Col.barbarian]),
+            'province_rank': row[Col.province_rank],
+            'citizen': { 'amount': int(row[Col.citizen])},
+            'freemen': {'amount': int(row[Col.freemen])},
+            'slaves': {'amount': int(row[Col.slaves])},
+            'tribesmen': {'amount': int(row[Col.tribesmen])}
+        }
+
+        if self.object['province_rank'] == '':
+            self.object['province_rank'] = 'settlement'
+
+        self.object['terrain'] = terrains.get(self.t_id)
+
+        if using_1815:
+            self.object['lower_strata'] = {'amount': int(row[Col.lower_strata])}
+            self.object['middle_strata'] = {'amount': int(row[Col.middle_strata])}
+            self.object['upper_strata'] = {'amount': int(row[Col.upper_strata])}
+            self.object['proletariat'] = {'amount': int(row[Col.proletariat])}
+
+    def __str__(self) -> str:
+        return f'{self.t_id} = {self.object}\n'
+
+class Generator:
+    def __init__(self, provinces: ProvinceCollection, terrains: TerrainCollection):
+        self.provinces = provinces
+        self.terrains = terrains
+
+    def generate(self, in_file: str, out_file: str):
+        setup_csv = open(in_file)
+        reader = csv.reader(setup_csv, delimiter=",")
+
+        generated_setup = codecs.open(out_file, "w", "utf-8-sig")
+        with generated_setup as f:
+            for row in reader:
+                thing = Thing(row, self.terrains)
+                # Ignore sea zones, wastelands, impassable, lakes, rivers etc.
+                if self.provinces.is_habitable(thing.t_id):
+                    f.write(str(thing))
+        f.close()
+
+def run():
+    generator = Generator(
+        ProvinceCollection("../map_data/default.map"),
+        TerrainCollection("province_terrain/00_province_terrain.txt"),
+    )
+    generator.generate("province_setup.csv", "GENERATED_SETUP.txt")
+
+if __name__ == "__main__":
+    run()
+

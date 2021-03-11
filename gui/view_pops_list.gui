@@ -1,0 +1,1010 @@
+@poptypewidth = 56
+@poptypeheight = 56
+
+base_sub_window = {
+	name = "view_pops_window"
+	parentanchor = bottom|left
+	size = { 944 446 }
+	widgetanchor = bottom|left
+	position = { 62 -4 }
+	
+	blockoverride "Title_text" { text = "[ViewPopsWindow.GetTitle]" }
+	
+	blockoverride "White_buttons"
+	{
+		button_close = {
+			onclick = "[ViewPopsWindow.OnClose]"
+			tooltip = "CLOSE"
+		}
+	}
+	
+	#####################################
+	# Piecharts!
+	#####################################
+	flowcontainer = {
+		position = { 16 44 }
+		spacing = 3
+		container = {
+			flowcontainer = {
+				direction = vertical
+				
+				flowcontainer = {
+					direction = vertical
+					margin_widget = {
+						size = { 300 120 }
+						sub_header = {
+							size = { 100% 24 }
+							blockoverride "Title_text"
+							{
+								text = "ASSIMILATION_TITLE"
+							}
+						}
+						
+						icon_pie = {
+							position = { 4 34 }
+							size = { 70 70 }
+							datamodel = "[ViewPopsWindow.GetPopCultures]"
+							blockoverride "Icon" { using = icon_culture }
+							blockoverride "SliceTooltip" { tooltip = "[PopCultureItem.GetTooltip]" }
+							blockoverride "SliceValue" { value = "[PopCultureItem.GetSize]" }
+							blockoverride "SliceColor" { color = "[PopCultureItem.GetColor]" }
+						}
+						
+						textbox = {
+							visible = "[Not( ViewPopsWindow.GetProvince.HasPopActivity('assimilate') )]"
+							position = { -12 80 }
+							parentanchor = right
+							autoresize = yes
+							using = BaseFontM
+							using = Black_FontColor
+							text = "NO_ASSIMILATION_TITLE"
+							fontsize = 14
+						}
+						
+						fixed_size_progressbar = {
+							size = { 286 8 }
+							parentanchor = bottom
+							position = { 4 -3 }
+							blockoverride "Value" { value = "[FixedPointToFloat(ViewPopsWindow.GetProvince.GetActivityStatus('assimilate'))]" }
+							
+						}
+						tooltip = "[ViewPopsWindow.GetProvince.GetActivityInformation('assimilate')]"
+						
+						icon = {
+							texture = "[GetPopIcon(ViewPopsWindow.GetProvince.GetPopActivity('assimilate').GetPop.GetType)]"
+							size = { @poptypewidth @poptypeheight }
+							position = { 76 -16 }
+							parentanchor = bottom
+							visible = "[ViewPopsWindow.GetProvince.HasPopActivity('assimilate')]"
+						}
+						
+						textbox = {
+							text = "[ViewPopsWindow.GetProvince.GetActivitySpeed('assimilate')|+=/%]"
+							using = BaseFontL
+							parentanchor = right|bottom
+							autoresize = yes
+							position = { -8 -20 }
+							visible = "[ViewPopsWindow.GetProvince.HasPopActivity('assimilate')]"
+						}
+					}
+					margin_widget = {
+						size = { 300 120 }
+						sub_header = {
+							size = { 100% 24 }
+							blockoverride "Title_text"
+							{
+								text = "CONVERSION_TITLE"
+							}
+						}
+						
+						icon_pie = {
+							position = { 4 34 }
+							size = { 70 70 }
+							datamodel = "[ViewPopsWindow.GetPopReligions]"
+							blockoverride "Icon" { using = icon_religious }
+							blockoverride "SliceTooltip" { tooltip = "[PopReligionItem.GetName]" }
+							blockoverride "SliceValue" { value = "[PopReligionItem.GetSize]" }
+							blockoverride "SliceColor" { color = "[PopReligionItem.GetColor]" }
+						}
+						
+						textbox = {
+							visible = "[Not( ViewPopsWindow.GetProvince.HasPopActivity('convert') )]"
+							position = { -12 80 }
+							parentanchor = right
+							autoresize = yes
+							using = BaseFontM
+							using = Black_FontColor
+							text = "NO_CONVERSION_TITLE"
+							fontsize = 14
+						}
+						
+						fixed_size_progressbar = {
+							size = { 286 8 }
+							parentanchor = bottom
+							position = { 4 -3 }
+							blockoverride "Value" { value = "[FixedPointToFloat(ViewPopsWindow.GetProvince.GetActivityStatus('convert'))]" }
+							
+						}
+						tooltip = "[ViewPopsWindow.GetProvince.GetActivityInformation('convert')]"
+						
+						icon = {
+							texture = "[GetPopIcon(ViewPopsWindow.GetProvince.GetPopActivity('convert').GetPop.GetType)]"
+							size = { @poptypewidth @poptypeheight }
+							position = { 76 -16 }
+							parentanchor = bottom
+							visible = "[ViewPopsWindow.GetProvince.HasPopActivity('convert')]"
+						}
+						
+						textbox = {
+							text = "[ViewPopsWindow.GetProvince.GetActivitySpeed('convert')|+=/%]"
+							using = BaseFontL
+							parentanchor = right|bottom
+							autoresize = yes
+							position = { -8 -20 }
+							visible = "[ViewPopsWindow.GetProvince.HasPopActivity('convert')]"
+						}
+					}
+					margin_widget = {
+						size = { 300 120 }
+						sub_header = {
+							size = { 100% 24 }
+							blockoverride "Title_text"
+							{
+								text = "POPTYPE_HEADER_PVIEW"
+							}
+						}
+						
+						icon_pie = {
+							position = { 4 34 }
+							size = { 70 70 }
+							datamodel = "[ViewPopsWindow.GetPopTypes]"
+							blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/pop_type.dds" }
+							blockoverride "SliceTooltip" { tooltip = "[PopTypeItem.GetName]" }
+							blockoverride "SliceValue" { value = "[PopTypeItem.GetSize]" }
+							blockoverride "SliceColor" { color = "[PopTypeItem.GetColor]" }
+						}
+						
+						textbox = {
+							visible = "[Not( Or( ViewPopsWindow.GetProvince.HasPopActivity('promote'), ViewPopsWindow.GetProvince.HasPopActivity('demote') ) )]"
+							position = { 92 48 }
+							using = BaseFontM
+							using = Black_FontColor
+							text = "NO_PROMOTION_OR_DEMOTION_TITLE"
+							fontsize = 14
+						}
+						
+						flowcontainer = {
+							position = { 78 64 }
+							spacing = 18
+							ignoreinvisible = yes
+							container = {
+								visible = "[ViewPopsWindow.GetProvince.HasPopActivity('promote')]"
+								textbox = {
+									position = { 0 -10 }
+									using = BaseFontM
+									using = Black_FontColor
+									text = "PROMOTION_H_TITLE"
+									fontsize = 15
+								}
+								icon_and_text_progress_s = {
+									blockoverride "Icon" { texture = "[GetPopIcon(ViewPopsWindow.GetProvince.GetPopActivity('promote').GetPop.GetType)]" }
+									blockoverride "Text" 
+									{
+										text = "[ViewPopsWindow.GetProvince.GetActivitySpeed('promote')|+=/%]" 
+										position = { 4 -7 }
+									}
+									blockoverride "Value" { value = "[FixedPointToFloat(ViewPopsWindow.GetProvince.GetActivityStatus('promote'))]" }
+									tooltip = "[ViewPopsWindow.GetProvince.GetActivityInformation('promote')]"
+								}
+							}
+							container = {
+								visible = "[ViewPopsWindow.GetProvince.HasPopActivity('demote')]"
+								textbox = {
+									position = { 0 -10 }
+									using = BaseFontM
+									using = Black_FontColor
+									text = "DEMOTION_H_TITLE"
+									fontsize = 15
+								}
+								icon_and_text_progress_s = {
+									size = { 94 34 }
+									blockoverride "Icon" { texture = "[GetPopIcon(ViewPopsWindow.GetProvince.GetPopActivity('demote').GetPop.GetType)]" }
+									blockoverride "Text" 
+									{ 
+										text = "[ViewPopsWindow.GetProvince.GetActivitySpeed('demote')|+=/%]" 
+										position = { 4 -7 }
+									}
+									blockoverride "Value" { value = "[FixedPointToFloat(ViewPopsWindow.GetProvince.GetActivityStatus('demote'))]" }
+									tooltip = "[ViewPopsWindow.GetProvince.GetActivityInformation('demote')]"
+								}
+							}
+						}
+					}
+					
+					flowcontainer = {
+						container = {
+							#tooltip = "[ViewPopsWindow.GetProvince.GetPopulationTooltip('citizen')]"
+							flowcontainer = {
+								position = { 0 -3 }
+								spacing = -2
+								flowcontainer = {
+									tooltip = "UPPER_STRATA_RATIO_TOOLTIP"
+									icon = {
+										size = { 32 32 }
+										using = icon_pop_upper_strata
+										alpha = "[TransparentIfZero_int32(ViewPopsWindow.GetProvince.GetPopulation('upper_strata'))]"
+										icon = {
+											visible = "[LessThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('upper_strata'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('upper_strata'))]"
+											using = icon_plus
+											position = { -8 0 }
+										}
+										
+										icon = {
+											visible = "[GreaterThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('upper_strata'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('upper_strata'))]"
+											using = icon_minus
+											position = { -8 0 }
+										}
+										
+										datacontext = "[ViewPopsWindow.GetProvince]"
+									
+									}
+									
+									container = {
+										flowcontainer = {
+											direction = vertical
+											position = { 6 -4 }
+											textbox = {
+												using = MarbleButtonFontS
+												text = "[ViewPopsWindow.GetProvince.GetCurrentPopRatio('upper_strata')|%0]"
+												fontsize = 14
+												autoresize = yes
+												parentanchor = top|hcenter
+											}
+											icon = {
+												name = "horizontal_divider_ruler_martial_divider"
+												texture = "gfx/interface/tiles/horizontal_divider.dds"
+												#spriteType = corneredtiled
+												spriteborder = { 0 0 }
+												size = { 20 2 }
+											#parentanchor = vcenter
+											}
+											container = {
+												parentanchor = top|hcenter
+												textbox = {
+													using = MarbleButtonFontS
+													text = "[ViewPopsWindow.GetProvince.GetDesiredPopRatio('upper_strata')|%0]"
+													fontsize = 14
+													autoresize = yes
+													
+													position = { -2 -4 }
+												}
+											}
+										}
+									}
+								
+								}
+								flowcontainer = {
+									tooltip = "MIDDLE_STRATA_RATIO_TOOLTIP"
+									icon = {
+										size = { 32 32 }
+										using = icon_pop_middle_strata
+										alpha = "[TransparentIfZero_int32(ViewPopsWindow.GetProvince.GetPopulation('middle_strata'))]"
+										icon = {
+											visible = "[LessThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('middle_strata'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('middle_strata'))]"
+											using = icon_plus
+											position = { -8 0 }
+										}
+										
+										icon = {
+											visible = "[GreaterThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('middle_strata'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('middle_strata'))]"
+											using = icon_minus
+											position = { -8 0 }
+										}
+										
+										datacontext = "[ViewPopsWindow.GetProvince]"
+									
+									}
+									
+									container = {
+										flowcontainer = {
+											direction = vertical
+											position = { 6 -4 }
+											textbox = {
+												using = MarbleButtonFontS
+												text = "[ViewPopsWindow.GetProvince.GetCurrentPopRatio('middle_strata')|%0]"
+												fontsize = 14
+												autoresize = yes
+												parentanchor = top|hcenter
+											}
+											icon = {
+												name = "horizontal_divider_ruler_martial_divider"
+												texture = "gfx/interface/tiles/horizontal_divider.dds"
+												#spriteType = corneredtiled
+												spriteborder = { 0 0 }
+												size = { 20 2 }
+											#parentanchor = vcenter
+											}
+											container = {
+												parentanchor = top|hcenter
+												textbox = {
+													using = MarbleButtonFontS
+													text = "[ViewPopsWindow.GetProvince.GetDesiredPopRatio('middle_strata')|%0]"
+													fontsize = 14
+													autoresize = yes
+													
+													position = { -2 -4 }
+												}
+											}
+										}
+									}
+								
+								}
+								flowcontainer = {
+									tooltip = "PROLETARIAT_RATIO_TOOLTIP"
+									icon = {
+										size = { 32 32 }
+										using = icon_pop_proletariat
+										alpha = "[TransparentIfZero_int32(ViewPopsWindow.GetProvince.GetPopulation('proletariat'))]"
+										icon = {
+											visible = "[LessThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('proletariat'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('proletariat'))]"
+											using = icon_plus
+											position = { -8 0 }
+										}
+										
+										icon = {
+											visible = "[GreaterThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('proletariat'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('proletariat'))]"
+											using = icon_minus
+											position = { -8 0 }
+										}
+										
+										datacontext = "[ViewPopsWindow.GetProvince]"
+									
+									}
+									
+									container = {
+										flowcontainer = {
+											direction = vertical
+											position = { 6 -4 }
+											textbox = {
+												using = MarbleButtonFontS
+												text = "[ViewPopsWindow.GetProvince.GetCurrentPopRatio('proletariat')|%0]"
+												fontsize = 14
+												autoresize = yes
+												parentanchor = top|hcenter
+											}
+											icon = {
+												name = "horizontal_divider_ruler_martial_divider"
+												texture = "gfx/interface/tiles/horizontal_divider.dds"
+												#spriteType = corneredtiled
+												spriteborder = { 0 0 }
+												size = { 20 2 }
+											#parentanchor = vcenter
+											}
+											container = {
+												parentanchor = top|hcenter
+												textbox = {
+													using = MarbleButtonFontS
+													text = "[ViewPopsWindow.GetProvince.GetDesiredPopRatio('proletariat')|%0]"
+													fontsize = 14
+													autoresize = yes
+													
+													position = { -2 -4 }
+												}
+											}
+										}
+									}
+								
+								}
+								flowcontainer = {
+									tooltip = "LOWER_STRATA_RATIO_TOOLTIP"
+									icon = {
+										size = { 33 33 }
+										using = icon_pop_lower_strata
+										alpha = "[TransparentIfZero_int32(ViewPopsWindow.GetProvince.GetPopulation('lower_strata'))]"
+										icon = {
+											visible = "[LessThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('lower_strata'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('lower_strata'))]"
+											using = icon_plus
+											position = { -8 0 }
+										}
+										
+										icon = {
+											visible = "[GreaterThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('lower_strata'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('lower_strata'))]"
+											using = icon_minus
+											position = { -8 0 }
+										}
+										datacontext = "[ViewPopsWindow.GetProvince]"
+									
+									}
+									container = {
+										flowcontainer = {
+											direction = vertical
+											position = { 6 -4 }
+											textbox = {
+												using = MarbleButtonFontS
+												text = "[ViewPopsWindow.GetProvince.GetCurrentPopRatio('lower_strata')|%0]"
+												fontsize = 14
+												autoresize = yes
+												parentanchor = top|hcenter
+											}
+											icon = {
+												name = "horizontal_divider_ruler_martial_divider"
+												texture = "gfx/interface/tiles/horizontal_divider.dds"
+												#spriteType = corneredtiled
+												spriteborder = { 0 0 }
+												size = { 20 2 }
+											#parentanchor = vcenter
+											}
+											container = {
+												parentanchor = top|hcenter
+												textbox = {
+													using = MarbleButtonFontS
+													text = "[ViewPopsWindow.GetProvince.GetDesiredPopRatio('lower_strata')|%0]"
+													fontsize = 14
+													autoresize = yes
+													
+													position = { -2 -4 }
+												}
+											}
+										}
+									}
+								
+								}
+								
+								flowcontainer = {
+									icon = {
+										tooltip = "TRIBESMEN_RATIO_TOOLTIP"
+										size = { 33 33 }
+										using = icon_pop_tribal
+										alpha = "[TransparentIfZero_int32(ViewPopsWindow.GetProvince.GetPopulation('tribesmen'))]"
+										icon = {
+											visible = "[LessThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('tribesmen'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('tribesmen'))]"
+											using = icon_plus
+											position = { -8 0 }
+										}
+										
+										icon = {
+											visible = "[GreaterThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('tribesmen'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('tribesmen'))]"
+											using = icon_minus
+											position = { -8 0 }
+										}
+										datacontext = "[ViewPopsWindow.GetProvince]"
+									
+									}
+									
+									container = {
+										flowcontainer = {
+											direction = vertical
+											position = { 6 -4 }
+											textbox = {
+												using = MarbleButtonFontS
+												text = "[ViewPopsWindow.GetProvince.GetCurrentPopRatio('tribesmen')|%0]"
+												fontsize = 14
+												autoresize = yes
+												parentanchor = top|hcenter
+											}
+											icon = {
+												name = "horizontal_divider_ruler_martial_divider"
+												texture = "gfx/interface/tiles/horizontal_divider.dds"
+												#spriteType = corneredtiled
+												spriteborder = { 0 0 }
+												size = { 20 2 }
+											#parentanchor = vcenter
+											}
+											container = {
+												parentanchor = top|hcenter
+												textbox = {
+													using = MarbleButtonFontS
+													text = "[ViewPopsWindow.GetProvince.GetDesiredPopRatio('tribesmen')|%0]"
+													fontsize = 14
+													autoresize = yes
+													
+													position = { -2 -4 }
+												}
+											}
+										}
+									}
+								}
+								flowcontainer = {
+									tooltip = "SLAVES_RATIO_TOOLTIP"
+									icon = {
+										size = { 31 31 }
+										using = icon_pop_slaves
+										alpha = "[TransparentIfZero_int32(ViewPopsWindow.GetProvince.GetPopulation('slaves'))]"
+										icon = {
+											visible = "[LessThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('slaves'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('slaves'))]"
+											using = icon_plus
+											position = { -8 0 }
+										}
+										
+										icon = {
+											visible = "[GreaterThan_CFixedPoint(ViewPopsWindow.GetProvince.GetCurrentPopRatio('slaves'), ViewPopsWindow.GetProvince.GetDesiredPopRatio('slaves'))]"
+											using = icon_minus
+											position = { -8 0 }
+										}
+										datacontext = "[ViewPopsWindow.GetProvince]"
+									
+									}
+									
+									container = {
+										flowcontainer = {
+											direction = vertical
+											position = { 6 -4 }
+											textbox = {
+												using = MarbleButtonFontS
+												text = "[ViewPopsWindow.GetProvince.GetCurrentPopRatio('slaves')|%0]"
+												fontsize = 14
+												autoresize = yes
+											#parentanchor = top|hcenter
+											}
+											icon = {
+												name = "horizontal_divider_ruler_martial_divider"
+												texture = "gfx/interface/tiles/horizontal_divider.dds"
+												#spriteType = corneredtiled
+												spriteborder = { 0 0 }
+												size = { 20 2 }
+											#parentanchor = vcenter
+											}
+											container = {
+												parentanchor = top|hcenter
+												textbox = {
+													using = MarbleButtonFontS
+													text = "[ViewPopsWindow.GetProvince.GetDesiredPopRatio('slaves')|%0]"
+													fontsize = 14
+													autoresize = yes
+													
+													position = { -2 -4 }
+												}
+											}
+										}
+									}
+								}
+							
+							}
+						}
+					}
+				}
+			}
+		}
+		 
+		container = {
+			#position = { 18 268 }
+			
+			flowcontainer = {
+			position = { -63 0 }
+				spacing = 4
+				text_button_sort = {
+					size = { 40 0 }
+					tooltip = POP_VIEW_COUNT
+					
+					blockoverride "Button_text" { visible = no }
+					blockoverride "Icon" { 
+						using = icon_population
+						size = { 34 34 }
+					}
+					blockoverride "On_click" { onclick = "[ViewPopsWindow.SortPops('count')]" }
+					blockoverride "DownState" { down = "[ViewPopsWindow.IsPopsSorted('count')]" }
+				}
+				
+				text_button_sort = {
+					size = { 120 0 }
+					tooltip = POP_VIEW_CULTURE
+					
+					blockoverride "Button_text" { visible = no }
+					blockoverride "Icon" { 
+						texture = "gfx/interface/icons/governor_policies/cultural_assimilation.dds"
+						size = { 34 34 }
+					}
+					blockoverride "On_click" { onclick = "[ViewPopsWindow.SortPops('culture')]" }
+					blockoverride "DownState" { down = "[ViewPopsWindow.IsPopsSorted('culture')]" }
+				}
+				
+				text_button_sort = {
+					size = { 80 0 }
+					tooltip = POP_VIEW_RELIGION
+					
+					blockoverride "Button_text" { visible = no }
+					blockoverride "Icon" { 
+						using = icon_religious
+						size = { 34 34 }
+					}
+					blockoverride "On_click" { onclick = "[ViewPopsWindow.SortPops('religion')]" }
+					blockoverride "DownState" { down = "[ViewPopsWindow.IsPopsSorted('religion')]" }
+				}
+				
+				text_button_sort = {
+					size = { 50 0 }
+					tooltip = POP_VIEW_HAPPINESS
+					
+					blockoverride "Button_text" { visible = no }
+					blockoverride "Icon" { 
+						texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
+						size = { 34 34 }
+					}
+					blockoverride "On_click" { onclick = "[ViewPopsWindow.SortPops('happy')]" }
+					blockoverride "DownState" { down = "[ViewPopsWindow.IsPopsSorted('happy')]" }
+				}
+				
+				text_button_sort = {
+					size = { 60 0 }
+					tooltip = POP_VIEW_POPTYPE
+					
+					blockoverride "Button_text" { visible = no }
+					blockoverride "Icon" { 
+						texture = "gfx/interface/icons/shared_icons/pop_type.dds"
+						size = { 34 34 }
+					}
+					blockoverride "On_click" { onclick = "[ViewPopsWindow.SortPops('type')]" }
+					blockoverride "DownState" { down = "[ViewPopsWindow.IsPopsSorted('type')]" }
+				}
+			}
+
+			scrollarea = {
+				position = { -62 34 }
+				size = { 372 146 }
+				scrollbarpolicy_horizontal = always_off
+				
+				using = VerticalScrollAreaCutOff
+				
+				scrollbar_vertical = {
+					using = VerticalScrollBar
+				}
+				
+				scrollwidget = {
+					dynamicgridbox = {
+						position = { 0 0 }
+						datamodel = "[ViewPopsWindow.GetPops]"
+						
+						item = {
+							widget = {
+								size = { 364 30 }
+								list_entry = { size = { 100% 100% } }
+								textbox = {
+									position = { 15 4 }
+									size = { 20 20 }
+									autoresize = yes
+									using = BaseFontM
+									using = Black_FontColor
+									text = "[PopItem.GetCount]"
+									fontsize = 14
+									elide = right
+								}
+								
+								textbox = {
+									position = { 48 3 }
+									size = { 120 20 }
+									using = BaseFontM
+									using = Black_FontColor
+									text = "[PopItem.GetPop.GetCulture.GetName]"
+									fontsize = 14
+									elide = right
+									align = center
+								}
+								
+								textbox = {
+									position = { 156 4 }
+									size = { 100 20 }
+									using = BaseFontM
+									using = Black_FontColor
+									text = "[PopItem.GetPop.GetReligion.GetName]"
+									tooltip = "[PopItem.GetPop.GetReligion.GetTooltip]"
+									fontsize = 14
+									elide = right
+									align = center
+								}
+								textbox = {
+									position = { 295 4 }
+									size = { 34 20 }
+									using = BaseFontM
+									using = Black_FontColor
+									text = "[PopItem.GetHappyness|0%]"
+									tooltip = "[PopItem.GetHappynessTooltip]"
+									widgetanchor = top|right
+									fontsize = 14
+									elide = right
+									align = center
+								}
+								icon = {
+									position = { 321 2 }
+									framesize = { 50 50 }
+									size = { 24 24 }
+									tooltip = "[PopItem.GetOutputTooltip]"
+									texture = "[PopItem.GetIconTexture]"
+									frame = 1
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	######################################
+	# Current Pops
+	######################################
+	
+	margin_widget = {
+		size = { 232 110 }
+		position = { -7 44 }
+		parentanchor = right
+		
+		sub_header = {
+			size = { 100% 24 }
+			blockoverride "Title_text" { text = "GROWTH_CHANGES" }
+		}
+		
+		fixed_size_progressbar = {
+			size = { 220 8 }
+			position = { 4 7 }
+			parentanchor = bottom
+			blockoverride "Value" { value = "[FixedPointToFloat(ViewPopsWindow.GetProvince.GetActivityStatus('growing_pop'))]" }
+		}
+		icon = {
+			position = { 0 -3 }
+			parentanchor = bottom
+			size = { @poptypewidth @poptypeheight }
+			texture = "[GetPopIcon(ViewPopsWindow.GetProvince.GetPopActivity('growing_pop').GetPop.GetType)]"
+		}
+		tooltip = "[ViewPopsWindow.GetProvince.GetActivitySpeedTooltip('growing_pop')]"
+		textbox = {
+			autoresize = yes
+			parentanchor = right|bottom
+			using = BaseFontL
+			text = "[ViewPopsWindow.GetProvince.GetActivitySpeed('growing_pop')|+=/%]"
+			position = { -8 -10 }
+		}
+		textbox = {
+			position = { -10 36 }
+			autoresize = yes
+			parentanchor = right
+			size = { 200 20 }
+			using = BaseFontM
+			using = Black_FontColor
+			text = "[ViewPopsWindow.GetProvince.GetPopActivity('growing_pop').GetPop.GetReligion.GetName] [ViewPopsWindow.GetProvince.GetPopActivity('growing_pop').GetPop.GetCulture.GetName] [ViewPopsWindow.GetProvince.GetPopActivity('growing_pop').GetPop.GetType.GetName]"
+			fontsize_min = 11
+			max_width = 180
+			elide = right
+		}
+	
+	}
+	
+	
+	margin_widget = {
+		#using = NoninteractableBG
+		size = { 364 150 }
+		position = { 320 232 }
+		margin_bottom = 12
+		
+		sub_header = {
+			size = { 100% 24 }
+			blockoverride "Title_text" { text = "POP_CHANGES_INCOMING" }
+		}
+		
+		scrollarea = {
+			position = { 0 40 }
+			size = { 372 160 }
+			scrollbarpolicy_horizontal = always_off
+			
+			using = VerticalScrollAreaCutOff
+			scrollbar_vertical = {
+				using = VerticalScrollBar
+			}
+			
+			scrollwidget = {
+				dynamicgridbox = {
+					position = { 0 0 }
+					datamodel = "[ViewPopsWindow.GetMigrants]"
+					
+					item = {
+						widget = {
+							size = { 360 34 }
+							list_entry = { size = { 100% 100% } }
+							goto_button = {
+								size = { 30 30 }
+								position = { -4 2 }
+								parentanchor = right
+								blockoverride "On_click" { onclick = "[OnClickOnProvince(MigratingPopItem.GetPop.GetProvince)]" }
+								onmousehierarchyenter = "[SetHighlightProvince(MigratingPopItem.GetPop.GetProvince.GetId)]"
+								onmousehierarchyleave = "[ClearHighlightColors]"
+							}
+							container = {
+								tooltip = "[MigratingPopItem.GetPop.GetProvince.GetActivityInformation('migrant')]"
+								
+								container = {
+									position = { 0 0 }
+									textbox = {
+										position = { 42 5 }
+										size = { 130 20 }
+										elide = right
+										using = BaseFontM
+										using = Black_FontColor
+										fontsize = 14
+										text = "[MigratingPopItem.GetPop.GetReligion.GetName] [MigratingPopItem.GetPop.GetCulture.GetName]"
+									}
+									icon = {
+										texture = "[GetPopIcon(MigratingPopItem.GetPop.GetType)]"
+										size = { 32 32 }
+									}
+								}
+								
+								container = {
+									position = { 152 0 }
+									parentanchor = vcenter
+									container = {
+										position = { 20 4 }
+										
+										fixed_size_progressbar = {
+											position = { 0 1 }
+											blockoverride "size" { size = { 86 7 } }
+											blockoverride "Value" { value = "[FixedPointToFloat(MigratingPopItem.GetChange.GetProgress)]" }
+										}
+										
+										textbox = {
+											position = { 104 -7 }
+											autoresize = yes
+											using = BaseFontXS
+											tooltip = "[MigratingPopItem.GetPop.GetProvince.GetActivitySpeedTooltip('migrant')]"
+											text = "[MigratingPopItem.GetPop.GetProvince.GetActivitySpeed('migrant')|+=/%]"
+										}
+										
+									}
+									
+									#flowcontainer = {
+									#	position = { 20 15 }
+									#	spacing = 2
+									#	textbox = {
+									#		autoresize = yes
+									#		using = BaseFontXS
+									#		using = Black_FontColor
+									#		text = "TO_HERE"
+									#		parentanchor = vcenter
+									#	}
+									#	textbox = {
+									#		autoresize = yes
+									#		using = BaseFontXS
+									#		using = Black_FontColor
+									#		text = "[MigratingPopItem.GetPop.GetProvince.GetName]"
+									#		parentanchor = vcenter
+									#		minimumsize = { 72 0 }
+									#	}
+									#}		
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+	}
+	
+	flowcontainer = {
+		position = { -30 -92 }
+		widgetanchor = bottom|right
+		parentanchor = bottom|right
+		spacing = 4
+		icon_and_text = {
+			size = { 100 0 }
+			blockoverride "Text" { text = "[ViewPopsWindow.GetProvince.GetModifierValue('local_migration_attraction')]" }
+			blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/citizen_move_cost_modifier.dds" }
+			tooltip = "[ViewPopsWindow.GetProvince.GetModifierTooltip('local_migration_attraction')]"
+		}
+
+		icon_and_text = {
+			size = { 100 0 }
+			blockoverride "Text" { text = "[ViewPopsWindow.GetProvince.GetPopulation('total')]/[ViewPopsWindow.GetProvince.GetPopulationCapacityValue]" }
+			blockoverride "Icon" { using = icon_population }
+			tooltip = "[ViewPopsWindow.GetProvince.GetPopulationCapacityInfo]"
+		}
+	}
+	
+	text_button_square = {
+		position = { -30 -12 }
+		widgetanchor = bottom|right
+		parentanchor = bottom|right
+		size = { 200 24 }
+		blockoverride "Center_text" { text = "ADD_POP_BUTTON" }
+		blockoverride "On_click" { 
+			onclick = "[ViewPopsWindow.AddPop]"
+			enabled = "[ViewPopsWindow.CanMoveFrom]"
+		}
+		tooltip = "[ViewPopsWindow.MovePopTooltip]"
+	}
+	
+	container = {
+		position = { -30 -48 }
+		visible = "[ViewPopsWindow.IsPlayerProvince]"
+		datacontext = "[ViewPopsWindow]"
+		tooltip = "SLAVE_PROMOTION_ALLOWED_TT"
+		widgetanchor = bottom|right
+		parentanchor = bottom|right
+		
+		checkbox_entry = {
+			size = { 204 0 }
+			position = { 3 -2 }
+			blockoverride "Frame" { frame = "[BoolTo2And1( ViewPopsWindow.GetProvince.HasSlavesLocked )]" }
+			blockoverride "On_click" { onclick = "[ViewPopsWindow.ToggleSlavesLocked]" }
+			blockoverride "Text" { text = "DISABLE_MANUMISSION" }
+		}
+	}
+	
+	margin_widget = {
+		size = { 232 110 }
+		position = { -7 164 }
+		parentanchor = right
+		
+		sub_header = {
+			size = { 100% 24 }
+			blockoverride "Title_text" { text = "POP_CHANGES" }
+		}
+		
+		fixed_size_progressbar = {
+			size = { 220 10 }
+			position = { 4 0 }
+			parentanchor = bottom
+			blockoverride "Value" { value = "[FixedPointToFloat(ViewPopsWindow.GetProvince.GetActivityStatus('migrant'))]" }
+			visible = "[ViewPopsWindow.GetProvince.HasPopActivity('migrant')]"
+		}
+		
+		tooltip = "[ViewPopsWindow.GetProvince.GetActivitySpeedTooltip('migrant')]"
+		textbox = {
+			autoresize = yes
+			parentanchor = right|bottom
+			using = BaseFontL
+			text = "[ViewPopsWindow.GetProvince.GetActivitySpeed('migrant')|+=/%]"
+			position = { -8 -16 }
+			visible = "[ViewPopsWindow.GetProvince.HasPopActivity('migrant')]"
+		}
+		textbox = {
+			position = { -10 36 }
+			autoresize = yes
+			parentanchor = right
+			size = { 200 20 }
+			using = BaseFontM
+			using = Black_FontColor
+			text = "[ViewPopsWindow.GetProvince.GetPopActivity('migrant').GetPop.GetCulture.GetName] [ViewPopsWindow.GetProvince.GetPopActivity('migrant').GetPop.GetType.GetName] -> [ViewPopsWindow.GetProvince.GetPopActivity('migrant').GetTarget.GetName]"
+			fontsize_min = 11
+			max_width = 180
+			elide = right
+			visible = "[ViewPopsWindow.GetProvince.HasPopActivity('migrant')]"
+		}
+		icon = {
+			position = { 0 36 }
+			size = { 60 60 }
+			texture = "[GetPopIcon(ViewPopsWindow.GetProvince.GetPopActivity('migrant').GetPop.GetType)]"
+			visible = "[ViewPopsWindow.GetProvince.HasPopActivity('migrant')]"
+		}
+	}
+	
+	#margin_widget = {
+	#	size = { 232 100 }
+	#	position = { -7 164 }
+	#	parentanchor = right
+	#	
+	#	sub_header = {
+	#		size = { 100% 24 }
+	#		blockoverride "Title_text" { text = "POP_CHANGES" }
+	#	}
+	#	
+	#	icon_and_text_progress = {
+	#		position = { 2 34 }
+	#		visible = "[ViewPopsWindow.GetProvince.HasPopActivity('migrant')]"
+	#		blockoverride "Icon" { texture = "[GetPopIcon(ViewPopsWindow.GetProvince.GetPopActivity('migrant').GetPop.GetType)]" }
+	#		blockoverride "Text" { text = "[ViewPopsWindow.GetProvince.GetActivitySpeed('migrant')|+=/%]" }
+	#		blockoverride "Value" { value = "[FixedPointToFloat(ViewPopsWindow.GetProvince.GetActivityStatus('migrant'))]" }
+	#		tooltip = "[ViewPopsWindow.GetProvince.GetActivitySpeedTooltip('migrant')]"
+	#	}
+	#	
+	#	textbox = {
+	#		position = { 8 70 }
+	#		size = { 200 20 }
+	#		using = MarbleButtonFont
+	#		visible = "[ViewPopsWindow.GetProvince.HasPopActivity('migrant')]"
+	#		
+	#		fontsize = 14
+	#		elide = right
+	#	}
+	#
+	#}
+}
+

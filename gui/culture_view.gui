@@ -1,0 +1,1040 @@
+@maxwidth = 640
+@listbuttonwidth = 572
+@listbuttontall = 106
+@listbuttonshort = 48
+@mainpopwidth = 90
+
+base_window = {
+	gfxtype = windowgfx
+	name = "culture_view"
+	parentanchor = top|left
+	widgetanchor = top|left
+	size = { @maxwidth 900 }
+	position = { 60 138 }
+	movable = no
+	
+	### Audio ###
+	state = {
+		name = _show
+		start_sound = {
+			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
+		}
+	}
+	state = {
+		name = _hide
+		start_sound = {
+			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
+		}
+	}	
+	
+	state = {
+		name = _hide
+		on_start = "[PdxGuiTriggerAllAnimations('culture_view_closed')]"
+	}
+
+	########### MAIN HEADER
+
+	vbox = {
+		using = MainWindowHeaderBox
+		name = "main window box with main header"
+
+		blockoverride "FlagOrIcon"
+		{
+			icon = {
+				texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
+				framesize = { 100 100 }
+				frame = 6
+				position = { -2 -1 }
+				size = { 32 32 }
+				modify_texture = {
+					texture = "gfx/interface/icons/menu_buttons/menu_culture.dds"
+					blend_mode = alphamultiply
+				}
+			}
+		}
+		
+		#container = {
+		#	name = "Culture Map Mode Button"
+		#	position = { -134 13 }
+		#	parentanchor = top|right
+
+		#	button = {
+		#		size = { 45 37 }
+		#		framesize = { 45 37 }
+		#		shortcut = map_mode_1
+		#		texture = "[CultureView.GetMapModeToggleIcon('culture')]"
+		#		tooltip = "[CultureView.GetMapModeToggleDesc('culture')]"
+		#		onclick = "[CultureView.OnClickMapModeToggle('culture')]"
+		#		clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_map_mode"
+		#	}
+		#}
+
+		blockoverride "Title_text"
+		{
+			text = "CULTURE_MENU_HEADER"
+		}
+	
+		blockoverride "White_buttons" 
+		{
+			button_back = { 
+				shortcut = "previous_window"
+				onclick = "[CultureView.OnPrevious]"
+				tooltip = "PREVIOUS_CULTURE_VIEW"
+			}
+
+			button_close = {
+				onclick = "[CultureView.OnClose]"
+				tooltip = "CLOSE"
+				shortcut = "close_window"
+			}
+		}
+	
+		vbox = {
+			name = "box for the vertically stacked boxes"
+			layoutpolicy_vertical = expanding
+			layoutpolicy_horizontal = expanding
+			margin = { 24 8 }
+
+			##########################
+			# Culture Summary of Nation
+			##########################
+	 
+			margin_widget = {
+				name = "summary top part"
+		        layoutpolicy_horizontal = expanding
+		        layoutpolicy_vertical = fixed
+		        size = { 0 158 }
+
+		        flowcontainer = {
+		        	position = { 0 4 }
+					direction = vertical
+					spacing = 6
+
+					textbox = {
+						using = BaseFontM
+						using = Black_FontColor
+						text = "MAIN_CULTURE_NAME"
+						size = { 320 28 }
+						align = left
+						elide = right
+					} 
+
+					textbox = {
+						using = BaseFontS
+						using = Black_FontColor
+						text = "CULTURE_MENU_CULTURE_GROUP_SUBTEXT"
+						size = { 310 20 }
+						align = left
+						elide = right
+					}					
+				}
+
+				flowcontainer = {
+					position = { 0 -22 }
+					name = "Main_Culture_Stats"
+					parentanchor = bottom|left
+					direction = vertical
+					spacing = 2
+
+
+					icon_and_text = {
+						name = "Main_Cultural_Happiness"
+						size = { 100 32 }
+						tooltip = "[CultureView.GetPrimaryCultureHappinessTooltip]"
+
+						blockoverride "Icon"
+						{
+							icon = {
+								position = { 2 2 }
+								texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
+								framesize = { 50 50 }
+								size = { 30 30 }
+								frame = 1
+							}
+						}
+
+						blockoverride "Text"
+						{
+							text = "[CultureView.GetPrimaryCultureHappiness|0%]"
+						}
+					}
+
+					icon_and_text = {
+						name = "Main_Cultural_Population"
+						size = { 100 32 }
+						tooltip = "[CultureView.GetPlayer.BuildTotalPopulationToolTip]"
+						blockoverride "Icon"
+						{
+							icon = {
+								size = { 34 34 }
+								texture = "gfx/interface/icons/shared_icons/pop_type.dds"
+							}
+						}
+						blockoverride "Text"
+						{
+							text = "[CultureView.GetNumberOfPopsOfType('total')]"
+						}
+					}
+				}
+
+				icon_pie = {
+					size = { 76 76 }
+					position = { 110 -18 }
+					parentanchor = bottom|left
+					datamodel = "[CultureView.GetPopCultures]"
+					###Slices and Icon
+					blockoverride "SliceTooltip" { tooltip = "[PopCultureItem.GetTooltip]" }
+					blockoverride "SliceValue" { value = "[PopCultureItem.GetSize]" }
+					blockoverride "SliceColor" { color = "[PopCultureItem.GetColor]" }
+					blockoverride "Icon" 
+					{ 
+						using = icon_culture
+						position = { 0 1 }
+						tooltip = "POPCULTUREPIECHART"
+					}
+				}
+
+				#### Pops In Here
+
+				margin_widget = {
+					name = "Main_Pops"
+					parentanchor = hcenter
+					size = { 100% 100 }
+					position = { 8 8 }
+
+					flowcontainer = {
+						direction = horizontal
+						spacing = 1
+						parentanchor = right
+
+						pop_widget = {
+							tooltip = "CVIEW_UPPER_STRATA_POPTYPE_TOOLTIP"
+							blockoverride "BackgroundTexture"
+							{
+									texture = "gfx/interface/icons/pop_types/upper_strata_bg.dds"
+							}
+
+							blockoverride "Icon"
+							{
+									using = icon_pop_upper_strata
+							}
+
+							blockoverride "NumPops"
+							{
+								text = "[CultureView.GetNumberOfPopsOfType('upper_strata')]"
+							}	
+						}
+
+						pop_widget = {							
+							tooltip = "CVIEW_MIDDLE_STRATA_POPTYPE_TOOLTIP"
+							
+							blockoverride "BackgroundTexture"
+							{
+									texture = "gfx/interface/icons/pop_types/middle_strata_bg.dds"
+							}
+							blockoverride "Icon"
+							{
+									using = icon_pop_middle_strata
+							}
+
+							blockoverride "NumPops"
+							{
+								text = "[CultureView.GetNumberOfPopsOfType('middle_strata')]"
+							}
+
+						}
+
+						pop_widget = {							
+							tooltip = "CVIEW_PROLETARIAT_POPTYPE_TOOLTIP"
+							
+							blockoverride "BackgroundTexture"
+							{
+									texture = "gfx/interface/icons/pop_types/proletariat_bg.dds"
+							}
+							blockoverride "Icon"
+							{
+									using = icon_pop_proletariat
+							}
+
+							blockoverride "NumPops"
+							{
+								text = "[CultureView.GetNumberOfPopsOfType('proletariat')]"
+							}
+
+						}
+						
+						pop_widget = {
+							tooltip = "CVIEW_LOWER_STRATA_POPTYPE_TOOLTIP"
+							
+							blockoverride "BackgroundTexture"
+							{
+								texture = "gfx/interface/icons/pop_types/lower_strata_bg.dds"
+							}
+
+							blockoverride "Icon"
+							{
+								using = icon_pop_lower_strata
+							}
+
+							blockoverride "NumPops"
+							{
+								text = "[CultureView.GetNumberOfPopsOfType('lower_strata')]"
+							}	
+						}
+
+						pop_widget = {
+							tooltip = "CVIEW_TRIBAL_POPTYPE_TOOLTIP"
+							blockoverride "BackgroundTexture"
+							{
+								texture = "gfx/interface/icons/pop_types/tribesmen_bg.dds"
+							}
+							blockoverride "Icon"
+							{
+								using = icon_pop_tribal
+							}								
+
+							blockoverride "NumPops"
+							{
+								text = "[CultureView.GetNumberOfPopsOfType('tribesmen')]"
+							}	
+						}
+
+						
+						pop_widget = {
+							tooltip = "CVIEW_SLAVES_POPTYPE_TOOLTIP"
+							blockoverride "BackgroundTexture"
+							{
+								texture = "gfx/interface/icons/pop_types/slaves_bg.dds"
+							}
+							blockoverride "Icon"
+							{
+								using = icon_pop_slaves
+							}
+
+							blockoverride "NumPops"
+							{
+								text = "[CultureView.GetNumberOfPopsOfType('slaves')]"
+							}	
+						}						
+					}	
+				}
+	   		}
+		
+			###########################
+			# Culture Integration
+			###########################
+			margin_widget = {
+				name = "Cultural_Integration_Header"
+				size = { 0 40 }
+		        layoutpolicy_horizontal = expanding
+		        layoutpolicy_vertical = fixed
+
+		        sub_header = {
+					name = "cultures_header"
+					size = { 100% 32 }
+					blockoverride "Title_text"
+					{
+						text = "CULTURE_INTEGRATION_HEADER"
+					}
+				}
+			}
+
+			margin_widget = {
+				name = "Filters_and_Sorting"
+				size { 0 52 }
+		        layoutpolicy_horizontal = expanding
+		        layoutpolicy_vertical = fixed
+				allow_outside = yes
+		        ##### Filter Options
+		        flowcontainer = {
+		        	position = { 4 2 }
+
+					direction = horizontal
+					parentanchor = top|left
+					name = "Filter_Options"
+					spacing = 8
+					
+					textbox = {
+						parentanchor = vcenter
+						autoresize = yes
+						align = left
+						multiline = no
+						using = BaseFontS
+						using = Black_FontColor
+						text = "FILTER_BY"
+						maximumsize = { 60 24 }
+						minimumsize = { 60 24 }
+					}
+
+					widget = {
+						size = { 180 28 }
+						name = "culture_group"
+						tooltip = SHOW_CULTURE_GROUPS_TT
+						
+						text_button_square_hollow = {
+							name = "fake_drop_down_button"
+							size = { 100% 100% }
+							blockoverride "Button_text"
+							{
+								text = "CULTURE_GROUPS_BUTTON"
+								using = Black_FontColor
+							}
+							blockoverride "On_click"
+							{
+								onclick = "[CultureView.OnOpenCultureGroupView]"
+							}
+
+							blockoverride "Center_text" 
+							{
+								visible = yes
+							}
+							#icon = {
+							#	texture = "gfx/interface/base_parts/arrow_right.dds"
+							#	parentanchor = right|vcenter
+							#	position = { -16 0 }
+							#}
+						}
+					}
+
+					widget = {
+						size = { 200 34 }
+						name = "integrated_notintegrated"
+						tooltip = SHOW_INTEGRATED_TT
+						
+						checkbox_entry = {
+							size = { 214 34 }
+							position = { 0 -3 }
+							blockoverride "Frame"
+							{
+								frame = "[CultureView.GetIntegratedIconFrame]"
+							}
+							blockoverride "On_click" 
+							{ 
+								onclick = "[CultureView.ToggleIntegrated]"
+							}
+							
+							blockoverride "Text" 
+							{ 
+								text = "INTEGRATED_POPS_BUTTON"
+								margin_right = 4
+							}
+						}
+					}
+				}		
+
+				##### List expand collapse options
+
+				icon_button_square = {
+					size = { 28 28 }
+					parentanchor = top|right
+					position = { 0 2 }
+					blockoverride "Icon" 
+					{
+						size = { 22 22 }
+						using = button_tiled_texture
+						framesize = { 200 200 }
+						frame = 2
+						modify_texture = {
+							texture = "gfx/interface/base_parts/expand_collapse_button.dds" 
+							framesize = { 26 26 }
+							frame = 2
+							blend_mode = alphamultiply
+						}
+					}
+					blockoverride "On_click" 
+					{ 
+						onclick = "[CultureView.ExpandAll]" 
+					}
+					tooltip = "EXPAND_ALL_TT"
+				}
+				icon_button_square = {
+					size = { 28 28 }
+					position = { -30 2 }
+					parentanchor = top|right
+					blockoverride "Icon" 
+					{ 
+						size = { 22 22 }
+						using = button_tiled_texture
+						framesize = { 200 200 }
+						frame = 2
+						modify_texture = {
+							texture = "gfx/interface/base_parts/expand_collapse_button.dds" 
+							framesize = { 26 26 }
+							frame = 1
+							blend_mode = alphamultiply
+						}
+					}
+					blockoverride "On_click" 
+					{ 
+						onclick = "[CultureView.CollapseAll]" 
+					}
+					tooltip = "COLLAPSE_ALL_TT"
+				}
+
+
+		        ##### Sorting Options
+		        flowcontainer = {
+		        	position = { 0 10 }
+					direction = horizontal
+					parentanchor = bottom|left
+					name = "Sort_Options"
+					spacing = 6
+					
+					textbox = {
+						using = BaseFontS
+						using = Black_FontColor
+						text = "SORT_BY_SITES"
+						autoresize = yes
+						align = left
+						parentanchor = vcenter
+						maximumsize = { 67 24 }
+						minimumsize = { 67 24 }
+					}
+					text_button_sort = {
+						name = "sort_culture"
+						size = { 72 0 }
+						tooltip = SORT_CULTURE_GROUP_TT
+						blockoverride "On_click"
+						{
+							onclick = "[CultureView.SortCultures('culture_group')]"
+							
+						}
+						blockoverride "DownState"
+						{
+							down = "[CultureView.IsSorted('culture_group')]"
+						}
+						
+						blockoverride "Icon" 
+						{
+							flowcontainer = {
+								spacing = 0
+								parentanchor = vcenter
+								container = {
+									icon = {
+										color = { 0.45 1.0 0.95 1.0 }
+										texture = "gfx/interface/base_parts/pattern_square.dds"
+										size = { 16 16 }
+										position = { -4 10 }
+									}
+								}
+
+								icon = {
+									parentanchor = vcenter
+									texture = "gfx/interface/icons/governor_policies/cultural_assimilation.dds"
+									size = { 34 34 }
+								}	
+							}
+						}
+
+						blockoverride "Button_text"
+						{
+							text = ""
+						}	
+					}
+					text_button_sort = {
+						name = "sort_name"
+						size = { 70 32 }
+						tooltip = SORT_CULTURE_NAME_TT
+						blockoverride "Button_text"
+						{
+							text = "A_Z"
+						}
+						blockoverride "Icon"
+						{
+							visible = no
+						}
+
+						blockoverride "On_click"
+						{
+							onclick = "[CultureView.SortCultures('name')]"
+							
+						}
+						blockoverride "DownState"
+						{
+							down = "[CultureView.IsSorted('name')]"
+						}
+					}
+
+					text_button_sort = {
+						name = "sort_integration"
+						size = { 70 32 }
+						tooltip = SORT_INTEGRATION_STATUS_TT
+						blockoverride "On_click"
+						{
+							onclick = "[CultureView.SortCultures('integration_status')]"
+							
+						}
+						blockoverride "DownState"
+						{
+							down = "[CultureView.IsSorted('integration_status')]"
+						}
+						
+						blockoverride "Icon"
+						{
+							size = { 32 32 }
+							texture = "gfx/interface/icons/integrated.dds"
+						}
+
+						blockoverride "Button_text"
+						{
+							visible = no
+						}
+					}
+					
+					text_button_sort = {
+						name = "sort_culture_happiness"
+						tooltip = SORT_CULTURAL_HAPPINESS_TT
+						blockoverride "On_click"
+						{
+							onclick = "[CultureView.SortCultures('happiness')]"
+							
+						}
+						
+						blockoverride "DownState"
+						{
+							down = "[CultureView.IsSorted('happiness')]"
+						}
+						size = { 70 32 }
+						blockoverride "Icon"
+						{
+							size = { 30 30 }
+							frame = 1
+							framesize = { 50 50 }
+							texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
+							#tooltip = "POPCULTUREPIECHART"
+						}
+
+						blockoverride "Button_text"
+						{
+							visible = no
+						}
+					}
+
+					text_button_sort = {
+						name = "sort_pop_type"
+						size = { 76 32 }
+						tooltip = SORT_POPTYPE_TT
+						blockoverride "On_click"
+						{
+							onclick = "[CultureView.SortCultures('poptype')]"
+							
+						}
+
+						blockoverride "DownState"
+						{
+							down = "[CultureView.IsSorted('poptype')]"
+						}
+					
+						blockoverride "Icon"
+						{
+							size = { 54 58 }
+							texture = "gfx/interface/icons/pop_types/pop_type_selection.dds"
+							framesize = { 98 100 }
+							frame = 3
+						}
+						blockoverride "Button_text"
+						{
+							visible = no
+						}
+					}
+
+					text_button_sort = {
+						name = "sort_population"
+						size = { 131 32 }
+						tooltip = SORT_POP_COUNT_TT
+						blockoverride "On_click"
+						{
+							onclick = "[CultureView.SortCultures('popcount')]"
+							down = "[CultureView.IsSorted('popcount')]"
+						}
+
+						blockoverride "DownState"
+						{
+							down = "[CultureView.IsSorted('popcount')]"
+						}
+
+						blockoverride "Icon"
+						{
+							size = { 34 34 }
+							texture = "gfx/interface/icons/shared_icons/pop_type.dds"
+						}
+						blockoverride "Button_text"
+						{
+							visible = no
+						}
+					}
+				}	
+			}
+			
+
+			###########################
+			# Culture Scroll List
+			###########################
+			margin_widget = {
+				name = "Culture Scroll List"
+		        layoutpolicy_horizontal = expanding
+		        layoutpolicy_vertical = expanding
+		        maximumsize = { @maxwidth 580 }
+		        margin = { 0 14 }
+
+		        scrollarea = {
+					position = { 0 8 }
+					size = { 100% 100% }
+					scrollbarpolicy_horizontal = always_off
+					
+					using = VerticalScrollAreaCutOff
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+					
+					scrollwidget = {
+
+					dynamicgridbox = {
+						name = "cultures_grid"
+						position = { 8 0 }	
+						datamodel = "[CultureView.GetAllCultures]"
+						
+						##########################
+						######### List Button Item
+						##########################						
+						item = {
+							widget = {
+								size = { @listbuttonwidth @listbuttontall }
+								
+								state = {
+									name = ensmallen
+									duration = 0.05
+									
+									animation = {
+										size = {  @listbuttonwidth @listbuttonshort }
+										bezier = { 1 0 0 1 }
+									}
+									
+									trigger_when = "[Not(CountryCultureItem.IsExpanded)]" 
+									on_finish = "[PdxGuiWidget.FindChild('culture_item_details').Hide]"
+									
+								}
+								
+								state = {
+									name = embiggen
+									duration = 0.05
+									
+									animation = {
+										size = {  @listbuttonwidth @listbuttontall }
+										bezier = { 1 0 0 1 }
+									}
+									
+									trigger_when = "[CountryCultureItem.IsExpanded]" 
+									on_start = "[PdxGuiWidget.FindChild('culture_item_details').Show]"
+									
+								}
+								
+								### culture_item_details
+								margin_widget = {
+									margin_top = 0
+									margin_left = 10
+									margin_right = 10
+									size = { 100% 100% }
+									name = "culture_item_details"
+									visible = "[CountryCultureItem.IsExpanded]"
+				
+									list_entry = {
+										name = "background"
+										size = { 558 80 }
+										parentanchor = bottom|hcenter
+										visible = yes
+									}
+									
+									margin_widget = {
+										size = { 168 42 }
+										position = { 6 -8 }
+										parentanchor = bottom
+										
+										using = NoninteractableBG
+										blockoverride "Margins"
+										{
+											margin = { 0 0 }
+											margin_top = 3
+										}
+										
+										overlappingitembox = {
+											datamodel = "[CountryCultureItem.GetTemporaryModifiers]"
+											size = { 146 34 }
+											spacing = 1
+											position = { 0 2 }
+											
+											item = {
+												container = {
+													#datacontext = "[CultureItemModifierItem.GetModifier]"
+													icon = {
+														texture = "[TimedModifier.GetModifier.GetIcon]"  
+														size = { 32 32 }
+													}
+													
+													tooltip = "[TimedModifier.GetTooltip]"
+												}
+											}
+										}
+									}
+									
+									text_button_square_highlighted = {
+										parentanchor = bottom
+										position = { 186 -17 }
+										size = { 156 28 }
+										blockoverride "Center_text" 
+										{
+											text = "DECISIONS"
+										}
+										blockoverride "On_click"
+										{
+											onclick = "[CountryCultureItem.OnOpenCultureDecisionsView]"
+										}
+										tooltip = "OPEN_CULTURE_DECISIONS_VIEW_TT"
+
+									}
+									
+									icon_button_square = {
+										name = "Civic Rights Change"
+										size = { 36 36 }
+										parentanchor = bottom
+										position = { 381 -14 }
+										enabled ="[CountryCultureItem.CanChangeCivicRights]"
+										tooltip = "[CountryCultureItem.CanChangeCivicRightsTooltip]"
+										blockoverride "On_click"
+										{
+										onclick = "[CountryCultureItem.OnChangeCivicRight]"
+										}
+
+										blockoverride "Icon"
+										{
+											texture = "gfx/interface/icons/shared_icons/change.dds"
+											size = { 32 32 }
+										}
+									}
+									
+									icon_card = {
+										size = { 38 38 }
+										parentanchor = bottom
+										position = { 444 -13 }
+										blockoverride "Icon" { 
+											texture = "gfx/interface/icons/modifiers/levy.dds"
+											size = { 32 32 }
+										}
+										#tooltip = "[CountryCultureItem.GetCountryCulture.GetCulture.GetName]"
+										datacontext = "[CountryCultureItem.GetCountryCulture.GetCulture]" 
+										tooltipwidget = {  
+											using = culture_tooltip 
+										}
+									}
+									
+									icon_button_square = {
+										name = "select_on_map_button"
+										size = { 36 36 }
+										position = { -12 -14 }
+										parentanchor = bottom|right
+										tooltip = "TOGGLE_CULTURE_MAPMODE_TT"
+										blockoverride "On_click"
+										{
+											onclick = "[CountryCultureItem.SelectCultureForMapMode('culture')]"
+										}
+										blockoverride "Icon"
+										{
+											
+											icon = {
+												parentanchor = center
+												using = button_tiled_texture
+												framesize = { 200 200 }
+												frame = 2
+												#alpha = 0.8
+												size = { 40 32 }
+												modify_texture = {
+													texture = "gfx/interface/icons/minimap/culture.dds"
+													blend_mode = alphamultiply
+												}
+											}
+											### When active	
+											icon = {
+												name = "select_on_map_toggle_active"
+												visible = "[CountryCultureItem.IsSelectedCultureForMapMode]"
+												parentanchor = center
+												texture = "gfx/interface/base_parts/button_allframes.dds"
+												framesize = { 100 100 }
+												frame = 10
+												size = { 39 32 }
+												modify_texture = {
+													texture = "gfx/interface/icons/minimap/culture.dds"
+													blend_mode = alphamultiply
+												}
+											}
+										}
+									}	
+								}
+
+								category_drop = {
+									name = "collapse_culture_item_button"
+									size = { 100% 44 }
+								
+									#visible = 
+									onclick = "[CountryCultureItem.OnClick]"	
+									blockoverride "Down" { visible = "[CountryCultureItem.IsExpanded]" }
+									blockoverride "Right" { visible = "[Not( CountryCultureItem.IsExpanded )]" }
+									#glow = {
+									#	name = "normal_glow" #TODO
+									#	glow_radius = 8
+									#	color = {1.0 0.85 0.45 1.0}
+									#	visible = "[EqualTo_string( CountryCultureItem.GetCountryCulture.GetName, CultureView.GetPlayer.GetPrimaryCulture.GetName )]"
+									#}
+									
+									icon = {
+										parentanchor = vcenter
+										color = "[CountryCultureItem.GetCultureGroup.GetColor]"
+										texture = "gfx/interface/base_parts/pattern_square.dds"
+										size = { 18 18 }
+										position = { 8 0 }
+									}
+									
+									tag = {
+										text = "[CountryCultureItem.GetCountryCulture.GetName]"	
+										datacontext = "[CountryCultureItem.GetCountryCulture]"
+										tooltipwidget = country_culture_tooltip
+										position = { 36 7 }
+										max_width = 130
+										fontsize_min = 10
+									}
+									
+									flowcontainer = {
+										name = "Integration"
+										ignoreinvisible = yes
+										position = { 180 18 }
+										fixed_size_progressbar = {
+											size = { 120 9 }
+											blockoverride "Value" { value = "[CountryCultureItem.GetProgress]" }
+											tooltip = "[CountryCultureItem.GetIntegrationProgressTooltip]"
+											visible = "[CountryCultureItem.IsIntegrating]"
+											parentanchor = vcenter
+										}
+									}
+									margin_widget = {
+										name = "Integration icon"
+										size = { 40 30 }
+										position = { 240 0 }
+										parentanchor = vcenter
+										visible = "[Or(CountryCultureItem.IsIntegrated, EqualTo_string( CountryCultureItem.GetCountryCulture.GetName, CultureView.GetPlayer.GetPrimaryCulture.GetName ))]"
+										
+										tooltip = "INTEGRATED_TT"
+										icon = {
+											parentanchor = vcenter
+											size = { 26 26 }
+											texture = "gfx/interface/icons/integrated.dds"
+										}											
+									}
+									
+									margin_widget = {
+										name = "Cultural_Happiness"
+										size = { 60 30 }
+										parentanchor = vcenter
+										position = { 304 1 }
+										tooltip = "[CountryCultureItem.GetCultureHappinessTooltip]"
+										icon = {
+											parentanchor = vcenter
+											framesize = { 50 50 }
+											size = { 22 22 }
+											texture = "gfx/interface/icons/shared_icons/pop_happy.dds"
+											frame = 1
+										}
+										
+										textbox = {
+											name = "culture_happiness"
+											autoresize = yes
+											position = { 24 1 }
+											multiline = no
+											using = BaseFontM
+											using = Black_FontColor
+											text = "[CountryCultureItem.GetCultureHappiness|%0]"
+											tooltip = "[CountryCultureItem.GetCultureHappinessTooltip]"
+											widgetanchor = top|left
+											align = left
+										}
+									}
+									
+									margin_widget = {
+										name = "Civic Rights"
+										size = { 76 30 }
+										parentanchor = vcenter
+										position = { 374 -5 }
+										icon = {
+											name = "pop_choice_icon"
+											parentanchor = vcenter
+											position = { 0 0 }
+											size = { 70 70 }
+											tooltip = "[CountryCultureItem.GetCivicRightsTooltip]"
+											texture = "gfx/interface/icons/pop_types/pop_type_selection.dds"
+											frame = "[CountryCultureItem.GetCivicRightsFrame]"
+											framesize = { 98 100 }
+										}
+									}
+									
+									margin_widget = {
+										position = { 464 0 }
+										size = { 46 30 }
+										parentanchor = vcenter
+
+										tag = {
+											text = "[CountryCultureItem.GetNumberOfPops]"
+											size = { 46 30 }
+											maximumsize = { 46 30 }  
+											parentanchor = hcenter
+										}
+									}
+									
+									widget = {
+										size = { 34 34 }
+										parentanchor = right|vcenter
+										position = { -26 0 }
+										piechart = {
+											size = { 32 32 }
+											position = { 0 0 }
+											parentanchor = vcenter
+											datamodel = "[CountryCultureItem.AccessPopTypeBreakdown]"
+											#alwaystransparent = no
+											item = {
+												pieslice = {
+													#texture = "gfx/interface/piechart.dds"
+													texture = "gfx/interface/pie_charts/pie_chart_alpha_44_thick.dds"
+													tooltip = "[PopTypeItem.GetName]"
+													value = "[PopTypeItem.GetSize]"
+													color = "[PopTypeItem.GetColor]"
+													alpha = 0.9
+												}
+											}
+										}			
+									}
+									
+									state = {
+										trigger_on_create = yes
+							 
+										name = squeeze
+										next = expand
+										 
+										duration = 0.8
+										glow_radius = 6
+									}
+							 
+									state = {
+										name = expand
+										next = squeeze
+										
+										duration = 0.8
+										glow_radius = 16
+									}
+									
+								}
+							}
+						}
+					}
+				}	
+			}
+		}	
+	}
+}
+

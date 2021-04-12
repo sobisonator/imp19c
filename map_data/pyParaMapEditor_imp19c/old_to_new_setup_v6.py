@@ -13,7 +13,8 @@ tradegoods_column = 3
 civilization_column = 12
 barbarian_column = 13
 province_rank_column = 13
-area_column = 16
+area_column = 15
+terrain_column = 16
 # Pop values
 citizen_column = 4
 freemen_column = 4
@@ -28,11 +29,20 @@ proletariat_column = 8
 extra_pop1 = 20
 extra_pop2 = 24
 extra_pop3 = 28
-extra_pops = [extra_pop1, extra_pop2, extra_pop3]
+extra_pop4 = 32
+extra_pop5 = 36
+extra_pop6 = 40
+extra_pops = [extra_pop1, extra_pop2, extra_pop3, extra_pop4, extra_pop5, extra_pop6]
 # Add these values to above minority pop columns to get corresponding data
 culture = 1
 religion = 2
 size = 3
+
+valid_terrains = ["plains", "farmland", "extreme_mountain", "semi_arid",
+                  "low_mountain", "desert", "extreme_desert", "forest",
+                  "boreal_forest", "arctic", "dense_jungle", "hills", "tundra",
+                  "marsh", "sparse_jungle", "ocean", "coastal_terrain",
+                  "constantinople","edo","kyoto","warsaw","riverine_terrain"]
 
 terrain_file = open("province_terrain/00_province_terrain.txt",encoding="utf=8")
 
@@ -88,7 +98,9 @@ with generated_setup as f:
     for row in reader:
         # Ignore seazones, wastelands, impassables, lakes, rivers etc.
         if check_if_habitable(row[id_column]):
-            if row[id_column] in terrain_dict:
+            if row[terrain_column] in valid_terrains:
+                terrain = row[terrain_column]
+            elif row[id_column] in terrain_dict:
                 terrain = terrain_dict[row[id_column]]
             else:
                 terrain = ""
@@ -97,6 +109,8 @@ with generated_setup as f:
                 province_rank = "settlement"
             elif province_rank == "1":
                 province_rank = "city"
+            elif province_rank == "2":
+                province_rank = "city_metropolis"
             
             f.write(
         row[id_column] + '={ #' + row[name_column] + '\n' +

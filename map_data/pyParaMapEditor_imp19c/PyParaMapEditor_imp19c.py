@@ -100,7 +100,8 @@ class SheetConnection(object):
                 "Industrialisation": 13,
                 "SettlementRank": 14,
                 "NameRef": 15,
-                "AraRef": 16
+                "AraRef": 16,
+                "Terrain":17
         }
 
     def write_to_sheet(self, provid, column, data):
@@ -126,7 +127,7 @@ class database_connection(object):
         self.checksum_query = "INSERT OR IGNORE INTO province_checksums(province_checksum) VALUES (:checksum)"
 
         self.definition_query = "INSERT OR IGNORE INTO definition(Province_id, R, G, B, Name, x) VALUES (?,?,?,?,?,?)"
-        self.setup_query = "INSERT OR IGNORE INTO province_setup(ProvID, Culture, Religion, TradeGoods, Citizens, Freedmen, LowerStrata, MiddleStrata, Proletariat, Slaves, Tribesmen, UpperStrata, Civilization, SettlementRank, NameRef, AraRef, isChanged) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+        self.setup_query = "INSERT OR IGNORE INTO province_setup(ProvID, Culture, Religion, TradeGoods, Citizens, Freedmen, LowerStrata, MiddleStrata, Proletariat, Slaves, Tribesmen, UpperStrata, Civilization, SettlementRank, NameRef, AraRef, Terrain, isChanged) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
         # A list to hold new provinces with checksums not existing in the current save
         self.new_sea_provinces = []
@@ -157,7 +158,8 @@ class database_connection(object):
         " Civilization =" + row["INDUSTRIALISATION"]+"," \
         " SettlementRank =" + row["PROVINCE RANK"]+"," \
         " NameRef ='" + row["NAME"].replace("'","’")+"'," \
-        " AraRef ='" + row["AREA"].replace("'","’")+"' WHERE ProvID = " + row["PROVID"]
+        " AraRef ='" + row["AREA"].replace("'","’")+"'," \
+        " Terrain ='" + row["TERRAIN"].replace("'", "’") + "' WHERE ProvID = " + row["PROVID"]
         return self.cursor.execute(query, "")
 
     def db_fetchall(self):
@@ -253,9 +255,9 @@ class database_connection(object):
                 self.query(checksum_query, checksum_params)
                 # print("Created definition for province " + str(i))
                 if provtype == "landprov":
-                    setup_params = (str(i), "roman", "roman_pantheon", "cloth", "1", "1", "1", "1", "40", "0", "landprov"+str(i), "noregion")
+                    setup_params = (str(i), "roman", "roman_pantheon", "cloth", "1", "1", "1", "1", "40", "0", "landprov"+str(i), "noregion", "plains")
                 elif provtype == "seaprov":
-                    setup_params = (str(i), "", "", "", "0", "0", "0", "0", "0", "0", "seaprov"+str(i), "")
+                    setup_params = (str(i), "", "", "", "0", "0", "0", "0", "0", "0", "seaprov"+str(i), "", "ocean")
                 self.query(self.setup_query, setup_params)
                 return True
             elif new_province == False:
@@ -293,8 +295,8 @@ class database_connection(object):
             for i, row in enumerate(rows):
                 rows[i] = list(row)
             for row in rows:
-                # print(row)
-                self.query(self.setup_query, (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], "FALSE"))
+                print(row)
+                self.query(self.setup_query, (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], row[16], "FALSE"))
             self.connection.commit()
 
 
@@ -341,13 +343,13 @@ class database_connection(object):
             try:
                 for province in land_provinces + new_land_provinces:
                     params = (str(i), "roman", "roman_pantheon", "cloth", "1", "1", "1", "1", "40", "0", "landprov"+str(i), "noregion")
-                    query = "INSERT OR IGNORE INTO province_setup(ProvID, Culture, Religion, TradeGoods, Citizens, Freedmen, Slaves, Tribesmen, Civilization, Barbarian, NameRef, AraRef) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+                    query = "INSERT OR IGNORE INTO province_setup(ProvID, Culture, Religion, TradeGoods, Citizens, Freedmen, Slaves, Tribesmen, Civilization, Barbarian, NameRef, AraRef, Terrain) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
                     self.query(query, params)
                     # print("Created default province setup for land province " + str(i))
                     i = i + 1
                 for province in sea_provinces + new_sea_provinces:
                     params = (str(i), "", "", "", "0", "0", "0", "0", "0", "0", "seaprov"+str(i), "")
-                    query = "INSERT OR IGNORE INTO province_setup(ProvID, Culture, Religion, TradeGoods, Citizens, Freedmen, Slaves, Tribesmen, Civilization, Barbarian, NameRef, AraRef) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+                    query = "INSERT OR IGNORE INTO province_setup(ProvID, Culture, Religion, TradeGoods, Citizens, Freedmen, Slaves, Tribesmen, Civilization, Barbarian, NameRef, AraRef, Terrain) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
                     self.query(query, params)
                     # print("Created default province setup for sea province " + str(i))
                     i = i + 1
@@ -426,7 +428,8 @@ fields = [
     "Industrialisation",
     "SettlementRank",
     "NameRef",
-    "AraRef"
+    "AraRef",
+    "Terrain"
 ]
 
 frame.pack(fill=BOTH,expand=1)

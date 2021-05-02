@@ -148,7 +148,7 @@ class database_connection(object):
         " Religion ='" + row["Religion"]+"'," \
         " TradeGoods ='" + row["TRADEGOOD"]+"'," \
         " Citizens =" + row["unused"]+"," \
-        " Freedmen =" + row["unused2"]+"," \
+        " Freedmen =" + row["indentured"]+"," \
         " LowerStrata =" + row["lower_strata"]+"," \
         " MiddleStrata =" + row["middle_strata"]+"," \
         " Proletariat =" + row["proletariat"]+"," \
@@ -418,7 +418,7 @@ fields = [
     "Religion",
     "TradeGoods",
     "Citizens",
-    "Freedmen",
+    "Indentured",
     "LowerStrata",
     "MiddleStrata",
     "Proletariat",
@@ -447,7 +447,7 @@ def submit_entry(event, fields):
     submission = event.widget.get()
     print("Submitting " + submission)
     event.widget.config({"background":"lime"})
-    widget_id = fields[list_of_entries.index(event.widget)]
+    widget_id = fields[list_of_entries.index(event.widget)].replace("Indentured","Freedmen")
     # Now find the field that corresponds to the widget
     submission_query = "UPDATE province_setup SET '" + widget_id + "'='" + str(submission) + "', 'isChanged' = 'TRUE' WHERE ProvID = "+ list_of_entries[0].get() +";"
     print(submission_query)

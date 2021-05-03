@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS province_setup (
 	SettlementRank INTEGER,
 	NameRef VARCHAR,
 	AraRef VARCHAR,
+	Terrain VARCHAR,
 	isChanged BOOLEAN
 );
 

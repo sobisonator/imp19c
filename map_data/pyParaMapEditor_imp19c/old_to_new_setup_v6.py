@@ -32,7 +32,8 @@ extra_pop3 = 28
 extra_pop4 = 32
 extra_pop5 = 36
 extra_pop6 = 40
-extra_pops = [extra_pop1, extra_pop2, extra_pop3, extra_pop4, extra_pop5, extra_pop6]
+extra_pop7 = 44
+extra_pops = [extra_pop1, extra_pop2, extra_pop3, extra_pop4, extra_pop5, extra_pop6, extra_pop7]
 # Add these values to above minority pop columns to get corresponding data
 culture = 1
 religion = 2

@@ -1,0 +1,370 @@
+change_color_and_subjects = {
+	if = { #when a subject goes independent
+		limit = {
+			is_subject = no
+			has_variable = my_color
+		}
+		change_country_color = $color$
+		remove_variable	= my_color
+	}
+
+	if = {
+		limit = {
+			is_overlord = yes
+		}
+
+		if = { #save original color
+			limit = {
+				NOT = {
+					has_variable = original_color
+				}
+			}
+			set_variable = {
+				name = original_color
+				value = color
+			}
+		}
+
+		if = { #save script color
+			limit = {
+				OR = {
+					NOT = {
+						has_variable = color
+					}
+					NOT = {
+						color = var:original_color
+					}
+				}
+			}
+			c:BAR = {
+				change_country_color = $color$
+			}
+			set_variable = {
+				name = color
+				value = c:BAR.color
+			}
+			c:BAR = {
+				change_country_color = barbarian_color
+			}
+			set_variable = {
+				name = original_color
+				value = color
+			}
+		}
+
+		every_subject = { #apply script color to subjects
+			limit = {
+				NOR = {
+					is_subject_type = tributary
+					is_subject_type = protectorate
+					is_subject_type = confederate_ally
+				}
+				color = {
+					NOT = {
+						is_color = prev.overlord.var:color
+					}
+				}
+			}
+
+			if = { #save subject's original color
+				limit = {
+					NOT = {
+						has_variable = my_color
+					}
+				}
+				set_variable = {
+					name = my_color
+					value = this.color
+				}
+			}
+
+			change_country_color = $color$
+		}
+	}
+}
+
+change_color_effect = {
+	if = {
+		limit = {
+			$color$ = { is_color = british_color }
+		}
+		change_color_and_subjects = { color = british_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = french_color }
+		}
+		change_color_and_subjects = { color = french_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = dutch_color }
+		}
+		change_color_and_subjects = { color = dutch_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = spanish_color }
+		}
+		change_color_and_subjects = { color = spanish_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = afghan_color }
+		}
+		change_color_and_subjects = { color = afghan_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = portuguese_color }
+		}
+		change_color_and_subjects = { color = portuguese_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = austrian_color }
+		}
+		change_color_and_subjects = { color = austrian_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = russian_color }
+		}
+		change_color_and_subjects = { color = russian_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = ottoman_color }
+		}
+		change_color_and_subjects = { color = ottoman_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = east_india_color }
+		}
+		change_color_and_subjects = { color = east_india_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = chinese_color }
+		}
+		change_color_and_subjects = { color = chinese_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = swedish_color }
+		}
+		change_color_and_subjects = { color = swedish_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = danish_color }
+		}
+		change_color_and_subjects = { color = danish_color }
+	}
+
+	else_if = {
+		limit = {
+			$color$ = { is_color = prussian_color }
+		}
+		change_color_and_subjects = { color = prussian_color }
+	}
+	
+	####
+
+	else_if = {
+		limit = {
+			$color$.saturation < 0.18
+		}
+		recolor_grey = yes
+	}
+
+	else_if = {
+		limit = {
+			OR = {
+				AND = {
+					$color$.hue >= 0
+					$color$.hue < 0.04
+				}
+				AND = {
+					$color$.hue <= 1
+					$color$.hue > 0.96
+				}
+			}
+		}
+		recolor = { hue = 00 }
+	}
+
+	else_if = {
+		limit = { $color$.hue < 0.47 }
+
+		if = {
+			limit = {
+				$color$.hue >= 0.04
+				$color$.hue < 0.12
+			}
+			recolor = { hue = 08 }
+		}
+
+		if = {
+			limit = {
+				$color$.hue >= 0.12
+				$color$.hue < 0.21
+			 }
+			recolor = { hue = 17 }
+		}
+
+		if = {
+			limit = {
+				$color$.hue >= 0.21
+				$color$.hue < 0.30
+			 }
+			recolor = { hue = 26 }
+		}
+
+		if = {
+			limit = {
+				$color$.hue >= 0.30
+				$color$.hue < 0.39
+			 }
+			recolor = { hue = 35 }
+		}
+
+		if = {
+			limit = {
+				$color$.hue >= 0.39
+				$color$.hue < 0.47
+			 }
+			recolor = { hue = 44 }
+		}
+	}
+
+	else = { # hue > 0.5
+
+		if = {
+			limit = {
+				$color$.hue >= 0.47
+				$color$.hue < 0.57
+			 }
+			recolor = { hue = 50 }
+		}
+
+		if = {
+			limit = {
+				$color$.hue >= 0.57
+				$color$.hue < 0.63
+			 }
+			recolor = { hue = 60 }
+		}
+
+		if = {
+			limit = {
+				$color$.hue >= 0.63
+				$color$.hue < 0.71
+			 }
+			recolor = { hue = 66 }
+		}
+
+		if = {
+			limit = {
+				$color$.hue >= 0.71
+				$color$.hue < 0.79
+			 }
+			recolor = { hue = 75 }
+		}
+
+		if = {
+			limit = {
+				$color$.hue >= 0.79
+				$color$.hue < 0.87
+			 }
+			recolor = { hue = 83 }
+		}
+
+		if = {
+			limit = {
+				$color$.hue >= 0.87
+				$color$.hue <= 0.96
+			 }
+			recolor = { hue = 91 }
+		}
+	}
+}
+
+recolor = {
+	if = {
+		limit = { color.saturation > 0.8 color.saturation <= 1 }
+		if = {
+			limit = { color.brightness > 0.8 color.brightness <= 1 }
+			change_color_and_subjects = { color = $hue$9095 }
+		}
+		else_if = {
+			limit = { color.brightness > 0.6 color.brightness <= 0.8 }
+			change_color_and_subjects = { color = $hue$9075 }
+		}
+		else = {
+			change_color_and_subjects = { color = $hue$905 }
+		}
+	}
+	else_if = {
+		limit = { color.saturation > 0.6 color.saturation <= 0.8 }
+		if = {
+			limit = { color.brightness > 0.8 color.brightness <= 1 }
+			change_color_and_subjects = { color = $hue$7095 }
+		}
+		else_if = {
+			limit = { color.brightness > 0.6 color.brightness <= 0.8 }
+			change_color_and_subjects = { color = $hue$7075 }
+		}
+		else = {
+			change_color_and_subjects = { color = $hue$705 }
+		}
+	}
+	else = {
+		if = {
+			limit = { color.brightness > 0.8 color.brightness <= 1 }
+			change_color_and_subjects = { color = $hue$4095 }
+		}
+		else_if = {
+			limit = { color.brightness > 0.6 color.brightness <= 0.8 }
+			change_color_and_subjects = { color = $hue$4075 }
+		}
+		else = {
+			change_color_and_subjects = { color = $hue$405 }
+		}
+	}
+}
+
+recolor_grey = {
+	if = {
+		limit = { color.brightness > 0.9 color.brightness <= 1 }
+		change_color_and_subjects = { color = 1009 }
+	}
+	else_if = {
+		limit = { color.brightness > 0.7 color.brightness <= 0.9 }
+		change_color_and_subjects = { color = 1008 }
+	}
+	else_if = {
+		limit = { color.brightness > 0.5 color.brightness <= 0.7 }
+		change_color_and_subjects = { color = 1006 }
+	}
+	else = {
+		change_color_and_subjects = { color = 1004 }
+	}
+}
+
+recolor_test = {
+	change_country_color = $hue$9095
+}

@@ -1,0 +1,110 @@
+namespace = color_picker
+
+color_picker.2 = {
+	type = country_event
+	hidden = yes
+
+	trigger = {
+		OR = {
+			is_overlord = yes
+			AND = {
+				is_subject = no
+				has_variable = my_color
+			}
+		}
+	}
+
+	immediate = {
+		#debug_log = start
+		if = {
+			limit = {
+				is_overlord = yes
+			}
+			change_color_effect = { color = color }
+		}
+		if = {
+			limit = {
+				is_subject = no
+				has_variable = my_color
+			}
+			change_color_effect = { color = var:my_color }
+		}
+		#debug_log = end
+	}
+}
+
+
+## test events#
+
+color_picker.10 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_country = {
+			trigger_event = {
+				id = color_picker.2
+			}
+		}
+	}
+}
+
+color_picker.20 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_neighbour_country = {
+			root = {
+				make_subject = {
+					target = prev
+					type = tributary
+				}
+			}
+		}
+	}
+}
+
+color_picker.30 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		set_variable = {
+			name = my_color
+			value = this.color
+		}
+		if = {
+			limit = {
+				var:my_color = {
+					is_color = roman_red
+				}
+			}
+			add_treasury = 100
+		}
+	}
+}
+
+color_picker.40 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		change_country_color = 1008
+	}
+}
+
+
+color_picker.100 = {#
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_country = {
+			limit = {
+				is_subject = yes
+			}
+			change_country_color = 509095
+		}
+	}
+}

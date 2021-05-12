@@ -43,7 +43,7 @@ valid_terrains = ["plains", "farmland", "extreme_mountain", "semi_arid",
                   "low_mountain", "desert", "extreme_desert", "forest",
                   "boreal_forest", "arctic", "dense_jungle", "hills", "tundra",
                   "marsh", "sparse_jungle", "ocean", "coastal_terrain",
-                  "constantinople","edo","kyoto","warsaw","riverine_terrain"]
+                  "constantinople","edo","kyoto","warsaw","riverine_terrain","desert_hills"]
 
 terrain_file = open("province_terrain/00_province_terrain.txt",encoding="utf=8")
 

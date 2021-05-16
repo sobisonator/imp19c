@@ -1,8 +1,9 @@
 name="imp19c"
-supported_version="1.5"
 description=""
 tags={
 	"Overhaul"
 	"Total Conversions"
 }
-path="mod/imp19c"
+supported_version="2.0"
+path="imp19c"
+remote_file_id="2487035466"

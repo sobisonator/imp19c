@@ -1,0 +1,2090 @@
+
+container = {
+	alwaystransparent = no
+	name = "GameConceptTooltipDefault"
+	object_tooltip_pop_out = {
+		blockoverride "header_tt" {}
+
+		blockoverride "header_additions" {
+
+			#is a flowcontainer since it needs margins and containers don't
+			flowcontainer = {
+				visible = "[GameConceptTooltip.HasIcon]"
+				margin_right = 5
+				margin_top = -10
+				icon = {
+					size = { 52 52 }
+					texture = "[GameConceptTooltip.GetIcon]"
+					tintcolor = "[TooltipInfo.GetTintColor]"
+					frame = "[GameConceptTooltip.GetFrame]"
+					framesize = "[GameConceptTooltip.GetFrameSize]"
+				}
+			}
+		}
+
+		blockoverride "title_text" {
+			text = "[GameConceptTooltip.GetOriginalAliasName]"
+		}
+
+		blockoverride "concept_link" {
+			text = ""
+		}
+		
+		blockoverride "ConceptLinkPreVisibility" {
+			visible = no
+		}
+
+		blockoverride "description_text" {
+			text = "[GameConceptTooltip.GetDescription]"
+			max_width = 400
+		}
+	}
+}
+
+# Character_tooltip is in gui_base.gui
+container = {
+	alwaystransparent = no
+	name = "CharacterTooltip"
+	using = Character_tooltip
+}
+
+types GameTooltipTypes
+{
+	
+	type object_tooltip_pop_out_old = flowcontainer {
+		name = "ObjectTooltipDefault"
+		direction = vertical
+		ignoreinvisible = yes
+		using = GeneralTooltipSetup
+		alwaystransparent = no
+		
+		container = {
+			widget = {
+				name = "background"
+				using = DefaultTooltipBackground
+				size = { 100% 100% }
+				alwaystransparent = no
+				block "TooltipBackgroundVisibility" { visible = yes }
+			}
+			
+			block "ContentsOutsideMargins" {}
+			
+			container = {
+				parentanchor = top|right
+				position = { -20 18 }
+				block "Icon"
+				{
+					icon = {
+						size = { 64 64 }
+						block "IconTexture" { 
+							#texture = "gfx/interface/icons/_default.dds"
+						}
+					}	
+				}
+			}
+			flowcontainer = {
+			
+				flowcontainer = {
+					ignoreinvisible = yes
+					direction = vertical
+					block "TooltipMargins" { 
+						margin = { 20 20 } 
+					}
+
+					container = {
+						block "header_tt" {}
+						block "header_additions" {}
+						margin_widget = {
+							name = "title_container"
+							size = { 400 64 }
+							
+							flowcontainer = {
+								name = "FancyHeader"
+								alwaystransparent = no
+								ignoreinvisible = yes
+								
+								direction = vertical
+								spacing = 0
+
+								normal_text = {
+									autoresize = yes
+									name = "title"
+									margin_bottom = 4
+									max_width = 400
+									fontsize_min = 14
+									using = BaseFontM
+									align = left
+									block "title_text" {}
+									fonttintcolor = "[TooltipInfo.GetTintColor]"
+									alwaystransparent = yes
+								}
+								
+								flowcontainer = {
+									spacing = 4
+									block "ConceptLinkPreVisibility" {}
+									normal_text = {
+										name = "concept_link_pre"
+										autoresize = yes
+										text = "READ_MORE_ABOUT"
+										using = TooltipConceptFont
+										alwaystransparent = yes
+										multiline = no
+										fontsize = 14
+									}
+									normal_text = {
+										name = "concept_link"
+										autoresize = yes
+										block "concept_link" {
+											text = "#D TODO#!"
+										}
+										using = TooltipConceptFont
+										alwaystransparent = yes
+										multiline = no
+										fontsize = 14
+									}
+								}
+							}
+							
+							
+						}
+					}
+					
+					block "extra_data" {}
+
+					textbox = {
+						name = "above_description"
+
+						using = DefaultTooltipText
+						multiline = yes
+						block "above_description_text" {}
+						fonttintcolor = "[TooltipInfo.GetTintColor]"
+						alwaystransparent = no
+					}
+
+					# NOTE: This edit box is filled by TooltipInfo.GetTintColor from code in order to set the correct size when the tooltip is created and positioned and then it uses the text property specified here in the next frames
+					textbox = {
+						name = "Description"
+					
+						using = GameConceptFlavorTooltipText
+						multiline = yes
+						block "description_text" {}
+						fonttintcolor = "[TooltipInfo.GetTintColor]"
+						alwaystransparent = no
+					}
+
+					# Things like "click to X", hotkeys etc
+					textbox = {
+						name = "input_info"
+						margin_top = 10
+						
+						multiline = yes
+						block "input_info_text" {}
+						fonttintcolor = "[TooltipInfo.GetTintColor]"
+						alwaystransparent = yes
+						
+					}
+
+					textbox = {
+						name = "TooltipTextShortcut"
+						using = DefaultTooltipText
+						parentanchor = right
+						margin = { 10 10 }
+						block "Cull" { visible = yes }
+					}
+				}
+				widget = {
+					size = { 22 100% }
+					using = ProgressLockIndicator
+				}
+			}
+		}
+	}
+
+	type player_decision_pop_out = object_tooltip_pop_out {
+		blockoverride "title_text" {
+			text = "[Decision.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = "[decisions|E]"
+		}
+		blockoverride "extra_data" {
+			# ERROR CRITERIA
+			cooltip_paragraph = {
+				layoutpolicy_horizontal	= expanding
+				visible = "[HasOpenEventWindow]"
+				text = "NOT_POSSIBLE_WHILE_EVENT_WINDOW_SHOWN"
+			}
+			cooltip_paragraph = {
+				layoutpolicy_horizontal	= expanding
+				visible = "[And(Not(Decision.IsAllowed(Player.Self)), Not(HasOpenEventWindow))]"
+				text = "GAME_PLAYER_DECISION_ALLOWED_DESC"
+			}
+			cooltip_spacer = { visible = "[Not(Or(Decision.IsAllowed(Player.Self), HasOpenEventWindow))]" }
+	
+			# EFFECT 
+			cooltip_paragraph = {
+				layoutpolicy_horizontal = expanding
+				text = "GAME_PLAYER_DECISION_EFFECT_DESC"
+			}
+			cooltip_spacer = { }
+	
+			# cooltip_paragraph = {
+			# 	layoutpolicy_horizontal	= expanding
+			# 	visible = "[IsBuildDebug]"
+			# 	text = "Debug: [Decision.GetDebugDesc(Player.Self)|F]" #TODO: grey formatting tag?
+			# }
+			# cooltip_spacer = { visible = "[IsBuildDebug]" }
+		}
+		blockoverride "description_text" { 
+			text = "[Decision.GetDescription(Player.Self)]"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}	
+
+	type cooltip_paragraph_old = textbox {
+
+		name = "cooltip_paragraph"
+		using = DefaultTooltipText
+		fonttintcolor = "[TooltipInfo.GetTintColor]"
+		multiline = yes
+		alwaystransparent = no
+	}
+
+	type idea_tooltip_pop_out = object_tooltip_pop_out {
+		blockoverride "IconTexture" {
+			texture = "[GetIdeaIcon(Idea.Self)]"
+		}
+		blockoverride "title_text" {
+			text = "[Idea.GetName]" # WITHOUT TOOLTIP
+		}
+		blockoverride "concept_link" {
+			text = "[Idea.GetGroup.GetName]" # will lead to national ideas
+		}
+		blockoverride "description_text" {
+			datacontext = "[Idea]"
+			text = "GAME_IDEA_TOOLTIP"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+
+
+
+	# some more info available from IdeaItem
+	type idea_item_tooltip_pop_out = object_tooltip_pop_out {
+		blockoverride "IconTexture" {
+			texture = "[IdeaItem.GetIcon]"
+		}
+		blockoverride "title_text" {
+			text = "[IdeaItem.GetIdea.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = "[IdeaItem.GetIdea.GetGroup.GetName]" # will lead to national ideas
+		}
+		blockoverride "description_text" {
+			text = "GAME_IDEA_ITEM_TOOLTIP"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+}
+
+container = {
+	alwaystransparent = no
+	name = "StaticModifierTooltip"
+	object_tooltip_pop_out = {
+		blockoverride "header_additions" {
+		}
+		blockoverride "title_text" {
+			text = "[StaticModifier.GetName]"
+		}
+		blockoverride "concept_link" {
+			text = ""
+		}
+		blockoverride "description_text" {
+			margin_left = 30
+			text = "[StaticModifier.GetDesc]"
+		}
+	}
+}
+
+
+
+types Cooltips
+{
+	type player_price_information_base = flowcontainer {
+		direction = vertical
+		ignoreinvisible = yes
+		cooltip_paragraph = {
+			layoutpolicy_horizontal	= expanding
+			text = "GAME_GENERIC_PRICE_HEADER"
+		}
+		cooltip_paragraph = {
+			layoutpolicy_horizontal	= expanding
+			text = "[Price.GetImpactInfo( Player.Self )]"
+		}
+		cooltip_paragraph = {
+			visible = "[Not( Price.CanAfford( Player.Self ) )]"
+			text = "[Price.GetAffordDescription( Player.Self )]"
+		}
+		cooltip_spacer = {}
+	}
+
+	type CountryTooltipBase = object_tooltip_pop_out {
+		visible = "[Not( Country.IsBarbarian )]"
+		blockoverride "title_text" {
+			text = "[Country.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "description_text" {
+		datacontext = "[Country]"
+			text = "COUNTRY_CONCEPT_TOOLTIP"
+		}
+
+		blockoverride "concept_link" {
+			text = [countries|E]
+			#text = ""
+		}
+
+		blockoverride "extra_data" {
+			
+		}
+		
+		blockoverride "Icon"
+		{
+			country_flag_reworked = {
+				blockoverride "Size"
+				{
+					size = { 56 56 }
+					position = { -16 0 }
+				}
+				blockoverride "Flag"
+				{ 
+					texture = "[Country.AccessCoatOfArms.GetTexture('(int32)120', '(int32)120')]"
+					frame = "[Country.AccessCoatOfArms.GetFrame('(int32)120', '(int32)120'))]"
+					framesize = { 120 120 }
+				}
+			}
+		}
+	}
+
+	type building_tooltip_pop_out = object_tooltip_pop_out {
+		blockoverride "IconTexture"
+		{
+			texture = "[GetBuildingIcon(Building.Self)]"
+		}
+		blockoverride "title_text" {
+			text = "[Building.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = [buildings|E]
+		}
+		blockoverride "description_text" { 
+			datacontext = "[Building]"
+			text = "GAME_BUILDING_TOOLTIP"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+	
+	type heritage_pop_out = object_tooltip_pop_out {
+		blockoverride "title_text" {
+			text = "[Heritage.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = [heritage|E]
+		}
+		blockoverride "description_text" {
+			datacontext = "[Heritage]" 
+			text = "GAME_HERITAGE_TOOLTIP"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}	
+
+	type province_rank_tooltip_base = object_tooltip_pop_out {
+		blockoverride "title_text" {
+			text = "[ProvinceRank.GetNameWithNoTooltip]" 
+		}
+		blockoverride "concept_link" { 
+			text = "[province_rank|E]"
+		}
+		blockoverride "extra_data" {
+			cooltip_paragraph = {
+				text = "GAME_PROVINCE_RANK_TOOLTIP_ACTIVE_DESC"
+			}
+		}
+		blockoverride "description_text" {
+			text = "[ProvinceRank.GetDescription]"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+
+	type terrain_tooltip_base = object_tooltip_pop_out {
+		blockoverride "IconTexture" { 
+			# do we have a texture?
+			#texture = "[GetTerrainIcon(TerrainType.Self)]"
+		}
+		blockoverride "title_text" {
+			text = "[TerrainType.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = "[terrain|E]"
+		}
+		blockoverride "extra_data" {
+			cooltip_paragraph = {
+				name = "Defensive Bonus"
+				visible = "[Not(EqualTo_int32(TerrainType.GetDefensiveBonus, '(int32)0'))]" 
+				text = "GAME_TERRAIN_TYPE_TOOLTIP_DEFENSIVE_BONUS"
+			}
+			cooltip_spacer = { visible = "[Not(EqualTo_int32(TerrainType.GetDefensiveBonus, '(int32)0'))]" }
+
+			cooltip_paragraph = {
+				name = "Combat Width"
+				text = "GAME_TERRAIN_TYPE_TOOLTIP_COMBAT_WIDTH"
+			}
+			cooltip_spacer = {}
+
+			cooltip_paragraph = {
+				name = "Modifier"
+				text = "GAME_TERRAIN_TYPE_TOOLTIP_MODIFIER"
+			}
+		} 
+		blockoverride "description_text" {
+			text = "[TerrainType.GetDescription]"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+
+	type basic_invention_pop_out = object_tooltip_pop_out {
+		blockoverride "Icon" { 
+			icon = {
+				size = { 64 64 }
+				texture = "gfx/interface/icons/icon_skills.dds"
+				framesize = { 50 50 }
+				frame = "[Invention.GetFrame]"	
+			}
+		}
+		blockoverride "title_text" {
+			text = "[Invention.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = "[inventions|E]"
+		}
+		blockoverride "extra_data" {
+			cooltip_paragraph = {
+				name = "Dependencies Title"
+				text = "GAME_GENERIC_DEPENDS_HEADER"
+				visible = "[Not( IsEmpty( Invention.GetDependencies ) )]"
+			}
+			cooltip_paragraph = {
+				name = "Dependencies"
+				text = "[Invention.GetDependencies]"
+				visible = "[Not( IsEmpty( Invention.GetDependencies ) )]"
+			}
+			cooltip_spacer = { visible = "[Not( IsEmpty( Invention.GetDependencies ) )]" }
+			
+			cooltip_paragraph = {
+				name = "Or Dependencies Title"
+				text = "GAME_GENERIC_DEPENDS_OR_HEADER"
+				visible = "[Not( IsEmpty( Invention.GetOrDependencies ) )]"
+			}
+			cooltip_paragraph = {
+				name = "OrDependencies"
+				text = "[Invention.GetOrDependencies]"
+				visible = "[Not( IsEmpty( Invention.GetOrDependencies ) )]"
+			}
+			cooltip_spacer = { visible = "[Not( IsEmpty( Invention.GetOrDependencies ) )]" }
+			
+			cooltip_paragraph = {
+				name = "Modifier Title"
+				text = "GAME_GENERIC_MODIFIER_HEADER" # TODO: generic loc title?
+				visible = "[Not( Invention.GetModifier.IsEmpty )]"
+			}
+			cooltip_paragraph = {
+				name = "Modifier"
+				text = "[Invention.GetModifier.BuildIconSummary]"
+				visible = "[Not( Invention.GetModifier.IsEmpty )]"
+			}
+			cooltip_spacer = { visible = "[Not( Invention.GetModifier.IsEmpty )]" }
+		} 
+		blockoverride "description_text" {
+			text = "[Invention.GetDescription]"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+
+	type player_invention_pop_out = object_tooltip_pop_out {
+		filter_mouse = all
+		blockoverride "Icon" { 
+			icon = {
+				size = { 64 64 }
+				texture = "gfx/interface/icons/icon_skills.dds"
+				framesize = { 50 50 }
+				frame = "[Invention.GetFrame]"	
+			}
+		}
+		blockoverride "title_text" {
+			text = "[Invention.GetNameWithNoTooltip]" # TODO: GetNameWithNoTooltip
+		}
+		blockoverride "concept_link" {
+			text = "[inventions|E]"
+		}
+		blockoverride "extra_data" {
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[Not( Player.HasInvention( Invention.Self ) )]"
+				name = "Not Owned"
+
+				player_price_information_base = {
+					datacontext = "[GetPrice( 'buy_invention' )]"
+				}
+				flowcontainer = {
+					ignoreinvisible = yes
+					direction = vertical
+					visible = "[Or( Not( IsEmpty( Invention.GetPotentialDescription( Player.Self ) ) ), Not( And( IsEmpty( Invention.GetDependenciesForOwner( Player.Self ) ), IsEmpty( Invention.GetOrDependenciesForOwner( Player.Self ) ) ) ) )]"
+					
+					cooltip_paragraph = {
+						name = "Dependencies Title"
+						text = "GAME_GENERIC_DEPENDS_HEADER"
+						visible = "[Not( IsEmpty( Invention.GetDependenciesForOwner( Player.Self ) ) )]"
+					}
+					cooltip_paragraph = {
+						name = "Dependencies"
+						text = "[Invention.GetDependenciesForOwner( Player.Self )]"
+						visible = "[Not( IsEmpty( Invention.GetDependenciesForOwner( Player.Self ) ) )]"
+					}
+					cooltip_paragraph = {
+						name = "Or Dependencies Title"
+						text = "GAME_GENERIC_DEPENDS_OR_HEADER"
+						visible = "[Not( IsEmpty( Invention.GetOrDependenciesForOwner( Player.Self ) ) )]"
+					}
+					cooltip_paragraph = {
+						name = "OrDependencies"
+						text = "[Invention.GetOrDependenciesForOwner( Player.Self )]"
+						visible = "[Not( IsEmpty( Invention.GetOrDependenciesForOwner( Player.Self ) ) )]"
+					}
+					cooltip_paragraph = {
+						name = "Potential"
+						text = "[Invention.GetPotentialDescription( Player.Self )]"
+						visible = "[Not( IsEmpty( Invention.GetPotentialDescription( Player.Self ) ) )]"
+					}
+					cooltip_spacer = { }
+				}
+			}
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+
+				flowcontainer = {
+					name = "Invention Activate"
+					ignoreinvisible = yes
+					direction = vertical
+					visible = "[Not( IsEmpty( Invention.GetOnEnableDescription( Player.Self ) ) )]"
+					cooltip_paragraph = {
+						name = "Title"
+						text = "GAME_GENERIC_EFFECT_HEADER" # TODO: generic loc title?
+					}
+					cooltip_paragraph = {
+						name = "Description"
+						text = "[Invention.GetOnEnableDescription( Player.Self )]"
+					}
+					cooltip_spacer = {}
+				}
+				flowcontainer = {
+				 	name = "Invention Enable Modifier"
+				 	ignoreinvisible = yes
+				 	direction = vertical
+				 	visible = "[Not( Invention.GetModifier.IsEmpty )]"
+				 	cooltip_paragraph = {
+				 		name = "Title"
+				 		text = "GAME_GENERIC_MODIFIER_HEADER" # TODO: generic loc title?
+					}
+					cooltip_paragraph = {
+				 		name = "Modifier"
+				 		text = "[Invention.GetModifier.BuildIconSummary]"
+				 	}
+					cooltip_spacer = {}
+				}
+			}
+		} 
+		blockoverride "description_text" {
+			text = "[Invention.GetDescription]"
+		}
+
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+
+	type basic_tradition_pop_out = object_tooltip_pop_out {
+		blockoverride "title_text" {
+			text = "[MilitaryBonus.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = "[military_bonus|E]"
+		}
+		blockoverride "extra_data" {
+			flowcontainer = {
+				name = "Generic Dependencies"
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[Not( IsEmpty( MilitaryBonus.GetDependencies ) )]"
+				cooltip_paragraph = { text = "GAME_GENERIC_DEPENDS_HEADER" }
+				cooltip_paragraph = { text = "[MilitaryBonus.GetDependencies]" }
+				cooltip_spacer = { }
+			}
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[MilitaryBonus.UnlocksUnit]"
+				cooltip_paragraph = { text = "[MilitaryBonus.GetUnlocksUnitDescription]" }
+				cooltip_spacer = {}
+			}
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[MilitaryBonus.UnlocksTactic]"
+				cooltip_paragraph = { text = "[MilitaryBonus.GetUnlocksTacticDescription]" }
+				cooltip_spacer = {}
+			}
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[MilitaryBonus.UnlocksAbility]"
+				cooltip_paragraph = { text = "[MilitaryBonus.GetUnlocksAbilityDescription]" }
+				cooltip_spacer = {}
+			}
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[Not( MilitaryBonus.GetModifier.IsEmpty )]"
+				cooltip_paragraph = { text = "GAME_GENERIC_MODIFIER_HEADER" }
+				cooltip_paragraph = { text = "[MilitaryBonus.GetModifier.BuildIconSummary]" }
+				cooltip_spacer = {}
+			}
+		} 
+		blockoverride "description_text" {
+			text = "[MilitaryBonus.GetFlavor]" # TODO
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+
+	type player_tradition_pop_out = object_tooltip_pop_out {
+		filter_mouse = all
+		blockoverride "title_text" {
+			text = "[MilitaryBonus.GetNameWithNoTooltip]" # TODO: GetNameWithNoTooltip
+		}
+		blockoverride "concept_link" {
+			text = "[military_bonus|E]"
+		}
+		blockoverride "extra_data" {
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[Not( Player.HasBonus( MilitaryBonus.Self ) )]"
+
+				player_price_information_base = {
+					datacontext = "[GetPrice( 'buy_military_tradition' )]"
+				}
+
+				flowcontainer = {
+					ignoreinvisible = yes
+					direction = vertical
+					visible = "[Or( Not( IsEmpty( MilitaryBonus.GetAllowedDescription( Player.Self ) ) ), Not( IsEmpty( MilitaryBonus.GetDependenciesForOwner( Player.Self ) ) ) )]"
+					
+					cooltip_paragraph = {
+						name = "Dependencies Title"
+						text = "GAME_GENERIC_DEPENDS_HEADER"
+					}
+					cooltip_paragraph = {
+						name = "Dependencies"
+						text = "[MilitaryBonus.GetDependenciesForOwner( Player.Self )]"
+						visible = "[Not( IsEmpty( MilitaryBonus.GetDependenciesForOwner( Player.Self ) ) )]"
+					}
+					cooltip_paragraph = {
+						name = "Potential"
+						text = "[MilitaryBonus.GetAllowedDescription( Player.Self )]"
+						visible = "[Not( IsEmpty( MilitaryBonus.GetAllowedDescription( Player.Self ) ) )]"
+					}
+					cooltip_spacer = { }
+				}
+			}
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[MilitaryBonus.UnlocksUnit]"
+				cooltip_paragraph = { text = "[MilitaryBonus.GetUnlocksUnitDescription]" }
+				cooltip_spacer = {}
+			}
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[MilitaryBonus.UnlocksTactic]"
+				cooltip_paragraph = { text = "[MilitaryBonus.GetUnlocksTacticDescription]" }
+				cooltip_spacer = {}
+			}
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[MilitaryBonus.UnlocksAbility]"
+				cooltip_paragraph = { text = "[MilitaryBonus.GetUnlocksAbilityDescription]" }
+				cooltip_spacer = {}
+			}
+			flowcontainer = {
+				name = "MilitaryBonus Activate"
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[MilitaryBonus.HasOnEnable]"
+				cooltip_paragraph = {text = "GAME_GENERIC_EFFECT_HEADER" }
+				cooltip_paragraph = { text = "[MilitaryBonus.GetOnEnableDescription( Player.Self )]" }
+				cooltip_spacer = {}
+			}
+			flowcontainer = {
+				name = "MilitaryBonus Enable Modifier"
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[Not( MilitaryBonus.GetModifier.IsEmpty )]"
+				cooltip_paragraph = { text = "GAME_GENERIC_MODIFIER_HEADER" }
+				cooltip_paragraph = { text = "[MilitaryBonus.GetModifier.BuildIconSummary]" }
+				cooltip_spacer = {}
+			}
+		} 
+		blockoverride "description_text" {
+			text = "[MilitaryBonus.GetFlavor]"
+		}
+
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+
+	
+	type player_law_item_pop_out = object_tooltip_pop_out {
+		blockoverride "Icon" { 
+			icon = {
+				# it would be nice with an icon..
+				# size = { 64 64 }
+				# texture = "gfx/interface/icons/icon_law.dds"
+				# framesize = { 50 50 }
+				# frame = "[Invention.GetFrame]"	
+			}
+		}
+		blockoverride "title_text" {
+			text = "[LawItem.GetName]" 
+		}
+		blockoverride "concept_link" {
+			text = "[laws|E]"
+		}
+		blockoverride "extra_data" {
+			flowcontainer = {
+				direction = vertical
+				ignoreinvisible = yes
+				visible = "[Not( LawItem.HasLaw )]"
+
+				player_price_information_base = { 
+					datacontext = "[GetPrice( 'enact_law' )]" 
+				}
+				flowcontainer = {
+					direction = vertical
+					visible = "[Not( IsEmpty( LawItem.GetCanSetLawDescription ))]"
+					cooltip_paragraph = { text = "GAME_GENERIC_DEPENDS_HEADER" }
+					cooltip_paragraph = { text = "[LawItem.GetCanSetLawDescription]" }
+					cooltip_spacer = {}
+				}
+			}
+
+			flowcontainer = { 
+				name = "Effects"
+				direction = vertical
+				cooltip_paragraph = { 
+					visible = "[Not( StringIsEmpty( LawItem.GetEffectDescription ))]"
+					text = "GAME_GENERIC_EFFECT_HEADER" 
+				}
+				cooltip_paragraph = {
+					visible = "[Not( StringIsEmpty( LawItem.GetEffectDescription ))]"
+					text = "[LawItem.GetEffectDescription]" 
+				}
+				cooltip_paragraph = { 
+					visible = "[Not( StringIsEmpty( LawItem.GetImpactDescription ))]"
+					text = "[LawItem.GetImpactDescription]" 
+				}
+				cooltip_paragraph = {
+					visible = "[Not( StringIsEmpty( LawItem.GetSuccessionDescription ) )]"
+					text = "[LawItem.GetSuccessionDescription]"
+				}
+				cooltip_spacer = {}
+			}
+
+			flowcontainer = {
+				name = "Modifiers"
+				direction = vertical 
+				visible = "[Not( LawItem.GetLaw.GetModifier.IsEmpty )]"
+				cooltip_paragraph = { text = "GAME_GENERIC_MODIFIER_HEADER" }
+				cooltip_paragraph = { text = "[LawItem.GetLaw.GetModifier.BuildIconSummary]" }
+				cooltip_spacer = {}
+			}
+			
+		} 
+		blockoverride "description_text" {
+			text = "[LawItem.GetDescription]"
+		}
+
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+}
+
+template CountryTooltip {
+	CountryTooltipBase = {
+		#blockoverride "input_info_text" {
+		#	text = "[Country.GetClickInfo]"
+		#}
+	}
+}
+
+template CountryTooltipTextLink {
+	CountryTooltipBase = {
+		blockoverride "input_info_text" {
+			#text = "CLICK_TO_VIEW"
+		}
+	}
+}
+
+template CountryTooltipNoClickInfo {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Country.GetNameNoTooltip]"
+		}
+		
+		blockoverride "concept_link" {
+			text = [country|E]
+		}
+		blockoverride "description_text" {
+			text = "[Country.GetTooltip]"
+		}
+	}
+}
+
+container = {
+	alwaystransparent = no
+	name = "CountryTooltip"
+	using = CountryTooltip
+}
+
+container = {
+	alwaystransparent = no
+	name = "CountryTooltipTextLink"
+	using = CountryTooltipTextLink
+}
+
+template province_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Province.GetNameWithNoTooltip]"
+		}
+		#blockoverride "IconTexture" {
+		#	texture = "[GetProvinceRankIcon( Province.GetRank )]"
+		#	size = { 100% 60 }
+		#}
+		blockoverride "concept_link" {
+			text = [territories|E]
+		}
+		blockoverride "description_text" {
+			text = "[Province.GetTooltip]"
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "ProvinceTooltip"
+	using = province_tooltip
+}
+
+template family_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "IconTexture" {
+			
+			texture = "gfx/interface/base_parts/background_x60bd_alpha.dds"
+			size = { 100 100 }
+			color = "[Family.GetBackgroundColor]"
+			#alpha = 0.8
+			parentanchor = top|right
+			modify_texture = {
+				name = "Alpha"
+				texture = "gfx/interface/base_parts/right_stripe_top_corner.dds"
+				blend_mode = alphamultiply                  
+			}
+			position = { 14 -12 }
+		}
+		
+		blockoverride "title_text" {
+			text = "[Family.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [family|E]
+		}
+		blockoverride "description_text" {
+			text = "[Family.GetMembersText]"
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "FamilyTooltip"
+	using = family_tooltip
+}
+
+
+template government_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Government.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [government|E]
+		}
+		blockoverride "description_text" {
+			text = "[Government.GetTooltip]"
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "GovernmentTooltip"
+	using = government_tooltip
+}
+
+template poptype_tooltip {
+	object_tooltip_pop_out = {
+		
+		blockoverride "title_text" {
+			text = "[PopType.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [poptype|E]
+		}
+		
+		blockoverride "IconTexture"
+		{
+			texture = "[GetPopIcon( PopType.Self )]"
+		}
+		
+		blockoverride "description_text" {
+			#datacontext = "[PopType.Self]"
+			text = "POPTYPE_CONCEPT_DESCRIPTION"
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "PopTypeTooltip"
+	using = poptype_tooltip
+}
+
+template date_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Date.GetLongString]"
+		}
+		blockoverride "IconTexture" {
+			texture = "gfx/interface/icons/shared_icons/age.dds"
+			size = { 52 52 }
+		}
+		blockoverride "concept_link" {
+			text = [date|E]
+		}
+		blockoverride "description_text" {
+			text = "DATE_TOOLTIP"
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "DateTooltip"
+	using = date_tooltip
+}
+
+template culture_group_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[CultureGroup.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = [culture_groups|E]
+		}
+		blockoverride "description_text" {
+			text = "[CultureGroup.GetTooltip]"
+		}
+		blockoverride "Cull" { 
+			visible = no 
+		}
+	}
+}
+
+container = {
+	alwaystransparent = no
+	name = "CultureGroupTooltip"
+	using = culture_group_tooltip
+}
+
+template area_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Area.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [areas|E]
+		}
+		blockoverride "description_text" {
+			datacontext = "[Area]"
+			text = "GAME_AREA_TOOLTIP"
+		}
+	}
+}
+ 
+container = {
+	alwaystransparent = no
+	name = "AreaTooltip"
+	using = area_tooltip
+}
+
+template culture_tooltip { 
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Culture.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = [cultures|E]
+		}
+		blockoverride "description_text" { 
+			text = "CULTURE_LINK_TEXT"
+		}
+		blockoverride "Cull" { 
+			visible = no 
+		}
+	}
+}
+
+container = {
+	alwaystransparent = no
+	name = "CultureTooltip"
+	using = culture_tooltip
+}
+
+template area_provinces_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			datacontext = "[Area]"
+			text = "GAME_AREA_PROVINCES_TITLE"
+		}
+
+		blockoverride "concept_link" {
+			text = [provinces|E]
+		}
+		blockoverride "description_text" {
+			text = "[Area.GetProvincesTooltip]"
+		}
+	}
+}
+
+container = {
+	alwaystransparent = no
+	name = "AreaProvincesTooltip"
+	using = area_provinces_tooltip
+}
+
+
+#deity_tooltip is in shared/gui_base.gui
+container = {
+	alwaystransparent = no
+	name = "DeityTooltip"
+	using = deity_tooltip
+}
+
+template area_states_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			datacontext = "[Area]"
+			text = "GAME_AREA_STATES_TITLE"
+		}
+
+		blockoverride "concept_link" {
+			text = [provinces|E]
+		}
+		blockoverride "description_text" {
+			text = "[Area.GetStatesTooltip]"
+		}
+	}
+}
+
+container = {
+	alwaystransparent = no
+	name = "AreaStatesTooltip"
+	using = area_states_tooltip
+}
+
+template law_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Law.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [laws|E]
+		}
+		blockoverride "description_text" {
+			text = "LAW_LINK_TEXT" 
+		}
+	}
+}
+
+container = {
+	alwaystransparent = no
+	name = "LawTooltip"
+	using = law_tooltip
+}
+
+template governorship_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Governorship.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [governorships|E]
+		}
+		blockoverride "description_text" {
+			datacontext = "[Governorship]"
+			text = "GAME_GOVERNORSHIP_TOOLTIP"
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "GovernorshipTooltip"
+	using = governorship_tooltip
+}
+
+
+template tradegood_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[TradeGoods.GetNameWithNoTooltip]"
+		}
+		blockoverride "IconTexture"
+		{
+			texture = "[GetTradeGoodsIcon( TradeGoods.Self )]"
+		}
+		blockoverride "concept_link" {
+			text = [tradegoods|E]
+		}
+		blockoverride "description_text" {
+			text = "[TradeGoods.GetTooltip]" 
+		}
+	}
+}
+
+container = {
+	alwaystransparent = no
+	name = "TradeGoodTooltip"
+	using = tradegood_tooltip
+}
+
+template governorship_states_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			datacontext = "[Governorship]"
+			text = "GAME_GOVERNORSHIP_STATES_TITLE"
+		}
+
+		blockoverride "concept_link" {
+			text = [provinces|E]
+		}
+		blockoverride "description_text" {
+			text = "[Governorship.GetStatesTooltip]"
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "GovernorshipStatesTooltip"
+	using = governorship_states_tooltip
+}
+template combat_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Combat.GetNameWithNoTooltip]"
+		} 
+		blockoverride "ConceptLinkPreVisibility" {
+			visible = no
+		}
+		blockoverride "description_text" {
+			text = "COMBAT_LINK_TEXT" 
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "CombatTooltip"
+	using = combat_tooltip
+}
+
+template region_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Region.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [regions|E]
+		}
+		blockoverride "description_text" {
+			datacontext = "[Region]"
+			text = "GAME_REGION_TOOLTIP"
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "RegionTooltip"
+	using = region_tooltip
+}
+template horde_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Horde.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [hordes|E]
+		}
+		blockoverride "description_text" {
+			text = "HORDE_LINK_TEXT"  
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "HordeTooltip"
+	using = horde_tooltip
+}
+template region_areas_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			datacontext = "[Region]"
+			text = "GAME_REGION_AREAS_TITLE"
+		}
+
+		blockoverride "concept_link" {
+			text = [areas|E]
+		}
+		blockoverride "description_text" {
+			text = "[Region.GetAreasTooltip]"
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "RegionAreasTooltip"
+	using = region_areas_tooltip
+}
+
+template siege_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Siege.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [sieges|E] 
+		}
+		blockoverride "description_text" {
+			text = "SIEGE_LINK_TEXT" 
+		}
+	}	
+}
+container = {
+	alwaystransparent = no
+	name = "SiegeTooltip"
+	using = siege_tooltip
+}
+template region_governorships_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			datacontext = "[Region]"
+			text = "GAME_REGION_GOVERNORSHIPS_TITLE"
+		}
+
+		blockoverride "concept_link" {
+			text = [governorships|E]
+		}
+		blockoverride "description_text" {
+			text = "[Region.GetGovernorshipsTooltip]"
+		}
+	}
+}
+
+container = {
+	alwaystransparent = no
+	name = "RegionGovernorshipsTooltip"
+	using = region_governorships_tooltip
+}
+
+template treasure_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Treasure.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [treasures|E]
+		}
+		blockoverride "description_text" {
+			text = "TREASURE_LINK_TEXT"  
+		}
+	}
+	
+}
+container = {
+	alwaystransparent = no
+	name = "TreasureTooltip"
+	using = treasure_tooltip
+}
+
+template state_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[State.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [provinces|E]
+		}
+		blockoverride "description_text" {
+			datacontext = "[State]"
+			text = "GAME_STATE_TOOLTIP"
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "StateTooltip"
+	using = state_tooltip
+}
+
+template religion_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Religion.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [religions|E]
+		}
+		blockoverride "description_text" { 
+			text = "[Religion.GetTooltip]"
+		}
+	}	
+}
+container = {
+	alwaystransparent = no
+	name = "ReligionTooltip"
+	using = religion_tooltip
+}
+template state_provinces_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			datacontext = "[State]"
+			text = "GAME_STATE_PROVINCES_TITLE"
+		}
+
+		blockoverride "concept_link" {
+			text = [provinces|E]
+		}
+		blockoverride "description_text" {
+			text = "[State.GetProvincesTooltip]"
+		}
+	}
+}
+
+
+container = {
+	alwaystransparent = no
+	name = "StateProvincesTooltip"
+	using = state_provinces_tooltip
+}
+
+template agenda_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Party.GetAgenda.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			text = [agendas|E]
+		}
+		blockoverride "description_text" { 
+			text = "[Party.GetAgenda.GetDescription]"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}	
+}
+container = {
+	alwaystransparent = no
+	name = "AgendaTooltip"
+	using = agenda_tooltip
+}
+
+template party_type_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "Icon" {
+			position = { -16 16 }
+			icon = {
+				size = { 56 56 }
+				texture = "[GetPartyIcon(PartyType.Self)]"
+			}
+		}
+		blockoverride "title_text" {
+			text = "[PartyType.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = [parties|E]
+		}
+		blockoverride "description_text" { 
+			text = "[PartyType.GetDescription]"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}	
+}
+container = {
+	alwaystransparent = no
+	name = "PartyTypeTooltip"
+	using = party_type_tooltip
+}
+
+template party_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Party.GetType.GetName]"
+		}
+		blockoverride "concept_link" {
+			text = [parties|E]
+		}
+		blockoverride "Icon" {
+			flowcontainer = {
+				position = { -16 0 }
+				icon = {
+					size = { 56 56 }
+					texture = "[GetPartyIcon(Party.GetType)]"
+				}
+
+				country_flag_reworked = {
+					datacontext = "[Party.GetCountry]"
+					blockoverride "Size"
+					{
+						size = { 56 56 }	
+					}
+					blockoverride "Flag"
+					{ 
+						texture = "[Country.AccessCoatOfArms.GetTexture('(int32)120', '(int32)120')]"
+						frame = "[Country.AccessCoatOfArms.GetFrame('(int32)120', '(int32)120'))]"
+						framesize = { 120 120 }
+					}
+				}
+			}
+		}
+		blockoverride "extra_data" {
+			margin_widget = {
+				size = { 100% 126 }
+				margin_top = 2
+				margin_bottom = 4
+				margin_left = 4
+				margin_right = 16
+
+				container = {
+					cpt_button = {
+						datacontext = "[Party.GetLeader]"
+						size = { 80 120 }
+						blockoverride "ShowIcons" { visible = no }
+						blockoverride "PortraitTexture" { portrait_texture = "[Character.GetPortrait('default', 'head')]" }
+					}
+				}
+				
+				flowcontainer = {
+					direction = vertical
+					parentanchor = vcenter|right
+					position = { 0 0 }
+					spacing = 8
+					icon_and_text = {
+						size = { 90 0 }
+						scale = 0.9
+						parentanchor = hcenter
+						blockoverride "Icon" 
+						{ 
+							texture = "gfx/interface/diplomacy/icon_senate_approval.dds" 
+							framesize = { 40 40 }
+						}
+						blockoverride "Text" 
+						{ 
+							using = WhiteFontColor
+							text = "[Party.GetApproval|0]" 
+						}
+						tooltip = "[Party.GetApprovalDescription]"
+					}
+					icon_and_text = {
+						size = { 90 0 }
+						scale = 0.9
+						parentanchor = hcenter
+						blockoverride "Icon" 
+						{ 
+							texture = "gfx/interface/icons/shared_icons/senate_seat.dds"
+						}
+						blockoverride "Text" 
+						{ 
+							using = WhiteFontColor
+							text = "[Party.GetSeats|0]" 
+						}
+						tooltip = "[Party.GetSeatsDescription]"
+					}
+					
+					tag = {
+						using = WhiteFontColor
+						parentanchor = hcenter
+						text = "[Party.GetAgenda.GetName]"
+					}
+				}
+			}
+		}
+		blockoverride "description_text" { 
+			text = "[Party.GetType.GetDescription]"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "PartyTooltip"
+	using = party_tooltip
+}
+
+template country_culture_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[CountryCulture.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = [cultural_rights|E]
+		}
+		blockoverride "description_text" {
+			text = "[CountryCulture.GetDescriptionTooltip]"
+		}
+		blockoverride "Cull" { visible = no }
+	}
+}
+
+
+container = {
+	alwaystransparent = no
+	name = "CountryCultureTooltip"
+	using = country_culture_tooltip
+}
+
+template building_tooltip {
+	building_tooltip_pop_out = {}	
+}
+
+container = {
+	alwaystransparent = no
+	name = "BuildingTooltip"
+	using = building_tooltip
+}
+
+template heritage_tooltip {
+	heritage_pop_out = {}	
+}
+container = {
+	alwaystransparent = no
+	name = "HeritageTooltip"
+	using = heritage_tooltip
+}
+
+template province_rank_tooltip { 
+	province_rank_tooltip_base = { }
+}
+container = {
+	alwaystransparent = no
+	name = "ProvinceRankTooltip"
+	using = province_rank_tooltip
+}
+
+template terrain_tooltip {
+	terrain_tooltip_base = {}
+}
+container = {
+	alwaystransparent = no
+	name = "TerrainTooltip"
+	using = terrain_tooltip
+}
+
+# character_loyalty_tooltip is in gui_base.gui
+container = { 
+	alwaystransparent = no
+	name = "CharacterLoyaltyTooltip"
+	using = character_loyalty_tooltip
+}
+
+template diplomatic_stance_tooltip { 
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[DiplomaticStance.GetNameWithNoTooltip]"
+		}  
+		blockoverride "IconTexture" {
+			texture = "[GetDiplomaticStanceIcon(DiplomaticStance.Self)]"
+		}
+		blockoverride "concept_link" {
+			text = [diplomatic_stances|E]
+		}
+		blockoverride "description_text" {
+			text = "GAME_DIPLOMATIC_STANCE_TOOLTIP"
+		}
+		blockoverride "Cull" { visible = no }
+	}
+}
+
+container = {
+	alwaystransparent = no
+	name = "DiplomaticStanceTooltip"
+	using = diplomatic_stance_tooltip
+}
+
+template idea_tooltip {
+	idea_tooltip_pop_out = {}
+}
+
+# named for code
+container = {
+	alwaystransparent = no
+	name = "IdeaTooltip"
+	using = idea_tooltip
+}
+
+template idea_item_tooltip {
+	idea_item_tooltip_pop_out = {}
+}
+
+template idea_item_desc_tooltip {
+	idea_tooltip_pop_out = { datacontext = "[IdeaItem.GetIdea]" }
+}
+
+template idea_group_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "IconTexture" {
+			texture = "[GetIdeaGroupIcon(IdeaGroup.Self)]"
+		}
+
+		blockoverride "title_text" {
+			text = "[IdeaGroup.GetNameWithNoTooltip]"
+		}
+
+		blockoverride "concept_link" {
+			# links one step up into national ideas
+			text = [national_ideas|E]
+		}
+		blockoverride "description_text" {
+			text = "GAME_IDEA_GROUP_TOOLTIP"
+		}
+		blockoverride "Cull" { visible = no }
+	}
+}
+
+# named for code
+container = {
+	alwaystransparent = no
+	name = "IdeaGroupTooltip"
+	using = idea_group_tooltip
+}
+
+template no_idea_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "Icon"
+		{
+			icon = {
+				name = "Pattern"
+				texture = "gfx/interface/base_parts/square_button_corner_pattern_x22y22bd.dds"
+				spriteType = Corneredtiled
+				spriteborder = { 11 11 }
+				size = { 66 66 }
+				parentanchor = bottom
+			}
+			
+			icon = {
+				name = "Idea Mark"
+				widgetanchor = center
+				parentanchor = center	
+				texture = "gfx/interface/base_parts/idea_mark.dds"
+				size = { 44 44 }
+			}
+		}
+		blockoverride "title_text" {
+			text = "NO_IDEA_FOREIGN_TITLE"
+		}
+		blockoverride "concept_link" {
+			text = [ideas|E]
+		}
+		blockoverride "description_text" { 
+			text = "NO_IDEA_FOREIGN_DESC"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+}
+
+template culture_decision_item_tooltip {
+	object_tooltip_pop_out = {
+		# TODO: DO SOMETHING SMART WITH ME. Checkbox?
+		# blockoverride "Icon" {
+		# 	icon = {
+		# 		size = { 64 64 }
+		# 		texture = "gfx/interface/icons/shared_icons/loyalty.dds"
+		# 	}
+		# }
+		blockoverride "title_text" {
+			text = "[CultureDecisionItem.GetDecision.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = "[culture_decisions|E]"
+		}
+		blockoverride "extra_data" {
+			# ERROR CRITERIA
+			cooltip_paragraph = {
+				layoutpolicy_horizontal	= expanding
+				visible = "[HasOpenEventWindow]"
+				text = "NOT_POSSIBLE_WHILE_EVENT_WINDOW_SHOWN"
+			}
+			cooltip_paragraph = {
+				layoutpolicy_horizontal	= expanding
+				visible = "[And(Not(HasOpenEventWindow), Not(CultureDecisionItem.IsAllowed))]"
+				text = "GAME_CULTURE_DECISION_ITEM_ALLOWED_DESC"
+			}
+			cooltip_spacer = { visible = "[Not(CultureDecisionItem.IsAllowed)]" }
+
+			# EFFECT 
+			cooltip_paragraph = {
+				layoutpolicy_horizontal = expanding
+				datacontext = "[CultureDecisionItem]"
+				text = "GAME_CULTURE_DECISION_ITEM_EFFECT_DESC"
+			}
+			cooltip_spacer = { visible = "[IsBuildDebug]" }
+
+			cooltip_paragraph = {
+				layoutpolicy_horizontal	= expanding
+				visible = "[IsBuildDebug]"
+				text = "#F debug:#! [CultureDecisionItem.GetDebugDesc|F]" #TODO: grey formatting tag?
+			}
+			
+		}
+		blockoverride "description_text" { 
+			text = "[CultureDecisionItem.GetDecision.GetDescription(Player.Self)]"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}	
+}
+
+template culture_decision_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[CultureDecision.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = "[culture_decisions|E]"
+		}
+		blockoverride "description_text" { 
+			text = "[CultureDecision.GetDescription(Player.Self)]"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}	
+}
+
+template player_decision_tooltip {
+	player_decision_pop_out = {}
+}
+
+template player_decision_item_tooltip {
+	player_decision_pop_out = {
+		datacontext = "[DecisionItem.GetDecision]"
+	}
+}
+
+container = {
+	alwaystransparent = no
+	name = "CultureDecisionSimpleTooltip"
+	using = culture_decision_tooltip
+}
+
+container = {
+	alwaystransparent = no
+	name = "PlayerDecisionTooltip"
+	using = player_decision_tooltip
+}
+
+template distinction_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Distinction.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = [distinctions|E]
+		}
+		blockoverride "extra_data" {
+			flowcontainer = {
+				name = "Unit Modifiers"
+				ignoreinvisible = yes
+				direction = vertical
+
+				datacontext = "[Distinction.GetUnitModifier]"
+				visible = "[Not( Modifier.IsEmpty )]"
+				cooltip_paragraph = {
+					layoutpolicy_horizontal = expanding
+					text = "UNIT_DISTINCTION_TEXT"
+				}
+				cooltip_paragraph = {
+					layoutpolicy_horizontal = expanding
+					text = "[Modifier.BuildIconSummary]" 
+				}
+				cooltip_spacer = {}
+			}
+			flowcontainer = {
+				name = "Character Modifiers"
+				ignoreinvisible = yes
+				direction = vertical
+				
+				datacontext = "[Distinction.GetCommanderModifier]"
+				visible = "[Not( Modifier.IsEmpty )]"
+				cooltip_paragraph = {
+					layoutpolicy_horizontal = expanding
+					text = "COMMANDER_DISTINCTION_TEXT"
+				}
+				cooltip_paragraph = {
+					layoutpolicy_horizontal = expanding
+					text = "[Modifier.BuildIconSummary]" 
+				}
+				cooltip_spacer = {}
+			}
+			flowcontainer = {
+				name = "Legion Modifiers"
+				ignoreinvisible = yes
+				direction = vertical
+				
+				datacontext = "[Distinction.GetLegionModifier]"
+				visible = "[Not( Modifier.IsEmpty )]"
+				cooltip_paragraph = {
+					layoutpolicy_horizontal = expanding
+					text = "LEGION_DISTINCTION_TEXT"
+				}
+				cooltip_paragraph = {
+					layoutpolicy_horizontal = expanding
+					text = "[Modifier.BuildIconSummary]" 
+				}
+				cooltip_spacer = {}
+			}
+		}
+		blockoverride "description_text" { 
+			text = "[Distinction.GetDescription]"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}	
+}
+container = {
+	alwaystransparent = no
+	name = "DistinctionTooltip"
+	using = distinction_tooltip
+}
+
+template legion_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "[Legion.GetNameWithNoTooltip]"
+		}
+		blockoverride "concept_link" {
+			text = [legions|E]
+		}
+
+		blockoverride "extra_data" {
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[Legion.HasUnits]"
+				cooltip_paragraph = {
+					layoutpolicy_horizontal	= expanding
+					text = "GAME_TOOLTIP_UNITS_HEADER" 
+				}
+				cooltip_paragraph = { 
+					layoutpolicy_horizontal	= expanding
+					text = "[Legion.GetUnitNames]" 
+				}
+				cooltip_spacer = {}
+			}
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[Legion.HasLeaders]"
+				cooltip_paragraph = { 
+					layoutpolicy_horizontal	= expanding
+					text = "GAME_TOOLTIP_LEAD_BY_HEADER" 
+				}
+				cooltip_paragraph = { 
+					layoutpolicy_horizontal	= expanding
+					text = "[Legion.GetLeaderNames]" 
+				}
+				cooltip_spacer = {}
+			}
+			# flowcontainer = {
+			# 	ignoreinvisible = yes
+			# 	direction = vertical
+			# 	#TODO show this?
+			# 	visible = "[Legion.HasHistory]"
+			# 	cooltip_paragraph = { 
+			# 		layoutpolicy_horizontal	= expanding
+			# 		text = "GAME_LEGION_TOOLTIP_HISTORY_HEADER" 
+			# 	}
+			# 	cooltip_paragraph = { 
+			# 		layoutpolicy_horizontal	= expanding
+			# 		text = "[Legion.GetHistorySummary]" 
+			# 	}
+			# 	cooltip_spacer = {}
+			# }
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				visible = "[Legion.HasDistinctions]"
+				cooltip_paragraph = { 
+					layoutpolicy_horizontal	= expanding
+					text = "GAME_LEGION_TOOLTIP_DISTINCTIONS" 
+				}
+				cooltip_spacer = {}
+				# cooltip_paragraph = {  
+				# 	layoutpolicy_horizontal	= expanding
+				# 	text = "GAME_LEGION_TOOLTIP_DISTINCTIONS_MODIFIERS" 
+				# }
+				# cooltip_paragraph = { 
+				# 	layoutpolicy_horizontal	= expanding
+				# 	text = "[Legion.GetModifier.BuildIconSummary]"
+				# }
+				# cooltip_spacer = {}
+			}
+		}
+
+		blockoverride "description_text" { 
+			text = "GAME_LEGION_TOOLTIP"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "LegionTooltip"
+	using = legion_tooltip
+}
+
+template basic_invention_tooltip {
+	basic_invention_pop_out = {}
+}
+container = {
+	alwaystransparent = no
+	name = "InventionTooltip"
+	using = basic_invention_tooltip
+}
+
+template player_law_item_tooltip {
+	player_law_item_pop_out = {}
+}
+
+container = {
+	alwaystransparent = no 
+	name = "PlayerLawItemTooltip"
+	using = player_law_item_tooltip
+}
+
+template basic_military_bonus_tooltip {
+	basic_tradition_pop_out = {}
+}
+container = {
+	alwaystransparent = no
+	name = "MilitaryBonusTooltip"
+	using = basic_military_bonus_tooltip
+}
+
+template levy_breakdown_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			# text = "[SubUnitType.GetName] Breakdown"
+			text = "LEVY_COMPOSITION_BREAKDOWN_TITLE"
+		}
+		blockoverride "ConceptLinkPreVisibility" {
+			visible = no
+		}
+		blockoverride "description_text" { 
+			text = "[LevyTemplate.GetBreakdownInfo( SubUnitType.Self )]"
+		}
+		blockoverride "Cull" {
+			visible = no
+		}
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "LevyTemplateBreakdownTooltipDefault"
+	using = levy_breakdown_tooltip
+}
+
+template unit_assault_power_tooltip {
+	object_tooltip_pop_out = {
+		blockoverride "title_text" {
+			text = "UNIT_ASSAULT_POWER_TITLE"
+		}
+		blockoverride "ConceptLinkPreVisibility" { visible = no }
+		blockoverride "description_text" { text = "[Unit.GetAssaultImpactDescription]" }
+		blockoverride "Cull" { visible = no }
+	}
+}
+container = {
+	alwaystransparent = no
+	name = "UnitAssaultPowerTooltip"
+	using = unit_assault_power_tooltip
+}

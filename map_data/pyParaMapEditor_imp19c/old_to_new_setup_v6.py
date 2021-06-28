@@ -17,10 +17,10 @@ area_column = 15
 terrain_column = 16
 # Pop values
 citizen_column = 4
-freemen_column = 4
 slaves_column = 9
 tribesmen_column = 10
 # Pops for the 1815 mod
+indentured_column = 5
 lower_strata_column = 6
 middle_strata_column = 7
 upper_strata_column = 11
@@ -43,7 +43,7 @@ valid_terrains = ["plains", "farmland", "extreme_mountain", "semi_arid",
                   "low_mountain", "desert", "extreme_desert", "forest",
                   "boreal_forest", "arctic", "dense_jungle", "hills", "tundra",
                   "marsh", "sparse_jungle", "ocean", "coastal_terrain",
-                  "constantinople","edo","kyoto","warsaw","riverine_terrain"]
+                  "constantinople","edo","kyoto","warsaw","riverine_terrain","desert_hills"]
 
 terrain_file = open("province_terrain/00_province_terrain.txt",encoding="utf=8")
 
@@ -129,10 +129,10 @@ with generated_setup as f:
         '      amount=' + row[citizen_column] + '\n'
         '   }\n'
                 )
-            if row[freemen_column] != "0":
+            if row[indentured_column] != "0":
                 f.write(
-        '   freemen={\n' +
-        '      amount=' + row[freemen_column] + '\n'
+        '   indentured={\n' +
+        '      amount=' + row[indentured_column] + '\n'
         '   }\n' 
                 )
             if row[slaves_column] != "0":

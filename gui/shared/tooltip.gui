@@ -1,0 +1,513 @@
+template DefaultTooltipText
+{
+	using = BaseFontS
+	#default_format = "#medium"
+	align = left
+	autoresize = yes
+	alwaystransparent = no
+	multiline = yes
+
+	max_width = 450
+}
+
+template GameConceptFlavorTooltipText
+{
+	using = BaseFontS
+	fontcolor = { 0.6 0.6 0.6 1 }
+	#default_format = "#medium"
+	align = left
+	autoresize = yes
+	alwaystransparent = no
+	multiline = yes
+
+	max_width = 450
+}
+
+template GeneralTooltipSetup
+{
+	#filter_mouse = all
+	#button = {
+	#	name = "close_tooltips"
+	#	size = { 0 0 } # Intentional zero size
+	#	onclick = "[CloseAllTooltips]"
+	#	shortcut = "close_tooltips"
+	#}
+}
+
+template ProgressLockIndicator
+{
+	block "LockIndicatorVisibility" { visible = yes }
+	icon = {
+		size = { 20 20 }
+		texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+		color = { 0.12 0.12 0.12 1 } #Colored black for invisible look when empty
+		modify_texture = {
+			name = "Alpha2"
+			texture = "gfx/interface/tooltip/lock_icon_alpha_s.dds"
+			blend_mode = alphamultiply
+		}
+		position = { -8 8 }
+		parentanchor = right
+		filter_mouse = all
+		alwaystransparent = no
+	}
+	progressbar = {
+		name = "tooltip_lock_progress_bar" #Do NOT change this; name referenced in code
+		size = { 8 100% }
+		progresstexture = "gfx/interface/base_parts/tooltip_progress.dds"
+		#color = { 0.96 0.96 0.96 1 } #Colored white, but reduced intensity with alpha below
+		alpha = 0.6
+		#color = { 0.1 0.7 0.1 1 }
+		color = { 1 1 1 0.75 }
+		position = { -6 0 }
+		parentanchor = right
+		direction = vertical
+		filter_mouse = all
+		alwaystransparent = no
+		visible = "[And( UsesTimerLocking, Not( PdxGuiWidget.IsTooltipLocked ) )]"
+		value = 0
+	}
+	progressbar = {
+		name = "fakebar"
+		size = { 8 100% }
+		progresstexture = "gfx/interface/base_parts/tooltip_progress.dds"
+		#color = { 0.96 0.96 0.96 1 } #Colored white, but reduced intensity with alpha below
+		alpha = 0.8
+		#color = { 0.1 0.7 0.1 1 }
+		color = { 1 1 1 0.75 }
+		position = { -6 0 }
+		parentanchor = right
+		direction = vertical
+		filter_mouse = all
+		alwaystransparent = no
+		value = 100
+		visible = "[PdxGuiWidget.IsTooltipLocked]"
+	}
+}
+
+template DefaultTooltipBackground
+{
+	alwaystransparent = no 
+	
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		texture = "gfx/interface/tooltip/tooltip_texture.dds"
+		spritetype = Corneredtiled
+		modify_texture = {
+			name = "Alpha2"
+			texture = "gfx/interface/tooltip/tooltip_base_alpha_x40y40bd.dds"
+			blend_mode = alphamultiply
+			spriteType = Corneredtiled
+			spriteborder = { 20 20 }
+		}
+	}
+	background = {
+		texture = "gfx/interface/tooltip/tooltip_bg_color_stretch.dds"
+		spriteType = Corneredstretched
+		alpha = 0.33
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		block "bg_color" {
+			tintcolor = "[TooltipInfo.GetTintColor]"
+		}
+		modify_texture = {
+			name = "Alpha2"
+			texture = "gfx/interface/tooltip/tooltip_base_alpha_x40y40bd.dds"
+			blend_mode = alphamultiply
+			spriteType = Corneredtiled
+			spriteborder = { 20 20 }
+		}
+	}
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		using = flat_background_white
+		modify_texture = {
+			name = "Alpha2"
+			texture = "gfx/interface/tooltip/tooltip_frame_alpha_x40y40bd.dds"
+			blend_mode = alphamultiply
+			spriteType = Corneredtiled
+			spriteborder = { 20 20 }
+		}
+	}
+	
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		texture = "gfx/interface/tooltip/tooltip_drop_shadow_x40y40bd.dds"
+		spriteType = Corneredtiled
+		spriteborder = { 20 20 }
+	}
+}
+
+template TooltipSection
+{
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+		spritetype = Corneredtiled
+		alpha = 0.5
+		modify_texture = {
+			texture = "gfx/interface/tooltip/tooltip_base_alpha_x40y40bd.dds"
+			blend_mode = alphamultiply
+			spriteType = Corneredtiled
+			spriteborder = { 20 20 }
+		}
+		modify_texture = {
+			texture = "gfx/interface/tooltip/tooltip_section_alpha_pattern_x0bd.dds"
+			blend_mode = alphamultiply
+			spriteType = Corneredtiled
+		}
+		modify_texture = {
+			texture = "gfx/interface/tooltip/tooltip_section_alpha_gradient_stretch.dds"
+			blend_mode = alphamultiply
+			spriteType = Corneredstretched
+		}
+	}
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		texture = "gfx/interface/tooltip/tooltip_drop_shadow_x40y40bd.dds"
+		spriteType = Corneredtiled
+		spriteborder = { 20 20 }
+	}
+}
+
+template CardTooltipBackground
+{
+	background = {
+		name = "bg"
+		texture = "gfx/interface/base_parts/background_black_texture.dds"
+		spriteType = Corneredtiled
+		tintcolor = "[TooltipInfo.GetTintColor]"
+	}
+}
+
+container = {
+	name = "ProvinceTooltipWidget"
+	alwaystransparent = yes
+	filter_mouse = none #Necessary for map scroll behaviour, leave it alone :d
+	container = {
+		position = { 20 20 }
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			texture = "gfx/interface/tooltip/tooltip_texture.dds"
+			spritetype = Corneredtiled
+			modify_texture = {
+				name = "Alpha2"
+				texture = "gfx/interface/tooltip/tooltip_base_alpha_x40y40bd.dds"
+				blend_mode = alphamultiply
+				spriteType = Corneredtiled
+				spriteborder = { 20 20 }
+			}
+		}
+		icon = {
+			size = { 100% 100% }
+			texture = "gfx/interface/tooltip/tooltip_bg_color_stretch.dds"
+			spriteType = Corneredstretched
+			alpha = 0.33
+			block "bg_color" {
+				tintcolor = "[TooltipInfo.GetTintColor]"
+			}
+			modify_texture = {
+				name = "Alpha2"
+				texture = "gfx/interface/tooltip/tooltip_base_alpha_x40y40bd.dds"
+				blend_mode = alphamultiply
+				spriteType = Corneredtiled
+				spriteborder = { 20 20 }
+			}
+		}
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = flat_background_white
+			modify_texture = {
+				name = "Alpha2"
+				texture = "gfx/interface/tooltip/tooltip_frame_alpha_x40y40bd.dds"
+				blend_mode = alphamultiply
+				spriteType = Corneredtiled
+				spriteborder = { 20 20 }
+			}
+		}
+		icon = {
+			name = "bgProvinceTooltipWidget"
+			tintcolor = { 1.0 1.0 1.0 1.0 }
+		}
+		flowcontainer = {
+			alwaystransparent = yes
+			filter_mouse = none
+			flowcontainer = {
+				direction = vertical
+				textbox = {
+					name = "TooltipText"
+					using = DefaultTooltipText
+					margin = { 20 20 }
+					margin_top = 10
+					multiline = yes
+					maximumsize = { 640 -1 }
+				}
+				container = {
+					textbox = {
+						name = "TooltipTextShortcut"
+						using = DefaultTooltipText
+						parentanchor = bottom|right
+						position = { -6 -12 }
+					}
+				}
+			}
+		}
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			texture = "gfx/interface/tooltip/tooltip_drop_shadow_x40y40bd.dds"
+			spriteType = Corneredtiled
+			spriteborder = { 20 20 }
+		}
+	}
+}
+
+template DefaultTooltipWidget {
+	alwaystransparent = no
+	filter_mouse = all
+	margin_widget = {
+		#margin = { 20 20 } #Not required with widget anchor tooltips now.
+		alwaystransparent = no
+		margin_widget = {
+			resizeparent = yes
+			alwaystransparent = no
+			container = {
+				using = GeneralTooltipSetup
+				alwaystransparent = no
+				resizeparent = yes
+				widget = {
+					name = "background"
+					using = DefaultTooltipBackground
+					size = { 100% 100% }
+					alwaystransparent = no
+				}
+				flowcontainer = {
+					alwaystransparent = no
+					flowcontainer = {
+						direction = vertical
+						ignoreinvisible = yes
+						alwaystransparent = no
+						textbox = {
+							name = "TooltipText"
+							using = DefaultTooltipText
+							margin = { 20 20 }
+							margin_top = 10
+							multiline = yes
+						}
+						container = {
+							parentanchor = right
+							widget = { 
+								textbox = {
+									name = "TooltipTextShortcut"
+									using = DefaultTooltipText
+									position = { 0 -16 }
+									resizeparent = yes
+								}
+							}
+						}
+					}
+					margin_widget = {
+						size = { 18 100% }
+						margin = { 0 6 }
+						using = ProgressLockIndicator
+					}
+				}
+			}
+		}
+	}
+}
+
+template double_piece_tooltip {
+	container = {
+		using = GeneralTooltipSetup
+		alwaystransparent = no
+		widget = {
+			name = "background"
+			using = DefaultTooltipBackground
+			size = { 100% 100% }
+			alwaystransparent = no
+		}
+		flowcontainer = {
+			flowcontainer = {
+				ignoreinvisible = yes
+				
+				textbox = {
+					name = "TooltipText1"
+					using = DefaultTooltipText
+					margin = { 20 20 }
+					margin_top = 10
+					multiline = yes
+					maximumsize = { 320 -1 }
+					block "LeftText" {}
+					using = TooltipSection
+				}
+				textbox = {
+					name = "TooltipText2"
+					using = DefaultTooltipText
+					margin = { 20 20 }
+					margin_top = 10
+					multiline = yes
+					maximumsize = { 320 -1 }
+					block "RightText" {}
+				}
+			}
+			margin_widget = {
+				size = { 18 100% }
+				margin = { 0 6 }
+				using = ProgressLockIndicator
+			}
+		}
+	}
+}
+
+template TooltipWithFakeShortcut {
+	container = {
+		using = GeneralTooltipSetup
+		alwaystransparent = no
+
+		widget = {
+			name = "background"
+			using = DefaultTooltipBackground
+			size = { 100% 100% }
+			alwaystransparent = no
+		}
+
+		flowcontainer = {
+			direction = vertical
+
+			textbox = {
+				name = "TooltipText"
+				using = DefaultTooltipText
+				margin = { 20 20 }
+				margin_top = 10
+
+				fonttintcolor = "[TooltipInfo.GetTintColor]"
+				alwaystransparent = no
+			}
+
+			textbox = {
+				name = "TooltipTextFakeShortcut"
+				using = DefaultTooltipText
+				block "shortcut_text" {}
+				parentanchor = right
+				margin_top = -20
+				margin_bottom = 15
+				margin_right = 15
+			}
+		}
+	}
+}
+
+
+
+###
+### TOOLTIP PLACEMENT TEMPLATES
+###
+
+## East-South Direction (right, then down)
+# Most common
+template tooltip_es
+{
+	tooltip_type = widget
+	tooltip_parentanchor = top|right
+	tooltip_widgetanchor = top|left
+	tooltip_verticalbehavior = slide
+	tooltip_horizontalbehavior = mirror
+}
+
+template tooltip_es_portrait
+{
+	tooltip_type = widget
+	tooltip_parentanchor = top|right
+	tooltip_widgetanchor = top|left
+	tooltip_verticalbehavior = slide
+	tooltip_horizontalbehavior = mirror
+	tooltip_offset = { 2 0 }
+}
+## west south
+template tooltip_ws
+{
+	tooltip_type = widget
+	tooltip_parentanchor = top|left
+	tooltip_widgetanchor = top|right
+	tooltip_verticalbehavior = slide
+	tooltip_horizontalbehavior = mirror
+	tooltip_offset = { 6 -18 }
+}
+
+template tooltip_ws_mm
+{
+	tooltip_type = widget
+	tooltip_parentanchor = top|left
+	tooltip_widgetanchor = top|right
+	tooltip_verticalbehavior = slide
+	tooltip_horizontalbehavior = mirror
+	tooltip_offset = { 0 10 }
+}
+
+## North-East Direction (up, then right)
+# Use in layouts that are horizontal
+template tooltip_ne
+{	
+	tooltip_type = widget
+	tooltip_parentanchor = top|left
+	tooltip_widgetanchor = bottom|left
+	tooltip_verticalbehavior = mirror
+	tooltip_horizontalbehavior = slide
+}
+
+# BELOW
+
+## South-East Direction (down, then right)
+# Use for "labelly" things
+template tooltip_se
+{
+	tooltip_type = widget
+	tooltip_parentanchor = bottom|left
+	tooltip_widgetanchor = top|left
+	tooltip_verticalbehavior = mirror
+	tooltip_horizontalbehavior = slide
+}
+
+## Straight Below
+# Use if it looks nicer
+template tooltip_below
+{
+	tooltip_type = widget
+	tooltip_parentanchor = bottom|hcenter
+	tooltip_widgetanchor = top|hcenter
+	tooltip_verticalbehavior = mirror
+	tooltip_horizontalbehavior = slide
+}
+
+## Straight Above
+# Use if it looks nicer
+template tooltip_above
+{
+	tooltip_type = widget
+	tooltip_parentanchor = top|hcenter
+	tooltip_widgetanchor = bottom|hcenter
+	tooltip_verticalbehavior = mirror
+	tooltip_horizontalbehavior = slide
+}
+
+#SPECIAL
+
+## North-West Direction (up, then left)
+# Only used in Map modes, kind of a special case to avoid overlap
+template tooltip_nw
+{
+	tooltip_type = widget
+	tooltip_parentanchor = top|right
+	tooltip_widgetanchor = bottom|right
+	tooltip_verticalbehavior = mirror
+	tooltip_horizontalbehavior = slide
+}
+
+
+
+
+container = {
+	alwaystransparent = no
+	name = "DefaultTooltipWidget"
+	using = DefaultTooltipWidget
+	position = { 0 0 }
+}

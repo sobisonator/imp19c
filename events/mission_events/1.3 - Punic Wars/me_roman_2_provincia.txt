@@ -1,0 +1,3039 @@
+﻿namespace = me_roman_2_provincia
+
+me_roman_2_provincia.1 = {							# 2 - Unruly Populace - Raid
+    type = country_event
+    title = me_roman_2_provincia.1.t
+    desc = me_roman_2_provincia.1.desc
+    picture = revolt
+    
+	left_portrait = yes
+	
+	fire_only_once = yes
+	
+	goto_location = scope:rm_2_unruly_province
+	
+    trigger = {
+		has_land = yes
+		NOT = { has_variable = rm_2_unruly_populace_cooldown }
+		any_owned_province = {
+			OR = {
+				is_in_area = sardinia_meridionalis
+				is_in_area = sardinia_septentrionalis
+			}
+		}
+	}
+	
+	immediate = {
+		random_owned_province = {
+			limit = {
+				OR = {
+					is_in_area = sardinia_meridionalis
+					is_in_area = sardinia_septentrionalis
+				}
+			}
+			weight = {
+				modifier = {
+					factor = 10
+					has_city_status = no
+				}
+				modifier = {
+					factor = 0
+					has_city_status = no
+					num_of_fortress_building > 0
+				}
+				modifier = {
+					factor = 500
+					has_city_status = no
+					num_of_used_building_slots > 0 
+					num_of_fortress_building = 0
+				}
+			}
+			save_scope_as = rm_2_unruly_province
+		}
+    }
+
+    option = {							#     
+        name = me_roman_2_provincia.1.a
+        scope:rm_2_unruly_province = {
+			destroy_building_effect = yes
+			add_province_modifier = {
+				name = rm_2_unruly_sabotage_pmod
+				duration = 1825 # 5 years
+			}
+		}
+    }
+	
+	after = {
+		set_variable = {
+			name = rm_2_unruly_populace_cooldown
+			days = 50
+		}
+	}
+}
+
+me_roman_2_provincia.2 = {							# 2 - Unruly Populace - Local Government
+    type = country_event
+    title = me_roman_2_provincia.2.t
+    desc = me_roman_2_provincia.2.desc
+    picture = revolt
+    
+	fire_only_once = yes
+	
+	left_portrait = current_ruler
+	right_portrait = scope:rm_2_nuragic_governor
+	
+    trigger = { has_land = yes }
+	
+	immediate = {
+		hidden_effect = {
+			create_character = {
+				culture = nuragic
+				religion = carthaginian_pantheon
+				age = 34
+				no_stats = yes
+				no_traits = yes
+				good_finesse_trait_effect = yes
+				other_personality_trait_effects = yes
+				average_martial_effect = yes
+				great_finesse_effect = yes
+				good_charisma_effect = yes
+				average_zeal_effect = yes
+				save_scope_as = rm_2_nuragic_governor
+			}
+			c:ROM = {
+				random_owned_province = {
+					limit = {
+						OR = {
+							is_in_area = sardinia_meridionalis
+							is_in_area = sardinia_septentrionalis
+						}
+						NOR = {
+							is_port = yes
+							province_id = 3483
+							province_id = 3484
+							province_id = 3485
+							province_id = 3499
+							province_id = 3500
+							province_id = 3496
+							province_id = 3505
+							province_id = 3506
+							province_id = 3500
+							province_id = 3497
+							province_id = 3493
+							province_id = 3492
+							province_id = 3482
+							province_id = 3490
+						}
+					}
+					random_pops_in_province = {
+						kill_pop = yes
+					}
+					save_scope_as = sardinia_capital_scope
+				}
+			}
+		}
+	}
+
+    option = {							# Accept    
+        name = me_roman_2_provincia.2.a		
+		hidden_effect = {
+			scope:sardinia_capital_scope = {
+				create_country = {
+					name = {
+						name = "SARDINIA_NAME"
+						adjective = "SARDINIA_ADJECTIVE"
+					}
+					save_scope_as = sardinia_scope
+					change_country_tag = SAR
+					set_primary_culture = nuragic
+					set_country_religion = carthaginian_pantheon
+					change_government = tribal_kingdom
+					add_treasury = 50.0
+				}
+			}
+			if = {
+				limit = { exists = scope:rm_2_nuragic_governor }
+				scope:rm_2_nuragic_governor = {
+					remove_all_positions = yes
+					move_country = scope:sardinia_scope
+				}
+				scope:sardinia_scope = {
+					set_as_ruler = scope:rm_2_nuragic_governor
+				}
+			}
+		}
+		set_variable = {
+			name = rm_2_sardinian_subject
+			days = 1825 # 5 years
+		}
+		custom_tooltip = me_roman_2_provincia.2.at
+		add_aggressive_expansion = -5.0
+    }
+	
+	option = {							# Refuse    
+        name = me_roman_2_provincia.2.b
+		if = {
+			limit = { exists = scope:rm_2_nuragic_governor }
+			custom_tooltip = me_roman_2_provincia.2.bt
+			hidden_effect = {
+				scope:rm_2_nuragic_governor = {
+					set_variable = {
+						name = nuragic_leader_flag
+						days = 3650
+					}
+					remove_all_positions = yes
+					move_country = c:MER
+				}
+			}
+		}
+		p:1.governorship = {
+			every_governorship_state = {
+				limit = {
+					any_state_province = {
+						OR = {
+							is_in_area = sardinia_meridionalis
+							is_in_area = sardinia_septentrionalis
+						}
+					}
+				}
+				custom = me_roman_2_provincia.bmodtt
+				add_state_modifier = {
+					name = rm_2_unruly_sardinians_smod
+					duration = 3650 # 10 years
+				}
+			}
+		}
+    }
+	
+	after = {
+		if = {
+			limit = {
+				has_variable = rm_2_sardinian_subject
+			}
+			hidden_effect = {
+				c:ROM = {
+					every_owned_province = {
+						limit = {
+							OR = {
+								is_in_area = sardinia_meridionalis
+								is_in_area = sardinia_septentrionalis
+							}
+							NOR = {
+								is_port = yes
+								province_id = 3483
+								province_id = 3484
+								province_id = 3485
+								province_id = 3499
+								province_id = 3500
+								province_id = 3496
+								province_id = 3505
+								province_id = 3506
+								province_id = 3500
+								province_id = 3497
+								province_id = 3493
+								province_id = 3492
+								province_id = 3482
+								province_id = 3490
+							}
+						}
+						set_conquered_by = scope:sardinia_scope
+					}
+					make_subject = { # Make Vassal Tribe
+						target = scope:sardinia_scope
+						type = vassal_tribe
+					}
+				}
+			}
+		}
+	}
+}
+
+me_roman_2_provincia.3 = {							# 2 - Exodus ping event
+    type = country_event
+    title = me_roman_2_provincia.3.t
+    desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = me_roman_2_provincia.3.desc_1
+				trigger = { 
+					c:ROM = { has_variable = rm_2_exodus_1 }
+				}
+			}
+			triggered_desc = {
+				desc = me_roman_2_provincia.3.desc_2
+				trigger = {
+					c:ROM = { 
+						has_variable = rm_2_exodus_2
+						NOT = { has_variable = rm_2_exodus_1 }			
+					}
+				}
+			}
+		}
+	}
+    picture = revolt
+    
+    trigger = { has_land = yes }
+
+    option = {							#     
+        name = me_roman_2_provincia.3.a
+		trigger = {
+			c:ROM = { has_variable = rm_2_exodus_1 }
+		}
+		custom_tooltip = me_roman_2_provincia.3.at
+		c:ROM = { remove_variable = rm_2_exodus_1 }
+    }
+	 
+	option = {							#     
+        name = me_roman_2_provincia.3.a
+		trigger = {
+			c:ROM = { 
+				has_variable = rm_2_exodus_2
+				NOT = { has_variable = rm_2_exodus_1 }			
+			}
+		}
+		custom_tooltip = me_roman_2_provincia.3.bt
+		c:ROM = { remove_variable = rm_2_exodus_2 }
+    }
+
+	after ={
+		c:ROM = { remove_variable = rm_punic_exodus_pop_total }
+	}
+}
+
+me_roman_2_provincia.4 = {							# 2 - Case for Expansion - Completion
+    type = country_event
+    title = me_roman_2_provincia.4.t
+    desc = me_roman_2_provincia.4.desc
+    picture = romans_marching
+    
+	fire_only_once = yes
+	
+    trigger = { has_land = yes }
+
+    option = {							#     
+        name = me_roman_2_provincia.4.a
+		
+    }
+}
+
+me_roman_2_provincia.5 = {							# 2 - Case for Expansion - People Clamor for War
+    type = country_event
+    title = me_roman_2_provincia.5.t
+    desc = me_roman_2_provincia.5.desc
+    picture = romans_marching
+
+	fire_only_once = yes
+	
+    trigger = {
+		has_land = yes
+    }
+
+    option = {							#     
+        name = me_roman_2_provincia.5.a
+		add_country_modifier = {
+			name = rm_2_demand_blood_cmod
+			duration = 3650 # 10 years
+		}
+    }
+	
+	option = {							#     
+        name = me_roman_2_provincia.5.b
+		add_country_modifier = {
+			name = rm_2_demand_wealth_cmod
+			duration = 3650 # 10 years
+		}
+    }
+}
+
+me_roman_2_provincia.6 = {							# 2 - Case for Expansion - Ending Punic Influence
+    type = country_event
+    title = me_roman_2_provincia.6.t
+    desc = me_roman_2_provincia.6.desc
+    picture = oration
+
+	fire_only_once = yes
+	
+	left_portrait = current_ruler
+	right_portrait = scope:expansion_encourager
+	
+    trigger = {
+		has_land = yes
+		OR = {
+			p:3504.area = {
+				any_area_province = {
+					owned_or_subject_owned = c:CAR
+				}
+			}
+			p:3481.area = {
+				any_area_province = {
+					owned_or_subject_owned = c:CAR
+				}
+			}
+			p:94.area = {
+				any_area_province = {
+					owned_or_subject_owned = c:CAR
+				}
+			}
+		}
+    }
+	
+	immediate = {
+		hidden_effect = {
+			p:3504.area = {
+				every_area_province = {
+					limit = { owner = c:CAR }
+					add_claim = c:ROM
+				}
+			}
+			p:3481.area = {
+				every_area_province = {
+					limit = { owner = c:CAR }
+					add_claim = c:ROM
+				}
+			}
+			p:94.area = {
+				every_area_province = {
+					add_claim = c:ROM
+				}
+			}
+		}
+		custom_tooltip = me_roman_2_provincia.6.tt
+		rm_notable_person_effect = yes
+		scope:expansion_encourager = {
+			add_popularity = popularity_small
+			if = {
+				limit = { is_minor_character = no }
+				family = { add_prestige = prestige_small }
+			}
+		}
+	}
+
+    option = {							# Accept
+        name = me_roman_2_provincia.6.a
+		add_country_modifier = {
+			name = rm_2_ending_punic_influence_cmod
+			duration = 1825 # 5 years
+		}
+    }
+	
+	after = {
+		scope:expansion_encourager = {
+			set_variable = {
+				name = expansion_encourager_cooldown
+				days = 90
+			}
+		}
+	}
+}
+
+me_roman_2_provincia.7 = {							# 2 - Case for Expansion - The Greek Menace
+    type = country_event
+    title = me_roman_2_provincia.7.t
+    desc = me_roman_2_provincia.7.desc
+    picture = council_country
+
+	fire_only_once = yes
+
+	left_portrait = current_ruler
+	right_portrait = scope:expansion_encourager
+	
+    trigger = {
+		has_land = yes
+		OR = {
+			OR = {
+				p:84.area = {
+					any_area_province = {
+						owned_or_subject_owned = c:SYR
+					}
+				}
+				p:80.area = {
+					any_area_province = {
+						owned_or_subject_owned = c:SYR
+					}
+				}
+				p:94.area = {
+					any_area_province = {
+						owned_or_subject_owned = c:SYR
+					}
+				}
+			}
+			OR = {
+				p:84.area = {
+					any_area_province = {
+						owner = { 
+							NOT = { this = root }
+							country_culture_group = hellenic
+						}
+					}
+				}
+				p:80.area = {
+					any_area_province = {
+						owner = { 
+							NOT = { this = root }
+							country_culture_group = hellenic
+						}
+					}
+				}
+				p:94.area = {
+					any_area_province = {
+						owner = { 
+							NOT = { this = root }
+							country_culture_group = hellenic
+						}
+					}
+				}
+			}
+		}
+    }
+	
+	immediate = {
+		hidden_effect = {
+			p:80.area = {
+				every_area_province = {
+					add_claim = c:ROM
+				}
+			}
+			p:84.area = {
+				every_area_province = {
+					add_claim = c:ROM
+				}
+			}
+		}
+		custom_tooltip = me_roman_2_provincia.7.tt
+		rm_notable_person_effect = yes
+		scope:expansion_encourager = {
+			add_popularity = popularity_small
+			if = {
+				limit = { is_minor_character = no }
+				family = { add_prestige = prestige_small }
+			}
+		}
+	}
+
+    option = {							# Accept    
+        name = me_roman_2_provincia.7.a
+		add_country_modifier = {
+			name = rm_2_greek_menace_cmod
+			duration = 1825 # 5 years
+		}
+    }
+	
+	after = {
+		scope:expansion_encourager = {
+			set_variable = {
+				name = expansion_encourager_cooldown
+				days = 90
+			}
+		}
+	}
+}
+
+me_roman_2_provincia.8 = {							# 2 - Case for Expansion - Our Island
+    type = country_event
+    title = me_roman_2_provincia.8.t
+    desc = me_roman_2_provincia.8.desc
+    picture = council_country
+
+	fire_only_once = yes
+	
+	left_portrait = current_ruler
+	right_portrait = scope:expansion_encourager
+	
+    trigger = {
+		has_land = yes
+		area:corsica_area = {
+			any_area_province = {
+				count >= 1
+				has_owner = yes
+				NOT = { owned_or_subject_owned = c:ROM }
+			}
+		}
+    }
+	
+	immediate = {
+		hidden_effect = {
+			p:3515.area = {
+				every_area_province = {
+					limit = {
+						NOT = { owner = c:ROM }
+						has_owner = yes
+					}
+					add_claim = c:ROM
+				}
+			}
+		}
+		custom_tooltip = me_roman_2_provincia.8.tt
+		rm_notable_person_effect = yes
+		scope:expansion_encourager = {
+			add_popularity = popularity_small
+			if = {
+				limit = { is_minor_character = no }
+				family = { add_prestige = prestige_small }
+			}
+		}
+	}
+
+    option = {							# Accept    
+        name = me_roman_2_provincia.8.a
+    }
+	
+	after = {
+		scope:expansion_encourager = {
+			set_variable = {
+				name = expansion_encourager_cooldown
+				days = 90
+			}
+		}
+	}
+}
+
+me_roman_2_provincia.9 = {							# 2 - Case for Expansion - Greco-Punic Worries
+    type = country_event
+    title = me_roman_2_provincia.9.t
+    desc = me_roman_2_provincia.9.desc
+    picture = council_country
+
+	fire_only_once = yes
+
+	left_portrait = current_ruler
+	right_portrait = c:SYR.current_ruler
+	right_portrait = c:CAR.current_ruler
+    
+    trigger = {
+		has_land = yes
+		c:CAR = {
+			num_of_cities > 0
+			any_owned_province = {
+				OR = {
+					is_in_area = syracuse_area
+					is_in_area = west_sicily_area
+					is_in_area = east_sicily_area
+				}
+			}
+			NOR = {
+				alliance_with = c:SYR
+				war_with = c:SYR
+				is_subject = yes
+			}
+		}
+		c:SYR = {
+			num_of_cities > 0
+			any_owned_province = {
+				OR = {
+					is_in_area = syracuse_area
+					is_in_area = west_sicily_area
+					is_in_area = east_sicily_area
+				}
+			}
+			NOT = { is_subject = yes }
+		}
+    }
+	
+	immediate = {
+		c:CAR = {
+			add_opinion = { target = c:SYR modifier = rm_mutual_threat_opmod }
+			trigger_event = {
+				id = me_roman_2_provincia.23 # Ping
+			}
+		}
+		c:SYR = {
+			add_opinion = { target = c:CAR modifier = rm_mutual_threat_opmod }
+			trigger_event = {
+				id = me_roman_2_provincia.23 # Ping
+			}
+		}
+	}
+
+    option = {							# Accept    
+        name = me_roman_2_provincia.9.a
+    }
+}
+
+me_roman_2_provincia.10 = {							# 2 - Provincia
+    type = country_event
+    title = me_roman_2_provincia.10.t
+    desc = me_roman_2_provincia.10.desc
+    picture = council_country
+    
+	fire_only_once = yes
+	
+    trigger = {
+		has_land = yes
+    }
+
+	immediate = {
+		add_2_free_province_investments = yes
+		if = { # TEMPORARY MEASURE TO STOP ERROR LOG SPAM
+			limit = { always = no }
+			set_variable = {
+				name = rm_marian_reforms_flag
+				days = 1
+			}
+		}
+	}
+
+    option = {							#     
+        name = me_roman_2_provincia.10.a
+    }
+}
+
+me_roman_2_provincia.11 = {							# 2 - Settling Corsica - Colonise Update Colony Starts
+    type = country_event
+    title = me_roman_2_provincia.11.t
+    desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = me_roman_2_provincia.11.desc_1
+				trigger = { 
+					p:3515.area = {
+						any_area_province = {
+							count = 1
+							has_variable = rm_2_col_flag
+						}
+					}
+				}
+			}
+			triggered_desc = {
+				desc = me_roman_2_provincia.11.desc_2
+				trigger = {
+					p:3515.area = {
+						any_area_province = {
+							count > 1
+							has_variable = rm_2_col_flag
+						}
+					}
+					NOT = { has_variable = rm_2_col_volition }
+				}
+			}
+			triggered_desc = {
+				desc = me_roman_2_provincia.11.desc_3
+				trigger = {
+					has_variable = rm_2_col_volition 
+				}
+			}
+		}
+	}
+    picture = road_construction
+    
+	left_portrait = current_ruler
+	
+	goto_location = scope:rm_col_target
+	
+    trigger = {
+		has_land = yes
+		p:3515.area = {
+			any_area_province = { 
+				has_owner = no
+				OR = {
+					this = p:3508
+					this = p:3511
+					any_neighbor_province = {
+						owner = root
+						total_population >= 4
+					}
+				}
+			}
+		}
+		NOT = {
+			p:3515.area = {
+				any_area_province = {
+					count = all
+					has_owner = yes
+					owner = c:ROM
+				}
+			}
+		}
+		NOR = { 
+			has_variable = rm_2_col_start_cooldown
+			has_variable = rm_col_grace_period
+		}
+    }
+	
+	immediate = {
+		set_variable = {
+			name = rm_2_col_start_cooldown
+			days = 40
+		}
+		if = {
+			limit = {
+				NOT = { has_variable = rm_2_colonising_flag }
+			}
+			set_variable = {
+				name = rm_2_colonising_flag
+				days = 1825 # 5 years
+			}
+		}
+		p:3515.area = {
+			random_area_province = { 
+				limit = {
+					has_owner = no
+					OR = {
+						this = p:3508
+						this = p:3511
+						any_neighbor_province = {
+							owner = root
+							total_population >= 4
+						}
+					}
+				}
+				weight = {
+					factor = 2
+					modifier = {
+						factor = 4
+						province_id = 3511
+					}
+					modifier = {
+						factor = 4
+						province_id = 3508
+					}
+					modifier = {
+						factor = 2
+						any_neighbor_province = { has_variable = rm_2_col_flag }
+					} 
+				}
+				save_scope_as = rm_col_target
+				set_variable = {
+					name = rm_2_col_flag
+					days = 1825 # 5 years
+				}
+			}
+		}
+		random_list = {
+			66 = {
+				random_owned_province = {
+					limit = {
+						NOR = { is_in_area = corsica_area }
+						total_population >= 5
+						dominant_province_culture = roman
+						any_pops_in_province = {
+							count >= 3
+							pop_culture = roman
+						}
+					}
+					weight = {
+						modifier = {
+							factor = 50
+							is_port = yes
+						}
+						modifier ={
+							factor = 0
+							has_variable = rm_2_col_source_cooldown
+						}
+					}
+					save_scope_as = rm_col_settler_source_1
+				}
+				random_owned_province = {
+					limit = {
+						NOR = { 
+							is_in_area = corsica_area
+							this = scope:rm_col_settler_source_1
+						}
+						total_population >= 5
+						dominant_province_culture = roman
+						any_pops_in_province = {
+							count >= 1
+							pop_culture = roman
+						}
+					}
+					weight = {
+						modifier = {
+							factor = 50
+							this = p:3508
+							this = p:3511
+						}
+						modifier ={
+							factor = 0
+							has_variable = rm_2_col_source_cooldown
+						}
+					}
+					save_scope_as = rm_col_settler_source_2
+				}
+			}
+			33 = {
+				trigger = {
+					NOT = { has_variable = rm_2_col_volition_cooldown }
+					p:3515.area = {
+						any_area_province = {
+							count > 1
+							has_variable = rm_2_col_flag
+						}
+					}
+				}
+				set_variable = { name = rm_2_col_volition }
+				set_variable = {
+					name = rm_2_col_volition_cooldown
+					days = 90 # 5 years
+				}
+				random_owned_province = {
+					limit = {
+						NOT = { has_variable = rm_2_col_flag }
+						total_population >= 5
+						dominant_province_culture = roman
+						any_pops_in_province = {
+							count >= 2
+							pop_culture = roman
+						}
+					}
+					weight = {
+						modifier = {
+							factor = 50
+							this = p:3508
+							this = p:3511
+						}
+						modifier ={
+							factor = 0
+							has_variable = rm_2_col_source_cooldown
+						}
+					}
+					save_scope_as = rm_col_settler_source_1
+				}
+				scope:rm_col_settler_source_1 = {
+					set_variable = {
+						name = rm_2_col_source_cooldown
+						days = 1825 # 5 years
+					}
+				}
+				hidden_effect = {
+					while = {
+						count = 2
+						scope:rm_col_settler_source_1 = {
+							random_pops_in_province = {
+								limit = {
+									pop_culture = roman
+								}
+								weight = {
+									modifier = {
+										factor = 20
+										NOR = {
+											pop_type = tribesmen
+											pop_type = slaves
+										}
+									}
+								}
+								move_pop = scope:rm_col_target
+							}
+						}
+					}
+				}
+				custom_tooltip = me_roman_2_provincia.11.ct
+			}
+		}
+	}
+
+    option = {							# Big  
+        name = me_roman_2_provincia.11.a
+		trigger = { 
+			NOT = {
+				has_variable = rm_2_col_volition 
+			}
+		}
+		add_treasury = {
+			value = has_monthly_income
+			multiply = {
+				fixed_range = { min = -2  max = -1 }
+			}
+		}
+		custom_tooltip = me_roman_2_provincia.11.at
+		scope:rm_col_target = {
+			set_conquered_by = root
+		}
+		scope:rm_col_settler_source_1 = {
+			set_variable = {
+				name = rm_2_col_source_cooldown
+				days = 1825 # 5 years
+			}
+		}
+		hidden_effect = {
+			while = {
+				count = 3
+				scope:rm_col_settler_source_1 = {
+					random_pops_in_province = {
+						limit = {
+							pop_culture = roman
+						}
+						weight = {
+							modifier = {
+								factor = 20
+								NOR = {
+									pop_type = tribesmen
+									pop_type = slaves
+								}
+							}
+						}
+						move_pop = scope:rm_col_target
+					}
+				}
+			}
+		}
+		scope:rm_col_target = {
+			add_province_modifier = {
+				name = rm_2_aggressive_colony_pmod
+				duration = 3650 # 10 years
+			}
+		}
+    }
+	
+	option = {							# Small  
+        name = me_roman_2_provincia.11.b
+		trigger = { 
+			NOT = {
+				has_variable = rm_2_col_volition 
+			}
+		}
+		custom_tooltip = me_roman_2_provincia.11.bt
+		scope:rm_col_target = {
+			set_conquered_by = root
+		}
+		scope:rm_col_settler_source_2 = {
+			set_variable = {
+				name = rm_2_col_source_cooldown
+				days = 1825 # 5 years
+			}
+		}
+		hidden_effect = {
+			while = {
+				count = 1
+				scope:rm_col_settler_source_2 = {
+					random_pops_in_province = {
+						limit = {
+							pop_culture = roman
+						}
+						weight = {
+							modifier = {
+								factor = 20
+								NOR = {
+									pop_type = tribesmen
+									pop_type = slaves
+								}
+							}
+						}
+						move_pop = scope:rm_col_target
+					}
+				}
+			}
+		}
+		scope:rm_col_target = {
+			add_province_modifier = {
+				name = rm_2_peaceful_colony_pmod
+				duration = 3650 # 10 years
+			}
+		}
+	}
+	
+	option = {							# Random 
+        name = me_roman_2_provincia.11.c
+		trigger = { has_variable = rm_2_col_volition }
+		scope:rm_col_target = {
+			set_conquered_by = root
+		}
+		scope:rm_col_target = {
+			add_province_modifier = {
+				name = rm_2_aggressive_colony_pmod
+				duration = 3650 # 10 years
+			}
+		}
+		remove_variable = rm_2_col_volition
+	}
+	
+	after = {
+		if = {
+			limit = {
+				p:3515.area = {
+					any_area_province = {
+						count = all
+						has_owner = yes
+						owner = c:ROM
+					}
+				}
+			}
+			root = { set_variable = rm_2_settling_corsica_complete }
+		}
+	}
+}
+
+me_roman_2_provincia.12 = {							# 2 - Settling Corsica - Task Start Ping
+    type = country_event
+    title = me_roman_2_provincia.12.t
+    desc = me_roman_2_provincia.12.desc
+    picture = farming
+    
+	left_portrait = current_ruler 
+	
+    trigger = {
+		has_land = yes
+    }
+
+	immediate = {
+		set_variable = {
+			name = rm_2_col_active
+			days = 1825 # 5 years
+		}
+	}
+
+    option = {							#     
+        name = me_roman_2_provincia.12.a
+		custom_tooltip = me_roman_2_provincia.12.at
+    }
+}
+
+me_roman_2_provincia.13 = {							# 2 - Settling Corsica - Colonise Update Bad
+    type = country_event
+    title = me_roman_2_provincia.13.t
+    desc = {
+		desc = me_roman_2_provincia.13.desc
+		first_valid = {
+			triggered_desc = {
+				desc = me_roman_2_provincia.13.desc_1
+				trigger = { has_variable = rm_2_col_corsian_flag }
+			}
+			triggered_desc = {
+				desc = me_roman_2_provincia.13.desc_2
+				trigger = {
+					NOT = { has_variable = rm_2_col_corsian_flag }
+				}
+			}
+		}
+	}
+    picture = revolt
+    
+	left_portrait = current_ruler
+	
+	goto_location = scope:rm_col_target
+	
+    trigger = {
+		has_land = yes
+		p:3515.area = {
+			any_area_province = { 
+				owner = root
+				has_variable = rm_2_col_flag
+				NOT = { has_variable = rm_2_city_col_cooldown }
+			}
+		}
+		NOR = { 
+			has_variable = rm_2_col_bad_cooldown
+			has_variable = rm_col_grace_period
+		}
+    }
+	
+	immediate = {
+		set_variable = {
+			name = rm_2_col_bad_cooldown
+			days = 90
+		}
+		p:3515.area = {
+			random_area_province = { 
+				limit = {
+					owner = root
+					has_variable = rm_2_col_flag
+					NOT = { has_variable = rm_2_city_col_cooldown }
+				}
+				weight = {
+					modifier = {
+						factor = 10					
+						any_pops_in_province = {
+							count < 3
+							pop_culture = roman
+						}
+					}
+					modifier = {
+						factor = 20					
+						any_pops_in_province = {
+							count = 1
+							pop_culture = roman
+						}
+					}
+					modifier = {
+						factor = 0				
+						has_variable = rm_2_col_bad_cooldown
+					}
+				}
+				save_scope_as = rm_col_target
+			}
+		}
+		scope:rm_col_target = {
+			set_variable = {
+				name = rm_2_col_bad_cooldown
+				days = 90
+			}
+			set_variable = {
+				name = rm_2_city_col_cooldown
+				days = 120
+			}
+		}
+		random_list = { 
+			66 = {
+				trigger = {
+					scope:rm_col_target = {
+						NOT = { has_province_modifier = rm_2_reprisal_colony_pmod }
+						any_pops_in_province = {
+							count >= 4
+							pop_culture = corsian
+							NOT = { pop_type = slaves }
+						}
+						any_pops_in_province = {
+							count > 1
+							pop_culture = roman
+							NOT = { pop_type = slaves }
+						}
+					}
+				}
+				set_variable = { name = rm_2_col_corsian_flag }
+			}
+			33 = {}
+		}
+		if = {
+			limit = { has_variable = rm_2_col_corsian_flag }
+			scope:rm_col_target = {
+				random_pops_in_province = {
+					limit = {
+						pop_culture = roman
+					}
+					weight = {
+						modifier = {
+							factor = 10
+							pop_type = freemen
+						}
+					}
+					kill_pop = yes
+				}
+			}
+		}
+	}
+
+    option = {							# We won't tolerate this   
+        name = me_roman_2_provincia.13.a
+		trigger = { has_variable = rm_2_col_corsian_flag }
+		add_manpower = -2.5
+		scope:rm_col_target = {
+			while = {
+				count = 2
+				random_pops_in_province = {
+					limit = {
+						pop_culture = corsian
+						NOT = { pop_type = slaves }
+					}
+					weight = {
+						modifier = {
+							factor = 10
+							pop_type = tribesmen
+						}
+					}
+					random_list = {
+						50 = { kill_pop = yes }
+						50 = { set_pop_type = slaves }
+					}
+				}
+			}
+			hidden_effect = {
+				remove_province_modifier = rm_2_aggressive_colony_pmod
+			}
+			add_province_modifier = {
+				name = rm_2_reprisal_colony_pmod
+				duration = 3650 # 10 years
+			}
+		}
+    }
+	
+	option = {							# That sucks  
+        name = me_roman_2_provincia.13.b
+		trigger = { has_variable = rm_2_col_corsian_flag }
+    }
+	
+	option = {							# Send them help
+        name = me_roman_2_provincia.13.c
+		trigger = { 
+			NOT = { has_variable = rm_2_col_corsian_flag }
+		}
+		add_treasury = {
+			value = has_monthly_income
+			multiply = {
+				fixed_range = { min = -1.5  max = -0.5 }
+			}
+		}
+    }
+	
+	option = {							# Send them special help
+        name = me_roman_2_provincia.13.d
+		trigger = { 
+			NOR = { 
+				has_variable = rm_2_col_corsian_flag 
+				has_variable = rm_2_col_party_help
+			}
+		}
+		highlight = yes
+		if = {
+			limit = {
+				current_ruler = { character_oligarchic_party_trigger = yes }
+			}
+			scope:rm_col_target.state = {
+				add_state_modifier = {
+					name = rm_2_tax_breaks_smod
+					duration = 1825 # 5 years
+				}
+			}
+			custom_tooltip = me_roman_2_provincia.13.dt
+		}
+		else_if = {
+			limit = {
+				current_ruler = { character_democratic_party_trigger = yes }
+			}
+			add_manpower = -2.5
+			custom_tooltip = me_roman_2_provincia.13.dt
+		}
+		if = {
+			limit = {
+				current_ruler = { character_traditionalist_party_trigger = yes }
+			}
+			scope:rm_col_target.state = {
+				add_state_modifier = {
+					name = rm_2_trade_support_smod
+					duration = 1825 # 5 years
+				}
+			}
+			custom_tooltip = me_roman_2_provincia.13.dt
+		}
+		set_variable = {
+			name = rm_2_col_party_help
+			days = 1825 # 5 years
+		}
+    }
+	
+	option = {							# Nothing to be done   
+        name = me_roman_2_provincia.13.e
+		trigger = { 
+			NOT = { has_variable = rm_2_col_corsian_flag }
+		}
+		hidden_effect = {
+			while = {
+				limit = {
+					scope:rm_col_target = {
+						any_pops_in_province = {
+							pop_culture = roman 
+							NOR = {
+								pop_type = tribesmen
+								pop_type = slaves
+							}
+						}
+					}
+				}
+				scope:rm_col_target = {
+					random_pops_in_province = {
+						limit = {
+							pop_culture = roman
+							NOR = {
+								pop_type = tribesmen
+								pop_type = slaves
+							}
+						}
+						move_pop = root.capital_scope
+					}
+				}
+			}
+		}
+		custom_tooltip = me_roman_2_provincia.13.et
+		scope:rm_col_target = {
+			remove_variable = rm_2_col_flag
+		}
+    }
+}
+
+me_roman_2_provincia.14 = {							# 2 - Settling Corsica - Colonise Update Good
+    type = country_event
+    title = me_roman_2_provincia.14.t
+    desc = {
+		desc = me_roman_2_provincia.14.desc
+		first_valid = {
+			triggered_desc = {
+				desc = me_roman_2_provincia.14.desc_1
+				trigger = { has_variable = rm_2_col_corsian_flag }
+			}
+			triggered_desc = {
+				desc = me_roman_2_provincia.14.desc_2
+				trigger = {
+					NOT = { has_variable = rm_2_col_corsian_flag }
+				}
+			}
+		}
+	}
+		
+    picture = hellenic_marketplace
+    
+	left_portrait = current_ruler
+	
+	goto_location = scope:rm_col_target
+	
+    trigger = {
+		has_land = yes
+		any_owned_province = {
+			NOT = { is_in_area = corsica_area }
+			total_population >= 5
+			any_pops_in_province = {
+				count >= 2
+				pop_culture = roman
+				NOR = {
+					pop_type = slaves
+					pop_type = tribesmen
+				}
+			}
+		}
+		p:3515.area = {
+			any_area_province = {
+				owner = root
+				has_variable = rm_2_col_flag
+			}
+		}
+		NOR = { 
+			has_variable = rm_2_col_good_cooldown
+			has_variable = rm_col_grace_period
+		}
+    }
+	
+	immediate = {
+		set_variable = {
+			name = rm_2_col_good_cooldown
+			days = 90
+		}
+		random_list = { 
+			33 = { 
+				trigger = {
+					p:3515.area = {
+						any_area_province = {
+							owner = root
+							any_pops_in_province = {
+								count >= 3
+								pop_culture = corsian
+							}
+							has_variable = rm_2_col_flag
+							NOR = { 
+								has_variable = rm_2_col_corsian_flag
+								has_variable = rm_2_col_good_cooldown
+							}
+						}
+					}
+				}
+				set_variable = rm_2_col_corsian_flag
+				p:3515.area = {
+					random_area_province = { 
+						limit = {
+							owner = root
+							any_pops_in_province = {
+								count >= 3
+								pop_culture = corsian
+							}
+							has_variable = rm_2_col_flag
+							NOR = { 
+								has_variable = rm_2_col_corsian_flag
+								has_variable = rm_2_col_good_cooldown
+							}
+						}
+						set_variable = {
+							name = rm_2_col_corsian_flag
+							days = 1825 # 5 years
+						}
+						set_variable = {
+							name = rm_2_col_good_cooldown
+							days = 90
+						}
+						set_variable = {
+							name = rm_2_city_col_cooldown
+							days = 120
+						}
+						save_scope_as = rm_col_target
+					}
+				}
+			}
+			33 = {
+				p:3515.area = {
+					random_area_province = {
+						limit = {
+							owner = root
+							has_variable = rm_2_col_flag
+						}
+						weight = {
+							modifier = {
+								factor = 0
+								has_variable = rm_2_col_good_cooldown
+							}
+						}
+						set_variable = {
+							name = rm_2_col_good_cooldown
+							days = 90
+						}
+						set_variable = {
+							name = rm_2_city_col_cooldown
+							days = 120
+						}
+						save_scope_as = rm_col_target
+					}
+				}
+				random_owned_province = {
+					limit = {
+						NOT = { is_in_area = corsica_area }
+						total_population >= 5
+						any_pops_in_province = {
+							count >= 2
+							pop_culture = roman
+							NOR = {
+								pop_type = slaves
+								pop_type = tribesmen
+							}
+						}
+					}
+					weight = {
+						modifier = {
+							factor = 50
+							this = p:3508
+							this = p:3511
+						}
+					}
+					save_scope_as = rm_2_col_settler_source
+				}
+			}
+		}
+	}
+
+    option = {							# Corsians Integrate
+        name = me_roman_2_provincia.14.a
+		trigger = { has_variable = rm_2_col_corsian_flag }
+		while = {
+			count = 2
+			scope:rm_col_target = {
+				random_pops_in_province = {
+					limit = { pop_culture = corsian }
+					set_pop_culture = roman
+				}
+			}
+		}
+		remove_variable = rm_2_col_corsian_flag
+    }
+	
+	option = {							# Extra Settlers
+        name = me_roman_2_provincia.14.a
+		trigger = {
+			NOT = { has_variable = rm_2_col_corsian_flag }
+		}
+		while = {
+			count = 2
+			scope:rm_2_col_settler_source = {
+				random_pops_in_province = {
+					limit = {
+						pop_culture = roman
+						NOR = {
+							pop_type = slaves
+							pop_type = tribesmen
+						}
+					}
+					move_pop = scope:rm_col_target
+				}
+			}
+		}
+    }
+}
+
+me_roman_2_provincia.15 = {							# 2 - Settling Corsica - Colonise End
+    type = country_event
+    title = me_roman_2_provincia.15.t
+    desc = {
+		first_valid = {
+			triggered_desc = {							# Everywhere owned by Rome
+				desc = me_roman_2_provincia.15.desc_1
+				trigger = {
+					has_variable = rm_2_settling_corsica_complete
+					p:3515.area = {
+						any_area_province = {
+							count = all
+							owner = root
+						}
+					}
+				}
+			}
+			triggered_desc = {							# Somewhere not owned by Rome
+				desc = me_roman_2_provincia.15.desc_2
+				trigger = {
+					p:3515.area = {
+						any_area_province = {
+							count >= 1
+							OR = {
+								NOT = { owner = root }
+								has_owner = no
+							}
+						}
+						any_area_province = {
+							count >= 1
+							owner = root
+						}
+					}
+				}
+			}
+			triggered_desc = {							# Nowhere owned by Rome
+				desc = me_roman_2_provincia.15.desc_3
+				trigger = {
+					p:3515.area = {
+						any_area_province = {
+							count = all
+							NOT = { owner = root }
+						}
+					}
+				}
+			}
+		}
+	}
+    picture = farming
+    
+	left_portrait = current_ruler
+	
+    trigger = {
+		has_land = yes
+		p:3515.area = {
+			any_area_province = {
+				count = all
+				has_owner = yes
+				owner = c:ROM
+			}
+		}
+    }
+
+    option = {							#     
+        name = me_roman_2_provincia.15.a
+		trigger = {
+			has_variable = rm_2_settling_corsica_complete
+			p:3515.area = {
+				any_area_province = {
+					count = all
+					owner = root
+				}
+			}
+		}
+		p:3515.state = {
+			add_state_modifier = {
+				name = rm_2_corsica_romanization_smod
+				duration = 3650 
+			}
+		}
+    }
+	
+	option = {							#     
+        name = me_roman_2_provincia.15.b
+		trigger = {
+			has_variable = rm_2_settling_corsica_complete
+			p:3515.area = {
+				any_area_province = {
+					count = all
+					owner = root
+				}
+			}
+		}
+		p:3515.state = {
+			add_state_modifier = {
+				name = rm_2_benign_neglect_smod
+				duration = 3650 
+			}
+		}
+    }
+	
+	option = {							#     
+        name = me_roman_2_provincia.15.c
+		trigger = {
+			p:3515.area = {
+				any_area_province = {
+					count >= 1
+					OR = {
+						NOT = { owner = root }
+						has_owner = no
+					}
+				}
+				any_area_province = {
+					count >= 1
+					owner = root
+				}
+			}
+		}
+		p:3515.state = {
+			add_state_modifier = {
+				name = rm_2_benign_neglect_smod
+				duration = 3650 
+			}
+		}
+    }
+	
+	option = {							#     
+        name = me_roman_2_provincia.15.d
+		trigger = {
+			p:3515.area = {
+				any_area_province = {
+					count = all
+					NOT = { owner = root }
+				}
+			}
+		}
+		p:3515.state = {
+			add_state_modifier = {
+				name = rm_2_benign_neglect_smod
+				duration = 3650 
+			}
+		}
+    }
+	
+	after = {
+		remove_variable = rm_2_colonising_flag
+	}
+}
+
+me_roman_2_provincia.16 = {							# 2 - Approach Siculians - Start
+    type = country_event
+    title = me_roman_2_provincia.16.t
+	desc = {
+		desc = me_roman_2_provincia.16.desc
+		first_valid = {
+			triggered_desc = {							# Free
+				desc = me_roman_2_provincia.16.desc_1
+				trigger = {
+					scope:rm_offer_scope = { is_subject = no }
+				}
+			}
+			triggered_desc = {							# Subject
+				desc = me_roman_2_provincia.16.desc_2
+				trigger = {
+					scope:rm_offer_scope = { is_subject = yes }
+				}
+			}
+		}
+	}
+    picture = council_country
+    
+    left_portrait = current_ruler
+	right_portrait = scope:rm_offer_scope.current_ruler
+	right_portrait = scope:rm_offer_scope.overlord.current_ruler
+
+    trigger = {
+		has_land = yes
+    }
+	
+    option = {							# Offer   
+        name = me_roman_2_provincia.16.a
+		trigger = { 
+			scope:rm_offer_scope = { is_subject = no }
+		}
+		set_variable = {
+			name = rm_siculia_offer_var
+			days = 365
+		}
+		add_political_influence = subtract_influence_huge
+		custom_tooltip = me_roman_accepts_become_trib_tooltip
+	}
+	
+    option = {							# Threaten  
+        name = me_roman_2_provincia.16.b
+		trigger = { 
+			scope:rm_offer_scope = { is_subject = no }
+		}
+		custom_tooltip = me_roman_2_provincia.16.bt
+    }
+	
+	option = {							# Liberate 
+        name = me_roman_2_provincia.16.c
+		trigger = { 
+			scope:rm_offer_scope = { is_subject = yes }
+		}
+		custom_tooltip = me_roman_2_provincia.16.ct
+    }
+	
+	option = {							# Forget it
+        name = me_roman_2_provincia.16.d
+		trigger = { 
+			scope:rm_offer_scope = { is_subject = yes }
+		}
+		current_ruler = { add_popularity = subtract_popularity_small }
+		custom_tooltip = no_effect_tooltip
+    }
+	
+	after = {
+		scope:rm_offer_scope = {
+			trigger_event = {
+				id = me_roman_2_provincia.17
+				days = 5
+			}
+		}
+	}
+}
+
+me_roman_2_provincia.17 = {							# 2 - Approach Siculians - Offer from Rome
+    type = country_event
+    title = me_roman_2_provincia.17.t
+    desc = {
+		desc = me_roman_2_provincia.17.desc
+		first_valid = {
+			triggered_desc = {		# Offer
+				trigger = {
+					NOT = { is_subject = yes }
+					c:ROM = { has_variable = rm_siculia_offer_var }
+				}
+				desc = "me_roman_2_provincia.17.desc_1"
+			}
+			triggered_desc = {		# Demand
+				trigger = {
+					NOR = {
+						is_subject = yes
+						c:ROM = { has_variable = rm_siculia_offer_var }
+					}
+				}
+				desc = "me_roman_2_provincia.17.desc_2" 
+			}
+			triggered_desc = {		# Subject
+				trigger = { is_subject = yes }
+				desc = "me_roman_2_provincia.17.desc_3" 
+			}
+		}
+	}
+    picture = council_country
+    
+    left_portrait = current_ruler
+	right_portrait = c:ROM.current_ruler
+
+    trigger = { has_land = yes }
+
+    immediate = {
+		if = {
+			limit = {
+				c:ROM = { has_variable = rm_siculia_offer_var }	
+			}
+			add_treasury = {
+				value = c:ROM.has_monthly_income
+				multiply = 1.5
+			}
+		}
+    }
+
+    option = {							# Accept    
+        name = me_roman_2_provincia.17.a
+		trigger = { is_subject = no }
+		set_variable = {
+			name = rm_siculia_accept_var
+			days = 365
+		}
+		if = {
+			limit = {
+				c:ROM = { has_variable = rm_siculia_offer_var }	
+			}
+			c:ROM = {
+				make_subject = {
+					target = root
+					type = tributary
+				}
+			}
+		}
+		else = {
+			c:ROM = {
+				make_subject = {
+					target = root
+					type = feudatory
+				}
+			}
+		}
+		c:ROM = {
+			trigger_event = {
+				id = me_roman_2_provincia.18
+				days = 5
+			}
+		}
+		ai_chance = {
+			factor = 2
+			modifier = {
+				factor = 5
+				c:ROM = { has_variable = rm_siculia_offer_var }	
+			}
+			modifier = {
+				factor = 15
+				c:ROM = { 
+					NOT = { has_variable = rm_siculia_offer_var }
+				}
+				c:ROM.num_of_cohorts >= rm_offer_bully_svalue
+			}
+		}
+	}
+	
+	option = {							# Refuse    
+        name = me_roman_2_provincia.17.b
+		trigger = { is_subject = no }
+		show_as_tooltip = {
+			every_owned_province = { add_claim = c:ROM }
+		}
+		c:ROM = {
+			trigger_event = {
+				id = me_roman_2_provincia.18
+				days = 5
+			}
+		}
+		ai_chance = {
+			factor = 2
+			modifier = {
+				factor = 10
+				NOT = {
+					c:ROM = { has_variable = rm_siculia_offer_var }	
+				}
+			}
+			modifier = {
+				factor = 0
+				OR = {
+					any_allied_country = { num_of_cohorts > 9 }
+					any_allied_country = { count >= 2 }
+					any_allied_country = { rank >= c:ROM.rank }
+					NOT = {
+						any_owned_province = {
+							any_neighbor_province = { owner = c:ROM }
+						}
+					}
+				}
+			}
+		}
+    }
+	
+	option = {							# Accept liberation    
+        name = me_roman_2_provincia.17.c
+		trigger = { is_subject = yes }
+		show_as_tooltip = {
+			every_owned_province = { add_claim = c:ROM }
+		}
+		c:ROM = {
+			trigger_event = { id = me_roman_2_provincia.20 }
+		}
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 20
+				root.overlord.rank < c:ROM.rank
+			}
+			modifier = {
+				factor = 20
+				has_subject_loyalty < 50 
+			}
+		}
+    }
+	
+	option = {							# Refuse liberation    
+        name = me_roman_2_provincia.17.d
+		trigger = { is_subject = yes }
+		show_as_tooltip = {
+			every_owned_province = { add_claim = c:ROM }
+		}
+		c:ROM = {
+			trigger_event = {
+				id = me_roman_2_provincia.18
+				days = 5
+			}
+		}
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 20
+				root.overlord.rank > c:ROM.rank
+			}
+			modifier = {
+				factor = 20
+				has_subject_loyalty > 75 
+			}
+		}
+    }
+}
+
+me_roman_2_provincia.18 = {							# 2 - Approach Siculians - Response (Accept/reject/refuse lib)
+    type = country_event
+    title = me_roman_2_provincia.16.t
+    desc = {
+		first_valid = {
+			triggered_desc = {		# Success offer
+				trigger = {
+					has_variable = rm_siculia_offer_var
+					scope:rm_offer_scope = { has_variable = rm_siculia_accept_var }
+				}
+				desc = me_roman_1_roman_italia.39.desc_1
+			}
+			triggered_desc = {		# Success demand
+				trigger = {
+					NOT = { has_variable = rm_siculia_offer_var }
+					scope:rm_offer_scope = { has_variable = rm_siculia_accept_var }
+				}
+				desc = me_roman_1_roman_italia.39.desc_2
+			}
+			triggered_desc = {		# Reject offer
+				trigger = {
+					has_variable = rm_siculia_offer_var
+					NOT = {
+						scope:rm_offer_scope = { has_variable = rm_siculia_accept_var }
+					}
+				}
+				desc = me_roman_1_roman_italia.39.desc_3
+			}
+			triggered_desc = {		# Reject demand
+				trigger = {
+					NOR = { 
+						has_variable = rm_siculia_offer_var
+						scope:rm_offer_scope = { has_variable = rm_siculia_accept_var }
+					}
+				}
+				desc = me_roman_1_roman_italia.39.desc_4
+			}
+			triggered_desc = {		# Reject liberation
+				trigger = {
+					scope:rm_offer_scope = { is_subject = yes }
+				}
+				desc = me_roman_1_roman_italia.39.desc_5
+			}
+		}
+	}
+    picture = council_country
+    
+    left_portrait = current_ruler
+	right_portrait = scope:rm_offer_scope.current_ruler
+
+	fire_only_once = yes
+
+    trigger = {
+		has_land = yes
+    }
+
+    immediate = {
+		if = {
+			limit = {
+				has_variable = rm_siculia_offer_var
+				scope:rm_offer_scope = { has_variable = rm_siculia_accept_var }
+			}
+			show_as_tooltip = {
+				make_subject = {
+					target = scope:rm_offer_scope
+					type = tributary
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_variable = rm_siculia_offer_var }
+				scope:rm_offer_scope = { has_variable = rm_siculia_accept_var }
+			}
+			show_as_tooltip = {
+				make_subject = {
+					target = scope:rm_offer_scope
+					type = feudatory
+				}
+			}
+		}
+		else = {
+			hidden_effect = {
+				scope:rm_offer_scope = {
+					every_owned_province = { add_claim = c:ROM }
+				}
+			}
+			custom_tooltip = me_roman_rome_claims_all_them_tooltip
+		}
+    }
+
+    option = {      
+        name = me_roman_1_roman_italia.39.a
+		trigger = { 
+			scope:rm_offer_scope = { has_variable = rm_siculia_accept_var }
+		}
+    }
+	
+    option = {    
+        name = me_roman_1_roman_italia.39.b
+		trigger = {
+			NOT = {
+				scope:rm_offer_scope = { has_variable = rm_siculia_accept_var }
+			}
+		}
+	}
+}
+
+me_roman_2_provincia.19 = {							# 2 - Expel Punics
+    type = country_event
+    title = me_roman_2_provincia.19.t
+    desc = {
+		first_valid = {
+			triggered_desc = {		# Sicily
+				trigger = {
+					has_variable = rm_2_exodus_1
+				}
+				desc = "me_roman_2_provincia.19.desc_1"
+			}
+			triggered_desc = {		# Sardinia
+				trigger = {
+					has_variable = rm_2_exodus_2
+					NOT = { has_variable = rm_2_exodus_1 }
+				}
+				desc = "me_roman_2_provincia.19.desc_2"
+			}
+		}
+		desc = "me_roman_2_provincia.19.desc"
+	}
+    picture = revolt
+	
+	fire_only_once = yes
+
+	left_portrait = current_ruler
+	right_portrait = scope:rm_punic_exodus_country.current_ruler
+
+    trigger = {
+		has_land = yes
+		OR = {
+			AND = {
+				has_variable = rm_2_exodus_1
+				any_owned_province = {
+					is_in_area = west_sicily_area
+					OR = {
+						dominant_province_culture = carthaginian
+						dominant_province_culture = phoenician
+					}
+				}
+			}
+			AND = {
+				has_variable = rm_2_exodus_2
+				any_owned_province = {
+					OR = {
+						is_in_area = sardinia_septentrionalis
+						is_in_area = sardinia_meridionalis
+					}
+					OR = {
+						dominant_province_culture = carthaginian
+						dominant_province_culture = phoenician
+					}
+				}
+			}
+		}
+    }
+
+    immediate = {
+		if = {
+			limit = {
+				c:CAR = {
+					has_land = yes
+					num_of_cities >= 10
+				}
+			}
+			c:CAR = { save_scope_as = rm_punic_exodus_country }
+		}
+		else_if = {
+			limit = {
+				any_country = {
+					has_land = yes
+					num_of_cities >= 10
+					primary_culture = carthaginian
+				}
+			}
+			ordered_country = {
+				limit = {
+					has_land = yes
+					num_of_cities >= 10
+					primary_culture = carthaginian
+				}
+				order_by = country_population
+				save_scope_as = rm_punic_exodus_country
+			}
+		}
+		else_if = {
+			limit = {
+				any_country = {
+					has_land = yes
+					num_of_cities >= 10
+					country_culture_group = west_levantine
+					NOT = { primary_culture = hebrew }
+				}
+			}
+			ordered_country = {
+				limit = {
+					has_land = yes
+					num_of_cities >= 10
+					country_culture_group = west_levantine
+					NOT = { primary_culture = hebrew }
+				}
+				order_by = country_population
+				save_scope_as = rm_punic_exodus_country
+			}
+		}
+		else_if = {
+			limit = {
+				any_neighbour_country = {
+					has_land = yes
+					NOR = {
+						is_subject_of = c:ROM
+						alliance_with = c:ROM
+					}
+				}
+			}
+			random_neighbour_country = {
+				limit = {
+					has_land = yes
+					NOR = {
+						is_subject_of = c:ROM
+						alliance_with = c:ROM
+					}
+				}
+				save_scope_as = rm_punic_exodus_country
+			}
+		}
+		else = {
+			random_country = {
+				limit = {
+					has_land = yes
+					in_diplomatic_range = c:ROM
+				}
+				save_scope_as = rm_punic_exodus_country
+			}
+		}
+    }
+
+    option = {								# Encouraged Sicily   
+        name = me_roman_2_provincia.19.a
+		trigger = { has_variable = rm_2_exodus_1 }
+		current_ruler = { add_popularity = popularity_small }
+		if = {
+			limit = { has_variable = rm_2_exodus_1 }
+			custom_tooltip = me_exodus_sicania
+		}
+		else_if = {
+			limit = { has_variable = rm_2_exodus_2 }
+			custom_tooltip = me_exodus_sardinia
+		}
+		rm_expelling_punics_large_effect = yes
+		random_owned_province = {
+			limit = { is_in_area = west_sicily_area }
+			state = {
+				add_state_modifier = {
+					name = rm_punic_exodus_encouraged_smod
+					duration = 3650 # 10 years
+				}
+			}
+		}
+		if = {
+			limit = { has_variable = rm_2_exodus_2 }
+			trigger_event = {
+				id = me_roman_2_provincia.19
+				days = 30
+			}
+		}
+    }
+	
+    option = {								# Discouraged Sicily
+        name = me_roman_2_provincia.19.b
+		trigger = { has_variable = rm_2_exodus_1 }
+		if = {
+			limit = { has_variable = rm_2_exodus_1 }
+			custom_tooltip = me_exodus_sicania
+		}
+		else_if = {
+			limit = { has_variable = rm_2_exodus_2 }
+			custom_tooltip = me_exodus_sardinia
+		}
+		rm_expelling_punics_small_effect = yes
+		random_owned_province = {
+			limit = { is_in_area = west_sicily_area }
+			state = {
+				add_state_modifier = {
+					name = rm_punic_exodus_discouraged_smod
+					duration = 3650 # 10 years
+				}
+			}
+		}
+		if = {
+			limit = { has_variable = rm_2_exodus_2 }
+			trigger_event = {
+				id = me_roman_2_provincia.19
+				days = 30
+			}
+		}
+    }
+	
+	option = {      						# Encouragad Sardinia
+        name = me_roman_2_provincia.19.a
+		trigger = { 
+			has_variable = rm_2_exodus_2
+			NOT = { has_variable = rm_2_exodus_1 }
+		}
+		current_ruler = { add_popularity = popularity_small }
+		if = {
+			limit = { has_variable = rm_2_exodus_1 }
+			custom_tooltip = me_exodus_sicania
+		}
+		else_if = {
+			limit = { has_variable = rm_2_exodus_2 }
+			custom_tooltip = me_exodus_sardinia
+		}
+		rm_expelling_punics_large_effect = yes
+		if = {
+			limit = {
+				any_owned_province = { is_in_area = sardinia_septentrionalis }
+			}
+			random_owned_province = {
+				limit = { is_in_area = sardinia_septentrionalis }
+				state = {
+					add_state_modifier = {
+						name = rm_punic_exodus_encouraged_smod
+						duration = 3650 # 10 years
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_owned_province = { is_in_area = sardinia_meridionalis }
+			}
+			random_owned_province = {
+				limit = { is_in_area = sardinia_meridionalis }
+				state = {
+					add_state_modifier = {
+						name = rm_punic_exodus_encouraged_smod
+						duration = 3650 # 10 years
+					}
+				}
+			}
+		}
+    }
+	
+    option = {								# Discouraged Sardinia
+        name = me_roman_2_provincia.19.b
+		trigger = { 
+			has_variable = rm_2_exodus_2
+			NOT = { has_variable = rm_2_exodus_1 }
+		}
+		if = {
+			limit = { has_variable = rm_2_exodus_1 }
+			custom_tooltip = me_exodus_sicania
+		}
+		else_if = {
+			limit = { has_variable = rm_2_exodus_2 }
+			custom_tooltip = me_exodus_sardinia
+		}
+		rm_expelling_punics_small_effect = yes
+		if = {
+			limit = {
+				any_owned_province = { is_in_area = sardinia_septentrionalis }
+			}
+			random_owned_province = {
+				limit = { is_in_area = sardinia_septentrionalis }
+				state = {
+					add_state_modifier = {
+						name = rm_punic_exodus_discouraged_smod
+						duration = 3650 # 10 years
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_owned_province = { is_in_area = sardinia_meridionalis }
+			}
+			random_owned_province = {
+				limit = { is_in_area = sardinia_meridionalis }
+				state = {
+					add_state_modifier = {
+						name = rm_punic_exodus_discouraged_smod
+						duration = 3650 # 10 years
+					}
+				}
+			}
+		}
+    }
+	
+	after = {
+		scope:rm_punic_exodus_country = {
+			trigger_event = { id = me_roman_2_provincia.3 }
+		}
+	}
+}
+
+me_roman_2_provincia.20 = {							# 2 - Approach Siculians - Liberation accepted ping for Rome
+    type = country_event
+    title = me_roman_1_roman_italia.39.t
+    desc = me_roman_2_provincia.20.desc
+    picture = council_country
+    
+    left_portrait = current_ruler
+	right_portrait = scope:rm_offer_scope.current_ruler
+	left_portrait = scope:rm_offer_scope.overlord.current_ruler
+
+    trigger = {
+		has_land = yes
+    }
+
+    option = {							# Great   
+        name = me_roman_2_provincia.20.a
+    }
+
+	after = {
+		scope:rm_offer_scope.overlord = {
+			trigger_event = {
+				id = me_roman_2_provincia.21
+				days = 5
+			}
+		}
+	}
+}
+
+me_roman_2_provincia.21 = {							# 2 - Approach Siculians - Rome demands liberation (overlord event)
+    type = country_event
+    title = me_roman_2_provincia.21.t
+    desc = me_roman_2_provincia.21.desc
+    picture = council_country
+    
+    left_portrait = current_ruler
+	right_portrait = c:ROM.current_ruler
+	right_portrait = scope:rm_offer_scope.current_ruler
+
+    trigger = {
+		has_land = yes
+    }
+
+    immediate = {
+		hidden_effect = {
+			c:ROM = {
+				if = {
+					limit = {
+						any_owned_province = {
+							any_neighbor_province = { owner = scope:rm_offer_scope.overlord }
+						}
+					}
+					random_owned_province = {
+						limit = {
+							any_neighbor_province = { owner = scope:rm_offer_scope.overlord }
+						}
+						random_neighbor_province = {
+							limit = { owner = scope:rm_offer_scope.overlord } 
+							add_claim = c:ROM
+							save_scope_as = rm_wargoal_scope
+						}
+					}
+				}
+				else = {
+					scope:rm_offer_scope.overlord.capital_scope = { 
+						add_claim = c:ROM
+						save_scope_as = rm_wargoal_scope  
+					}
+				}
+			}
+		}
+		add_opinion = { target = c:ROM modifier = greek_forced_subject_freedom_opmod }
+    }
+
+    option = {							# Back down      
+        name = me_roman_2_provincia.21.a
+		current_ruler = { add_popularity = subtract_popularity_medium }
+		if = {
+			limit = {
+				scope:rm_offer_scope = { is_subject = yes }
+			}
+			release_subject = scope:rm_offer_scope
+			scope:rm_offer_scope = {
+				add_opinion = { target = root modifier = greek_forced_subject_freedom_opmod }
+				trigger_event = { id = me_roman_1_roman_italia.22 }
+			}
+		}
+		ai_chance = {
+			factor = 20
+			modifier = {
+				c:ROM.num_of_cohorts > rm_total_bully_strength_svalue
+				factor = 30
+			}
+			modifier = {
+				c:ROM.rank > root.rank
+				factor = 20
+			}
+		}
+		c:ROM = {
+			trigger_event = { id = me_roman_2_provincia.22 }
+		}
+    }
+
+	option = {							# War it is   
+        name = me_roman_2_provincia.21.b
+		custom_tooltip = me_roman_2_provincia.21.bt
+		c:ROM = {
+			set_variable = {
+				name = liberation_war_flag
+				days = 3650 # 10 years
+			}
+			trigger_event = {
+				id = me_roman_2_provincia.22
+			}
+		}
+		ai_chance = {
+			factor = 80
+			modifier = {
+				c:ROM.num_of_cohorts < rm_total_bully_strength_svalue
+				factor = 100
+			}
+			modifier = {
+				c:ROM.rank < root.rank
+				factor = 20
+			}
+		}
+    }
+}
+
+me_roman_2_provincia.22 = {							# 2 - Approach Siculians - Overlord response ping
+    type = country_event
+    title = me_roman_2_provincia.22.t
+    desc = {
+		first_valid = {
+			triggered_desc = {		# Backed down 
+				trigger = {
+					NOT = { has_variable = liberation_war_flag }
+				}
+				desc = "me_roman_2_provincia.22.desc_1"
+			}
+			triggered_desc = {		# War
+				trigger = { has_variable = liberation_war_flag }
+				desc = "me_roman_2_provincia.22.desc_2"
+			}
+		}
+	}
+    picture = council_country
+    
+    left_portrait = current_ruler
+	left_portrait = scope:rm_offer_scope.current_ruler
+	right_portrait = scope:rm_offer_scope.overlord.current_ruler
+
+    trigger = {
+		has_land = yes
+    }
+	
+	immediate = {
+		show_as_tooltip = {
+			reverse_add_opinion = { target = scope:rm_offer_scope.overlord modifier = greek_forced_subject_freedom_opmod }
+		}
+	}
+
+    option = {							# Backed down    
+        name = me_roman_2_provincia.22.a
+		trigger = { 
+			NOT = { has_variable = liberation_war_flag }
+		}
+    }
+	
+	option = {							# War  
+        name = me_roman_2_provincia.22.b
+		trigger = { has_variable = liberation_war_flag }
+		scope:rm_offer_scope.overlord = { release_subject = scope:rm_offer_scope }
+		scope:rm_offer_scope = { add_alliance = c:ROM }
+		c:ROM = {
+			declare_war_with_wargoal = {
+				war_goal = conquer_wargoal
+				province = scope:rm_wargoal_scope
+				target = scope:rm_offer_scope.overlord
+			}
+		}
+    }
+}
+
+me_roman_2_provincia.23 = {							# 2 - Case for Expansion - Greco-Punic Worries ping
+    type = country_event
+    title = me_roman_2_provincia.23.t
+    desc = me_roman_2_provincia.23.desc
+    picture = romans_marching
+    
+    left_portrait = c:SYR.current_ruler
+	left_portrait = c:CAR.current_ruler
+	right_portrait = c:ROM.current_ruler
+
+    trigger = { has_land = yes }
+	
+	immediate = {
+		show_as_tooltip = {
+			c:CAR = {
+				add_opinion = { target = c:SYR modifier = rm_mutual_threat_opmod }
+			}
+			c:SYR = {
+				add_opinion = { target = c:CAR modifier = rm_mutual_threat_opmod }
+			}
+		}
+	}
+
+    option = {							# Backed down    
+        name = me_roman_2_provincia.23.a
+	}
+}
+
+me_roman_2_provincia.24 = {							# 2 - Unruly Populace - Rebels
+	type = country_event
+	title = "me_roman_2_provincia.24.t"
+	desc = "me_roman_2_provincia.24.desc"
+	picture = revolt
+	goto_location = scope:rm_2_unruly_province
+	
+	left_portrait = current_ruler
+	right_portrait = scope:sardinia_scope
+	
+	trigger = {
+		any_owned_province = {
+			OR = {
+				is_in_area = sardinia_meridionalis
+				is_in_area = sardinia_septentrionalis
+			}
+			dominant_province_culture = nuragic
+			trigger_if = {
+				limit = {
+					any_pops_in_province = { pop_type = slaves }
+				}
+				slaves_happiness <= 0.60
+			}
+			trigger_if = {
+				limit = {
+					any_pops_in_province = { pop_type = tribesmen }
+				}
+				tribesmen_happiness <= 0.60
+			}
+			trigger_if = {
+				limit = {
+					any_pops_in_province = { pop_type = freemen }
+				}
+				freemen_happiness <= 0.60
+			}
+			trigger_if = {
+				limit = {
+					any_pops_in_province = { pop_type = citizen }
+				}
+				citizen_happiness <= 0.60
+			}
+			NOT = { has_province_modifier = recent_slave_revolt } #Safe for a bit
+		}
+	}
+	
+	immediate = {
+		ordered_owned_province = {
+			limit = {
+				OR = {
+					is_in_area = sardinia_meridionalis
+					is_in_area = sardinia_septentrionalis
+				}
+				dominant_province_culture = nuragic
+				trigger_if = {
+					limit = {
+						any_pops_in_province = { pop_type = slaves }
+					}
+					slaves_happiness <= 0.60
+				}
+				trigger_if = {
+					limit = {
+						any_pops_in_province = { pop_type = tribesmen }
+					}
+					tribesmen_happiness <= 0.60
+				}
+				trigger_if = {
+					limit = {
+						any_pops_in_province = { pop_type = freemen }
+					}
+					freemen_happiness <= 0.60
+				}
+				trigger_if = {
+					limit = {
+						any_pops_in_province = { pop_type = citizen }
+					}
+					citizen_happiness <= 0.60
+				}
+			}
+			order_by = total_population
+			save_scope_as = rm_2_unruly_province 
+			if = { 
+				limit = {
+					any_pops_in_province = { pop_culture = roman }
+				}
+				every_pops_in_province = {
+					limit = { pop_culture = roman }
+					kill_pop = yes
+				}
+			}
+		}
+		hidden_effect = {
+			scope:rm_2_unruly_province = {
+				create_country = {
+					name = {
+						name = "SARDINIA_NAME"
+						adjective = "SARDINIA_ADJECTIVE"
+					}
+					save_scope_as = sardinia_scope
+					set_primary_culture = nuragic
+					set_country_religion = carthaginian_pantheon
+					change_government = tribal_kingdom
+					add_treasury = 50.0
+				}
+			}
+			if = {
+				limit = {
+					c:MER = {
+						any_character = { has_variable = nuragic_leader_flag }
+					}
+				}			
+				c:MER = {
+					random_character = {
+						limit = { has_variable = nuragic_leader_flag }
+						move_country = scope:sardinia_scope
+						remove_character_modifier = foreign_citizen
+						save_scope_as = rm_2_nuragic_governor
+					}
+				}
+			}
+			else = {
+				scope:sardinia_scope = {
+					create_character = {
+						culture = nuragic
+						religion = carthaginian_pantheon
+						age = 28
+						no_stats = yes
+						no_traits = yes
+						positive_martial_trait_effect = yes
+						other_personality_trait_effects = yes
+						good_martial_effect = yes
+						average_finesse_effect = yes
+						good_charisma_effect = yes
+						average_zeal_effect = yes
+						save_scope_as = rm_2_nuragic_governor
+					}
+				}
+			}
+			scope:sardinia_scope = {
+				change_country_tag = SAR
+				set_as_ruler = scope:rm_2_nuragic_governor
+				if = {
+					limit = {
+						scope:rm_2_unruly_province = {
+							any_neighbor_province = {
+								NOT = { owner = scope:sardinia_scope }
+								dominant_province_culture = nuragic
+							}
+						}
+					}
+					while = {
+						count = 2
+						scope:sardinia_scope.capital_scope = {
+							random_neighbor_province = {
+								limit = {
+									NOT = { owner = scope:sardinia_scope }
+									dominant_province_culture = nuragic
+								}
+								set_conquered_by = scope:sardinia_scope
+							}
+						}
+					}
+				}
+			}
+			c:ROM = {
+				every_owned_province = {
+					limit = {
+						OR = {
+							is_in_area = sardinia_meridionalis
+							is_in_area = sardinia_septentrionalis
+						}
+					}
+					add_claim = scope:sardinia_scope
+				}
+				random_owned_province = {
+					limit = {
+						OR = {
+							is_in_area = sardinia_meridionalis
+							is_in_area = sardinia_septentrionalis
+						}
+					}
+					save_scope_as = rm_2_unruly_wargoal_scope
+				}
+			}
+			scope:sardinia_scope = {
+				declare_war_with_wargoal = {
+					war_goal = conquer_wargoal
+					province = scope:rm_2_unruly_wargoal_scope
+					target = c:ROM
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "me_roman_2_provincia.24.a"
+		custom_tooltip = me_roman_2_provincia.24.tt
+	}
+}
+
+me_roman_2_provincia.25 = {							# 2 - Unruly Populace - Pirates
+    type = country_event
+    title = me_roman_2_provincia.25.t
+    desc = me_roman_2_provincia.25.desc
+    picture = trade_port
+    
+	left_portrait = current_ruler
+	
+	fire_only_once = yes
+	
+	goto_location = scope:rm_2_unruly_province
+	
+    trigger = {
+		has_land = yes
+		NOT = { has_variable = rm_2_unruly_populace_cooldown }
+		any_owned_province = {
+			OR = {
+				is_in_area = sardinia_meridionalis
+				is_in_area = sardinia_septentrionalis
+			}
+			is_port = yes
+			NOT = { has_province_modifier = pirate_haven_modifier }
+		}
+	}
+	
+	immediate = {
+		ordered_owned_province = {
+			limit = {
+				OR = {
+					is_in_area = sardinia_meridionalis
+					is_in_area = sardinia_septentrionalis
+				}
+				is_port = yes
+				NOT = { has_province_modifier = pirate_haven_modifier }
+			}
+			order_by = {
+				value = 0   # For clarity
+				subtract = total_population
+			}
+			save_scope_as = rm_2_unruly_province
+		}
+		scope:rm_2_unruly_province = {
+			add_province_modifier = {
+				name = pirate_haven_modifier
+			}
+		}
+	}
+
+    option = {							#     
+        name = me_roman_2_provincia.25.a
+    }
+	
+	after = {
+		set_variable = {
+			name = rm_2_unruly_populace_cooldown
+			days = 50
+		}
+	}
+}
+
+me_roman_2_provincia.26 = {							# 2 - The Provincia
+    type = country_event
+	title = me_roman_2_provincia.26.t
+    desc = me_roman_2_provincia.26.desc
+    picture = farming
+    
+    left_portrait = current_ruler
+	
+	fire_only_once = yes
+
+    trigger = { has_land = yes }
+
+    option = {      
+        name = me_roman_2_provincia.26.a
+		if = {
+			limit = {
+				any_owned_province = {
+					OR = {
+						is_in_area = corsica_area
+						is_in_area = sardinia_septentrionalis
+						is_in_area = sardinia_meridionalis
+						is_in_area = syracuse_area
+						is_in_area = east_sicily_area
+						is_in_area = west_sicily_area
+					}
+				}
+			}
+			custom_tooltip = me_roman_2_provincia.26.modtt
+			random_country_state = {
+				limit = {
+					any_state_province = {
+						OR = {
+							is_in_area = corsica_area
+							is_in_area = sardinia_septentrionalis
+							is_in_area = sardinia_meridionalis
+							is_in_area = syracuse_area
+							is_in_area = east_sicily_area
+							is_in_area = west_sicily_area
+						}
+					}
+				}
+				show_as_tooltip = {
+					add_state_modifier = {
+						name = rm_2_provincia_integrate_smod
+						duration = 7300 # 20 years
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			area:corsica_area = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_integrate_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+			area:sardinia_septentrionalis = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_integrate_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+			area:sardinia_meridionalis = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_integrate_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+			area:syracuse_area = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_integrate_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+			area:east_sicily_area = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_integrate_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+			area:west_sicily_area = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_integrate_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+		}
+    }
+	
+    option = {      
+        name = me_roman_2_provincia.26.b
+		if = {
+			limit = {
+				any_owned_province = {
+					OR = {
+						is_in_area = corsica_area
+						is_in_area = sardinia_septentrionalis
+						is_in_area = sardinia_meridionalis
+						is_in_area = syracuse_area
+						is_in_area = east_sicily_area
+						is_in_area = west_sicily_area
+					}
+				}
+			}
+			custom_tooltip = me_roman_2_provincia.26.modtt
+			random_country_state = {
+				limit = {
+					any_state_province = {
+						OR = {
+							is_in_area = corsica_area
+							is_in_area = sardinia_septentrionalis
+							is_in_area = sardinia_meridionalis
+							is_in_area = syracuse_area
+							is_in_area = east_sicily_area
+							is_in_area = west_sicily_area
+						}
+					}
+				}
+				show_as_tooltip = {
+					add_state_modifier = {
+						name = rm_2_provincia_production_smod
+						duration = 7300 # 20 years
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			area:corsica_area = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_production_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+			area:sardinia_septentrionalis = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_production_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+			area:sardinia_meridionalis = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_production_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+			area:syracuse_area = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_production_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+			area:east_sicily_area = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_production_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+			area:west_sicily_area = {
+				random_area_province = {
+					limit = { owner = root }
+					state = {
+						add_state_modifier = {
+							name = rm_2_provincia_production_smod
+							duration = 7300 # 20 years
+						}
+					}
+				}
+			}
+		}
+    }
+}
+

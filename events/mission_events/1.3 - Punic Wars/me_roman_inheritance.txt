@@ -1,0 +1,118 @@
+﻿namespace = me_roman_inheritance
+
+# Country gets the chance to becomes subjects of Rome for a stab boost
+me_roman_inheritance.1 = {
+    type = country_event
+    title = me_roman_inheritance.1.t
+    desc = me_roman_inheritance.1.desc
+    picture = revolt
+    
+    left_portrait = current_ruler
+    right_portrait = c:ROM.current_ruler
+    left_portrait = scope:former_ruler
+
+    trigger = {
+    	has_variable = friend_of_rome_variable # Has the right variable
+    	is_monarchy = yes # Is a monarchy
+    	current_ruler = {
+    		NOR = { 
+    			has_same_family = scope:former_ruler # Ruler is from a new family
+    			scope:former_ruler = { is_parent_of = prev } # Previous ruler wasn't parent of current ruler
+    		} 
+    	}
+    	exists = c:ROM # Rome exists
+    	c:ROM = {
+    		num_of_cities > 50 # Rome has more than 50 cities
+    		num_of_cities > root.roman_inheritance_current_territory_svalue # Rome owns more than twice the cities of root
+    		NOT = { war_with = root } # Rome is not at war with root
+    	}
+    }
+
+    immediate = {
+    	save_scope_as = willing_country
+    	c:ROM = { save_scope_as = rome_country }
+    	if = {
+    		limit = {
+    			has_variable = friend_of_rome_variable
+    		}
+    		remove_variable = friend_of_rome_variable
+    	}
+    }
+
+    option = {      
+        name = me_roman_inheritance.1.a
+        if = {
+        	limit = {
+        		is_ai = no
+        	}
+        	scope:rome_country = {
+        		make_subject = {
+        			target = root
+        			type = client_state
+        		}
+        		trigger_event = { id = me_roman_inheritance.2 }
+        	}
+        }
+        else = {
+        	scope:rome_country = {
+        		trigger_event = { id = me_roman_inheritance.3 }
+        	}
+        	every_owned_province = {
+        		set_owned_by = scope:rome_country
+        	}
+        }
+    }
+    option = {      
+        name = me_roman_inheritance.1.b
+        add_stability = -10
+        add_legitimacy = -20
+    }
+}
+
+# Subject of Rome (for players)
+me_roman_inheritance.2 = {
+    type = country_event
+    title = me_roman_inheritance.2.t
+    desc = me_roman_inheritance.2.desc
+    picture = scribe_tools
+    
+    left_portrait = current_ruler
+    right_portrait = scope:willing_country.current_ruler
+    right_portrait = scope:former_ruler
+
+    immediate = {
+    	show_as_tooltip = {
+    		make_subject = {
+    			target = scope:willing_country
+    			type = client_state
+    		}
+    	}
+    }
+
+    option = {      
+        name = me_roman_inheritance.2.a
+    }
+}
+
+# Willing their lands to Rome (for AI)
+me_roman_inheritance.3 = {
+    type = country_event
+    title = me_roman_inheritance.3.t
+    desc = me_roman_inheritance.3.desc
+    picture = scribe_tools
+    
+    left_portrait = current_ruler
+    right_portrait = scope:former_ruler
+
+    trigger = {
+    
+    }
+
+    immediate = {
+    	custom_tooltip = me_roman_inheritance.3.tt
+    }
+
+    option = {      
+        name = me_roman_inheritance.3.a
+    }
+}

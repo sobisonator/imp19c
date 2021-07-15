@@ -1,0 +1,28 @@
+on_action_requiring_senate_approval = { #If you change this, also change the scripted effect: change_religion_effect
+	effect = {
+		if = {
+			limit = {
+				has_senate_approval < define:NPolitics|SENATE_REQUIRED_APPROVAL_WITHOUT_PENALTIES
+				is_republic = yes
+				is_ai = no
+				NOT = { has_variable = dictatorship_enabled }
+				NOT = { has_variable = one_senatorial_bypass }
+			}
+			add_tyranny = {
+				# Calculates the percentage of disapproval
+				value = define:NPolitics|SENATE_REQUIRED_APPROVAL_WITHOUT_PENALTIES
+				subtract = has_senate_approval
+				divide = define:NPolitics|SENATE_REQUIRED_APPROVAL
+
+				# This is the real value that you want for 100% of the effect
+				multiply = 20
+			}
+		}
+		if = {
+			limit = { has_variable = one_senatorial_bypass }
+			custom_tooltip = senatorial_bypass_spent_tt
+			remove_variable = one_senatorial_bypass
+			set_ignore_senate_approval = no
+		}
+	}
+}

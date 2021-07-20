@@ -27,9 +27,15 @@ def check_if_province_habitable(province_id):
 
 setup_main = open("00_default.txt")
 setup_data = setup_main.read()
-pattern_provinces = "(\d+)"
-all_provinces = re.findall(pattern_provinces, setup_data)
+province_data = setup_data.partition("country = {")[2].partition("trade = {")[0]
+pattern_provinces = "(?<!deity = )(\d+)"
+all_provinces = re.findall(pattern_provinces, province_data)
+
+printed_provinces = []
 
 for province in all_provinces:
-    if not check_if_province_habitable(province):
+    if not check_if_province_habitable(province) and province not in printed_provinces:
         print(province)
+        printed_provinces.append(province)
+
+input("\n Done. Press return to close")

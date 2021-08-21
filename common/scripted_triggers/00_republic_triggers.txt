@@ -1,0 +1,254 @@
+﻿# Generic Country Triggers
+rome_republic_trigger = {
+	is_republic = yes
+	tag = ROM
+}
+
+default_republic_trigger = {
+	is_republic = yes
+	NOT = { tag = ROM }
+}
+
+country_has_oligarchic_party_trigger = {
+	OR = {
+		has_party_type = optimates_party
+		has_party_type = oligarchic_party
+	}
+}
+
+country_has_democratic_party_trigger = {
+	OR = {
+		has_party_type = populares_party
+		has_party_type = democratic_party
+	}
+}
+
+country_has_traditionalist_party_trigger = {
+	OR = {
+		has_party_type = boni_party
+		has_party_type = traditionalist_party
+	}
+}
+
+# Generic Character Triggers
+
+## VANILLA
+character_oligarchic_party_trigger = {
+	exists = character_party
+	OR = {
+		AND = {
+			employer = { has_party_type = optimates_party }
+			party_type = optimates_party
+		}
+		AND = {
+			employer = { has_party_type = oligarchic_party }
+			party_type = oligarchic_party
+		}
+	}
+}
+
+character_democratic_party_trigger = {
+	exists = character_party
+	OR = {
+		AND = {
+			employer = { has_party_type = populares_party }
+			party_type = populares_party
+		}
+		AND = {
+			employer = { has_party_type = democratic_party }
+			party_type = democratic_party
+		}
+	}
+}
+
+character_traditionalist_party_trigger = {
+	exists = character_party
+	OR = {
+		AND = {
+			employer = { has_party_type = boni_party }
+			party_type = boni_party
+		}
+		AND = {
+			employer = { has_party_type = traditionalist_party }
+			party_type = traditionalist_party
+		}
+	}
+}
+
+# Dictatorship Trigger
+country_dictatorship_party_trigger = {
+	trigger_if = {
+		limit = {
+			has_party_type = populares_party
+		}
+		populares_party_support >= 80
+	}
+	trigger_else_if = {
+		limit = {
+			has_party_type = oligarchic_party
+		}
+		oligarchic_party_support >= 80
+	}
+	trigger_else = {
+		always = no
+	}
+}
+
+# DHE Slave Trigger
+country_slave_party_trigger = {
+	trigger_if = {
+		limit = {
+			has_party_type = populares_party
+		}
+		NOT = { populares_party_support >= 50 }
+	}
+	trigger_else_if = {
+		limit = {
+			has_party_type = democratic_party
+		}
+		NOT = { democratic_party_support >= 50 }
+	}
+	trigger_else = {
+		always = no
+	}
+}
+
+# AI plan Triggers
+#VANILLA
+character_oligarchic_party_ai_plan_trigger = {
+	OR = {
+		party_type = optimates_party
+		party_type = oligarchic_party
+	}
+}
+
+character_democratic_party_ai_plan_trigger = {
+	OR = {
+		party_type = populares_party
+		party_type = democratic_party
+	}
+}
+
+character_traditionalist_party_ai_plan_trigger = {
+	OR = {
+		party_type = boni_party
+		party_type = traditionalist_party
+	}
+}
+
+# IMP19C
+character_conservative_bloc_ai_plan_trigger = {
+	OR = {
+		party_type = conservative_bloc
+	}
+}
+
+character_reactionary_bloc_ai_plan_trigger = {
+	OR = {
+		party_type = reactionary_bloc
+	}
+}
+
+character_liberal_bloc_ai_plan_trigger = {
+	OR = {
+		party_type = liberal_bloc
+	}
+}
+
+character_radical_bloc_ai_plan_trigger = {
+	OR = {
+		party_type = radical_bloc
+	}
+}
+
+character_populares_or_oligarchic_trigger = {
+	OR = {
+		AND = {
+			employer = { has_party_type = populares_party } 
+			party_type = populares_party
+		}
+		AND = {
+			employer = { has_party_type = oligarchic_party } 
+			party_type = oligarchic_party
+		}
+	}
+}
+
+character_optimates_or_democratic_trigger = {
+	OR = {
+		AND = {
+			employer = { has_party_type = optimates_party } 
+			party_type = optimates_party
+		}
+		AND = {
+			employer = { has_party_type = democratic_party } 
+			party_type = democratic_party
+		}
+	}
+}
+
+character_boni_or_traditionalist_trigger = {
+	OR = {
+		AND = {
+			employer = { has_party_type = boni_party } 
+			party_type = boni_party
+		}
+		AND = {
+			employer = { has_party_type = traditionalist_party } 
+			party_type = traditionalist_party
+		}
+	}
+}
+
+character_populares_or_democratic_trigger = {
+	OR = {
+		AND = {
+			employer = { has_party_type = populares_party } 
+			party_type = populares_party
+		}
+		AND = {
+			employer = { has_party_type = democratic_party } 
+			party_type = democratic_party
+		}
+	}
+}
+
+character_optimates_or_oligarchic_trigger = {
+	OR = {
+		AND = {
+			employer = { has_party_type = optimates_party } 
+			party_type = optimates_party
+		}
+		AND = {
+			employer = { has_party_type = oligarchic_party } 
+			party_type = oligarchic_party
+		}
+	}
+}
+
+acquire_subject_trigger = {
+	rank <= 2
+	is_subject = no
+	NOR = {
+		war_with = PREV
+		opinion = { target = PREV value < -50 }
+		has_truce_with = PREV
+	}
+	num_of_cohorts < PREV.num_of_cohorts
+	num_of_cities < PREV.num_of_cities
+}
+
+senate_craves_war_trigger = { #Evaluates if it is reasonable to demand war
+	war = no #We should not be trying to go to war again if we are currently fighting a war - even politicians understand this.
+	has_war_exhaustion <= 1 #Same as above
+	has_civil_war = no #See above
+	is_subject = no #Can't
+	manpower_percentage >= 0.25
+	num_of_cohorts > 10 #This check is here to see that the country is not completely wiped out already. It's not here to evaluate if it can win the war.
+}
+
+agenda_force_block_trigger = {
+	NOT = {
+		hidden:party_country = { has_variable = force_agenda_active }
+	}
+}

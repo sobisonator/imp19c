@@ -13,8 +13,12 @@ Pre-prep (I don't have Python already):
 		ii) Install dependencies once you have opened the project, following this tutorial: https://www.jetbrains.com/help/pycharm/managing-dependencies.html
 	b) With pip (if you don't have PyCharm)
 		i) Enter the following command in your command line:
-			pip install pandas gspread oauth2client Pillow
+			pip install pandas gspread Pillow
 		ii) Launch the script by double clicking it.
+	c) Command line in directory
+		i) Open command line in the directory's location
+		ii) Enter the following command in your command line:
+			pip install -r requirements.txt
 
 2. Preparing data (if you are using imp19c, these files should all be there already and you can skip this step!)
 	a) All files below simply need to be present in the setup editor's
@@ -23,7 +27,9 @@ Pre-prep (I don't have Python already):
 		a map of your land provinces with sea provinces coloured white, (land_input.BMP)
 		and a map of your sea provinces with land provinces coloured white. (sea_input.BMP)
 	 All of these images must be of the same dimensions.
-	c) You may optionally load in an existing definition.csv and existing province_setup.csv, which will be loaded by the setup editor. If these are not present
+	c) You may optionally load in an existing definition.csv and existing province_setup.csv, which will be loaded by the setup editor. 
+	d) Credentials json file which should be selected when prompted by the program. It should be named "imp19c_credentials.json"
+	
 
 3. Using the editor
 	 - When you launch the editor you will be prompted to create a new savefile, which you can name whatever you want. This will store your edited setup data.

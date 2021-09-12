@@ -26,3 +26,239 @@ on_action_requiring_senate_approval = { #If you change this, also change the scr
 		}
 	}
 }
+
+on_ending_war = {
+	effect = {
+	}
+	events = {
+	}
+}
+
+### VANILLA UNMODIFIED BELOW - PUT MODIFIED ON_ACTIONS ABOVE
+
+on_winning_war = {
+	effect = {
+	}
+	events = {
+	}
+}
+
+on_losing_war = {
+	effect = {
+	}
+	events = {
+
+	}
+	
+}
+
+on_ownership_change = { #province scope
+	effect = {
+		if = {
+			limit = {
+				is_iron_man = yes
+				exists = owner
+				owner = {
+					is_ai = no
+					has_land = yes
+				}
+			}
+			owner = {
+				if = {
+					limit = {
+						NOT = {
+							has_variable = ach_render_unto_caesar_var
+						}
+					}
+					set_variable = {
+						name = ach_render_unto_caesar_var
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				exists = owner
+				owner = {
+					has_land = yes
+					tag = ROM
+				}
+				has_variable = roman_colonia_flag
+				NOR = {
+					has_province_modifier = italian_colonia_military_pmod
+					has_province_modifier = italian_colonia_civic_pmod
+					has_province_modifier = italian_colonia_religious_pmod
+					has_province_modifier = italian_colonia_trade_pmod
+					has_province_modifier =  italian_colonia_pmod
+				}
+			}
+			trigger_event = {
+				id = me_roman_1_roman_italia.26
+			}
+		}
+		if = {
+			limit = {
+				exists = holding_owner
+			}
+			holding_owner = {
+				remove_holding = root
+			}
+		}
+		if = {
+			limit = { has_variable = sm_rebel_base }
+			save_scope_as = sm_old_base
+			remove_variable = sm_rebel_base
+			if = {
+				limit = {
+					c:SYR = { has_land = yes }
+				}
+				c:SYR = {
+					trigger_event = { id = me_syracuse_1_democracy.21 }
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_in_list = {
+					list = gm_1_hellenic_liberation_list
+					this = root
+				}
+			}
+			if = {
+				limit = {
+					OR = {
+						AND = {
+							has_owner = yes
+							owner = {
+								country_culture_group = hellenic
+							}
+						}
+						has_owner = no
+					}
+				}
+				remove_from_list = gm_1_hellenic_liberation_list
+			}
+			if = {
+				limit = { has_variable = gm_1_bartered_flag }
+				remove_variable = gm_1_bartered_flag
+			}
+		}
+		if = {
+			limit = { 
+				has_owner = yes 
+				has_variable = me_epi_2_rome_cap_flag
+				exists = scope:me_epirus_scope
+				owner = scope:me_epirus_scope
+				NOT = {
+					scope:me_epirus_scope = { has_variable = me_epi_2_captured_flag }
+				}
+			}
+			scope:me_epirus_scope = { set_variable = me_epi_2_captured_flag }
+		}
+	}
+	events = {
+		dhe_city_fall.1
+		dhe_city_fall.2
+		dhe_city_fall.3
+		dhe_city_fall.4
+		dhe_city_fall.5
+		dhe_city_fall.6
+		dhe_city_fall.7
+		dhe_city_fall.8
+		dhe_city_fall.9
+		dhe_city_fall.10
+		dhe_city_fall.11
+		dhe_city_fall.12
+		dhe_city_fall.13
+		dhe_city_fall.14
+		dhe_city_fall.15
+		dhe_city_fall.16
+		dhe_city_fall.17
+		dhe_city_fall.100
+		dhe_body.3
+		dhe_carthage.4
+		dhe_carthage.6
+		dhe_carthage.10
+		dhe_carthage.11
+		dhe_carthage.12
+		comet.2
+		dhe_rome.20
+	}
+}
+
+on_province_occupied = { #province scope, it will fire AS WELL as on_siege_won
+# IMP19c comment: Maybe make this transfer occupation to the war leader to prevent the ally surrender crash?
+# A bit of a bodge though...
+	effect = {
+		if = {
+			limit = {
+				this = p:3256
+				this = c:CAR.capital_scope
+				exists = scope:me_syracuse_scope
+				controller = scope:me_syracuse_scope
+				OR = {
+					controller = scope:gm_2_greek_scope
+					controller = { is_subject_of = scope:me_syracuse_scope }
+				}
+			}
+			scope:me_syracuse_scope = { set_variable = syr_occupied_carthage_flag }
+		}
+		if = {
+			limit = {
+				this = p:428
+				exists = scope:gm_2_greek_scope
+				OR = {
+					controller = scope:gm_2_greek_scope
+					controller = { is_subject_of = scope:gm_2_greek_scope }
+				}
+			}
+			scope:gm_2_greek_scope = { set_variable = me_gre_2_14_flag }
+		}
+		if = {
+			limit = { 
+				has_owner = yes 
+				has_variable = me_epi_2_rome_cap_flag
+				exists = scope:me_epirus_scope
+				controller = scope:me_epirus_scope
+				NOT = {
+					scope:me_epirus_scope = { has_variable = me_epi_2_captured_flag }
+				}
+			}
+			scope:me_epirus_scope = { set_variable = me_epi_2_captured_flag }
+		}
+	}
+	events = {
+		fire_events.1
+		slave_revolts.2 #Interactive Looting
+		slave_revolts.5 #Interactive Looting of capital
+	}
+}
+
+# scope is country being annexed
+# scope:actor = country doing the annexing
+on_military_annex = {
+	effect = {
+		every_country_treasure = {
+			add_to_list = annexed_treasures
+		}
+		on_annexation_event_effect = yes
+		if = {
+			limit = {
+				OR = {
+					has_variable = me_syr_foreign_country_flag
+					has_variable = me_syr_deal_with_devil_flag
+				}
+			}
+			save_scope_as = me_syr_annexed_scope
+			if = {
+				limit = {
+					any_country = { has_variable = death_to_tyrants_flag }
+				}
+				random_country = {
+					limit = { has_variable = death_to_tyrants_flag }
+					trigger_event = { id = me_syracuse_1_democracy.60 }
+				}
+			}
+		}
+	}
+}

@@ -45,6 +45,9 @@ valid_terrains = ["plains", "farmland", "extreme_mountain", "semi_arid",
                   "marsh", "sparse_jungle", "ocean", "coastal_terrain",
                   "constantinople","edo","kyoto","warsaw","riverine_terrain","desert_hills"]
 
+# Data validation for pop types
+valid_pops = ["lower_strata","proletariat","middle_strata","upper_strata","slaves","tribesmen"]
+
 terrain_file = open("province_terrain/00_province_terrain.txt",encoding="utf=8")
 
 def create_terrain_dict(terrain_file):
@@ -174,7 +177,7 @@ with generated_setup as f:
                 )
         # Only look at extra pops if there is data there
             for extra_pop in extra_pops:
-                if row[extra_pop] != "" and len(row[extra_pop]) < 14:
+                if row[extra_pop] in valid_pops and len(row[extra_pop]) < 14:
                     f.write(
             '   ' + row[extra_pop].replace(" ","_") + '={\n' +
             '       amount=' + row[extra_pop+size] + '\n' +

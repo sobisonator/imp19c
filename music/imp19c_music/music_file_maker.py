@@ -1,5 +1,5 @@
 import glob
-music_files = glob.glob("*.mp3")
+music_files = glob.glob("*.mp3") + glob.glob("*.ogg")
 
 track_format = 'track%(trackno)d = { \n    music = "file:/music/imp19c_music/%(trackname)s" \n    weight = 25 \n    mood = yes \n    can_be_interrupted = yes \n}\n'
 

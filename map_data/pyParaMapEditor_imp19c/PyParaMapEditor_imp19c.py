@@ -2,7 +2,6 @@ import sqlite3, csv, gspread, pandas
 from tkinter import filedialog
 from tkinter import *
 from PIL import Image, ImageTk
-from oauth2client.service_account import ServiceAccountCredentials
 
 remote_sheet_exists = False
 
@@ -69,14 +68,7 @@ SHEET_NAME = "linked_imp19c_province_setup"
  # https://youtu.be/cnPlKLEGR7E?t=346
 class SheetConnection(object):
     def __init__(self):
-        self.scope = ["https://spreadsheets.google.com/feeds",
-                 "https://www.googleapis.com/auth/spreadsheets",
-                 "https://www.googleapis.com/auth/drive.file",
-                 "https://www.googleapis.com/auth/drive"]
-
-        self.credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS, self.scope)
-
-        self.client = gspread.authorize(self.credentials)
+        self.client = gspread.service_account(filename=CREDENTIALS)
 
         self.sheet = self.client.open(SHEET_NAME).sheet1
 

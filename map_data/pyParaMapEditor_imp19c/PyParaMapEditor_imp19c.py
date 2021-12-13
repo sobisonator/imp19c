@@ -148,7 +148,7 @@ class database_connection(object):
         " Tribesmen =" + row["tribesmen"]+"," \
         " UpperStrata =" + row["upper_strata"]+"," \
         " Civilization =" + row["INDUSTRIALISATION"]+"," \
-        " SettlementRank =" + row["PROVINCE RANK"]+"," \
+        " SettlementRank =" + row["PROVINCE_RANK"]+"," \
         " NameRef ='" + row["NAME"].replace("'","’")+"'," \
         " AraRef ='" + row["AREA"].replace("'","’")+"'," \
         " Terrain ='" + row["TERRAIN"].replace("'", "’") + "' WHERE ProvID = " + row["PROVID"]

@@ -1,0 +1,46 @@
+# Handling the employment system
+# https://github.com/sobisonator/imp19c/issues/37
+
+# Prefix = JOBS
+
+JOBS_set_employment_slots = {
+	############
+	# Function:	Set the employment slots available in a province
+	# Scope:	Province
+	# Called:	Yearly
+	############
+
+	# Subsistence:
+	#	At 0% industrialisation, each pop creates 1 slot.
+	#	At 100% industrialisation, each pop creates 0 slots.
+	#	slots = total_population x 1-(civilization_value x 0.01)
+
+	# SHOULD THESE VARIABLES BE LOCAL?
+	set_variable = {
+		name = JOBS_slots_subsistence
+		value = this.total_population
+	}
+	# Multiple civilization value by 0.01
+	set_variable = { # SHOULD BE TEMPORARY VARIABLE
+		name = T_001_civilization
+		value = this.civilization_value
+	}
+	change_variable = {
+		name = T_001_civilization
+		multiply = 0.01
+	}
+	# Subtract the result from 1
+	set_variable = {
+		name = T_civilization_value_modifier
+		value = 1
+	}
+	change_variable = {
+		name = T_civilization_value_modifier
+		subtract = var:T_001_civilization
+	}
+	# Multiply the slots from pops by this value
+	change_variable = {
+		name = JOBS_slots_subsistence
+		multiply = var:T_civilization_value_modifier
+	}
+}

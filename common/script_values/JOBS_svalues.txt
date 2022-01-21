@@ -1,0 +1,76 @@
+# Employment
+
+## Jobs
+
+### Country level
+
+JOBS_national_subsistence_slots = {
+	value = 0
+	every_owned_province = {
+		add = JOBS_slots_subsistence
+	}
+}
+
+### Province level
+
+#### Available slots
+
+JOBS_slots_subsistence = {
+	# This represents subsistence farmers (lower strata), artisans & merchants (middle strata) and traditional landed nobility (upper strata). Tribesmen can only ever occupy subsitence type jobs. Reduced food consumption, very low output
+	value = total_population
+	if = {
+		limit = {
+			civilization_value > 0
+		}
+		multiply = inverse_industrialisation
+	}
+	multiply = province_rural_percentage_modifier
+	round = yes
+}
+
+JOBS_slots_industrial = { # WiP
+	# This represents manufacturing or infrastructure focused jobs. Manual workers or for-export farmers (lower strata), foremen & technicians (middle strata) and factory owners (upper strata). High manufactured resource output
+	value = num_of_IND_industrial_estate
+	divide = industrialisation_as_modifier # More industrialisation means more auxiliary jobs for industry
+}
+
+JOBS_slots_commercial_raw_materials = { # WiP
+	value = num_of_IND_commercial_farms
+	add = num_of_IND_mines
+	multiply = civilization_value # More efficient = fewer jobs from it
+	if = {
+		limit = {
+			has_city_status = no
+		}
+		multiply = 4 # Since only 1 building can be built in rural provinces, multiply rural industry significantly here
+	}
+}
+
+JOBS_slots_civil_service = { # WiP
+	# Civil service jobs improve the efficiency of spending on government projects. A governoship without those jobs filled should have tax efficiency lower in proportion to the number of empty jobs
+	# Level of education in the region should also affect tax efficiency, representing availability of accountants, lawyers etc
+	value = num_of_URB_administration_district
+}
+
+JOBS_slots_from_commerce_districts = {
+	value = num_of_URB_commerce_district
+	multiply = 3
+}
+
+JOBS_slots_private_service = { # WiP
+	# This represents skill-based work, less focused on technology. Servants, wait staff, cleaners (lower strata), office clerks, teachers, lawyers, doctors (middle strata) and bankers or business owners (upper strata). High abstract wealth output
+	value = num_of_URB_residential_district # Local shops, house servants etc.
+	add = num_of_upper_strata # Direct employees of upper strata
+	add = JOBS_slots_from_commerce_districts
+}
+
+JOBS_slots_military = { # WiP
+	# Permanent military jobs
+	value = total_population
+	if = {
+		limit = {
+			PROVINCE.owner = { has_law = regional_militias }
+		}
+		subtract = total_population
+	}
+}

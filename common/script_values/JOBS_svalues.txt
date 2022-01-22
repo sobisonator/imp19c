@@ -11,6 +11,42 @@ JOBS_national_subsistence_slots = {
 	}
 }
 
+JOBS_national_private_service_modifier = { # Factors increasing the available private service jobs nationwide
+	value = 1
+	if = {
+		limit = { 
+			owner.country = { has_law = independent_bar }
+		}
+		add = 0.1
+	}
+}
+
+JOBS_national_civil_service_modifier = { # Factors increasing the available private service jobs nationwide
+	value = 1
+	if = {
+		limit = { 
+			owner.country = {
+				OR = {
+					has_law = bureaucratic_judiciary
+					has_law = civil_judiciary
+				}
+			}
+		}
+		add = 0.1
+	}
+	if = {
+		limit = { 
+			owner.country = {
+				OR = {
+					has_law = state_distribution # land law
+					has_law = registered_land # land law
+				}
+			}
+		}
+		add = 0.1
+	}
+}
+
 ### Province level
 
 #### Available slots
@@ -28,7 +64,7 @@ JOBS_slots_subsistence = {
 	round = yes
 }
 
-JOBS_slots_industrial = { # WiP
+JOBS_slots_manufacturing = { # WiP
 	# This represents manufacturing or infrastructure focused jobs. Manual workers or for-export farmers (lower strata), foremen & technicians (middle strata) and factory owners (upper strata). High manufactured resource output
 	value = num_of_IND_industrial_estate
 	divide = industrialisation_as_modifier # More industrialisation means more auxiliary jobs for industry
@@ -37,7 +73,7 @@ JOBS_slots_industrial = { # WiP
 JOBS_slots_commercial_raw_materials = { # WiP
 	value = num_of_IND_commercial_farms
 	add = num_of_IND_mines
-	multiply = civilization_value # More efficient = fewer jobs from it
+	multiply = industrialisation_as_modifier # More efficient = fewer jobs from it
 	if = {
 		limit = {
 			has_city_status = no
@@ -46,10 +82,24 @@ JOBS_slots_commercial_raw_materials = { # WiP
 	}
 }
 
+JOBS_civil_service_slots_from_admin = {
+	value = num_of_URB_administration_district
+	if = {
+		limit = { 
+			owner.country = {
+				has_law = feudal_regional_governments # Feudal governments rely far less on central civil service
+			}
+		}
+		multiply = 0.5
+	}
+}
+
 JOBS_slots_civil_service = { # WiP
 	# Civil service jobs improve the efficiency of spending on government projects. A governoship without those jobs filled should have tax efficiency lower in proportion to the number of empty jobs
 	# Level of education in the region should also affect tax efficiency, representing availability of accountants, lawyers etc
-	value = num_of_URB_administration_district
+	value = JOBS_civil_service_slots_from_admin
+	multiply = JOBS_national_civil_service_modifier
+	round = yes
 }
 
 JOBS_slots_from_commerce_districts = {
@@ -62,15 +112,8 @@ JOBS_slots_private_service = { # WiP
 	value = num_of_URB_residential_district # Local shops, house servants etc.
 	add = num_of_upper_strata # Direct employees of upper strata
 	add = JOBS_slots_from_commerce_districts
+	multiply = owner.JOBS_national_private_service_modifier
+	round = yes
 }
 
-JOBS_slots_military = { # WiP
-	# Permanent military jobs
-	value = total_population
-	if = {
-		limit = {
-			PROVINCE.owner = { has_law = regional_militias }
-		}
-		subtract = total_population
-	}
-}
+# Military job slots are not calculated as the roles are filled on an as-needed basis

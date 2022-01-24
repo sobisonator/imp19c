@@ -25,10 +25,16 @@ JOBS_national_civil_service_modifier = { # Factors increasing the available priv
 	value = 1
 	if = {
 		limit = { 
-			owner.country = {
+			owner = { has_law = bureaucratic_judiciary }
+		}
+		add = 0.2
+	}
+	if = {
+		limit = { 
+			owner = {
 				OR = {
-					has_law = bureaucratic_judiciary
-					has_law = civil_judiciary
+					has_law = state_distribution # land law
+					has_law = registered_land # land law
 				}
 			}
 		}
@@ -36,12 +42,25 @@ JOBS_national_civil_service_modifier = { # Factors increasing the available priv
 	}
 	if = {
 		limit = { 
-			owner.country = {
-				OR = {
-					has_law = state_distribution # land law
-					has_law = registered_land # land law
-				}
-			}
+			owner = { has_law = civil_judiciary }
+		}
+		add = 0.1
+	}
+	if = {
+		limit = { 
+			owner = { has_law = immigration_closed_borders }
+		}
+		subtract = 0.1
+	}
+	if = {
+		limit = { 
+			owner = { has_law = emigration_closed_borders }
+		}
+		subtract = 0.1
+	}
+	if = {
+		limit = { 
+			owner = { has_law = emigration_passports }
 		}
 		add = 0.1
 	}
@@ -67,7 +86,9 @@ JOBS_slots_subsistence = {
 JOBS_slots_manufacturing = { # WiP
 	# This represents manufacturing or infrastructure focused jobs. Manual workers or for-export farmers (lower strata), foremen & technicians (middle strata) and factory owners (upper strata). High manufactured resource output
 	value = num_of_IND_industrial_estate
+	multiply = 2
 	divide = industrialisation_as_modifier # More industrialisation means more auxiliary jobs for industry
+	round = yes
 }
 
 JOBS_slots_commercial_raw_materials = { # WiP
@@ -82,36 +103,103 @@ JOBS_slots_commercial_raw_materials = { # WiP
 	}
 }
 
-JOBS_civil_service_slots_from_admin = {
+half_commerce_district_slots = {
+	value = num_of_URB_commerce_district
+	multiply = 0.5
+}
+
+JOBS_civil_service_slots_from_buildings = {
 	value = num_of_URB_administration_district
 	if = {
 		limit = { 
-			owner.country = {
-				has_law = feudal_regional_governments # Feudal governments rely far less on central civil service
-			}
+			owner = { has_law = feudal_regional_governments }
 		}
 		multiply = 0.5
+	}
+	if = {
+		limit = { 
+			owner = { has_law = business_light_regulations }
+		}
+		add = half_commerce_district_slots
+	}
+	if = {
+		limit = { 
+			owner = { has_law = business_heavy_regulations }
+		}
+		add = num_of_URB_commerce_district
+	}
+	if = {
+		limit = {
+			owner = {
+				OR = {
+					has_law = funded_employers_health_insurance
+					has_law = national_health_insurance
+				}
+			}
+		}
+		add = num_of_INF_hospital
 	}
 }
 
 JOBS_slots_civil_service = { # WiP
 	# Civil service jobs improve the efficiency of spending on government projects. A governoship without those jobs filled should have tax efficiency lower in proportion to the number of empty jobs
 	# Level of education in the region should also affect tax efficiency, representing availability of accountants, lawyers etc
-	value = JOBS_civil_service_slots_from_admin
+	value = JOBS_civil_service_slots_from_buildings
 	multiply = JOBS_national_civil_service_modifier
+	if = {
+		limit = { is_capital = yes }
+		multiply = 2
+	}
 	round = yes
 }
 
-JOBS_slots_from_commerce_districts = {
+JOBS_slots_from_URB_commerce_districts = {
 	value = num_of_URB_commerce_district
-	multiply = 3
+	multiply = 10
+	multiply = stability
+}
+
+JOBS_slots_from_EDU_schools = {
+	value = num_of_EDU_school
+	multiply = 1
+}
+
+JOBS_slots_from_EDU_universities = {
+	value = num_of_EDU_university
+	multiply = 1
+}
+
+JOBS_slots_from_URB_residential_ditricts = {
+	value = num_of_URB_residential_district
+	multiply = 2
+}
+
+JOBS_slots_from_URB_cultural_districts = {
+	value = num_of_URB_cultural_district
+	multiply = 1.5
+}
+
+JOBS_slots_from_population = { # Private service jobs grow with a square curve to accommodate population
+	value = total_population
+	multiply = total_population
+	divide = 1000
+}
+
+JOBS_slots_from_INF_hospitals = {
+	value = num_of_INF_hospital
+	multiply = 2
 }
 
 JOBS_slots_private_service = { # WiP
 	# This represents skill-based work, less focused on technology. Servants, wait staff, cleaners (lower strata), office clerks, teachers, lawyers, doctors (middle strata) and bankers or business owners (upper strata). High abstract wealth output
-	value = num_of_URB_residential_district # Local shops, house servants etc.
+	value = JOBS_slots_from_URB_residential_ditricts # Local shops, house servants etc.
+	add = JOBS_slots_from_URB_cultural_districts # Jobs to do with maintenance of cultural sites, enterainment etc.
 	add = num_of_upper_strata # Direct employees of upper strata
-	add = JOBS_slots_from_commerce_districts
+	add = JOBS_slots_from_URB_commerce_districts # Banking, etc.
+	add = JOBS_slots_from_EDU_schools
+	add = JOBS_slots_from_EDU_universities
+	add = JOBS_slots_from_population
+	add = JOBS_slots_from_INF_hospitals	
 	multiply = owner.JOBS_national_private_service_modifier
 	round = yes
 }

@@ -143,6 +143,69 @@ tributary = { # Pays money, but otherwise politically independent
 	}
 }
 
+sinosphere_tributary = { # Gives tribute in scripted events every few years, politically independent but protected_when_attacked
+	subject_pays = subject_pays_nominal
+	
+	joins_overlord_in_war = no
+	
+	protected_when_attacked = yes
+	costs_diplomatic_slot = no
+	subject_can_cancel = no
+	has_limited_diplomacy = no
+	
+	overlord_modifier = {
+		monthly_legitimacy = 0.02
+	}
+	subject_modifier = {
+		global_upper_strata_happyness = 0.05
+	}
+	
+	allow = {
+		num_of_cities < 100
+		OR = {
+			chinese_traditional_religion_trigger = yes
+			buddhist_group_trigger = yes
+		}
+		scope:future_overlord = {
+			tag = CHI
+			government = imperial_monarchy
+			num_of_cities > 100
+		}
+	}
+	
+	# on_enable = {}
+	# on_disable = {}
+	# on_monthly = {}
+	
+	diplo_chance = {
+		base = {
+			offset = -80
+		}
+		in_debt = {
+			scale = 0
+		}
+		negative_stability = {
+			scale = 0
+		}
+		current_strength = {
+			scale = 0.25
+		}
+		potential_strength = {
+			scale = 0.25
+		}
+		border_distance = {
+			scale = 5
+		}
+		rank = {
+			scale = -10
+		}
+		junior_to = {
+			scale = -50
+		}
+	}
+}
+
+
 nominal_vassal = { # Vassals that are in all ways independent, but are under international law recognised as part of the master empire
 	subject_pays = subject_pays_nominal
 
@@ -157,16 +220,13 @@ nominal_vassal = { # Vassals that are in all ways independent, but are under int
 	has_limited_diplomacy = no
 	
 	
-	overlord_modifier = {
-		
+	overlord_modifier = {	
 	}
 	subject_modifier = {
 	}
 	
 	allow = {
-		scope:future_overlord = {
-			num_of_cities >= 20
-		}
+		always = no
 	}
 	
 	# on_enable = {}
@@ -364,6 +424,7 @@ satrapy = {
 	}
 	
 	allow = {
+		always = no
 		has_military_tradition = persian_philosophy #subjected state is Persian.
 		num_of_cities > 40
 		is_monarchy = yes
@@ -467,8 +528,8 @@ client_state = { # More or less an autonomous region of an empire, with little d
 	}
 }
 
-major_governorship = { # A major governorship uniting several provinces, under the supervision of the master state
-	subject_pays = subject_client_state_pays
+autonomous_governorship = { # Formerly major_governorship - several provinces whose governor has significant personal power
+	subject_pays = subject_pays_auto
 	
 	joins_overlord_in_war = yes
 	
@@ -485,12 +546,76 @@ major_governorship = { # A major governorship uniting several provinces, under t
 		
 	}
 	subject_modifier = {
-		global_commerce_modifier = 0.1
 		loyalty_to_overlord = 25
+		global_export_commerce_modifier = 0.05
 		army_maintenance_cost = -0.1
 	}
 	
 	allow = {
+		always = no #should be scripted
+		num_of_cities < 150
+		is_tribal = no
+		scope:future_overlord = {
+			is_tribal = no
+		}
+	}
+	
+	# on_enable = {}
+	# on_disable = {}
+	# on_monthly = {}
+	
+	diplo_chance = {
+		base = {
+			offset = -130
+		}
+		in_debt = {
+			scale = -1
+		}
+		negative_stability = {
+			scale = -0.05
+		}
+		current_strength = {
+			scale = 0.25
+		}
+		potential_strength = {
+			scale = 0.25
+		}
+		border_distance = {
+			scale = 3
+		}
+		rank = {
+			scale = -10
+		}
+		junior_to = {
+			scale = -40
+		}
+	}
+}
+
+semi_autonomous_governorship = { # New type, more central oversight than autonomous_governorship
+	subject_pays = subject_pays_semi_auto
+	
+	joins_overlord_in_war = yes
+	
+	protected_when_attacked = yes
+	has_overlords_ruler = no
+	can_be_integrated = no
+	costs_diplomatic_slot = no
+	subject_can_cancel = no
+	
+	has_limited_diplomacy = yes
+	only_trade_with_overlord=yes #make this a law issue instead? for Liangguang
+	
+	overlord_modifier = {
+		
+	}
+	subject_modifier = {
+		global_export_commerce_modifier = 0.1
+		loyalty_to_overlord = 50
+	}
+	
+	allow = {
+		always = no #should be scripted
 		num_of_cities < 150
 		is_tribal = no
 		scope:future_overlord = {
@@ -551,6 +676,7 @@ subsidiary_ally = { # A legally independent state which is under the yoke of an 
 	}
 	
 	allow = {
+		always = no #should be scripted
 		num_of_cities < 300
 		scope:future_overlord = {
 			is_tribal = no
@@ -613,6 +739,7 @@ autonomous_colony = { # A colonial governorship run on behalf of the master stat
 	}
 	
 	allow = {
+		always = no #should be scripted
 		num_of_cities < 300
 		is_tribal = no
 		scope:future_overlord = {
@@ -674,6 +801,7 @@ client_colony = { # A colonial governorship run with significant accountability 
 	}
 	
 	allow = {
+		always = no #should be scripted
 		num_of_cities < 300
 		is_tribal = no
 		scope:future_overlord = {
@@ -735,6 +863,7 @@ territory = { # A governorship not granted statehood but run with significant ac
 	}
 	
 	allow = {
+		always = no #shouldn't be possible to turn a country into a territory
 		num_of_cities < 300
 		is_tribal = no
 		scope:future_overlord = {
@@ -787,7 +916,6 @@ royal_union = {
 	
 	has_limited_diplomacy = no
 	
-	
 	overlord_modifier = {
 		next_ruler_legitimacy = -0.05
 	}
@@ -799,12 +927,10 @@ royal_union = {
 		scope:future_overlord = {
 			this.religion = root.religion
 			OR = {
-				AND = {
-					government = charter_parliament
-					# has_law = constitutional_monarchy
-				} 
+				government = charter_parliament
 				is_monarchy = yes
 			}
+			NOT = { chinese_traditional_religion_trigger = yes }
 		}
 	}
 	
@@ -871,6 +997,7 @@ confederate_ally = { #Aligned member of a cultural confederation
 	}
 	
 	allow = {
+		always = no
 		num_of_cities <= 30
 		scope:future_overlord = {
 			num_of_cities >= 30

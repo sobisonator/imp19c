@@ -507,7 +507,7 @@ canvas.create_image(0, 0, image=canvas_img, anchor="nw")
 canvas.config(scrollregion=canvas.bbox(ALL))
 
 prevprovince = None
-selector_img = ImageTk.PhotoImage(file="selector.gif", master=root)
+selector_img = ImageTk.PhotoImage(Image.open("selector.gif").convert("RGBA"))
 
 #function to be called when mouse is clicked
 def getprovince(event):

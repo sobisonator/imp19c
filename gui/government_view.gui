@@ -1519,6 +1519,155 @@ base_window = {
 							blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/patronize_arts.dds" }
 						}
 					}
+					flowcontainer = { ### to show officeholders on main government tab, for directorial republics. Not showing up atm with this code
+						position = { 0 20 }
+						parentanchor = hcenter
+						spacing = 0
+						direction = vertical
+						#ignoreinvisible = yes
+						datacontext = "[GetScriptedGui('directorial_government_view')]"
+						visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
+						scrollwidget = {
+							datamodel = "[GovernmentView.GetOfficeHolders]"
+							datamodel_wrap = 4
+							item = {
+								margin_widget = {
+									size = { 306 150 }
+									datacontext = "[OfficeHolderItem.GetCharacter]"
+									cpt_button = {
+										position = { 4 36 }
+										size = { 70 105 }
+									}
+									sub_header = {
+										size = { 294 32 }
+										position = { 0 0 }
+										blockoverride "Title_text" { text = "[OfficeHolderItem.GetName]" }
+										tooltip = "[OfficeHolderItem.GetNameDesc]"
+									}
+									tag = {
+										position = { 80 28 }
+										text = "[OfficeHolderItem.GetCharacter.GetName]"										
+										maximumsize = { 208 32 }
+										visible = "[OfficeHolderItem.HasHolder]"
+										align = left
+										using = BaseFontS
+										using = Black_FontColor
+									}
+									icon_and_text = {
+										name = "loyalty"
+										size = { 80 0 }
+										visible = "[OfficeHolderItem.HasHolder]"
+										position = { 74 60 }
+										tooltipwidget = { 
+											using = character_loyalty_tooltip 
+										}
+										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/loyalty.dds" }
+										blockoverride "Text" { text = "[OfficeHolderItem.GetCharacter.GetLoyalty|0]" }
+									}
+									icon_button_square = {
+										size = { 36 36 }
+										position = { 80 -10 }
+										parentanchor = bottom
+										blockoverride "On_click"
+										{
+											onclick = "[OfficeHolderItem.ChangeHolder]"
+											enabled = "[OfficeHolderItem.CanChange]"
+										}
+										blockoverride "Icon"
+										{
+											texture = "gfx/interface/icons/shared_icons/change.dds"
+											size = { 30 30 }
+										}
+										
+										tooltip = "[OfficeHolderItem.GetChangeTooltip]"
+									}
+									icon_and_text_progress_S = {
+										name = "statesmanship"
+										visible = "[OfficeHolderItem.HasHolder]"
+										parentanchor = right
+										position = { -22 56 }
+										blockoverride "Icon" {
+											framesize = { 50 50 }
+											texture = "gfx/interface/icons/icon_skills.dds"
+											frame = "[OfficeHolderItem.GetCharacter.GetAttributes.GetFrame(OfficeHolderItem.GetOffice.GetRequiredSkill)]"
+										}
+										blockoverride "Text" { 
+											text = "[OfficeHolderItem.GetCharacter.GetEffectiveModifiedAttribute(OfficeHolderItem.GetOffice.GetRequiredSkill)]/[OfficeHolderItem.GetCharacter.GetModifiedAttribute(OfficeHolderItem.GetOffice.GetRequiredSkill)]"
+											using = BaseFontM
+											using = Black_FontColor
+											position = { 4 -10 }
+										}
+										blockoverride "Value" { value = "[FixedPointToFloat(OfficeHolderItem.GetCharacter.GetExperience)]" }
+										tooltip = "[OfficeHolderItem.GetSkillTooltip]"
+									}
+									widget = {
+										name = "modifier_reward"
+										size = { 170 42 }
+										using = NoninteractableBG
+										blockoverride "Margins" {}
+										parentanchor = right
+										position = { -12 103 }
+										visible = "[OfficeHolderItem.HasHolder]"
+										modifier_desc_condensed = {
+											position = { 0 -4 } 											
+											parentanchor = center
+											widgetanchor = center
+											datacontext = "[OfficeHolderItem.GetModifier]"
+											tooltip = "[OfficeHolderItem.GetTooltip]"
+											scale = 0.9
+										}
+									}
+									textbox = {
+										using = BaseFontS
+										using = Black_FontColor
+										autoresize = yes
+										elide = right										
+										max_width = 220
+										fontsize_min = 11
+										text = "ASSIGNING_OFFICER_WILL"
+										position = { 80 38 }
+										visible = "[Not( OfficeHolderItem.GetCharacter.IsValid )]"
+										alpha = 0.55
+									}
+									textbox = {
+										visible = "[Not( OfficeHolderItem.GetCharacter.IsValid )]"
+										using = BaseFontM
+										using = Black_FontColor
+										position = { 80 64 }
+										autoresize = yes
+										elide = left
+										max_width = 226
+										fontsize_min = 11
+										text = "[OfficeHolderItem.GetOffice.GetSkillDescription]"
+										alpha = 0.60
+									}
+									flowcontainer = {
+										position = { -8 108 }
+										parentanchor = right
+										spacing = 2
+										visible = "[Not( OfficeHolderItem.GetCharacter.IsValid )]"
+										alpha = 0.60
+										textbox = {
+											using = BaseFontS
+											using = Black_FontColor
+											parentanchor = vcenter
+											autoresize = yes
+											elide = right
+											max_width = 230
+											fontsize_min = 11
+											text = "PER_POINT_DESC"
+										}
+										icon = {
+											texture = "gfx/interface/icons/icon_skills.dds"
+											framesize = { 50 50 }
+											size = { 34 34 }											
+											frame = "[OfficeHolderItem.GetCharacter.GetAttributes.GetFrame(OfficeHolderItem.GetOffice.GetRequiredSkill)]"
+										}
+									}
+								}
+							}
+						}
+					}
 					#container = {
 					#	position = { 15 0 }
 					#	container = {

@@ -1,12 +1,38 @@
-import sqlite3, csv, gspread, pandas
+import sqlite3, csv, gspread, configparser
+from urllib.parse import _NetlocResultMixinStr
 import gspread_dataframe as gd
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from tkinter import *
 from PIL import Image, ImageTk
 
 remote_sheet_exists = False # Why is this here? Belongs in a class handling the database and/or cloud integration
 
 event2canvas = lambda e, c: (c.canvasx(e.x), c.canvasy(e.y)) # Why is this here? Belongs in an interface class
+
+class Editor: # Parent class
+    def __init__(self):
+        self.config = configparser.ConfigParser()
+
+        # Declare the credentials var on init, but it will only be given a file at the credentials select stage by the GUI object
+        self.remote_credentials = None # NEED TO GET THIS FROM GUI FUNCTION
+
+        # Declare the map var on init, but it will only be given a file at the file select stage
+        self.map_file = None # NEED TO GET THIS FROM GUI FUNCTION
+
+    def __new__(self):
+        map_handler = MapHandler.new()
+        gui = MapEditorGUI.new()
+
+        self.remote_credentials = gui.prompt_remote_credentials()
+
+        gui.prompt_file_select()
+        if self.remote_credentials != None: # We only need a remote sheet object if we're actually using a remote sheet
+            self.setup_remote_sheet()
+            
+
+    def setup_remote_sheet(self):
+        remote_sheet_name = self.config['RemoteSheet']['SheetName']
+        remote = RemoteSheet.new(sheet_name = remote_sheet_name, credentials = self.remote_credentials)
 
 # MapHandler deals with the map image files
 class MapHandler:
@@ -48,48 +74,57 @@ class MapHandler:
 class MapEditorGUI:
     def __init__(self):
         self.im_selector = Image.open("selector.gif", "r")
+    
+    def prompt_file_select(self): # Select the local database, used for loading and saving map data. Data will also be saved to the remote sheet if there is one
+        # We have to initialise Tkinter so we can create GUI, but we'll just use the default file select function
+        file_select = Tk()
+        # Hide the default Tkinter window, as we'll be popping up a file select dialog
+        file_select.withdraw()
+        file_name = filedialog.asksaveasfilename( # Use saveas as this allows the user to create a new file if there isn't one, or to load & overwrite an existing one
+            initialdir = "./",
+            title = "Select or create map editor save file",
+            filetypes = (("all files",""),("all files","*"))
+        )
+        # Update the class attribute
+        self.map_file = file_name
+        file_select.destroy()
 
+    def prompt_remote_credentials(self): # Get the JSON credentials for connecting to the Google Sheet
+        # We have to initialise Tkinter so we can create GUI, but we'll just use the default file select function
+        credentials_select = Tk()
+        # Check if the user wants to connect to the remote sheet
+        using_remote_sheet = credentials_select.messagebox.askquestion("Connect to remote sheet?", "Do you want to connect to the remote setup data spreadsheet")
+        if using_remote_sheet == "yes":
+            # Hide the default Tkinter window, as we'll be popping up a file select dialog
+            credentials_select.withdraw()
+            file_name = filedialog.askopenfilename(
+                intialdir = "./",
+                title = "Select credentials for remote editing. Cancel to edit remotely",
+                filetypes = (("json files","*.json"),("json files","*.json"))
+            )
+            # Update the class attribute if a file was selected
+            if str(file_name) != "":
+                self.remote_credentials = file_name
+            credentials_select.destroy()
+            return(self.remote_credentials) # Flag that we are indeed using remote credentials
+        else:
+            credentials_select.destroy()
+            return(None) # Flag that we are not using remote credentials
+        
+class RemoteSheet:
+     # https://youtu.be/cnPlKLEGR7E?t=346
+    def __init__(self, sheet_name, credentials):
+        self.credentials = credentials # Credentials are loaded from a separate file, selected when the user is prompted on startup
+    
+        client = gspread.service_account(filename=credentials)
+        
+        self.sheet = client.open(sheet_name).sheet1 # Sheet name is passed from config by the parent class
 
-# What a mess...
-try:
-    province_setup_csv = open('province_setup.csv', 'r',encoding='UTF-8')
-except:
-    province_setup_csv = False
-try:
-    definition_csv = open('definition.csv', 'r')
-except:
-    definition_csv = False
+        # data = sheet.get_values() # Not used - consider removing
 
-fileselect = Tk()
-fileselect.withdraw()
-map_file = fileselect.filename = filedialog.asksaveasfilename(initialdir = "./", title="Select or create map editor save file",filetypes = (("all files",""),("all files","*")))
-fileselect.destroy()
+        # dataframe = gd.get_as_dataframe(sheet) # Not used - consider removing
 
-# This could be determined in a config file for a one-time solution
-get_credentials = Tk()
-get_credentials.withdraw()
-CREDENTIALS = get_credentials.filename = filedialog.askopenfilename(initialdir = "./", title="Select credentials file for remote editing", filetypes = (("json files","*.json"),("json files","*.json")))
-get_credentials.destroy()
-# Do not try to load an online sheet if no credentials are selected
-if str(CREDENTIALS) == "":
-    CREDENTIALS = False
-
-# Get sheetname for imp19c - put this in a config file so it's editable
-SHEET_NAME = "linked_imp19c_province_setup"
-
-
- # https://youtu.be/cnPlKLEGR7E?t=346
-class SheetConnection(object):
-    def __init__(self):
-        self.client = gspread.service_account(filename=CREDENTIALS)
-
-        self.sheet = self.client.open(SHEET_NAME).sheet1
-
-        self.data = self.sheet.get_values()
-
-        self.dataframe = gd.get_as_dataframe(self.sheet)
-
-        self.column_indices = {
+        self.column_indices = { # Best defined in config... TODO!
                 "ProvID": 1,
                 "Culture": 2,
                 "Religion": 3,
@@ -114,6 +149,23 @@ class SheetConnection(object):
         rownum = int(provid) + 1
         colnum = self.column_indices[column]
         self.sheet.update_cell(rownum, colnum, str(data))
+    
+    def read_from_sheet(self):
+        # THOUGHTS:
+        # Is it best to read straight from the sheet, and not rely on anything local at all?
+        # We could just read one row at a time when we click on the corresponding province
+        # We should probably put the remote sheet prompt before the local file select dialog, in that case.
+        pass
+
+# What a mess...
+try:
+    province_setup_csv = open('province_setup.csv', 'r',encoding='UTF-8')
+except:
+    province_setup_csv = False
+try:
+    definition_csv = open('definition.csv', 'r')
+except:
+    definition_csv = False
 
 # Only establish a connection if credentials have been provided
 if CREDENTIALS:

@@ -19,8 +19,38 @@ class MapHandler:
         # Each colour is effectively a unique ID for the province/searegion
         # Maxcolors set to 100,000 to exceed the default maximum, as we have over 10,000 provinces
         self.land_colours = self.img_land.getcolors(maxcolors=100000)
+        self.sea_colours = self.img_sea.getcolors(maxcolors=100000)
 
-im_selector = Image.open("selector.gif", "r") # This belongs in the interface class
+        # List of colours in the land provinces file
+        # Each item is a tuple of the RGB value of a land province's colour
+        self.land_provinces = []
+        # Add colours to the list. Index [1] of each is a tuple with the RGB value
+        for colour in self.land_colours:
+            self.land_provinces.append(colour[1])
+        # Ignore white, which we use in the input images to delineate sea and land.
+        self.land_provinces.remove((255,255,255))
+
+        # List of colours in the sea provinces file
+        # See above land provinces
+        self.sea_provinces = []
+        for colours in self.sea_provinces:
+            self.sea_provinces.append(colour[1])
+
+        # Get the total number of provinces
+        # Why do we need this again?
+        self.total_provinces = len(sea_provinces) + len(land_provinces)
+
+        # Read back the lengths to the user
+        print(str(len(self.sea_provinces)) + " sea provinces found and " +
+            str(len(self.land_provinces)) + " land provinces found.")
+        print("Total provinces in land and sea: " + str(self.total_provinces))
+
+class MapEditorGUI:
+    def __init__(self):
+        self.im_selector = Image.open("selector.gif", "r")
+
+
+# What a mess...
 try:
     province_setup_csv = open('province_setup.csv', 'r',encoding='UTF-8')
 except:
@@ -29,32 +59,6 @@ try:
     definition_csv = open('definition.csv', 'r')
 except:
     definition_csv = False
-
-land_provinces = [] # What does this do?
-
-for colour in land_colours:
-    land_provinces.append(colour[1])
-# Ignore white
-land_provinces.remove((255,255,255))
-
-# Sea provinces
-
-sea_colours = im_sea.getcolors(maxcolors=100000)
-
-sea_provinces = []
-
-for colour in sea_colours:
-    sea_provinces.append(colour[1])
-# Ignore white
-sea_provinces.remove((255,255,255))
-
-land_sea_provinces = land_provinces + sea_provinces
-
-total_provinces = len(sea_provinces) + len(land_provinces)
-
-print(str(len(sea_provinces)) + " sea provinces found and " +
-      str(len(land_provinces)) + " land provinces found.")
-print("Total provinces in land sea (may include overlap!) = " + str(total_provinces))
 
 fileselect = Tk()
 fileselect.withdraw()

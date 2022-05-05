@@ -1,0 +1,158 @@
+﻿############################################################
+# NOTE: I didn't make this system do anything yet it is just showing values for now, but the values are accurate.
+############################################################
+all_governorship_trade_svalue = {
+	value = 0
+	every_governorship_state = {
+		every_state_province = {
+			add = num_goods_produced
+#	Trade centers commented out but could be added if you want but they are a whole system in themselves and require on_actions.
+#			#Each level of regional trade center counts as 5 goods produced.
+#			if = {
+#				limit = {
+#					has_province_modifier = regional_center_of_trade_level_1
+#				}
+#				add = 5
+#			}
+#			else_if = {
+#				limit = {
+#					has_province_modifier = regional_center_of_trade_level_2
+#				}
+#				add = 10
+#			}
+#			else_if = {
+#				limit = {
+#					has_province_modifier = regional_center_of_trade_level_3
+#				}
+#				add = 15
+#			}
+		}
+	}
+}
+
+all_governorship_commerce_svalue = {
+	value = 1
+	every_governorship_state = {
+		add = state_commerce_income
+	}
+	multiply = 2
+}
+
+player_trade_total_value = {
+	add = all_governorship_trade_svalue
+	every_governorship_state = {
+		multiply = all_governorship_commerce_svalue
+	}
+	#Divide this number and the number in absolute_trade_total_value in the same amount.
+	#If this number is lower the accuracy of trade power in nodes where you have little power will be better
+	#But numbers will be much bigger if it's lower.
+	#I would just divide by 100 but script values are only int
+	divide = 20
+	round = floor
+}
+
+all_region_trade_svalue = {
+	value = 0
+	capital_scope = {
+		region = {
+			every_region_province = {
+				add = num_goods_produced
+#				if = {
+#					limit = {
+#						has_province_modifier = regional_center_of_trade_level_1
+#					}
+#					add = 5
+#				}
+#				else_if = {
+#					limit = {
+#						has_province_modifier = regional_center_of_trade_level_2
+#					}
+#					add = 10
+#				}
+#				else_if = {
+#					limit = {
+#						has_province_modifier = regional_center_of_trade_level_3
+#					}
+#					add = 15
+#				}
+			}
+		}
+	}
+}
+all_region_commerce_svalue = {
+	value = 1
+	capital_scope = {
+		region = {
+			every_region_state = {
+				add = state_commerce_income
+			}
+		}
+	}
+	multiply = 2
+}
+absolute_trade_total_value = {
+	value = 0
+	add = all_region_trade_svalue
+	every_governorship_state = {
+		multiply = all_governorship_commerce_svalue
+	}
+	divide = 20
+	round = floor
+}
+
+#The Final Value.
+percentage_of_trade_value_in_region_svalue = {
+	value = 0
+	add = player_trade_total_value
+	divide = absolute_trade_total_value	
+}
+
+#This is the value you need to get a bonus for in a region
+90_percent_of_trade_value_in_governorship_svalue = {
+	value = 0
+	add = absolute_trade_total_value
+	multiply = 0.9
+}
+
+#This is used to find the total amount of governorships that are above 80% so the right modifier can be given.
+#NOTE: This is in the country scope NOT governorship scope
+governorships_that_are_above_90_percent_svalue = {
+	value = 0
+    every_governorships = {
+        limit = {
+            player_trade_total_value >= 90_percent_of_trade_value_in_governorship_svalue
+        }
+        add = 1
+    }
+}
+
+all_state_goods_produced = {
+	value = 0
+	every_state_province = {
+		add = num_goods_produced
+	}
+}
+
+#trade_center_level_svalue = {
+#	value = 0
+#	if = {
+#		limit = {
+#			has_province_modifier = regional_center_of_trade_level_1
+#		}
+#		add = 1
+#	}
+#	else_if = {
+#		limit = {
+#			has_province_modifier = regional_center_of_trade_level_2
+#		}
+#		add = 2
+#	}
+#	else_if = {
+#		limit = {
+#			has_province_modifier = regional_center_of_trade_level_3
+#		}
+#		add = 3
+#	}
+#	max = 3
+#}
+

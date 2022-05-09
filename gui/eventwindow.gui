@@ -443,8 +443,7 @@ base_window = { ####Currently unused in vanilla
 		}
 		
 	}
-	#The "close button" is actually the event option so you can run effects there and they happen when close is clicked.
-	#This is the only way to open and close a non hardcoded window without console commands that I know of!
+	#The close button/event option.
 	flowcontainer = {
 		position = { 605 15 }
 		flowcontainer = {
@@ -470,6 +469,7 @@ base_window = { ####Currently unused in vanilla
 			}
 		}
 	}
+	#Main Container that holds all custom windows.
 	container = {
 		name = "major_event_window_main_container"
 		resizeparent = yes
@@ -671,6 +671,7 @@ base_window = { ####Currently unused in vanilla
 			}
 		}
 	}
+	#Governorship List
 	vbox = {
 		layoutpolicy_horizontal = expanding
 		layoutpolicy_vertical = expanding
@@ -845,9 +846,6 @@ base_window = { ####Currently unused in vanilla
 												text = "[GuiScope.SetRoot( Governorship.MakeScope ).ScriptValue('WEALTH_governorship_tribesmen')|2]"
 											}
 										}
-										widget = {
-											size = { 10 0 }
-										}
 										icon_button_square = {
 											datacontext = "[GetScriptedGui('show_governorship_states_button')]" 
 											tooltip = "#T Show States in [Governorship.GetName]"
@@ -860,6 +858,19 @@ base_window = { ####Currently unused in vanilla
 												texture = "gfx/interface/icons/shared_icons/assist_with_scheme.dds" 
 												size = { 34 34 }
 											}
+										}
+										icon_button_square = {
+											datacontext = "[GetScriptedGui('show_trade_centers_in_governorship')]" 
+											tooltip = "#T Show Trade Centers in [Governorship.GetName]#!"
+											blockoverride "On_click" {
+												onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Governorship.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+												onclick = "[GetVariableSystem.Set( 'show_governorship_trade_centers', 'yes' )]"
+											}
+											blockoverride "Icon" 
+											{
+												texture = "gfx/interface/icons/modifiers/global_state_trade_routes.dds" 
+												size = { 34 34 }
+											}							
 										}
 										textbox = {
 											size = { 200 }
@@ -877,6 +888,7 @@ base_window = { ####Currently unused in vanilla
 			}
 		}
 	}
+	#Governorship States Window
 	base_window = {
 		size = { 660 580 }
 		position = { 0 0 }
@@ -976,45 +988,15 @@ base_window = { ####Currently unused in vanilla
 												size = { 10 0 }
 											}
 											icon_and_text = {
-												size = { 76 0 }
-												tooltip = "#T Provincal Goods Produced#!"
+												size = { 200 0 }
+												tooltip = "TRADE_ZONE_TOOLTIP"
 												blockoverride "Icon"
 													{
 														texture = "gfx/interface/icons/modifiers/base_resources.dds"
 													}
 												blockoverride "Text"
 												{
-													text = "[GuiScope.SetRoot( State.MakeScope ).ScriptValue('all_state_goods_produced')|0]"
-												}
-											}
-											widget = {
-												size = { 10 0 }
-											}
-											icon_and_text = {
-												size = { 86 0 }
-												tooltip = "[State.GetCurrentCommerceIncomeInfo]"
-												blockoverride "Icon"
-												{
-													texture = "gfx/interface/icons/shared_icons/trade.dds"
-												}
-												blockoverride "Text"
-												{
-													text = "[FixedPointToFloat(State.GetCommerceIncome )]"
-												}
-											}
-											widget = {
-												size = { 10 0 }
-											}
-											icon_and_text = {
-												size = { 100 0 }
-												tooltip = "#T Total State Income#! [State.GetGovernorOrRuler]"
-												blockoverride "Icon"
-												{
-													texture = "gfx/interface/icons/modifiers/global_export_commerce_modifier.dds"
-												}
-												blockoverride "Text"
-												{
-													text = "[FixedPointToFloat(State.GetTotalIncome )]"
+													text = "[State.GetCapital.Custom('state_trade_zone_loc')]"
 												}
 											}
 											widget = {
@@ -1064,7 +1046,156 @@ base_window = { ####Currently unused in vanilla
 			}
 		}
 	}
+	#Trade Centers Window
+	base_window = {
+		size = { 660 610 }
+		position = { 0 0 }
+		movable = no
+		parentanchor = top
+		visible = "[GetVariableSystem.HasValue( 'show_governorship_trade_centers', 'yes' )]"
+			vbox = {
+				using = MainWindowHeaderBoxCentered
+				
+				blockoverride "Title_text" { text = "Trade Centers" }
+				
+				vbox = {
+					layoutpolicy_vertical = expanding
+				}
+				
+			}
+		alwaystransparent = no
+		flowcontainer = {
+			parentanchor = top|right
+			position = { -10 15 }
 
+			button_close = {
+				name = "close_button"
+				datacontext = "[GetScriptedGui('remove_trade_center_list_variables_button')]"
+				onclick = "[GetVariableSystem.Set( 'show_governorship_trade_centers', 'no' )]"
+				onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+				tooltip = "CLOSE"
+			}
+		}
+		vbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			margin_top = 43
+			margin_bottom = 8
+			margin_right = 25
+			margin_left = -5
+
+			vbox = {
+				margin_bottom = 3
+				layoutpolicy_vertical = expanding
+				layoutpolicy_horizontal = expanding
+
+				widget = {
+					size = { 0 12 }
+				}
+				scrollarea = {
+					layoutpolicy_vertical = expanding
+					using = VerticalScrollAreaCutOff
+
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+
+					scrollbarpolicy_horizontal = always_off
+							
+					scrollwidget = {
+						vbox = {
+							vbox = {
+								layoutpolicy_horizontal = expanding 
+								layoutpolicy_vertical = shrinking
+								datamodel = "[Player.MakeScope.GetList('region_trade_centers')]"
+								item = {
+									hbox = {
+										hbox = {
+											layoutpolicy_vertical = expanding
+											layoutpolicy_horizontal = shrinking
+											datacontext = "[Scope.Province]"
+											widget = {
+												size = { 25 80 }
+											}
+											icon_and_text = {
+												size = { 130 0 }
+												tooltip = "The Trade Center of [Province.GetName] is owned by [Province.GetOwner.GetName]"
+												blockoverride "Icon"
+													{
+														texture = "gfx/interface/icons/shared_icons/civilization.dds"
+														size = { 0 0 }
+													}
+												blockoverride "Text"
+												{
+													text = "[Province.GetName]"
+													using = BaseFontM
+													using = Black_FontColor													
+												}												
+											}
+											widget = {
+												size = { 30 0 }
+											}
+											icon_and_text = {
+												size = { 76 0 }
+												tooltip = "[Province.GetName] is a level #Y [GuiScope.SetRoot( Province.MakeScope ).ScriptValue('trade_center_level_svalue')|0]#! Trade Center."
+												blockoverride "Icon"
+													{
+														texture = "gfx/interface/icons/shared_icons/trade.dds"
+													}
+												blockoverride "Text"
+												{
+													text = "[GuiScope.SetRoot( Province.MakeScope ).ScriptValue('trade_center_level_svalue')|0]"
+												}
+											}
+											widget = {
+												size  = { 30 0 }
+											}
+											#flowcontainer = {
+												#position = { 15 190 }
+												#parentanchor = top
+												icon_button_square = {
+													datacontext = "[GetScriptedGui('upgrade_trade_center_button')]"
+													visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Province.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+													size = { 285 65 }
+													blockoverride "On_click"
+													{
+														enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Province.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+														onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Province.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+													}
+													tooltip = "UPGRADE_TRADE_CENTER_TT"
+													blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
+													blockoverride "Icon" { texture = "gfx/interface/icons/military_traditions/latin_philosophy_start_bonus.dds" size = { 281 62 } }
+													alpha = 0.99
+												}
+											#}
+											widget = {
+												size = { 15 0 }
+											}
+											goto_button = {
+												size = { 36 36 }
+												blockoverride "On_click"
+												{
+													onclick = "[PanToProvince(Province.Self)]"
+												}
+												tooltip = "GO_TO_PROVINCE_TOOLTIP"
+											}
+											textbox = {
+												size = { 200 }
+											}
+										}													
+									}
+								}
+							}
+							vbox = {
+								name = "expander"
+								layoutpolicy_vertical = growing 
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 base_sub_window = {

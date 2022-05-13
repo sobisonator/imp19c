@@ -1,0 +1,565 @@
+demand_reparations_button = {
+	scope = war
+	saved_scopes = {
+		player
+	}
+	ai_is_valid = {
+		always = no
+	}
+	is_valid = {
+		trigger_if = {
+			limit = { is_civil_war = yes }
+			is_civil_war = no
+		}
+		trigger_if = {
+			limit = { 
+				any_war_defender = { this = scope:player } 
+			}
+			trigger_if = {
+				limit = {
+					NOT = { defender_warleader = scope:player }
+				}
+				custom_tooltip = {
+					text = player_is_the_defending_leader
+					defender_warleader = scope:player
+				}
+			}
+			custom_tooltip = {
+				text = has_greater_than_50_warscore_tt
+			    war_score = {
+			        target = defender_warleader
+			        value >= 50
+			    }
+		    }
+		    #TODO
+		    #IF THE WARGOAL PROVINCE EXISTS THAT HAS TO BE OWNED ELSE THE CAPITAL HAS TO BE OWNED.
+		    #GET THE WARGOAL PROVINCE FROM A LIST CREATED WHEN THE WINDOW OPENS
+		    custom_tooltip = {
+		    	text = control_attacker_capital_tt
+				attacker_warleader = {
+					capital_scope = { controller = scope:player }
+				}
+			}
+		}
+		trigger_if = {
+			limit = { 
+				any_war_attacker = { this = scope:player } 
+			}
+			trigger_if = {
+				limit = {
+					NOT = { attacker_warleader = scope:player }
+				}
+				custom_tooltip = {
+					text = player_is_the_attacking_leader
+					attacker_warleader = scope:player
+				}
+			}
+			custom_tooltip = {
+				text = has_greater_than_50_warscore_tt
+			    war_score = {
+			        target = attacker_warleader
+			        value >= 50
+			    }
+		    }
+		    custom_tooltip = {
+		    	text = control_defender_capital_tt
+				defender_warleader = {
+					save_temporary_scope_as = defender_country
+					capital_scope = { controller = scope:player }
+				}
+			}
+		}
+	}
+	effect = {
+		save_scope_as = war
+		if = {
+			limit = {
+				any_war_defender = { this = scope:player }
+			}
+			attacker_warleader = { save_scope_as = attacker }
+			custom_tooltip = 10_percent_income_for_10_years_defender_tt
+			attacker_warleader = {
+				set_variable = {
+					name = paying_5_year_reparations
+					days = 1825
+					value = scope:player 
+					#Value is scope:player so this variable can be used to check if money should be given and give the money at the same time.	 
+					#This also makes it so this will work in multiplayer which is nice
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_war_attacker = { this = scope:player }
+			}
+			defender_warleader = { save_scope_as = defender }
+			custom_tooltip = 10_percent_income_for_10_years_attacker_tt
+			defender_warleader = {
+				set_variable = {
+					name = paying_5_year_reparations
+					days = 1825
+					value = scope:player
+				}
+			}
+		}
+	}	
+}
+alt_peace_button = {
+	scope = war
+	saved_scopes = {
+		player
+	}
+	ai_is_valid = {
+		always = no
+	}
+	effect = {
+		every_war_attacker = {
+			scope:player = {
+				add_to_variable_list = {
+					name = war_attacker_list
+					target = prev
+				}
+			}			
+		}
+		every_war_defender = {
+			scope:player = {
+				add_to_variable_list = {
+					name = war_defender_list
+					target = prev
+				}
+			}
+		}
+	}
+}
+add_demand_gold_button = {
+	scope = war
+	saved_scopes = {
+		player
+	}
+
+	is_valid = {
+		trigger_if = {
+			limit = { is_civil_war = yes }
+			is_civil_war = no
+		}
+		trigger_if = {
+			limit = { 
+				any_war_defender = { this = scope:player } 
+			}
+			trigger_if = {
+				limit = {
+					NOT = { defender_warleader = scope:player }
+				}
+				custom_tooltip = {
+					text = player_is_the_defending_leader
+					defender_warleader = scope:player
+				}
+			}
+			trigger_if = {
+				limit = {
+					scope:player = { has_variable = demands_gold }
+				}
+				trigger_if = {
+					limit = { 
+						scope:player = {
+							var:demands_gold >= attacker_gold_max_svalue
+						}
+					}
+					custom_tooltip = {
+						text = attacker_gold_demand_at_max_tt
+						scope:player = {
+							NOT = { var:demands_gold >= attacker_gold_max_svalue }
+						}
+					}
+				}
+			}
+		}
+		trigger_if = {
+			limit = { 
+				any_war_attacker = { this = scope:player } 
+			}
+			trigger_if = {
+				limit = {
+					NOT = { attacker_warleader = scope:player }
+				}
+				custom_tooltip = {
+					text = player_is_the_attacking_leader
+					attacker_warleader = scope:player
+				}
+			}
+			trigger_if = {
+				limit = {
+					scope:player = { has_variable = demands_gold }
+				}
+				trigger_if = {
+					limit = { 
+						scope:player = {
+							var:demands_gold >= defender_gold_max_svalue
+						}
+					}
+					custom_tooltip = {
+						text = defender_gold_demand_at_max_tt
+						scope:player = {
+							NOT = { var:demands_gold >= defender_gold_max_svalue }
+						}
+					}
+				}
+			}
+		}
+	}
+	effect = {
+		scope:player = {
+			if = {
+				limit = {
+					NOT = { has_variable = current_warscore_cost }
+				}
+				set_variable = {
+					name = current_warscore_cost
+					value = 15
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = current_warscore_cost
+				}
+				change_variable = {
+					name = current_warscore_cost
+					add = 15
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_war_defender = { this = scope:player }
+				scope:player = {
+					NOT = { has_variable = demands_gold }
+				}
+			}
+			scope:player = {
+				set_variable = {
+					name = demands_gold
+					value = attacker_gold_actual_add_svalue
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				any_war_defender = { this = scope:player }
+				scope:player = {
+					has_variable = demands_gold
+				}				
+			}
+			scope:player = {
+				change_variable = {
+					name = demands_gold
+					add = attacker_gold_actual_add_svalue
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_war_attacker = { this = scope:player }
+				scope:player = {
+					NOT = { has_variable = demands_gold }
+				}
+			}
+			scope:player = {
+				set_variable = {
+					name = demands_gold
+					value = defender_gold_adding_svalue
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				any_war_attacker = { this = scope:player } 
+				scope:player = {
+					has_variable = demands_gold
+				}				
+			}
+			scope:player = {
+				change_variable = {
+					name = demands_gold
+					add = defender_gold_adding_svalue
+				}
+			}
+		}
+	}
+}
+subtract_demand_gold_button = {
+	scope = war
+	saved_scopes = {
+		player
+	}
+
+	is_valid = {
+		trigger_if = {
+			limit = { is_civil_war = yes }
+			is_civil_war = no
+		}
+		trigger_if = {
+			limit = { 
+				any_war_defender = { this = scope:player } 
+			}
+			trigger_if = {
+				limit = {
+					NOT = { defender_warleader = scope:player }
+				}
+				custom_tooltip = {
+					text = player_is_the_defending_leader
+					defender_warleader = scope:player
+				}
+			}
+			trigger_if = {
+				limit = {
+					scope:player = { has_variable = demands_gold }
+				}
+				trigger_if = {
+					limit = { 
+						scope:player = {
+							var:demands_gold = 0
+						}
+					}
+					custom_tooltip = {
+						text = cant_offer_less_than_zero_tt
+						scope:player = {
+							var:demands_gold != 0
+						}
+					}
+				}
+			}
+		}
+		trigger_if = {
+			limit = { 
+				any_war_attacker = { this = scope:player } 
+			}
+			trigger_if = {
+				limit = {
+					NOT = { attacker_warleader = scope:player }
+				}
+				custom_tooltip = {
+					text = player_is_the_attacking_leader
+					attacker_warleader = scope:player
+				}
+			}
+			trigger_if = {
+				limit = {
+					scope:player = { has_variable = demands_gold }
+				}
+				trigger_if = {
+					limit = { 
+						scope:player = {
+							var:demands_gold = 0
+						}
+					}
+					custom_tooltip = {
+						text = cant_offer_less_than_zero_tt
+						scope:player = {
+							var:demands_gold != 0
+						}
+					}
+				}
+			}
+		}
+	}
+	effect = {
+		scope:player = {
+			if = {
+				limit = {
+					has_variable = current_warscore_cost
+				}
+				change_variable = {
+					name = current_warscore_cost
+					subtract = 15
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_war_defender = { this = scope:player }
+				scope:player = {
+					has_variable = demands_gold
+				}				
+			}
+			scope:player = {
+				change_variable = {
+					name = demands_gold
+					subtract = attacker_gold_actual_add_svalue
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_war_attacker = { this = scope:player } 
+				scope:player = {
+					has_variable = demands_gold
+				}				
+			}
+			scope:player = {
+				change_variable = {
+					name = demands_gold
+					subtract = defender_gold_adding_svalue
+				}
+			}
+		}
+	}
+}
+add_offer_gold_button = {
+	scope = war
+	saved_scopes = {
+		player
+	}
+
+	is_valid = {
+		trigger_if = {
+			limit = { is_civil_war = yes }
+			is_civil_war = no
+		}
+		trigger_if = {
+			limit = {
+				scope:player = { has_variable = offer_gold }
+			}
+			trigger_if = {
+				limit = { 
+					scope:player = {
+						var:offer_gold >= player_gold_max_svalue
+					}
+				}
+				custom_tooltip = {
+					text = attacker_gold_offer_at_max_tt
+					scope:player = {
+						NOT = { var:offer_gold >= player_gold_max_svalue }
+					}
+				}
+			}
+		}
+	}
+	effect = {
+		scope:player = {
+			if = {
+				limit = {
+					NOT = { has_variable = current_warscore_cost }
+				}
+				set_variable = {
+					name = current_warscore_cost
+					value = 15
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = current_warscore_cost
+				}
+				change_variable = {
+					name = current_warscore_cost
+					add = 15
+				}
+			}
+		}
+		if = {
+			limit = {
+				scope:player = {
+					NOT = { has_variable = offer_gold }
+				}
+			}
+			scope:player = {
+				set_variable = {
+					name = offer_gold
+					value = player_gold_actual_add_svalue
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				scope:player = {
+					has_variable = offer_gold
+				}				
+			}
+			scope:player = {
+				change_variable = {
+					name = offer_gold
+					add = player_gold_actual_add_svalue
+				}
+			}
+		}
+	}	
+}
+subtract_offer_gold_button = {
+	scope = war
+	saved_scopes = {
+		player
+	}
+
+	is_valid = {
+		trigger_if = {
+			limit = { is_civil_war = yes }
+			is_civil_war = no
+		}
+		trigger_if = {
+			limit = {
+				scope:player = { has_variable = offer_gold }
+			}
+			trigger_if = {
+				limit = { 
+					scope:player = {
+						var:offer_gold = 0
+					}
+				}
+				custom_tooltip = {
+					text = cant_offer_less_than_zero_tt
+					scope:player = {
+						var:offer_gold != 0
+					}
+				}
+			}
+		}
+	}
+	effect = {
+		scope:player = {
+			if = {
+				limit = {
+					has_variable = current_warscore_cost
+				}
+				change_variable = {
+					name = current_warscore_cost
+					subtract = 15
+				}
+			}
+		}
+		if = {
+			limit = {
+				scope:player = {
+					has_variable = offer_gold
+				}				
+			}
+			scope:player = {
+				change_variable = {
+					name = offer_gold
+					subtract = player_gold_actual_add_svalue
+				}
+			}
+		}
+	}	
+}
+remove_war_lists_button = {
+	scope = country
+	effect = {
+        every_in_list = {
+            variable = war_defender_list
+            root = {
+	            remove_list_variable = {
+	                name = war_defender_list
+	                target = prev
+	            }
+	        }
+        }
+        every_in_list = {
+            variable = war_attacker_list
+            root = {
+	            remove_list_variable = {
+	                name = war_attacker_list
+	                target = prev
+	            }
+	        }
+        }
+	}	
+}

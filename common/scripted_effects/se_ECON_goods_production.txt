@@ -1,6 +1,6 @@
 # Function:	Create variables for stockpiles in every governorship
 # Scope:	Governorship
-# Called:	At beginning of game
+# Called:	1) At beginning of game
 
 GOODS_setup_governorship_stockpiles = {
 	set_variable = {
@@ -50,6 +50,10 @@ GOODS_setup_governorship_stockpiles = {
 	set_variable = {
 		name = sulphur_stockpile
 		value = GOODS_governorship_sulphur_produced
+	}
+	set_variable = {
+		name = whales_stockpile
+		value = GOODS_governorship_whales_produced
 	}
 	set_variable = {
 		name = gems_stockpile
@@ -157,13 +161,52 @@ GOODS_setup_governorship_stockpiles = {
 	}
 }
 
+
+# Function: Update the list of goods that a governorship produces
+#			Then the governorship will only calculate production for those goods
+# Scope:	Governorship
+# Called:	1) At the beginning of the game
+#			2) Whenever the goods in a province change, it should be triggered for that province's governorship
+#			3) Whenever ownership of territory changes, it should be triggered in all governorships involved
+GOODS_update_governorship_local_goods = {
+	GOODS_check_if_governorship_grain_produced = yes
+}
+
+# Child effects of GOODS_update_governorship_local_goods
+
+GOODS_check_if_governorship_grain_produced = {
+	if = {
+		limit = {
+			any_governorship_state = {
+				any_state_province = {
+					trade_goods = grain
+				}
+			}
+		}
+		set_variable = {
+			name = produces_grain
+			value = 1
+		}
+	}
+	else = {
+		remove_variable  = {
+			name = produces_grain
+		}
+	}
+}
+
+# Function:	Transfer ownership of stockpiles when a governorship is taken over
+# Scope:	Governorship
+# Called:	Whenever ownership of territory changes, it should be triggered in all governorships involved
+
+GOODS_transfer_stockpile_ownership = {
+	# This needs to transfer a % of each stockpile based on... population of cities taken over? TBD
+	# Consider the scenario where a governorship is wholly taken over by a tag. That might need its own sub-function
+}
+
 # Function:	Set the amount of raw goods produced by a governorship
 # Scope:	Governorship
 # Called:	Quarterly
-
-GOODS_update_governorship_production = {
-	# Only update production for goods actually produced within a governorship
-}
 
 GOODS_produce_fur = {
 

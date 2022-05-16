@@ -1,0 +1,364 @@
+namespace = health
+
+health.1 = { #Death during childbirth
+	type = character_event
+	title = "health.1.t"
+	desc = "health.1.desc"
+	picture = greek_court
+	
+	left_portrait = root
+	right_portrait = scope:grieving_husband
+	
+	trigger = {
+		is_alive = yes
+		exists = employer 
+	}
+	
+	
+	immediate = {
+		scope:newborn = {
+			save_scope_as = newborn
+		}
+		if = {
+			limit = {
+				has_trait = infection
+			}
+			death = {
+				death_reason = death_infection_during_childbirth
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = {
+					has_trait = infection
+				}
+			}
+			death = {
+				death_reason = death_childbirth
+			}
+		}
+		employer = {
+			if = {
+				limit = {
+					any_character = {
+						is_spouse_of = root
+						is_alive = yes
+					}
+				}
+				random_character = {
+					limit = {
+						is_spouse_of = root
+					}
+					save_scope_as = grieving_husband
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "health.1.a"
+		if = {
+			limit = {
+				exists = scope:grieving_husband
+				scope:grieving_husband = {
+					NOT = {
+						has_trait = mourning
+					}
+				}
+			}
+			random = {
+			chance = 50
+				scope:grieving_husband = {
+					add_trait = mourning
+					trigger_event = {
+						id = health.2
+						days = { 360 3600 }
+					}
+				}
+			}	
+		}
+	}
+	
+}
+
+health.2 = { #Death during childbirth
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		is_alive = yes
+		has_trait = mourning
+	}
+	
+	immediate = {
+		remove_trait = mourning
+	}
+	
+}
+
+health.3 = { #Death of mother and child during childbirth
+	type = character_event
+	title = "health.3.t"
+	desc = "health.3.desc"
+	picture = greek_court
+	
+	left_portrait = root
+	left_portrait = scope:newborn
+	right_portrait = scope:grieving_husband
+	
+	trigger = {
+		is_alive = yes
+		exists = employer 
+	}
+	
+	
+	immediate = {
+		scope:newborn = {
+			save_scope_as = newborn
+		}
+		if = {
+			limit = {
+				has_trait = infection
+			}
+			death = {
+				death_reason = death_infection_during_childbirth
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = {
+					has_trait = infection
+				}
+			}
+			death = {
+				death_reason = death_childbirth
+			}
+		}
+		scope:newborn = {
+			death = {
+				death_reason = death_being_born
+			}
+		}
+		employer = {
+			if = {
+				limit = {
+					any_character = {
+						is_spouse_of = root
+						is_alive = yes
+					}
+				}
+				random_character = {
+					limit = {
+						is_spouse_of = root
+					}
+					save_scope_as = grieving_husband
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "health.3.a"
+		if = {
+			limit = {
+				exists = scope:grieving_husband
+				scope:grieving_husband = {
+					NOT = {
+						has_trait = mourning
+					}
+				}
+			}
+			scope:grieving_husband = {
+				add_trait = mourning
+				trigger_event = {
+					id = health.2
+					days = { 360 3600 }
+				}
+			}
+		}
+	}
+	
+}
+
+health.4 = { #Death of child during childbirth
+	type = character_event
+	title = "health.4.t"
+	desc = "health.4.desc"
+	picture = greek_court
+	
+	left_portrait = root
+	left_portrait = scope:newborn
+	right_portrait = scope:grieving_husband
+	
+	trigger = {
+		is_alive = yes
+		exists = employer 
+	}
+	
+	
+	immediate = {
+		scope:newborn = {
+			save_scope_as = newborn
+		}
+		scope:newborn = {
+			death = {
+				death_reason = death_being_born
+			}
+		}
+		employer = {
+			if = {
+				limit = {
+					any_character = {
+						is_spouse_of = root
+						is_alive = yes
+					}
+				}
+				random_character = {
+					limit = {
+						is_spouse_of = root
+						is_alive = yes
+					}
+					save_scope_as = grieving_husband
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "health.4.a"
+		if = {
+			limit = {
+				NOT = {
+					has_trait = mourning
+				}
+			}
+			add_trait = mourning
+		}
+		trigger_event = {
+			id = health.2
+			days = { 360 3600 }
+		}
+		if = {
+			limit = {
+				exists = scope:grieving_husband
+				scope:grieving_husband = {
+					NOT = {
+						has_trait = mourning
+					}
+				}
+			}
+			scope:grieving_husband = {
+				add_trait = mourning
+				trigger_event = {
+					id = health.2
+					days = { 360 3600 }
+				}
+			}
+		}
+	}
+	
+}
+
+health.5 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		is_alive = yes
+	}
+	
+	immediate = {
+		add_health = -10
+	}
+}
+
+health.6 = {
+	type = character_event
+	title = "health.6.t"
+	desc = "health.6.desc"
+	picture = greek_court
+	
+	left_portrait = root
+	
+	trigger = {
+		is_alive = yes
+		NOT = {
+			has_trait = depressed
+		}
+	}
+	
+	weight_multiplier = {
+		modifier = {
+			factor = 2
+			has_trait = mourning
+		}
+	}
+	
+	option = {
+		name = "health.6.a"
+		if = {
+			limit = {
+				has_trait = mourning
+			}
+			remove_trait = mourning
+		}
+		add_trait = depressed
+	}
+	
+}
+
+health.7 = {
+	type = character_event
+	title = "health.7.t"
+	desc = "health.7.desc"
+	picture = ascetic
+	
+	left_portrait = root
+	
+	trigger = {
+		is_alive = yes
+		has_trait = depressed
+	}
+	
+	weight_multiplier = {
+		modifier = {
+			factor = 1.5
+			num_of_children >= 1
+		}
+		modifier = {
+			factor = 1.5
+			is_married = yes
+		}
+		modifier = {
+			factor = 1.5
+			num_of_friends = yes
+		}
+	}
+	
+	option = {
+		name = "health.7.a"
+		remove_trait = depressed
+	}
+	
+}
+
+health.8 = {
+	type = character_event
+	hidden = yes
+	
+	immediate = {
+		add_health = -5
+	}
+	
+}
+
+health.9 = {
+	type = character_event
+	hidden = yes
+	
+	immediate = {
+		add_health = 5
+	}
+	
+}
+	

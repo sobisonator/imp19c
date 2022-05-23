@@ -12,6 +12,7 @@ event2canvas = lambda e, c: (c.canvasx(e.x), c.canvasy(e.y)) # Why is this here?
 class Editor: # Parent class
     def __init__(self):
         self.config = configparser.ConfigParser()
+        self.config.read('config/MapEditor.ini')
 
         # Declare the credentials var on init, but it will only be given a file at the credentials select stage by the GUI object
         self.remote_credentials = None # NEED TO GET THIS FROM GUI FUNCTION
@@ -30,9 +31,19 @@ class Editor: # Parent class
             self.setup_remote_sheet()
             
 
+    def config_to_dict(self, input_config):
+        config_as_dict = {s:dict(input_config.items(s)) for s in input_config.sections()}
+
     def setup_remote_sheet(self):
         remote_sheet_name = self.config['RemoteSheet']['SheetName']
-        remote = RemoteSheet.new(sheet_name = remote_sheet_name, credentials = self.remote_credentials)
+        remote_sheet_columns = self.config.items('RemoteColumns')
+        for k, v in remote_sheet_columns.items():
+            remote_sheet_columns[k] = int(v) # Convert the column indices to integers
+        remote = RemoteSheet.new(
+            sheet_name = remote_sheet_name, 
+            credentials = self.remote_credentials,
+            column_indices = remote_sheet_columns
+            )
 
 # MapHandler deals with the map image files
 class MapHandler:
@@ -113,7 +124,7 @@ class MapEditorGUI:
         
 class RemoteSheet:
      # https://youtu.be/cnPlKLEGR7E?t=346
-    def __init__(self, sheet_name, credentials):
+    def __init__(self, sheet_name, credentials, column_indices):
         self.credentials = credentials # Credentials are loaded from a separate file, selected when the user is prompted on startup
     
         client = gspread.service_account(filename=credentials)
@@ -124,25 +135,7 @@ class RemoteSheet:
 
         # dataframe = gd.get_as_dataframe(sheet) # Not used - consider removing
 
-        self.column_indices = { # Best defined in config... TODO!
-                "ProvID": 1,
-                "Culture": 2,
-                "Religion": 3,
-                "TradeGoods": 4,
-                "Citizens": 5,
-                "Freedmen": 6,
-                "LowerStrata": 7,
-                "MiddleStrata": 8,
-                "Proletariat": 9,
-                "Slaves": 10,
-                "Tribesmen": 11,
-                "UpperStrata": 12,
-                "Industrialisation": 13,
-                "SettlementRank": 14,
-                "NameRef": 15,
-                "AraRef": 16,
-                "Terrain":17
-        }
+        self.column_indices = column_indices
 
     def write_to_sheet(self, provid, column, data):
         # Data is a row from the database
@@ -154,7 +147,11 @@ class RemoteSheet:
         # THOUGHTS:
         # Is it best to read straight from the sheet, and not rely on anything local at all?
         # We could just read one row at a time when we click on the corresponding province
-        # We should probably put the remote sheet prompt before the local file select dialog, in that case.
+        #
+        # Process is as follows:
+        # 1) Get the PROVID locally, from the save file using the RGB comparison
+        # 2) Lookup the PROVID on the spreadsheet
+        # 3) Return the data from that PROVID as a tuple/list
         pass
 
 # What a mess...

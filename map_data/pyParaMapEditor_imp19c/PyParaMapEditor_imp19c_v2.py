@@ -14,6 +14,8 @@ class Editor: # Parent class
         self.config = configparser.ConfigParser()
         self.config.read('config/MapEditor.ini')
 
+        self.has_remote_sheet = False # If true, functions related to getting remote data will be used.
+
         # Declare the credentials var on init, but it will only be given a file at the credentials select stage by the GUI object
         self.remote_credentials = None # NEED TO GET THIS FROM GUI FUNCTION
 
@@ -29,21 +31,26 @@ class Editor: # Parent class
         gui.prompt_file_select()
         if self.remote_credentials != None: # We only need a remote sheet object if we're actually using a remote sheet
             self.setup_remote_sheet()
-            
 
     def config_to_dict(self, input_config):
         config_as_dict = {s:dict(input_config.items(s)) for s in input_config.sections()}
+        return config_as_dict
+
+    def get_remote_sheet_columns(self, input_columns):
+        remote_sheet_columns = input_columns
+        for k, v in remote_sheet_columns.items():
+            remote_sheet_columns[k] = int(v) # Convert the column indices to integers
+        return remote_sheet_columns # Dict
 
     def setup_remote_sheet(self):
         remote_sheet_name = self.config['RemoteSheet']['SheetName']
-        remote_sheet_columns = self.config.items('RemoteColumns')
-        for k, v in remote_sheet_columns.items():
-            remote_sheet_columns[k] = int(v) # Convert the column indices to integers
-        remote = RemoteSheet.new(
+        remote_sheet_columns = get_remote_sheet_columns(self.config.items('RemoteColumns'))
+        self.remote_sheet = RemoteSheet.new(
             sheet_name = remote_sheet_name, 
             credentials = self.remote_credentials,
             column_indices = remote_sheet_columns
             )
+        self.has_remote_sheet = True
 
 # MapHandler deals with the map image files
 class MapHandler:
@@ -81,6 +88,18 @@ class MapHandler:
         print(str(len(self.sea_provinces)) + " sea provinces found and " +
             str(len(self.land_provinces)) + " land provinces found.")
         print("Total provinces in land and sea: " + str(self.total_provinces))
+
+        # Get the definition CSV file. If there isn't one, one will be generated on the first time it's loaded.
+        try:
+            self.definition_csv = open("definition.csv","r")
+        except:
+            self.definition_csv = False
+       
+        # Check for a local setup file - maybe not necessary if
+        try:
+            self.province_setup_csv = open("province_setup.csv",'r',encoding='UTF-8')
+        except:
+            self.province_setup_csv = False
 
 class MapEditorGUI:
     def __init__(self):
@@ -154,24 +173,9 @@ class RemoteSheet:
         # 3) Return the data from that PROVID as a tuple/list
         pass
 
-# What a mess...
-try:
-    province_setup_csv = open('province_setup.csv', 'r',encoding='UTF-8')
-except:
-    province_setup_csv = False
-try:
-    definition_csv = open('definition.csv', 'r')
-except:
-    definition_csv = False
-
-# Only establish a connection if credentials have been provided
-if CREDENTIALS:
-    remote_sheet = SheetConnection()
-    remote_sheet_exists = True
-
 # Database connection class
 class database_connection(object):
-    def __init__(self):
+    def __init__(self, column_indices):
         db_path = map_file
         self.connection = sqlite3.connect(db_path)
         self.cursor = self.connection.cursor()
@@ -189,6 +193,8 @@ class database_connection(object):
 
         # A list of free province IDs which can be re-used when provinces are deleted
         self.free_ids = []
+
+        self.column_indices = column_indices
 
     def db_fetchone(self):
         return self.cursor.fetchone()

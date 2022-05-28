@@ -74,7 +74,7 @@ void ScriptedTriggers()
     }
 }
 
-void ScriptValues ()
+void GoodsProducedScriptValues ()
 {
     string trade_zone;
     string regions_from_file;
@@ -120,9 +120,54 @@ void ScriptValues ()
     }
 }
 
-void CustomLoc ()
+void PopulationScriptValues ()
 {
     string trade_zone;
+    string regions_from_file;
+    vector<string> regions;
+    ofstream fw("script_values_2.txt", ofstream::out);
+    if (fw.is_open())
+    {
+        ifstream input_file;
+        input_file.open("input_all.in");
+        while (regions_from_file != "DONE")
+        {
+            input_file >> regions_from_file;
+            if (regions_from_file == "START")
+            {
+                input_file >> trade_zone;
+            }
+            else if (regions_from_file != "PRINT")
+            {
+                regions.push_back(regions_from_file);
+            }
+            else if (regions_from_file == "PRINT")
+            {
+                fw << trade_zone << "_total_population = {" << endl;
+                fw << "    value = 0" << endl;
+                for (int i = 0; i < regions.size(); i++) {
+                    fw << "    region:" << regions.at(i) << " = {" << endl;
+                    fw << "        every_region_province = {" << endl;
+                    fw << "            add = total_population" << endl;
+                    fw << "        }" << endl;
+                    fw << "    }";
+                    fw << endl;
+                }
+                fw << "}" << endl;
+            }
+            if (regions_from_file == "CLEAR")
+            {
+                regions.clear();
+            }
+        }
+        regions.clear();
+        cout << "\nScript Values have been generated successfully.\n";
+        fw.close();
+    }
+}
+
+void CustomLoc ()
+{
     string zones_from_file;
     vector<string> tradeZones;
     ofstream fw("custom_loc.txt", ofstream::out);
@@ -133,11 +178,7 @@ void CustomLoc ()
         while (zones_from_file != "DONE")
         {
             input_file >> zones_from_file;
-            if (zones_from_file == "START")
-            {
-                input_file >> trade_zone;
-            }
-            else if (zones_from_file != "PRINT")
+            if (zones_from_file != "PRINT")
             {
                 tradeZones.push_back(zones_from_file);
             }
@@ -204,11 +245,7 @@ void Localization ()
         while (zones_from_file != "DONE")
         {
             input_file >> zones_from_file;
-            if (zones_from_file == "START")
-            {
-                input_file >> trade_zone;
-            }
-            else if (zones_from_file != "PRINT")
+            if (zones_from_file != "PRINT")
             {
                 tradeZones.push_back(zones_from_file);
             }
@@ -277,7 +314,8 @@ void SetupEvent ()
 int main()
 {
     ScriptedTriggers();
-    ScriptValues();
+    GoodsProducedScriptValues();
+    PopulationScriptValues();
     CustomLoc ();
     Localization ();
     SetupEvent ();

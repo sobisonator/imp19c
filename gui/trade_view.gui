@@ -11,6 +11,7 @@ base_window = {
 		start_sound = {
 			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
 		}
+		on_start = "[GetVariableSystem.Clear('trade_zone_view_open')]"
 	}
 	state = {
 		name = _hide
@@ -21,7 +22,7 @@ base_window = {
 
 	vbox = {
 		using = MainWindowHeaderBox
-		
+		visible = "[Not(GetVariableSystem.Exists('trade_zone_view_open'))]"
 		blockoverride "Title_text" { text = "TRADE_MENU_HEADER" }
 		
 		blockoverride "White_buttons"
@@ -63,7 +64,7 @@ base_window = {
 				size = { 0 80 }
 				layoutpolicy_horizontal = expanding
 				flowcontainer = {
-					position = { 350 10 }
+					position = { 430 5 }
 					icon_button_square = {
 						size = { 50 50 }
 						datacontext = "[GetScriptedGui('open_economy_view_button')]"
@@ -80,7 +81,7 @@ base_window = {
 					}
 				}
 				flowcontainer = {
-					position = { 280 10 }
+					position = { 320 5 }
 					icon_button_square = {
 						size = { 50 50 }
 						datacontext = "[GetScriptedGui('open_trade_goods_view_button')]" 
@@ -94,6 +95,22 @@ base_window = {
 							texture = "gfx/interface/icons/modifiers/base_resources.dds" 
 							size = { 40 40 }
 						}
+					}
+				}
+				flowcontainer = {
+					position = { 280 60 }
+					text_button_square = {
+						position = { 140 -20 }
+						name = "open trade zones"
+						datacontext = "[GetScriptedGui('show_trade_zones_button')]"
+						blockoverride "Center_text" { text = "Trade Zones" }
+						blockoverride "On_click" { 
+							onclick = "[GetVariableSystem.Toggle('trade_zone_view_open')]"
+							onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
+						}
+						tooltip = "#T Trade Zones#!"
+						parentanchor = bottom|hcenter
+						size = { 250 24 }
 					}
 				}
 				hbox = {
@@ -515,5 +532,125 @@ base_window = {
 		}
 		
 	}
-}
 
+	base_window = {
+		size = { 800 950 }
+		using = Imp19cFadeStates
+		movable = no
+		alwaystransparent = no
+		visible = "[GetVariableSystem.Exists('trade_zone_view_open')]"
+		vbox = {
+			using = MainWindowHeaderBoxCentered
+				
+			blockoverride "Title_text" { text = "Trade Zones" }
+				
+			vbox = {
+				layoutpolicy_vertical = expanding
+			}		
+		}
+		flowcontainer = {
+			parentanchor = top|right
+			position = { -10 15 }
+
+			button_close = {
+				name = "the_close"
+				onclick = "[GetVariableSystem.Clear('trade_zone_view_open')]"
+				datacontext = "[GetScriptedGui('remove_trade_zones_list_button')]"
+				onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+				tooltip = "CLOSE"
+			}
+		}
+		#Governorship List
+		vbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			margin_top = 49
+			margin_bottom = 8
+			margin_right = 5
+			margin_left = 0
+
+			vbox = {
+				margin_bottom = 5
+				layoutpolicy_vertical = expanding
+				layoutpolicy_horizontal = expanding
+
+				scrollarea = {
+					layoutpolicy_vertical = expanding
+					using = VerticalScrollAreaCutOff
+
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+
+					scrollbarpolicy_horizontal = always_off
+							
+					scrollwidget = {
+						vbox = {
+							vbox = {
+								layoutpolicy_horizontal = expanding 
+								layoutpolicy_vertical = shrinking
+								datamodel = "[Player.MakeScope.GetList('trade_zones_list')]"
+								item = {
+									hbox = {
+										hbox = {
+											layoutpolicy_vertical = expanding
+											layoutpolicy_horizontal = shrinking
+											datacontext = "[Scope.Province]"
+											widget = {
+												size = { 5 55 }
+											}
+											textbox = {
+												margin_left = 10
+												size = { 115 0 }
+												using = BaseFontM
+												using = Black_FontColor
+												text = "[Province.Custom('state_trade_zone_loc')]" #TradeZone name
+											}
+											widget = {
+												size = { 70 0 }
+											}
+											icon_and_text = {
+												size = { 100 0 }
+												tooltip = "TRADE_ZONE_PRODUCTION_TT"
+												blockoverride "Icon"
+													{
+														texture = "gfx/interface/icons/modifiers/base_resources.dds"
+													}
+												blockoverride "Text"
+												{
+													text = "[Province.Custom('state_trade_zone_value_loc')]" #TradeZone goods produced
+												}
+											}
+											widget = {
+												size = { 25 0 }
+											}
+											icon_and_text = {
+												size = { 100 0 }
+												tooltip = "TRADE_ZONE_POPULATION_TT"
+												blockoverride "Icon"
+													{
+														texture = "gfx/interface/icons/shared_icons/pop_type.dds"
+													}
+												blockoverride "Text"
+												{
+													text = "[Province.Custom('trade_zone_population_loc')]" #TradeZone pops
+												}
+											}
+											textbox = {
+												size = { 550 }
+											}
+										}
+									}
+								}
+							}
+							vbox = {
+								name = "expander"
+								layoutpolicy_vertical = growing 
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

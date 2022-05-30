@@ -36,7 +36,7 @@ class Editor: # Parent class
         config_as_dict = {s:dict(input_config.items(s)) for s in input_config.sections()}
         return config_as_dict
 
-    def get_remote_sheet_columns(self, input_columns):
+    def get_remote_sheet_column_indices(self, input_columns):
         remote_sheet_columns = input_columns
         for k, v in remote_sheet_columns.items():
             remote_sheet_columns[k] = int(v) # Convert the column indices to integers
@@ -44,7 +44,7 @@ class Editor: # Parent class
 
     def setup_remote_sheet(self):
         remote_sheet_name = self.config['RemoteSheet']['SheetName']
-        remote_sheet_columns = get_remote_sheet_columns(self.config.items('RemoteColumns'))
+        remote_sheet_columns = self.get_remote_sheet_column_indices(self.config.items('RemoteColumns'))
         self.remote_sheet = RemoteSheet.new(
             sheet_name = remote_sheet_name, 
             credentials = self.remote_credentials,
@@ -174,6 +174,8 @@ class RemoteSheet:
         pass
 
 # Database connection class
+# Only needed for the definition reading so we can interpret the province map
+# As we will be reading directly from the remote sheet at all times
 class database_connection(object):
     def __init__(self, column_indices):
         db_path = map_file
@@ -182,10 +184,25 @@ class database_connection(object):
         
         self.load_db()
 
-        self.checksum_query = "INSERT OR IGNORE INTO province_checksums(province_checksum) VALUES (:checksum)"
+        self.checksum_query = """INSERT OR IGNORE INTO province_checksums(province_checksum)
+                                    VALUES (:checksum)"""
 
-        self.definition_query = "INSERT OR IGNORE INTO definition(Province_id, R, G, B, Name, x) VALUES (?,?,?,?,?,?)"
-        self.setup_query = "INSERT OR IGNORE INTO province_setup(ProvID, Culture, Religion, TradeGoods, Citizens, Freedmen, LowerStrata, MiddleStrata, Proletariat, Slaves, Tribesmen, UpperStrata, Civilization, SettlementRank, NameRef, AraRef, Terrain, isChanged) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+        self.definition_query = """INSERT OR IGNORE INTO definition(
+                                        Province_id,
+                                        R,
+                                        G,
+                                        B,
+                                        Name,
+                                        x
+                                    )
+                                    VALUES (
+                                        ?,
+                                        ?,
+                                        ?,
+                                        ?,
+                                        ?,
+                                        ?
+                                    )"""
 
         # A list to hold new provinces with checksums not existing in the current save
         self.new_sea_provinces = []
@@ -200,42 +217,26 @@ class database_connection(object):
         return self.cursor.fetchone()
 
     def setup_update_query(self, row):
-        provid_col = 0
-        culture_col = 1
-        religion_col = 2
-        tradegood_col = 3
-        #4
-        indentured_col = 5
-        lower_strata_col = 6
-        middle_strata_col = 7
-        proletariat_col = 8
-        slaves_col = 9
-        tribesmen_col = 10
-        upper_strata_col = 11
-        industrialisation_col = 12
-        province_rank_col = 13
-        name_col = 14
-        area_col = 15
-        terrain_col = 16
+        # Instead of defining the columns individually, just get their column index by the name
         for item in row:
             if item == "":
                 item = "0"
-        query = "UPDATE province_setup SET Culture ='" + row[culture_col]+"'," \
-        " Religion ='" + row[religion_col]+"'," \
-        " TradeGoods ='" + row[tradegood_col]+"'," \
-        " Citizens =" + row[4]+"," \
-        " Freedmen =" + row[indentured_col]+"," \
-        " LowerStrata =" + row[lower_strata_col]+"," \
-        " MiddleStrata =" + row[middle_strata_col]+"," \
-        " Proletariat =" + row[proletariat_col]+"," \
-        " Slaves =" + row[slaves_col]+"," \
-        " Tribesmen =" + row[tribesmen_col]+"," \
-        " UpperStrata =" + row[upper_strata_col]+"," \
-        " Civilization =" + row[industrialisation_col]+"," \
-        " SettlementRank =" + row[province_rank_col]+"," \
-        " NameRef ='" + row[name_col].replace("'","’")+"'," \
-        " AraRef ='" + row[area_col].replace("'","’")+"'," \
-        " Terrain ='" + row[terrain_col].replace("'", "’") + "' WHERE ProvID = " + row[provid_col]
+        query = "UPDATE province_setup SET Culture ='" + row[self.column_indices("Culture")]+"'," \
+        " Religion ='" + row[self.column_indices("Religion")]+"'," \
+        " TradeGoods ='" + row[self.column_indices("Culture")]+"'," \
+        " Citizens =" + row[self.column_indices("Culture")]+"," \
+        " Freedmen =" + row[self.column_indices("Culture")]+"," \
+        " LowerStrata =" + row[self.column_indices("Culture")]+"," \
+        " MiddleStrata =" + row[self.column_indices("Culture")]+"," \
+        " Proletariat =" + row[self.column_indices("Culture")]+"," \
+        " Slaves =" + row[self.column_indices("Culture")]+"," \
+        " Tribesmen =" + row[self.column_indices("Culture")]+"," \
+        " UpperStrata =" + row[self.column_indices("Culture")]+"," \
+        " Civilization =" + row[self.column_indices("Culture")]+"," \
+        " SettlementRank =" + row[self.column_indices("Culture")]+"," \
+        " NameRef ='" + row[self.column_indices("Culture")].replace("'","’")+"'," \
+        " AraRef ='" + row[self.column_indices("Culture")].replace("'","’")+"'," \
+        " Terrain ='" + row[self.column_indices("Culture")].replace("'", "’") + "' WHERE ProvID = " + row[provid_col]
         return self.cursor.execute(query, "")
 
     def db_fetchall(self):
@@ -330,11 +331,6 @@ class database_connection(object):
                 checksum_query = self.checksum_query
                 self.query(checksum_query, checksum_params)
                 # print("Created definition for province " + str(i))
-                if provtype == "landprov":
-                    setup_params = (str(i), "roman", "roman_pantheon", "cloth", "1", "1", "1", "1", "40", "0", "landprov"+str(i), "noregion", "plains")
-                elif provtype == "seaprov":
-                    setup_params = (str(i), "", "", "", "0", "0", "0", "0", "0", "0", "seaprov"+str(i), "", "ocean")
-                self.query(self.setup_query, setup_params)
                 return True
             elif new_province == False:
                 if provtype == "seaprov":
@@ -355,7 +351,7 @@ class database_connection(object):
                 self.query(self.definition_query, (row[0], row[1], row[2], row[3], row[4], row[5]))
             self.connection.commit()
 
-    def import_remote_sheet(self):
+    def import_remote_sheet(self): # Obsolete - writing to remote
         # Import a remote sheet
         if remote_sheet_exists:
             rows = remote_sheet.data[1:]
@@ -364,7 +360,7 @@ class database_connection(object):
                 self.setup_update_query(row)
             self.connection.commit()
 
-    def import_setup(self):
+    def import_setup(self): # Obsolete - writing to remote
         # Import setup
         if province_setup_csv:
             rows = list(csv.reader(province_setup_csv, delimiter=";"))
@@ -413,7 +409,7 @@ class database_connection(object):
             self.query(province_setup_query,params)
         self.db_commit("")
 
-    def default_setup(self):
+    def default_setup(self): # Obsolete
         i = 1
         while i < total_provinces:
             try:
@@ -433,7 +429,7 @@ class database_connection(object):
                 self.db_commit("")
             break
 
-    def export_to_csv(self):
+    def export_to_csv(self): # Rework - needs to export to CSV from sheet
         print("Exporting to CSV")
         select_setup = "SELECT * FROM province_setup;"
         self.query(select_setup, "")
@@ -445,165 +441,169 @@ class database_connection(object):
                 csv_writer.writerow(row)
 
 
-db = database_connection()
+# db = database_connection()
 
-if remote_sheet_exists:
-    db.import_remote_sheet()
-elif province_setup_csv:
-    db.import_setup()
+#if remote_sheet_exists:
+#    db.import_remote_sheet()
+#elif province_setup_csv:
+#    db.import_setup()
 
-if not remote_sheet_exists:
-    if definition_csv:
-        db.import_definition()
-    else:
-        db.fill_definition()
+#if not remote_sheet_exists:
+#    if definition_csv:
+#        db.import_definition()
+#    else:
+#        db.fill_definition()
 
-root = Tk()
+class EditorGUI():
+    def __init__(self, column_indices, remote_sheet, db):
+        self.root = Tk()
 
-#setting up a tkinter canvas with scrollbars
-frame = Frame(root, bd=2, relief=SUNKEN)
-frame.grid_rowconfigure(0, weight=1)
-frame.grid_columnconfigure(0, weight=1)
-xscroll = Scrollbar(frame, orient=HORIZONTAL)
-xscroll.grid(row=1, column=0, sticky=E+W)
-yscroll = Scrollbar(frame)
-yscroll.grid(row=0, column=1, sticky=N+S)
-canvas = Canvas(frame, bd=0, xscrollcommand=xscroll.set, yscrollcommand=yscroll.set)
-canvas.grid(row=0, column=0, sticky=N+S+E+W)
-xscroll.config(command=canvas.xview)
-yscroll.config(command=canvas.yview)
+        self.remote_sheet = remote_sheet
+        self.db = db # Reference to database for picking out province ID from RGB values on the image
 
-editorframe = Frame(frame, bd=2, relief=SUNKEN, padx=110)
-editorframe.grid(row=0, column=2)
+        # Take the column names and use them for editable fields on the GUI. The names are stored as keys in the indices dict
+        # Unpack the dict into a list literal
+        self.data_fields = [*column_indices]
 
-def export_to_csv():
-    db.export_to_csv()
+        self.create_mapview()
+        self.create_export_button()
+        self.frame.pack(fill=BOTH,expand=1)
+        self.add_map_canvas()
 
-export_button = Button(frame, command= lambda: export_to_csv(), text="Export to CSV", bd=4, height=2, padx=2, bg="deep sky blue")
-export_button.grid(row=1, column=2)
+        self.list_of_entries = self.create_fields()
 
-def makeentry(parent, caption, rownum, **options):
-    Label(parent, text=caption, pady=10).grid(row = rownum, column = 0)
-    entry = Entry(parent, width=16, font=("Arial 18"), **options)
-    entry.grid(row = rownum, column = 1)
-    return entry
+        # Empty value for comparing when field values are changed
+        self.entry_value = None
 
-fields = [
-    "ProvID",
-    "Culture",
-    "Religion",
-    "TradeGoods",
-    "Citizens",
-    "Indentured",
-    "LowerStrata",
-    "MiddleStrata",
-    "Proletariat",
-    "Slaves",
-    "Tribesmen",
-    "UpperStrata",
-    "Industrialisation",
-    "SettlementRank",
-    "NameRef",
-    "AraRef",
-    "Terrain"
-]
+        # Empty value for comparing the previous selected province
+        self.prev_province = None
 
-frame.pack(fill=BOTH,expand=1)
+    def create_mapview(self):
+        #setting up a tkinter canvas with scrollbars
+        self.frame = Frame(root, bd=2, relief=SUNKEN)
+        self.frame.grid_rowconfigure(0, weight=1)
+        self.frame.grid_columnconfigure(0, weight=1)
+        xscroll = Scrollbar(frame, orient=HORIZONTAL)
+        xscroll.grid(row=1, column=0, sticky=E+W)
+        yscroll = Scrollbar(frame)
+        yscroll.grid(row=0, column=1, sticky=N+S)
+        self.canvas = Canvas(frame, bd=0, xscrollcommand=xscroll.set, yscrollcommand=yscroll.set)
+        self.canvas.grid(row=0, column=0, sticky=N+S+E+W)
+        xscroll.config(command=self.canvas.xview)
+        yscroll.config(command=self.canvas.yview)
 
-# If name changes, it also needs to change in the definition.csv
-def change_name(submission):
-    # definition.csv puts semicolons between spaces in names
-    csv_submission = str(submission).replace(" ",";")
-    extra_query = "UPDATE definition SET 'Name'='" + csv_submission + "' WHERE Province_id = "+ list_of_entries[0].get() +";"
-    db.db_commit(extra_query)
-    print("Name changed in definition")
+        self.editorframe = Frame(frame, bd=2, relief=SUNKEN, padx=110)
+        self.editorframe.grid(row=0, column=2)
 
-def submit_entry(event, fields):
-    #try:
-    submission = event.widget.get()
-    print("Submitting " + submission)
-    event.widget.config({"background":"lime"})
-    widget_id = fields[list_of_entries.index(event.widget)].replace("Indentured","Freedmen")
-    # Now find the field that corresponds to the widget
-    submission_query = "UPDATE province_setup SET '" + widget_id + "'='" + str(submission) + "', 'isChanged' = 'TRUE' WHERE ProvID = "+ list_of_entries[0].get() +";"
-    print(submission_query)
-    db.db_commit(submission_query)
-    if widget_id == "NameRef":
-        change_name(submission)
-    if remote_sheet_exists:
-        # Send the submission to the database at the correct PROVID (list of entries 0) and column (widget_id)
-        remote_sheet.write_to_sheet(list_of_entries[0].get(), widget_id, submission)
-    #except Exception as ex:
-    #    print("Unacceptable input. Ignoring submission.")
-    #    print(ex)
+    def export_to_csv(self):
+        pass
+        # Get data from Google Sheets API
+    
+    def create_fields(self):
+        i = 1
+        list_of_entries = []
+        for field in self.data_fields:
+            setting = "normal"
+            if field == "PROVID":
+                setting = "readonly"
+            entry = self.make_entry(self.editorframe, field, i, state=setting)
+            entry.bind("<KeyPress>", entry_changing)
+            entry.bind("<KeyRelease>", entry_changed)
+            list_of_entries.append(entry)
+            i += 1
+        return list_of_entries
+    
+    # These two functions handle how a field shows that its value has been edited but not submitted, or edited and submitted
+    def entry_changing(self, event):
+        value = event.widget.get()
+        self.entry_value = value
 
-def create_fields():
-    i = 1
-    list_of_entries = []
-    for field in fields:
-        setting = "normal"
-        if field == "ProvID":
-            setting = "readonly"
-        entry = makeentry(editorframe, field, i, state=setting)
-        entry.bind("<KeyPress>", entry_changing)
-        entry.bind("<KeyRelease>", entry_changed)
-        list_of_entries.append(entry)
-        i = i + 1
-    return list_of_entries
+    def entry_changed(self, event):
+        value = event.widget.get()
+        if value != self.entry_value:
+            event.widget.config({"background":"yellow"})
+    
+    def create_export_button(self):
+        export_button = Button(frame, command= lambda: self.export_to_csv(), text="Export to CSV", bd=4, height=2, padx=2, bg="deep sky blue")
+        export_button.grid(row=1, column=2)
 
-entry_value = None
+    # If name changes, it also needs to change in the definition.csv
+    def change_name(self,submission):
+        # definition.csv puts semicolons between spaces in names
+        csv_submission = str(submission).replace(" ",";")
+        extra_query = "UPDATE definition SET 'Name'='" + csv_submission + "' WHERE Province_id = "+ list_of_entries[0].get() +";"
+        db.db_commit(extra_query)
+        print("Name changed in definition")
 
-def entry_changing(event):
-    global entry_value
-    value = event.widget.get()
-    entry_value = value
+    def make_entry(self, parent, caption, rownum, **options):
+        Label(parent, text=caption, pady=10).grid(row = rownum, column = 0)
+        entry = Entry(parent, width=16, font=("Arial 18"), **options)
+        entry.grid(row = rownum, column = 1)
+        return entry
 
-def entry_changed(event):
-    global entry_value
-    value = event.widget.get()
-    if value != entry_value:
-        event.widget.config({"background":"yellow"})
+    def submit_entry(self, event, fields): # Refactored - write to remote only
+        try:
+            submission = event.widget.get()
+            print("Submitting " + submission)
+            event.widget.config({"background":"lime"})
+            widget_id = fields[list_of_entries.index(event.widget)].replace("Indentured","Freedmen") # This may not be necessary anymore
+            # Now find the field that corresponds to the widget
+            if widget_id == "NameRef":
+                self.change_name(submission)
+            if remote_sheet_exists:
+                # Send the submission to the database at the correct PROVID (list of entries 0) and column (widget_id)
+                self.remote_sheet.write_to_sheet(self.list_of_entries[0].get(), widget_id, submission)
+        except Exception as ex:
+            print("Submission failed.")
+            print(ex)
+    
+    def add_map_canvas(self):
+        canvas_img = ImageTk.PhotoImage(file='main_input.png', size=(1024,768))
+        pxdata = Image.open('main_input.png','r')
+        self.px = pxdata.load()
+        self.canvas.create_image(0, 0, image=canvas_img, anchor="nw")
+        self.canvas.config(scrollregion=canvas.bbox(ALL))
 
-list_of_entries = create_fields()
+    selector_img = ImageTk.PhotoImage(Image.open("selector.gif").convert("RGBA"))
 
-#adding the image
-canvas_img = ImageTk.PhotoImage(file='main_input.png', size=(1024,768))
-pxdata = Image.open('main_input.png','r')
-px = pxdata.load()
-canvas.create_image(0, 0, image=canvas_img, anchor="nw")
-canvas.config(scrollregion=canvas.bbox(ALL))
-
-prevprovince = None
-selector_img = ImageTk.PhotoImage(Image.open("selector.gif").convert("RGBA"))
-
-#function to be called when mouse is clicked
-def getprovince(event):
-    global prevprovince
-    #outputting x and y coords to console
-    cx, cy = event2canvas(event, canvas)
-    print ("click at (%d, %d) / (%d, %d)" % (event.x,event.y,cx,cy))
-    colour = px[cx,cy]
-    params = colour
-    # Clear the canvas and draw a selector where you last clicked
-    canvas.delete("all")
-    canvas.create_image(0, 0, image=canvas_img, anchor="nw")
-    canvas.create_image((cx, cy), image=selector_img)
-    # Look in definition first to get the province ID from RGB
-    search_query = "SELECT Province_ID FROM definition WHERE R=? AND G=? AND B=?;"
-    db.query(search_query,params)
-    province = str(db.db_fetchone()[0])
-    # Do not repeat all this if the province is already selected
-    if province != prevprovince:
-        prevprovince = province
+    #function to be called when mouse is clicked
+    def getprovince(self,event):
+        #outputting x and y coords to console
+        cx, cy = event2canvas(event, canvas)
+        print ("click at (%d, %d) / (%d, %d)" % (event.x,event.y,cx,cy))
+        colour = px[cx,cy]
+        params = colour # Pass the RGB colour as a database query to find the PROVID
+        self.refresh_selector_position(cx, cy) # Redraw selector and canvas, prevents lag
+        province = self.lookup_province_rgb()
+        # Do not refresh / overwrite the contents of data entry fields if the province is already selected
+        if province != self.prevprovince:
+            self.refresh_province_data_fields()
+    
+    def refresh_selector_position(self, cx, cy):
+        # Clear the canvas and draw a selector where you last clicked
+        self.canvas.delete("all")
+        self.canvas.create_image(0, 0, image=canvas_img, anchor="nw")
+        self.canvas.create_image((cx, cy), image=selector_img)
+    
+    def lookup_province_rgb(self):# Look in definition first to get the province ID from RGB
+        search_query = "SELECT Province_ID FROM definition WHERE R=? AND G=? AND B=?;"
+        self.db.query(search_query,params)
+        province = str(self.db.db_fetchone()[0])
+        return province
+    
+    def refresh_province_data_fields(self):
+        self.prevprovince = province
         print("province ID is " + province)
-        province_data_query = "SELECT * FROM province_setup WHERE ProvID = " + province + ";"
-        db.query(province_data_query, "")
-        province_data = db.db_fetchone()
-        for index, entry in enumerate(list_of_entries):
+        # Below three lines are obsolete, as we will read directly from the remote sheet
+        # province_data_query = "SELECT * FROM province_setup WHERE ProvID = " + province + ";"
+        # self.db.query(province_data_query, "")
+        # province_data = self.db.db_fetchone()
+        # TODO
+        for index, entry in enumerate(self.list_of_entries): # Load the new data for the relevant province from the province data sheet
             entry.config(state="normal")
-            entry.delete(0,999)
-            entry.insert(0,province_data[index])
-            entry.config({"background":"white"})
+            entry.delete(0,999) # Clear the contents of the entry widget
+            entry.insert(0,province_data[index]) # TODO - should need refactoring
+            entry.config({"background":"white"}) # Reset colour as it may have been yellow or green when edited
             if index == 0:
                 entry.config(state="readonly")
         print(province_data)

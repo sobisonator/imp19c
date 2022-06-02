@@ -1,0 +1,357 @@
+﻿ai_will_accept_effect = {
+    if = {
+        limit = {
+            has_variable = ai_will_not_accept
+        }
+        remove_variable = ai_will_not_accept
+    }
+    set_variable = ai_will_accept
+}
+ai_will_not_accept_effect = {
+    if = {
+        limit = {
+            has_variable = ai_will_accept
+        }
+        remove_variable = ai_will_accept
+    }
+    set_variable = ai_will_not_accept
+}
+debug_peace_treaties_effect = {
+    if = {
+        limit = {
+            has_variable = ai_will_not_accept
+        }
+        debug_log = "[Player.MakeScope.Var('bad_guys_var').GetCountry.GetName] WILL REJECT PEACE!"
+    }
+    else = {
+        limit = {
+            has_variable = ai_will_accept
+        }
+        debug_log = "[Player.MakeScope.Var('bad_guys_var').GetCountry.GetName] WILL ACCEPT PEACE!"
+    }
+}
+add_2_acceptance_value_effect = {
+    scope:player = {
+        if = {
+            limit = {
+                NOT = { has_local_variable = acceptance_value }
+            }
+            set_local_variable = {
+                name = acceptance_value
+                value = 2
+            }
+        }
+        else = {
+            change_local_variable = {
+                name = acceptance_value
+                add = 2
+            }
+        }
+    }
+}
+add_1_acceptance_value_effect = {
+    scope:player = {
+        if = {
+            limit = {
+                NOT = { has_local_variable = acceptance_value }
+            }
+            set_local_variable = {
+                name = acceptance_value
+                value = 1
+            }
+        }
+        else = {
+            change_local_variable = {
+                name = acceptance_value
+                add = 1
+            }
+        }
+    }
+}
+add_half_of_1_acceptance_value_effect = {
+    scope:player = {
+        if = {
+            limit = {
+                NOT = { has_local_variable = acceptance_value }
+            }
+            set_local_variable = {
+                name = acceptance_value
+                value = 0.5
+            }
+        }
+        else = {
+            change_local_variable = {
+                name = acceptance_value
+                add = 0.5
+            }
+        }
+    }    
+}
+ai_war_between_0_and_30_acceptance_effect = {
+    var:bad_guys_var = {
+        if = {
+            limit = {
+                has_war_exhaustion >= 8
+                has_war_exhaustion < 18
+            }
+            add_1_acceptance_value_effect = yes
+        }
+        else_if = {
+            limit = {
+                has_war_exhaustion >= 18
+            }
+            add_2_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+                treasury < 0
+                treasury > -100
+            }
+            add_1_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+                stability <= 7
+            }
+            add_1_acceptance_value_effect = yes
+        }
+        if = {
+            limit = { stability < 10 }
+            add_1_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+                capital_scope = {
+                    NOT = { controller = owner}
+                }
+            }
+            add_2_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+                trigger_if = {
+                    limit = {
+                        any_country_sub_unit = {
+                            count >= 10
+                        }
+                    }
+                    num_of_controlled_cities < num_of_cities
+                    #This checks if the threat in owned land is 4 times the size of every army.
+                    threat_in_owned_land >= bad_guys_total_army_size
+                }
+            }
+            add_1_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+                #if they control less than 50% of their provinces they will accept the deal.
+                bad_guys_controlled_provinces < bad_guys_half_of_total_provinces
+            }
+            add_2_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+            #If they have 0 troops they will accept peace
+                bad_guys_total_army_size = 0
+            }
+                add_2_acceptance_value_effect = yes
+        }
+        if = {
+            limit = { distress_level = near_death }
+            add_1_acceptance_value_effect = yes
+        }      
+    }   
+}
+ai_war_between_30_and_60_acceptance_effect = {
+    var:bad_guys_var = {
+        if = {
+            limit = {
+                has_war_exhaustion >= 8
+                has_war_exhaustion < 18
+            }
+            add_1_acceptance_value_effect = yes
+        }
+        else_if = {
+            limit = {
+                has_war_exhaustion >= 18
+            }
+            add_2_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+                treasury < 0
+                treasury > -100
+            }
+            add_1_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+                stability <= 7
+            }
+            add_1_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+                capital_scope = {
+                    NOT = { controller = owner}
+                }
+            }
+            add_2_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+                trigger_if = {
+                    limit = {
+                        any_country_sub_unit = {
+                            count >= 10
+                        }
+                    }
+                    num_of_controlled_cities < num_of_cities
+                    #This checks if the threat in owned land is 4 times the size of every army.
+                    threat_in_owned_land >= bad_guys_total_army_size
+                }
+            }
+            add_1_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+                #if they control less than 50% of their provinces they will accept the deal.
+                bad_guys_controlled_provinces < bad_guys_quarter_of_total_provinces
+            }
+            add_2_acceptance_value_effect = yes
+        }
+        if = {
+            limit = {
+            #If they have 0 troops they will accept peace
+                bad_guys_total_army_size = 0
+            }
+                add_2_acceptance_value_effect = yes
+        }
+        if = {
+            limit = { distress_level = near_death }
+            add_1_acceptance_value_effect = yes
+        }      
+    }
+}
+calculate_ai_acceptance_effect = {
+    if = {
+        limit = {
+            has_variable = current_warscore_cost
+        }
+        if = {
+            limit = {
+                root = { #root = war scope
+                    war_score = {
+                        target = scope:player
+                        value >= var:current_warscore_cost_war #war score cost in the war scope...
+                    }
+                }
+            }
+            if = {
+                limit = {
+                    var:current_warscore_cost >= 0
+                    var:current_warscore_cost < 30
+                }
+                ai_war_between_0_and_30_acceptance_effect = yes
+            }
+            if = {
+                limit = {
+                    var:current_warscore_cost >= 30
+                    var:current_warscore_cost < 65
+                }
+                ai_war_between_30_and_60_acceptance_effect = yes
+            }
+            if = {
+                limit = {
+                    var:current_warscore_cost >= 65
+                }
+                ai_war_between_30_and_60_acceptance_effect = yes
+            }
+        }
+        else = {
+            ai_will_not_accept_effect = yes
+        }
+        if = {
+            limit = {
+                has_local_variable = acceptance_value
+            }
+            if = {
+                limit = {
+                    local_var:acceptance_value >= 2
+                }
+                ai_will_accept_effect = yes
+            }
+            else = {
+                ai_will_not_accept_effect = yes
+            }
+            remove_local_variable = acceptance_value
+            #debug_peace_treaties_effect  = yes
+        }
+    }
+}
+peace_out_of_war_effect = {
+    #The duration of this truce is added on top of the white peace duration. No way around this.
+    if = {
+        limit = {
+            var:current_warscore_cost < 40
+            var:current_warscore_cost >= 0
+        }
+        add_truce = {
+            target = var:bad_guys_var
+            duration = 1825 # 5 years
+        }
+        var:bad_guys_var = {
+            add_truce = {
+                target = scope:player
+                duration = 1825 # 5 years
+            }
+        }
+    }
+    else_if = {
+        limit = {
+            var:current_warscore_cost < 60
+            var:current_warscore_cost >= 40
+        }
+        add_truce = {
+            target = var:bad_guys_var
+            duration = 2555 # 7 years
+        }
+        var:bad_guys_var = {
+            add_truce = {
+                target = scope:player
+                duration = 2555 # 7 years
+            }
+        }
+    }
+    else_if = {
+        limit = {
+            var:current_warscore_cost < 80
+            var:current_warscore_cost >= 60
+        }
+        add_truce = {
+            target = var:bad_guys_var
+            duration = 2920 # 8 years
+        }
+        var:bad_guys_var = {
+            add_truce = {
+                target = scope:player
+                duration = 2920 # 8 years
+            }
+        }
+    }
+    else_if = {
+        limit = {
+            var:current_warscore_cost >= 80
+        }
+        add_truce = {
+            target = var:bad_guys_var
+            duration = 3650 # 10 years
+        }
+        var:bad_guys_var = {
+            add_truce = {
+                target = scope:player
+                duration = 3650 # 10 years
+            }
+        }
+    }
+}

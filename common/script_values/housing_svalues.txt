@@ -1,0 +1,71 @@
+residential_district_housing_slots = { # Each residential district provides homes for 10 pops
+	value = 0
+	add = num_of_URB_residential_district
+	multiply = 10
+}
+
+urban_housing_shanty_rate = { # 50% of movers into urban housing should come from shanty towns
+	value = residential_district_housing_slots
+	multiply = 0.5
+}
+
+urban_housing_rural_rate = { # 50% of movers into urban housing should come from rural areas
+	value = residential_district_housing_slots
+	multiply = 0.5
+}
+
+province_pops_rural = { 
+	value = total_population
+	subtract = num_of_proletariat
+	subtract = urban_housing_rural_rate
+	min = 0
+	round = yes
+}
+
+province_pops_shanty_towns = {
+	value = num_of_proletariat
+	# Lower strata need to be involved based on how job slots are filled
+	subtract = urban_housing_shanty_rate
+	min = 0
+	round = yes
+}
+
+total_population_tenth = { # Returns the number of pops in a province divided by 10
+	value = total_population
+	multiply = 0.1
+	round = yes
+}
+
+province_pops_urban = { 
+	value = total_population
+	subtract = province_pops_shanty_towns
+	subtract = province_pops_rural
+	round = yes
+}
+
+province_pops_urban_and_shanty = {
+	value = province_pops_urban
+	add = province_pops_shanty_towns
+}
+
+province_urban_percentage = {
+	value = province_pops_urban_and_shanty
+	divide = total_population
+	multiply = 100
+	round = yes
+}
+
+province_rural_percentage = {
+	value = 100
+	subtract = province_urban_percentage
+}
+
+province_urban_percentage_modifier = { # For use as a modifier
+	value = province_pops_urban_and_shanty
+	divide = total_population
+}
+
+province_rural_percentage_modifier = { # For use as a modifier
+	value = province_rural_percentage
+	divide = 100
+}

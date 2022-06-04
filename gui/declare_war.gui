@@ -1,0 +1,378 @@
+
+template declare_war_ally
+{
+	hbox = {
+		using = NoninteractableBG
+		layoutpolicy_horizontal = expanding
+		blockoverride "Margins"
+		{
+		
+		}
+		country_flag = {
+			datacontext = "[DeclareWarAlly.GetCountry]"
+			tooltip = "COUNTRY_SHORTHAND_INFO"
+			layoutpolicy_horizontal = fixed
+			
+			onmousehierarchyenter = "[SetHighlightCountry( DeclareWarAlly.GetCountry )]"
+			onmousehierarchyleave = "[ClearHighlightColors]"
+			
+			blockoverride "flag"
+			{
+				texture = "[DeclareWarAlly.GetCountry.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+				frame = "[DeclareWarAlly.GetCountry.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+				framesize = { 56 56 }
+			}
+			
+			blockoverride "size"
+			{
+				size = { 32 32 }
+			}
+			
+			blockoverride "click"
+			{
+				onclick = "[OpenDiplomacy(DeclareWarAlly.GetCountry)]"
+			}
+		} 
+		
+		textbox = {
+			text = "[DeclareWarAlly.GetCountry.GetName]"
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			autoresize = yes
+			using = BaseFontS
+			using = Black_FontColor
+			align = left|nobaseline
+			minimumsize = { 100 32 }
+			margin_left = 4
+		}
+		
+		vbox = {
+			check_box_button = { 
+				visible = "[DeclareWarAlly.IsCallAllyVisible]"
+				
+				enabled = "[DeclareWarAlly.IsCallAllyEnabled]"
+				
+				blockoverride "Frame"
+				{
+					frame = "[DeclareWarAlly.GetCallAllyFrame]"
+				} 
+				blockoverride "On_click"
+				{
+					onclick = "[DeclareWarAlly.OnCallAllyClick]"
+				}
+				
+				tooltip = "[DeclareWarAlly.GetCallAllyTooltip]"
+			}
+		}
+
+		icon = {
+			texture = "gfx/interface/icons/shared_icons/war_leader.dds"
+			size = { 32 32 }
+			#Should probably be a unique background as it shows that the ally will become the 	warleader
+			visible = "[DeclareWarAlly.WillBecomeWarleader]"
+			tooltip = "[DeclareWarAlly.GetWillJoinTooltip]"
+		}
+			
+		icon = {
+			texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
+			framesize = { 45 45 }
+			size = { 32 32 }
+			frame = "[DeclareWarAlly.GetWillJoinFrame]"
+			tooltip = "[DeclareWarAlly.GetWillJoinTooltip]"
+		} 
+		
+	}
+}
+
+message_window = {
+	name = "declare_war_window"
+	minimumsize = { 580 700 }
+	position = { 320 300 }
+	enabled = "[DeclareWarWindow.IsWindowEnabled]"
+	resizable = no
+	
+	blockoverride "Title_text"
+	{
+		text = "[DeclareWarWindow.GetTitle]"
+	}
+	
+	vbox = {
+		resizeparent = yes
+		margin_left = 14
+		margin_right = 14
+		margin_bottom = 0
+		margin_top = 32
+		
+		vbox = {
+			name = "first_row"
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				spacing = 18
+				
+				vbox = {
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					margin_right = 2
+					name = "war_description_box"
+					layoutstretchfactor_horizontal = 50
+					
+					hbox = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = preferred
+						using = NoninteractableBG
+						blockoverride "Margins"
+						{
+							margin = { 4 2 }
+						}
+						textbox = {
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = expanding
+							text = "[DeclareWarWindow.GetDesc]"
+							multiline = yes
+							using = BaseFontS
+							using = Black_FontColor
+							margin = { 10 4 }
+							elide = right
+						}
+					}
+				}
+				vbox = {
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					layoutstretchfactor_horizontal = 50
+					name = "wargoal_selection_box"
+					spacing = 10
+					sub_header = { 
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = fixed
+						size = { 0 30 }
+						name = "top_sh"
+						blockoverride "Title_text" 
+						{
+							text = "WAR_GOAL"
+						}
+						
+						blockoverride "Max_text_width"
+						{
+							max_width = 208
+						}
+						
+					}
+					
+					scrollarea = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+						scrollbarpolicy_horizontal = always_off
+						
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+						
+						scrollwidget = {
+							vbox = {
+								vbox = {
+									layoutpolicy_horizontal = expanding
+									layoutpolicy_vertical = preferred
+									datamodel = "[DeclareWarWindow.GetWarGoals]"
+									margin_left = 10
+									margin_right = 10
+									spacing = 4
+									item = {
+										flowcontainer = {	
+											tooltip = "[SelectWarGoal.GetInfo]"
+											spacing = 8
+											layoutpolicy_horizontal = expanding
+											button_radial = {
+												layoutpolicy_horizontal = expanding
+												
+												blockoverride "On_click"
+												{
+													onclick = "[SelectWarGoal.OnClick]"
+												}
+												
+												blockoverride "ShowDot"
+												{
+													trigger_when = "[SelectWarGoal.IsSelected]"
+												} 
+												
+												blockoverride "HideDot" 
+												{
+													trigger_when = "[Not(SelectWarGoal.IsSelected)]"
+												} 
+												
+											} 
+											textbox = {
+												autoresize = yes
+												text = "[SelectWarGoal.GetName]"
+												using = BaseFontM
+												using = Black_FontColor
+												parentanchor = center
+											}
+										}
+									}
+								}
+								vbox = {
+									layoutpolicy_horizontal = expanding
+									layoutpolicy_vertical = expanding
+								}
+							}
+						}
+					}
+					
+				}
+				
+			}
+		}
+		hbox = {
+			name = "second_row"
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			vbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				name = "enemy_allies_box"
+				
+				sub_header_v = {
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					size = { 0 70 }
+					blockoverride "Title_text" 
+					{
+						text = "ENEMY_ALLIES"
+					}
+					
+					blockoverride "Max_text_width"
+					{
+						max_width = 208
+					}
+					
+					vbox = {
+						margin_top = 40
+						margin_right = 6
+						margin_left = 6
+						scrollarea = {
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = expanding
+							scrollbarpolicy_horizontal = always_off
+							
+							using = VerticalScrollAreaCutOff
+							
+							scrollbar_vertical = {
+								using = VerticalScrollBar
+							}
+							
+							scrollwidget = {
+								vbox = {
+									vbox = {
+										layoutpolicy_horizontal = expanding
+										layoutpolicy_vertical = shrinking
+										datamodel = "[DeclareWarWindow.GetEnemyAllies]"
+										margin_right = 10
+										item = {
+											using = declare_war_ally
+										}
+									}
+									vbox = {
+										name = "expander"
+										layoutpolicy_vertical = growing 
+									}
+								}
+								
+							}
+						}
+					}
+					
+				}
+			}
+			vbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				name = "call_allies_box"
+				
+				sub_header = {
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = fixed
+					blockoverride "Title_text" 
+					{
+						text = "CALL_ALLIES"
+					}
+					
+					blockoverride "Max_text_width"
+					{
+						max_width = 208
+					}
+				}
+				
+				vbox = {
+					margin_top = 41
+					margin_right = 6
+					margin_left = 6
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					scrollarea = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+						scrollbarpolicy_horizontal = always_off
+						
+						using = VerticalScrollAreaCutOff
+						
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+						
+						scrollwidget = {
+							vbox = {
+								vbox = {
+									layoutpolicy_horizontal = expanding
+									layoutpolicy_vertical = shrinking
+									datamodel = "[DeclareWarWindow.GetPlayerAllies]"
+									margin_right = 10
+									item = {
+										using = declare_war_ally
+									}
+								}
+								vbox = {
+									name = "expander"
+									layoutpolicy_vertical = growing 
+								}
+							}
+							
+						}
+					}
+				}
+				
+			}	
+		}	
+		
+		hbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = preferred
+			
+			hbox = {
+				using = message_buttons
+				
+				margin_top = 10
+				
+				blockoverride "ConfirmContents"
+				{
+					onclick = "[DeclareWarWindow.OnAccept]"
+					clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_war_declare_war"
+				}
+				
+				blockoverride "DeclineContents"
+				{
+					onclick = "[DeclareWarWindow.OnDecline]" 
+				}
+				
+			}
+			
+		}
+		
+	}
+
+}
+

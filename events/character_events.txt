@@ -1,0 +1,1014 @@
+namespace = character_events
+
+character_events.4 = {
+	type = character_event
+	hidden = yes
+	
+	immediate = {
+		if = {
+			limit = {
+				is_governor = no
+				is_mercenary = no
+				trigger_if = {
+					limit = {
+						has_variable = came_from
+					}
+					NOT = { employer = { civil_war_with = root.var:came_from } }
+				}
+				NOT = { has_character_modifier = foreign_citizen }
+			}
+			add_character_modifier = {
+				name = foreign_citizen
+				duration = -1
+			}
+		}
+	}
+
+}
+
+character_events.5 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				exists = spouse
+				spouse = {
+					is_alive = yes
+					employer = root.employer
+					has_character_modifier = foreign_citizen
+				}
+			}
+			AND = {
+				exists = spouse
+				spouse = {
+					NOR = {
+						is_alive = yes
+						employer = root.employer
+						has_character_modifier = foreign_citizen
+					}
+				}
+				has_character_modifier = foreign_citizen
+			}
+			AND = {
+				NOT = {
+					exists = spouse
+				}
+				has_character_modifier = foreign_citizen
+			}
+		}
+	}
+	
+	immediate = {
+		scope:newborn = {
+			add_character_modifier = {
+				name = foreign_citizen
+				duration = -1
+			}
+		}
+	}
+
+}
+character_events.10 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		wealth <= -100
+		is_ruler = no
+		is_general = no
+		is_adult = yes
+		NOT = {
+			has_variable = prison_refused
+		}
+		NOR = {
+			has_office = office_magistrate
+			has_office = office_praetor
+			has_office = office_steward
+		}
+		employer = {
+			any_character = {
+				OR = {
+					has_office = office_magistrate
+					has_office = office_praetor
+					has_office = office_steward
+				}
+			}
+			NOT = {
+				has_variable = ongoing_trial
+			}
+		}
+		
+	}
+	
+	immediate = {
+		save_scope_as = debtor
+		employer = {
+			random_character = {
+				limit = {
+					OR = {
+						has_office = office_magistrate
+						has_office = office_praetor
+						has_office = office_steward
+					}
+				}
+				weight = {
+					title_importance_modifier = yes
+				}
+				save_scope_as = chief_justice
+			}
+			trigger_event = {
+				id = character_events.11
+			}
+		}
+	}
+	
+}
+
+character_events.11 = {
+	type = country_event
+	title = "character_events.11.t"
+	desc = "character_events.11.desc"
+	picture = roman_trial
+	
+	left_portrait = scope:chief_justice
+	right_portrait = scope:debtor
+	
+	trigger = {
+		exists = scope:chief_justice
+		exists = scope:debtor
+		scope:debtor = {
+			is_alive = yes
+		}
+	}
+	
+	immediate = {
+		set_variable = {
+			name = ongoing_trial
+			days = 365
+		}
+	}
+	
+	option = {
+		name = "character_events.11.a"
+		imprison = {
+			target = scope:debtor
+		}
+		custom_tooltip = "working_towards_release_tooltip"
+		scope:chief_justice = {
+			add_prominence = prominence_small
+		}
+		hidden_effect = {
+			scope:debtor = {
+				add_character_modifier = {
+					name = debt_payoff_toggle
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "character_events.11.b"
+		trigger = {
+			scope:debtor = {
+				num_loyal_cohorts >= 10
+			}
+		}
+		custom_tooltip = "loyal_cohorts_say_no"
+		exclusive = yes
+		highlight = yes
+		scope:debtor = {
+			add_prominence = 10
+			hidden_effect = {
+				set_variable = {
+					name = prison_refused
+				}
+			}
+		}
+		scope:chief_justice = {
+			add_popularity = -5
+			add_prominence = -5
+		}
+	}
+	
+}
+
+character_events.12 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		is_general = no
+		martial >= 6
+		trigger_if = {
+			limit = {
+				employer = {
+					gender_equality = no
+				}
+			}
+			is_female = no
+		}
+		NOT = {
+			has_character_modifier = secret_pit_fighter
+		}
+	}
+	
+	immediate = {
+		add_gold = 600
+		add_character_modifier = {
+			name = secret_pit_fighter
+			duration = 3650
+		}
+	}
+	
+}
+
+character_events.13 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		NOR = {
+			has_character_modifier = secret_gambler
+			has_character_modifier = reformed_gambler
+		}
+	}
+	
+	immediate = {
+		add_character_modifier = {
+			name = secret_gambler
+		}
+	}
+}
+
+character_events.14 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		has_character_modifier = secret_gambler
+	}
+	
+	immediate = {
+		remove_character_modifier = secret_gambler
+		add_character_modifier = {
+			name = reformed_gambler
+		}
+	}
+}
+
+character_events.15 = {
+	type = country_event
+	hidden = yes
+	
+	immediate = {
+		if = {
+			limit = {
+				current_ruler = {
+					has_character_modifier = debt_payoff_toggle
+				}
+			}
+			current_ruler = {
+				remove_character_modifier = debt_payoff_toggle
+			}
+		}
+		if = {
+			limit = {
+				current_ruler = {
+					has_character_modifier = secret_pit_fighter
+				}
+			}
+			current_ruler = {
+				remove_character_modifier = secret_pit_fighter
+			}
+		}
+		if = {
+			limit = {
+				current_ruler = {
+					has_character_modifier = secret_gambler
+				}
+			}
+			current_ruler = {
+				remove_character_modifier = secret_gambler
+				add_character_modifier = {
+					name = reformed_gambler
+				}
+			}
+		}
+	}
+}
+character_events.16 = {
+	type = character_event
+	hidden = yes
+	
+	immediate = {
+		if = {
+			limit = {
+				has_character_modifier = debt_payoff_toggle
+			}
+			remove_character_modifier = debt_payoff_toggle
+		}
+		if = {
+			limit = {
+				has_character_modifier = secret_pit_fighter
+			}
+			remove_character_modifier = secret_pit_fighter
+		}
+		if = {
+			limit = {
+				has_character_modifier = secret_gambler
+			}
+			remove_character_modifier = secret_gambler
+			add_character_modifier = {
+				name = reformed_gambler
+			}
+		}
+		if = {
+			limit = {
+				has_character_modifier = foreign_royalty
+			}
+			remove_character_modifier = foreign_royalty
+		}
+	}
+}
+character_events.17 = {
+	type = character_event
+	hidden = yes
+	
+	immediate = {
+		if = {
+			limit = {
+				has_character_modifier = secret_gambler
+			}
+			remove_character_modifier = secret_gambler
+		}
+	}
+}
+character_events.18 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		has_character_modifier = secret_gambler
+		wealth <= -500
+	}
+	
+	immediate = {
+		remove_character_modifier = secret_gambler
+		add_character_modifier = {
+			name = reformed_gambler
+		}
+	}
+}
+
+character_events.19 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		employer = {
+			is_republic = yes
+			any_character = {
+				is_party_leader = yes
+				wealth >= 500
+				NOR = {
+					is_same_party_as = root.employer.current_ruler
+					is_same_party_as = root
+				}
+			}
+		}
+		wealth < -100
+		wealth > -500
+		is_general = no
+		NOR = {
+			has_character_modifier = debt_payoff_toggle
+			has_character_modifier = secret_pit_fighter
+		}
+		is_party_leader = no
+	}
+	
+	immediate = {
+		save_scope_as = debtor
+		employer = {
+			random_character = {
+				limit = {
+					is_party_leader = yes
+					NOR = {
+						is_same_party_as = root.employer.current_ruler
+						is_same_party_as = root
+					}
+					wealth >= 500
+				}
+				weight = {
+					title_importance_modifier = yes
+				}
+				save_scope_as = randomized_party_leader
+			}
+		}
+		employer = {
+			trigger_event = {
+				id = character_events.20
+			}
+		}
+	}
+	
+}
+
+character_events.20 = { 
+	type = country_event
+	title = "character_events.20.t"
+	desc = "character_events.20.desc"
+	picture = war_chest
+	
+	left_portrait = current_ruler
+	right_portrait = scope:debtor
+	right_portrait = scope:randomized_party_leader
+	
+	trigger = {
+		is_republic = yes
+		exists = scope:debtor
+		exists = scope:randomized_party_leader
+	}
+	
+	immediate = {
+	
+	}
+	
+	option = {
+		name = "character_events.20.a"
+		scope:randomized_party_leader = {
+			add_gold = {
+				value = 0
+				add = scope:debtor.wealth
+			}
+		}
+		scope:debtor = {
+			add_gold = {
+				value = 0
+				subtract = wealth
+			}
+			if = {
+				limit = {
+					is_minor_character = no
+				}
+				family = {
+					add_prestige = -100
+				}
+			}
+			add_party_conviction = {
+				party = scope:randomized_party_leader.character_party
+				value = 20
+			}
+		}
+	}
+	
+	option = {
+		name = "character_events.20.b"
+		add_treasury = {
+			value = 0
+			add = scope:debtor.wealth
+		}
+		scope:debtor = {
+			add_gold = {
+				value = 0
+				subtract = wealth
+			}
+			if = {
+				limit = {
+					is_minor_character = no
+				}
+				family = {
+					add_prestige = -100
+				}
+			}
+			add_party_conviction = {
+				party = root.current_ruler.character_party
+				value = 50
+			}
+		}
+	}
+	
+}
+character_events.21 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		is_governor = yes
+		is_ruler = no
+		is_primary_heir = no
+		NOT = {
+			has_character_modifier = switched_char_religion
+		}
+		location = {
+			NOR = {
+				dominant_province_religion = root.religion
+				governor_policy = religious_conversion
+			}
+		}
+	}
+	
+	weight_multiplier = {
+		modifier = {
+			factor = 1.5
+			has_trait = tolerant
+		}
+		modifier = {
+			factor = 1.5
+			has_trait = lapsed
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = devout
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = sceptical
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = abrasive
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = pious
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = zealous
+		}
+		
+	}
+	
+	immediate = {
+		location = {
+			save_scope_as = religion_switch_province
+		}
+		set_character_religion = scope:religion_switch_province.religion
+		add_character_modifier = {
+			name = switched_char_religion
+			duration = 1825
+		}
+		if = {
+			limit = {
+				has_trait = lapsed
+			}
+			remove_trait = lapsed
+		}
+	}
+}
+
+character_events.22 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		is_governor = yes
+		is_ruler = no
+		is_primary_heir = no
+		NOT = {
+			has_character_modifier = switched_char_culture
+		}
+		location = {
+			NOR = {
+				dominant_province_culture = root.culture
+				governor_policy = cultural_assimilation
+			}
+		}
+	}
+	
+	weight_multiplier = {
+		modifier = {
+			factor = 1.5
+			has_trait = tolerant
+		}
+		modifier = {
+			factor = 1.5
+			has_trait = lapsed
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = devout
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = sceptical
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = abrasive
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = pious
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = zealous
+		}
+		
+	}
+	
+	immediate = {
+		location = {
+			save_scope_as = culture_switch_province
+		}
+		set_culture = scope:culture_switch_province.culture
+		add_character_modifier = {
+			name = switched_char_culture
+			duration = 1825
+		}
+	}
+}
+
+character_events.23 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		has_any_office = yes
+		is_ruler = no
+		employer = {
+			NOR = {
+				tag = REB
+				tag = PIR
+				tag = BAR
+				tag = MER
+			}
+		}
+		is_primary_heir = no
+		NOT = {
+			has_character_modifier = switched_char_religion
+		}
+		NOT = {
+			has_religion = root.employer.religion
+		}
+	}
+	
+	weight_multiplier = {
+		modifier = {
+			factor = 2
+			has_trait = ambitious
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = devout
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = sceptical
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = pious
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = abrasive
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = zealous
+		}
+	}
+	
+	immediate = {
+		set_character_religion = root.employer.religion
+		add_character_modifier = {
+			name = switched_char_religion
+			duration = 1825
+		}
+	}
+	
+}
+
+character_events.24 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		has_any_office = yes
+		is_ruler = no
+		is_primary_heir = no
+		NOT = {
+			has_character_modifier = switched_char_culture
+		}
+		NOT = {
+			has_culture = root.employer.culture
+		}
+	}
+	
+	weight_multiplier = {
+		modifier = {
+			factor = 2
+			has_trait = ambitious
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = devout
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = sceptical
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = pious
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = abrasive
+		}
+		modifier = {
+			factor = 0.75
+			has_trait = zealous
+		}
+	}
+	
+	immediate = {
+		set_culture = root.employer.culture
+		add_character_modifier = {
+			name = switched_char_culture
+			duration = 1825
+		}
+	}
+	
+}
+character_events.37 = {
+	type = character_event
+	hidden = yes
+	
+	trigger = {
+		employer = {
+			is_monarchy = yes
+		}
+		is_ruler = no
+		is_primary_heir = no
+		is_general = no
+		is_admiral = no
+		loyalty <= 50
+		wealth >= 1000
+		employer = {
+			any_successor = {
+				is_pretender = yes
+				loyalty < 50
+				is_adult = yes
+			}
+		}
+	}
+	
+	immediate = {
+		employer = {
+			random_successor = {
+				limit = {
+					is_pretender = yes
+					loyalty < 50
+					is_adult = yes
+				}
+				weight = {
+					modifier = {
+						factor = 100
+						this = root.preferred_heir
+					}
+				}
+				save_scope_as = disloyal_friend_target
+			}
+		}
+		if = {
+			limit = {
+				can_get_friends = no
+				num_of_friends >= 1
+			}
+			random_friend = {
+				weight = {
+					modifier = {
+						factor = 100
+						is_pretender = no
+					}
+				}
+				remove_friend = root
+			}
+		}
+		add_friend = scope:disloyal_friend_target
+	}
+}
+
+character_events.38 = {
+	type = country_event
+	title = "character_events.38.t"
+	desc = "character_events.38.desc"
+	left_portrait = scope:recipient
+	right_portrait = scope:target 
+	
+	picture = great_library
+	
+	option = {
+		name = "character_events.38.a" #Military
+		trigger = {
+			scope:recipient = {
+				NOT = {
+					has_ambition = ambition_become_great_warrior
+				}
+			}
+		}
+		scope:recipient = {
+			hidden_effect = { clear_ambition_effect = yes }
+			add_loyalty = loyalty_education_diverted
+			custom_tooltip = military_ambition_tutor
+			hidden_effect = {
+				random_list = {
+					90 = { set_ambition = ambition_become_great_warrior }
+					10 = {
+						modifier = {
+							factor = 2
+							scope:target = {
+								has_trait = prominent
+							}
+						}
+						modifier = {
+							factor = 2
+							scope:target = {
+								has_trait = ambitious
+							}
+						}
+						modifier = {
+							factor = 2
+							scope:target = {
+								has_trait = cruel
+							}
+						}
+						set_ambition = ambition_become_despot 
+					}
+				}
+			}	
+		}
+	}
+	
+	option = {
+		name = "character_events.38.b" #Oratory
+		trigger = {
+			scope:recipient = {
+				NOT = {
+					has_ambition = ambition_become_politician
+				}
+			}
+		}
+		scope:recipient = {
+			hidden_effect = { clear_ambition_effect = yes }
+			add_loyalty = loyalty_education_diverted
+			custom_tooltip = oratory_ambition_tutor
+			hidden_effect = {
+				random_list = {
+					90 = { set_ambition = ambition_become_politician }
+					10 = {
+						modifier = {
+							factor = 2
+							scope:target = {
+								has_trait = harsh
+							}
+						}
+						modifier = {
+							factor = 2
+							scope:target = {
+								has_trait = vengeful
+							}
+						}
+						modifier = {
+							factor = 2
+							scope:target = {
+								has_trait = suspicious
+							}
+						}
+						set_ambition = ambition_become_demagogue 
+					}
+				}
+			}	
+		}
+	}
+
+	option = {
+		name = "character_events.38.c" #Finesse
+		trigger = {
+			scope:recipient = {
+				NOT = {
+					has_ambition = ambition_become_bureacrat
+				}
+			}
+		}
+		scope:recipient = {
+			hidden_effect = { clear_ambition_effect = yes }
+			add_loyalty = loyalty_education_diverted
+			custom_tooltip = finesse_ambition_tutor
+			hidden_effect = {
+				random_list = {
+					90 = { set_ambition = ambition_become_bureacrat }
+					10 = {
+						modifier = {
+							factor = 2
+							scope:target = {
+								has_trait = gluttonous
+							}
+						}
+						modifier = {
+							factor = 2
+							scope:target = {
+								has_trait = crafty
+							}
+						}
+						modifier = {
+							factor = 2
+							scope:target = {
+								has_trait = shrewd
+							}
+						}
+						set_ambition = ambition_become_rich 
+					}
+				}
+			}	
+		}
+	}
+	
+	option = {
+		name = "character_events.38.d" #Religious
+		trigger = {
+			scope:recipient = {
+				NOT = {
+					has_ambition = ambition_become_holy
+				}
+			}
+		}
+		scope:recipient = {
+			hidden_effect = { clear_ambition_effect = yes }
+			add_loyalty = loyalty_education_diverted
+			custom_tooltip = religious_ambition_tutor
+			hidden_effect = {
+				set_ambition = ambition_become_holy
+			}
+		}
+	}
+	
+	option = {
+		name = "character_events.38.e" #none
+		custom_tooltip = no_effect_tooltip
+		scope:recipient = { remove_variable = tutored_already }
+		#refund_price = price_tutor_heir
+	}
+	
+}
+# Baldness
+character_events.49 = {
+	type = character_event
+	hidden = yes
+
+	trigger = {
+		NOT = { has_variable = bald }
+		age >= 30
+	}
+
+	immediate = {
+		random_list = {
+			50 = {
+				# Do nothing
+			}
+			1 = {
+				set_variable = bald
+			}
+			5 = {
+				modifier = {
+					factor = 0
+					age <= 30
+				}
+				set_variable = bald
+			}
+			5 = {
+				modifier = {
+					factor = 0
+					age <= 40
+				}
+				set_variable = bald
+			}
+			5 = {
+				modifier = {
+					factor = 0
+					age <= 50
+				}
+				set_variable = bald
+			}
+			5 = {
+				modifier = {
+					factor = 0
+					age <= 55
+				}
+				set_variable = bald
+			}
+			5 = {
+				modifier = {
+					factor = 0
+					age <= 60
+				}
+				set_variable = bald
+			}
+		}
+	}
+}

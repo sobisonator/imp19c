@@ -1,0 +1,44 @@
+namespace = holding_mech
+
+holding_mech.1 = { #Un-Deprecated!
+	type = character_event
+	hidden = yes
+
+	trigger = {
+		is_minor_character = no
+		exists = family
+		exists = family.head_of_family
+		NOT = {
+			root = family.head_of_family
+		}
+	}
+	
+	immediate = {
+		if = {
+			limit = {
+				num_holdings_owned > 0
+			}
+			family.head_of_family = {
+				save_scope_as = holding_target
+			}
+			if = {
+				limit = {
+					exists = scope:holding_target
+				}
+				while = {
+					limit = {
+						num_holdings_owned > 0
+					}
+					random_holdings = {
+						save_scope_as = holding_transfer
+					}
+					remove_holding = scope:holding_transfer
+					scope:holding_target = {
+						add_holding = scope:holding_transfer
+					}
+				}
+			}
+		}
+	}
+	
+}

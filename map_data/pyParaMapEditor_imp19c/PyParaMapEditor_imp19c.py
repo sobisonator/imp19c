@@ -1,4 +1,5 @@
 import sqlite3, csv, gspread, pandas
+import gspread_dataframe as gd
 from tkinter import filedialog
 from tkinter import *
 from PIL import Image, ImageTk
@@ -72,9 +73,9 @@ class SheetConnection(object):
 
         self.sheet = self.client.open(SHEET_NAME).sheet1
 
-        self.data = self.sheet.get_all_records()
+        self.data = self.sheet.get_values()
 
-        self.dataframe = pandas.DataFrame(self.data[1:], columns=self.data[0])
+        self.dataframe = gd.get_as_dataframe(self.sheet)
 
         self.column_indices = {
                 "ProvID": 1,
@@ -132,26 +133,42 @@ class database_connection(object):
         return self.cursor.fetchone()
 
     def setup_update_query(self, row):
+        provid_col = 0
+        culture_col = 1
+        religion_col = 2
+        tradegood_col = 3
+        #4
+        indentured_col = 5
+        lower_strata_col = 6
+        middle_strata_col = 7
+        proletariat_col = 8
+        slaves_col = 9
+        tribesmen_col = 10
+        upper_strata_col = 11
+        industrialisation_col = 12
+        province_rank_col = 13
+        name_col = 14
+        area_col = 15
+        terrain_col = 16
         for item in row:
-            row[item] = str(row[item])
-            if row[item] == "":
-                row[item] = "0"
-        query = "UPDATE province_setup SET Culture ='" + row["CULTURE"]+"'," \
-        " Religion ='" + row["Religion"]+"'," \
-        " TradeGoods ='" + row["TRADEGOOD"]+"'," \
-        " Citizens =" + row["unused"]+"," \
-        " Freedmen =" + row["indentured"]+"," \
-        " LowerStrata =" + row["lower_strata"]+"," \
-        " MiddleStrata =" + row["middle_strata"]+"," \
-        " Proletariat =" + row["proletariat"]+"," \
-        " Slaves =" + row["slaves"]+"," \
-        " Tribesmen =" + row["tribesmen"]+"," \
-        " UpperStrata =" + row["upper_strata"]+"," \
-        " Civilization =" + row["INDUSTRIALISATION"]+"," \
-        " SettlementRank =" + row["PROVINCE RANK"]+"," \
-        " NameRef ='" + row["NAME"].replace("'","’")+"'," \
-        " AraRef ='" + row["AREA"].replace("'","’")+"'," \
-        " Terrain ='" + row["TERRAIN"].replace("'", "’") + "' WHERE ProvID = " + row["PROVID"]
+            if item == "":
+                item = "0"
+        query = "UPDATE province_setup SET Culture ='" + row[culture_col]+"'," \
+        " Religion ='" + row[religion_col]+"'," \
+        " TradeGoods ='" + row[tradegood_col]+"'," \
+        " Citizens =" + row[4]+"," \
+        " Freedmen =" + row[indentured_col]+"," \
+        " LowerStrata =" + row[lower_strata_col]+"," \
+        " MiddleStrata =" + row[middle_strata_col]+"," \
+        " Proletariat =" + row[proletariat_col]+"," \
+        " Slaves =" + row[slaves_col]+"," \
+        " Tribesmen =" + row[tribesmen_col]+"," \
+        " UpperStrata =" + row[upper_strata_col]+"," \
+        " Civilization =" + row[industrialisation_col]+"," \
+        " SettlementRank =" + row[province_rank_col]+"," \
+        " NameRef ='" + row[name_col].replace("'","’")+"'," \
+        " AraRef ='" + row[area_col].replace("'","’")+"'," \
+        " Terrain ='" + row[terrain_col].replace("'", "’") + "' WHERE ProvID = " + row[provid_col]
         return self.cursor.execute(query, "")
 
     def db_fetchall(self):
@@ -490,7 +507,7 @@ canvas.create_image(0, 0, image=canvas_img, anchor="nw")
 canvas.config(scrollregion=canvas.bbox(ALL))
 
 prevprovince = None
-selector_img = ImageTk.PhotoImage(file="selector.gif", master=root)
+selector_img = ImageTk.PhotoImage(Image.open("selector.gif").convert("RGBA"))
 
 #function to be called when mouse is clicked
 def getprovince(event):

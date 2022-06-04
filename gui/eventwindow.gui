@@ -1,0 +1,1290 @@
+@portraittopspacer = 304
+template event_portrait 
+{
+	flowcontainer = {
+		direction = vertical
+		
+		spacing = 4
+		
+		cpt_button = {
+		
+			size = { 70 105 }
+		
+			country_flag = {
+				position = { 1 2 }
+				tooltip = "[Character.GetEmployer.GetDescriptiveName]"
+				parentanchor = top|right
+				visible = "[Not( EqualTo_int32( Character.GetEmployer.GetId, Player.GetId ) )]"  
+				
+				datacontext = "[Character.GetEmployer]"
+
+				blockoverride "flag"
+				{
+					texture = "[Character.GetEmployer.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+					frame = "[Character.GetEmployer.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+					framesize = { 120 120 }
+				}
+				
+				blockoverride "size"
+				{
+					size = { 32 32 }
+				}
+				
+				blockoverride "click"
+				{
+					onclick = "[OpenDiplomacy(Character.GetEmployer)]"
+				}
+			}
+		}
+		
+		container = {
+			tag = {
+				name = "header"
+				#size = { 120 32 }
+				tooltip = "[Character.GetFamilyMemberText]"
+				text = "[Character.GetPraenomen]"
+				max_width = 70
+				minimumsize = { 70 0 }
+			}
+		}
+	}
+}
+
+
+base_window = {
+	name = "event_window"
+	parentanchor = center
+	position = { 0 38 }
+	minimumsize = { 694 540 } #Width with top image should always be 756, otherwse this
+	blockoverride "Drop_shadow" { visible = yes }
+	blockoverride "DropShadowAlpha" { alpha = 0.3 }
+	blockoverride "WindowAlpha" { alpha = 1 }
+	
+	state = {
+		name = _show 
+		start_sound = {
+			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_snapshot_windows"
+		}
+	}
+
+	icon = {
+		visible = "[Or( EventWindow.HasRightPortraitCharacter('0'), EventWindow.HasLeftPortraitCharacter('0') )]"
+		size = { 756 137 }
+		texture = "gfx/interface/ornamental/event_top_white.dds"
+		widgetanchor = bottom
+		position = { 0 10 }
+	}
+	
+	vbox = {
+		using = MainWindowHeaderBoxCentered
+		
+		blockoverride "Title_text" { text = "[EventWindow.GetTitle]" }
+		
+		vbox = {
+			layoutpolicy_vertical = expanding
+		}
+		
+	}
+	
+	icon = {
+		visible = "[Or( EventWindow.HasRightPortraitCharacter('0'), EventWindow.HasLeftPortraitCharacter('0') )]"
+		size = { 756 137 }
+		texture = "gfx/interface/ornamental/event_top_red.dds"
+		widgetanchor = bottom
+		position = { 0 10 }
+	}
+	
+	icon = {
+		#size = { 373 68 }
+		position = { -1 -2 }
+		texture = "gfx/interface/ornamental/event_bot_white.dds"
+		widgetanchor = top|hcenter
+		parentanchor = bottom|hcenter
+		scale = 0.75
+		alpha = 0.4
+		color = { 0 0 0 1 }
+	}
+	
+	icon = {
+		#size = { 373 68 }
+		position = { 0 -6 }
+		texture = "gfx/interface/ornamental/event_bot_white.dds"
+		widgetanchor = top|hcenter
+		parentanchor = bottom|hcenter
+		scale = 0.75
+	}
+	
+	icon = {
+		position = { 6 -54 }
+		texture = "gfx/interface/ornamental/event_bot_red.dds"
+		widgetanchor = hcenter
+		parentanchor = bottom|hcenter
+		scale = 0.75
+	}
+	
+	container = {
+		resizeparent = yes
+		
+		flowcontainer = {
+			name = "portraits_left"
+			visible = "[EventWindow.HasLeftPortraitCharacter('0')]"
+			ignoreinvisible = yes
+			direction = vertical
+			spacing = 4
+			position = { 19 @portraittopspacer }
+			container = {
+				using = event_portrait
+				name = "portrait_left"
+				parentanchor = hcenter
+				datacontext = "[EventWindow.GetLeftPortraitCharacter('0')]"
+				visible = "[EventWindow.HasLeftPortraitCharacter('0')]"
+			}
+			container = {
+				using = event_portrait
+				name = "portrait_left_small_1"
+				parentanchor = hcenter
+				datacontext = "[EventWindow.GetLeftPortraitCharacter('1')]"
+				visible = "[EventWindow.HasLeftPortraitCharacter('1')]"
+			}
+			container = {
+				using = event_portrait
+				name = "portrait_left_small_2"
+				parentanchor = hcenter
+				datacontext = "[EventWindow.GetLeftPortraitCharacter('2')]"
+				visible = "[EventWindow.HasLeftPortraitCharacter('2')]"
+			}
+			widget = { size = { 1 24 } visible = "[EventWindow.HasLeftPortraitCharacter('2')]" }
+		}
+		
+		flowcontainer = {
+			name = "portraits_right"
+			
+			visible = "[EventWindow.HasRightPortraitCharacter('0')]"
+			ignoreinvisible = yes
+			direction = vertical
+			spacing = 4
+			parentanchor = right
+			position = { -19 @portraittopspacer }
+			container = {
+				using = event_portrait
+				name = "portrait_right"
+				parentanchor = hcenter
+				datacontext = "[EventWindow.GetRightPortraitCharacter('0')]"
+				visible = "[EventWindow.HasRightPortraitCharacter('0')]"
+				blockoverride "portrait_transformation"
+				{
+					portrait_scale = { -1 1 }
+					portrait_offset = { 1 0 }
+				}
+			}
+			
+			container = {
+				using = event_portrait
+				name = "portrait_right_small_1"
+				parentanchor = hcenter
+				datacontext = "[EventWindow.GetRightPortraitCharacter('1')]"
+				visible = "[EventWindow.HasRightPortraitCharacter('1')]"
+				blockoverride "portrait_transformation"
+				{
+					portrait_scale = { -1 1 }
+					portrait_offset = { 1 0 }
+				}
+			}
+			
+			container = {
+				using = event_portrait
+				name = "portrait_right_small_2"
+				parentanchor = hcenter
+				datacontext = "[EventWindow.GetRightPortraitCharacter('2')]"
+				visible = "[EventWindow.HasRightPortraitCharacter('2')]"
+				blockoverride "portrait_transformation"
+				{
+					portrait_scale = { -1 1 }
+					portrait_offset = { 1 0 }
+				}
+			}
+			widget = { size = { 1 24 } visible = "[EventWindow.HasLeftPortraitCharacter('2')]" }
+		}
+		
+		flowcontainer = {
+			name = "Bottom"
+			direction = horizontal
+			position = { 0 0 }
+			ignoreinvisible = yes
+			
+			margin_widget = {
+				size = { 44 280 }
+				icon = {
+					texture = "gfx/interface/base_parts/background_red.dds"
+					position = { 12 42 }
+					size = { 40 260 }
+					
+					modify_texture = {
+						name = "Alpha"
+						texture = "gfx/interface/base_parts/header_l_pattern_x0bd_vertical.dds"
+						blend_mode = alphamultiply
+						spriteType = Corneredtiled
+					}
+					
+					modify_texture = {
+						name = "Alpha2"
+						texture = "gfx/interface/base_parts/side_s_x104bd_left_cut_alpha.dds"
+						blend_mode = alphamultiply
+						spritetype = corneredTiled
+						spriteborder = { 60 40 }
+					}
+					
+				}
+			}
+			
+			flowcontainer = {
+				direction = vertical
+				ignoreinvisible = yes
+				flowcontainer = {
+					name = "Center_Box_Smaller"
+					direction = vertical
+					margin = { 4 0 }
+					ignoreinvisible = yes
+					visible = "[Not( Or( EventWindow.HasRightPortraitCharacter('0'), EventWindow.HasLeftPortraitCharacter('0') ) )]"
+					
+					widget = { size = { 0 62 } }
+					
+					widget = {
+						visible = "[Or( EventWindow.HasRightPortraitCharacter('0'), EventWindow.HasLeftPortraitCharacter('0') )]"
+						name = "spacing_w"
+						size = { 660 0 }
+					}
+
+					margin_widget = {
+						size = { 600 249 }
+						parentanchor = hcenter
+						icon = {
+							name = "event_picture"
+							size = { 600 239 }
+							texture = "[EventWindow.GetEventPicture]"
+							tooltip = "[EventWindow.GetDebugInfo]"
+							alpha = 0.8
+						}
+					}
+					
+					scrollarea = {
+						parentanchor = hcenter
+						name = "description_scrollarea"
+						maximumsize = { -1 340 }
+						scrollbarpolicy_horizontal = always_off
+						
+						using = NoninteractableBG
+						blockoverride "Margins" { 
+							margin = { 4 7 } 
+							margin_bottom = 10
+						}
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+						
+						scrollwidget = {
+							textbox = {
+								name = "description"
+								resizeparent = yes
+								minimumsize = { 560 0 }
+								maximumsize = { 560 -1 }
+								multiline = yes
+								using = BaseFontM
+								using = Black_FontColor
+								autoresize = yes
+								margin = { 12 0 }
+								align = top|left
+								text = "[EventWindow.GetDescription]"
+							}
+						}
+					}
+					
+					widget = {
+						name = "spacer_2"
+						size = { 0 20 }
+					}
+				}
+				
+				flowcontainer = {
+					name = "Center_Box_big"
+					direction = vertical
+					margin = { 4 0 }
+					ignoreinvisible = yes
+					minimumsize = { 0 0 }
+					visible = "[Or( EventWindow.HasRightPortraitCharacter('0'), EventWindow.HasLeftPortraitCharacter('0') )]"
+					
+					widget = { size = { 0 54 } }
+					
+					widget = {
+						visible = "[Or( EventWindow.HasRightPortraitCharacter('0'), EventWindow.HasLeftPortraitCharacter('0') )]"
+						name = "spacing_w_big"
+						size = { 660 0 }
+					}
+
+					margin_widget = {
+						size = { 600 242 }
+						parentanchor = hcenter
+						icon = {
+							name = "event_picture_big"
+							size = { 600 239 }
+							texture = "[EventWindow.GetEventPicture]"
+							tooltip = "[EventWindow.GetDebugInfo]"
+							alpha = 0.8
+						}
+					}
+					widget = { size = { 0 10 } }
+					scrollarea = {
+						parentanchor = hcenter
+						name = "description_scrollarea_big"
+						maximumsize = { -1 340 }
+						scrollbarpolicy_horizontal = always_off
+						
+						using = NoninteractableBG
+						blockoverride "Margins" { 
+							margin = { 2 7 } 
+							margin_bottom = 10
+						}
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+						
+						scrollwidget = {
+							textbox = {
+								name = "description_big"
+								resizeparent = yes
+								minimumsize = { 560 0 }
+								maximumsize = { 560 -1 }
+								multiline = yes
+								using = BaseFontM
+								using = Black_FontColor
+								autoresize = yes
+								margin = { 12 3 }
+								align = top|left
+								text = "[EventWindow.GetDescription]"
+							}
+						}
+					}
+				} 
+				widget = {
+					size = { 0 34 }
+				}
+				fixedgridbox = {
+					parentanchor = hcenter
+					name = "option_grid"
+					addcolumn = 550
+					addrow = 38
+					minimumsize = { 0 0 }
+					item = {
+						container = {
+							using = eventbutton
+						}
+					}
+				}
+				
+				widget = {
+					name = "spacer_big_3"
+					size = { 0 30 }
+				} 
+				
+			}
+			
+			margin_widget = {
+				size = { 44 280 }
+				icon = {
+					texture = "gfx/interface/base_parts/background_red.dds"
+					parentanchor = right
+					position = { -12 42 }
+					size = { 40 260 }
+					
+					modify_texture = {
+						name = "Alpha"
+						texture = "gfx/interface/base_parts/header_l_pattern_x0bd_vertical.dds"
+						blend_mode = alphamultiply
+						spriteType = Corneredtiled
+					}
+					
+					modify_texture = {
+						name = "Alpha2"
+						texture = "gfx/interface/base_parts/side_s_x104bd_right_cut_alpha.dds"
+						blend_mode = alphamultiply
+						spritetype = corneredTiled
+						spriteborder = { 60 40 }
+					}
+					
+				}
+			}
+			
+		}
+
+		goto_button = {
+			name = "goto_button"
+			position = { -54 56 }
+			parentanchor = right
+			shortcut = "go_to_button"
+			visible = "[EventWindow.HasLocation]"
+			blockoverride "On_click" { onclick = "[EventWindow.GoToLocation]" }
+			tooltip = "go_to"
+		}
+	}
+}
+
+base_window = { ####Currently unused in vanilla
+	gfxtype = windowgfx
+	name = "major_event_window"
+	position = { 690 138 }
+	#movable = no
+	vbox = {
+		using = MainWindowHeaderBoxCentered
+		
+		blockoverride "Title_text" { text = "[EventWindow.GetTitle]" }
+		
+		vbox = {
+			layoutpolicy_vertical = expanding
+		}
+		
+	}
+	#The close button/event option.
+	flowcontainer = {
+		position = { 605 15 }
+		flowcontainer = {
+			ignoreinvisible = yes
+			fixedgridbox = {
+				parentanchor = top|right
+				name = "option_grid"
+				addcolumn = 500
+				addrow = 40
+				maxhorizontalslots = 10
+				maxverticalslots = 1
+				minimumsize = { 20 20 }
+				item = {
+					container = {
+						# For Standard Event Options
+						button_close = { 
+							onclick = "[EventOption.Select]"
+							tooltip = "CLOSE"
+							shortcut = "close_window"
+						}
+					}
+				}
+			}
+		}
+	}
+	#Main Container that holds all custom windows.
+	container = {
+		name = "major_event_window_main_container"
+		resizeparent = yes
+		container = {
+			name = "first_minor_container"
+			datacontext = "[GetScriptedGui('showing_screen_1_trigger')]"
+			visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
+			using = NoninteractableBGDark
+				
+			flowcontainer = {
+				name = "Bottom"
+				direction = horizontal
+				position = { 0 0 }
+				ignoreinvisible = yes
+					
+				margin_widget = {
+					size = { 650 580 }
+					icon = {
+						texture = "gfx/interface/base_parts/background_red.dds"
+						position = { 18 42 }
+						size = { 40 530 }
+							
+						modify_texture = {
+							name = "Alpha"
+							texture = "gfx/interface/base_parts/header_l_pattern_x0bd_vertical.dds"
+							blend_mode = alphamultiply
+							spriteType = Corneredtiled
+						}
+							
+						modify_texture = {
+							name = "Alpha2"
+							texture = "gfx/interface/base_parts/side_s_x104bd_left_cut_alpha.dds"
+							blend_mode = alphamultiply
+							spritetype = corneredTiled
+							spriteborder = { 60 40 }
+						}
+							
+					}
+				}
+				widget = {
+					size = { 400 0 }
+				}
+				margin_widget = {
+					size = { 70 580 }
+					icon = {
+						texture = "gfx/interface/base_parts/background_red.dds"
+						parentanchor = right
+						position = { -12 42 }
+						size = { 40 530 }
+							
+						modify_texture = {
+							name = "Alpha"
+							texture = "gfx/interface/base_parts/header_l_pattern_x0bd_vertical.dds"
+							blend_mode = alphamultiply
+							spriteType = Corneredtiled
+						}
+							
+						modify_texture = {
+							name = "Alpha2"
+							texture = "gfx/interface/base_parts/side_s_x104bd_right_cut_alpha.dds"
+							blend_mode = alphamultiply
+							spritetype = corneredTiled
+							spriteborder = { 60 40 }
+						}
+							
+					}
+				}
+			}
+		}
+		container = {
+			name = "second_minor_container"
+			datacontext = "[GetScriptedGui('showing_screen_2_trigger')]"
+			visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
+			using = NoninteractableBG
+					
+			background = {
+				texture = "gfx/interface/tiles/small_window_frame_p_corners.dds"
+				spriteType = Corneredtiled
+				size = { 100% 100% }
+				margin_top = -33
+				spriteborder = { 32 24 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+			}
+				
+			flowcontainer = {
+				name = "Bottom"
+				direction = horizontal
+				position = { 0 0 }
+				ignoreinvisible = yes
+					
+				margin_widget = {
+					size = { 210 880 }
+					icon = {
+						texture = "gfx/interface/base_parts/background_red.dds"
+						position = { 18 42 }
+						size = { 40 830 }
+							
+						modify_texture = {
+							name = "Alpha"
+							texture = "gfx/interface/base_parts/header_l_pattern_x0bd_vertical.dds"
+							blend_mode = alphamultiply
+							spriteType = Corneredtiled
+						}
+							
+						modify_texture = {
+							name = "Alpha2"
+							texture = "gfx/interface/base_parts/side_s_x104bd_left_cut_alpha.dds"
+							blend_mode = alphamultiply
+							spritetype = corneredTiled
+							spriteborder = { 60 40 }
+						}
+							
+					}
+				}
+				widget = {
+					size = { 400 0 }
+				}
+				margin_widget = {
+					size = { 44 480 }
+					icon = {
+						texture = "gfx/interface/base_parts/background_red.dds"
+						parentanchor = right
+						position = { -12 42 }
+						size = { 40 830 }
+							
+						modify_texture = {
+							name = "Alpha"
+							texture = "gfx/interface/base_parts/header_l_pattern_x0bd_vertical.dds"
+							blend_mode = alphamultiply
+							spriteType = Corneredtiled
+						}
+							
+						modify_texture = {
+							name = "Alpha2"
+							texture = "gfx/interface/base_parts/side_s_x104bd_right_cut_alpha.dds"
+							blend_mode = alphamultiply
+							spritetype = corneredTiled
+							spriteborder = { 60 40 }
+						}
+							
+					}
+				}
+			}
+			flowcontainer = {
+				parentanchor = top
+				position = { 50 70 }
+				icon_and_text = {
+					size = { 120 0 }
+					tooltip = "a"
+					blockoverride "Icon"
+					{
+						size = { 60 60 }
+						texture = "gfx/interface/icons/tradegoods/amber.dds"
+					}
+					blockoverride "Text"
+					{
+						text = "Amber"
+					}
+				}
+				icon_and_text = {
+					size = { 150 0 }
+					tooltip = "b"
+					blockoverride "Icon"
+					{
+						size = { 60 60 }
+						texture = "gfx/interface/icons/tradegoods/base_metals.dds"
+					}
+					blockoverride "Text"
+					{
+						text = "Base Metals"
+					}
+				}
+				icon_and_text = {
+					size = { 120 0 }
+					tooltip = "c"
+					blockoverride "Icon"
+					{
+						size = { 55 55 }
+						texture = "gfx/interface/icons/tradegoods/camel.dds"
+					}
+					blockoverride "Text"
+					{
+						text = "Camels"
+					}
+				}
+				icon_and_text = {
+					size = { 140 0 }
+					tooltip = "d"
+					blockoverride "Icon"
+					{
+						size = { 55 55 }
+						texture = "gfx/interface/icons/tradegoods/cattle.dds"
+					}
+					blockoverride "Text"
+					{
+						text = "Livestock"
+					}
+				}
+			}
+		}
+	}
+	#Governorship List
+	vbox = {
+		layoutpolicy_horizontal = expanding
+		layoutpolicy_vertical = expanding
+		margin_top = 49
+		margin_bottom = 8
+		margin_right = 5
+		margin_left = -10
+		datacontext = "[GetScriptedGui('showing_screen_1_trigger')]"
+		visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
+
+		vbox = {
+			margin_bottom = 5
+			layoutpolicy_vertical = expanding
+			layoutpolicy_horizontal = expanding
+
+			#sub_header = {
+			#	size = { 616 32 }
+			#	blockoverride "Title_text" 
+			#	{ 
+			#		text = "OUR_GOVERNORSHIPS"
+			#	}
+			#}
+			#widget = {
+			#	size = { 400 42 }
+			#}
+			scrollarea = {
+				layoutpolicy_vertical = expanding
+				using = VerticalScrollAreaCutOff
+
+				scrollbar_vertical = {
+					using = VerticalScrollBar
+				}
+
+				scrollbarpolicy_horizontal = always_off
+						
+				scrollwidget = {
+					vbox = {
+						vbox = {
+							layoutpolicy_horizontal = expanding 
+							layoutpolicy_vertical = shrinking
+							datamodel = "[Player.MakeScope.GetList('player_governorships')]"
+							item = {
+								hbox = {
+									hbox = {
+										layoutpolicy_vertical = expanding
+										layoutpolicy_horizontal = shrinking
+										datacontext = "[Scope.Governorship]"
+										widget = {
+											size = { 50 55 }
+										}
+										textbox = {
+											margin_left = 10
+											size = { 115 0 }
+											using = BaseFontM
+											using = Black_FontColor
+											text = "[Governorship.GetName]"
+										}
+										widget = {
+											size = { 50 0 }
+										}
+										icon_and_text = {
+											size = { 100 0 }
+											tooltip = "GOV_TRADE_VALUE_TT"
+											blockoverride "Icon"
+												{
+													texture = "gfx/interface/icons/shared_icons/trade.dds"
+												}
+											blockoverride "Text"
+											{
+												text = "[GuiScope.SetRoot( Governorship.MakeScope ).ScriptValue('percentage_of_trade_value_in_region_svalue')|0%]"
+											}
+										}
+										widget = {
+											size = { 15 0 }
+										}
+										icon_and_text = {
+											size = { 86 0 }
+											tooltip = "GOV_WEALTH_TT"
+											blockoverride "Icon"
+											{
+												texture = "gfx/interface/icons/shared_icons/treasury.dds"
+											}
+											blockoverride "Text"
+											{
+												text = "[GuiScope.SetRoot( Governorship.MakeScope ).ScriptValue('WEALTH_governorship_total')|2]"
+											}
+										}
+										widget = {
+											size = { 10 0 }
+										}
+										icon_and_text = {
+											size = { 86 0 }
+											tooltip = "GOV_UPPER_STRATA_WEALTH_TT"
+											blockoverride "Icon"
+											{
+												texture = "gfx/interface/icons/pop_types/upper_strata.dds"
+											}
+											blockoverride "Text"
+											{
+												text = "[GuiScope.SetRoot( Governorship.MakeScope ).ScriptValue('WEALTH_governorship_upper_strata')|2]"
+											}
+										}
+										icon_and_text = {
+											size = { 86 0 }
+											tooltip = "GOV_MIDDLE_STRATA_WEALTH_TT"
+											blockoverride "Icon"
+											{
+												texture = "gfx/interface/icons/pop_types/middle_strata.dds"
+											}
+											blockoverride "Text"
+											{
+												text = "[GuiScope.SetRoot( Governorship.MakeScope ).ScriptValue('WEALTH_governorship_middle_strata')|2]"
+											}
+										}
+										icon_and_text = {
+											size = { 86 0 }
+											tooltip = "GOV_LOWER_STRATA_WEALTH_TT"
+											blockoverride "Icon"
+											{
+												texture = "gfx/interface/icons/pop_types/lower_strata.dds"
+											}
+											blockoverride "Text"
+											{
+												text = "[GuiScope.SetRoot( Governorship.MakeScope ).ScriptValue('WEALTH_governorship_lower_strata')|2]"
+											}
+										}
+										icon_and_text = {
+											size = { 86 0 }
+											tooltip = "GOV_PROLETARIAT_WEALTH_TT"
+											blockoverride "Icon"
+											{
+												texture = "gfx/interface/icons/pop_types/proletariat.dds"
+											}
+											blockoverride "Text"
+											{
+												text = "[GuiScope.SetRoot( Governorship.MakeScope ).ScriptValue('WEALTH_governorship_proletariat')|2]"
+											}
+										}
+										icon_and_text = {
+											size = { 86 0 }
+											tooltip = "GOV_SLAVES_WEALTH_TT"
+											blockoverride "Icon"
+											{
+												texture = "gfx/interface/icons/pop_types/slaves.dds"
+											}
+											blockoverride "Text"
+											{
+												text = "[GuiScope.SetRoot( Governorship.MakeScope ).ScriptValue('WEALTH_governorship_slaves')|2]"
+											}
+										}
+										icon_and_text = {
+											size = { 86 0 }
+											tooltip = "GOV_INDENTURED_WEALTH_TT"
+											blockoverride "Icon"
+											{
+												texture = "gfx/interface/icons/pop_types/indentured.dds"
+											}
+											blockoverride "Text"
+											{
+												text = "[GuiScope.SetRoot( Governorship.MakeScope ).ScriptValue('WEALTH_governorship_indentured')|2]"
+											}
+										}
+										icon_and_text = {
+											size = { 86 0 }
+											tooltip = "GOV_TRIBESMEN_WEALTH_TT"
+											blockoverride "Icon"
+											{
+												texture = "gfx/interface/icons/pop_types/tribesmen.dds"
+											}
+											blockoverride "Text"
+											{
+												text = "[GuiScope.SetRoot( Governorship.MakeScope ).ScriptValue('WEALTH_governorship_tribesmen')|2]"
+											}
+										}
+										icon_button_square = {
+											datacontext = "[GetScriptedGui('show_governorship_states_button')]" 
+											tooltip = "#T Show States in [Governorship.GetName]"
+											blockoverride "On_click" { 
+												onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Governorship.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+												onclick = "[GetVariableSystem.Set( 'show_governorship_states', 'yes' )]"
+											}
+											blockoverride "Icon" 
+											{
+												texture = "gfx/interface/icons/shared_icons/assist_with_scheme.dds" 
+												size = { 34 34 }
+											}
+										}
+										icon_button_square = {
+											datacontext = "[GetScriptedGui('show_trade_centers_in_governorship')]" 
+											tooltip = "#T Show Trade Centers in [Governorship.GetName]#!"
+											blockoverride "On_click" {
+												onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Governorship.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+												onclick = "[GetVariableSystem.Set( 'show_governorship_trade_centers', 'yes' )]"
+											}
+											blockoverride "Icon" 
+											{
+												texture = "gfx/interface/icons/modifiers/global_state_trade_routes.dds" 
+												size = { 34 34 }
+											}							
+										}
+										textbox = {
+											size = { 200 }
+										}
+									}
+								}
+							}
+						}
+						vbox = {
+							name = "expander"
+							layoutpolicy_vertical = growing 
+						}
+					}
+				}
+			}
+		}
+	}
+	#Governorship States Window
+	base_window = {
+		size = { 660 580 }
+		position = { 0 0 }
+		movable = no
+		parentanchor = bottom
+		visible = "[GetVariableSystem.HasValue( 'show_governorship_states', 'yes' )]"
+			vbox = {
+				using = MainWindowHeaderBoxCentered
+				
+				blockoverride "Title_text" { text = "Provincal Trade" }
+				
+				vbox = {
+					layoutpolicy_vertical = expanding
+				}
+				
+			}
+			using = NoninteractableBG
+					
+			background = {
+				texture = "gfx/interface/tiles/small_window_frame_p_corners.dds"
+				spriteType = Corneredtiled
+				size = { 100% 100% }
+				margin_top = -33
+				spriteborder = { 32 24 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+			}
+		alwaystransparent = no
+		flowcontainer = {
+			parentanchor = top|right
+			position = { -10 15 }
+
+			button_close = {
+				name = "close_button"
+				datacontext = "[GetScriptedGui('remove_state_list_variables_button')]"
+				onclick = "[GetVariableSystem.Set( 'show_governorship_states', 'no' )]"
+				onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+				tooltip = "CLOSE"
+			}
+		}
+		vbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			margin_top = 43
+			margin_bottom = 8
+			margin_right = 25
+			margin_left = 10
+
+			vbox = {
+				margin_bottom = 3
+				layoutpolicy_vertical = expanding
+				layoutpolicy_horizontal = expanding
+
+				widget = {
+					size = { 0 12 }
+				}
+				scrollarea = {
+					layoutpolicy_vertical = expanding
+					using = VerticalScrollAreaCutOff
+
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+
+					scrollbarpolicy_horizontal = always_off
+							
+					scrollwidget = {
+						vbox = {
+							vbox = {
+								layoutpolicy_horizontal = expanding 
+								layoutpolicy_vertical = shrinking
+								datamodel = "[Player.MakeScope.GetList('player_governorship_states')]"
+								item = {
+									hbox = {
+										hbox = {
+											layoutpolicy_vertical = expanding
+											layoutpolicy_horizontal = shrinking
+											datacontext = "[Scope.State]"
+											widget = {
+												size = { 10 45 }
+											}
+											icon_and_text = {
+												size = { 120 0 }
+												tooltip = "[State.GetMemberInformation|0]"
+												blockoverride "Icon"
+													{
+														texture = "gfx/interface/icons/shared_icons/civilization.dds"
+														size = { 0 0 }
+													}
+												blockoverride "Text"
+												{
+													text = "[State.GetShortNameWithNoTooltip]"
+													using = BaseFontM
+													using = Black_FontColor													
+												}												
+											}
+											widget = {
+												size = { 10 0 }
+											}
+											icon_and_text = {
+												size = { 200 0 }
+												tooltip = "TRADE_ZONE_TOOLTIP"
+												blockoverride "Icon"
+													{
+														texture = "gfx/interface/icons/modifiers/base_resources.dds"
+													}
+												blockoverride "Text"
+												{
+													text = "[State.GetCapital.Custom('state_trade_zone_loc')]"
+												}
+											}
+											widget = {
+												size = { 10 0 }
+											}
+											icon_and_text = {
+												size = { 100 0 }
+												tooltip = "[State.GetTradeRoutesTooltip]"
+												blockoverride "Icon"
+												{
+													texture = "gfx/interface/icons/modifiers/local_state_trade_routes.dds"
+												}
+												blockoverride "Text"
+												{
+													text = "[State.GetTradeRoutesShort|0]"
+												}
+											}
+											widget = {
+												size = { 5 0 }
+											}
+											icon_and_text = {
+													size = { 86 0 }
+													tooltip = "[State.GetShortNameWithNoTooltip] has a total population of #Y [State.GetTotalPopulation|0]#!"
+													blockoverride "Icon"
+														{
+															texture = "gfx/interface/icons/shared_icons/pop_type.dds"
+														}
+													blockoverride "Text"
+													{
+														text = "[State.GetTotalPopulation|0]"
+													}
+											}
+											textbox = {
+												size = { 200 }
+											}
+										}													
+									}
+								}
+							}
+							vbox = {
+								name = "expander"
+								layoutpolicy_vertical = growing 
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	#Trade Centers Window
+	base_window = {
+		size = { 660 610 }
+		position = { 0 0 }
+		movable = no
+		parentanchor = top
+		visible = "[GetVariableSystem.HasValue( 'show_governorship_trade_centers', 'yes' )]"
+			vbox = {
+				using = MainWindowHeaderBoxCentered
+				
+				blockoverride "Title_text" { text = "Trade Centers" }
+				
+				vbox = {
+					layoutpolicy_vertical = expanding
+				}
+				
+			}
+		alwaystransparent = no
+		flowcontainer = {
+			parentanchor = top|right
+			position = { -10 15 }
+
+			button_close = {
+				name = "close_button"
+				datacontext = "[GetScriptedGui('remove_trade_center_list_variables_button')]"
+				onclick = "[GetVariableSystem.Set( 'show_governorship_trade_centers', 'no' )]"
+				onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+				tooltip = "CLOSE"
+			}
+		}
+		vbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			margin_top = 43
+			margin_bottom = 8
+			margin_right = 25
+			margin_left = -5
+
+			vbox = {
+				margin_bottom = 3
+				layoutpolicy_vertical = expanding
+				layoutpolicy_horizontal = expanding
+
+				widget = {
+					size = { 0 12 }
+				}
+				scrollarea = {
+					layoutpolicy_vertical = expanding
+					using = VerticalScrollAreaCutOff
+
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+
+					scrollbarpolicy_horizontal = always_off
+							
+					scrollwidget = {
+						vbox = {
+							vbox = {
+								layoutpolicy_horizontal = expanding 
+								layoutpolicy_vertical = shrinking
+								datamodel = "[Player.MakeScope.GetList('region_trade_centers')]"
+								item = {
+									hbox = {
+										hbox = {
+											layoutpolicy_vertical = expanding
+											layoutpolicy_horizontal = shrinking
+											datacontext = "[Scope.Province]"
+											widget = {
+												size = { 25 80 }
+											}
+											icon_and_text = {
+												size = { 130 0 }
+												tooltip = "The Trade Center of [Province.GetName] is owned by [Province.GetOwner.GetName]"
+												blockoverride "Icon"
+													{
+														texture = "gfx/interface/icons/shared_icons/civilization.dds"
+														size = { 0 0 }
+													}
+												blockoverride "Text"
+												{
+													text = "[Province.GetName]"
+													using = BaseFontM
+													using = Black_FontColor													
+												}												
+											}
+											widget = {
+												size = { 30 0 }
+											}
+											icon_and_text = {
+												size = { 76 0 }
+												tooltip = "[Province.GetName] is a level #Y [GuiScope.SetRoot( Province.MakeScope ).ScriptValue('trade_center_level_svalue')|0]#! Trade Center."
+												blockoverride "Icon"
+													{
+														texture = "gfx/interface/icons/shared_icons/trade.dds"
+													}
+												blockoverride "Text"
+												{
+													text = "[GuiScope.SetRoot( Province.MakeScope ).ScriptValue('trade_center_level_svalue')|0]"
+												}
+											}
+											widget = {
+												size  = { 30 0 }
+											}
+											#flowcontainer = {
+												#position = { 15 190 }
+												#parentanchor = top
+												icon_button_square = {
+													datacontext = "[GetScriptedGui('upgrade_trade_center_button')]"
+													visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Province.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+													size = { 285 65 }
+													blockoverride "On_click"
+													{
+														enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Province.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+														onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Province.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+													}
+													tooltip = "UPGRADE_TRADE_CENTER_TT"
+													blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
+													blockoverride "Icon" { texture = "gfx/interface/icons/military_traditions/latin_philosophy_start_bonus.dds" size = { 281 62 } }
+													alpha = 0.99
+												}
+											#}
+											widget = {
+												size = { 15 0 }
+											}
+											goto_button = {
+												size = { 36 36 }
+												blockoverride "On_click"
+												{
+													onclick = "[PanToProvince(Province.Self)]"
+												}
+												tooltip = "GO_TO_PROVINCE_TOOLTIP"
+											}
+											textbox = {
+												size = { 200 }
+											}
+										}													
+									}
+								}
+							}
+							vbox = {
+								name = "expander"
+								layoutpolicy_vertical = growing 
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+base_sub_window = {
+	gfxtype = windowgfx
+	name = "minor_event_window"
+	parentanchor = bottom|hcenter
+	movable = yes
+	position = { 0 400 }
+	size = { 480 340 }
+	
+	blockoverride "Title_text" { text = "[EventWindow.GetTitle]" }
+	
+	blockoverride "White_buttons"
+	{
+		
+	}
+	
+	goto_button = {
+		name = "close_button"
+		shortcut = "go_to_button"
+		parentanchor = bottom|right
+		position = { -12 -12 }
+		visible = "[EventWindow.HasLocation]"
+		blockoverride "On_click" { onclick = "[EventWindow.GoToLocation]" }
+		tooltip = "go_to"
+	}
+	
+	cpt_button = {
+		name = "portrait_left"
+		visible = "[EventWindow.HasLeftPortraitCharacter('0')]"
+		datacontext = "[EventWindow.GetLeftPortraitCharacter('0')]"
+		size = { 100 150 }      
+		position = { 14 44 }
+	}
+	
+	textbox = {
+		name = "description"
+		size = { 350 300 }
+		position = { 120 44 }
+		multiline = yes
+		using = BaseFontS
+		using = Black_FontColor
+		margin = { 10 0 }
+		align = top
+		text = "[EventWindow.GetDescription]"
+	}
+		
+	fixedgridbox = {
+		name = "option_grid"
+		addcolumn = 340
+		addrow = 36
+		parentanchor = bottom|hcenter
+		position = { 0 -10 }
+		item = {
+			container = {
+				text_button_square = {
+					visible = "[Not(EventOption.IsHighlighted)]"
+					blockoverride "Center_text" { text = "[EventOption.GetText]" }
+					tooltip = "[EventOption.GetTooltip]"
+					blockoverride "On_click" { onclick = "[EventOption.Select]" }
+					size = { 340 0 }
+				}
+				
+				# For Highlighted Event Options
+				text_button_square_highlighted = {
+					visible = "[EventOption.IsHighlighted]" 
+					blockoverride "Center_text" 
+					{ 
+						text = "[EventOption.GetText]" 
+						max_width = 340
+					}
+					tooltip = "[EventOption.GetTooltip]"
+					blockoverride "On_click" { onclick = "[EventOption.Select]" }	
+					size = { 340 0 }
+				}
+			}
+		}
+	}
+	
+	state = {
+		name = on_appear
+		
+		animation = {
+			position = { 0 -400 }
+		}
+		
+		trigger_on_create = yes
+		duration = 0.10
+		
+	}
+
+}

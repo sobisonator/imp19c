@@ -1,36 +1,38 @@
-import sqlite3, csv, gspread, configparser
+import sqlite3, csv, gspread, configparser, os
 from urllib.parse import _NetlocResultMixinStr
 import gspread_dataframe as gd
 from tkinter import filedialog, messagebox
 from tkinter import *
 from PIL import Image, ImageTk
 
-remote_sheet_exists = False # Why is this here? Belongs in a class handling the database and/or cloud integration
-
-event2canvas = lambda e, c: (c.canvasx(e.x), c.canvasy(e.y)) # Why is this here? Belongs in an interface class
+# remote_sheet_exists = False # Why is this here? Belongs in a class handling the database and/or cloud integration
 
 class Editor: # Parent class
     def __init__(self):
+        print("Starting editor...")
         self.config = configparser.ConfigParser()
         self.config.read('config/MapEditor.ini')
 
-        self.has_remote_sheet = False # If true, functions related to getting remote data will be used.
+        self.has_remote_sheet = True # If true, functions related to getting remote data will be used.
+
+        self.remote_sheet_columns = self.get_remote_sheet_column_indices(self.config.items('RemoteColumns'))
 
         # Declare the credentials var on init, but it will only be given a file at the credentials select stage by the GUI object
         self.remote_credentials = None # NEED TO GET THIS FROM GUI FUNCTION
 
-        # Declare the map var on init, but it will only be given a file at the file select stage
-        self.map_file = None # NEED TO GET THIS FROM GUI FUNCTION
+        self.map_handler = MapHandler("land_input.bmp","sea_input.bmp")
+        self.db = database_connection()
+        self.remote_sheet = RemoteSheet
+        self.gui = EditorGUI(self.remote_sheet_columns,self.remote_sheet,self.db)
 
-    def __new__(self):
-        map_handler = MapHandler.new()
-        gui = MapEditorGUI.new()
+        self.remote_credentials = self.gui.prompt_remote_credentials()
 
-        self.remote_credentials = gui.prompt_remote_credentials()
-
-        gui.prompt_file_select()
+        self.gui.prompt_file_select()
         if self.remote_credentials != None: # We only need a remote sheet object if we're actually using a remote sheet
             self.setup_remote_sheet()
+        
+        # Declare the map var on init, but it will only be given a file at the file select stage
+        self.map_file = None # NEED TO GET THIS FROM GUI FUNCTION
 
     def config_to_dict(self, input_config):
         config_as_dict = {s:dict(input_config.items(s)) for s in input_config.sections()}
@@ -39,16 +41,15 @@ class Editor: # Parent class
     def get_remote_sheet_column_indices(self, input_columns):
         remote_sheet_columns = input_columns
         for k, v in remote_sheet_columns.items():
-            remote_sheet_columns[k] = int(v) # Convert the column indices to integers
+            remote_sheet_columns[k] = int(v) # Convert the column indices to integers # WHy???
         return remote_sheet_columns # Dict
 
     def setup_remote_sheet(self):
         remote_sheet_name = self.config['RemoteSheet']['SheetName']
-        remote_sheet_columns = self.get_remote_sheet_column_indices(self.config.items('RemoteColumns'))
         self.remote_sheet = RemoteSheet.new(
             sheet_name = remote_sheet_name, 
             credentials = self.remote_credentials,
-            column_indices = remote_sheet_columns
+            column_indices = self.remote_sheet_columns
             )
         self.has_remote_sheet = True
 
@@ -82,7 +83,7 @@ class MapHandler:
 
         # Get the total number of provinces
         # Why do we need this again?
-        self.total_provinces = len(sea_provinces) + len(land_provinces)
+        self.total_provinces = len(self.sea_provinces) + len(self.land_provinces)
 
         # Read back the lengths to the user
         print(str(len(self.sea_provinces)) + " sea provinces found and " +
@@ -95,51 +96,13 @@ class MapHandler:
         except:
             self.definition_csv = False
        
-        # Check for a local setup file - maybe not necessary if
+        # Check for a local setup file - maybe not necessary if we're just pulling from the remote
         try:
             self.province_setup_csv = open("province_setup.csv",'r',encoding='UTF-8')
         except:
             self.province_setup_csv = False
 
-class MapEditorGUI:
-    def __init__(self):
-        self.im_selector = Image.open("selector.gif", "r")
-    
-    def prompt_file_select(self): # Select the local database, used for loading and saving map data. Data will also be saved to the remote sheet if there is one
-        # We have to initialise Tkinter so we can create GUI, but we'll just use the default file select function
-        file_select = Tk()
-        # Hide the default Tkinter window, as we'll be popping up a file select dialog
-        file_select.withdraw()
-        file_name = filedialog.asksaveasfilename( # Use saveas as this allows the user to create a new file if there isn't one, or to load & overwrite an existing one
-            initialdir = "./",
-            title = "Select or create map editor save file",
-            filetypes = (("all files",""),("all files","*"))
-        )
-        # Update the class attribute
-        self.map_file = file_name
-        file_select.destroy()
 
-    def prompt_remote_credentials(self): # Get the JSON credentials for connecting to the Google Sheet
-        # We have to initialise Tkinter so we can create GUI, but we'll just use the default file select function
-        credentials_select = Tk()
-        # Check if the user wants to connect to the remote sheet
-        using_remote_sheet = credentials_select.messagebox.askquestion("Connect to remote sheet?", "Do you want to connect to the remote setup data spreadsheet")
-        if using_remote_sheet == "yes":
-            # Hide the default Tkinter window, as we'll be popping up a file select dialog
-            credentials_select.withdraw()
-            file_name = filedialog.askopenfilename(
-                intialdir = "./",
-                title = "Select credentials for remote editing. Cancel to edit remotely",
-                filetypes = (("json files","*.json"),("json files","*.json"))
-            )
-            # Update the class attribute if a file was selected
-            if str(file_name) != "":
-                self.remote_credentials = file_name
-            credentials_select.destroy()
-            return(self.remote_credentials) # Flag that we are indeed using remote credentials
-        else:
-            credentials_select.destroy()
-            return(None) # Flag that we are not using remote credentials
         
 class RemoteSheet:
      # https://youtu.be/cnPlKLEGR7E?t=346
@@ -162,7 +125,7 @@ class RemoteSheet:
         colnum = self.column_indices[column]
         self.sheet.update_cell(rownum, colnum, str(data))
     
-    def read_from_sheet(self):
+    def get_province_data(self, PROVID):
         # THOUGHTS:
         # Is it best to read straight from the sheet, and not rely on anything local at all?
         # We could just read one row at a time when we click on the corresponding province
@@ -171,7 +134,8 @@ class RemoteSheet:
         # 1) Get the PROVID locally, from the save file using the RGB comparison
         # 2) Lookup the PROVID on the spreadsheet
         # 3) Return the data from that PROVID as a tuple/list
-        pass
+        province_data = self.sheet.values().get(range=PROVID)
+        return province_data
 
 # Database connection class
 # Only needed for the definition reading so we can interpret the province map
@@ -440,23 +404,11 @@ class database_connection(object):
                 # print(row)
                 csv_writer.writerow(row)
 
-
-# db = database_connection()
-
-#if remote_sheet_exists:
-#    db.import_remote_sheet()
-#elif province_setup_csv:
-#    db.import_setup()
-
-#if not remote_sheet_exists:
-#    if definition_csv:
-#        db.import_definition()
-#    else:
-#        db.fill_definition()
-
 class EditorGUI():
     def __init__(self, column_indices, remote_sheet, db):
         self.root = Tk()
+
+        self.im_selector = Image.open("selector.gif", "r")
 
         self.remote_sheet = remote_sheet
         self.db = db # Reference to database for picking out province ID from RGB values on the image
@@ -478,6 +430,53 @@ class EditorGUI():
         # Empty value for comparing the previous selected province
         self.prev_province = None
 
+        self.selector_img = ImageTk.PhotoImage(Image.open("selector.gif").convert("RGBA"))
+
+        #mouseclick event definitions
+        self.canvas.bind_all("<ButtonPress-2>", _on_mousewheel_dn)
+        self.canvas.bind_all("<ButtonRelease-2>", _on_mousewheel_up)
+        self.canvas.bind_all("<Motion>",scan)
+        self.canvas.bind_all("<Return>", lambda event, fieldvar=fields:self.submit_entry(event, fieldvar))
+        self.canvas.bind("<ButtonPress-1>", self.getprovince)
+
+        self.root.mainloop()
+
+    def prompt_file_select(self): # Select the local database, used for loading and saving map data. Data will also be saved to the remote sheet if there is one
+        # We have to initialise Tkinter so we can create GUI, but we'll just use the default file select function
+        file_select = Tk()
+        # Hide the default Tkinter window, as we'll be popping up a file select dialog
+        file_select.withdraw()
+        file_name = filedialog.asksaveasfilename( # Use saveas as this allows the user to create a new file if there isn't one, or to load & overwrite an existing one
+            initialdir = "./",
+            title = "Select or create map editor save file",
+            filetypes = (("all files",""),("all files","*"))
+        )
+        # Update the class attribute
+        self.map_file = file_name
+        file_select.destroy()
+
+    def prompt_remote_credentials(self): # Get the JSON credentials for connecting to the Google Sheet
+        # We have to initialise Tkinter so we can create GUI, but we'll just use the default file select function
+        credentials_select = Tk()
+        # Check if the user wants to connect to the remote sheet
+        using_remote_sheet = credentials_select.messagebox.askquestion("Connect to remote sheet?", "Do you want to connect to the remote setup data spreadsheet")
+        if using_remote_sheet == "yes":
+            # Hide the default Tkinter window, as we'll be popping up a file select dialog
+            credentials_select.withdraw()
+            file_name = filedialog.askopenfilename(
+                intialdir = "./",
+                title = "Select credentials for remote editing. Cancel to edit remotely",
+                filetypes = (("json files","*.json"),("json files","*.json"))
+            )
+            # Update the class attribute if a file was selected
+            if str(file_name) != "":
+                self.remote_credentials = file_name
+            credentials_select.destroy()
+            return(self.remote_credentials) # Flag that we are indeed using remote credentials
+        else:
+            credentials_select.destroy()
+            return(None) # Flag that we are not using remote credentials
+
     def create_mapview(self):
         #setting up a tkinter canvas with scrollbars
         self.frame = Frame(root, bd=2, relief=SUNKEN)
@@ -495,6 +494,10 @@ class EditorGUI():
         self.editorframe = Frame(frame, bd=2, relief=SUNKEN, padx=110)
         self.editorframe.grid(row=0, column=2)
 
+        self.event2canvas = lambda e, c: (c.canvasx(e.x), c.canvasy(e.y))
+
+        self.mousewheel = 0 # Mousewheel press status
+
     def export_to_csv(self):
         pass
         # Get data from Google Sheets API
@@ -509,7 +512,7 @@ class EditorGUI():
             entry = self.make_entry(self.editorframe, field, i, state=setting)
             entry.bind("<KeyPress>", entry_changing)
             entry.bind("<KeyRelease>", entry_changed)
-            list_of_entries.append(entry)
+            list_of_entries.append(entry) # Appends in column order
             i += 1
         return list_of_entries
     
@@ -550,9 +553,8 @@ class EditorGUI():
             # Now find the field that corresponds to the widget
             if widget_id == "NameRef":
                 self.change_name(submission)
-            if remote_sheet_exists:
-                # Send the submission to the database at the correct PROVID (list of entries 0) and column (widget_id)
-                self.remote_sheet.write_to_sheet(self.list_of_entries[0].get(), widget_id, submission)
+            # Send the submission to the database at the correct PROVID (list of entries 0) and column (widget_id)
+            self.remote_sheet.write_to_sheet(self.list_of_entries[0].get(), widget_id, submission)
         except Exception as ex:
             print("Submission failed.")
             print(ex)
@@ -564,12 +566,10 @@ class EditorGUI():
         self.canvas.create_image(0, 0, image=canvas_img, anchor="nw")
         self.canvas.config(scrollregion=canvas.bbox(ALL))
 
-    selector_img = ImageTk.PhotoImage(Image.open("selector.gif").convert("RGBA"))
-
     #function to be called when mouse is clicked
     def getprovince(self,event):
         #outputting x and y coords to console
-        cx, cy = event2canvas(event, canvas)
+        cx, cy = self.event2canvas(event, canvas)
         print ("click at (%d, %d) / (%d, %d)" % (event.x,event.y,cx,cy))
         colour = px[cx,cy]
         params = colour # Pass the RGB colour as a database query to find the PROVID
@@ -577,13 +577,13 @@ class EditorGUI():
         province = self.lookup_province_rgb()
         # Do not refresh / overwrite the contents of data entry fields if the province is already selected
         if province != self.prevprovince:
-            self.refresh_province_data_fields()
+            self.refresh_province_data_fields(province)
     
     def refresh_selector_position(self, cx, cy):
         # Clear the canvas and draw a selector where you last clicked
         self.canvas.delete("all")
         self.canvas.create_image(0, 0, image=canvas_img, anchor="nw")
-        self.canvas.create_image((cx, cy), image=selector_img)
+        self.canvas.create_image((cx, cy), image=self.selector_img)
     
     def lookup_province_rgb(self):# Look in definition first to get the province ID from RGB
         search_query = "SELECT Province_ID FROM definition WHERE R=? AND G=? AND B=?;"
@@ -591,7 +591,7 @@ class EditorGUI():
         province = str(self.db.db_fetchone()[0])
         return province
     
-    def refresh_province_data_fields(self):
+    def refresh_province_data_fields(self,province):
         self.prevprovince = province
         print("province ID is " + province)
         # Below three lines are obsolete, as we will read directly from the remote sheet
@@ -599,53 +599,29 @@ class EditorGUI():
         # self.db.query(province_data_query, "")
         # province_data = self.db.db_fetchone()
         # TODO
+        province_data = self.remote_sheet.get_province_data(province) # Get the row's data for this province from the remote spreadsheet
         for index, entry in enumerate(self.list_of_entries): # Load the new data for the relevant province from the province data sheet
             entry.config(state="normal")
             entry.delete(0,999) # Clear the contents of the entry widget
-            entry.insert(0,province_data[index]) # TODO - should need refactoring
+            entry.insert(0,province_data[index]) # Get the cell data from the remote sheet
             entry.config({"background":"white"}) # Reset colour as it may have been yellow or green when edited
             if index == 0:
                 entry.config(state="readonly")
         print(province_data)
 
-# Export to CSV
-# definition.csv has 0 in first row.
-# header rows need to be commented out
-# ;;;;;;;;;;;;;;;;; after each x
-
-# province_setup.csv
-# Use commas to separate fields
-# Use semicolons to separate headers
-# ,,,,,,,,,,,, after AraRef
-
-mousewheel = 0
-
-def _on_mousewheel_dn(event):
-    global mousewheel
-    global scan_anchor
-    mousewheel = 1
-    print(event)
-    canvas.scan_mark(event.x, event.y)
-
-def _on_mousewheel_up(event):
-    global mousewheel
-    mousewheel = 0
-    print(event)
-
-def scan(event):
-    global mousewheel
-    global scan_anchor
-    if mousewheel == 1:
+    def _on_mousewheel_dn(self, event):
+        self.mousewheel = 1
         print(event)
-        canvas.scan_dragto(event.x,event.y, gain = 1)
-    
-#mouseclick event
-canvas.bind_all("<ButtonPress-2>", _on_mousewheel_dn)
-canvas.bind_all("<ButtonRelease-2>", _on_mousewheel_up)
-canvas.bind_all("<Motion>",scan)
-canvas.bind_all("<Return>", lambda event, fieldvar=fields:submit_entry(event, fieldvar))
-canvas.bind("<ButtonPress-1>", getprovince)
+        self.canvas.scan_mark(event.x, event.y)
 
-# Replace spaces with semicolons for input to definition.csv province names
+    def _on_mousewheel_up(self, event):
+        self.mousewheel = 0
+        print(event)
 
-root.mainloop()
+    def scan(self, event):
+        if self.mousewheel == 1:
+            print(event)
+            self.canvas.scan_dragto(event.x,event.y, gain = 1)
+
+
+editor = Editor()

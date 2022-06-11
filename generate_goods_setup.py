@@ -1,23 +1,13 @@
 def print_out_good(goods_name):
 	goods_name = goods_name
-	loc = """	if = {{
-		limit = {{
-			has_variable = produces_{goods_name}
-		}}
-		set_variable = {{
-			name = {goods_name}_stockpile
-			value = GOODS_governorship_{goods_name}_produced
-		}}
-	}}
-	else = {{
-		set_variable = {{
-			name = {goods_name}_stockpile
-			value = 0
-		}}
-	}}""".format(goods_name=goods_name)
+	loc = """GOODS_governorship_produced_manufactured = (
+		industry_assigned = INDUSTRY_factories_assigned_{goods_name}
+		amount = GOODS_governorship_{goods_name}_produced
+		into_stockpile = {goods_name}_stockpile
+	)""".format(goods_name=goods_name)
 	print(loc)
 
-all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish"]
+all_goods = ["clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods"]
 
 for good in all_goods:
 	print_out_good(good)

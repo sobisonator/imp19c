@@ -1,0 +1,2294 @@
+﻿#Default duration = 730 days
+
+scheme_assassinate = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOR = {
+			has_variable = ongoing_scheme_target
+			has_variable = recently_attempted_assassination
+		}
+		any_rival = {
+			employer = root.employer
+			OR = {
+				NOT = {
+					has_variable_list = targeted_by
+				}
+				AND = {
+					has_variable_list = targeted_by
+					variable_list_size = {
+						name = targeted_by
+						value <= 6  
+					}
+				}
+			}
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_conditions_tooltip"
+		}
+	} 
+	
+	duration = 730
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = yes
+			NOT = {
+				exists = scope:ongoing_scheme_target
+			}
+			scope:ongoing_scheme_target = {
+				OR = {
+					NOT = {
+						employer = root.employer
+					}
+					is_alive = no
+				}
+			}
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 1
+		likely_murderer = yes
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_assassinate_start
+	on_finish = scheme_assassinate_finish
+	on_abort = scheme_abort
+
+	modifier = {
+
+	}
+}
+
+scheme_provoke_rival = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		can_get_rivals = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		employer = {
+			any_character = {
+				is_adult = yes
+				NOR = {
+					this = root
+					is_rival = root
+					is_friend = root
+				}
+				OR = {
+					is_ruler = no
+					AND = {
+						is_ruler = yes
+						root.power_base >= 15
+					}
+				}
+				can_get_rivals = yes
+				trigger_if = {
+					limit = {
+						employer = {
+							is_republic = yes
+						}
+					}
+					NOT = {
+						is_same_party_as = root
+					}
+				}
+				OR = {
+					NOT = {
+						has_variable_list = targeted_by
+					}
+					AND = {
+						has_variable_list = targeted_by
+						variable_list_size = {
+							name = targeted_by
+							value <= 6  
+						}
+					}
+				}
+			}
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = yes
+			NOT = {
+				exists = scope:ongoing_scheme_target
+			}
+			scope:ongoing_scheme_target = {
+				OR = {
+					NOT = {
+						employer = root.employer
+					}
+					is_alive = no
+					can_get_rivals = no
+					is_friend = root
+					root = {
+						is_friend = scope:ongoing_scheme_target
+						is_rival = scope:ongoing_scheme_target
+					}
+				} 
+			}
+			can_get_rivals = no
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 5
+		modifier = {
+			add = 2
+			has_trait = abrasive
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_provoke_rival_start
+	on_finish = scheme_provoke_rival_finish
+	on_abort = scheme_abort
+
+	modifier = {
+
+	}
+}
+
+scheme_make_friends = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		can_get_friends = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		employer = {
+			any_character = {
+				is_adult = yes
+				NOR = {
+					this = root
+					is_rival = root
+					is_friend = root
+				}
+				OR = {
+					is_ruler = no
+					AND = {
+						is_ruler = yes
+						root.power_base >= 20
+					}
+				}
+				can_get_friends = yes
+				OR = {
+					NOT = {
+						has_variable_list = targeted_by
+					}
+					AND = {
+						has_variable_list = targeted_by
+						variable_list_size = {
+							name = targeted_by
+							value <= 6  
+						}
+					}
+				}
+			}
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = yes
+			NOT = {
+				exists = scope:ongoing_scheme_target
+			}
+			scope:ongoing_scheme_target = {
+				OR = {
+					is_alive = no
+					NOT = {
+						employer = root.employer
+					}
+					can_get_friends = no
+					is_friend = root
+					root = {
+						is_rival = scope:ongoing_scheme_target
+						is_friend = scope:ongoing_scheme_target
+					}
+				} 
+			}
+			can_get_friends = no
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 5
+		modifier = {
+			add = 2
+			has_trait = kindly
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_make_friends_start
+	on_finish = scheme_make_friends_finish
+	on_abort = scheme_abort
+
+	modifier = {
+
+	}
+}
+
+scheme_hold_games = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		popularity <= 70
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		wealth >= 100
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			AND = {
+				is_ruler = no
+				popularity = 100
+			}
+			prisoner = yes
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 5
+		modifier = {
+			add = 2
+			has_trait = generous
+		}
+		modifier = {
+			add = 2
+			has_trait = founder
+		}
+		modifier = {
+			add = 2
+			prominence >= 50
+		}
+		modifier = {
+			add = 2
+			prominence >= 80
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_hold_games_start
+	on_finish = scheme_hold_games_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = -5
+		monthly_character_popularity = 0.5
+	}
+}
+
+scheme_invest = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = yes
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 5
+		modifier = {
+			factor = 1.5
+			employer = {
+				is_republic = yes
+			}
+			character_traditionalist_party_trigger = yes
+		}
+		modifier = {
+			factor = 1.5
+			has_trait = gluttonous
+		}
+		modifier = {
+			factor = 1.5
+			has_trait = ambitious
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_invest_start
+	on_finish = scheme_invest_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = 2
+	}
+}
+
+scheme_steal = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOR = {
+			has_variable = ongoing_scheme_target
+			has_variable = recent_theft
+		}
+		any_rival = {
+			employer = root.employer
+			wealth >= root.wealth
+			wealth >= 400
+			OR = {
+				NOT = {
+					has_variable_list = targeted_by
+				}
+				AND = {
+					has_variable_list = targeted_by
+					variable_list_size = {
+						name = targeted_by
+						value <= 6  
+					}
+				}
+			}
+			OR = {
+				is_ruler = no
+				AND = {
+					is_ruler = yes
+					root = {
+						power_base >= 15
+					}
+				}
+			}
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	duration = 730
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_conditions_tooltip"
+		}
+	}
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = yes
+			NOT = {
+				exists = scope:ongoing_scheme_target
+			}
+			scope:ongoing_scheme_target = {
+				OR = {
+					NOT = {
+						employer = root.employer
+					}
+					is_alive = no
+				}
+			}
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 1
+		likely_thief = yes
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_steal_start
+	on_finish = scheme_steal_finish
+	on_abort = scheme_abort
+
+	modifier = {
+
+	}
+}
+
+scheme_seek_treatment = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOR = {
+			has_variable = ongoing_scheme_target
+		}
+		recoverable_ailments_trigger = yes
+		wealth >= 200
+		NOT = {
+			has_variable = seeking_treatment
+		}
+		employer = {
+			any_character = {
+				OR = {
+					has_office = office_physician
+					has_office = office_republic_physician
+					has_office = office_apothecary
+				}
+				is_alive = yes
+			}
+		}
+		NOR = {
+			trigger_if = {
+				limit = {
+					employer = { is_republic = yes }
+				}
+				has_office = office_republic_physician
+			}
+			trigger_else_if = {
+				limit = {
+					employer = { is_monarchy = yes }
+				}
+				has_office = office_physician
+			}
+			trigger_else_if = {
+				limit = {
+					employer = { is_tribal = yes }
+				}
+				has_office = office_apothecary
+			}			
+			has_ambition = scheme_seek_treatment
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_can_have_consequences"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = yes
+			NOT = {
+				exists = scope:ongoing_scheme_target
+			}
+			scope:ongoing_scheme_target = {
+				OR = {
+					NOT = {
+						employer = root.employer
+					}
+					is_alive = no
+				}
+			}
+			is_alive = no
+			NOT = {
+				recoverable_ailments_trigger = yes
+			}
+			NOT = {
+				has_variable = seeking_treatment
+			}
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 20
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_seek_treatment_start
+	on_finish = scheme_seek_treatment_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		health = 0.04
+	}
+}
+
+scheme_steal_holding = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOR = {
+			has_variable = ongoing_scheme_target
+			has_variable = recent_holding_theft
+		}
+		employer = {
+			any_character = {
+				NOT = {
+					this = root
+				}
+				employer = root.employer
+				num_holdings_owned > 2
+				NOT = {
+					is_friend = root
+				}
+				OR = {
+					NOT = {
+						has_variable_list = targeted_by
+					}
+					AND = {
+						has_variable_list = targeted_by
+						variable_list_size = {
+							name = targeted_by
+							value <= 6  
+						}
+					}
+				}
+				OR = {
+					is_ruler = no
+					AND = {
+						is_ruler = yes
+						root = {
+							power_base >= 15
+						}
+					}
+				}
+			}
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_conditions_tooltip"
+		}
+	}
+	
+	duration = 730
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			NOT = {
+				exists = employer
+			}
+			prisoner = yes
+			NOT = {
+				exists = scope:ongoing_scheme_target
+			}
+			scope:ongoing_scheme_target = {
+				OR = {
+					NOT = {
+						employer = root.employer
+					}
+					is_alive = no
+					NOT = {
+						num_holdings_owned > 0
+					}
+				}
+			}
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 1
+		likely_thief = yes
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_steal_holding_start
+	on_finish = scheme_steal_holding_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_popularity = -0.25
+	}
+}
+
+scheme_seek_patron = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		prominence <= 50
+		wealth >= 50
+		NOT = {
+			has_character_modifier = patronage_cmod
+		}
+		trigger_if = {
+			limit = {
+				employer = {
+					gender_equality = no
+				}
+			}
+			is_female = no
+		}
+		exists = employer
+		employer = {
+			any_character = {
+				is_adult = yes
+				NOT = {
+					this = root
+				}
+				employer = root.employer
+				NOR = {
+					is_rival = root
+					has_variable = patronage_cooldown
+				}
+				prominence >= root.prominence
+				OR = {
+					NOT = {
+						has_variable_list = targeted_by
+					}
+					AND = {
+						has_variable_list = targeted_by
+						variable_list_size = {
+							name = targeted_by
+							value <= 6  
+						}
+					}
+				}
+				OR = {
+					is_ruler = no
+					AND = {
+						is_ruler = yes
+						root = {
+							power_base >= 15
+						}
+					}
+				}
+			}
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			NOT = {
+				exists = employer
+			}
+			prisoner = yes
+			NOT = {
+				exists = scope:ongoing_scheme_target
+			}
+			scope:ongoing_scheme_target = {
+				OR = {
+					NOT = {
+						employer = root.employer
+					}
+					is_alive = no
+					prisoner = yes
+				}
+			}
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 5
+		modifier = {
+			add = 5
+			has_trait = ambitious
+		}
+		modifier = {
+			add = 5
+			has_trait = energetic
+		}
+		modifier = {
+			add = -5
+			age >= 50
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_seek_patron_start
+	on_finish = scheme_seek_patron_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = -2
+	}
+}
+
+scheme_buy_holding = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		NOT = {
+			has_variable = bought_holding_recently
+		}	
+		wealth >= character_holding_price_svalue
+		is_head_of_family = yes
+		employer = {
+			any_owned_province = {
+				controller = root.employer
+				AND = {
+					NOT = {
+						this = root.employer.capital_scope
+					}
+					OR = {
+						NOT = {
+							exists = holding_owner
+						}
+						AND = {
+							exists = holding_owner
+							holding_owner = {
+								is_alive = no
+							}
+						}
+					}
+				}
+			}
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 60
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = yes
+			NOT = {
+				exists = scope:ongoing_scheme_target
+			}
+			NOT = {
+				exists = scope:buy_holding_target
+			}
+			scope:buy_holding_target = {
+				OR = {
+					NOT = {
+						owner = root.employer
+					}
+					exists = holding_owner
+				}
+			}
+			scope:ongoing_scheme_target = {
+				OR = {
+					NOT = {
+						employer = root.employer
+					}
+					is_alive = no
+				}
+			}
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 10
+		likely_thief = yes
+		modifier = {
+			factor = 5
+			is_head_of_family = yes
+		}
+		modifier = {
+			factor = 0.2
+			employer = {
+				num_of_provinces < 10
+			}
+		}
+		modifier = {
+			factor = 10
+			employer = {
+				num_of_provinces > 100
+			}
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_buy_holding_start
+	on_finish = scheme_buy_holding_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_popularity = -0.25
+	}
+}
+
+scheme_gamble = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		wealth > 200
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "gamble_scheme_chance_tooltip"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = yes
+			is_alive = no
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 3
+		modifier = {
+			add = 5
+			has_character_modifier = secret_gambler
+		}
+		modifier = {
+			add = 2
+			charisma <= 6
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_gamble_start
+	on_finish = scheme_gamble_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = -5
+	}
+}
+
+### Pitfighting
+
+scheme_pitfighting = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+		OR = {
+			has_trait = reckless
+			has_trait = brave
+			has_trait = foolish
+			has_trait = rash
+			martial >= 14
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "pitfighting_scheme_chance_tooltip"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = yes
+			is_alive = no
+			is_ruler = yes
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 2
+		modifier = {
+			add = 4
+			has_character_modifier = secret_pit_fighter
+		}
+		modifier = {
+			add = 2
+			martial > 11
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_pitfighting_start
+	on_finish = scheme_pitfighting_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		health = -0.2
+		monthly_character_popularity = -0.1
+	}
+}
+
+### General buying loyalty of troops
+
+scheme_buy_troop_loyalty = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+		is_general = yes
+		wealth >= 400
+		popularity >= 33
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = yes
+			is_alive = no
+			wealth <= 200
+			is_general = no
+			NOT = {
+				any_character_unit = {
+					any_sub_unit = {
+						has_personal_loyalty = no
+					}
+				}
+			}
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 3
+		modifier = {
+			add = 5
+			is_general = yes
+			loyalty <= 66
+		}
+		modifier = {
+			add = 5
+			is_general = yes
+			loyalty <= 33
+		}
+		modifier = {
+			add = 5
+			wealth >= 1000
+		}
+		modifier = {
+			add = 5
+			popularity >= 50
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_buy_troop_loyalty_start
+	on_finish = scheme_buy_troop_loyalty_finish
+	on_abort = scheme_abort
+
+	modifier = {
+
+	}
+}
+
+### Demand Office
+
+scheme_demand_office = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+		popularity >= 60
+		prominence >= 50
+		has_any_position = no
+		NOR = {
+			has_variable = demanded_an_office
+			employer = {
+				has_variable = scheme_8_cooldown
+			}
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 730
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = yes
+			is_alive = no
+			has_any_office = yes
+			is_general = yes
+			is_admiral = yes
+			is_governor = yes
+			is_ruler = yes
+			is_co_ruler = yes
+			is_clan_chief = yes
+			AND = {
+				employer = { is_monarchy = yes }
+				this = employer.consort
+			}
+			has_character_modifier = indisposed_charmod
+			employer = { has_variable = scheme_8_cooldown }
+		}
+	}
+	
+	chance = {
+		base = 12
+		modifier = {
+			add = 10
+			has_trait = ambitious
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_demand_office_start
+	on_finish = scheme_demand_office_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_prominence = 0.1
+	}
+}
+
+scheme_purchase_power_base = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+		popularity >= 50
+		prominence >= 30
+		loyalty <= 80
+		wealth >= 400
+		NOT = {
+			has_variable = bought_power_base
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_above_85_loyalty"
+			loyalty > 85
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			loyalty > 85
+			is_ruler = yes
+			is_alive = no
+			prisoner = yes
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 8
+		modifier = {
+			add = 5
+			wealth >= 1000
+		}
+		modifier = {
+			add = 5
+			has_trait = ambitious
+		}
+		modifier = {
+			add = 5
+			has_trait = crafty
+		}
+		modifier = {
+			add = 15
+			is_head_of_family = yes
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_purchase_power_base_start
+	on_finish = scheme_purchase_power_base_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = -24
+	}
+}
+
+scheme_disloyalty_self = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOR = {
+			has_variable = ongoing_scheme_target
+			has_variable = disloyalty_self_cooldown
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+		wealth >= 400
+		employer = {
+			current_date > 465.1.1 #Not until this far in.
+			is_tutorial_active = no
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			is_ruler = yes
+			is_alive = no
+			prisoner = yes
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 4
+		modifier = {
+			add = 3
+			wealth >= 1000
+		}
+		modifier = {
+			add = {
+				value = employer.tyranny
+				divide = 4
+			}
+		}
+		modifier = {
+			add = root.power_base
+		}
+		
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_disloyalty_self_start
+	on_finish = scheme_disloyalty_self_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		#character_loyalty = -10
+		monthly_character_wealth = -6
+	}
+}
+
+scheme_disloyalty_other = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOR = {
+			has_variable = ongoing_scheme_target
+			has_variable = disloyalty_other_cooldown
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+		wealth >= 800
+		loyalty <= 66
+		employer = {
+			any_character = {
+				power_base >= root.power_base
+				wealth < root.wealth
+				is_ruler = no
+				NOT = {
+					is_rival = root
+				}
+				NOT = {
+					this = root
+				}
+				OR = {
+					NOT = {
+						has_variable_list = targeted_by
+					}
+					AND = {
+						has_variable_list = targeted_by
+						variable_list_size = {
+							name = targeted_by
+							value <= 6  
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_above_66_loyalty"
+			loyalty > 66
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			loyalty > 66
+			is_ruler = yes
+			is_alive = no
+			prisoner = yes
+			NOT = {
+				exists = scope:ongoing_scheme_target
+			}
+			AND = {
+				exists = scope:ongoing_scheme_target
+				scope:ongoing_scheme_target = {
+					OR = {
+						is_alive = no
+						NOT = {
+							employer = root.employer
+						}
+						is_ruler = yes
+					}
+				}
+			}
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 6
+		modifier = {
+			add = 3
+			wealth >= 1000
+		}
+		modifier = {
+			add = 5
+			has_trait = crafty
+		}
+		modifier = {
+			add = {
+				value = employer.tyranny
+				divide = 4
+			}
+		}
+		
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_disloyalty_other_start
+	on_finish = scheme_disloyalty_other_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = -12
+	}
+}
+
+scheme_expand_family_estates = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		is_head_of_family = yes
+		wealth >= 400
+		num_holdings_owned > 5
+		NOT = {
+			has_variable = expanded_family_estates
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_expand_family_estates"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			is_head_of_family = no
+			is_ruler = yes
+			is_alive = no
+			prisoner = yes
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 5
+		modifier = {
+			add = 5
+			wealth >= 1000
+		}
+		modifier = {
+			add = 5
+			has_trait = ambitious
+		}
+		modifier = {
+			add = 5
+			has_trait = crafty
+		}
+		modifier = {
+			add = 5
+			has_trait = founder
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_expand_family_estates_start
+	on_finish = scheme_expand_family_estates_finish
+	on_abort = scheme_abort
+}
+
+###Escape Prison
+
+scheme_escape_prison = {
+	can_be_picked = {
+		prisoner = yes
+		power_base >= 1
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_escape_prison"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			prisoner = no
+			is_alive = no
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 1
+		modifier = {
+			add = power_base
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_escape_prison_start
+	on_finish = scheme_escape_prison_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		
+	}
+}
+
+###Governor 
+
+scheme_governor_extort = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+		is_governor = yes
+		loyalty <= 80
+		is_ruler = no
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			is_alive = no
+			is_ruler = yes
+			is_governor = no
+			NOT = {
+				exists = scope:province_target
+			}
+			AND = {
+				exists = scope:province_target
+				scope:province_target = {
+					OR = {
+						has_owner = no
+						NOT = {
+							owner = root.employer
+						}
+						NOT = {
+							controller = root.employer
+						}
+					}
+				}
+			}
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 2.5
+		modifier = {
+			corruption > 1
+			add = {
+				value = corruption
+				divide = 2
+				max = 10
+			}
+		}
+		modifier = {
+			has_trait = corrupt
+			add = 2
+		}
+		modifier = {
+			has_trait = honest
+			add = -5
+		}
+		modifier = {
+			is_friend = employer.current_ruler
+			add = -5
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_governor_extort_start
+	on_finish = scheme_governor_extort_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = 6
+		monthly_corruption = 0.5
+	}
+}
+
+#### RULER SCHEMES
+
+scheme_influence = {
+	can_be_picked = {
+		trigger_if = {
+			limit = {
+				OR = {
+					employer = {
+						is_ai = no
+					}
+					current_date <= 450.10.10
+				}
+			}
+			always = no
+		}
+		trigger_else = {
+			is_ruler = yes
+		}
+	}
+	
+	finished_when = {
+		#custom_tooltip = {
+		#	text = "scheme_ambition_fulfillment_always_yes_influence_tt"
+		#	var:ongoing_scheme_target = { loyalty < 33 }
+		#}
+	}
+	
+	duration = 7300
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			is_ruler = no
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 10
+		modifier = {
+			factor = 0
+			popularity <= 60
+		}
+	}
+	
+	on_monthly = scheme_influence_monthly
+	on_start = scheme_influence_start
+	on_finish = scheme_influence_finish
+	on_abort = scheme_influence_abort
+
+	modifier = {
+		monthly_character_popularity = -0.1 # update char int tt if changing
+	}
+}
+
+scheme_ruler_invest = {
+	can_be_picked = {
+		scheme_preconditions_ruler = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		AND = {
+			employer = {
+				is_ai = yes
+			}
+			wealth <= 400
+		}
+		is_ruler = yes
+		NOT = {
+			has_variable = invested_recently
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 730
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			NOT = {
+				has_variable = ongoing_scheme_target
+			}
+			is_alive = no
+			is_ruler = no
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 8
+		modifier = {
+			add = 10
+			wealth <= 400
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_invest_start
+	on_finish = scheme_invest_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = 10
+		monthly_corruption = 0.1
+	}
+}
+
+scheme_ruler_legitimacy = {
+	can_be_picked = {
+		is_ruler = yes
+		wealth >= 400
+		employer = {
+			is_ai = yes
+			is_monarchy = yes
+			legitimacy <= 40
+		}
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_fulfillment_always_yes"
+		}
+	}
+	
+	duration = 730
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			is_alive = no
+			is_ruler = no
+			wealth <= 0
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 10
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_ruler_legitimacy_start
+	on_finish = scheme_ruler_legitimacy_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = -4 # update char int tt if changing
+	}
+}
+
+scheme_invest_in_agriculture = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOR = {
+			has_variable = ongoing_scheme_target
+		}
+		NOR = {
+			has_variable = expanded_latifundia
+		}
+		is_head_of_family = yes
+		wealth >= 150
+		num_holdings_owned > 0
+		any_holdings = {
+			has_food_trade_good_trigger = yes
+			has_city_status = no
+			has_construction = no
+			#NOT = { has_building = basic_settlement_infratructure_building }
+			NOT = {
+				has_province_modifier = founding_city_in_progress
+			}
+			NOT = {
+				has_province_modifier = urban_development_in_progress
+			}
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_invest_in_agriculture"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			is_head_of_family = no
+			is_ruler = yes
+			is_alive = no
+			prisoner = yes
+			has_character_modifier = indisposed_charmod
+			scope:latifundia_holding = {
+				OR = {
+					has_city_status = yes
+					#has_construction = yes
+					#has_building = basic_settlement_infratructure_building
+					has_province_modifier = founding_city_in_progress
+					has_province_modifier = urban_development_in_progress
+				}
+			}
+		}
+	}
+	
+	chance = {
+		base = 3
+		modifier = {
+			add = 2
+			wealth >= 500
+		}
+		modifier = {
+			add = 5
+			wealth >= 1000
+		}
+		modifier = {
+			add = 5
+			has_trait = ambitious
+		}
+		modifier = {
+			add = 5
+			has_trait = crafty
+		}
+		modifier = {
+			add = 5
+			has_trait = founder
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_invest_in_agriculture_start
+	on_finish = scheme_invest_in_agriculture_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = -10
+		#monthly_corruption = 0.5 #Separate Modifier for better tooltip
+	}
+}
+
+scheme_invest_in_mining = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOR = {
+			has_variable = ongoing_scheme_target
+		}
+		NOR = {
+			has_variable = expanded_mines
+		}
+		is_head_of_family = yes
+		wealth >= 150
+		num_holdings_owned > 0
+		any_holdings = {
+			has_minable_trade_good_trigger = yes
+			has_city_status = no
+			#has_construction = no
+			#NOT = { has_building = slave_mine_building }
+			NOT = {
+				has_province_modifier = founding_city_in_progress
+			}
+			NOT = {
+				has_province_modifier = urban_development_in_progress
+			}
+		}
+		OR = {
+			title_importance_svalue > 1.25
+			power_base >= 1
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_invest_in_mining"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			is_head_of_family = no
+			is_ruler = yes
+			is_alive = no
+			prisoner = yes
+			has_character_modifier = indisposed_charmod
+			scope:mining_holding = {
+				OR = {
+					has_city_status = yes
+					#has_construction = yes
+					#has_building = slave_mine_building
+					has_province_modifier = founding_city_in_progress
+					has_province_modifier = urban_development_in_progress
+				}
+			}
+		}
+	}
+	
+	chance = {
+		base = 3
+		modifier = {
+			add = 2
+			wealth >= 500
+		}
+		modifier = {
+			add = 5
+			wealth >= 1000
+		}
+		modifier = {
+			add = 5
+			has_trait = ambitious
+		}
+		modifier = {
+			add = 5
+			has_trait = crafty
+		}
+		modifier = {
+			add = 5
+			has_trait = founder
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_invest_in_mining_start
+	on_finish = scheme_invest_in_mining_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = -10
+		#monthly_corruption = 0.5 #Separate Modifier for better tooltip
+	}
+}
+
+scheme_hold_religious_festival = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		OR = {
+			has_office = office_pontifex
+			has_office = office_high_priest
+			has_office = office_high_priest_monarchy
+		}
+		wealth >= 150
+		NOT = {
+			employer = {
+				has_country_modifier = grand_religious_festival
+			}
+		}
+		loyalty >= 60
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_religious_festival"
+		}
+	}
+	
+	duration = 10
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			NOR = {
+				has_office = office_pontifex
+				has_office = office_high_priest
+				has_office = office_high_priest_monarchy
+			}
+			is_ruler = yes
+			is_alive = no
+			prisoner = yes
+			has_character_modifier = indisposed_charmod
+		}
+	}
+	
+	chance = {
+		base = 3
+		modifier = {
+			add = {
+				value = zeal
+			}
+		}
+		modifier = {
+			add = -5
+			has_trait = lapsed
+		}
+		modifier = {
+			add = -5    
+			has_trait = sceptical
+		}
+		modifier = {
+			add = 5
+			has_trait = devout
+		}
+		modifier = {
+			add = 5
+			has_trait = zealous
+		}
+		modifier = {
+			add = 5
+			has_trait = pious
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_hold_religious_festival_start
+	on_finish = scheme_hold_religious_festival_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = -10
+	}
+}
+
+scheme_offer_marriage_to_ruler = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		NOT = {
+			has_variable = ruler_refused
+		}
+		NOT = { has_loyalty = spurned_family_members }
+		NOT = { has_loyalty = spurned_family }
+		is_head_of_family = yes
+		is_ruler = no
+		wealth >= 150
+		employer = {
+			is_monarchy = yes
+			current_ruler = {
+				is_married = no
+				is_adult = yes
+				NOT = {
+					has_variable = being_courted
+				}
+			}
+		}
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_offer_marriage"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			NOT = { exists = scope:ongoing_scheme_target }
+			is_head_of_family = no
+			is_ruler = yes
+			is_alive = no
+			prisoner = yes
+			has_character_modifier = indisposed_charmod
+			scope:ongoing_scheme_target = { is_married = yes }
+			scope:ongoing_scheme_target = { is_ruler = no }
+			scope:ongoing_scheme_target = { is_alive = no }
+		}
+	}
+	
+	chance = {
+		base = 10
+		modifier = {
+			add = 2
+			employer.current_ruler = { age > 25 }
+		}
+		modifier = {
+			add = 2
+			employer.current_ruler = { age > 30 }
+		}
+		modifier = {
+			add = 2
+			employer.current_ruler = { age > 35 }
+		}
+		modifier = {
+			add = 2
+			employer.current_ruler = { age > 40 }
+		}
+		modifier = {
+			add = 5
+			has_trait = ambitious
+		}
+		modifier = {
+			add = 5
+			has_trait = crafty
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_court_ruler_start
+	on_finish = scheme_court_ruler_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = -10
+	}
+}
+
+scheme_seek_a_spouse = {
+	can_be_picked = {
+		scheme_preconditions = yes
+		is_adult = yes
+		is_married = no
+		is_pregnant = no
+		is_minor_character = no
+		NOT = {
+			has_variable = ongoing_scheme_target
+		}
+		NOT = {
+			has_character_modifier = proposal_refused 
+		}
+		NOT = { has_trait = chaste }
+		NOT = { has_trait = barren }
+		NOT = { has_trait = castrated }
+		NOT = { has_trait = depressed }
+		OR = {
+			is_head_of_family = yes
+			is_ruler = yes
+			is_primary_heir = yes
+			is_clan_chief = yes
+			trigger_if = {
+				limit = {
+					employer = { is_ai = no }
+				}
+				OR = {
+					is_successor = yes
+					title_importance_svalue > 1.25
+					AND = {
+						exists = father
+						father = { is_head_of_family = yes }
+					}
+					AND = {
+						exists = mother
+						mother = { is_head_of_family = yes }
+					}
+				}
+			}
+		}
+		employer = {
+			any_character = {
+				is_minor_character = no
+				NOT = {
+					this = root
+				}
+				is_head_of_family = yes
+				family = {
+					NOT = { this = root.family }
+				}
+			}
+		}
+		wealth >= 30
+		NOT = { has_variable = betrothed_flag }
+	}
+	
+	finished_when = {
+		custom_tooltip = {
+			text = "scheme_ambition_seek_a_spouse"
+		}
+	}
+	
+	duration = 365
+	
+	skip_initial_abort = yes
+	
+	abort = {
+		OR = {
+			AND = {
+				is_minor_character = yes
+				NOR = { 
+					is_close_relative = employer.current_ruler
+					is_ruler = yes
+				}
+			}
+			trigger_if = {
+				limit = { exists = scope:ongoing_scheme_target }
+				scope:ongoing_scheme_target = { 
+					OR = {
+						is_minor_character = yes
+						is_alive = no
+						is_head_of_family = no
+					}
+				}
+			}
+			trigger_if = {
+				limit = { has_variable = ongoing_scheme_target }
+				var:ongoing_scheme_target = {
+					OR = {
+						is_minor_character = yes
+						is_alive = no
+						is_head_of_family = no
+					}
+				}
+			}
+			is_alive = no
+			prisoner = yes
+			has_character_modifier = indisposed_charmod
+			is_married = yes
+			NOT = { has_variable = ongoing_scheme_target }
+			NOT = { exists = scope:ongoing_scheme_target }
+			has_character_modifier = proposal_refused 
+			has_trait = chaste
+			has_trait = barren
+			has_trait = castrated
+			has_trait = depressed
+			AND = {
+				NOT = { has_variable = seeking_spouse_ci }
+				is_head_of_family = no
+				is_successor = no
+				is_primary_heir = no
+				is_ruler = no
+				trigger_if = {
+					limit = {
+						employer = { is_ai = no } 
+						exists = father
+						father = { is_minor_character = no }
+					}
+					father = { is_head_of_family = no }
+				}
+				trigger_if = {
+					limit = {
+						employer = { is_ai = no } 
+						exists = mother
+						mother = { is_minor_character = no }
+					}
+					mother = { is_head_of_family = no }
+				}
+				trigger_if = {
+					limit = {
+						employer = { is_ai = no } 
+					}
+					title_importance_svalue <= 1.25
+				}
+			}
+		}
+	}
+	
+	chance = {
+		base = 10
+		modifier = {
+			add = 2
+			age > 25
+		}
+		modifier = {
+			add = 2
+			age > 30
+		}
+		modifier = {
+			add = 2
+			age > 35
+		}
+		modifier = {
+			add = 2
+			age > 40
+		}
+		modifier = {
+			add = 10
+			is_head_of_family = yes
+		}
+		modifier = {
+			add = 5
+			has_trait = ambitious
+		}
+		modifier = {
+			add = 5
+			has_trait = crafty
+		}
+	}
+	
+	#on_monthly = xyz
+	on_start = scheme_seek_a_spouse_start
+	on_finish = scheme_seek_a_spouse_finish
+	on_abort = scheme_abort
+
+	modifier = {
+		monthly_character_wealth = -2.5
+	}
+}

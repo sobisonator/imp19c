@@ -13,7 +13,7 @@ def industrial_goods_localization(goods_name):
 	print("{goods_name}_industry_remove_confirm_title:0 \" Decrease {initial_cap_name} Industries\"".format(goods_name=goods_name,initial_cap_name=initial_cap_name))
 	print("{goods_name}_industry_remove_confirm_desc:0 \" Are you sure you want to decrease {initial_cap_name} industries?\"\n".format(goods_name=goods_name,initial_cap_name=initial_cap_name))
 
-all_goods = ["clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","aeroplanes"]
+all_goods = ["clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]
 		
 for good in all_goods:
 	industrial_goods_localization(good)

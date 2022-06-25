@@ -1033,6 +1033,28 @@ GOODS_governorship_produce_all_raw = {
 	}
 }
 
+## MANUFACTURED GOODS
+
+### Functional scripted effects
+
+GOODS_consume_industrial_demand = {
+	change_variable = {
+		name = $from_stockpile$
+		subtract = $demand$
+	}
+	if = {
+		limit = {
+			var:$from_stockpile$ < 0
+			set_variable = {
+				name = $from_stockpile$
+				value = 0
+			}
+		}
+	}
+}
+
+## Production scripted effects
+
 GOODS_governorship_produce_all_manufactured = {
 	GOODS_governorship_produce_manufactured = {
 		industry_assigned = INDUSTRY_factories_assigned_clothing
@@ -1059,10 +1081,13 @@ GOODS_governorship_produce_all_manufactured = {
 		amount = GOODS_governorship_alcohol_produced
 		into_stockpile = alcohol_stockpile
 	}
-		change_variable = {
-			name = grain_stockpile
-			subtract = DEMAND_grain_from_industry_alcohol
-			min = 0
+		GOODS_consume_industrial_demand = {
+			from_stockpile = grain_stockpile
+			demand = DEMAND_grain_from_industry_alcohol
+		}
+		GOODS_consume_industrial_demand = {
+			from_stockpile = mediterranean_fruit_stockpile
+			demand = DEMAND_mediterranean_from_industry_alcohol
 		}
 	GOODS_governorship_produce_manufactured = {
 		industry_assigned = INDUSTRY_factories_assigned_glass

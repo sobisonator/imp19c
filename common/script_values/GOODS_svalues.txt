@@ -1052,6 +1052,19 @@ GOODS_governorship_fish_produced = {
 	}
 }
 
+### COTTAGE INDUSTRY SVALUES
+### These are svalues for goods production multiplied by 0.01 so that they can be referenced in cottage industry bonuses
+
+GOODS_cottage_industry_from_grain = {
+	value = GOODS_governorship_grain_produced
+	multiply = 0.01
+}
+
+GOODS_cottage_industry_from_mediterranean_fruit = {
+	value = GOODS_governorship_mediterranean_fruit_produced
+	multiply = 0.01
+}
+
 ### MANUFACTURED GOODS
 
 GOODS_governorship_clothing_produced = {
@@ -1073,11 +1086,29 @@ GOODS_governorship_luxury_furniture_produced = {
 GOODS_governorship_alcohol_produced = {
 	value = INDUSTRY_alcohol_factories
 	multiply = 5
+	# COTTAGE INDUSTRIES
+	if = { # Alcohol from grain & vine
+		limit = {
+			OR = {
+				has_variable = produces_grain
+				has_variable = produces_mediterranean_fruit
+			}
+		}
+		add = GOODS_cottage_industry_from_grain
+		add = GOODS_cottage_industry_from_mediterranean_fruit
+	}
+	# DEFICIT MALUSES
 	if = { # Malus from not enough grain
 		limit = {
 			var:grain_stockpile < DEMAND_grain_from_industry_alcohol
 		}
 		multiply = DEMAND_grain_industry_alcohol_malus
+	}
+	if = { # Malus from not enough mediterranean fruit
+		limit = {
+			var:grain_stockpile < DEMAND_mediterranean_fruit_from_industry_alcohol
+		}
+		multiply = DEMAND_mediterranean_fruit_industry_alcohol_malus
 	}
 }
 GOODS_governorship_glass_produced = {

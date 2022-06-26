@@ -1,0 +1,117 @@
+# Svalues containing the demand calculations for every type of good
+
+# 0.25 is the default amount that is sufficient for 1 pop for 1 quarter
+
+# Demand levels
+
+DEMAND_tiny = {
+	value = 0.1
+}
+
+DEMAND_small = {
+	value = 0.25
+}
+
+DEMAND_medium = {
+	value = 0.5
+}
+
+DEMAND_large = {
+	value = 0.75
+}
+
+DEMAND_huge = {
+	value = 1
+}
+
+# Malus levels. If essential, simply do not add a min value for the malus.
+
+deficit_malus_large = {
+	value = 0.25 # This good is very important for the demanding industry
+}
+
+deficit_malus_medium = {
+	value = 0.5 # This good is moderately important for the demanding industry
+}
+
+deficit_malus_small = {
+	value = 0.75 # This good provides a minor bonus for the demanding industry
+}
+
+### Governorship level
+
+#### Grain
+
+DEMAND_grain_from_pops = {
+	value = governorship_population
+	multiply = DEMAND_small
+}
+
+##### Grain demand from alcohol industry
+
+DEMAND_grain_from_industry_alcohol = {
+	value = var:INDUSTRY_factories_assigned_alcohol
+	multiply = DEMAND_huge
+}
+
+DEMAND_grain_industry_alcohol_malus = {
+	value = DEMAND_grain_from_industry_alcohol
+	if = {
+		limit = {
+			var:grain_stockpile > 0
+		}
+		divide = var:grain_stockpile
+	}
+	else_if = {
+		limit = {
+			var:grain_stockpile = 0
+		}
+		value = deficit_malus_large
+	}
+	min = deficit_malus_large
+}
+
+##### End grain demand from alcohol industry
+
+DEMAND_grain = { # Total
+	value = DEMAND_grain_from_pops
+	add = DEMAND_grain_from_industry_alcohol
+}
+
+#### Mediterranean fruit
+
+DEMAND_mediterranean_fruit_from_pops = {
+	value = governorship_population
+	multiply = DEMAND_tiny
+}
+
+##### Mediterranean fruit demand from alcohol industry
+
+DEMAND_mediterranean_fruit_from_industry_alcohol = {
+	value = var:INDUSTRY_factories_assigned_alcohol
+	multiply = DEMAND_huge
+}
+
+DEMAND_mediterranean_fruit_industry_alcohol_malus = {
+	value = DEMAND_mediterranean_fruit_from_industry_alcohol
+	if = {
+		limit = {
+			var:mediterranean_fruit_stockpile > 0
+		}
+		divide = var:mediterranean_fruit_stockpile
+	}
+	else_if = {
+		limit = {
+			var:mediterranean_fruit_stockpile = 0
+		}
+		value = deficit_malus_large
+	}
+	min = deficit_malus_large
+}
+
+##### End mediterranean fruit demand from alcohol industry
+
+DEMAND_mediterranean_fruit = { # Total
+	value = DEMAND_mediterranean_fruit_from_pops
+	add = DEMAND_mediterranean_fruit_from_industry_alcohol
+}

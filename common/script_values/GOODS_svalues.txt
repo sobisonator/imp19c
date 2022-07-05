@@ -191,12 +191,12 @@ GOODS_processed_foods_stockpile = {
 			value = var:processed_foods_stockpile
 		}
 }
-GOODS_aeroplanes_stockpile = {
+GOODS_petrochemicals_stockpile = {
 		if = {
 			limit = {
 				has_global_variable = wealth_setup_done
 			}
-			value = var:aeroplanes_stockpile
+			value = var:petrochemicals_stockpile
 		}
 }
 
@@ -1052,6 +1052,24 @@ GOODS_governorship_fish_produced = {
 	}
 }
 
+### COTTAGE INDUSTRY SVALUES
+### These are svalues for goods production multiplied by 0.01 so that they can be referenced in cottage industry bonuses
+
+GOODS_cottage_industry_from_grain = {
+	value = GOODS_governorship_grain_produced
+	multiply = 0.01
+}
+
+GOODS_cottage_industry_from_mediterranean_fruit = {
+	value = GOODS_governorship_mediterranean_fruit_produced
+	multiply = 0.01
+}
+
+GOODS_cottage_industry_from_wood = {
+	value = GOODS_governorship_wood_produced
+	multiply = 0.01
+}
+
 ### MANUFACTURED GOODS
 
 GOODS_governorship_clothing_produced = {
@@ -1065,14 +1083,49 @@ GOODS_governorship_luxury_clothing_produced = {
 GOODS_governorship_furniture_produced = {
 	value = INDUSTRY_furniture_factories
 	multiply = 5
+	# COTTAGE INDUSTRIES
+	if = { # Furniture from wood
+		limit = {
+			has_variable = wood
+		}
+		add = GOODS_cottage_industry_from_wood
+	}
+	# DEFICIT MALUSES
 }
 GOODS_governorship_luxury_furniture_produced = {
 	value = INDUSTRY_luxury_furniture_factories
 	multiply = 5
 }
-GOODS_governorship_alcohol_produced = {
+GOODS_governorship_alcohol_capacity = {
 	value = INDUSTRY_alcohol_factories
 	multiply = 5
+	# COTTAGE INDUSTRIES
+	if = { # Alcohol from grain & vine
+		limit = {
+			OR = {
+				has_variable = produces_grain
+				has_variable = produces_mediterranean_fruit
+			}
+		}
+		add = GOODS_cottage_industry_from_grain
+		add = GOODS_cottage_industry_from_mediterranean_fruit
+	}
+}
+GOODS_governorship_alcohol_produced = {
+	value = GOODS_governorship_alcohol_capacity
+	# DEFICIT MALUSES
+	if = { # Malus from not enough grain
+		limit = {
+			GOODS_grain_stockpile < DEMAND_grain_from_industry_alcohol
+		}
+		multiply = DEMAND_grain_industry_alcohol_malus
+	}
+	if = { # Malus from not enough mediterranean fruit
+		limit = {
+			GOODS_mediterranean_fruit_stockpile < DEMAND_mediterranean_fruit_from_industry_alcohol
+		}
+		multiply = DEMAND_mediterranean_fruit_industry_alcohol_malus
+	}
 }
 GOODS_governorship_glass_produced = {
 	value = INDUSTRY_glass_factories
@@ -1146,7 +1199,15 @@ GOODS_governorship_processed_foods_produced = {
 	value = INDUSTRY_processed_foods_factories
 	multiply = 5
 }
-GOODS_governorship_aeroplanes_produced = {
-	value = INDUSTRY_aeroplanes_factories
+GOODS_governorship_petrochemicals_produced = {
+	value = INDUSTRY_petrochemicals_factories
 	multiply = 5
+}
+
+# Industrial efficiency from demand
+
+GOODS_governorship_alcohol_effiency = {
+	value = var:alcohol_produced_last_quarter
+	divide = GOODS_governorship_alcohol_capacity
+	multiply = 100
 }

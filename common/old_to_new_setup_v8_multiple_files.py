@@ -75,9 +75,15 @@ def find_terrain(province_id):
     pass
 
 setup_csv = open("province_setup.csv", "rb")
-#reader = csv.reader(setup_csv, delimiter=";")
-reader = pd.read_csv(setup_csv, sep=';')
-reader = reader.fillna("") # Fill all NaN values with empty strings
+reader = pd.read_csv(setup_csv, sep=";")
+reader = reader.fillna("0")
+reader["indentured"] = reader["indentured"].astype("int32")
+reader["tribesmen"] = reader["tribesmen"].astype("int32")
+reader["slaves"] = reader["slaves"].astype("int32")
+reader["upper_strata"] = reader["upper_strata"].astype("int32")
+reader["middle_strata"] = reader["middle_strata"].astype("int32")
+reader["lower_strata"] = reader["lower_strata"].astype("int32")
+reader["proletariat"] = reader["proletariat"].astype("int32")
 print(reader)
 
 non_habitable_provinces = open("../map_data/default.map")
@@ -130,98 +136,96 @@ for area in all_areas:
     print(area_name)
     generated_setup = codecs.open(export_dir+"00_"+area_name+"_setup.txt", "w", "utf-8-sig") 
     with generated_setup as f:
-        for row in reader.astype(str).itertuples():
+        for row in reader.itertuples():
             if sanitise_string(row.AREA) == area_name:
                 # Ignore seazones, wastelands, impassables, lakes, rivers etc.
                 if check_if_habitable(row.PROVID):
-                    if row.TERRAIN in valid_terrains:
+                    if str(row.TERRAIN) in valid_terrains:
                         terrain = row.TERRAIN
                     elif row.PROVID in terrain_df[id_column].values:
                         terrain = terrain_df.loc[terrain_df[id_column] == row.PROVID][terrain_column].values[0] # Find the value of the terrain at the index of the current province
                     else:
                         terrain = ""
                     province_rank = row.PROVINCE_RANK
-                    if province_rank == "0":
+                    if int(province_rank) == 0:
                         province_rank = "settlement"
-                    elif province_rank == "1":
+                    elif int(province_rank) == 1:
                         province_rank = "city"
-                    elif province_rank == "2":
+                    elif int(province_rank) == 2:
                         province_rank = "city_metropolis"
 
                     total_population = get_total_population(row)
                     
                     f.write(
-                row.PROVID + '={ #' + row.NAME + '\n' +
-                '   terrain="' + terrain + '"\n' +
-                '   culture="' + row.CULTURE + '"\n' +
-                '   religion="' + row.Religion + '"\n' +
-                '   trade_goods="' + row.TRADEGOOD + '"\n' +
-                '   civilization_value=' + row.INDUSTRIALISATION + '\n' +
-                '   barbarian_power=' + row.unused + '\n' +
-                '   province_rank="' + province_rank + '"\n'
+                str(row.PROVID) + '={ #' + row.NAME + '\n' +
+                '   terrain="' + str(terrain).replace(" ","") + '"\n' +
+                '   culture="' + str(row.CULTURE).replace(" ","") + '"\n' +
+                '   religion="' + str(row.Religion).replace(" ","") + '"\n' +
+                '   trade_goods="' + str(row.TRADEGOOD).replace(" ","") + '"\n' +
+                '   civilization_value=' + str(row.INDUSTRIALISATION).replace(" ","") + '\n' +
+                '   barbarian_power=' + str(row.unused).replace(" ","") + '\n' +
+                '   province_rank="' + str(province_rank).replace(" ","") + '"\n'
                     )
-                    if row.unused != "0":
+                    if int(row.unused) != 0:
                         f.write(
                 '   citizen={\n' +
-                '      amount=' + row.unused + '\n'
+                '      amount=' + row.unused.replace(" ","") + '\n'
                 '   }\n'
                         )
-                    if row.indentured != "0":
+                    if int(row.indentured) != 0:
                         f.write(
                 '   indentured={\n' +
-                '      amount=' + row.indentured + '\n'
+                '      amount=' + str(int(row.indentured)).replace(" ","") + '\n'
                 '   }\n' 
                         )
-                    if row.slaves != "0":
+                    if int(row.slaves) != 0:
                         f.write(
                 '   slaves={\n' +
-                '      amount=' + row.slaves + '\n'
+                '      amount=' + str(int(row.slaves)).replace(" ","") + '\n'
                 '   }\n' 
                         )
-                    if row.tribesmen != "0":
+                    if int(row.tribesmen) != 0:
                         f.write(
                 '   tribesmen={\n' +
-                '      amount=' + row.tribesmen + '\n'
+                '      amount=' + str(int(row.tribesmen)).replace(" ","") + '\n'
                 '   }\n' 
                         )
                 # Below special for 1815 mod
-                    if row.lower_strata != "0":
+                    if int(row.lower_strata) != 0:
                         f.write(
                 '   lower_strata={\n' +
-                '      amount=' + row.lower_strata + '\n'
+                '      amount=' + str(int(row.lower_strata)).replace(" ","") + '\n'
                 '   }\n' 
                         )
-                    if row.middle_strata != "0":
+                    if int(row.middle_strata) != 0:
                         f.write(
                 '   middle_strata={\n' +
-                '      amount=' + row.middle_strata + '\n'
+                '      amount=' + str(int(row.middle_strata)).replace(" ","") + '\n'
                 '   }\n' 
                         )
-                    if row.upper_strata != "0":
+                    if int(row.upper_strata) != 0:
                         f.write(
                 '      upper_strata={\n' +
-                '         amount=' + row.upper_strata + '\n'
+                '         amount=' + str(int(row.upper_strata)).replace(" ","") + '\n'
                 '   }\n' 
                         )
-                    if row.proletariat != "0":
+                    if int(row.proletariat) != 0:
                         f.write(
                 '   proletariat={\n' +
-                '      amount=' + row.proletariat + '\n'
+                '      amount=' + str(int(row.proletariat)).replace(" ","") + '\n'
                 '   }\n' 
                         )
                 # Only look at extra pops if there is data there
                     for extra_pop in extra_pops:
-                        if row[extra_pop].replace(" ","_") in valid_pops and len(row[extra_pop]) < 14:
-                            total_population = total_population + int(row[extra_pop+size].replace(".0",""))
+                        if row[extra_pop].replace(" ","_") in valid_pops:
+                            total_population = total_population + int(row[extra_pop+size])
                             f.write(
                     '   ' + row[extra_pop].replace(" ","_") + '={\n' +
-                    '       amount=' + row[extra_pop+size].replace(".0","") + '\n' +
+                    '       amount=' + str(row[extra_pop+size]).replace(".0","") + '\n' +
                     '       culture="' + row[extra_pop+culture] + '"\n' +
                     '       religion="' + row[extra_pop+religion] + '"\n' +
                     '   }\n'
-                        )
-                    f.write(
-                '}\n\n'
-                    )
+                            )
+                    f.write('}\n\n')
             else:
                 pass

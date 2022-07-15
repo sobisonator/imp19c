@@ -21,32 +21,31 @@ class Editor: # Parent class
         self.remote_credentials = None # NEED TO GET THIS FROM GUI FUNCTION
 
         self.map_handler = MapHandler("land_input.bmp","sea_input.bmp")
-        self.db = database_connection()
-        self.remote_sheet = RemoteSheet
-        self.gui = EditorGUI(self.remote_sheet_columns,self.remote_sheet,self.db)
-
-        self.remote_credentials = self.gui.prompt_remote_credentials()
-
-        self.gui.prompt_file_select()
-        if self.remote_credentials != None: # We only need a remote sheet object if we're actually using a remote sheet
-            self.setup_remote_sheet()
+        self.gui = EditorGUI(self.remote_sheet_columns,self.remote_sheet_columns,db = None) # Database = none
+        # Prompt a selection of the database path
+        db_path = self.gui.prompt_file_select()
+        self.db = database_connection(self.remote_sheet_columns,db_path)
+        self.gui.db = self.db # Load database now that it has been initialised
+        self.remote_credentials = self.gui.prompt_remote_credentials() # Get remote credentials
+        self.setup_remote_sheet() # Load the remote data now that we have the credentials ready
+        self.gui.start_main_gui()
         
         # Declare the map var on init, but it will only be given a file at the file select stage
-        self.map_file = None # NEED TO GET THIS FROM GUI FUNCTION
+        self.editor_file = None # NEED TO GET THIS FROM GUI FUNCTION
 
     def config_to_dict(self, input_config):
         config_as_dict = {s:dict(input_config.items(s)) for s in input_config.sections()}
         return config_as_dict
 
     def get_remote_sheet_column_indices(self, input_columns):
-        remote_sheet_columns = input_columns
+        remote_sheet_columns = dict(input_columns)
         for k, v in remote_sheet_columns.items():
-            remote_sheet_columns[k] = int(v) # Convert the column indices to integers # WHy???
+            remote_sheet_columns[k] = int(v) # Convert the column indices to integers
         return remote_sheet_columns # Dict
 
     def setup_remote_sheet(self):
         remote_sheet_name = self.config['RemoteSheet']['SheetName']
-        self.remote_sheet = RemoteSheet.new(
+        self.remote_sheet = RemoteSheet(
             sheet_name = remote_sheet_name, 
             credentials = self.remote_credentials,
             column_indices = self.remote_sheet_columns
@@ -141,8 +140,7 @@ class RemoteSheet:
 # Only needed for the definition reading so we can interpret the province map
 # As we will be reading directly from the remote sheet at all times
 class database_connection(object):
-    def __init__(self, column_indices):
-        db_path = map_file
+    def __init__(self, column_indices, db_path):
         self.connection = sqlite3.connect(db_path)
         self.cursor = self.connection.cursor()
         
@@ -417,6 +415,7 @@ class EditorGUI():
         # Unpack the dict into a list literal
         self.data_fields = [*column_indices]
 
+    def start_main_gui(self): # Called by main Editor class when it's time to call up the main view
         self.create_mapview()
         self.create_export_button()
         self.frame.pack(fill=BOTH,expand=1)
@@ -428,15 +427,15 @@ class EditorGUI():
         self.entry_value = None
 
         # Empty value for comparing the previous selected province
-        self.prev_province = None
+        self.prevprovince = None
 
         self.selector_img = ImageTk.PhotoImage(Image.open("selector.gif").convert("RGBA"))
 
         #mouseclick event definitions
-        self.canvas.bind_all("<ButtonPress-2>", _on_mousewheel_dn)
-        self.canvas.bind_all("<ButtonRelease-2>", _on_mousewheel_up)
-        self.canvas.bind_all("<Motion>",scan)
-        self.canvas.bind_all("<Return>", lambda event, fieldvar=fields:self.submit_entry(event, fieldvar))
+        self.canvas.bind_all("<ButtonPress-2>", self._on_mousewheel_dn)
+        self.canvas.bind_all("<ButtonRelease-2>", self._on_mousewheel_up)
+        self.canvas.bind_all("<Motion>",self.scan)
+        self.canvas.bind_all("<Return>", lambda event, fieldvar=self.list_of_entries:self.submit_entry(event, fieldvar))
         self.canvas.bind("<ButtonPress-1>", self.getprovince)
 
         self.root.mainloop()
@@ -451,47 +450,41 @@ class EditorGUI():
             title = "Select or create map editor save file",
             filetypes = (("all files",""),("all files","*"))
         )
-        # Update the class attribute
-        self.map_file = file_name
+        # Update the class attribute to select the database
+        database_file = file_name
         file_select.destroy()
+        return database_file # Pass this back to the main Editor class
 
     def prompt_remote_credentials(self): # Get the JSON credentials for connecting to the Google Sheet
         # We have to initialise Tkinter so we can create GUI, but we'll just use the default file select function
         credentials_select = Tk()
         # Check if the user wants to connect to the remote sheet
-        using_remote_sheet = credentials_select.messagebox.askquestion("Connect to remote sheet?", "Do you want to connect to the remote setup data spreadsheet")
-        if using_remote_sheet == "yes":
-            # Hide the default Tkinter window, as we'll be popping up a file select dialog
-            credentials_select.withdraw()
-            file_name = filedialog.askopenfilename(
-                intialdir = "./",
-                title = "Select credentials for remote editing. Cancel to edit remotely",
-                filetypes = (("json files","*.json"),("json files","*.json"))
-            )
-            # Update the class attribute if a file was selected
-            if str(file_name) != "":
-                self.remote_credentials = file_name
-            credentials_select.destroy()
-            return(self.remote_credentials) # Flag that we are indeed using remote credentials
-        else:
-            credentials_select.destroy()
-            return(None) # Flag that we are not using remote credentials
+        file_name = filedialog.askopenfilename(
+            initialdir = "./",
+            title = "Select credentials for remote editing. Cancel to edit remotely",
+            filetypes = (("json files","*.json"),("json files","*.json"))
+        )
+        # Update the class attribute if a file was selected
+        if str(file_name) != "":
+            self.remote_credentials = file_name
+        credentials_select.destroy()
+        return(self.remote_credentials) # Flag that we are indeed using remote credentials
 
     def create_mapview(self):
         #setting up a tkinter canvas with scrollbars
-        self.frame = Frame(root, bd=2, relief=SUNKEN)
+        self.frame = Frame(self.root, bd=2, relief=SUNKEN)
         self.frame.grid_rowconfigure(0, weight=1)
         self.frame.grid_columnconfigure(0, weight=1)
-        xscroll = Scrollbar(frame, orient=HORIZONTAL)
+        xscroll = Scrollbar(self.frame, orient=HORIZONTAL)
         xscroll.grid(row=1, column=0, sticky=E+W)
-        yscroll = Scrollbar(frame)
+        yscroll = Scrollbar(self.frame)
         yscroll.grid(row=0, column=1, sticky=N+S)
-        self.canvas = Canvas(frame, bd=0, xscrollcommand=xscroll.set, yscrollcommand=yscroll.set)
+        self.canvas = Canvas(self.frame, bd=0, xscrollcommand=xscroll.set, yscrollcommand=yscroll.set)
         self.canvas.grid(row=0, column=0, sticky=N+S+E+W)
         xscroll.config(command=self.canvas.xview)
         yscroll.config(command=self.canvas.yview)
 
-        self.editorframe = Frame(frame, bd=2, relief=SUNKEN, padx=110)
+        self.editorframe = Frame(self.frame, bd=2, relief=SUNKEN, padx=110)
         self.editorframe.grid(row=0, column=2)
 
         self.event2canvas = lambda e, c: (c.canvasx(e.x), c.canvasy(e.y))
@@ -510,8 +503,8 @@ class EditorGUI():
             if field == "PROVID":
                 setting = "readonly"
             entry = self.make_entry(self.editorframe, field, i, state=setting)
-            entry.bind("<KeyPress>", entry_changing)
-            entry.bind("<KeyRelease>", entry_changed)
+            entry.bind("<KeyPress>", self.entry_changing)
+            entry.bind("<KeyRelease>", self.entry_changed)
             list_of_entries.append(entry) # Appends in column order
             i += 1
         return list_of_entries
@@ -527,7 +520,7 @@ class EditorGUI():
             event.widget.config({"background":"yellow"})
     
     def create_export_button(self):
-        export_button = Button(frame, command= lambda: self.export_to_csv(), text="Export to CSV", bd=4, height=2, padx=2, bg="deep sky blue")
+        export_button = Button(self.frame, command= lambda: self.export_to_csv(), text="Export to CSV", bd=4, height=2, padx=2, bg="deep sky blue")
         export_button.grid(row=1, column=2)
 
     # If name changes, it also needs to change in the definition.csv
@@ -535,7 +528,7 @@ class EditorGUI():
         # definition.csv puts semicolons between spaces in names
         csv_submission = str(submission).replace(" ",";")
         extra_query = "UPDATE definition SET 'Name'='" + csv_submission + "' WHERE Province_id = "+ list_of_entries[0].get() +";"
-        db.db_commit(extra_query)
+        self.db.db_commit(extra_query)
         print("Name changed in definition")
 
     def make_entry(self, parent, caption, rownum, **options):
@@ -560,21 +553,21 @@ class EditorGUI():
             print(ex)
     
     def add_map_canvas(self):
-        canvas_img = ImageTk.PhotoImage(file='main_input.png', size=(1024,768))
+        self.canvas_img = ImageTk.PhotoImage(file='main_input.png', size=(1024,768))
         pxdata = Image.open('main_input.png','r')
         self.px = pxdata.load()
-        self.canvas.create_image(0, 0, image=canvas_img, anchor="nw")
-        self.canvas.config(scrollregion=canvas.bbox(ALL))
+        self.canvas.create_image(0, 0, image=self.canvas_img, anchor="nw")
+        self.canvas.config(scrollregion=self.canvas.bbox(ALL))
 
     #function to be called when mouse is clicked
     def getprovince(self,event):
         #outputting x and y coords to console
-        cx, cy = self.event2canvas(event, canvas)
+        cx, cy = self.event2canvas(event, self.canvas)
         print ("click at (%d, %d) / (%d, %d)" % (event.x,event.y,cx,cy))
-        colour = px[cx,cy]
+        colour = self.px[cx,cy]
         params = colour # Pass the RGB colour as a database query to find the PROVID
         self.refresh_selector_position(cx, cy) # Redraw selector and canvas, prevents lag
-        province = self.lookup_province_rgb()
+        province = self.lookup_province_rgb(params)
         # Do not refresh / overwrite the contents of data entry fields if the province is already selected
         if province != self.prevprovince:
             self.refresh_province_data_fields(province)
@@ -582,10 +575,10 @@ class EditorGUI():
     def refresh_selector_position(self, cx, cy):
         # Clear the canvas and draw a selector where you last clicked
         self.canvas.delete("all")
-        self.canvas.create_image(0, 0, image=canvas_img, anchor="nw")
+        self.canvas.create_image(0, 0, image=self.canvas_img, anchor="nw")
         self.canvas.create_image((cx, cy), image=self.selector_img)
     
-    def lookup_province_rgb(self):# Look in definition first to get the province ID from RGB
+    def lookup_province_rgb(self, params):# Look in definition first to get the province ID from RGB
         search_query = "SELECT Province_ID FROM definition WHERE R=? AND G=? AND B=?;"
         self.db.query(search_query,params)
         province = str(self.db.db_fetchone()[0])

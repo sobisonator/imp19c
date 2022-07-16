@@ -375,26 +375,6 @@ class database_connection(object):
             self.query(province_setup_query,params)
         self.db_commit("")
 
-    def default_setup(self): # Obsolete
-        i = 1
-        while i < total_provinces:
-            try:
-                for province in land_provinces + new_land_provinces:
-                    params = (str(i), "roman", "roman_pantheon", "cloth", "1", "1", "1", "1", "40", "0", "landprov"+str(i), "noregion")
-                    query = "INSERT OR IGNORE INTO province_setup(ProvID, Culture, Religion, TradeGoods, Citizens, Freedmen, Slaves, Tribesmen, Civilization, Barbarian, NameRef, AraRef, Terrain) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
-                    self.query(query, params)
-                    # print("Created default province setup for land province " + str(i))
-                    i = i + 1
-                for province in sea_provinces + new_sea_provinces:
-                    params = (str(i), "", "", "", "0", "0", "0", "0", "0", "0", "seaprov"+str(i), "")
-                    query = "INSERT OR IGNORE INTO province_setup(ProvID, Culture, Religion, TradeGoods, Citizens, Freedmen, Slaves, Tribesmen, Civilization, Barbarian, NameRef, AraRef, Terrain) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
-                    self.query(query, params)
-                    # print("Created default province setup for sea province " + str(i))
-                    i = i + 1
-            finally:
-                self.db_commit("")
-            break
-
     def export_to_csv(self): # Rework - needs to export to CSV from sheet
         print("Exporting to CSV")
         select_setup = "SELECT * FROM province_setup;"
@@ -602,8 +582,7 @@ class EditorGUI():
         for index, entry in enumerate(self.list_of_entries): # Load the new data for the relevant province from the province data sheet
             entry.config(state="normal")
             entry.delete(0,999) # Clear the contents of the entry widget
-            if index: # Only insert province data if it exists, otherwise leave blank
-                entry.insert(0,province_data[index]) # Get the cell data from the remote sheet
+            entry.insert(0,province_data[index]) # Get the cell data from the remote sheet
             entry.config({"background":"white"}) # Reset colour as it may have been yellow or green when edited
             if index == 0:
                 entry.config(state="readonly")

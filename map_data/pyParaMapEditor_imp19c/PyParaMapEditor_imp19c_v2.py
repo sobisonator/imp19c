@@ -13,6 +13,8 @@ class Editor: # Parent class
         self.config = configparser.ConfigParser()
         self.config.read('config/MapEditor.ini')
 
+        self.remote_sheet = None # Set later by self.setup_remote_sheet()
+
         self.has_remote_sheet = True # If true, functions related to getting remote data will be used.
 
         self.remote_sheet_columns = self.get_remote_sheet_column_indices(self.config.items('RemoteColumns'))
@@ -21,13 +23,14 @@ class Editor: # Parent class
         self.remote_credentials = None # NEED TO GET THIS FROM GUI FUNCTION
 
         self.map_handler = MapHandler("land_input.bmp","sea_input.bmp")
-        self.gui = EditorGUI(self.remote_sheet_columns,self.remote_sheet_columns,db = None) # Database = none
+        self.gui = EditorGUI(self.remote_sheet_columns,remote_sheet=None,db = None) # Database = none
         # Prompt a selection of the database path
         db_path = self.gui.prompt_file_select()
-        self.db = database_connection(self.remote_sheet_columns,db_path)
+        self.db = database_connection(self.remote_sheet,db_path)
         self.gui.db = self.db # Load database now that it has been initialised
         self.remote_credentials = self.gui.prompt_remote_credentials() # Get remote credentials
         self.setup_remote_sheet() # Load the remote data now that we have the credentials ready
+        self.gui.remote_sheet = self.remote_sheet # Load the remote sheet for reference by GUI functions
         self.gui.start_main_gui()
         
         # Declare the map var on init, but it will only be given a file at the file select stage
@@ -121,10 +124,11 @@ class RemoteSheet:
     def write_to_sheet(self, provid, column, data):
         # Data is a row from the database
         rownum = int(provid) + 1
-        colnum = self.column_indices[column]
-        self.sheet.update_cell(rownum, colnum, str(data))
+        column = column + 1 # Google sheets counts from 1. Great job, Google sheets.   
+        # colnum = self.column_indices[column]
+        self.sheet.update_cell(rownum, column, str(data))
     
-    def get_province_data(self, PROVID):
+    def get_province_data(self, provid):
         # THOUGHTS:
         # Is it best to read straight from the sheet, and not rely on anything local at all?
         # We could just read one row at a time when we click on the corresponding province
@@ -133,7 +137,7 @@ class RemoteSheet:
         # 1) Get the PROVID locally, from the save file using the RGB comparison
         # 2) Lookup the PROVID on the spreadsheet
         # 3) Return the data from that PROVID as a tuple/list
-        province_data = self.sheet.values().get(range=PROVID)
+        province_data = self.sheet.row_values(int(provid) + 1) # Add one, as the first row is used by columns
         return province_data
 
 # Database connection class
@@ -527,7 +531,7 @@ class EditorGUI():
     def change_name(self,submission):
         # definition.csv puts semicolons between spaces in names
         csv_submission = str(submission).replace(" ",";")
-        extra_query = "UPDATE definition SET 'Name'='" + csv_submission + "' WHERE Province_id = "+ list_of_entries[0].get() +";"
+        extra_query = "UPDATE definition SET 'Name'='" + csv_submission + "' WHERE Province_id = "+ self.list_of_entries[0].get() +";"
         self.db.db_commit(extra_query)
         print("Name changed in definition")
 
@@ -541,16 +545,18 @@ class EditorGUI():
         try:
             submission = event.widget.get()
             print("Submitting " + submission)
-            event.widget.config({"background":"lime"})
-            widget_id = fields[list_of_entries.index(event.widget)].replace("Indentured","Freedmen") # This may not be necessary anymore
+            widget_id = fields.index(event.widget) # Get column number
+            print(widget_id)
             # Now find the field that corresponds to the widget
             if widget_id == "NameRef":
                 self.change_name(submission)
             # Send the submission to the database at the correct PROVID (list of entries 0) and column (widget_id)
             self.remote_sheet.write_to_sheet(self.list_of_entries[0].get(), widget_id, submission)
+            event.widget.config({"background":"lime"})
         except Exception as ex:
             print("Submission failed.")
             print(ex)
+            event.widget.config({"background":"red"})
     
     def add_map_canvas(self):
         self.canvas_img = ImageTk.PhotoImage(file='main_input.png', size=(1024,768))
@@ -596,7 +602,8 @@ class EditorGUI():
         for index, entry in enumerate(self.list_of_entries): # Load the new data for the relevant province from the province data sheet
             entry.config(state="normal")
             entry.delete(0,999) # Clear the contents of the entry widget
-            entry.insert(0,province_data[index]) # Get the cell data from the remote sheet
+            if index: # Only insert province data if it exists, otherwise leave blank
+                entry.insert(0,province_data[index]) # Get the cell data from the remote sheet
             entry.config({"background":"white"}) # Reset colour as it may have been yellow or green when edited
             if index == 0:
                 entry.config(state="readonly")

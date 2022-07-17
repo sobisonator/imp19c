@@ -1,4 +1,4 @@
-import sqlite3, csv, gspread, configparser, os
+import sqlite3, csv, gspread, configparser, re, glob, codecs
 from urllib.parse import _NetlocResultMixinStr
 import gspread_dataframe as gd
 from tkinter import filedialog, messagebox
@@ -17,13 +17,25 @@ class Editor: # Parent class
 
         self.has_remote_sheet = True # If true, functions related to getting remote data will be used.
 
-        self.remote_sheet_columns = self.get_remote_sheet_column_indices(self.config.items('RemoteColumns'))
+        self.remote_sheet_columns = self.get_remote_sheet_column_indices(self.config.items('AlphanumericColumns')) | self.get_remote_sheet_column_indices(self.config.items('NumericColumns'))
+        sorted_tuples = sorted(self.remote_sheet_columns.items(), key=lambda item: item[1])
+        self.remote_sheet_columns = {k: v for k, v in sorted_tuples}
+
+        valid_cultures = self.get_valid_cultures("../../common/cultures/")
+        valid_religions = self.get_valid_religions("../../common/religions/")
+        valid_trade_goods = self.get_valid_trade_goods("../../common/trade_goods/")
 
         # Declare the credentials var on init, but it will only be given a file at the credentials select stage by the GUI object
         self.remote_credentials = None # NEED TO GET THIS FROM GUI FUNCTION
 
         self.map_handler = MapHandler("land_input.bmp","sea_input.bmp")
-        self.gui = EditorGUI(self.remote_sheet_columns,remote_sheet=None,db = None) # Database = none
+        self.gui = EditorGUI(self.remote_sheet_columns,
+            remote_sheet=None, # Remote sheet = none until loaded
+            db = None, # Database = none until loaded
+            valid_cultures = valid_cultures,
+            valid_religions = valid_religions,
+            valid_trade_goods = valid_trade_goods,
+            config = self.config) 
         # Prompt a selection of the database path
         db_path = self.gui.prompt_file_select()
         self.db = database_connection(self.remote_sheet,db_path)
@@ -54,6 +66,94 @@ class Editor: # Parent class
             column_indices = self.remote_sheet_columns
             )
         self.has_remote_sheet = True
+
+    def get_valid_cultures(self, cultures_directory):
+        replace_values = {" ": "", "{": "", "}": "", "=": "",
+                          "\r": "",
+                          "\t": ""}
+        replace_values = dict((re.escape(k), v) for k, v in replace_values.items())
+        pattern = re.compile("|".join(replace_values.keys()))
+        valid_cultures = []
+        for cultures_file in glob.glob(cultures_directory+"*.txt"):
+            with codecs.open(cultures_file, "r+", "utf-8-sig") as culture_file_data:
+                data = culture_file_data.read()
+                # Find the bit that says cultures and cut off everything before
+                #cultures = data.partition("culture = {")[2]
+                cultures = data.partition("culture = {")[2]
+                cultures = cultures.partition("barbarian_names")[0]
+                cultures = re.sub("#.*", "", cultures)
+                cultures = re.sub(".*names", "", cultures)
+                cultures = re.sub(".*family", "", cultures)
+                cultures = re.sub("\\{(.|\\n|\\r|\\t)*?\\}", "", cultures)
+                cultures = pattern.sub(lambda m: replace_values[re.escape(m.group(0))], cultures)
+                cultures = cultures.split("\n")
+                for culture in cultures:
+                    if len(culture) > 0 and culture not in valid_cultures:
+                        valid_cultures.append(culture)
+                #cultures = cultures.partition("")[1]
+                #cultures = regex.sub(br'\{[^()]*+(?:(?R)[^()]*)*+\}', '', cultures)
+                #print(cultures)
+                culture_file_data.close()
+        print("Valid cultures = " + str(valid_cultures))
+        return valid_cultures
+    
+    def get_valid_religions(self, religions_directory):
+        replace_values = {" ": "", "{": "", "}": "", "=": "",
+                            "\r": "",
+                            "\t": "",
+                        }
+        replace_values = dict((re.escape(k), v) for k, v in replace_values.items())
+        pattern = re.compile("|".join(replace_values.keys()))
+        valid_religions = []
+        for religions_file in glob.glob(religions_directory+"*.txt"):
+            with codecs.open(religions_file, "r+", "utf-8-sig") as religion_file_data:
+                data = religion_file_data.read()
+                # Find the bit that says religions and cut off everything before
+                religions = re.sub(" .*", "", data)
+                religions = re.sub(" .*", "", religions)
+                religions = re.sub("\\{\\{[^}]*\\}\\}", "", religions, re.MULTILINE | re.DOTALL)
+                pattern = re.compile("|".join(replace_values.keys()))
+                religions = pattern.sub(lambda m: replace_values[re.escape(m.group(0))], religions)
+                religions = re.sub("#.*", "", religions)
+                religions = religions.split("\n")
+                for religion in religions:
+                    if len(religion) > 0 and religion not in valid_religions:
+                        valid_religions.append(religion)
+                #religions = religions.partition("")[1]
+                #religions = regex.sub(br'\{[^()]*+(?:(?R)[^()]*)*+\}', '', religions)
+                #print(religions)
+                religion_file_data.close()
+        print("Valid religions = " + str(valid_religions))
+        return valid_religions
+    
+    def get_valid_trade_goods(self, trade_goods_directory):
+        replace_values = {" ": "", "{": "", "}": "", "=": "",
+                            "\r": "",
+                            "\t": "",
+                        }
+        replace_values = dict((re.escape(k), v) for k, v in replace_values.items())
+        pattern = re.compile("|".join(replace_values.keys()))
+        valid_trade_goods = []
+        for trade_goods_file in glob.glob(trade_goods_directory+"*.txt"):
+            with codecs.open(trade_goods_file, "r+", "utf-8-sig") as trade_good_file_data:
+                data = trade_good_file_data.read()
+                # Find the bit that says trade_goods and cut off everything before
+                trade_goods = re.sub(" .*", "", data)
+                trade_goods = re.sub("\t.*", "", trade_goods)
+                trade_goods = re.sub("\\{\\{[^}]*\\}\\}", "", trade_goods, re.MULTILINE | re.DOTALL)
+                pattern = re.compile("|".join(replace_values.keys()))
+                trade_goods = pattern.sub(lambda m: replace_values[re.escape(m.group(0))], trade_goods)
+                trade_goods = re.sub("#.*", "", trade_goods)
+                trade_goods = trade_goods.split("\n")
+                for trade_good in trade_goods:
+                    if len(trade_good) > 0 and trade_good not in valid_trade_goods:
+                        valid_trade_goods.append(trade_good)
+                #trade_goods = trade_goods.partition("")[1]
+                #trade_goods = regex.sub(br'\{[^()]*+(?:(?R)[^()]*)*+\}', '', trade_goods)
+                #print(trade_goods)
+                trade_good_file_data.close()
+        print("Valid tradegoods = " + str(valid_trade_goods))
+        return valid_trade_goods
 
 # MapHandler deals with the map image files
 class MapHandler:
@@ -317,27 +417,6 @@ class database_connection(object):
                 self.query(self.definition_query, (row[0], row[1], row[2], row[3], row[4], row[5]))
             self.connection.commit()
 
-    def import_remote_sheet(self): # Obsolete - writing to remote
-        # Import a remote sheet
-        if remote_sheet_exists:
-            rows = remote_sheet.data[1:]
-            for row in rows:
-                print(row)
-                self.setup_update_query(row)
-            self.connection.commit()
-
-    def import_setup(self): # Obsolete - writing to remote
-        # Import setup
-        if province_setup_csv:
-            rows = list(csv.reader(province_setup_csv, delimiter=";"))
-            for i, row in enumerate(rows):
-                rows[i] = list(row)
-            for row in rows:
-                print(row)
-                self.query(self.setup_query, (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], row[16], "FALSE"))
-            self.connection.commit()
-
-
     def fill_definition(self):
         self.clear_old_provinces(land_sea_provinces)
         self.compensate_for_deleted_provinces()
@@ -387,10 +466,12 @@ class database_connection(object):
                 csv_writer.writerow(row)
 
 class EditorGUI():
-    def __init__(self, column_indices, remote_sheet, db):
+    def __init__(self, column_indices, remote_sheet, db, valid_cultures, valid_religions, valid_trade_goods, config):
         self.root = Tk()
 
         self.im_selector = Image.open("selector.gif", "r")
+
+        self.config = config # In order to get column identities
 
         self.remote_sheet = remote_sheet
         self.db = db # Reference to database for picking out province ID from RGB values on the image
@@ -398,6 +479,11 @@ class EditorGUI():
         # Take the column names and use them for editable fields on the GUI. The names are stored as keys in the indices dict
         # Unpack the dict into a list literal
         self.data_fields = [*column_indices]
+
+        # Get lists of valid cultures, religions and tradegoods in the mod so we can refuse to submit an invalid culture
+        self.valid_cultures = valid_cultures
+        self.valid_religions = valid_religions
+        self.valid_trade_goods = valid_trade_goods
 
     def start_main_gui(self): # Called by main Editor class when it's time to call up the main view
         self.create_mapview()
@@ -421,9 +507,10 @@ class EditorGUI():
         self.canvas.bind_all("<Motion>",self.scan)
         self.canvas.bind_all("<Return>", lambda event, fieldvar=self.list_of_entries:self.submit_entry(event, fieldvar))
         self.canvas.bind("<ButtonPress-1>", self.getprovince)
+        # self.canvas.bind("<MouseWheel>", self.zoom_view) # TODO
 
         self.root.mainloop()
-
+    
     def prompt_file_select(self): # Select the local database, used for loading and saving map data. Data will also be saved to the remote sheet if there is one
         # We have to initialise Tkinter so we can create GUI, but we'll just use the default file select function
         file_select = Tk()
@@ -518,18 +605,38 @@ class EditorGUI():
     def make_entry(self, parent, caption, rownum, **options):
         Label(parent, text=caption, pady=10).grid(row = rownum, column = 0)
         entry = Entry(parent, width=16, font=("Arial 18"), **options)
+        entry.name = str(caption)
         entry.grid(row = rownum, column = 1)
         return entry
 
     def submit_entry(self, event, fields): # Refactored - write to remote only
         try:
             submission = event.widget.get()
-            print("Submitting " + submission)
+            print("Submitting value " + submission + " in field " + event.widget.name)
             widget_id = fields.index(event.widget) # Get column number
-            print(widget_id)
             # Now find the field that corresponds to the widget
-            if widget_id == "NameRef":
+            if event.widget.name == "culture":
+                if submission not in self.valid_cultures:
+                    event.widget.config({"background":"orange"})
+                    messagebox.showwarning("Unrecognised culture", "The culture '" + submission + "' which you entered is invalid. Check for typos, or add the culture to the mod files before proceeding.")
+                    return False
+            elif event.widget.name == "religion":
+                if submission not in self.valid_religions:
+                    event.widget.config({"background":"orange"})
+                    messagebox.showwarning("Unrecognised religion", "The religion '" + submission + "' which you entered is invalid. Check for typos, or add the religion to the mod files before proceeding.")
+                    return False
+            elif event.widget.name == "tradegoods":
+                if submission not in self.valid_trade_goods:
+                    event.widget.config({"background":"orange"})
+                    messagebox.showwarning("Unrecognised tradegood", "The tradegood '" + submission + "' which you entered is invalid. Check for typos, or add the tradegood to the mod files before proceeding.")
+                    return False
+            elif event.widget.name == "nameref":
                 self.change_name(submission)
+            elif event.widget.name in {k.lower(): v for k, v in self.config.items('NumericColumns')}: # All others must only accept numeric data
+                if not submission.isnumeric():
+                    event.widget.config({"background":"orange"})
+                    messagebox.showwarning("Value must be a number", "The value for this field must always be a number")
+                    return False
             # Send the submission to the database at the correct PROVID (list of entries 0) and column (widget_id)
             self.remote_sheet.write_to_sheet(self.list_of_entries[0].get(), widget_id, submission)
             event.widget.config({"background":"lime"})

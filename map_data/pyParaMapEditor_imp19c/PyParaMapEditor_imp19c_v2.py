@@ -10,7 +10,7 @@ from PIL import Image, ImageTk
 class Editor: # Parent class
     def __init__(self):
         print("Starting editor...")
-        self.config = configparser.ConfigParser()
+        self.config = configparser.ConfigParser(allow_no_value=True) # no_value must be allowed so that we can read the list of valid pop types, which is just a list of names
         self.config.read('config/MapEditor.ini')
 
         self.remote_sheet = None # Set later by self.setup_remote_sheet()
@@ -475,6 +475,7 @@ class EditorGUI():
         self.minority_pop_start_column = self.config['MinorityPopDef']['StartColumn'] # Column where the first minority pop is defined
         self.minority_pop_columns = self.config['MinorityPopColumns']
         self.columns_per_minority = len(self.config.items('MinorityPopColumns')) # Number of columns to iterate per minority pop
+        self.valid_pop_types = self.config['ValidPopTypes']
 
         self.remote_sheet = remote_sheet
         self.db = db # Reference to database for picking out province ID from RGB values on the image
@@ -495,6 +496,7 @@ class EditorGUI():
         self.add_map_canvas()
 
         self.list_of_entries = self.create_fields()
+        self.create_minority_pop_fields()
 
         # Empty value for comparing when field values are changed
         self.entry_value = None
@@ -558,8 +560,10 @@ class EditorGUI():
         xscroll.config(command=self.canvas.xview)
         yscroll.config(command=self.canvas.yview)
 
-        self.editorframe = Frame(self.frame, bd=2, relief=SUNKEN, padx=60)
+        self.editorframe = Frame(self.frame, bd=2, relief=SUNKEN, padx=30) # Main frame for basisc province data on the right of the map
         self.editorframe.grid(row=0, column=2)
+        self.minoritiesframe = Frame (self.frame, bd=2, relief=SUNKEN, pady=30)# Extra frame for minority pop fields at the bottom
+        self.minoritiesframe.grid(row=2, column = 0) # Beneath the map and X-axis scrollbar
 
         self.event2canvas = lambda e, c: (c.canvasx(e.x), c.canvasy(e.y))
 
@@ -569,16 +573,8 @@ class EditorGUI():
         pass
         # Get data from Google Sheets API
 
-    def view_minority_pops(self):
-        print("Opening minority pops for ")
-        try:
-            self.popup.destroy() # If there is already a minor pops window open, close it
-        except Exception:
-            pass
-        # Create a popup with minority pops
+    def create_minority_pop_fields(self):
         self.minority_pop_entries = []
-        self.popup = Toplevel(self.root)
-        self.popup.title("Minority pops")
         # Create 7 columns of 4 entry fields to populate each with the 4 minority pop columns
         entry_fields = self.config.items('MinorityPopColumns')
         num_minority_pops = self.config['MinorityPopDef']['NumMinorityPops']
@@ -586,25 +582,33 @@ class EditorGUI():
         ref_column = 0
         while i < ( int(num_minority_pops) * 2 ) + 1: # Double these to add space for labels between each column, and add one for space for the first label
             for field, value in entry_fields:
-                self.make_minority_entry(self.popup,field,value,i,str(int(value)+ref_column))
+                self.make_minority_entry(self.minoritiesframe,field,value,i,str(int(value)+ref_column))
             ref_column = ref_column + self.columns_per_minority
             i = i+2
-        # Update all the data in the fields
-        for entry in self.minority_pop_entries:
-                self.refresh_minority_pop_entry(entry)
     
     def make_minority_entry(self, parent, caption, row_num, col_num, ref_column, **options):
         Label(parent, text=caption, pady=10).grid(row = row_num, column = str(int(col_num)-1))
         entry = Entry(parent, width=10, font=("Arial 18"), **options)
+        entry.category = "minority_province_data"
+        entry.row = row_num
         entry.column = ref_column # Get the number of the column to search from in the remote sheet
+        entry.name = caption
         entry.grid(row = row_num, column = col_num)
         self.minority_pop_entries.append(entry)
         return entry
+
+    def get_minority_pop_entry_column(self, entry):
+        column = int(self.minority_pop_start_column) + int(entry.column)
+        return column
     
     def refresh_minority_pop_entry(self, entry):
         entry.config(state="normal")
+        entry.config({"background":"yellow"})
         entry.delete(0,999) # Clear the contents of the entry widget
-        entry.insert(0,self.province_data[int(self.minority_pop_start_column) + int(entry.column)]) # Get the cell data from the remote sheet
+        try:
+            entry.insert(0,self.province_data[self.get_minority_pop_entry_column(entry)]) # Get the cell data from the remote sheet
+        except Exception as ex: # If there is no data
+            pass
         entry.config({"background":"white"}) # Reset colour as it may have been yellow or green when edited
     
     def create_fields(self):
@@ -646,40 +650,96 @@ class EditorGUI():
     def make_entry(self, parent, caption, rownum, **options):
         Label(parent, text=caption, pady=10).grid(row = rownum, column = 0)
         entry = Entry(parent, width=16, font=("Arial 18"), **options)
+        entry.category = "main_province_data"
         entry.name = str(caption)
         entry.grid(row = rownum, column = 1)
         return entry
 
+    def province_submission_warning(self, messagetitle, messagetext):
+        messagebox.showwarning(messagetitle, messagetext)
+        print(messagetitle + " " + messagetext)
+
+
+    def validate_culture(self, event, submission):
+        if submission not in self.valid_cultures:
+            event.widget.config({"background":"orange"})
+            self.province_submission_warning("Unrecognised culture", "The culture '" + submission + "' which you entered is invalid. Check for typos, or add the culture to the mod files before proceeding.")
+            return False
+    
+    def validate_religion(self, event, submission):
+        if submission not in self.valid_religions:
+            event.widget.config({"background":"orange"})
+            self.province_submission_warning("Unrecognised religion", "The religion '" + submission + "' which you entered is invalid. Check for typos, or add the religion to the mod files before proceeding.")
+            return False
+
+    def validate_trade_goods(self, event, submission):
+        if submission not in self.valid_trade_goods:
+            event.widget.config({"background":"orange"})
+            self.province_submission_warning("Unrecognised tradegood", "The tradegood '" + submission + "' which you entered is invalid. Check for typos, or add the tradegood to the mod files before proceeding.")
+            return False
+    
+    def validate_numeric_only(self, event, submission):
+        if not submission.isnumeric():
+            event.widget.config({"background":"orange"})
+            self.province_submission_warning("Value must be a number", "The value for this field must always be a number")
+            return False
+
+    def validate_pop_type(self, event, submission):
+        if submission not in self.valid_pop_types:
+            event.widget.config({"background":"orange"})
+            self.province_submission_warning("Invalid pop type", "The pop type '" + submission + "' which you entered is invalid. Check for typos.")
+            return False
+
+    def submit_main_province_data(self, event, submission, fields):
+        self.widget_id = fields.index(event.widget) # Get column number
+        print("Attempting to submit value " + submission + " in field " + event.widget.name)
+        if event.widget.name == "culture":
+            if self.validate_culture(event, submission) == False:
+                return False
+        elif event.widget.name == "religion":
+            if self.validate_religion(event, submission) == False:
+                return False
+        elif event.widget.name == "tradegoods":
+            if self.validate_trade_goods(event, submission) == False:
+                return False
+        elif event.widget.name == "nameref":
+            self.change_name(submission)
+        elif event.widget.name in {k.lower(): v for k, v in self.config.items('NumericColumns')}: # All others must only accept numeric data
+            if self.validate_numeric_only(event, submission) == False:
+                return False
+        self.remote_sheet.write_to_sheet(provid = self.list_of_entries[0].get(), column = self.widget_id, data = submission)
+        print("Submission successful")
+
+    def submit_minority_province_data(self, event, submission):
+        print("Attempting to submit value " + submission + " in minority pop field " + event.widget.name)
+        if event.widget.name == "culture":
+            if self.validate_culture(event, submission) == False:
+                return False
+        elif event.widget.name == "religion":
+            if self.validate_religion(event, submission) == False:
+                return False
+        elif event.widget.name == "size":
+            if self.validate_numeric_only(event, submission) == False:
+                return False
+        elif event.widget.name == "poptype":
+            if self.validate_pop_type(event, submission) == False:
+                return False
+        self.remote_sheet.write_to_sheet(provid = self.list_of_entries[0].get(), column = self.get_minority_pop_entry_column(event.widget), data = submission)
+        print("Submission successful")
+    
     def submit_entry(self, event, fields): # Refactored - write to remote only
         try:
             submission = event.widget.get()
-            print("Submitting value " + submission + " in field " + event.widget.name)
-            widget_id = fields.index(event.widget) # Get column number
             # Now find the field that corresponds to the widget
-            if event.widget.name == "culture":
-                if submission not in self.valid_cultures:
-                    event.widget.config({"background":"orange"})
-                    messagebox.showwarning("Unrecognised culture", "The culture '" + submission + "' which you entered is invalid. Check for typos, or add the culture to the mod files before proceeding.")
-                    return False
-            elif event.widget.name == "religion":
-                if submission not in self.valid_religions:
-                    event.widget.config({"background":"orange"})
-                    messagebox.showwarning("Unrecognised religion", "The religion '" + submission + "' which you entered is invalid. Check for typos, or add the religion to the mod files before proceeding.")
-                    return False
-            elif event.widget.name == "tradegoods":
-                if submission not in self.valid_trade_goods:
-                    event.widget.config({"background":"orange"})
-                    messagebox.showwarning("Unrecognised tradegood", "The tradegood '" + submission + "' which you entered is invalid. Check for typos, or add the tradegood to the mod files before proceeding.")
-                    return False
-            elif event.widget.name == "nameref":
-                self.change_name(submission)
-            elif event.widget.name in {k.lower(): v for k, v in self.config.items('NumericColumns')}: # All others must only accept numeric data
-                if not submission.isnumeric():
-                    event.widget.config({"background":"orange"})
-                    messagebox.showwarning("Value must be a number", "The value for this field must always be a number")
-                    return False
+            # If event widget is in main province data
+            if event.widget.category == "main_province_data":
+                if self.submit_main_province_data(event, submission, fields) == False:
+                    return False # The submit data function will return False if the submission was erroneous, do not continue.
+            # If the event widget is in minority pops
+            elif event.widget.category == "minority_province_data":
+                if self.submit_minority_province_data(event, submission) == False:
+                    return False # The submit data function will return False if the submission was erroneous, do not continue.
             # Send the submission to the database at the correct PROVID (list of entries 0) and column (widget_id)
-            self.remote_sheet.write_to_sheet(self.list_of_entries[0].get(), widget_id, submission)
             event.widget.config({"background":"lime"})
         except Exception as ex:
             print("Submission failed.")
@@ -729,13 +789,17 @@ class EditorGUI():
         self.province_data = self.remote_sheet.get_province_data(province) # Get the row's data for this province from the remote spreadsheet
         for index, entry in enumerate(self.list_of_entries): # Load the new data for the relevant province from the province data sheet
             self.refresh_entry(index, entry)
-        self.view_minority_pops()
+        for entry in self.minority_pop_entries:
+            self.refresh_minority_pop_entry(entry)
         print(self.province_data)
 
     def refresh_entry(self, index, entry):
         entry.config(state="normal")
         entry.delete(0,999) # Clear the contents of the entry widget
-        entry.insert(0,self.province_data[index]) # Get the cell data from the remote sheet
+        try:
+            entry.insert(0,self.province_data[index]) # Get the cell data from the remote sheet
+        except: # If there is no data
+            pass
         entry.config({"background":"white"}) # Reset colour as it may have been yellow or green when edited
         if index == 0:
             entry.config(state="readonly")

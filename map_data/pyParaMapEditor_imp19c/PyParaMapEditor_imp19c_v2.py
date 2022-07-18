@@ -1,6 +1,5 @@
 import sqlite3, csv, gspread, configparser, re, glob, codecs
 from urllib.parse import _NetlocResultMixinStr
-import gspread_dataframe as gd
 from tkinter import filedialog, messagebox
 from tkinter import *
 from PIL import Image, ImageTk
@@ -214,10 +213,6 @@ class RemoteSheet:
         client = gspread.service_account(filename=credentials)
         
         self.sheet = client.open(sheet_name).sheet1 # Sheet name is passed from config by the parent class
-
-        # data = sheet.get_values() # Not used - consider removing
-
-        # dataframe = gd.get_as_dataframe(sheet) # Not used - consider removing
 
         self.column_indices = column_indices
 

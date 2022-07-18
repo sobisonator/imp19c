@@ -472,6 +472,9 @@ class EditorGUI():
         self.im_selector = Image.open("selector.gif", "r")
 
         self.config = config # In order to get column identities
+        self.minority_pop_start_column = self.config['MinorityPopDef']['StartColumn'] # Column where the first minority pop is defined
+        self.minority_pop_columns = self.config['MinorityPopColumns']
+        self.columns_per_minority = len(self.config.items('MinorityPopColumns')) # Number of columns to iterate per minority pop
 
         self.remote_sheet = remote_sheet
         self.db = db # Reference to database for picking out province ID from RGB values on the image
@@ -487,7 +490,7 @@ class EditorGUI():
 
     def start_main_gui(self): # Called by main Editor class when it's time to call up the main view
         self.create_mapview()
-        self.create_export_button()
+        self.create_minorities_button()
         self.frame.pack(fill=BOTH,expand=1)
         self.add_map_canvas()
 
@@ -555,7 +558,7 @@ class EditorGUI():
         xscroll.config(command=self.canvas.xview)
         yscroll.config(command=self.canvas.yview)
 
-        self.editorframe = Frame(self.frame, bd=2, relief=SUNKEN, padx=110)
+        self.editorframe = Frame(self.frame, bd=2, relief=SUNKEN, padx=60)
         self.editorframe.grid(row=0, column=2)
 
         self.event2canvas = lambda e, c: (c.canvasx(e.x), c.canvasy(e.y))
@@ -565,6 +568,44 @@ class EditorGUI():
     def export_to_csv(self):
         pass
         # Get data from Google Sheets API
+
+    def view_minority_pops(self):
+        print("Opening minority pops for ")
+        try:
+            self.popup.destroy() # If there is already a minor pops window open, close it
+        except Exception:
+            pass
+        # Create a popup with minority pops
+        self.minority_pop_entries = []
+        self.popup = Toplevel(self.root)
+        self.popup.title("Minority pops")
+        # Create 7 columns of 4 entry fields to populate each with the 4 minority pop columns
+        entry_fields = self.config.items('MinorityPopColumns')
+        num_minority_pops = self.config['MinorityPopDef']['NumMinorityPops']
+        i = 1 # Value for column placement in the GUI
+        ref_column = 0
+        while i < ( int(num_minority_pops) * 2 ) + 1: # Double these to add space for labels between each column, and add one for space for the first label
+            for field, value in entry_fields:
+                self.make_minority_entry(self.popup,field,value,i,str(int(value)+ref_column))
+            ref_column = ref_column + self.columns_per_minority
+            i = i+2
+        # Update all the data in the fields
+        for entry in self.minority_pop_entries:
+                self.refresh_minority_pop_entry(entry)
+    
+    def make_minority_entry(self, parent, caption, row_num, col_num, ref_column, **options):
+        Label(parent, text=caption, pady=10).grid(row = row_num, column = str(int(col_num)-1))
+        entry = Entry(parent, width=10, font=("Arial 18"), **options)
+        entry.column = ref_column # Get the number of the column to search from in the remote sheet
+        entry.grid(row = row_num, column = col_num)
+        self.minority_pop_entries.append(entry)
+        return entry
+    
+    def refresh_minority_pop_entry(self, entry):
+        entry.config(state="normal")
+        entry.delete(0,999) # Clear the contents of the entry widget
+        entry.insert(0,self.province_data[int(self.minority_pop_start_column) + int(entry.column)]) # Get the cell data from the remote sheet
+        entry.config({"background":"white"}) # Reset colour as it may have been yellow or green when edited
     
     def create_fields(self):
         i = 1
@@ -590,9 +631,9 @@ class EditorGUI():
         if value != self.entry_value:
             event.widget.config({"background":"yellow"})
     
-    def create_export_button(self):
-        export_button = Button(self.frame, command= lambda: self.export_to_csv(), text="Export to CSV", bd=4, height=2, padx=2, bg="deep sky blue")
-        export_button.grid(row=1, column=2)
+    def create_minorities_button(self):
+        minorities_button = Button(self.frame, command= lambda: self.view_minority_pops(), text="View minority pops", bd=4, height=2, padx=2, bg="deep sky blue")
+        minorities_button.grid(row=1, column=2)
 
     # If name changes, it also needs to change in the definition.csv
     def change_name(self,submission):
@@ -685,28 +726,29 @@ class EditorGUI():
         # self.db.query(province_data_query, "")
         # province_data = self.db.db_fetchone()
         # TODO
-        province_data = self.remote_sheet.get_province_data(province) # Get the row's data for this province from the remote spreadsheet
+        self.province_data = self.remote_sheet.get_province_data(province) # Get the row's data for this province from the remote spreadsheet
         for index, entry in enumerate(self.list_of_entries): # Load the new data for the relevant province from the province data sheet
-            entry.config(state="normal")
-            entry.delete(0,999) # Clear the contents of the entry widget
-            entry.insert(0,province_data[index]) # Get the cell data from the remote sheet
-            entry.config({"background":"white"}) # Reset colour as it may have been yellow or green when edited
-            if index == 0:
-                entry.config(state="readonly")
-        print(province_data)
+            self.refresh_entry(index, entry)
+        self.view_minority_pops()
+        print(self.province_data)
 
+    def refresh_entry(self, index, entry):
+        entry.config(state="normal")
+        entry.delete(0,999) # Clear the contents of the entry widget
+        entry.insert(0,self.province_data[index]) # Get the cell data from the remote sheet
+        entry.config({"background":"white"}) # Reset colour as it may have been yellow or green when edited
+        if index == 0:
+            entry.config(state="readonly")
+    
     def _on_mousewheel_dn(self, event):
         self.mousewheel = 1
-        print(event)
         self.canvas.scan_mark(event.x, event.y)
 
     def _on_mousewheel_up(self, event):
         self.mousewheel = 0
-        print(event)
 
     def scan(self, event):
         if self.mousewheel == 1:
-            print(event)
             self.canvas.scan_dragto(event.x,event.y, gain = 1)
 
 

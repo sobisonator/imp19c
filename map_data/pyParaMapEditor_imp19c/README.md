@@ -1,4 +1,4 @@
-PROVINCE SETUP EDITOR FOR IMPERATOR: ROME
+PROVINCE SETUP EDITOR FOR IMPERATRIX: VICTORIA
 
 Instructions:
 
@@ -8,17 +8,15 @@ Pre-prep (I don't have Python already):
 
 
 1. Installing requirements to run the map editor
-	a) With PyCharm (advanced)
+	a) With an IDE (advanced)
 		i) Open pyParaMapEditor_imp19c as a project. The folder is already set up as a PyCharm project so it should be recognised if you open the folder in PyCharm.
 		ii) Install dependencies once you have opened the project, following this tutorial: https://www.jetbrains.com/help/pycharm/managing-dependencies.html
 	b) With pip (if you don't have PyCharm)
-		i) Enter the following command in your command line:
-			pip install pandas gspread Pillow
-		ii) Launch the script by double clicking it.
-	c) Command line in directory
-		i) Open command line in the directory's location
+		i) Open command line and type the following command:
+			cd "[path to wherever you put Imperatrix files]map_data\pyParaMapEditor_imp19c"
 		ii) Enter the following command in your command line:
 			pip install -r requirements.txt
+		iii) Launch the script by double clicking it or in the command line.
 
 2. Preparing data (if you are using imp19c, these files should all be there already and you can skip this step!)
 	a) All files below simply need to be present in the setup editor's
@@ -32,10 +30,10 @@ Pre-prep (I don't have Python already):
 	
 
 3. Using the editor
-	 - When you launch the editor you will be prompted to create a new savefile, which you can name whatever you want. This will store your edited setup data.
+	 - When you launch the editor you will be prompted to create a new savefile, which you can name whatever you want. This stores the definition file for the mod's map in a database so that the app can reference it quickly.
 	 	- You may also load a previous save this way. (In imp19c, load the existing "map_imported_file" file)
 	 	- The map editor only takes database files in the expected format, so it will encounter an error and close if you try to open any other kind of file.
-	 - You will also be prompted to enter a credentials file - select your config json file to link to the Google Sheet.
+	 - You will also be prompted to enter a credentials file - select your config json file to link to the Google Sheet. The config json file can be accessed to dev members of the discord here: https://discord.com/channels/666029461795373067/666029463145807893/784059456928743434
 	 - Use the middle mouse button and drag the mouse to navigate the map. Alternatively, use the scrollbars around the province map canvas.
 	 - Left-click on a province to select it. A crosshair will appear over the selected province while you are editing it.
 	 - Click on any field on the right-hand side to edit that field.

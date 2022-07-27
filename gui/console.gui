@@ -1,0 +1,289 @@
+types ConsoleTypes {
+	type console_button = button {
+		using = e2
+		using = editor_button
+		using = editor_text
+		size = { 0 0 }
+		text = ""
+
+		icon = {
+			block "icon" {
+				texture = "gfx/interface/icons/shared_icons/treasury.dds"
+			}
+			parentanchor = center
+			scale = 0.7
+		}
+	}
+}
+
+template ConsoleBackground
+{
+	texture = "gfx/interface/small_tiles_dialog.dds"
+	spriteType = CorneredStretched
+	spriteborder = { 4 4 }
+}
+
+textbox = {
+	name = "console_output_item"
+	maximumsize = { 390 -1 }
+	align = left|top
+	using = FontNormal
+	multiline = yes
+	autoresize = yes
+}
+
+window = {
+	name = "console_window"
+	alwaystransparent = no
+	size = { 400 100% }
+
+	vbox = {
+		margin = { 5 5 }
+		margin_top = 50
+
+		scrollarea = {
+			using = ev
+			background = {
+				using = ConsoleBackground
+				margin = { 5 5 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+			}
+			name = "console_output_scrollarea"
+			#size = { 390 510 }
+
+			scrollwidget = {
+				flowcontainer = {
+					name = "console_output"
+					direction = "vertical"
+					ignoreinvisible = no
+				}
+			}
+
+			scrollbar_vertical = {
+				using = editor_vertical_scrollbar
+			}
+
+			scrollbar_horizontal = {
+				using = editor_vertical_scrollbar
+			}
+		}
+
+		editbox = {
+			background = {
+				using = ConsoleBackground
+				margin = { 5 0 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+			}
+			name = "console_edit"
+			size = { 390 40 }
+			alwaystransparent = no
+			focuspolicy = all
+			using = FontNormal
+		}
+
+		widget = {
+			size = { 100% 90 }
+			background = {
+				using = editor_window
+				margin = { 3 0 }
+			}
+
+			widget = {#why do I need this? I"m confuzzled
+				using = fs
+
+				vbox = {
+				margin_top = 5
+					hbox = {
+						using = ev
+
+						console_button = {
+							onclick = "[ExecuteConsoleCommand('cash')]"
+							onrightclick = "[ExecuteConsoleCommand('cash 200')]"
+							tooltip = "Add 5 000 @gold!  Right-click to add 100 @gold!"
+						}
+						console_button = {
+							onclick = "[ExecuteConsoleCommand('manpower')]"
+							onrightclick = "[ExecuteConsoleCommand('manpower 2')]"
+							tooltip = "Add 50 000 @manpower!  Right-click to add 1 000 @manpower!"
+							blockoverride "icon" {
+								texture = "gfx/interface/icons/shared_icons/manpower.dds"
+							}
+						}
+						console_button = {
+							onclick = "[ExecuteConsoleCommand('political_influence')]"
+							onrightclick = "[ExecuteConsoleCommand('political_influence 30')]"
+							tooltip = "Add 100 @political_influence!  Right-click to add 30 @political_influence!"
+							blockoverride "icon" {
+								texture = "gfx/interface/icons/shared_icons/political_influence.dds"
+							}
+						}
+						console_button = {
+							onclick = "[ExecuteConsoleCommand('military_experience 80')]"
+							onrightclick = "[ExecuteConsoleCommand('military_experience 20')]"
+							tooltip = "Add 80 @military_experience!  Right-click to add 20 @military_experience!"
+							blockoverride "icon" {
+								texture = "gfx/interface/icons/shared_icons/military_experience.dds"
+							}
+						}
+						console_button = {
+							onclick = "[ExecuteConsoleCommand('stab')]"
+							onrightclick = "[ExecuteConsoleCommand('stab 10')]"
+							tooltip = "Add 50 @stability!  Right-click to add 10 @stability!"
+							blockoverride "icon" {
+								texture = "gfx/interface/icons/shared_icons/stability.dds"
+							}
+						}
+						console_button = {
+							onclick = "[ExecuteConsoleCommand('ae -50')]"
+							onrightclick = "[ExecuteConsoleCommand('ae -5')]"
+							tooltip = "Remove 50 @aggressive_expansion!  Right-click to remove 5 @aggressive_expansion!"
+							blockoverride "icon" {
+								texture = "gfx/interface/icons/shared_icons/aggressive_expansion.dds"
+							}
+						}
+						console_button = {
+							onclick = "[ExecuteConsoleCommand('warexhaustion -30')]"
+							onrightclick = "[ExecuteConsoleCommand('warexhaustion -3')]"
+							tooltip = "Remove 30 @war_exhaustion!  Right-click to remove 3 @war_exhaustion!"
+							blockoverride "icon" {
+								texture = "gfx/interface/icons/modifiers/war_exhaustion.dds"
+							}
+						}
+						console_button = {
+							onclick = "[ExecuteConsoleCommand('tyranny -50')]"
+							onrightclick = "[ExecuteConsoleCommand('tyranny -5')]"
+							tooltip = "Remove 50 @tyranny!  Right-click to remove 5 @tyranny!"
+							blockoverride "icon" {
+								texture = "gfx/interface/icons/shared_icons/tyranny.dds"
+							}
+						}
+						console_button = {
+							visible = "[Player.GetGovernment.IsMonarchy]"
+							onclick = "[ExecuteConsoleCommand('legitimacy 50')]"
+							onrightclick = "[ExecuteConsoleCommand('legitimacy 10')]"
+							tooltip = "Add 50 @legitimacy!  Right-click to add 10 @legitimacy!"
+							blockoverride "icon" {
+								texture = "gfx/interface/icons/shared_icons/legitimacy.dds"
+							}
+						}
+						console_button = {
+							visible = "[Player.GetGovernment.IsTribal]"
+							onclick = "[ExecuteConsoleCommand('centralization 10')]"
+							onrightclick = "[ExecuteConsoleCommand('centralization -10')]"
+							tooltip = "Add 10 @centralization!  Right-click to remove 10 @centralization!"
+							blockoverride "icon" {
+								texture = "gfx/interface/icons/shared_icons/centralization.dds"
+							}
+						}
+					}
+					hbox = {
+						using = ev
+						console_button = {
+							text = "Imperatrix Mod Menu"
+							size = { 0 0 }
+							blockoverride "icon" {}
+							onclick = "[ExecuteConsoleCommand('gui.CreateDockable gui/debug_menus.gui imp19c')]"
+							tooltip = "Open Imperatrix mod menu"
+						}
+						console_button = {
+							text = "Supranational Window"
+							size = { 0 0 }
+							blockoverride "icon" {}
+							onclick = "[ExecuteConsoleCommand('gui.createwidget gui/imp19c_windows.gui supranational')]"
+							tooltip = "Open the Supranational window"
+						}
+					}
+				}
+			}
+
+			textbox = {
+				position = { 15 2 }
+				size = { 200 20 }
+				using = FontNormal
+				text = ""
+			}
+		}
+	}
+
+	button = {
+		using = editor_button
+		position = { 380 0 }
+		size = { 24 24 }
+		onclick = "[ConsoleWindow.ToggleMenu]"
+		text = "M"
+		visible = no
+	}
+
+	container = {
+		name = menu
+		visible = [ConsoleWindow.IsMenuShown]
+
+		scrollarea = {
+			name = "menu_scroll_area"
+			position = { 402 4 }
+			size = { 150 500 }
+			scrollbarpolicy_horizontal = always_off
+
+			scrollbar_vertical = {
+				using = editor_vertical_scrollbar
+			}
+
+			scrollwidget = {
+				fixedgridbox = {
+					name = "menu_grid"
+					addcolumn = 100
+					addrow = 24
+
+					item = {
+						container = {
+							icon = {
+								visible = [ConsoleMenuItem.IsCurrentGroup]
+								using = ConsoleBackground
+								size = { 106 28 }
+							}
+							button = {
+								using = editor_button
+								position = { 3 3 }
+								size = { 100 22 }
+								onclick = "[ConsoleMenuItem.Select]"
+								tooltip = "[ConsoleMenuItem.GetHelp]"
+								text = "[ConsoleMenuItem.GetName]"
+								using = FontNormal
+							}
+
+						}
+					}
+				}
+			}
+		}
+
+		scrollarea = {
+			name = "command_scroll_area"
+			position = { 508 7 }
+			size = { 250  500 }
+			scrollbarpolicy_horizontal = always_off
+
+			scrollbar_vertical = {
+				using = editor_vertical_scrollbar
+			}
+
+			scrollwidget = {
+				fixedgridbox = {
+					name = "command_grid"
+					addcolumn = 200
+					addrow = 24
+
+					item = {
+						button = {
+							using = editor_button
+							size = { 250 24 }
+							onclick = "[ConsoleMenuItem.Select]"
+							tooltip = "[ConsoleMenuItem.GetHelp]"
+							text = "[ConsoleMenuItem.GetName]"
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -4,22 +4,61 @@
 #	target = root
 #}
 
-# Scope:	Province, capital province of the federation leader
+# Scope:	Country, then scopes to a province most likely the capital province of the federation leader
 
 federation_create = {
-	# Question - how to store a plaintext name? Variables can only store numbers, bools, flags and scopes
-	# Could we convert an ASCII string to a decimal value? Pretty ridiculous.
-	# Could we have a few pre-set ones that correspond to numbers, that combo with something about the founders?
-	# Like if variable = 1, localisation = "Alliance of... " and then it grabs the culture name like "...[CULTURE] nations"
-	set_variable = is_federation_scope # Tags this province as the holding scope for a federation's values. If another federation is created by another tag with a capital here in the future, it will use another random available province that doesn't have this flag
-	set_variable = {
-		name = federation_name
-		value = $federation_name_value$ # Pre-scripted: German Confederation
+	# First of all, scope to the capital province which holds the federation data:
+	random_owned_province = {
+		limit = {
+				NOT = { has_variable = is_federation_scope }
+			}
+			# Scope is now the federation capital province scope
+
+			# Question - how to store a plaintext name? Variables can only store numbers, bools, flags and scopes
+			# Could we convert an ASCII string to a decimal value? Pretty ridiculous.
+			# Could we have a few pre-set ones that correspond to numbers, that combo with something about the founders?
+			# Like if variable = 1, localisation = "Alliance of... " and then it grabs the culture name like "...[CULTURE] nations"
+			set_variable = is_federation_scope # Tags this province as the holding scope for a federation's values. If another federation is created by another tag with a capital here in the future, it will use another random available province that doesn't have this flag
+			set_variable = {
+				name = federation_name
+				value = $federation_name$ # Contains a number key that generates a name in loc
+			}
+			set_variable = {
+				name = founder_tag
+				value = $founder_tag$ # Grabbed from owner scope, as the federation is created in the owner's capital
+			}
+			while = {
+				count = var:number_of_members
+			}
+			# Create a list of the members now
+			# Some kind of while loop to iterate through all the members and add them to a list?
+		}
 	}
-	set_variable = {
-		name = federation_leader
-		value = $leader_tag$ # Grabbed from owner scope, as the federation is created in the owner's capital
+}
+
+get_variable_list_size = { # Count the number of members in a variable list
+	if = {
+		limit = {
+			variable_list_size = {
+				name = $list$
+				value = 1 
+			}
+		}
+		set_variable = {
+			name = variable_list_size_int
+			value = 1
+		}
 	}
-	# Create a list of the members now
-	# Some kind of while loop to iterate through all the members and add them to a list?
+	if = {
+		limit = {
+			variable_list_size = {
+				name = $list$
+				value = 2 
+			}
+		}
+		set_variable = {
+			name = variable_list_size_int
+			value = 2
+		}
+	}
 }

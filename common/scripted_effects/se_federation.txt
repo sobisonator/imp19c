@@ -8,42 +8,46 @@
 
 federation_create = {
 	# First of all, scope to a province which will hold the federation data and serve as a "federation capital":
-	random_owned_province = {
-		limit = {
-				NOT = { has_variable = is_federation_scope }
-			}
-			# Scope is now the federation capital province scope
+	$federation_province$ = {
+		# Scope is now the federation capital province scope
+		save_scope_as = federation_scope
 
-			# Question - how to store a plaintext name? Variables can only store numbers, bools, flags and scopes
-			# Could we convert an ASCII string to a decimal value? Pretty ridiculous.
-			# Could we have a few pre-set ones that correspond to numbers, that combo with something about the founders?
-			# Like if variable = 1, localisation = "Alliance of... " and then it grabs the culture name like "...[CULTURE] nations"
-			set_variable = is_federation_scope # Tags this province as the holding scope for a federation's values. If another federation is created by another tag with a capital here in the future, it will use another random available province that doesn't have this flag
+		# Question - how to store a plaintext name? Variables can only store numbers, bools, flags and scopes
+		# Answer - Variables can store objects
+		# Could we convert an ASCII string to a decimal value? Pretty ridiculous.
+		# Could we have a few pre-set ones that correspond to numbers, that combo with something about the founders?
+		# Like if variable = 1, localisation = "Alliance of... " and then it grabs the culture name like "...[CULTURE] nations"
+		set_variable = is_federation_scope # Tags this province as the holding scope for a federation's values. If another federation is created by another tag with a capital here in the future, it will use another random available province that doesn't have this flag
+		set_variable = {
+			name = federation_name
+			value = $federation_name$ # Contains a number key that generates a name in loc
+		}
+		set_variable = {
+			name = host_tag
+			value = $host_tag$ # Grabbed from owner scope, as the federation is created in the owner's capital
+		}
+		every_in_list = {
+			list = $list_of_members$
+			add_to_list = list_of_members # Transfer the list of members locally
+		}
+		every_in_list = {
+			list = list_of_members
 			set_variable = {
-				name = federation_name
-				value = $federation_name$ # Contains a number key that generates a name in loc
+				name = member_of_federation
+				value = scope:federation_scope
 			}
+		}
+		$host_tag$ = {
 			set_variable = {
-				name = host_tag
-				value = $host_tag$ # Grabbed from owner scope, as the federation is created in the owner's capital
+				name = member_of_federation
+				value = scope:federation_scope
 			}
-			every_in_list = {
-				list = $list_of_members$
-				add_to_variable_list = list_of_members # Transfer the list of members locally
-			}
-			every_in_list = {
-				list = list_of_members
-				set_variable = {
-					name = member_of_federation
-					value = PREV
-				}
-			}
-			# Create a list of the members now
-			# Some kind of while loop to iterate through all the members and add them to a list?
 		}
 	}
 }
 
+# Why not just the this trigger?
+# variable_list_size
 get_variable_list_size  = {
     set_variable = {
         name = variable_list_size_int

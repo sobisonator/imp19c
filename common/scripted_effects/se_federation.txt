@@ -31,6 +31,10 @@ federation_create = {
 			add_to_list = list_of_members # Transfer the list of members locally
 		}
 		every_in_list = {
+			list = $customs_union_regions$
+			add_to_list = customs_union_regions
+		}
+		every_in_list = {
 			list = list_of_members
 			set_variable = {
 				name = member_of_federation
@@ -126,10 +130,23 @@ federation_create = {
         if = {
         	limit = { var:customs_union_law = 1 }
         	every_in_list = {
-        		list = $customs_union_regions$
-        		set_variable = {
-        			name = federation_customs_union
-        			value = scope:federation_scope
+        		list = customs_union_regions
+        		every_region_province = {
+        			limit = {
+        				owner = {
+	        				member_of_federation = scope:federation_scope
+        				}
+        				governorship = {
+        					NOT = { has_variable = customs_union_setup }
+        				}
+        			}
+        			governorship = {
+        				set_variable = {
+							name = federation_customs_union
+							value = scope:federation_scope
+						}
+						set_variable = customs_union_setup
+        			}
         		}
         	}
         }

@@ -787,7 +787,6 @@ class EditorGUI():
             self.refresh_entry(index, entry)
         for entry in self.minority_pop_entries:
             self.refresh_minority_pop_entry(entry)
-        print(self.province_data)
 
     def refresh_entry(self, index, entry):
         entry.config(state="normal")

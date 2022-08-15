@@ -529,6 +529,7 @@ class EditorGUI():
     def prompt_remote_credentials(self): # Get the JSON credentials for connecting to the Google Sheet
         # We have to initialise Tkinter so we can create GUI, but we'll just use the default file select function
         credentials_select = Tk()
+        credentials_select.withdraw()
         # Check if the user wants to connect to the remote sheet
         file_name = filedialog.askopenfilename(
             initialdir = "./",

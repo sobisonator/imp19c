@@ -30,7 +30,7 @@ Pre-prep (I don't have Python already):
 	
 
 3. Using the editor
-	 - When you launch the editor you will be prompted to create a new savefile, which you can name whatever you want. This stores the definition file for the mod's map in a database so that the app can reference it quickly.
+	 - When you launch the editor you will be prompted to create a new savefile, which you can name whatever you want. This stores the definition file for the mod's map in a database so that the app can reference it quickly. It doesn't contain any setup data
 	 	- You may also load a previous save this way. (In imp19c, load the existing "map_imported_file" file)
 	 	- The map editor only takes database files in the expected format, so it will encounter an error and close if you try to open any other kind of file.
 	 - You will also be prompted to enter a credentials file - select your config json file to link to the Google Sheet. The config json file can be accessed to dev members of the discord here: https://discord.com/channels/666029461795373067/666029463145807893/784059456928743434
@@ -39,6 +39,7 @@ Pre-prep (I don't have Python already):
 	 - Click on any field on the right-hand side to edit that field.
 	 	A changed field which has not yet been submitted will be coloured yellow.
 	 	Press <Return> to submit your change. This will be saved to your file.
+	- Your changes are saved whenever you submit them, so there is no need to save before you exit.
 
 Info about fields:
 

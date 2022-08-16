@@ -20,7 +20,7 @@ federation_create = {
 		set_variable = is_federation_scope # Tags this province as the holding scope for a federation's values. If another federation is created by another tag with a capital here in the future, it will use another random available province that doesn't have this flag
 		set_variable = {
 			name = federation_name
-			value = $federation_name$ # Contains a number key that generates a name in loc
+			value = flag:$federation_name$ # Contains a number key that generates a name in loc
 		}
 		set_variable = {
 			name = host_tag
@@ -29,6 +29,10 @@ federation_create = {
 		every_in_list = {
 			list = $list_of_members$
 			add_to_list = list_of_members # Transfer the list of members locally
+		}
+		every_in_list = {
+			list = $customs_union_regions$
+			add_to_list = customs_union_regions
 		}
 		every_in_list = {
 			list = list_of_members
@@ -126,10 +130,25 @@ federation_create = {
         if = {
         	limit = { var:customs_union_law = 1 }
         	every_in_list = {
-        		list = $customs_union_regions$
-        		set_variable = {
-        			name = federation_customs_union
-        			value = scope:federation_scope
+        		list = customs_union_regions
+        		every_region_province = {
+        			limit = {
+	        			AND = {
+	        				owner = {
+		        				var:member_of_federation = scope:federation_scope
+	        				}
+	        				governorship = {
+	        					NOT = { has_variable = customs_union_setup }
+	        				}
+	        			}
+        			}
+        			governorship = {
+        				set_variable = {
+							name = federation_customs_union
+							value = scope:federation_scope
+						}
+						set_variable = customs_union_setup
+        			}
         		}
         	}
         }

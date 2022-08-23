@@ -529,6 +529,7 @@ class EditorGUI():
     def prompt_remote_credentials(self): # Get the JSON credentials for connecting to the Google Sheet
         # We have to initialise Tkinter so we can create GUI, but we'll just use the default file select function
         credentials_select = Tk()
+        credentials_select.withdraw()
         # Check if the user wants to connect to the remote sheet
         file_name = filedialog.askopenfilename(
             initialdir = "./",
@@ -786,7 +787,6 @@ class EditorGUI():
             self.refresh_entry(index, entry)
         for entry in self.minority_pop_entries:
             self.refresh_minority_pop_entry(entry)
-        print(self.province_data)
 
     def refresh_entry(self, index, entry):
         entry.config(state="normal")

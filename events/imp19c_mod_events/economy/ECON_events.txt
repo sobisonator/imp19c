@@ -1,6 +1,7 @@
 namespace = ECON_events
 
 ECON_events.1 = {	#Trigger this event to set up trade centers.
+     # Moved to scripted effects
     type = country_event
     hidden = yes
 
@@ -78,5 +79,32 @@ ECON_events.6 = {
     }
     option = {      
         name = ECON_events.6.b
+    }
+}
+
+ECON_events.7 = {
+    type = country_event
+    hidden = yes
+
+    immediate = {
+        every_country = {
+            every_governorships = {
+                debug_log = "Governorship should be: [THIS.GetRegion.GetName]"
+                region = {
+                    debug_log = "The region of the governorship is: [THIS.GetRegion.GetName]"
+                    random_trade_center = {
+                        debug_log = "The trade center is: [THIS.GetProvince.GetName]"
+                        limit = { india_tradezone = { REGION = yes } }
+                        prev.prev = {   # prev.prev = the current governorship
+                            debug_log = "We have scoped back to governorship: [THIS.GetRegion.GetName]"
+                            set_variable = {
+                                name = trade_center
+                                value = prev
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

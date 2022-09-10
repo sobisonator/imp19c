@@ -78,8 +78,43 @@ PURCHASE_reset_quarterly_var = {
 	}
 }
 
-PURCHASE_find_cheapest_stockpile = { # Find the best value stockpile based on transport costs
-	#idk how to do this...
+PURHCASE_get_TZ_distances = { # At the beginning of the purchase phase, set variables to rank the distances between all other tradezones and this one
+	# Scope: Trade center
+	# This needs to run a check for every tradezone, so it can get the proper svalue
+	# This saves performance overhead by saving the travel costs as static vars at the beginning of the quarter
+	every_in_global_list = {
+		list = list_of_trade_centers
+		if = {
+			limit = { has_variable = india_tradezone }
+			set_variable = {
+				name = travel_cost_east_north_america
+				value = india_to_east_north_america_svalue
+			}
+			set_variable = {
+				name = travel_cost_west_north_america
+				value = india_to_west_north_america_svalue
+			}
+		}
+	}
+}
+
+PURCHASE_rank_deals = { # Rank tradezones by total costs for the named tradegood
+	# Scope: Trade center
+	# This effect creates a list of the best deals with the best deal first, including a variable that stores the best deal.
+	# This somehow needs to add together the TZ's price for selling the named good + the travel cost variable
+	ordered_in_global_list = {
+		list = list_of_trade_centers
+		limit = { # Only check prices where there are goods available
+			var:$goods_stockpile$ > 0
+		}
+		order_by = var:$tradegood_price$ # Order based on that TZ's price for the named tradegood
+		PREV = {
+			set_variable = {
+				name = $best_value_for_goods$ # format = best_value_for_grain
+				value = PREV # The TZ scope
+			}
+		}
+	}
 }
 
 # Sale actions

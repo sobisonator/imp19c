@@ -2049,6 +2049,66 @@ SELL_declare_all_available = {
 	}
 }
 
+TRADE_update_global_base_price = {
+	# Scope: Random country, doesn't matter
+	# This effect sets the global base price for a tradegood
+	# The formula is:
+	# Base price = global units demanded / units produced # For now, anyway
+	# This checks the given good
+
+	# Format of arguments:
+	# $global_price$ = global_price_grain
+	# $global_supply$ = global_supply_grain
+	# $global_demand$ = global_demand_grain
+	# $demand_good$ = DEMAND_grain, svalue, see DEMAND_svalues
+	# $supply_good$ = GOODS_governorship_grain_produced, svalue, see GOODS_svalues
+
+	set_global_variable = {
+		name = $global_demand$
+		value = 1 # Starts 1, gets augmented
+	}
+
+	set_global_variable = {
+		name = $global_supply$
+		value = 1 # Starts 1, gets augmented
+	}
+
+	# Add the total of all demand for this good around the world
+	every_country = {
+		every_governorships = {
+			change_global_variable = {
+				name = $global_demand$
+				value = $demand_good$
+			}
+		}
+	}
+
+	# Now get the supply
+	every_country = {
+		every_governorships = {
+			change_global_variable = {
+				name = $global_supply$
+				value = $supply_good$
+			}
+		}
+	}
+
+	# Now calculate the price
+	set_global_variable = {
+		name = $global_price$
+		value = $global_demand$
+	}
+	change_global_variable = {
+		name = $global_price$
+		divide = $global_supply$
+	}
+
+}
+
+SELL_set_TZ_prices = {
+	# Scope: TZ
+	# This effect determines the sale price modifier on the global price of the tradegood
+}
 
 SELL_declare_available = {
 	# Scope: Governorship

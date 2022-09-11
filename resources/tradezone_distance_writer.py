@@ -1,16 +1,15 @@
 import pandas as pd
 
-df = pd.read_csv("imp19c trade zone distances.csv", sep=";")
+df = pd.read_csv("imp19c trade zone distances.csv", sep=";").fillna(0)
 
 for column in df:
     i = 1
-    if column != "TZ":
-        for item in df[column]:
-            if str(item) != "nan": # Don't get distance to self
-                try:
-                    print(column + " to " + df["TZ"][i])
-                    print(int(item))
-                    i = i + 1
-                except:
-                    pass
+    for item in df[column]:
+        if column != df["TZ"][i-1]: # Don't get distance to self
+            try:
+                print(column + " to " + df["TZ"][i-1])
+                print(int(item))
+            except:
+                pass
+        i = i + 1
 

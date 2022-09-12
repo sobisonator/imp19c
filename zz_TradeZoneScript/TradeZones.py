@@ -2,11 +2,11 @@ trade_zones = ["india","east_north_america","west_north_america","caribbean","we
 india_regions = ["Ceylon","South_India","Central_India","East_India","Indo-Gangetic_Plain","West_India","Punjab","Nepal","Burma","Eastern_Himalayas","Bay_of_Bengal","Maldives","Kashmir","Lan_Na"]
 east_north_america_regions = ["Mid-Atlantic_South","Appalachia","Great_Forests","Great_Lakes","Mid-Atlantic","New_England","Ontario","Quebec","New_Brunswick","Nova_Scotia","Atlantic_Region","Greenland"]
 west_north_america_regions = ["Pacific_Mexico","Northern_Mexico","American_Southwest","Great_Plains","Mountain_West","California","Cascadia","Praire_Provinces","British_Columbia","Alaska","Northern_Territories","Hawaii"]
-caribbean_regions = ["Deep_South","Cuba","Antilles","Lucayan_Archipelago","Bermuda","Haiti","Eastern_Mexico"]
-west_south_america_regions = ["Central_America","Colombia","Peru","Ecuador","Lower_Peru","Chile"]
+caribbean_regions = ["Central_America","Deep_South","Cuba","Antilles","Lucayan_Archipelago","Bermuda","Haiti","Eastern_Mexico"]
+west_south_america_regions = ["Colombia","Peru","Ecuador","Lower_Peru","Chile"]
 east_south_america_regions = ["Venezuela","Guyana","North_Brazil","Northeast_Brazil","Center-West_Brazil","Southeast_Brazil","Paraguay","South_Brazil","Uruguay","Argentina","South_Atlantic_Islands","Patagonia"]
 south_east_asia_regions = ["South_Island","North_Island","Fiji","Nouvelle-Caledonie","Vanuatu","Salomon_Islands","Tuvalu","Nauru","Gilbert_Islands","Caroline_Islands","Marshall_Islands","Guam","Mariana_Islands","Wake","Marcus_Island","Northern_Territory","South_Australia","Nusa_Tenggara","Tasmania","Western_Australia","Queensland","Johore","Borneo","Sulawesi","Sumatra","Christmas_Island","Palau","Bougainville_Island","New_Britain","New_Guinea","Maluku","Java","Cocos_Islands","Chagos"]
-indo_china_regions = ["South_Siam","Tenasserim","Siam","Cambodia","Vietnam","Laos","Guangxi","Sichuan_Kham","Guangdong"]
+indo_china_regions = ["Isan","South_Siam","Tenasserim","Siam","Cambodia","Vietnam","Laos","Guangxi","Sichuan_Kham","Guangdong"]
 yellow_sea_regions = ["Jiangxi","Fujian","Zhejiang","Anhui","Jiangsu","Henan","Shandong","Korea","Kyushu","Ezo","Honshu","Shikoku","Taiwan","Okinawa","Iwo_Jima","Mindanao","Visayas","Luzon"]
 southern_africa_regions = ["South_Africa","Kalahari","Angola","Zimbabwe"]
 west_africa_regions = ["Congo_Basin","Gulf_of_Guinea","Coastal_West_Africa","Sahel","Western_Sahara","Macaronesia","Comoro_Islands"]
@@ -101,6 +101,7 @@ def print_tradezone_localization(trade_zones):
 		x = x + 1
 		print("state_trade_zone_value_loc_{x}:0 \"[GuiScope.SetRoot( Player.MakeScope ).ScriptValue('{i}_total_goods')|0]\"".format(i=i,x=x))
 	print("state_trade_zone_value_loc_fallback:0 \"0\"")
+
 
 #FUNCTION 1: Purpose - Print trade zone scripted triggers
 #for trade_zone in trade_zones_dict:

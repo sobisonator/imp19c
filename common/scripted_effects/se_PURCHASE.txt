@@ -37,12 +37,12 @@ PURHCASE_make_shopping_list = {
 	}
 }
 
-PURCHASE_check_shopping = {
+PURCHASE_check_shopping = { # Check if it's necessary to go shopping for X stockpile
 	if = {
 		limit = {
 			$demand$ > var:$stockpile$
 		}
-		purchase_order = {
+		PURCHASE_order = {
 			for_stockpile = var:$stockpile$
 		}
 	}
@@ -78,8 +78,31 @@ PURCHASE_reset_quarterly_var = {
 	}
 }
 
-PURCHASE_find_cheapest_stockpile = { # Find the best value stockpile based on transport costs
-	#idk how to do this...
+PURCHASE_rank_deals = { # Rank tradezones by total costs for the named tradegood
+	# Scope: Trade center
+	# This effect creates a list of the best deals with the best deal first, including a variable that stores the best deal.
+	# This somehow needs to add together the TZ's price for selling the named good + the travel cost variable
+	ordered_in_global_list = {
+		variable = list_of_trade_centers
+
+		# use a switch here too
+		# And for each TZ, create a variable that is total_cost
+		# total_cost = travel_cost + tradegood_price
+		# Then compare all those variables and rank them
+		# Create a special variable for top slot, for quick reference
+		# And have a mechanism in place to swap to second best, etc. as the top slot runs out
+
+		limit = { # Only check prices where there are goods available
+			var:$goods_stockpile$ > 0
+		}
+		order_by = var:$tradegood_price$ # Order based on that TZ's price for the named tradegood
+		PREV = {
+			set_variable = {
+				name = $best_value_for_goods$ # format = best_value_for_grain
+				value = PREV # The TZ scope
+			}
+		}
+	}
 }
 
 # Sale actions
@@ -91,48 +114,151 @@ SELL_declare_all_available = {
 	# Then the governorships will all get a cut of revenue from these sales
 	if = { # Grain
 		limit = {
-			var:grain_stockpile > 0
+			var:grain_stockpile > TRADE_governorship_export_threshold_grain
 		}
 		SELL_declare_available = {
 			goods_stockpile = grain_stockpile
 			amount_for_sale = grain_for_sale # svalue
-			goods_sold = grain_sold
+			goods_offered = grain_offered
 		}
 	}
 	if = {
 		limit = {
-			var:fruit_stockpile > 0
+			var:mediterranean_fruit_stockpile > TRADE_governorship_export_threshold_mediterranean_fruit
 		}
 		SELL_declare_available = {
 			goods_stockpile = mediterranean_fruit_stockpile
 			amount_for_sale = mediterranean_fruit_for_sale # svalue
-			goods_sold = mediterranean_fruit_sold
+			goods_offered = mediterranean_fruit_offered
 		}
 	}
 	if = {
 		limit = {
-			var:glass_stockpile > 0
+			var:glass_stockpile > TRADE_governorship_export_threshold_glass
 		}
 		SELL_declare_available = {
 			goods_stockpile = glass_stockpile
 			amount_for_sale = glass_for_sale # svalue
-			goods_sold = glass_sold
+			goods_offered = glass_offered
 		}
+	}
+}
+
+TRADE_update_global_base_price = {
+	# Scope: Random country, doesn't matter
+	# This effect sets the global base price for a tradegood
+	# The formula is:
+	# Base price = global units demanded / units produced # For now, anyway
+	# This checks the given good
+
+	# Format of arguments:
+	# $global_price$ = global_price_grain
+	# $global_supply$ = global_supply_grain
+	# $global_demand$ = global_demand_grain
+	# $demand_good$ = DEMAND_grain, svalue, see DEMAND_svalues
+	# $supply_good$ = GOODS_governorship_grain_produced, svalue, see GOODS_svalues
+
+	debug_log = "Started setting global price"
+
+	set_global_variable = {
+		name = $global_demand$
+		value = 1 # Starts 1, gets augmented
+	}
+
+	set_global_variable = {
+		name = $global_supply$
+		value = 1 # Starts 1, gets augmented
+	}
+
+	# Add the total of all demand for this good around the world
+	every_country = {
+		every_governorships = {
+			change_global_variable = {
+				name = $global_demand$
+				add = $demand_good$
+			}
+		}
+	}
+
+	# Now get the supply
+	every_country = {
+		every_governorships = {
+			change_global_variable = {
+				name = $global_supply$
+				add = $supply_good$
+			}
+		}
+	}
+	# NOTE: Global supply should probably be the amount offered in all TZs, not produced in every governorship
+	# See TRADE_svalues TRADE_global_offered_grain for WiP example
+
+	# Now calculate the price
+	set_global_variable = {
+		name = $global_price$
+		value = global_var:$global_demand$
+	}
+	change_global_variable = {
+		name = $global_price$
+		divide = global_var:$global_supply$
+	}
+
+	debug_log = "Finished setting global price"
+
+}
+
+SELL_set_TZ_price_modifier = { # used to get local price modifier for the named good
+	# Scope: TZ
+	# This does NOT contain an iteration of all TZs, as it should only be run in TZs that actually supply said good.
+		# the on_action should have the every_in_global_list, with a limit that they have a variable for that tradegood
+
+	# Format of arguments:
+	# $share_of_global_supply$ = share_of_global_supply_grain
+	# $global_supply$ = global_supply_grain
+
+	# Share of global supply should come from a svalue
+	set_variable = {
+		name = $share_of_global_supply$
+		value = global_var:$global_supply$
+	}
+	change_variable = {
+
+	}
+}
+
+SELL_set_TZ_prices = {
+	# Scope: TZ
+	# This effect determines the sale price modifier on the global price of the given tradegood
+	# This does NOT contain an iteration of all TZs, as it should only be run in TZs that actually supply said good.
+		# the on_action should have the every_in_global_list, with a limit that they have a variable for that tradegood
+
+	# Format of arguments:
+	# $local_price$ = local_price_grain
+	# $global_price$ = global_price_grain
+	set_variable = {
+		name = $local_price$
+		value = global_var:$global_price$
 	}
 }
 
 SELL_declare_available = {
 	# Scope: Governorship
+
+	# Format of arguments:
+	# $goods_offered$ = grain_offered
+	# $amount_for_sale$ = TRADE_governorship_for_export_grain, svalue, see TRADE_svalues
+	# $goods_stockpile$ = TZ_stockpile_grain
+
 	set_variable = { # Within the governorship scope, track how much was sold so you can then calculate how much of a cut to get
 	# See SELL_calculate_cut to see how the cut of revenue gets calculated
-		name = $goods_sold$
+		name = $goods_offered$
 		value = $amount_for_sale$
-	}
-	random_trade_center = { # Scope to the tradezone
+	} # Is this necessary, or can we just use the svalues?
+
+	var:trade_center = { # Scope to the TZ
 		# Add to the tradezone's stockpile
-		change_variable = { # TODO: set stockpile variables in the TZ scope at game start when TZs are created
-			name = $goods_stockpile$ # The trade center variable will have the same name as the governorship one, for ease of transfer
-			value = $amount_for_sale$ # This amount is derived from the governorship's stockpile multiplied by an svalue
+		change_variable = { # TODO: set stockpile variables back to 0 at the beginning of every quarter, using a SE in the on_action
+			name = $goods_stockpile$ # The trade center variable will have the same name as the governorship one, for ease of reference
+			value = $amount_for_sale$
 		}
 	}
 }
@@ -144,17 +270,14 @@ SELL_calculate_revenue_cut_percentage = { # Calculates how much money the govern
 	# This calculates the percentage BEFORE sales are made, and AFTER all the SELL_declare_available actions have been completed
 	# Should only be called if the governorship has actually sold any of the given tradegood. How to limit this to that scenario?
 	# Scope: governorship
-	random_trade_center = { # Scope to the tradezone
-		save_scope_as = tradezone
-	}
 	set_variable = { # Get the total of the goods in the tradezone
 		name = $stockpile_cut_percentage$ # This argument gets a name like "grain_stockpile_cut_percentage"
-		value = $amount_of_goods_sold$ # It starts off just containing the value of the whole stockpile
+		value = $amount_of_goods_offered$ # It starts off just containing the value of the whole stockpile
 	}
 	change_variable = { # Now divide the amount contributed by the total in the TZ stockpile, getting a percentage.
 		# e.g. if the governorship contributed 150 units and the TZ stockpile has 1000 units, you get 0.15 (15%)
 		name = $stockpile_cut_percentage$
-		divide = scope:tradezone.var:$tradezone_stockpile$ # Gets the stockpile from the tradezone e.g. "grain_stockpile"
+		divide = var:trade_center.var:$tradezone_stockpile$ # Gets the stockpile from the tradezone e.g. "grain_stockpile"
 	}
 	# Now the stockpile cut percentage variable for this month can be used to divvy out the total
 	# Another scripted effect, SELL_get_cut_of_revenue, will multiply the TZ total revenue by the local stockpile cut percentage var for every good sent to market
@@ -169,7 +292,7 @@ SELL_get_cut_of_revenue = {
 	}
 	set_variable = { # Get the total revenue from the tradezone
 		name = $local_cut_of_revenue$ # This needs to be passed a name in the format "grain_actual_revenue_cut"
-		value = scope:tradezone.var:$tradezone_revenue_var$ # This needs a variable name like "TZ_revenue_total_grain"
+		value = var:trade_center.var:$tradezone_revenue_var$ # This needs a variable name like "TZ_revenue_total_grain"
 	}
 	change_variable = {
 		name = $local_cut_of_revenue$
@@ -177,7 +300,7 @@ SELL_get_cut_of_revenue = {
 	}
 }
 
-SELL_deduct_sold_goods = {
+SELL_deduct_offered_goods = {
 	# TBC
 	# Effect to actually decrease a governorship's stockpile when goods are sold from the TZ scope!
 	# This will probably need two scenarios in case a governorship is selling to itself (i.e. customers for a good within the same governorship)

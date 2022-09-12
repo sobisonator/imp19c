@@ -1,3 +1,5 @@
+# MODIFIERS
+
 TRADE_country_export_stock_modifier = { # At the national level, modifies the amount of every governorship's stockpile that's available for trade
 	# Range 0 - 1
 	value = 1
@@ -10,5 +12,69 @@ TRADE_governorship_export_stock_modifier = { # At the governorship level, modifi
 	# Range 0 - 1
 	value = 1
 	# Modified by local ordnances
-	max = c:owner.TRADE_country_export_stock_modifier # You can never sell more than 100% of your stockpile!
+	max = 1 # You can never sell more than 100% of your stockpile!
+}
+
+### EXPORT THRESHOLDS, do not sell any stock below this amount
+
+TRADE_governorship_export_threshold_grain = { # The lower limit before a governorship is allowed to export any of this good. Should be derived from a variable
+# FOR NOW, THIS IS JUST A TEST AND HAS NO VARIABLE FROM WHICH IT DERIVES
+	value = 10
+}
+
+TRADE_governorship_export_threshold_mediterranean_fruit = { # The lower limit before a governorship is allowed to export any of this good. Should be derived from a variable
+# FOR NOW, THIS IS JUST A TEST AND HAS NO VARIABLE FROM WHICH IT DERIVES
+	value = 10
+}
+
+TRADE_governorship_export_threshold_glass = { # The lower limit before a governorship is allowed to export any of this good. Should be derived from a variable
+# FOR NOW, THIS IS JUST A TEST AND HAS NO VARIABLE FROM WHICH IT DERIVES
+	value = 10
+}
+
+### EXPORT CAPS - the maximum amount a governorship can sell
+
+TRADE_governorship_export_cap_grain = { # The upper limit over which a governorship is NOT allowed to export any of this good. Should be derived from a variable
+# FOR NOW, THIS IS JUST A TEST AND HAS NO VARIABLE FROM WHICH IT DERIVES
+	value = 10
+}
+
+### ACTUAL AMOUNTS OFFERED FOR SALE
+
+TRADE_governorship_for_export_grain = {
+	value = TRADE_governorship_export_cap_grain # Sell up to cap
+	max = grain_stockpile # Do not sell more than you have
+	multiply = TRADE_country_export_stock_modifier
+	multiply = TRADE_governorship_export_stock_modifier
+	subtract = TRADE_governorship_export_threshold_grain # Keep up to threshold
+}
+
+#### GLOBAL PRICE SVALUES
+
+TRADE_global_price_grain = {
+	value = global_var:global_price_grain
+}
+
+### For use in tradezone local price calculations
+
+
+#### Global total amount available to buy
+
+TRADE_global_offered_grain = {
+	value = 1 # To avoid dividing by 0
+	every_in_list = {
+		variable = list_of_trade_centers
+		add = var:TZ_stockpile_grain
+	}
+}
+
+#### Shares of supply
+
+TRADE_share_of_global_grain_supply = {
+	# Scope: Trade center province
+	# Gets percentage in this TZ of global supply
+	# Worth thinking about:
+	# The global supply is amount produced...
+	value = var:TZ_stockpile_grain
+	divide = TRADE_global_offered_grain
 }

@@ -189,6 +189,8 @@ TRADE_update_global_base_price = {
 			}
 		}
 	}
+	# NOTE: Global supply should probably be the amount offered in all TZs, not produced in every governorship
+	# See TRADE_svalues TRADE_global_offered_grain for WiP example
 
 	# Now calculate the price
 	set_global_variable = {
@@ -240,16 +242,23 @@ SELL_set_TZ_prices = {
 
 SELL_declare_available = {
 	# Scope: Governorship
+
+	# Format of arguments:
+	# $goods_offered$ = grain_offered
+	# $amount_for_sale$ = TRADE_governorship_for_export_grain, svalue, see TRADE_svalues
+	# $goods_stockpile$ = TZ_stockpile_grain
+
 	set_variable = { # Within the governorship scope, track how much was sold so you can then calculate how much of a cut to get
 	# See SELL_calculate_cut to see how the cut of revenue gets calculated
 		name = $goods_offered$
 		value = $amount_for_sale$
-	}
-	random_trade_center = { # Scope to the tradezone
+	} # Is this necessary, or can we just use the svalues?
+
+	var:trade_center = { # Scope to the TZ
 		# Add to the tradezone's stockpile
-		change_variable = { # TODO: set stockpile variables in the TZ scope at game start when TZs are created
-			name = $goods_stockpile$ # The trade center variable will have the same name as the governorship one, for ease of transfer
-			value = $amount_for_sale$ # This amount is derived from the governorship's stockpile multiplied by an svalue
+		change_variable = { # TODO: set stockpile variables back to 0 at the beginning of every quarter, using a SE in the on_action
+			name = $goods_stockpile$ # The trade center variable will have the same name as the governorship one, for ease of reference
+			value = $amount_for_sale$
 		}
 	}
 }

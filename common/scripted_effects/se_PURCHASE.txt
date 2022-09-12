@@ -145,8 +145,7 @@ SELL_declare_all_available = {
 }
 
 TRADE_update_global_base_price = {
-	# Scope: Province - a random trade center
-	# This then propagates the value to all other trade centers to be modified
+	# Scope: Random country, doesn't matter
 	# This effect sets the global base price for a tradegood
 	# The formula is:
 	# Base price = global units demanded / units produced # For now, anyway
@@ -161,83 +160,81 @@ TRADE_update_global_base_price = {
 
 	debug_log = "Started setting global price"
 
-	# We don't use global vars because they are tricky to test with
+	set_global_variable = {
+		name = $global_demand$
+		value = 1 # Starts 1, gets augmented
+	}
 
-	random_in_global_list = {
-		variable = list_of_trade_centers
-		save_scope_as = propagating_global_price
-		set_variable = {
-			name = $global_demand$
-			value = 1 # Starts 1, gets augmented
-		}
+	set_global_variable = {
+		name = $global_supply$
+		value = 1 # Starts 1, gets augmented
+	}
 
-		set_variable = {
-			name = $global_supply$
-			value = 1 # Starts 1, gets augmented
-		}
-
-		# Add the total of all demand for this good around the world
-		every_country = {
-			every_governorships = {
-				change_variable = {
-					name = $global_demand$
-					add = $demand_good$
-				}
+	# Add the total of all demand for this good around the world
+	every_country = {
+		every_governorships = {
+			change_global_variable = {
+				name = $global_demand$
+				add = $demand_good$
 			}
-		}
-
-		# Now get the supply
-		every_country = {
-			every_governorships = {
-				change_variable = {
-					name = $global_supply$
-					add = $supply_good$
-				}
-			}
-		}
-
-		# Now calculate the price
-		set_variable = {
-			name = $global_price$
-			value = var:$global_demand$
-		}
-		change_variable = {
-			name = $global_price$
-			divide = var:$global_supply$
 		}
 	}
 
-	# Now propagate to other trade centers
-	every_in_global_list = {
-		variable = list_of_trade_centers
-		if = {
-			limit = { # Don't set it in the one that already has it
-				NOT = { has_variable = $global_price$ }
-			}
-			set_variable = {
-				name = $global_price$
-				value = scope:propagating_global_price.var:$global_price$
+	# Now get the supply
+	every_country = {
+		every_governorships = {
+			change_global_variable = {
+				name = $global_supply$
+				add = $supply_good$
 			}
 		}
+	}
+
+	# Now calculate the price
+	set_global_variable = {
+		name = $global_price$
+		value = global_var:$global_demand$
+	}
+	change_global_variable = {
+		name = $global_price$
+		divide = global_var:$global_supply$
 	}
 
 	debug_log = "Finished setting global price"
 
 }
 
+SELL_set_TZ_price_modifier = { # used to get local price modifier for the named good
+	# Scope: TZ
+	# This does NOT contain an iteration of all TZs, as it should only be run in TZs that actually supply said good.
+		# the on_action should have the every_in_global_list, with a limit that they have a variable for that tradegood
+
+	# Format of arguments:
+	# $share_of_global_supply$ = share_of_global_supply_grain
+	# $global_supply$ = global_supply_grain
+
+	# Share of global supply should come from a svalue
+	set_variable = {
+		name = $share_of_global_supply$
+		value = global_var:$global_supply$
+	}
+	change_variable = {
+
+	}
+}
+
 SELL_set_TZ_prices = {
 	# Scope: TZ
 	# This effect determines the sale price modifier on the global price of the given tradegood
+	# This does NOT contain an iteration of all TZs, as it should only be run in TZs that actually supply said good.
+		# the on_action should have the every_in_global_list, with a limit that they have a variable for that tradegood
 
 	# Format of arguments:
 	# $local_price$ = local_price_grain
 	# $global_price$ = global_price_grain
-	every_in_global_list = {
-		variable = list_of_trade_centers
-		set_variable = {
-			name = $local_price$
-			value = var:$global_price$
-		}
+	set_variable = {
+		name = $local_price$
+		value = global_var:$global_price$
 	}
 }
 

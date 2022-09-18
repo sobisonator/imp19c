@@ -107,6 +107,123 @@ PURCHASE_rank_deals = { # Rank tradezones by total costs for the named tradegood
 
 # Sale actions
 
+## Internal - for customs unions or countries
+
+SELL_reset_all_internal_trade_stockpiles = {
+	# Scope: Random country
+
+	# Called: At the beginning of every quarter, to refresh the temporary stockpiles
+
+	# WiP / debug - grain only
+	SELL_reset_internal_trade_stockpile = {
+		goods_stockpile_internal = internal_stockpile_grain
+	}
+}
+
+SELL_reset_internal_trade_stockpile = { # Needs to be repeated for every tradegood
+	# Scope: Random country
+
+	# Called: At the beginning of every quarter, to refresh the temporary stockpiles
+
+	# Format of arguments:
+	# $goods_stockpile_internal$ = internal_stockpile_grain
+
+	every_country = {
+		set_variable = {
+			name = $goods_stockpile_internal$
+			value = 0
+		}
+	}
+	every_in_global_list = {
+		variable = list_of_federations
+		set_variable = {
+			name = $goods_stockpile_internal$
+			value = 0
+		}
+	}
+}
+
+SELL_declare_all_internal_available = {
+	# Scope: Governorship
+	# Called: At the beginning of every quarter
+	# Tells the internal tradezone all the stockpiles a governorship has available to sell to other governorships in the same country or customs union
+	if = {
+		limit = {
+			NOT = { has_variable = federation_customs_union }
+		}
+		owner = {
+			save_scope_as = internal_trade_scope
+		}
+	}
+	else = {
+		var:federation_customs_union = {
+			save_scope_as = internal_trade_scope
+		}
+	}
+
+	SELL_declare_internal_available = {
+		goods_offered_internal = grain_offered_internal
+		amount_for_export_internal = TRADE_governorship_for_export_internal_grain
+		goods_stockpile_internal = internal_stockpile_grain
+		trade_scope = scope:internal_trade_scope
+	}
+
+}
+
+SELL_declare_internal_available = {
+	# Scope: Governorship
+
+	# Format of arguments:
+	# $goods_offered_internal$ = grain_offered_internal
+	# $amount_for_export_internal$ = TRADE_governorship_for_export_internal_grain, svalue, see TRADE_svalues
+	# $goods_stockpile_internal$ = internal_stockpile_grain
+	# $trade_scope$ = scope:internal_trade_scope (see SELL_declare_all_internal_available)
+
+	set_variable = { # Within the governorship scope, track how much was sold so you can then calculate how much of a cut to get
+	# See SELL_calculate_cut to see how the cut of revenue gets calculated
+		name = $goods_offered_internal$
+		value = $amount_for_export_internal$
+	} # Is this necessary, or can we just use the svalues?
+
+	$trade_scope$ = { # Scope to the internal trade scope, be it country or customs union
+		# Add to the internal trade scope's stockpile
+		change_variable = { # TODO: set stockpile variables back to 0 at the beginning of every quarter, using a SE in the on_action
+			name = $goods_stockpile_internal$ # The trade center variable will have the same name as the governorship one, for ease of reference
+			value = $amount_for_export_internal$
+		}
+	} 
+}
+
+## Global - for the whole world
+
+SELL_reset_all_TZ_trade_stockpiles = {
+	# Scope: Random country
+
+	# Called: At the beginning of every quarter, to refresh the temporary stockpiles
+
+	# WiP / debug - grain only
+	SELL_reset_TZ_trade_stockpile = {
+		goods_stockpile = stockpile_grain
+	}
+}
+
+SELL_reset_TZ_trade_stockpile = { # Needs to be repeated for every tradegood
+	# Scope: Random country
+
+	# Called: At the beginning of every quarter, to refresh the temporary stockpiles
+
+	# Format of arguments:
+	# $goods_stockpile$ = stockpile_grain
+
+	every_in_global_list = {
+		variable = list_of_trade_centers
+		set_variable = {
+			name = $goods_stockpile$
+			value = 0
+		}
+	}
+}
+
 SELL_declare_all_available = {
 	# Scope: Governorship
 	# This effect gets the governorship to declare to the tradezone (TZ) what resources it has available to sell

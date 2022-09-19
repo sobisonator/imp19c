@@ -264,8 +264,9 @@ SELL_calculate_internal_revenue_cut_percentage = { # WIP
 	# Scope: governorship
 
 	# Format of arguments:
-	# $stockpile_cut_percentage$ = internal_grain_stockpile_cut_percentage
-	# $amount_of_goods_offered$ = Integer, amount of goods sold
+	# $stockpile_cut_percentage$ = internal_stockpile_cut_percentage_grain
+	# $amount_of_goods_offered$ = grain_offered_internal
+	# $internal_stockpile$ = internal_stockpile_grain
 
 	set_variable = { # Get the total of the goods that this governorship sent up
 		name = $stockpile_cut_percentage$
@@ -275,27 +276,35 @@ SELL_calculate_internal_revenue_cut_percentage = { # WIP
 	change_variable = { # Now divide the amount contributed by the total in the internal stockpile, getting a percentage.
 		# e.g. if the governorship contributed 150 units and the internal stockpile has 1000 units, you get 0.15 (15%)
 		name = $stockpile_cut_percentage$
-		divide = var:internal_trade_scope.var:$tradezone_stockpile$ # Gets the stockpile from the tradezone e.g. "grain_stockpile"
+		divide = var:internal_trade_scope.var:$internal_stockpile$ # Gets the stockpile from the internal trade scope (country or customs union) e.g. "internal_stockpile_grain"
 	}
 }
 
-SELL_get_cut_of_revenue = {
+SELL_get_internal_cut_of_revenue = {
 	# WIP
 	# Scope: governorship
-	#random_trade_center = { # Scope to the tradezone
-	#	save_scope_as = tradezone
-	#} ???
+
+	# Format of arguments
+	# $internal_total_revenue$ = internal_total_revenue_grain
+	# $internal_stockpile_cut_percentage$ = internal_stockpile_cut_percentage_grain
+	# $local_cut_of_revenue$ = local_internal_revenue_cut_grain
+
 	set_variable = { # Get the total revenue from the tradezone
-		name = $local_cut_of_revenue$ # This needs to be passed a name in the format "grain_actual_revenue_cut"
-		value = var:trade_center.var:$tradezone_revenue_var$ # This needs a variable name like "TZ_revenue_total_grain"
+		name = $local_cut_of_revenue$
+		value = var:internal_trade_scope.var:$tradezone_revenue_var$ # This needs a variable name like "TZ_revenue_total_grain"
 	}
 	change_variable = {
 		name = $local_cut_of_revenue$
-		multiply = $stockpile_cut_percentage$ # This argument gets a name like "grain_stockpile_cut_percentage"
+		multiply = $stockpile_cut_percentage$
+	}
+
+	change_variable = {
+		name = this_quarter_income # Quarterly governorship income is only divvied up and given out at the end of both internal and external trade. Gets reset 
+		add = $local_cut_of_revenue$
 	}
 }
 
-SELL_deduct_offered_goods = {
+SELL_deduct_internal_offered_goods = {
 	# Scope: governorship
 	# TBC
 	# Effect to actually decrease a governorship's stockpile when goods are sold from the TZ scope!

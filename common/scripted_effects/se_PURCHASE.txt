@@ -26,7 +26,8 @@ PURCHASE_make_internal_shopping_list = {
 	# Grain stockpile
 	PURCHASE_check_shopping_internal = {
 		demand = DEMAND_grain
-		stockpile = grain_stockpile
+		for_stockpile = grain_stockpile
+		from_stockpile = grain_stockpile_internal
 	}
 }
 
@@ -54,19 +55,48 @@ PURCHASE_order_internal = {
 	# Scope: governorship
 	# Buy from the internal trade scope's stockpile, be it country or customs union
 
+	# Format of arguments:
+	# $for_stockpile$ = grain_stockpile, the stockpile in the governorship scope
+	# $from_stockpile$ = grain_stockpile_internal, the stockpile from the internal trade scope with the sum of all goods available for internal trade
+	# $order_size$ = local variable, local_var:l_order_size
+
 	if = { # Only transfer the goods if they're actually available
 		limit = {
-			scope:internal_trade_scope
+			var:internal_trade_scope = { var:$from_stockpile$ > $order_size$ }
 		}
-	}
-
-	# Add to the purchasing governorship's stockpile
-	change_variable = {
-		name = $for_stockpile$
-		value = $order_size$
+		# Add to the purchasing governorship's stockpile
+		change_variable = {
+			name = $for_stockpile$
+			value = $order_size$
+		}
+		break = yes
 	}
 
 	# Give the share of sale income to the selling governorships
+}
+
+PURCHASE_transfer_goods_internally = {
+	# Scope: governorship
+	# Function: Put goods in the purchasing governorship, subtract goods from the selling governorships and send them profit according to their cut.
+
+	# Format of arguments:
+	# $target_stockpile$ = grain_stockpile, derived from $for_stockpile$ in PURCHASE_order_internal, the stockpile in the governorship being filled
+	# $amount$ = Integer, derived from $order_size$ in PURCHASE_order_internal
+	# $internal_stockpile$ = grain_stockpile_internal, derived from $from_stockpile$ in PURCHASE_order_internal, this is the available stockpile on the whole internal market
+
+	# ADD TO BUYER'S STOCKPILE
+	change_variable = {
+		name = $target_stockpile$
+		value = $amount$
+	}
+
+	# SUBTRACT FROM THE INTERNAL AVAILABLE STOCKPILE
+	change_variable = {
+		name = $internal_stockpile$
+		value = $amount$
+	}
+
+	# SUBTRACT FROM THE GOVERNORSHIPS ACCORDING TO THEIR CUT
 }
 
 # EXTERNAL PURCHASES
@@ -198,7 +228,7 @@ SELL_declare_all_internal_available = {
 		goods_offered_internal = grain_offered_internal
 		amount_for_export_internal = TRADE_governorship_for_export_internal_grain
 		goods_stockpile_internal = internal_stockpile_grain
-		trade_scope = scope:internal_trade_scope
+		trade_scope = var:internal_trade_scope
 	}
 
 }
@@ -210,7 +240,7 @@ SELL_declare_internal_available = {
 	# $goods_offered_internal$ = grain_offered_internal
 	# $amount_for_export_internal$ = TRADE_governorship_for_export_internal_grain, svalue, see TRADE_svalues
 	# $goods_stockpile_internal$ = internal_stockpile_grain
-	# $trade_scope$ = scope:internal_trade_scope (see SELL_declare_all_internal_available)
+	# $trade_scope$ = var:internal_trade_scope (see SELL_declare_all_internal_available)
 
 	set_variable = { # Within the governorship scope, track how much was sold so you can then calculate how much of a cut to get
 	# See SELL_calculate_cut to see how the cut of revenue gets calculated
@@ -225,6 +255,61 @@ SELL_declare_internal_available = {
 			value = $amount_for_export_internal$
 		}
 	} 
+}
+
+SELL_calculate_internal_revenue_cut_percentage = { # WIP
+	# Calculates how much money the governorship should get for contributing goods to the internal trade for-sale stockpile
+	# This calculates the percentage BEFORE sales are made, and AFTER all the SELL_declare_available actions have been completed
+	# Should only be called if the governorship has actually sold any of the given tradegood. How to limit this to that scenario?
+	# Scope: governorship
+
+	# Format of arguments:
+	# $stockpile_cut_percentage$ = internal_grain_stockpile_cut_percentage
+	# $amount_of_goods_offered$ = Integer, amount of goods sold
+
+	set_variable = { # Get the total of the goods that this governorship sent up
+		name = $stockpile_cut_percentage$
+		value = $amount_of_goods_offered$
+	}
+
+	change_variable = { # Now divide the amount contributed by the total in the internal stockpile, getting a percentage.
+		# e.g. if the governorship contributed 150 units and the internal stockpile has 1000 units, you get 0.15 (15%)
+		name = $stockpile_cut_percentage$
+		divide = var:internal_trade_scope.var:$tradezone_stockpile$ # Gets the stockpile from the tradezone e.g. "grain_stockpile"
+	}
+}
+
+SELL_get_cut_of_revenue = {
+	# WIP
+	# Scope: governorship
+	#random_trade_center = { # Scope to the tradezone
+	#	save_scope_as = tradezone
+	#} ???
+	set_variable = { # Get the total revenue from the tradezone
+		name = $local_cut_of_revenue$ # This needs to be passed a name in the format "grain_actual_revenue_cut"
+		value = var:trade_center.var:$tradezone_revenue_var$ # This needs a variable name like "TZ_revenue_total_grain"
+	}
+	change_variable = {
+		name = $local_cut_of_revenue$
+		multiply = $stockpile_cut_percentage$ # This argument gets a name like "grain_stockpile_cut_percentage"
+	}
+}
+
+SELL_deduct_offered_goods = {
+	# Scope: governorship
+	# TBC
+	# Effect to actually decrease a governorship's stockpile when goods are sold from the TZ scope!
+	# This will probably need two scenarios in case a governorship is selling to itself (i.e. customers for a good within the same governorship)
+
+	# Method plan:
+	# 1. Get the total sold from the TZ (so we need to be storing this in a gradually growing variable whenever a PO is completed, and that needs to be reset to 0 every quarter)
+	# 2. Divide that by the cut percentage of this governorship (multiply if it's being done as <1, you get the idea)
+	# 3. Subtract that amount from this governorship
+	# e.g. total sold from the TZ is 1,500 out of 3,000 offered
+	# ... this governorship's cut is 12%
+	# ... so this governorship has to deduct 180 goods from its stockpile (and it would have offered 360)
+
+	# Maybe this effect could be wrapped into the SELL_get_cut_of_revenue effect. Rename, "resolve_sale"?
 }
 
 ## Global - for the whole world

@@ -15,6 +15,62 @@
 
 #5. After the order is made the goods will be "moved" into the stockpile of the governorship that ordered them.
 
+# INTERNAL PURCHASES
+# Run these first, checking if demand can be fulfilled within the country or customs union
+
+PURCHASE_make_internal_shopping_list = {
+	# Create a list of items that will need to be bought to satisfy demand this quarter
+	# Scope = governorship
+
+	# Iterate manually through all the stockpiles
+	# Grain stockpile
+	PURCHASE_check_shopping_internal = {
+		demand = DEMAND_grain
+		stockpile = grain_stockpile
+	}
+}
+
+PURCHASE_check_shopping_internal = {
+	if = {
+		limit = {
+			$demand$ > var:$stockpile$
+		}
+		set_local_variable = {
+			name = l_order_size
+			value = $demand$
+		}
+		change_local_variable = {
+			name = l_order_size
+			subtract = var:$stockpile$
+		}
+		PURCHASE_order_internal = {
+			for_stockpile = var:$stockpile$
+			order_size = local_var:l_order_size
+		}
+	}
+}
+
+PURCHASE_order_internal = {
+	# Scope: governorship
+	# Buy from the internal trade scope's stockpile, be it country or customs union
+
+	if = { # Only transfer the goods if they're actually available
+		limit = {
+			scope:internal_trade_scope
+		}
+	}
+
+	# Add to the purchasing governorship's stockpile
+	change_variable = {
+		name = $for_stockpile$
+		value = $order_size$
+	}
+
+	# Give the share of sale income to the selling governorships
+}
+
+# EXTERNAL PURCHASES
+
 PURHCASE_make_shopping_list = {
 	# Create a list of items that will need to be bought to satisfy demand this quarter
 	# Scope = governorship
@@ -24,16 +80,6 @@ PURHCASE_make_shopping_list = {
 	PURCHASE_check_shopping = {
 		demand = DEMAND_grain
 		stockpile = grain_stockpile
-	}
-	# Mediterranean fruit stockpile
-	PURCHASE_check_shopping = {
-		demand = DEMAND_mediterranean_fruit
-		stockpile = mediterranean_fruit_stockpile
-	}
-	# Glass stockpile
-	PURCHASE_check_shopping = {
-		demand = DEMAND_glass
-		stockpile = glass_stockpile
 	}
 }
 
@@ -147,19 +193,6 @@ SELL_declare_all_internal_available = {
 	# Scope: Governorship
 	# Called: At the beginning of every quarter
 	# Tells the internal tradezone all the stockpiles a governorship has available to sell to other governorships in the same country or customs union
-	if = {
-		limit = {
-			NOT = { has_variable = federation_customs_union }
-		}
-		owner = {
-			save_scope_as = internal_trade_scope
-		}
-	}
-	else = {
-		var:federation_customs_union = {
-			save_scope_as = internal_trade_scope
-		}
-	}
 
 	SELL_declare_internal_available = {
 		goods_offered_internal = grain_offered_internal
@@ -412,7 +445,18 @@ SELL_get_cut_of_revenue = {
 }
 
 SELL_deduct_offered_goods = {
+	# Scope: governorship
 	# TBC
 	# Effect to actually decrease a governorship's stockpile when goods are sold from the TZ scope!
 	# This will probably need two scenarios in case a governorship is selling to itself (i.e. customers for a good within the same governorship)
+
+	# Method plan:
+	# 1. Get the total sold from the TZ (so we need to be storing this in a gradually growing variable whenever a PO is completed, and that needs to be reset to 0 every quarter)
+	# 2. Divide that by the cut percentage of this governorship (multiply if it's being done as <1, you get the idea)
+	# 3. Subtract that amount from this governorship
+	# e.g. total sold from the TZ is 1,500 out of 3,000 offered
+	# ... this governorship's cut is 12%
+	# ... so this governorship has to deduct 180 goods from its stockpile (and it would have offered 360)
+
+	# Maybe this effect could be wrapped into the SELL_get_cut_of_revenue effect. Rename, "resolve_sale"?
 }

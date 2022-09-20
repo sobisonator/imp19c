@@ -359,15 +359,76 @@ TRADE_set_internal_trade_scope = {
 TRADE_reset_quarterly_governorship_values = {
 	# Scope: governorship
 	set_variable = {
-		name = this_quarter_income
+		name = governorship_this_quarter_balance
 		value = 0
 	}
+	PURCHASE_reset_quarterly_var = yes
 }
 
 TRADE_reset_quarterly_trade_scope_values = {
 	# Scope: random country
+	TRADE_reset_internal_pools = yes
+	SELL_reset_all_internal_trade_stockpiles = yes
+}
+
+TRADE_reset_internal_pools = {
 	every_country = {
-		PURCHASE_reset_quarterly_var = yes
-		SELL_reset_all_internal_trade_stockpiles = yes
+		set_variable = {
+			name = internal_income_pool
+			value = 0
+		}
+	}
+	every_in_global_list = {
+		variable = list_of_federations
+		set_variable = {
+			name = internal_income_pool
+			value = 0
+		}
+	}
+	TRADE_reset_internal_amounts_sold = yes
+}
+
+TRADE_reset_internal_amounts_sold = {
+	# Scope: random country
+
+	#WiP: grain only
+	every_country = {
+		TRADE_reset_internal_amount_sold = { internal_sold_total = internal_sold_total_grain }
+	}
+	every_in_global_list = {
+		variable = list_of_federations
+		TRADE_reset_internal_amount_sold = { internal_sold_total = internal_sold_total_grain }
+	}
+}
+
+TRADE_reset_internal_amount_sold = {
+	# Scope: internal trade scope
+
+	# Format of arguments:
+	# $internal_sold_total$ = internal_sold_total_grain
+	set_variable = {
+		name = $internal_sold_total$
+		value = 0
+	}
+}
+
+TRADE_update_all_global_base_prices = {
+	TRADE_update_global_base_price = {
+		global_price = global_price_grain
+		global_supply = global_supply_grain
+		global_demand = global_demand_grain
+		demand_good = DEMAND_grain
+		supply_good = GOODS_governorship_grain_produced
+	}
+}
+
+TRADE_update_all_TZ_local_prices = {
+	every_in_global_list = {
+		variable = list_of_trade_centers
+		limit = { always = yes } # Debug purposes only, this should contain an actual limit checking if the TZ actually has any stock of the named tradegood
+		SELL_set_TZ_prices = {
+			local_price = local_price_grain
+			global_price = global_price_grain
+		}
 	}
 }

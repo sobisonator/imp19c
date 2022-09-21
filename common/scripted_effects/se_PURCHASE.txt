@@ -26,7 +26,7 @@ PURCHASE_make_internal_shopping_list = {
 	# Grain stockpile
 	PURCHASE_check_shopping_internal = {
 		demand = DEMAND_grain
-		for_stockpile = grain_stockpile
+		for_stockpile = grain_stockpile_svalue
 		from_stockpile = grain_stockpile_internal
 		goods_price = local_price_grain
 		internal_sold_total = internal_sold_total_grain
@@ -36,9 +36,20 @@ PURCHASE_make_internal_shopping_list = {
 PURCHASE_check_shopping_internal = {
 	# Scope: governorship
 	# Function: The sole purpose of this effect is to only run the purchase order effect if there's actually demand, therefore all of its arguments are basically proxies for the purchase order effect.
-	if = {
+
+	# It has to be this way because you can't use a < operator between a svalue and a var
+	# Check if the stockpile is big enough to satisfy demand
+	set_local_variable = {
+		name = l_demand_diff
+		value = $demand$
+	}
+	change_local_variable = {
+		name = l_demand_diff
+		subtract = var:$for_stockpile$
+	}
+	if = { # It has to be this way I promise
 		limit = {
-			$demand$ > var:$for_stockpile$
+			local_var:l_demand_diff > 0
 		}
 		set_local_variable = {
 			name = l_order_size
@@ -50,7 +61,7 @@ PURCHASE_check_shopping_internal = {
 		}
 		PURCHASE_order_internal = {
 			for_stockpile = $for_stockpile$
-			from_stockpile = $grain_stockpile_internal$
+			from_stockpile = $from_stockpile$
 			order_size = local_var:l_order_size
 			goods_price = $goods_price$
 			internal_sold_total = $internal_sold_total$
@@ -68,9 +79,20 @@ PURCHASE_order_internal = {
 	# $order_size$ = local variable, local_var:l_order_size
 	# $internal_sold_total$ = internal_sold_total_grain
 
-	if = { # Only transfer the goods if they're actually available
+	var:internal_trade_scope = {
+		set_local_variable = {
+			name = i_demand_diff
+			value = $order_size$
+		}
+		change_local_variable = {
+			name = i_demand_diff
+			subtract = var:$from_stockpile$
+		}
+	}
+
+	if = { # Only transfer the goods if they from stockpile is actually bigger than the order size
 		limit = {
-			var:internal_trade_scope = { var:$from_stockpile$ > $order_size$ }
+			var:internal_trade_scope = { local_var:i_demand_diff < 0 }
 		}
 		# Add to the purchasing governorship's stockpile
 		PURCHASE_transfer_goods_internally = {
@@ -119,7 +141,7 @@ PURCHASE_transfer_goods_internally = {
 
 	change_local_variable = {
 		name = this_spend
-		value = owner.capital_scope.governorship.var:trade_center.var:$local_price$
+		add = owner.capital_scope.governorship.var:trade_center.var:$local_price$
 	}
 
 	# Transport costs are fully discounted for internal trade
@@ -139,7 +161,7 @@ PURCHASE_transfer_goods_internally = {
 
 	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
 	change_variable = {
-		name = var:trade_scope.$internal_sold_total$
+		name = var:trade_scope.var:$internal_sold_total$
 		add = $amount$
 	}
 }

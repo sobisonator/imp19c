@@ -280,62 +280,6 @@ SELL_declare_all_available = {
 	}
 }
 
-TRADE_update_global_base_price = {
-	# Scope: Random country, doesn't matter
-	# This effect sets the global base price for a tradegood
-	# The formula is:
-	# Base price = global units demanded / units produced # For now, anyway
-	# This checks the given good
-
-	# Format of arguments:
-	# $global_price$ = global_price_grain
-	# $global_supply$ = global_supply_grain
-	# $global_demand$ = global_demand_grain
-	# $demand_good$ = DEMAND_grain, svalue, see DEMAND_svalues
-	# $supply_good$ = GOODS_governorship_grain_produced, svalue, see GOODS_svalues
-
-	debug_log = "Started setting global price"
-
-	set_global_variable = {
-		name = $global_demand$
-		value = 1 # Starts 1, gets augmented
-	}
-
-	set_global_variable = {
-		name = $global_supply$
-		value = 1 # Starts 1, gets augmented
-	}
-
-	# Add the total of all demand for this good around the world
-	every_country = {
-		every_governorships = {
-			change_global_variable = {
-				name = $global_demand$
-				add = $demand_good$
-			}
-			change_global_variable = {
-				name = $global_supply$
-				add = $supply_good$
-			}
-		}
-	}
-	# NOTE: Global supply should probably be the amount offered in all TZs, not produced in every governorship
-	# See TRADE_svalues TRADE_global_offered_grain for WiP example
-
-	# Now calculate the price
-	set_global_variable = {
-		name = $global_price$
-		value = global_var:$global_demand$
-	}
-	change_global_variable = {
-		name = $global_price$
-		divide = global_var:$global_supply$
-	}
-
-	debug_log = "Finished setting global price"
-
-}
-
 SELL_set_TZ_price_modifier = { # used to get local price modifier for the named good
 	# Scope: TZ
 	# This does NOT contain an iteration of all TZs, as it should only be run in TZs that actually supply said good.

@@ -53,7 +53,6 @@ SELL_declare_all_internal_available = {
 		goods_offered_internal = internal_offered_grain
 		amount_for_export_internal = TRADE_governorship_for_export_internal_grain
 		goods_stockpile_internal = internal_stockpile_grain
-		trade_scope = internal_trade_scope
 	}
 
 }
@@ -73,7 +72,7 @@ SELL_declare_internal_available = {
 		value = $amount_for_export_internal$
 	} # Is this necessary, or can we just use the svalues?
 
-	var:$trade_scope$ = { # Scope to the internal trade scope, be it country or customs union
+	var:internal_trade_scope = { # Scope to the internal trade scope, be it country or customs union
 		# Add to the internal trade scope's stockpile
 		change_variable = { # TODO: set stockpile variables back to 0 at the beginning of every quarter, using a SE in the on_action
 			name = $goods_stockpile_internal$ # The trade center variable will have the same name as the governorship one, for ease of reference
@@ -129,10 +128,15 @@ SELL_calculate_internal_revenue_cut_percentage = { # WIP
 		value = var:$amount_of_goods_offered$
 	}
 
-	change_variable = { # Now divide the amount contributed by the total in the internal stockpile, getting a percentage.
-		# e.g. if the governorship contributed 150 units and the internal stockpile has 1000 units, you get 0.15 (15%)
-		name = $stockpile_cut_percentage$
-		divide = var:internal_trade_scope.var:$internal_stockpile$ # Gets the stockpile from the internal trade scope (country or customs union) e.g. "internal_stockpile_grain"
+	if = {
+		limit = {
+			NOT = { var:internal_trade_scope.var:$internal_stockpile$ = 0 }
+		}
+		change_variable = { # Now divide the amount contributed by the total in the internal stockpile, getting a percentage.
+			# e.g. if the governorship contributed 150 units and the internal stockpile has 1000 units, you get 0.15 (15%)
+			name = $stockpile_cut_percentage$
+			divide = var:internal_trade_scope.var:$internal_stockpile$ # Gets the stockpile from the internal trade scope (country or customs union) e.g. "internal_stockpile_grain"
+		}
 	}
 }
 

@@ -113,7 +113,7 @@ PURCHASE_transfer_goods_internally = {
 
 	# Format of arguments:
 	# $target_stockpile$ = grain_stockpile, derived from $for_stockpile$ in PURCHASE_order_internal, the stockpile in the governorship being filled
-	# $amount$ = Integer, derived from $order_size$ in PURCHASE_order_internal
+	# $amount$ = local variable, derived from $order_size$ in PURCHASE_order_internal
 	# $from_stockpile$ = grain_stockpile_internal, derived from $from_stockpile$ in PURCHASE_order_internal, this is the available stockpile on the whole internal market
 	# $local_price$ = local_price_grain, gets the local price of grain from the governorship owner's capital
 	# $internal_sold_total$ = internal_sold_total_grain, the total amount sold in the internal trade scope, used by the effect to distribute the cut of amount sold to contributing governorships
@@ -124,30 +124,31 @@ PURCHASE_transfer_goods_internally = {
 		add = $amount$
 	}
 
-	# SUBTRACT FROM THE INTERNAL AVAILABLE STOCKPILE
-	change_variable = {
-		name = $from_stockpile$
-		subtract = $amount$
-	}
-
 	# SEND MONEY TO THE POOL
 	set_local_variable = {
 		name = this_spend
 		value = $amount$
 	}
 
-	change_local_variable = {
+	# SUBTRACT FROM THE INTERNAL AVAILABLE STOCKPILE
+	var:internal_trade_scope = {
+		change_variable = {
+			name = $from_stockpile$
+			subtract = local_var:this_spend
+		}
+		change_variable = {
+			name = internal_income_pool
+			add = local_var:this_spend
+		}
+	}
+
+	# Transport costs are fully discounted for internal trade
+	change_local_variable = { # use the price from the governorship capital's TZ
 		name = this_spend
 		add = owner.capital_scope.governorship.var:trade_center.var:$local_price$
 	}
 
-	# Transport costs are fully discounted for internal trade
-
-	change_variable = {
-		name = internal_income_pool
-		add = local_var:this_spend
-	}
-
+	
 	# SUBTRACT MONEY FROM THE BUYING GOVERNORSHIP'S BALANCE
 	# The balance will then be applied to the governorship wealth pools at the end of the purchase phase
 

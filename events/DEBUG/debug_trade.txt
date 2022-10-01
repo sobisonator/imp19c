@@ -1,6 +1,6 @@
 namespace = debug_trade
 
-debug_trade.1 = { 
+debug_trade.1 = { # Trade setup
 	type = country_event
 	title = "TEST"
 	desc = "TEST"
@@ -8,19 +8,39 @@ debug_trade.1 = {
 
 	immediate = {
 		MOVEMENT_get_TZ_distances = yes
-		TRADE_update_global_base_price = {
-			global_price = global_price_grain
-			global_supply = global_supply_grain
-			global_demand = global_demand_grain
-			demand_good = DEMAND_grain
-			supply_good = GOODS_governorship_grain_produced
+		every_country = {
+			every_governorships = {
+				TRADE_setup_internal_trade_cuts = yes
+			}
 		}
-		every_in_global_list = {
-			variable = list_of_trade_centers
-			limit = { always = yes } # Debug purposes only, this should contain an actual limit checking if the TZ actually has any stock of the named tradegood
-			SELL_set_TZ_prices = {
-				local_price = local_price_grain
-				global_price = global_price_grain
+	}
+
+	option = {
+		name = "TEST"
+	}
+}
+
+debug_trade.2 = { # Quarterly internal trade simulation
+	type = country_event
+	title = "TEST"
+	desc = "TEST"
+	picture = aqueducts
+
+	immediate = {
+		TRADE_update_all_global_base_prices = yes
+		TRADE_update_all_TZ_local_prices = yes
+		TRADE_reset_internal_pools = yes
+		TRADE_reset_quarterly_trade_scope_values = yes
+		TRADE_reset_all_internal_trade_stockpiles = yes
+		TRADE_reset_all_internal_trade_revenue_totals = yes
+		every_country = {
+			every_governorships = {
+				TRADE_reset_quarterly_governorship_values = yes
+				TRADE_set_internal_trade_scope = yes
+				SELL_declare_all_internal_available = yes
+				PURCHASE_make_internal_shopping_list = yes
+				SELL_calculate_all_internal_revenue_cut_percentages = yes
+				SELL_get_all_internal_cuts_of_revenue = yes
 			}
 		}
 	}

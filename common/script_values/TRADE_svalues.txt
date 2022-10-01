@@ -1,5 +1,7 @@
 # MODIFIERS
 
+## EXPORT MODIFIERS
+
 TRADE_country_export_stock_modifier = { # At the national level, modifies the amount of every governorship's stockpile that's available for trade
 	# Range 0 - 1
 	value = 1
@@ -36,7 +38,26 @@ TRADE_governorship_export_threshold_glass = { # The lower limit before a governo
 
 TRADE_governorship_export_cap_grain = { # The upper limit over which a governorship is NOT allowed to export any of this good. Should be derived from a variable
 # FOR NOW, THIS IS JUST A TEST AND HAS NO VARIABLE FROM WHICH IT DERIVES
-	value = 10
+	value = 100
+}
+
+### INTERNAL EXPORT AMOUNTS
+
+# Internal export will never offer more than the governorship can afford to sell without compromising its own demand, otherwise there would be a recursive loop of buying back what it oversold to other governorships.
+# So this is basically the surplus
+# If the country has the export focus, it will also subtract the amount for external export which has been reserved for international sale. This can (by design, to reflect exploitative colonial regimes) cause issues with a country not being able to properly supply itself internally as its goods are being reserved for external sale rather than being redistributed internally
+
+TRADE_governorship_for_export_internal_grain = {
+	# Scope: governorship
+	value = GOODS_grain_stockpile
+	subtract = DEMAND_grain
+	if = {
+		limit = {
+			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+		}
+		subtract = TRADE_governorship_for_export_grain
+	}
+	min = 0
 }
 
 ### ACTUAL AMOUNTS OFFERED FOR SALE

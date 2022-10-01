@@ -143,11 +143,7 @@ SELL_calculate_internal_revenue_cut_percentage = { # WIP
 SELL_get_all_internal_cuts_of_revenue = {
 
 	SELL_get_internal_cut_of_revenue = {
-		internal_total_revenue = internal_total_revenue_grain
-		internal_stockpile_cut_percentage = internal_stockpile_cut_percentage_grain
-		local_cut_of_revenue = local_internal_revenue_cut_grain
-		stockpile_sold = grain_stockpile
-		amount_sold_total = internal_sold_total_grain
+		tradegood = "grain"
 	}
 	
 }
@@ -165,33 +161,33 @@ SELL_get_internal_cut_of_revenue = {
 	# $amount_sold_total$ = internal_sold_total_grain, recorded by the transfer of goods effect
 
 	set_variable = { # Get the total revenue from the tradezone
-		name = $local_cut_of_revenue$
-		value = var:internal_trade_scope.var:$internal_total_revenue$ # This needs a variable name like "TZ_revenue_total_grain"
+		name = local_internal_revenue_cut_$tradegood$
+		value = var:internal_trade_scope.var:internal_total_revenue_$tradegood$ # This needs a variable name like "TZ_revenue_total_grain"
 	}
 	change_variable = {
-		name = $local_cut_of_revenue$
-		multiply = var:$internal_stockpile_cut_percentage$
+		name = local_internal_revenue_cut_$tradegood$
+		multiply = var:internal_stockpile_cut_percentage_$tradegood$
 	}
 
 	change_variable = {
 		name = governorship_this_quarter_balance # Quarterly governorship income is only divvied up and given out at the end of both internal and external trade. Gets reset at the beginning of every quarter
-		add = var:$local_cut_of_revenue$
+		add = var:local_internal_revenue_cut_$tradegood$
 	}
 
 	# SUBTRACT THE RESOURCES SOLD FROM THE GOVERNORSHIPS ACCORDING TO THEIR CUT
 
 	set_local_variable = {
 		name = local_sold_cut
-		value = var:internal_trade_scope.var:$amount_sold_total$
+		value = var:internal_trade_scope.var:internal_sold_total_$tradegood$
 	}
 
 	change_local_variable = {
 		name = local_sold_cut
-		multiply = var:$internal_stockpile_cut_percentage$
+		multiply = var:internal_stockpile_cut_percentage_$tradegood$
 	}
 
 	change_variable = {
-		name = $stockpile_sold$
+		name = $tradegood$_stockpile
 		subtract = local_var:local_sold_cut
 	}
 }

@@ -1,13 +1,13 @@
-PROVINCE SETUP EDITOR FOR IMPERATRIX: VICTORIA
+#PROVINCE SETUP EDITOR FOR IMPERATRIX: VICTORIA
 
-Instructions:
+##Instructions:
 
-Pre-prep (I don't have Python already):
+###Pre-prep (I don't have Python already):
 	- Install Python from https://www.python.org/ftp/python/3.9.4/python-3.9.4-amd64.exe
 	- Make sure when you install to install pip when prompted, and to add Python to PATH when prompted
 
 
-I. Installing requirements to run the map editor
+1. Installing requirements to run the map editor
 	a) With an IDE (advanced)
 		i) Open pyParaMapEditor_imp19c as a project. The folder is already set up as a PyCharm project so it should be recognised if you open the folder in PyCharm.
 		ii) Install dependencies once you have opened the project, following this tutorial: https://www.jetbrains.com/help/pycharm/managing-dependencies.html
@@ -18,7 +18,7 @@ I. Installing requirements to run the map editor
 			pip install -r requirements.txt
 		iii) Launch the script by double clicking it or in the command line.
 
-II. Preparing data (if you are using imp19c, these files should all be there already and you can skip this step!)
+2. Preparing data (if you are using imp19c, these files should all be there already and you can skip this step!)
 	a) All files below simply need to be present in the setup editor's
 	b) You will need 3 map files: 
 		your province map, (main_input.BMP)
@@ -29,7 +29,7 @@ II. Preparing data (if you are using imp19c, these files should all be there alr
 	d) Credentials json file which should be selected when prompted by the program. It should be named "imp19c_credentials.json"
 	
 
-III. Using the editor
+3. Using the editor
 	 - When you launch the editor you will be prompted to create a new savefile, which you can name whatever you want. This stores the definition file for the mod's map in a database so that the app can reference it quickly. It doesn't contain any setup data
 	 	- You may also load a previous save this way. (In imp19c, load the existing "map_imported_file" file)
 	 	- The map editor only takes database files in the expected format, so it will encounter an error and close if you try to open any other kind of file.

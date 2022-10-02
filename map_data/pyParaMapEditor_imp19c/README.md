@@ -16,9 +16,9 @@
 			cd "[path to wherever you put Imperatrix files]map_data\pyParaMapEditor_imp19c"
 		- Enter the following command in your command line:
 			pip install -r requirements.txt
-		- Launch the script by double clicking it or in the command line.
+		- Launch the script by double clicking it, or typing `py pyParaMapEditor_imp19c_v2` in the command line.
 
-2. Preparing data (if you are using imp19c, these files should all be there already and you can skip this step!)
+2. Preparing data (if you are using imp19c, these files should all be there already and you can SKIP THIS STEP!)
 	- All files below simply need to be present in the setup editor's
 	- You will need 3 map files: 
 		- your province map, (main_input.BMP)

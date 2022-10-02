@@ -1,8 +1,8 @@
-#PROVINCE SETUP EDITOR FOR IMPERATRIX: VICTORIA
+# PROVINCE SETUP EDITOR FOR IMPERATRIX: VICTORIA
 
-##Instructions:
+## Instructions:
 
-###Pre-prep (I don't have Python already):
+### Pre-prep (I don't have Python already):
 	- Install Python from https://www.python.org/ftp/python/3.9.4/python-3.9.4-amd64.exe
 	- Make sure when you install to install pip when prompted, and to add Python to PATH when prompted
 

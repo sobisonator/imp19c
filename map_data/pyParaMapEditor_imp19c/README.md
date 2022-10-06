@@ -1,32 +1,32 @@
-PROVINCE SETUP EDITOR FOR IMPERATRIX: VICTORIA
+# PROVINCE SETUP EDITOR FOR IMPERATRIX: VICTORIA
 
-Instructions:
+## Instructions:
 
-Pre-prep (I don't have Python already):
+### Pre-prep (I don't have Python already):
 	- Install Python from https://www.python.org/ftp/python/3.9.4/python-3.9.4-amd64.exe
 	- Make sure when you install to install pip when prompted, and to add Python to PATH when prompted
 
 
 1. Installing requirements to run the map editor
-	a) With an IDE (advanced)
-		i) Open pyParaMapEditor_imp19c as a project. The folder is already set up as a PyCharm project so it should be recognised if you open the folder in PyCharm.
-		ii) Install dependencies once you have opened the project, following this tutorial: https://www.jetbrains.com/help/pycharm/managing-dependencies.html
-	b) With pip (if you don't have PyCharm)
-		i) Open command line and type the following command:
+	- With an IDE (advanced)
+		- Open pyParaMapEditor_imp19c as a project. The folder is already set up as a PyCharm project so it should be recognised if you open the folder in PyCharm.
+		- Install dependencies once you have opened the project, following this tutorial: https://www.jetbrains.com/help/pycharm/managing-dependencies.html
+	- With pip (if you don't have PyCharm)
+		- Open command line and type the following command:
 			cd "[path to wherever you put Imperatrix files]map_data\pyParaMapEditor_imp19c"
-		ii) Enter the following command in your command line:
+		- Enter the following command in your command line:
 			pip install -r requirements.txt
-		iii) Launch the script by double clicking it or in the command line.
+		- Launch the script by double clicking it, or typing `py pyParaMapEditor_imp19c_v2` in the command line.
 
-2. Preparing data (if you are using imp19c, these files should all be there already and you can skip this step!)
-	a) All files below simply need to be present in the setup editor's
-	b) You will need 3 map files: 
-		your province map, (main_input.BMP)
-		a map of your land provinces with sea provinces coloured white, (land_input.BMP)
-		and a map of your sea provinces with land provinces coloured white. (sea_input.BMP)
-	 All of these images must be of the same dimensions.
-	c) You may optionally load in an existing definition.csv and existing province_setup.csv, which will be loaded by the setup editor. 
-	d) Credentials json file which should be selected when prompted by the program. It should be named "imp19c_credentials.json"
+2. Preparing data (if you are using imp19c, these files should all be there already and you can SKIP THIS STEP!)
+	- All files below simply need to be present in the setup editor's
+	- You will need 3 map files: 
+		- your province map, (main_input.BMP)
+		- a map of your land provinces with sea provinces coloured white, (land_input.BMP)
+		- and a map of your sea provinces with land provinces coloured white. (sea_input.BMP)
+	 - All of these images must be of the same dimensions.
+	- You may optionally load in an existing definition.csv and existing province_setup.csv, which will be loaded by the setup editor. 
+	- Credentials json file which should be selected when prompted by the program. It should be named "imp19c_credentials.json"
 	
 
 3. Using the editor

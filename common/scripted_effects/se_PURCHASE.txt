@@ -24,12 +24,30 @@ PURCHASE_make_internal_shopping_list = {
 
 	# Iterate manually through all the stockpiles
 	# Grain stockpile
-	PURCHASE_check_shopping_internal = {
-		demand = DEMAND_grain
-		for_stockpile = grain_stockpile
-		from_stockpile = grain_stockpile_internal
-		goods_price = local_price_grain
-		internal_sold_total = internal_sold_total_grain
+	every_in_global_list = {
+		variable = list_of_tradegoods
+		switch = {
+			trigger = has_variable
+			grain = {
+				prev = {
+					PURCHASE_check_shopping_internal = { tradegood = grain }
+				}
+			}
+		}
+	}
+}
+
+PURCHASE_make_internal_shopping_list_2 = {
+	# Create a list of items that will need to be bought to satisfy demand this quarter
+	# Scope = governorship
+
+	# Iterate automatically through all the stockpiles
+	# Grain stockpile
+	every_in_global_list = {
+		variable = list_of_tradegoods
+		prev = {
+			PURCHASE_check_shopping_internal = { tradegood = var:tradegood }
+		}
 	}
 }
 
@@ -41,11 +59,11 @@ PURCHASE_check_shopping_internal = {
 	# Check if the stockpile is big enough to satisfy demand
 	set_local_variable = {
 		name = l_demand_diff
-		value = $demand$
+		value = DEMAND_$tradegood$
 	}
 	change_local_variable = {
 		name = l_demand_diff
-		subtract = var:$for_stockpile$
+		subtract = var:$tradegood$_stockpile
 	}
 	if = { # It has to be this way I promise
 		limit = {
@@ -53,18 +71,19 @@ PURCHASE_check_shopping_internal = {
 		}
 		set_local_variable = {
 			name = l_order_size
-			value = $demand$
+			value = DEMAND_$tradegood$
 		}
 		change_local_variable = {
 			name = l_order_size
-			subtract = var:$for_stockpile$
+			subtract = var:$tradegood$_stockpile
 		}
 		PURCHASE_order_internal = {
-			for_stockpile = $for_stockpile$
-			from_stockpile = $from_stockpile$
+			tradegood = $tradegood$
+			#for_stockpile = $for_stockpile$
+			#from_stockpile = $from_stockpile$
 			order_size = local_var:l_order_size
-			goods_price = $goods_price$
-			internal_sold_total = $internal_sold_total$
+			#goods_price = $goods_price$
+			#internal_sold_total = $internal_sold_total$
 		}
 	}
 }
@@ -86,7 +105,7 @@ PURCHASE_order_internal = {
 		}
 		change_local_variable = {
 			name = i_demand_diff
-			subtract = var:$from_stockpile$
+			subtract = var:$tradegood$_stockpile_internal
 		}
 	}
 
@@ -96,11 +115,12 @@ PURCHASE_order_internal = {
 		}
 		# Add to the purchasing governorship's stockpile
 		PURCHASE_transfer_goods_internally = {
-			target_stockpile = $for_stockpile$
+			tradegood = $tradegood$
+			#target_stockpile = $for_stockpile$
 			amount = $order_size$
-			from_stockpile = $from_stockpile$
-			local_price = $goods_price$
-			internal_sold_total = $internal_sold_total$
+			#from_stockpile = $from_stockpile$
+			#local_price = $goods_price$
+			#internal_sold_total = $internal_sold_total$
 		}
 	}
 
@@ -120,7 +140,7 @@ PURCHASE_transfer_goods_internally = {
 
 	# ADD TO BUYER'S STOCKPILE
 	change_variable = {
-		name = $target_stockpile$
+		name = var:$tradegood$_stockpile
 		add = $amount$
 	}
 
@@ -133,7 +153,7 @@ PURCHASE_transfer_goods_internally = {
 	# SUBTRACT FROM THE INTERNAL AVAILABLE STOCKPILE
 	var:internal_trade_scope = {
 		change_variable = {
-			name = $from_stockpile$
+			name = $tradegood$_stockpile_internal
 			subtract = local_var:this_spend
 		}
 		change_variable = {
@@ -145,7 +165,7 @@ PURCHASE_transfer_goods_internally = {
 	# Transport costs are fully discounted for internal trade
 	change_local_variable = { # use the price from the governorship capital's TZ
 		name = this_spend
-		multiply = owner.capital_scope.governorship.var:trade_center.var:$local_price$
+		multiply = owner.capital_scope.governorship.var:trade_center.var:local_price_$tradegood$
 	}
 
 	
@@ -160,7 +180,7 @@ PURCHASE_transfer_goods_internally = {
 	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
 	var:internal_trade_scope = {
 		change_variable = {
-			name = $internal_sold_total$
+			name = internal_sold_total_$tradegood$
 			add = $amount$
 		}
 	}
@@ -173,11 +193,12 @@ PURHCASE_make_shopping_list = {
 	# Create a list of items that will need to be bought to satisfy demand this quarter
 	# Scope = governorship
 
-	# Iterate manually through all the stockpiles
-	# Grain stockpile
+	# Iterate automatically through all the stockpiles
+	# WiP - add iterate through all tradegoods effect
 	PURCHASE_check_shopping = {
-		demand = DEMAND_grain
-		stockpile = grain_stockpile
+		tradegood = grain
+		# demand = DEMAND_grain
+		# stockpile = grain_stockpile
 	}
 }
 

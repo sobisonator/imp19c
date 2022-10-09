@@ -9,16 +9,16 @@ SELL_reset_all_internal_trade_stockpiles = {
 	# WiP / debug - grain only
 	every_country = {
 		SELL_reset_internal_trade_stockpile = {
-			goods_stockpile_internal = grain_stockpile_internal
+			tradegood = grain
+			#goods_stockpile_internal = grain_stockpile_internal
 		}
 	}
-	every_in_list = {
-		variable = list_of_federations
+	every_federation = {
 		SELL_reset_internal_trade_stockpile = {
-			goods_stockpile_internal = grain_stockpile_internal
+			tradegood = grain
+			#goods_stockpile_internal = grain_stockpile_internal
 		}
 	}
-	
 }
 
 SELL_reset_internal_trade_stockpile = { # Needs to be repeated for every tradegood
@@ -31,14 +31,13 @@ SELL_reset_internal_trade_stockpile = { # Needs to be repeated for every tradego
 
 	every_country = {
 		set_variable = {
-			name = $goods_stockpile_internal$
+			name = $tradegood$_stockpile_internal
 			value = 0
 		}
 	}
-	every_in_global_list = {
-		variable = list_of_federations
+	every_federation = {
 		set_variable = {
-			name = $goods_stockpile_internal$
+			name = $tradegood$_stockpile_internal
 			value = 0
 		}
 	}
@@ -50,9 +49,10 @@ SELL_declare_all_internal_available = {
 	# Tells the internal tradezone all the stockpiles a governorship has available to sell to other governorships in the same country or customs union
 
 	SELL_declare_internal_available = {
-		goods_offered_internal = internal_offered_grain
-		amount_for_export_internal = TRADE_governorship_for_export_internal_grain
-		goods_stockpile_internal = grain_stockpile_internal
+		tradegood = grain
+		#goods_offered_internal = internal_offered_grain
+		#amount_for_export_internal = TRADE_governorship_for_export_internal_grain
+		#goods_stockpile_internal = grain_stockpile_internal
 	}
 
 }
@@ -68,15 +68,15 @@ SELL_declare_internal_available = {
 
 	set_variable = { # Within the governorship scope, track how much was sold so you can then calculate how much of a cut to get
 	# See SELL_calculate_cut to see how the cut of revenue gets calculated
-		name = $goods_offered_internal$
-		value = $amount_for_export_internal$
+		name = internal_offered_$tradegood$
+		value = TRADE_governorship_for_export_internal_$tradegood$
 	} # Is this necessary, or can we just use the svalues?
 
 	var:internal_trade_scope = { # Scope to the internal trade scope, be it country or customs union
 		# Add to the internal trade scope's stockpile
 		change_variable = { # TODO: set stockpile variables back to 0 at the beginning of every quarter, using a SE in the on_action
-			name = $goods_stockpile_internal$ # The trade center variable will have the same name as the governorship one, for ease of reference
-			add = prev.$amount_for_export_internal$
+			name = $tradegood$_stockpile_internal # The trade center variable will have the same name as the governorship one, for ease of reference
+			add = prev.TRADE_governorship_for_export_internal_$tradegood$
 		}
 	} 
 }
@@ -88,7 +88,7 @@ SELL_reset_internal_amount_offered = {
 	# $goods_offered_internal$ = internal_offered_grain
 
 	set_variable = {
-		name = $goods_offered_internal$
+		name = internal_offered_$tradegood$
 		value = 0
 	}
 }
@@ -97,7 +97,7 @@ SELL_reset_all_internal_amounts_offered = {
 	# Scope: governorship
 
 	SELL_reset_internal_amount_offered = { # grain
-		goods_offered_internal = internal_offered_grain
+		tradegood = grain
 	}
 
 }
@@ -105,9 +105,10 @@ SELL_reset_all_internal_amounts_offered = {
 SELL_calculate_all_internal_revenue_cut_percentages = {
 
 	SELL_calculate_internal_revenue_cut_percentage = { # grain
-		stockpile_cut_percentage = internal_stockpile_cut_percentage_grain
-		amount_of_goods_offered = internal_offered_grain
-		internal_stockpile = grain_stockpile_internal
+		tradegood = grain
+		#stockpile_cut_percentage = internal_stockpile_cut_percentage_grain
+		#amount_of_goods_offered = internal_offered_grain
+		#internal_stockpile = grain_stockpile_internal
 	}
 
 }
@@ -124,18 +125,18 @@ SELL_calculate_internal_revenue_cut_percentage = { # WIP
 	# $internal_stockpile$ = grain_stockpile_internal
 
 	set_variable = { # Get the total of the goods that this governorship sent up
-		name = $stockpile_cut_percentage$
-		value = var:$amount_of_goods_offered$
+		name = internal_stockpile_cut_percentage_$tradegood$
+		value = var:internal_offered_$tradegood$
 	}
 
 	if = {
 		limit = {
-			NOT = { var:internal_trade_scope.var:$internal_stockpile$ = 0 }
+			NOT = { var:internal_trade_scope.var:$tradegood$_stockpile_internal = 0 }
 		}
 		change_variable = { # Now divide the amount contributed by the total in the internal stockpile, getting a percentage.
 			# e.g. if the governorship contributed 150 units and the internal stockpile has 1000 units, you get 0.15 (15%)
-			name = $stockpile_cut_percentage$
-			divide = var:internal_trade_scope.var:$internal_stockpile$ # Gets the stockpile from the internal trade scope (country or customs union) e.g. "grain_stockpile_internal"
+			name = internal_stockpile_cut_percentage_$tradegood$
+			divide = var:internal_trade_scope.var:$tradegood$_stockpile_internal # Gets the stockpile from the internal trade scope (country or customs union) e.g. "grain_stockpile_internal"
 		}
 	}
 }
@@ -143,11 +144,7 @@ SELL_calculate_internal_revenue_cut_percentage = { # WIP
 SELL_get_all_internal_cuts_of_revenue = {
 
 	SELL_get_internal_cut_of_revenue = {
-		internal_total_revenue = internal_total_revenue_grain
-		internal_stockpile_cut_percentage = internal_stockpile_cut_percentage_grain
-		local_cut_of_revenue = local_internal_revenue_cut_grain
-		stockpile_sold = grain_stockpile
-		amount_sold_total = internal_sold_total_grain
+		tradegood = grain
 	}
 	
 }
@@ -165,33 +162,33 @@ SELL_get_internal_cut_of_revenue = {
 	# $amount_sold_total$ = internal_sold_total_grain, recorded by the transfer of goods effect
 
 	set_variable = { # Get the total revenue from the tradezone
-		name = $local_cut_of_revenue$
-		value = var:internal_trade_scope.var:$internal_total_revenue$ # This needs a variable name like "TZ_revenue_total_grain"
+		name = local_internal_revenue_cut_$tradegood$
+		value = var:internal_trade_scope.var:internal_total_revenue_$tradegood$ # This needs a variable name like "TZ_revenue_total_grain"
 	}
 	change_variable = {
-		name = $local_cut_of_revenue$
-		multiply = var:$internal_stockpile_cut_percentage$
+		name = local_internal_revenue_cut_$tradegood$
+		multiply = var:internal_stockpile_cut_percentage_$tradegood$
 	}
 
 	change_variable = {
 		name = governorship_this_quarter_balance # Quarterly governorship income is only divvied up and given out at the end of both internal and external trade. Gets reset at the beginning of every quarter
-		add = var:$local_cut_of_revenue$
+		add = var:local_internal_revenue_cut_$tradegood$
 	}
 
 	# SUBTRACT THE RESOURCES SOLD FROM THE GOVERNORSHIPS ACCORDING TO THEIR CUT
 
 	set_local_variable = {
 		name = local_sold_cut
-		value = var:internal_trade_scope.var:$amount_sold_total$
+		value = var:internal_trade_scope.var:internal_sold_total_$tradegood$
 	}
 
 	change_local_variable = {
 		name = local_sold_cut
-		multiply = var:$internal_stockpile_cut_percentage$
+		multiply = var:internal_stockpile_cut_percentage_$tradegood$
 	}
 
 	change_variable = {
-		name = $stockpile_sold$
+		name = $tradegood$_stockpile
 		subtract = local_var:local_sold_cut
 	}
 }
@@ -222,7 +219,8 @@ SELL_reset_all_TZ_trade_stockpiles = {
 
 	# WiP / debug - grain only
 	SELL_reset_TZ_trade_stockpile = {
-		goods_stockpile = stockpile_grain
+		tradegood = grain
+		#goods_stockpile = stockpile_grain
 	}
 }
 
@@ -237,7 +235,7 @@ SELL_reset_TZ_trade_stockpile = { # Needs to be repeated for every tradegood
 	every_in_global_list = {
 		variable = list_of_trade_centers
 		set_variable = {
-			name = $goods_stockpile$
+			name = stockpile_$tradegood$
 			value = 0
 		}
 	}

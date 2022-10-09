@@ -96,6 +96,10 @@ GOODS_setup_governorship_stockpiles = {
 		name = processed_foods_stockpile
 		value = 0
 	}
+	set_variable = {
+		name = petrochemicals_stockpile
+		value = 0
+	}
 	# Raw goods. Will only iterate through provinces if goods are actually produced locally
 	if = {
 		limit = {
@@ -1029,6 +1033,37 @@ GOODS_governorship_produce_all_raw = {
 	}
 }
 
+## MANUFACTURED GOODS
+
+### Functional scripted effects
+
+GOODS_consume_industrial_demand = {
+	change_variable = {
+		name = $from_stockpile$
+		subtract = $demand$
+	}
+	if = {
+		limit = {
+			var:$from_stockpile$ < 0
+			set_variable = {
+				name = $from_stockpile$
+				value = 0
+			}
+		}
+	}
+}
+
+## Production scripted effects
+
+# The scripted effect to produce all manufactured goods repeats a scripted effect that takes three variables:
+# Variable 1 = industry_assigned : that's the number of industries in the governorship producing the manufactured good
+#				This variable is ONLY used to check if the function should continue to run at all.
+#				If this variable is 0, the function will do no further calculations
+#				This is to save needlessly wasting processing time on calculations using the next couple of svalues
+# Variable 2 = amount : that's the amount of the tradegood produced, and is a script value taken from GOODS_svalues
+#				the amount svalue handles all the calculations for how much of a good can be produced in a governorship
+# Variable 3 = into_stockpile : this is simply the target stockpile, so that when the goods are produced, the appropriate stockpile is increased
+
 GOODS_governorship_produce_all_manufactured = {
 	GOODS_governorship_produce_manufactured = {
 		industry_assigned = INDUSTRY_factories_assigned_clothing
@@ -1050,11 +1085,20 @@ GOODS_governorship_produce_all_manufactured = {
 		amount = GOODS_governorship_luxury_furniture_produced
 		into_stockpile = luxury_furniture_stockpile
 	}
-	GOODS_governorship_produce_manufactured = {
+	GOODS_governorship_produce_manufactured_2 = {
 		industry_assigned = INDUSTRY_factories_assigned_alcohol
 		amount = GOODS_governorship_alcohol_produced
 		into_stockpile = alcohol_stockpile
+		record = alcohol_produced_last_quarter
 	}
+		GOODS_consume_industrial_demand = {
+			from_stockpile = grain_stockpile
+			demand = DEMAND_grain_from_industry_alcohol
+		}
+		GOODS_consume_industrial_demand = {
+			from_stockpile = mediterranean_fruit_stockpile
+			demand = DEMAND_mediterranean_from_industry_alcohol
+		}
 	GOODS_governorship_produce_manufactured = {
 		industry_assigned = INDUSTRY_factories_assigned_glass
 		amount = GOODS_governorship_glass_produced
@@ -1146,9 +1190,9 @@ GOODS_governorship_produce_all_manufactured = {
 		into_stockpile = processed_foods_stockpile
 	}
 	GOODS_governorship_produce_manufactured = {
-		industry_assigned = INDUSTRY_factories_assigned_aeroplanes
-		amount = GOODS_governorship_processed_aeroplanes_produced
-		into_stockpile = aeroplanes_stockpile
+		industry_assigned = INDUSTRY_factories_assigned_petrochemicals
+		amount = GOODS_governorship_petrochemicals_produced
+		into_stockpile = petrochemicals_stockpile
 	}
 }
 
@@ -1177,5 +1221,21 @@ GOODS_governorship_produce_manufactured = {
 	change_variable = {
 		name = $into_stockpile$
 		add = $amount$
+	}
+}
+
+GOODS_governorship_produce_manufactured_2 = {
+	if = {
+		limit = {
+			var:$industry_assigned$ > 0 # format = INDUSTRY_factories_assigned_[tradegood_name]
+		}
+	}
+	change_variable = {
+		name = $into_stockpile$
+		add = $amount$
+	}
+	set_variable = {
+		name = $record$
+		value = $amount$
 	}
 }

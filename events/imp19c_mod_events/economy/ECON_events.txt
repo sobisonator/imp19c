@@ -1,6 +1,7 @@
 namespace = ECON_events
 
-ECON_events.1 = {	#Trigger this event to test trade centers.
+ECON_events.1 = {	#Trigger this event to set up trade centers.
+     # Moved to scripted effects
     type = country_event
     hidden = yes
 
@@ -9,77 +10,8 @@ ECON_events.1 = {	#Trigger this event to test trade centers.
             has_global_variable = economic_enhancement_setup_done
         }
     }
-
-    immediate = {
-        #Populate the world with trade centers - 1 per tradezone.
-        set_global_variable = economic_enhancement_setup_done
-        tradezone_setup_effect = {
-             TRADE_ZONE = india_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = east_north_america_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = west_north_america_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = caribbean_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = west_south_america_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = east_south_america_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = south_east_asia_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = indo_china_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = yellow_sea_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = southern_africa_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = west_africa_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = east_africa_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = middle_east_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = western_steppe_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = eastern_steppe_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = upper_yangtzi_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = atlantic_seaboard_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = central_europe_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = west_mediterranean_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = baltic_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = east_europe_tradezone
-        }
-        tradezone_setup_effect = {
-             TRADE_ZONE = east_mediterranean_tradezone
-        }
-    }
+}
+    
 }
 ECON_events.2 = {
     type = province_event
@@ -147,5 +79,32 @@ ECON_events.6 = {
     }
     option = {      
         name = ECON_events.6.b
+    }
+}
+
+ECON_events.7 = {
+    type = country_event
+    hidden = yes
+
+    immediate = {
+        every_country = {
+            every_governorships = {
+                debug_log = "Governorship should be: [THIS.GetRegion.GetName]"
+                region = {
+                    debug_log = "The region of the governorship is: [THIS.GetRegion.GetName]"
+                    random_trade_center = {
+                        debug_log = "The trade center is: [THIS.GetProvince.GetName]"
+                        limit = { india_tradezone = { REGION = yes } }
+                        prev.prev = {   # prev.prev = the current governorship
+                            debug_log = "We have scoped back to governorship: [THIS.GetRegion.GetName]"
+                            set_variable = {
+                                name = trade_center
+                                value = prev
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

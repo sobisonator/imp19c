@@ -1,0 +1,247 @@
+
+#*************************************************
+#*            The Purchase Order Plan            *
+#*************************************************
+
+
+#1. Wealth from pops in the governorship should all be pooled up to determine the "Purchasing Power" of the governorship for that quarter.
+#	- This would be "WEALTH_governorship_total"
+
+#2. Then sort demand by how important the trade good is.
+
+#3. The purchase order will then be made to nearby trade zones that have an available stockpile for the goods that are in demand.
+
+#4. Once the order is sent the movement cost between the trade zones can be factored in along with the price of the good. This will give the final price of the order.
+
+#5. After the order is made the goods will be "moved" into the stockpile of the governorship that ordered them.
+
+# INTERNAL PURCHASES
+# Run these first, checking if demand can be fulfilled within the country or customs union
+
+PURCHASE_make_internal_shopping_list = {
+	# Create a list of items that will need to be bought to satisfy demand this quarter
+	# Scope = governorship
+
+	# Iterate manually through all the stockpiles
+	# Grain stockpile
+	PURCHASE_check_shopping_internal = { tradegood = grain }
+}
+
+PURCHASE_check_shopping_internal = {
+	# Scope: governorship
+	# Function: The sole purpose of this effect is to only run the purchase order effect if there's actually demand, therefore all of its arguments are basically proxies for the purchase order effect.
+
+	# It has to be this way because you can't use a < operator between a svalue and a var
+	# Check if the stockpile is big enough to satisfy demand
+	set_local_variable = {
+		name = l_demand_diff
+		value = DEMAND_$tradegood$
+	}
+	change_local_variable = {
+		name = l_demand_diff
+		subtract = var:$tradegood$_stockpile
+	}
+	if = { # It has to be this way I promise
+		limit = {
+			local_var:l_demand_diff > 0
+		}
+		set_local_variable = {
+			name = l_order_size
+			value = DEMAND_$tradegood$
+		}
+		change_local_variable = {
+			name = l_order_size
+			subtract = var:$tradegood$_stockpile
+		}
+		PURCHASE_order_internal = {
+			tradegood = $tradegood$
+			#for_stockpile = $for_stockpile$
+			#from_stockpile = $from_stockpile$
+			order_size = local_var:l_order_size
+			#goods_price = $goods_price$
+			#internal_sold_total = $internal_sold_total$
+		}
+	}
+}
+
+PURCHASE_order_internal = {
+	# Scope: governorship
+	# Buy from the internal trade scope's stockpile, be it country or customs union
+
+	# Format of arguments:
+	# $for_stockpile$ = grain_stockpile, the stockpile in the governorship scope
+	# $from_stockpile$ = grain_stockpile_internal, the stockpile from the internal trade scope with the sum of all goods available for internal trade
+	# $order_size$ = local variable, local_var:l_order_size
+	# $internal_sold_total$ = internal_sold_total_grain
+
+	var:internal_trade_scope = {
+		set_local_variable = {
+			name = i_demand_diff
+			value = $order_size$
+		}
+		change_local_variable = {
+			name = i_demand_diff
+			subtract = var:$tradegood$_stockpile_internal
+		}
+	}
+
+	if = { # Only transfer the goods if they from stockpile is actually bigger than the order size
+		limit = {
+			var:internal_trade_scope = { local_var:i_demand_diff < 0 }
+		}
+		# Add to the purchasing governorship's stockpile
+		PURCHASE_transfer_goods_internally = {
+			tradegood = $tradegood$
+			#target_stockpile = $for_stockpile$
+			amount = $order_size$
+			#from_stockpile = $from_stockpile$
+			#local_price = $goods_price$
+			#internal_sold_total = $internal_sold_total$
+		}
+	}
+
+	# Give the share of sale income to the selling governorships
+}
+
+PURCHASE_transfer_goods_internally = {
+	# Scope: governorship
+	# Function: Put goods in the purchasing governorship, subtract goods from the selling governorships and send them profit according to their cut.
+
+	# Format of arguments:
+	# $target_stockpile$ = grain_stockpile, derived from $for_stockpile$ in PURCHASE_order_internal, the stockpile in the governorship being filled
+	# $amount$ = local variable, derived from $order_size$ in PURCHASE_order_internal
+	# $from_stockpile$ = grain_stockpile_internal, derived from $from_stockpile$ in PURCHASE_order_internal, this is the available stockpile on the whole internal market
+	# $local_price$ = local_price_grain, gets the local price of grain from the governorship owner's capital
+	# $internal_sold_total$ = internal_sold_total_grain, the total amount sold in the internal trade scope, used by the effect to distribute the cut of amount sold to contributing governorships
+
+	# ADD TO BUYER'S STOCKPILE
+	change_variable = {
+		name = $tradegood$_stockpile
+		add = $amount$
+	}
+
+	# SEND MONEY TO THE POOL
+	set_local_variable = {
+		name = this_spend
+		value = $amount$
+	}
+
+	# SUBTRACT FROM THE INTERNAL AVAILABLE STOCKPILE
+	var:internal_trade_scope = {
+		change_variable = {
+			name = $tradegood$_stockpile_internal
+			subtract = local_var:this_spend
+		}
+		change_variable = {
+			name = internal_income_pool
+			add = local_var:this_spend
+		}
+	}
+
+	# Transport costs are fully discounted for internal trade
+	change_local_variable = { # use the price from the governorship capital's TZ
+		name = this_spend
+		multiply = owner.capital_scope.governorship.var:trade_center.var:local_price_$tradegood$
+	}
+
+	
+	# SUBTRACT MONEY FROM THE BUYING GOVERNORSHIP'S BALANCE
+	# The balance will then be applied to the governorship wealth pools at the end of the purchase phase
+
+	change_variable = {
+		name = governorship_this_quarter_balance
+		subtract = local_var:this_spend
+	}
+
+	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
+	var:internal_trade_scope = {
+		change_variable = {
+			name = internal_sold_total_$tradegood$
+			add = $amount$
+		}
+	}
+	
+}
+
+# EXTERNAL PURCHASES
+
+PURHCASE_make_shopping_list = {
+	# Create a list of items that will need to be bought to satisfy demand this quarter
+	# Scope = governorship
+
+	# Iterate automatically through all the stockpiles
+	# WiP - add iterate through all tradegoods effect
+	PURCHASE_check_shopping = {
+		tradegood = grain
+		# demand = DEMAND_grain
+		# stockpile = grain_stockpile
+	}
+}
+
+PURCHASE_check_shopping = { # Check if it's necessary to go shopping for X stockpile
+	if = {
+		limit = {
+			$demand$ > var:$stockpile$
+		}
+		PURCHASE_order = {
+			for_stockpile = var:$stockpile$
+		}
+	}
+}
+
+PURHCASE_order = {
+	# Every governorship does this for every deficit every quarter
+	# $for_stockpile$ = the stockpile sent from the shopping list scripted effect when the PO is created
+}
+
+
+PURCHASE_reset_quarterly_var = {
+	#Reset puchase variable every quarter for every country for every governorship
+	if = {
+		limit = {
+			NOT = { has_variable = purchase_power }
+		}
+		set_variable = {
+			name = purchase_power
+			value = 0
+		}
+	}
+	else = {
+		remove_variable = purchase_power
+		set_variable = {
+			name = purchase_power
+			value = 0
+		}
+	}
+	change_variable = {
+		name = purchase_power
+		add = WEALTH_governorship_total
+	}
+}
+
+PURCHASE_rank_deals = { # Rank tradezones by total costs for the named tradegood
+	# Scope: Trade center
+	# This effect creates a list of the best deals with the best deal first, including a variable that stores the best deal.
+	# This somehow needs to add together the TZ's price for selling the named good + the travel cost variable
+	ordered_in_global_list = {
+		variable = list_of_trade_centers
+
+		# use a switch here too
+		# And for each TZ, create a variable that is total_cost
+		# total_cost = travel_cost + tradegood_price
+		# Then compare all those variables and rank them
+		# Create a special variable for top slot, for quick reference
+		# And have a mechanism in place to swap to second best, etc. as the top slot runs out
+
+		limit = { # Only check prices where there are goods available
+			var:$goods_stockpile$ > 0
+		}
+		order_by = var:$tradegood_price$ # Order based on that TZ's price for the named tradegood
+		PREV = {
+			set_variable = {
+				name = $best_value_for_goods$ # format = best_value_for_grain
+				value = PREV # The TZ scope
+			}
+		}
+	}
+}

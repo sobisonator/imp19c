@@ -1,4 +1,108 @@
-﻿tradezone_setup_effect = {
+﻿TRADE_setup_list_of_tradegoods = {
+	# Function: Create a list of random provinces with variables corresponding to all the tradegoods, so that you can iterate through the tradegoods
+	# Scope: Random country
+	# Called: At start of game
+	random_province = {
+		limit = {
+			NOT = { has_variable = grain }
+		}
+		set_variable = {
+			name = grain
+		}
+		add_to_global_variable_list = {
+			name = list_of_tradegoods
+			target = THIS
+		}
+	}
+	random_province = {
+		limit = {
+			NOT = { has_variable = wood }
+		}
+		set_variable = {
+			name = wood
+		}
+		add_to_global_variable_list = {
+			name = list_of_tradegoods
+			target = THIS
+		}
+	}
+}
+
+TRADE_setup_list_of_tradegoods_2 = {
+	# Function: Create a list of random provinces with variables corresponding to all the tradegoods, so that you can iterate through the tradegoods
+	# Version 2, save it into a variable with a consistent name but different value
+	# Scope: Random country
+	# Called: At start of game
+	random_province = {
+		limit = {
+			NOT = { has_variable = tradegood }
+		}
+		set_variable = {
+			name = tradegood
+			value = grain
+		}
+		add_to_global_variable_list = {
+			name = list_of_tradegoods
+			target = THIS
+		}
+	}
+	random_province = {
+		limit = {
+			NOT = { has_variable = wood }
+		}
+		set_variable = {
+			name = tradegood
+			value = wood
+		}
+		add_to_global_variable_list = {
+			name = list_of_tradegoods
+			target = THIS
+		}
+	}
+}
+
+TRADE_test_tradegoods_list = {
+	# Scope: country
+	every_in_global_list = {
+		variable = list_of_tradegoods
+		save_scope_as = this_tradegood
+		switch = {
+
+			trigger = has_variable
+			grain = {
+				prev = {
+					TRADE_test_create_variable = {
+						tradegood = grain
+					}
+				}
+			}
+			wood = {
+				prev = {
+					TRADE_test_create_variable = {
+						tradegood = wood
+					}
+				}
+			}
+
+		}
+	}
+}
+
+TRADE_test_create_variable = {
+	remove_variable = test_variable_grain
+	set_variable = {
+		name = test_variable_$tradegood$
+		value = 999
+	}
+	if = {
+		limit = {
+			has_variable = test_variable_grain
+		}
+		add_treasury = 50
+	}
+}
+
+tradezone_setup_effect = {
 	#Makes the most populated province in a trade zone a center of trade.
 	#REQUIRED INPUT: TRADE_ZONE = XXX (scripted trigger name)
 	random_region = {
@@ -8,10 +112,553 @@
 			}
 		}
 		ordered_region_province = {
-    		order_by = total_population
-	        add_permanent_province_modifier = {
-	            name = regional_center_of_trade_level_1
-	        }
+			order_by = total_population
+			add_permanent_province_modifier = {
+				name = regional_center_of_trade_level_1
+			}
+			add_to_global_variable_list = {
+				name = list_of_trade_centers
+				target = THIS
+			}
+			set_variable = $TRADE_ZONE$ # Record the name of the TZ in the province
 		}
-    }
+	}
+}
+
+# Function:	Add a variable to every governorship that stores the tradezone scope, so that you can easily scope to the TZ from a governorship with minimal performance overhead whenever necessary. This front-loads the performance overhead to the start of the game and any update periods.
+# Scope:	Governorship
+# Called:	1) Whenever the governorship change effects are called (e.g. change of territory)
+#			2) At the beginning of the game
+# NOTE:		Actually calls several other effects that set the variables
+
+TRADE_update_governorship_TZs = {
+	if = {
+		limit = { NOT = { has_variable = trade_center } }
+		capital_scope = {
+			if = {
+				limit = { india_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { india_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { east_north_america_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { east_north_america_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { west_north_america_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { west_north_america_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { caribbean_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { caribbean_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { west_south_america_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { west_south_america_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { east_south_america_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { east_south_america_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { south_east_asia_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { south_east_asia_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { indo_china_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { indo_china_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { yellow_sea_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { yellow_sea_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { southern_africa_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { southern_africa_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { west_africa_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { west_africa_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { east_africa_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { east_africa_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { middle_east_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { middle_east_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { western_steppe_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { western_steppe_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { eastern_steppe_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { eastern_steppe_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { upper_yangtzi_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { upper_yangtzi_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { atlantic_seaboard_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { atlantic_seaboard_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { central_europe_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { central_europe_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { west_mediterranean_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { west_mediterranean_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { baltic_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { baltic_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { east_europe_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { east_europe_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+			else_if = {
+				limit = { east_mediterranean_tradezone = { PROVINCE = yes } }
+				random_trade_center = {
+					limit = { east_mediterranean_tradezone = { PROVINCE = yes } }
+					save_scope_as = trade_center_province
+				}
+			}
+		}
+		set_variable = { # Save it in the governorship
+			name = trade_center
+			value = scope:trade_center_province
+		}
+	}  
+}
+
+# Function:	Set a province as the "trade center" scope for a tradezone (TZ) to act as a scope for that TZ.
+# Scope:	any
+# Called:	1) At the beginning of the game
+
+TRADE_setup_tradezones = { # Calls the tradezone_setup_effect for every tradezone
+	#Populate the world with trade centers - 1 per tradezone.
+	set_global_variable = economic_enhancement_setup_done
+	tradezone_setup_effect = {
+		 TRADE_ZONE = india_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = east_north_america_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = west_north_america_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = caribbean_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = west_south_america_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = east_south_america_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = south_east_asia_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = indo_china_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = yellow_sea_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = southern_africa_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = west_africa_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = east_africa_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = middle_east_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = western_steppe_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = eastern_steppe_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = upper_yangtzi_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = atlantic_seaboard_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = central_europe_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = west_mediterranean_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = baltic_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = east_europe_tradezone
+	}
+	tradezone_setup_effect = {
+		 TRADE_ZONE = east_mediterranean_tradezone
+	}
+}
+
+# Function:	Get every governorship in a specified trade zone, only used to put goverorship svalues into trade zone svalues
+# Scope:	Country
+
+stockpile_every_governorship_in_tradezone = {
+	every_governorships = {
+		random_governorship_state = {
+			limit = {
+				 any_state_province = {
+					$TRADE_ZONE$ = { PROVINCE = yes }
+				}
+			}
+			random_state_province = {
+				$TRADE_ZONE$ = { PROVINCE = yes }
+			}
+		}
+		add = $STOCKPILE$
+	}
+}
+
+# Function:	Store all the necessary values as variables every quarter
+# Scope:	Governorship
+# Called:	1) Every quarter before doing trade
+#			2) At the beginning of the game, to prevent any errors from missing variables referenced in svalues
+# NOTE:		Actually calls several other effects that set the variables
+TRADE_governorship_set_variables = {
+	TRADE_governorships_get_pops_this_quarter = yes
+}
+
+# Function:	Store population values for a governorship in variables so that they can be referenced multiple times quickly in one quarter, rather than being re-calculated every time as a svalue
+# Scope:	Governorship
+# Called:	1) Every quarter before doing trade
+#			2) At the beginning of the game, to prevent any errors from missing variables referenced in svalues
+# NOTE:		Whenever this is called, the variables are overwritten.
+
+TRADE_governorship_get_pops_this_quarter = {
+	set_variable = {
+		name = gov_total_pop_this_quarter
+		value = governorship_population
+	}
+	set_variable = {
+		name = gov_upper_strata_this_quarter
+		value = governorship_upper_strata
+	}
+	set_variable = {
+		name = gov_middle_strata_this_quarter
+		value = governorship_middle_strata
+	}
+	set_variable = {
+		name = gov_lower_strata_this_quarter
+		value = governorship_lower_strata
+	}
+	set_variable = {
+		name = gov_indentured_this_quarter
+		value = governorship_indentured
+	}
+	set_variable = {
+		name = gov_tribesmen_this_quarter
+		value = governorship_tribesmen
+	}
+	set_variable = {
+		name = gov_slaves_this_quarter
+		value = governorship_slaves
+	}
+}
+
+# Effects supporting the PURCHASE and SELL effects
+
+TRADE_set_internal_trade_scope = {
+	# Function: Tell the governorship whether it's selling to a country or a customs union when doing internal trade
+	# Scope: governorship
+	# Called: Every quarter before doing trade
+	if = {
+		limit = {
+			NOT = { has_variable = federation_customs_union }
+		}
+		set_variable = {
+			name = internal_trade_scope
+			value = capital_scope.owner
+		}
+	}
+	else = {
+		set_variable = {
+			name = internal_trade_scope
+			value = var:federation_customs_union
+		}
+	}
+}
+
+TRADE_reset_quarterly_governorship_values = {
+	# Scope: governorship
+	set_variable = {
+		name = governorship_this_quarter_balance
+		value = 0
+	}
+	PURCHASE_reset_quarterly_var = yes
+	SELL_reset_all_internal_amounts_offered = yes
+}
+
+TRADE_reset_quarterly_trade_scope_values = {
+	# Scope: random country
+	TRADE_reset_internal_pools = yes
+	SELL_reset_all_internal_trade_stockpiles = yes
+}
+
+TRADE_reset_internal_pools = {
+	every_country = {
+		set_variable = {
+			name = internal_income_pool
+			value = 0
+		}
+	}
+	every_in_global_list = {
+		variable = list_of_federations
+		set_variable = {
+			name = internal_income_pool
+			value = 0
+		}
+	}
+	TRADE_reset_internal_amounts_sold = yes
+}
+
+TRADE_reset_internal_amounts_sold = {
+	# Scope: random country
+
+	#WiP: grain only
+	every_country = {
+		TRADE_reset_internal_amount_sold = { internal_sold_total = internal_sold_total_grain }
+	}
+	every_in_global_list = {
+		variable = list_of_federations
+		TRADE_reset_internal_amount_sold = { internal_sold_total = internal_sold_total_grain }
+	}
+}
+
+TRADE_reset_internal_amount_sold = {
+	# Scope: internal trade scope
+
+	# Format of arguments:
+	# $internal_sold_total$ = internal_sold_total_grain
+	set_variable = {
+		name = $internal_sold_total$
+		value = 0
+	}
+}
+
+TRADE_reset_all_internal_trade_stockpiles = {
+	# Scope: Random country
+	# Called: Quarterly
+	# Resets all internal trade stockpiles to 0
+	#WiP: grain only
+	every_country = {
+		set_variable = {
+			name = grain_stockpile_internal
+			value = 0 
+		}
+	}
+	every_federation = {
+		set_variable = {
+			name = grain_stockpile_internal
+			value = 0
+		}
+	}
+}
+
+TRADE_reset_all_internal_trade_revenue_totals = {
+	# Scope: Random country
+	# Called: Quarterly
+	# Resets all internal trade stockpiles to 0
+	#WiP: grain only
+	every_country = {
+		set_variable = {
+			name = internal_total_revenue_grain
+			value = 0 
+		}
+	}
+	every_in_global_list = {
+		variable = list_of_federations
+		set_variable = {
+			name = internal_total_revenue_grain
+			value = 0 
+		}
+	}
+}
+
+TRADE_update_all_global_base_prices = {
+	TRADE_update_global_base_price = {
+		global_price = global_price_grain
+		global_supply = global_supply_grain
+		global_demand = global_demand_grain
+		demand_good = DEMAND_grain
+		supply_good = GOODS_governorship_grain_produced
+	}
+}
+
+TRADE_update_global_base_price = {
+	# Scope: Random country, doesn't matter
+	# This effect sets the global base price for a tradegood
+	# The formula is:
+	# Base price = global units demanded / units produced # For now, anyway
+	# This checks the given good
+
+	# Format of arguments:
+	# $global_price$ = global_price_grain
+	# $global_supply$ = global_supply_grain
+	# $global_demand$ = global_demand_grain
+	# $demand_good$ = DEMAND_grain, svalue, see DEMAND_svalues
+	# $supply_good$ = GOODS_governorship_grain_produced, svalue, see GOODS_svalues
+
+	set_global_variable = {
+		name = $global_demand$
+		value = 1 # Starts 1, gets augmented
+	}
+
+	set_global_variable = {
+		name = $global_supply$
+		value = 1 # Starts 1, gets augmented
+	}
+
+	# Add the total of all demand for this good around the world
+	every_country = {
+		every_governorships = {
+			change_global_variable = {
+				name = $global_demand$
+				add = $demand_good$
+			}
+			change_global_variable = {
+				name = $global_supply$
+				add = $supply_good$
+			}
+		}
+	}
+	# NOTE: Global supply should probably be the amount offered in all TZs, not produced in every governorship
+	# See TRADE_svalues TRADE_global_offered_grain for WiP example
+
+	# Now calculate the price
+	set_global_variable = {
+		name = $global_price$
+		value = global_var:$global_demand$
+	}
+	change_global_variable = {
+		name = $global_price$
+		divide = global_var:$global_supply$
+	}
+
+	change_global_variable = {
+		name = $global_price$
+		multiply = 0.01
+	}
+
+	debug_log = "Finished setting global price"
+
+}
+
+TRADE_update_all_TZ_local_prices = {
+	every_in_global_list = {
+		variable = list_of_trade_centers
+		limit = { always = yes } # Debug purposes only, this should contain an actual limit checking if the TZ actually has any stock of the named tradegood
+		SELL_set_TZ_prices = {
+			local_price = local_price_grain
+			global_price = global_price_grain
+		}
+	}
+}
+
+TRADE_set_all_local_internal_cuts_of_revenue = {
+	# Scope: governorship
+	# Called: start of game
+	# Sets all local internal cuts of revenue for this quarter to 0
+	# Needs to exist because the trade effects cannot set variables that don't exist yet
+	set_variable = { # Grain
+		name = local_internal_revenue_cut_grain
+		value = 0
+	}
+}
+
+TRADE_set_all_internal_stockpile_cut_percentages = {
+	# Scope: governorship
+	# Called: start of game
+	# Sets all local internal revenue cut percentages for this quarter to 0
+	# Needs to exist because the trade effects cannot set variables that don't exist yet
+	set_variable = { # Grain
+		name = internal_stockpile_cut_percentage_grain
+		value = 0
+	}
+}
+
+TRADE_setup_internal_trade_cuts = {
+	TRADE_set_all_local_internal_cuts_of_revenue = yes
+	TRADE_set_all_internal_stockpile_cut_percentages =yes
 }

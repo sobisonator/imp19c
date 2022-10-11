@@ -1,0 +1,84 @@
+# OPEN WITH: gui.createwidget gui/settings_window.gui settings OR use shift+f5
+# Just replace "settings" with the name of your widget
+
+
+base_window = {
+	name = "settings" #name used in console command to open widget
+    gfxtype = windowgfx
+    parentanchor = center
+    size = { 470 170 }
+    vbox = {
+        using = MainWindowHeaderBox
+
+        blockoverride "Title_text" { text = "Graphical Settings" }
+
+        blockoverride "White_buttons" {}
+        vbox = {
+            layoutpolicy_vertical = expanding
+        }
+
+    }
+    button_close = {
+        onclick = "[ExecuteConsoleCommand('GUI.ClearWidgets settings')]"
+        tooltip = "CLOSE"
+        parentanchor = top|right
+        position = { -7 14}
+    }
+    sub_header = {
+        size = { 464 30 }
+        position = { 4 55 }
+        blockoverride "Title_text" { text = "Lighting Modes" }
+    }
+    @col_1 = 110
+    @button_height = 140    
+    @row_1 = 35
+    @row_2 = @[row_1 + (button_height + 1) * 1]
+    @row_3 = @[row_1 + (button_height + 1) * 2]
+
+    text_button_square = {
+        size = { 120 28 }
+        position = { @row_1 @col_1 }
+        enabled = "[Not(Or(GetVariableSystem.Exists('evening_mode'), GetVariableSystem.Exists('night_mode')))]"
+        #enabled = "[Not(Or(GetVariableSystem.Exists('evening_mode'), GetVariableSystem.Exists('night_mode')), Or(GetVariableSystem.Exists('dyn_morning_mode'), GetVariableSystem.Exists('dyn_night_mode')), GetVariableSystem.Exists('dyn_full_mode'))]"
+        tooltip = "morning_mode_tt"
+        blockoverride "Center_text"
+        {
+            text = "Morning"
+        }
+        blockoverride "On_click"
+        {
+            onclick = "[GetVariableSystem.Toggle( 'morning_mode' )]"
+            onclick = "[ExecuteConsoleCommand('shader_debug morningLight')]"
+        }
+    }
+    text_button_square = {
+        size = { 120 28 }
+        position = { @row_2 @col_1 }
+        enabled = "[Not(Or(GetVariableSystem.Exists('morning_mode'), GetVariableSystem.Exists('night_mode')))]"
+        tooltip = "evening_mode_tt"
+        blockoverride "Center_text"
+        {
+            text = "Evening"
+        }
+        blockoverride "On_click"
+        {
+            onclick = "[GetVariableSystem.Toggle( 'evening_mode' )]"
+            onclick = "[ExecuteConsoleCommand('shader_debug eveningLight')]"
+        }
+    }
+    text_button_square = {
+        size = { 120 28 }
+        position = { @row_3 @col_1 }
+        enabled = "[Not(Or(GetVariableSystem.Exists('evening_mode'), GetVariableSystem.Exists('morning_mode')))]"
+        tooltip = "night_mode_tt"
+        blockoverride "Center_text"
+        {
+            text = "Night"
+        }
+        blockoverride "On_click"
+        {
+            onclick = "[GetVariableSystem.Toggle( 'night_mode' )]"
+            onclick = "[ExecuteConsoleCommand('shader_debug nightLight')]"
+        }
+    }
+}

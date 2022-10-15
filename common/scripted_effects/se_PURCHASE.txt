@@ -53,6 +53,17 @@ PURCHASE_check_shopping_internal = {
 			name = l_order_size
 			subtract = var:$tradegood$_stockpile
 		}
+		# Below is commented out: limits the import capacity based on infrastructure
+		# Disabled during testing because buildings aren't set up yet
+		#if = {
+		#	limit = {
+		#		local_var:l_order_size > TRADE_governorship_infrastructure_capacity_svalue
+		#	}
+		#	set_local_variable = {
+		#		name = l_order_size
+		#		value = TRADE_governorship_infrastructure_capacity_svalue
+		#	}
+		#}
 		PURCHASE_order_internal = {
 			tradegood = $tradegood$
 			#for_stockpile = $for_stockpile$
@@ -149,8 +160,8 @@ PURCHASE_transfer_goods_internally = {
 	# The balance will then be applied to the governorship wealth pools at the end of the purchase phase
 
 	change_variable = {
-		name = governorship_this_quarter_balance
-		subtract = local_var:this_spend
+		name = governorship_this_quarter_spend
+		add = local_var:this_spend
 	}
 
 	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
@@ -158,6 +169,12 @@ PURCHASE_transfer_goods_internally = {
 		change_variable = {
 			name = internal_sold_total_$tradegood$
 			add = $amount$
+		}
+	}
+	var:internal_trade_scope = {
+		change_variable = {
+			name = internal_total_revenue_$tradegood$
+			add = local_var:this_spend
 		}
 	}
 	

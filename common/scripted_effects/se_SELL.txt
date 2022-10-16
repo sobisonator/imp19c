@@ -145,6 +145,7 @@ SELL_get_all_internal_cuts_of_revenue = {
 
 	SELL_get_internal_cut_of_revenue = {
 		tradegood = grain
+		category = essentials
 	}
 	
 }
@@ -171,7 +172,7 @@ SELL_get_internal_cut_of_revenue = {
 	}
 
 	change_variable = {
-		name = governorship_this_quarter_income # Quarterly governorship income is only divvied up and given out at the end of both internal and external trade. Gets reset at the beginning of every quarter
+		name = governorship_this_quarter_income_from_$category$ # Quarterly governorship income is only divvied up and given out at the end of both internal and external trade. Gets reset at the beginning of every quarter
 		add = var:local_internal_revenue_cut_$tradegood$
 	}
 
@@ -190,6 +191,101 @@ SELL_get_internal_cut_of_revenue = {
 	change_variable = {
 		name = $tradegood$_stockpile
 		subtract = local_var:local_sold_cut
+	}
+
+}
+
+SELL_split_all_income = {
+	# Scope: governorship
+	# Function: Split the income for each category of tradegoods between the appropriate pop groups
+	SELL_split_income = {
+		category = essentials
+	}
+	SELL_split_income = {
+		category = luxuries
+	}
+	SELL_split_income = {
+		category = business_goods
+	}
+	SELL_split_income = {
+		category = military
+	}
+}
+
+SELL_calculate_actual_share_of_income = {
+	set_local_variable = {
+		name = this_income_from_$category$
+		value = var:governorship_this_quarter_income_from_$category$
+	}
+	change_local_variable = {
+		name = this_spend_on_$category$
+		multiply = var:income_share_$category$_$seller$
+	}
+}
+
+SELL_split_income = {
+	# Scope: governorship
+	# Split the income for a single category of imported goods
+	SELL_calculate_actual_share_of_income = {
+		category = $category$
+		seller = the_state
+	}
+	c:owner = {
+		add_treasury = local_var:this_income_from_$category$
+	}
+	# Upper strata
+	SELL_calculate_actual_share_of_income = {
+		category = $category$
+		seller = upper_strata
+	}
+	change_variable = {
+		name = upper_strata_wealth
+		add = local_var:this_income_from_$category$
+	}
+	# Middle strata
+	SELL_calculate_actual_share_of_income = {
+		category = $category$
+		seller = middle_strata
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = local_var:this_income_from_$category$
+	}
+	# Lower strata
+	SELL_calculate_actual_share_of_income = {
+		category = $category$
+		seller = lower_strata
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = local_var:this_income_from_$category$
+	}
+	# Tribesmen
+	SELL_calculate_actual_share_of_income = {
+		category = $category$
+		seller = tribesmen
+	}
+	change_variable = {
+		name = tribesmen_wealth
+		add = local_var:this_income_from_$category$
+	}
+	# Indentured
+	SELL_calculate_actual_share_of_income = {
+		category = $category$
+		seller = indentured
+	}
+	change_variable = {
+		name = indentured_wealth
+		add = local_var:this_income_from_$category$
+	}
+	# Slaves
+	SELL_calculate_actual_share_of_income = {
+		category = $category$
+		seller = slaves
+	}
+	change_variable = {
+		name = slaves_wealth
+		add = local_var:this_income_from_$category$
 	}
 }
 

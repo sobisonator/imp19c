@@ -17,6 +17,60 @@ TRADE_governorship_export_stock_modifier = { # At the governorship level, modifi
 	max = 1 # You can never sell more than 100% of your stockpile!
 }
 
+### INFRASTRUCTURE LIMITS
+# Infrastructure puts a hard cap on how much of any good a governorship can export/import
+# This is a number of units, not a modifier
+# the _svalue is converted into a variable at the start of every quarter to avoid recalculation
+# The resulting variable, from a TRADE scripted effect, is used as a <max> for SELL and PURCHASE declarations
+
+TRADE_governorship_infrastructure_capacity_svalue = {
+	value = TRADE_canal_bonus
+	add = TRADE_railway_bonus
+	add = TRADE_port_bonus
+	add = TRADE_river_port_bonus
+}
+
+# Bonuses from individual infrastructure buildings
+
+TRADE_canal_bonus = {
+	value = 0
+	every_governorship_state = {
+		every_province = {
+			add = num_of_INF_canal
+		}
+	}	
+}
+
+TRADE_railway_bonus = {
+	value = 0
+	every_governorship_state = {
+		every_province = {
+			add = INF_railway_upgrade
+			# Also add if there's a road... if possible.
+		}
+	}	
+}
+
+TRADE_port_bonus = {
+	value = 0
+	every_governorship_state = {
+		every_province = {
+			add = num_of_port_building
+		}
+	}
+	multiply = 2	
+}
+
+TRADE_river_port_bonus = {
+	value = 0
+	every_governorship_state = {
+		every_province = {
+			add = num_of_river_port_building
+		}
+	}
+	multiply = 2	
+}
+
 ### EXPORT THRESHOLDS, do not sell any stock below this amount
 
 TRADE_governorship_export_threshold_grain = { # The lower limit before a governorship is allowed to export any of this good. Should be derived from a variable
@@ -58,6 +112,7 @@ TRADE_governorship_for_export_internal_grain = {
 		subtract = TRADE_governorship_for_export_grain
 	}
 	min = 0
+	# max = TRADE_governorship_infrastructure_capacity_svalue # DISABLED FOR TESTING
 }
 
 ### ACTUAL AMOUNTS OFFERED FOR SALE
@@ -98,4 +153,729 @@ TRADE_share_of_global_grain_supply = {
 	# The global supply is amount produced...
 	value = var:TZ_stockpile_grain
 	divide = TRADE_global_offered_grain
+}
+
+### Shares of spends
+#### Purpose: get the weighting for each spend that that each spender group should have
+#### Used in TRADE_set_cost_shares scripted effect
+
+# ESSENTIALS
+
+TRADE_share_of_spend_essentials_upper_strata = {
+	value = 100
+	multiply = governorship_upper_strata
+}
+TRADE_share_of_spend_essentials_middle_strata = {
+	value = 100
+	multiply = governorship_middle_strata
+}
+TRADE_share_of_spend_essentials_lower_strata = {
+	value = 100
+	multiply = governorship_lower_strata
+}
+TRADE_share_of_spend_essentials_proletariat = {
+	value = 100
+	multiply = governorship_proletariat
+}
+TRADE_share_of_spend_essentials_indentured = {
+	value = 50 # Partially paid for by landowners
+	multiply = governorship_indentured
+}
+TRADE_share_of_spend_essentials_tribesmen = {
+	value = 100
+	multiply = governorship_tribesmen
+}
+TRADE_share_of_spend_essentials_slaves = {
+	value = 0 # Entirely paid for by landowners
+	multiply = governorship_slaves
+}
+TRADE_share_of_spend_essentials_the_state = {
+	value = 0 # Consider subsidies as a value
+	multiply = governorship_population
+}
+
+# LUXURIES
+
+TRADE_share_of_spend_luxuries_upper_strata = {
+	value = 100
+	multiply = governorship_upper_strata
+}
+TRADE_share_of_spend_luxuries_middle_strata = {
+	value = 60
+	multiply = governorship_middle_strata
+}
+TRADE_share_of_spend_luxuries_lower_strata = {
+	value = 10
+	multiply = governorship_lower_strata
+}
+TRADE_share_of_spend_luxuries_proletariat = {
+	value = 10
+	multiply = governorship_proletariat
+}
+TRADE_share_of_spend_luxuries_indentured = {
+	value = 0
+	multiply = governorship_indentured
+}
+TRADE_share_of_spend_luxuries_tribesmen = {
+	value = 10
+	multiply = governorship_tribesmen
+}
+TRADE_share_of_spend_luxuries_slaves = {
+	value = 0
+	multiply = governorship_slaves
+}
+TRADE_share_of_spend_luxuries_the_state = {
+	value = 0 # Consider subsidies as a value
+	multiply = governorship_population
+}
+
+# BUSINESS GOODS
+# This should have some conditions about who owns businesses based on laws. For testing purposes, the values are static
+
+TRADE_share_of_spend_business_goods_upper_strata = {
+	value = 100
+	multiply = governorship_upper_strata
+}
+TRADE_share_of_spend_business_goods_middle_strata = {
+	value = 60
+	multiply = governorship_middle_strata
+}
+TRADE_share_of_spend_business_goods_lower_strata = {
+	value = 20
+	multiply = governorship_lower_strata
+}
+TRADE_share_of_spend_business_goods_proletariat = {
+	value = 10
+	multiply = governorship_proletariat
+}
+TRADE_share_of_spend_business_goods_indentured = {
+	value = 0
+	multiply = governorship_indentured
+}
+TRADE_share_of_spend_business_goods_tribesmen = {
+	value = 0
+	multiply = governorship_tribesmen
+}
+TRADE_share_of_spend_business_goods_slaves = {
+	value = 0
+	multiply = governorship_slaves
+}
+TRADE_share_of_spend_business_goods_the_state = {
+	value = 0 # Consider subsidies as a value
+	multiply = governorship_population
+}
+
+# MILITARY
+# This should have some conditions about who shoulders the cost for military. For testing purposes, the values are static/
+
+TRADE_share_of_spend_military_upper_strata = {
+	value = 0 # Consider feudalism as a way to add to this, or private military suppliers
+	multiply = governorship_upper_strata
+}
+TRADE_share_of_spend_military_middle_strata = {
+	value = 0 # Consider self-armed militia as a way to add to this
+	multiply = governorship_middle_strata
+}
+TRADE_share_of_spend_military_lower_strata = {
+	value = 0 # Consider self-armed militia as a way to add to this
+	multiply = governorship_lower_strata
+}
+TRADE_share_of_spend_military_proletariat = {
+	value = 0 # Consider self-armed militia as a way to add to this
+	multiply = governorship_proletariat
+}
+TRADE_share_of_spend_military_indentured = {
+	value = 0
+	multiply = governorship_indentured
+}
+TRADE_share_of_spend_military_tribesmen = {
+	value = 0 # Consider self-armed militia as a way to add to this
+	multiply = governorship_tribesmen
+}
+TRADE_share_of_spend_military_slaves = {
+	value = 0
+	multiply = governorship_slaves
+}
+TRADE_share_of_spend_military_the_state = {
+	value = 100
+	multiply = governorship_population
+}
+
+## SPENDER SHARES AS PERCENTAGES
+# Spender shares need to be turned from weights into percentages
+
+TRADE_sum_of_essentials_spend_weights = {
+	value = TRADE_share_of_spend_essentials_upper_strata
+	add = TRADE_share_of_spend_essentials_middle_strata
+	add = TRADE_share_of_spend_essentials_lower_strata
+	add = TRADE_share_of_spend_essentials_proletariat
+	add = TRADE_share_of_spend_essentials_tribesmen
+	add = TRADE_share_of_spend_essentials_indentured
+	add = TRADE_share_of_spend_essentials_slaves
+	add = TRADE_share_of_spend_essentials_the_state
+}
+
+TRADE_sum_of_luxuries_spend_weights = {
+	value = TRADE_share_of_spend_luxuries_upper_strata
+	add = TRADE_share_of_spend_luxuries_middle_strata
+	add = TRADE_share_of_spend_luxuries_lower_strata
+	add = TRADE_share_of_spend_luxuries_proletariat
+	add = TRADE_share_of_spend_luxuries_tribesmen
+	add = TRADE_share_of_spend_luxuries_indentured
+	add = TRADE_share_of_spend_luxuries_slaves
+	add = TRADE_share_of_spend_luxuries_the_state
+}
+
+TRADE_sum_of_business_goods_spend_weights = {
+	value = TRADE_share_of_spend_business_goods_upper_strata
+	add = TRADE_share_of_spend_business_goods_middle_strata
+	add = TRADE_share_of_spend_business_goods_lower_strata
+	add = TRADE_share_of_spend_business_goods_proletariat
+	add = TRADE_share_of_spend_business_goods_tribesmen
+	add = TRADE_share_of_spend_business_goods_indentured
+	add = TRADE_share_of_spend_business_goods_slaves
+	add = TRADE_share_of_spend_business_goods_the_state
+}
+
+TRADE_sum_of_military_spend_weights = {
+	value = TRADE_share_of_spend_military_upper_strata
+	add = TRADE_share_of_spend_military_middle_strata
+	add = TRADE_share_of_spend_military_lower_strata
+	add = TRADE_share_of_spend_military_proletariat
+	add = TRADE_share_of_spend_military_tribesmen
+	add = TRADE_share_of_spend_military_indentured
+	add = TRADE_share_of_spend_military_slaves
+	add = TRADE_share_of_spend_military_the_state
+}
+
+## Essentials
+
+TRADE_spender_share_percentage_essentials_upper_strata = {
+	value = TRADE_share_of_spend_essentials_upper_strata
+	divide = TRADE_sum_of_essentials_spend_weights
+}
+
+TRADE_spender_share_percentage_essentials_middle_strata = {
+	value = TRADE_share_of_spend_essentials_middle_strata
+	divide = TRADE_sum_of_essentials_spend_weights
+}
+
+TRADE_spender_share_percentage_essentials_lower_strata = {
+	value = TRADE_share_of_spend_essentials_lower_strata
+	divide = TRADE_sum_of_essentials_spend_weights
+}
+
+TRADE_spender_share_percentage_essentials_proletariat = {
+	value = TRADE_share_of_spend_essentials_proletariat
+	divide = TRADE_sum_of_essentials_spend_weights
+}
+
+TRADE_spender_share_percentage_essentials_tribesmen = {
+	value = TRADE_share_of_spend_essentials_tribesmen
+	divide = TRADE_sum_of_essentials_spend_weights
+}
+
+TRADE_spender_share_percentage_essentials_indentured = {
+	value = TRADE_share_of_spend_essentials_indentured
+	divide = TRADE_sum_of_essentials_spend_weights
+}
+
+TRADE_spender_share_percentage_essentials_slaves = {
+	value = TRADE_share_of_spend_essentials_slaves
+	divide = TRADE_sum_of_essentials_spend_weights
+}
+
+TRADE_spender_share_percentage_essentials_the_state = {
+	value = TRADE_share_of_spend_essentials_the_state
+	divide = TRADE_sum_of_essentials_spend_weights
+}
+
+
+## Luxuries
+
+TRADE_spender_share_percentage_luxuries_upper_strata = {
+	value = TRADE_share_of_spend_luxuries_upper_strata
+	divide = TRADE_sum_of_luxuries_spend_weights
+}
+
+TRADE_spender_share_percentage_luxuries_middle_strata = {
+	value = TRADE_share_of_spend_luxuries_middle_strata
+	divide = TRADE_sum_of_luxuries_spend_weights
+}
+
+TRADE_spender_share_percentage_luxuries_lower_strata = {
+	value = TRADE_share_of_spend_luxuries_lower_strata
+	divide = TRADE_sum_of_luxuries_spend_weights
+}
+
+TRADE_spender_share_percentage_luxuries_proletariat = {
+	value = TRADE_share_of_spend_luxuries_proletariat
+	divide = TRADE_sum_of_luxuries_spend_weights
+}
+
+TRADE_spender_share_percentage_luxuries_tribesmen = {
+	value = TRADE_share_of_spend_luxuries_tribesmen
+	divide = TRADE_sum_of_luxuries_spend_weights
+}
+
+TRADE_spender_share_percentage_luxuries_indentured = {
+	value = TRADE_share_of_spend_luxuries_indentured
+	divide = TRADE_sum_of_luxuries_spend_weights
+}
+
+TRADE_spender_share_percentage_luxuries_slaves = {
+	value = TRADE_share_of_spend_luxuries_slaves
+	divide = TRADE_sum_of_luxuries_spend_weights
+}
+
+TRADE_spender_share_percentage_luxuries_the_state = {
+	value = TRADE_share_of_spend_luxuries_the_state
+	divide = TRADE_sum_of_luxuries_spend_weights
+}
+
+## Business goods
+
+TRADE_spender_share_percentage_business_goods_upper_strata = {
+	value = TRADE_share_of_spend_business_goods_upper_strata
+	divide = TRADE_sum_of_business_goods_spend_weights
+}
+
+TRADE_spender_share_percentage_business_goods_middle_strata = {
+	value = TRADE_share_of_spend_business_goods_middle_strata
+	divide = TRADE_sum_of_business_goods_spend_weights
+}
+
+TRADE_spender_share_percentage_business_goods_lower_strata = {
+	value = TRADE_share_of_spend_business_goods_lower_strata
+	divide = TRADE_sum_of_business_goods_spend_weights
+}
+
+TRADE_spender_share_percentage_business_goods_proletariat = {
+	value = TRADE_share_of_spend_business_goods_proletariat
+	divide = TRADE_sum_of_business_goods_spend_weights
+}
+
+TRADE_spender_share_percentage_business_goods_tribesmen = {
+	value = TRADE_share_of_spend_business_goods_tribesmen
+	divide = TRADE_sum_of_business_goods_spend_weights
+}
+
+TRADE_spender_share_percentage_business_goods_indentured = {
+	value = TRADE_share_of_spend_business_goods_indentured
+	divide = TRADE_sum_of_business_goods_spend_weights
+}
+
+TRADE_spender_share_percentage_business_goods_slaves = {
+	value = TRADE_share_of_spend_business_goods_slaves
+	divide = TRADE_sum_of_business_goods_spend_weights
+}
+
+TRADE_spender_share_percentage_business_goods_the_state = {
+	value = TRADE_share_of_spend_business_goods_the_state
+	divide = TRADE_sum_of_business_goods_spend_weights
+}
+
+## Military
+
+TRADE_spender_share_percentage_military_upper_strata = {
+	value = TRADE_share_of_spend_military_upper_strata
+	divide = TRADE_sum_of_military_spend_weights
+}
+
+TRADE_spender_share_percentage_military_middle_strata = {
+	value = TRADE_share_of_spend_military_middle_strata
+	divide = TRADE_sum_of_military_spend_weights
+}
+
+TRADE_spender_share_percentage_military_lower_strata = {
+	value = TRADE_share_of_spend_military_lower_strata
+	divide = TRADE_sum_of_military_spend_weights
+}
+
+TRADE_spender_share_percentage_military_proletariat = {
+	value = TRADE_share_of_spend_military_proletariat
+	divide = TRADE_sum_of_military_spend_weights
+}
+
+TRADE_spender_share_percentage_military_tribesmen = {
+	value = TRADE_share_of_spend_military_tribesmen
+	divide = TRADE_sum_of_military_spend_weights
+}
+
+TRADE_spender_share_percentage_military_indentured = {
+	value = TRADE_share_of_spend_military_indentured
+	divide = TRADE_sum_of_military_spend_weights
+}
+
+TRADE_spender_share_percentage_military_slaves = {
+	value = TRADE_share_of_spend_military_slaves
+	divide = TRADE_sum_of_military_spend_weights
+}
+
+TRADE_spender_share_percentage_military_the_state = {
+	value = TRADE_share_of_spend_military_the_state
+	divide = TRADE_sum_of_military_spend_weights
+}
+
+### income SHARES
+# income shares are like spend shares and are broken down by category
+
+# Scope is governorship for all
+
+# ESSENTIALS
+
+TRADE_share_of_income_essentials_upper_strata = {
+	value = 100
+	multiply = governorship_upper_strata
+}
+TRADE_share_of_income_essentials_middle_strata = {
+	value = 50
+	multiply = governorship_middle_strata
+}
+TRADE_share_of_income_essentials_lower_strata = {
+	value = 25
+	multiply = governorship_lower_strata
+}
+TRADE_share_of_income_essentials_proletariat = {
+	value = 0
+	multiply = governorship_proletariat
+}
+TRADE_share_of_income_essentials_indentured = {
+	value = 0 # Partially paid for by landowners
+	multiply = governorship_indentured
+}
+TRADE_share_of_income_essentials_tribesmen = {
+	value = 5
+	multiply = governorship_tribesmen
+}
+TRADE_share_of_income_essentials_slaves = {
+	value = 0 # Entirely paid for by landowners
+	multiply = governorship_slaves
+}
+TRADE_share_of_income_essentials_the_state = {
+	value = 0 # Consider subsidies as a value
+	multiply = governorship_population
+}
+
+# LUXURIES
+
+TRADE_share_of_income_luxuries_upper_strata = {
+	value = 100
+	multiply = governorship_upper_strata
+}
+TRADE_share_of_income_luxuries_middle_strata = {
+	value = 50
+	multiply = governorship_middle_strata
+}
+TRADE_share_of_income_luxuries_lower_strata = {
+	value = 5
+	multiply = governorship_lower_strata
+}
+TRADE_share_of_income_luxuries_proletariat = {
+	value = 0
+	multiply = governorship_proletariat
+}
+TRADE_share_of_income_luxuries_indentured = {
+	value = 0
+	multiply = governorship_indentured
+}
+TRADE_share_of_income_luxuries_tribesmen = {
+	value = 10
+	multiply = governorship_tribesmen
+}
+TRADE_share_of_income_luxuries_slaves = {
+	value = 0
+	multiply = governorship_slaves
+}
+TRADE_share_of_income_luxuries_the_state = {
+	value = 0 # Consider subsidies as a value
+	multiply = governorship_population
+}
+
+# BUSINESS GOODS
+# This should have some conditions about who owns businesses based on laws. For testing purposes, the values are static
+
+TRADE_share_of_income_business_goods_upper_strata = {
+	value = 100
+	multiply = governorship_upper_strata
+}
+TRADE_share_of_income_business_goods_middle_strata = {
+	value = 60
+	multiply = governorship_middle_strata
+}
+TRADE_share_of_income_business_goods_lower_strata = {
+	value = 5
+	multiply = governorship_lower_strata
+}
+TRADE_share_of_income_business_goods_proletariat = {
+	value = 0
+	multiply = governorship_proletariat
+}
+TRADE_share_of_income_business_goods_indentured = {
+	value = 0
+	multiply = governorship_indentured
+}
+TRADE_share_of_income_business_goods_tribesmen = {
+	value = 0
+	multiply = governorship_tribesmen
+}
+TRADE_share_of_income_business_goods_slaves = {
+	value = 0
+	multiply = governorship_slaves
+}
+TRADE_share_of_income_business_goods_the_state = {
+	value = 0 # Consider subsidies as a value
+	multiply = governorship_population
+}
+
+# MILITARY
+# This should have some conditions about who shoulders the cost for military. For testing purposes, the values are static/
+
+TRADE_share_of_income_military_upper_strata = {
+	value = 100 # Consider feudalism as a way to add to this, or private military suppliers
+	multiply = governorship_upper_strata
+}
+TRADE_share_of_income_military_middle_strata = {
+	value = 0 # Consider self-armed militia as a way to add to this
+	multiply = governorship_middle_strata
+}
+TRADE_share_of_income_military_lower_strata = {
+	value = 0 # Consider self-armed militia as a way to add to this
+	multiply = governorship_lower_strata
+}
+TRADE_share_of_income_military_proletariat = {
+	value = 0 # Consider self-armed militia as a way to add to this
+	multiply = governorship_proletariat
+}
+TRADE_share_of_income_military_indentured = {
+	value = 0
+	multiply = governorship_indentured
+}
+TRADE_share_of_income_military_tribesmen = {
+	value = 0 # Consider self-armed militia as a way to add to this
+	multiply = governorship_tribesmen
+}
+TRADE_share_of_income_military_slaves = {
+	value = 0
+	multiply = governorship_slaves
+}
+TRADE_share_of_income_military_the_state = {
+	value = 0
+	multiply = governorship_population
+}
+
+## income SHARES AS PERCENTAGES
+# income shares need to be turned from weights into percentages
+
+TRADE_sum_of_essentials_income_weights = {
+	value = TRADE_share_of_income_essentials_upper_strata
+	add = TRADE_share_of_income_essentials_middle_strata
+	add = TRADE_share_of_income_essentials_lower_strata
+	add = TRADE_share_of_income_essentials_proletariat
+	add = TRADE_share_of_income_essentials_tribesmen
+	add = TRADE_share_of_income_essentials_indentured
+	add = TRADE_share_of_income_essentials_slaves
+	add = TRADE_share_of_income_essentials_the_state
+}
+
+TRADE_sum_of_luxuries_income_weights = {
+	value = TRADE_share_of_income_luxuries_upper_strata
+	add = TRADE_share_of_income_luxuries_middle_strata
+	add = TRADE_share_of_income_luxuries_lower_strata
+	add = TRADE_share_of_income_luxuries_proletariat
+	add = TRADE_share_of_income_luxuries_tribesmen
+	add = TRADE_share_of_income_luxuries_indentured
+	add = TRADE_share_of_income_luxuries_slaves
+	add = TRADE_share_of_income_luxuries_the_state
+}
+
+TRADE_sum_of_business_goods_income_weights = {
+	value = TRADE_share_of_income_business_goods_upper_strata
+	add = TRADE_share_of_income_business_goods_middle_strata
+	add = TRADE_share_of_income_business_goods_lower_strata
+	add = TRADE_share_of_income_business_goods_proletariat
+	add = TRADE_share_of_income_business_goods_tribesmen
+	add = TRADE_share_of_income_business_goods_indentured
+	add = TRADE_share_of_income_business_goods_slaves
+	add = TRADE_share_of_income_business_goods_the_state
+}
+
+TRADE_sum_of_military_income_weights = {
+	value = TRADE_share_of_income_military_upper_strata
+	add = TRADE_share_of_income_military_middle_strata
+	add = TRADE_share_of_income_military_lower_strata
+	add = TRADE_share_of_income_military_proletariat
+	add = TRADE_share_of_income_military_tribesmen
+	add = TRADE_share_of_income_military_indentured
+	add = TRADE_share_of_income_military_slaves
+	add = TRADE_share_of_income_military_the_state
+}
+
+## Essentials
+
+TRADE_income_share_percentage_essentials_upper_strata = {
+	value = TRADE_share_of_income_essentials_upper_strata
+	divide = TRADE_sum_of_essentials_income_weights
+}
+
+TRADE_income_share_percentage_essentials_middle_strata = {
+	value = TRADE_share_of_income_essentials_middle_strata
+	divide = TRADE_sum_of_essentials_income_weights
+}
+
+TRADE_income_share_percentage_essentials_lower_strata = {
+	value = TRADE_share_of_income_essentials_lower_strata
+	divide = TRADE_sum_of_essentials_income_weights
+}
+
+TRADE_income_share_percentage_essentials_proletariat = {
+	value = TRADE_share_of_income_essentials_proletariat
+	divide = TRADE_sum_of_essentials_income_weights
+}
+
+TRADE_income_share_percentage_essentials_tribesmen = {
+	value = TRADE_share_of_income_essentials_tribesmen
+	divide = TRADE_sum_of_essentials_income_weights
+}
+
+TRADE_income_share_percentage_essentials_indentured = {
+	value = TRADE_share_of_income_essentials_indentured
+	divide = TRADE_sum_of_essentials_income_weights
+}
+
+TRADE_income_share_percentage_essentials_slaves = {
+	value = TRADE_share_of_income_essentials_slaves
+	divide = TRADE_sum_of_essentials_income_weights
+}
+
+TRADE_income_share_percentage_essentials_the_state = {
+	value = TRADE_share_of_income_essentials_the_state
+	divide = TRADE_sum_of_essentials_income_weights
+}
+
+
+## Luxuries
+
+TRADE_income_share_percentage_luxuries_upper_strata = {
+	value = TRADE_share_of_income_luxuries_upper_strata
+	divide = TRADE_sum_of_luxuries_income_weights
+}
+
+TRADE_income_share_percentage_luxuries_middle_strata = {
+	value = TRADE_share_of_income_luxuries_middle_strata
+	divide = TRADE_sum_of_luxuries_income_weights
+}
+
+TRADE_income_share_percentage_luxuries_lower_strata = {
+	value = TRADE_share_of_income_luxuries_lower_strata
+	divide = TRADE_sum_of_luxuries_income_weights
+}
+
+TRADE_income_share_percentage_luxuries_proletariat = {
+	value = TRADE_share_of_income_luxuries_proletariat
+	divide = TRADE_sum_of_luxuries_income_weights
+}
+
+TRADE_income_share_percentage_luxuries_tribesmen = {
+	value = TRADE_share_of_income_luxuries_tribesmen
+	divide = TRADE_sum_of_luxuries_income_weights
+}
+
+TRADE_income_share_percentage_luxuries_indentured = {
+	value = TRADE_share_of_income_luxuries_indentured
+	divide = TRADE_sum_of_luxuries_income_weights
+}
+
+TRADE_income_share_percentage_luxuries_slaves = {
+	value = TRADE_share_of_income_luxuries_slaves
+	divide = TRADE_sum_of_luxuries_income_weights
+}
+
+TRADE_income_share_percentage_luxuries_the_state = {
+	value = TRADE_share_of_income_luxuries_the_state
+	divide = TRADE_sum_of_luxuries_income_weights
+}
+
+## Business goods
+
+TRADE_income_share_percentage_business_goods_upper_strata = {
+	value = TRADE_share_of_income_business_goods_upper_strata
+	divide = TRADE_sum_of_business_goods_income_weights
+}
+
+TRADE_income_share_percentage_business_goods_middle_strata = {
+	value = TRADE_share_of_income_business_goods_middle_strata
+	divide = TRADE_sum_of_business_goods_income_weights
+}
+
+TRADE_income_share_percentage_business_goods_lower_strata = {
+	value = TRADE_share_of_income_business_goods_lower_strata
+	divide = TRADE_sum_of_business_goods_income_weights
+}
+
+TRADE_income_share_percentage_business_goods_proletariat = {
+	value = TRADE_share_of_income_business_goods_proletariat
+	divide = TRADE_sum_of_business_goods_income_weights
+}
+
+TRADE_income_share_percentage_business_goods_tribesmen = {
+	value = TRADE_share_of_income_business_goods_tribesmen
+	divide = TRADE_sum_of_business_goods_income_weights
+}
+
+TRADE_income_share_percentage_business_goods_indentured = {
+	value = TRADE_share_of_income_business_goods_indentured
+	divide = TRADE_sum_of_business_goods_income_weights
+}
+
+TRADE_income_share_percentage_business_goods_slaves = {
+	value = TRADE_share_of_income_business_goods_slaves
+	divide = TRADE_sum_of_business_goods_income_weights
+}
+
+TRADE_income_share_percentage_business_goods_the_state = {
+	value = TRADE_share_of_income_business_goods_the_state
+	divide = TRADE_sum_of_business_goods_income_weights
+}
+
+## Military
+
+TRADE_income_share_percentage_military_upper_strata = {
+	value = TRADE_share_of_income_military_upper_strata
+	divide = TRADE_sum_of_military_income_weights
+}
+
+TRADE_income_share_percentage_military_middle_strata = {
+	value = TRADE_share_of_income_military_middle_strata
+	divide = TRADE_sum_of_military_income_weights
+}
+
+TRADE_income_share_percentage_military_lower_strata = {
+	value = TRADE_share_of_income_military_lower_strata
+	divide = TRADE_sum_of_military_income_weights
+}
+
+TRADE_income_share_percentage_military_proletariat = {
+	value = TRADE_share_of_income_military_proletariat
+	divide = TRADE_sum_of_military_income_weights
+}
+
+TRADE_income_share_percentage_military_tribesmen = {
+	value = TRADE_share_of_income_military_tribesmen
+	divide = TRADE_sum_of_military_income_weights
+}
+
+TRADE_income_share_percentage_military_indentured = {
+	value = TRADE_share_of_income_military_indentured
+	divide = TRADE_sum_of_military_income_weights
+}
+
+TRADE_income_share_percentage_military_slaves = {
+	value = TRADE_share_of_income_military_slaves
+	divide = TRADE_sum_of_military_income_weights
+}
+
+TRADE_income_share_percentage_military_the_state = {
+	value = TRADE_share_of_income_military_the_state
+	divide = TRADE_sum_of_military_income_weights
 }

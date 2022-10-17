@@ -23,8 +23,13 @@ PURCHASE_make_internal_shopping_list = {
 	# Scope = governorship
 
 	# Iterate manually through all the stockpiles
+	# tradegood = the tradegood to order
+	# category = the category under which to log spends, so the costs can be correctly attributed to buyers. See wiki for which good is which https://github.com/sobisonator/imp19c/wiki/Trade#tradegood-groups
 	# Grain stockpile
-	PURCHASE_check_shopping_internal = { tradegood = grain }
+	PURCHASE_check_shopping_internal = { 
+		tradegood = grain 
+		category = essentials
+	}
 }
 
 PURCHASE_check_shopping_internal = {
@@ -53,11 +58,23 @@ PURCHASE_check_shopping_internal = {
 			name = l_order_size
 			subtract = var:$tradegood$_stockpile
 		}
+		# Below is commented out: limits the import capacity based on infrastructure
+		# Disabled during testing because buildings aren't set up yet
+		#if = {
+		#	limit = {
+		#		local_var:l_order_size > TRADE_governorship_infrastructure_capacity_svalue
+		#	}
+		#	set_local_variable = {
+		#		name = l_order_size
+		#		value = TRADE_governorship_infrastructure_capacity_svalue
+		#	}
+		#}
 		PURCHASE_order_internal = {
 			tradegood = $tradegood$
 			#for_stockpile = $for_stockpile$
 			#from_stockpile = $from_stockpile$
 			order_size = local_var:l_order_size
+			category = $category$
 			#goods_price = $goods_price$
 			#internal_sold_total = $internal_sold_total$
 		}
@@ -94,6 +111,7 @@ PURCHASE_order_internal = {
 			tradegood = $tradegood$
 			#target_stockpile = $for_stockpile$
 			amount = $order_size$
+			category = $category$
 			#from_stockpile = $from_stockpile$
 			#local_price = $goods_price$
 			#internal_sold_total = $internal_sold_total$
@@ -149,8 +167,8 @@ PURCHASE_transfer_goods_internally = {
 	# The balance will then be applied to the governorship wealth pools at the end of the purchase phase
 
 	change_variable = {
-		name = governorship_this_quarter_balance
-		subtract = local_var:this_spend
+		name = governorship_this_quarter_spend_on_$category$
+		subtract = local_var:this_spend # Must be negative so it can be used with add_treasury
 	}
 
 	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
@@ -160,7 +178,107 @@ PURCHASE_transfer_goods_internally = {
 			add = $amount$
 		}
 	}
+	var:internal_trade_scope = {
+		change_variable = {
+			name = internal_total_revenue_$tradegood$
+			add = local_var:this_spend
+		}
+	}
 	
+}
+
+PURCHASE_split_all_costs = {
+	# Scope: governorship
+	# Function: Split the spend for each category of tradegoods between the appropriate pop groups
+	PURCHASE_split_costs = {
+		category = essentials
+	}
+	PURCHASE_split_costs = {
+		category = luxuries
+	}
+	PURCHASE_split_costs = {
+		category = business_goods
+	}
+	PURCHASE_split_costs = {
+		category = military
+	}
+}
+
+PURHCASE_calculate_actual_share_of_spend = {
+	set_local_variable = {
+		name = this_spend_on_$category$
+		value = var:governorship_this_quarter_spend_on_$category$
+	}
+	change_local_variable = {
+		name = this_spend_on_$category$
+		multiply = var:spender_share_$category$_$spender$
+	}
+}
+
+PURCHASE_split_costs = {
+	# Scope: governorship
+	# Split the spend for a single category of imported goods
+	PURHCASE_calculate_actual_share_of_spend = {
+		category = $category$
+		spender = the_state
+	}
+	c:owner = {
+		add_treasury = local_var:this_spend_on_$category$
+	}
+	# Upper strata
+	PURHCASE_calculate_actual_share_of_spend = {
+		category = $category$
+		spender = upper_strata
+	}
+	change_variable = {
+		name = upper_strata_wealth
+		add = local_var:this_spend_on_$category$
+	}
+	# Middle strata
+	PURHCASE_calculate_actual_share_of_spend = {
+		category = $category$
+		spender = middle_strata
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = local_var:this_spend_on_$category$
+	}
+	# Lower strata
+	PURHCASE_calculate_actual_share_of_spend = {
+		category = $category$
+		spender = lower_strata
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = local_var:this_spend_on_$category$
+	}
+	# Tribesmen
+	PURHCASE_calculate_actual_share_of_spend = {
+		category = $category$
+		spender = tribesmen
+	}
+	change_variable = {
+		name = tribesmen_wealth
+		add = local_var:this_spend_on_$category$
+	}
+	# Indentured
+	PURHCASE_calculate_actual_share_of_spend = {
+		category = $category$
+		spender = indentured
+	}
+	change_variable = {
+		name = indentured_wealth
+		add = local_var:this_spend_on_$category$
+	}
+	# Slaves
+	PURHCASE_calculate_actual_share_of_spend = {
+		category = $category$
+		spender = slaves
+	}
+	change_variable = {
+		name = slaves_wealth
+		add = local_var:this_spend_on_$category$
+	}
 }
 
 # EXTERNAL PURCHASES

@@ -11,7 +11,7 @@ def print_trade_zone_header(trade_zone,file_given):
 def print_trade_zone_connection_values(trade_zone, trade_zone_2,file_given):
 	zone_1 = trade_zone.lower()
 	zone_2 = trade_zone_2.lower()
-	trade_zone_connections = """{zone_1}_x_{zone_2}_svalue = {{
+	trade_zone_connections = """{zone_1}_to_{zone_2}_svalue = {{
 	value = 100 #Base Value
 	subtract = {zone_1}_transportation_svalue
 	subtract = {zone_2}_transportation_svalue
@@ -57,12 +57,11 @@ def connection_values(trade_zone_list):
 			if ( regions != zone and regions not in done_zones):
 				print_trade_zone_connection_values(zone, regions,f2)
 		done_zones.append(zone)
-	#NOTE: This is the function that needs fixed. It currently prints connections that are repetitions but idk how to fix it yet.
 
 
 #FUNCTION 1: Purpose - Print all base movement values
 for trade_zone in TradeZones.trade_zones_dict:
   print_movement_script_values(trade_zone)
 
-#FUNCTION 2: Purpose - Print all conncection movement values
+#FUNCTION 2: Purpose - Print all connection movement values
 connection_values(TradeZones.trade_zones)

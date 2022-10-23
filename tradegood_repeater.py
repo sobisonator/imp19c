@@ -1,19 +1,19 @@
 def print_out_good(spender_name, category_name):
 	spender = spender_name
 	category = category_name
-	loc = """TRADE_income_share_percentage_{category}_{spender} = {{
-	value = TRADE_share_of_income_{category}_the_state
+	loc = """TRADE_spender_share_percentage_{category}_{spender} = {{
+        value = TRADE_share_of_spend_{category}_{spender}
 	if = {{
                 limit = {{
-                        TRADE_sum_of_{category}_income_weights > 0
+                        TRADE_sum_of_{category}_spend_weights > 0
                 }}
-                divide = TRADE_sum_of_{category}_income_weights
+                divide = TRADE_sum_of_{category}_spend_weights
         }}
 }}\n""".format(spender=spender,category=category)
 	print(loc)
 
 #all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]
-all_categories = ["essential_goods","luxury_goods","business_goods","military"]
+all_categories = ["essential_goods","luxury_goods","business_goods","military_goods"]
 
 all_spenders = ["upper_strata","middle_strata","lower_strata","proletariat","tribesmen","indentured","slaves","the_state"]
 

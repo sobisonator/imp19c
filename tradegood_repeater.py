@@ -1,14 +1,21 @@
-def print_out_good(goods_name, category_name):
-	goods_name = goods_name
-	category_name = category_name
-	loc = """TRADE_governorship_export_cap_{goods_name} = {{ # The upper limit over which a governorship is NOT allowed to export any of this good. Should be derived from a variable
-# FOR NOW, THIS IS JUST A TEST AND HAS NO VARIABLE FROM WHICH IT DERIVES
-	value = 100
-}}\n""".format(goods_name=goods_name,category_name=category_name)
+def print_out_good(spender_name, category_name):
+	spender = spender_name
+	category = category_name
+	loc = """TRADE_income_share_percentage_{category}_{spender} = {{
+	value = TRADE_share_of_income_{category}_the_state
+	if = {{
+                limit = {{
+                        TRADE_sum_of_{category}_income_weights > 0
+                }}
+                divide = TRADE_sum_of_{category}_income_weights
+        }}
+}}\n""".format(spender=spender,category=category)
 	print(loc)
 
 #all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]
-#all_categories = ["essentials","luxuries","business_goods","military"]
+all_categories = ["essentials","luxuries","business_goods","military"]
+
+all_spenders = ["upper_strata","middle_strata","lower_strata","proletariat","tribesmen","indentured","slaves","the_state"]
 
 all_goods = {
 	"grain":"essentials",
@@ -73,5 +80,6 @@ all_goods = {
 	"late_artillery":"military"
         }
 
-for tradegood, category in all_goods.items():
-    print_out_good(tradegood, category)
+for category in all_categories:
+        for spender in all_spenders:
+                print_out_good(spender, category)

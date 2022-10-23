@@ -1,108 +1,4 @@
-﻿TRADE_setup_list_of_tradegoods = {
-	# Function: Create a list of random provinces with variables corresponding to all the tradegoods, so that you can iterate through the tradegoods
-	# Scope: Random country
-	# Called: At start of game
-	random_province = {
-		limit = {
-			NOT = { has_variable = grain }
-		}
-		set_variable = {
-			name = grain
-		}
-		add_to_global_variable_list = {
-			name = list_of_tradegoods
-			target = THIS
-		}
-	}
-	random_province = {
-		limit = {
-			NOT = { has_variable = wood }
-		}
-		set_variable = {
-			name = wood
-		}
-		add_to_global_variable_list = {
-			name = list_of_tradegoods
-			target = THIS
-		}
-	}
-}
-
-TRADE_setup_list_of_tradegoods_2 = {
-	# Function: Create a list of random provinces with variables corresponding to all the tradegoods, so that you can iterate through the tradegoods
-	# Version 2, save it into a variable with a consistent name but different value
-	# Scope: Random country
-	# Called: At start of game
-	random_province = {
-		limit = {
-			NOT = { has_variable = tradegood }
-		}
-		set_variable = {
-			name = tradegood
-			value = grain
-		}
-		add_to_global_variable_list = {
-			name = list_of_tradegoods
-			target = THIS
-		}
-	}
-	random_province = {
-		limit = {
-			NOT = { has_variable = wood }
-		}
-		set_variable = {
-			name = tradegood
-			value = wood
-		}
-		add_to_global_variable_list = {
-			name = list_of_tradegoods
-			target = THIS
-		}
-	}
-}
-
-TRADE_test_tradegoods_list = {
-	# Scope: country
-	every_in_global_list = {
-		variable = list_of_tradegoods
-		save_scope_as = this_tradegood
-		switch = {
-
-			trigger = has_variable
-			grain = {
-				prev = {
-					TRADE_test_create_variable = {
-						tradegood = grain
-					}
-				}
-			}
-			wood = {
-				prev = {
-					TRADE_test_create_variable = {
-						tradegood = wood
-					}
-				}
-			}
-
-		}
-	}
-}
-
-TRADE_test_create_variable = {
-	remove_variable = test_variable_grain
-	set_variable = {
-		name = test_variable_$tradegood$
-		value = 999
-	}
-	if = {
-		limit = {
-			has_variable = test_variable_grain
-		}
-		add_treasury = 50
-	}
-}
-
-tradezone_setup_effect = {
+﻿tradezone_setup_effect = {
 	#Makes the most populated province in a trade zone a center of trade.
 	#REQUIRED INPUT: TRADE_ZONE = XXX (scripted trigger name)
 	random_region = {
@@ -1022,16 +918,21 @@ TRADE_reset_all_internal_trade_stockpiles = {
 	# Scope: Random country
 	# Called: Quarterly
 	# Resets all internal trade stockpiles to 0
-	#WiP: grain only
+	every_tradegoods_complex = {
+		APPLY = TRADE_reset_internal_trade_stockpile
+	}
+}
+
+TRADE_reset_internal_trade_stockpile = {
 	every_country = {
 		set_variable = {
-			name = grain_stockpile_internal
+			name = $tradegood$_stockpile_internal
 			value = 0 
 		}
 	}
 	every_federation = {
 		set_variable = {
-			name = grain_stockpile_internal
+			name = $tradegood$_stockpile_internal
 			value = 0
 		}
 	}
@@ -1041,16 +942,22 @@ TRADE_reset_all_internal_trade_revenue_totals = {
 	# Scope: Random country
 	# Called: Quarterly
 	# Resets all internal trade stockpiles to 0
-	#WiP: grain only
+	every_tradegoods_complex = {
+		APPLY = TRADE_reset_internal_trade_revenue_total
+	}
+	
+}
+
+TRADE_reset_internal_trade_revenue_total = {
 	every_country = {
 		set_variable = {
-			name = internal_total_revenue_grain
+			name = internal_total_revenue_$tradegood$
 			value = 0 
 		}
 	}
 	every_federation = {
 		set_variable = {
-			name = internal_total_revenue_grain
+			name = internal_total_revenue_$tradegood$
 			value = 0 
 		}
 	}

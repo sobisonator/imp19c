@@ -1,8 +1,9 @@
-def print_out_good(tradegood_name):
+def print_out_good(tradegood_name, category_name):
 	tradegood = tradegood_name
-	loc = """internal_trade_scope_country_{tradegood}:0 "#T {tradegood} available for internal trade in [ROOT.GetProvince.GetOwner.GetName] last quarter :#! [ROOT.GetProvince.GetOwner.MakeScope.Var('{tradegood}_stockpile_internal').GetValue|0]"\n
-
-internal_trade_scope_customs_union_{tradegood}:0 "#T {tradegood} available for internal trade in [ROOT.GetProvince.GetState.GetGovernorship.MakeScope.GetVariable('federation_customs_union').GetProvince.MakeScope.Var('federation_name').GetFlagName] last quarter :#! [ROOT.GetProvince.GetState.GetGovernorship.MakeScope.GetVariable('internal_trade_scope').GetProvince.MakeScope.GetVariable('{tradegood}_stockpile_internal').GetValue|0]"\n""".format(tradegood=tradegood)
+	category = category_name
+	tradegood_caps = tradegood.upper()
+	loc = """PROVWINDOW_GOV_{tradegood_caps}_STOCKPILE:0 "[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('GOODS_{tradegood}_stockpile')|0]"
+PROVWINDOW_GOV_{tradegood_caps}_PRODUCED_TT:0 "#T {tradegood} produced in [ProvinceWindow.GetState.GetGovernorship.GetName]#!: [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('GOODS_governorship_{tradegood}_produced')|0] \\n\\n #T Current {tradegood} demand#!: [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_{tradegood}')|0] \\n #T {tradegood} available for trade internally last quarter:#! [ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('internal_offered_{tradegood}').GetValue|0] \\n [ProvinceWindow.GetProvince.Custom('internal_trade_scope_custom_loc_{tradegood}')] \\n\\n#T Price of {tradegood} here :#! £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('trade_center').GetProvince.MakeScope.Var('local_price_{tradegood}').GetValue|3] / unit\\n#T Amount spent on {category} imports last quarter :#! £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('governorship_this_quarter_spend_on_{category}').GetValue|3]\\n#T Amount made from {category} exports last quarter :#! £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('governorship_this_quarter_income_from_{category}').GetValue|3]"\\n\n\n""".format(tradegood=tradegood,category=category,tradegood_caps = tradegood_caps)
 	print(loc)
 
 #all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]
@@ -73,5 +74,5 @@ all_goods = {
 	"late_artillery":"military"
         }
 
-for tradegood in all_goods:
-    print_out_good(tradegood)
+for tradegood, category in all_goods.items():
+    print_out_good(tradegood, category)

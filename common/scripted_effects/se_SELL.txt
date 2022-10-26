@@ -831,6 +831,10 @@ SELL_declare_internal_available = {
 			name = $tradegood$_stockpile_internal # The trade center variable will have the same name as the governorship one, for ease of reference
 			add = prev.TRADE_governorship_for_export_internal_$tradegood$
 		}
+		change_variable = { # Save a parallel variable that does not have its value reduced as purchase orders are fulfilled, and can thereby reliably be used to calculate a final cut of income and deductions from governorships
+			name = $tradegood$_available_at_start_of_quarter_internal
+			add = prev.TRADE_governorship_for_export_internal_$tradegood$
+		}
 	} 
 }
 
@@ -1240,7 +1244,7 @@ SELL_calculate_internal_revenue_cut_percentage = { # WIP
 		change_variable = { # Now divide the amount contributed by the total in the internal stockpile, getting a percentage.
 			# e.g. if the governorship contributed 150 units and the internal stockpile has 1000 units, you get 0.15 (15%)
 			name = internal_stockpile_cut_percentage_$tradegood$
-			divide = var:internal_trade_scope.var:$tradegood$_stockpile_internal # Gets the stockpile from the internal trade scope (country or customs union) e.g. "grain_stockpile_internal"
+			divide = var:internal_trade_scope.var:$tradegood$_available_at_start_of_quarter_internal # Gets the stockpile from the internal trade scope (country or customs union) e.g. "grain_stockpile_internal"
 		}
 	}
 }
@@ -1494,6 +1498,7 @@ SELL_get_internal_cut_of_revenue = {
 	# WIP
 	# Scope: governorship
 	# Called: After all internal POs are completed.
+	# Function: Get the governorship's cut of total revenue AND subtract the resources sold proportionate to their contribution to trade-scope-wide trade.
 
 	# Format of arguments
 	# $internal_total_revenue$ = internal_total_revenue_grain
@@ -1518,9 +1523,11 @@ SELL_get_internal_cut_of_revenue = {
 
 	# SUBTRACT THE RESOURCES SOLD FROM THE GOVERNORSHIPS ACCORDING TO THEIR CUT
 
-	set_local_variable = {
-		name = local_sold_cut
-		value = var:internal_trade_scope.var:internal_sold_total_$tradegood$
+	var:internal_trade_scope = {
+		set_local_variable = {
+			name = local_sold_cut
+			value = var:internal_sold_total_$tradegood$
+		}
 	}
 
 	change_local_variable = {

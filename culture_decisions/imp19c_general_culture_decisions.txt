@@ -9,14 +9,99 @@ culture_decisions = {
 					same_language_culture_trigger = yes
 				}
 				can_pay_price = minor_cultural_decision_price
+				OR = {
+					scope:target_culture = {
+						OR = {
+							has_pop_type_right = middle_strata
+							has_pop_type_right = upper_strata
+						}
+					}
+				}
 			}
 			effect = {
 				pay_price = minor_cultural_decision_price
-				scope:target_culture = {
-					add_country_culture_modifier = {
-						name = "official_language" 
-						duration = -1
+				if = {
+					limit = {
+						scope:target_culture = {
+							has_country_culture_modifier = official_language
+						}
 					}
+					scope:target_culture = {
+						remove_country_culture_modifier = official_language
+						add_country_culture_modifier = {
+							name = "official_language_recently_removed" 
+							duration = 2190
+						}
+					}
+					add_stability = -5
+				}
+				else = {
+					scope:target_culture = {
+						add_country_culture_modifier = {
+							name = "official_language" 
+							duration = -1
+						}
+					}
+				}
+			}
+			ai_will_do = {
+				factor = 1
+				modifier = {
+					factor = 0
+					culture_pops_in_country = {
+						target = scope:target_culture
+						value <= 15_percent_of_total_population
+					}
+				}
+				modifier = {
+					factor = 0
+					stability < 50
+				}
+				# Add something about politics here - ruling party, etc.
+			}
+		}
+
+		self_determination = { # Grant this culture local assemblies
+			potential = {
+				NOT = { primary_culture = scope:target_culture.culture }
+			}
+			allow = {
+				can_pay_price = major_cultural_decision_price
+				OR = {
+					scope:target_culture = {
+						OR = {
+							has_pop_type_right = middle_strata
+							has_pop_type_right = upper_strata
+						}
+					}
+				}
+			}
+			effect = {
+				pay_price = major_cultural_decision_price
+				if = {
+					limit = {
+						scope:target_culture = {
+							has_country_culture_modifier = self_determination
+						}
+					}
+					scope:target_culture = {
+						remove_country_culture_modifier = self_determination
+						add_country_culture_modifier = {
+							name = "self_determination_recently_removed" 
+							duration = 4380
+						}
+					}
+					add_stability = -10
+				}
+				else = {
+					scope:target_culture = {
+						add_country_culture_modifier = {
+							name = "self_determination" 
+							duration = -1
+						}
+					}
+					add_stability = -5
+					add_tyranny = -10
 				}
 			}
 			ai_will_do = {

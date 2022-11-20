@@ -652,7 +652,7 @@ SELL_declare_internal_available = {
 		# Add to the internal trade scope's stockpile
 		change_variable = { # TODO: set stockpile variables back to 0 at the beginning of every quarter, using a SE in the on_action
 			name = $tradegood$_stockpile_internal # The trade center variable will have the same name as the governorship one, for ease of reference
-			add = prev.TRADE_governorship_for_export_internal_$tradegood$
+			add = prev.var:internal_offered_$tradegood$
 		}
 		change_variable = { # Save a parallel variable that does not have its value reduced as purchase orders are fulfilled, and can thereby reliably be used to calculate a final cut of income and deductions from governorships
 			name = $tradegood$_available_at_start_of_quarter_internal
@@ -1400,25 +1400,24 @@ SELL_set_TZ_prices = {
 	}
 }
 
-SELL_declare_available = {
+SELL_declare_external_available = {
 	# Scope: Governorship
 
 	# Format of arguments:
-	# $goods_offered$ = grain_offered
 	# $amount_for_sale$ = TRADE_governorship_for_export_grain, svalue, see TRADE_svalues
 	# $goods_stockpile$ = TZ_stockpile_grain
 
 	set_variable = { # Within the governorship scope, track how much was sold so you can then calculate how much of a cut to get
 	# See SELL_calculate_cut to see how the cut of revenue gets calculated
-		name = $goods_offered$
-		value = $amount_for_sale$
+		name = external_offered_$tradegood$
+		value = TRADE_governorship_for_export_external_$tradegood$
 	} # Is this necessary, or can we just use the svalues?
 
 	var:trade_center = { # Scope to the TZ
 		# Add to the tradezone's stockpile
 		change_variable = { # TODO: set stockpile variables back to 0 at the beginning of every quarter, using a SE in the on_action
-			name = $goods_stockpile$ # The trade center variable will have the same name as the governorship one, for ease of reference
-			value = $amount_for_sale$
+			name = TZ_stockpile_$tradegood$ # The trade center variable will have the same name as the governorship one, for ease of reference
+			value = prev.var:external_offered_$tradegood$
 		}
 	}
 }

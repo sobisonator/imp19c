@@ -1329,43 +1329,6 @@ SELL_reset_TZ_trade_stockpile = { # Needs to be repeated for every tradegood
 	}
 }
 
-SELL_declare_all_available = {
-	# Scope: Governorship
-	# This effect gets the governorship to declare to the tradezone (TZ) what resources it has available to sell
-	# Once all governorships have done this, the TZ will have a stockpile of available goods to sell in order to meet POs
-	# Then the governorships will all get a cut of revenue from these sales
-	if = { # Grain
-		limit = {
-			var:grain_stockpile > TRADE_governorship_export_threshold_grain
-		}
-		SELL_declare_available = {
-			goods_stockpile = grain_stockpile
-			amount_for_sale = grain_for_sale # svalue
-			goods_offered = grain_offered
-		}
-	}
-	if = {
-		limit = {
-			var:mediterranean_fruit_stockpile > TRADE_governorship_export_threshold_mediterranean_fruit
-		}
-		SELL_declare_available = {
-			goods_stockpile = mediterranean_fruit_stockpile
-			amount_for_sale = mediterranean_fruit_for_sale # svalue
-			goods_offered = mediterranean_fruit_offered
-		}
-	}
-	if = {
-		limit = {
-			var:glass_stockpile > TRADE_governorship_export_threshold_glass
-		}
-		SELL_declare_available = {
-			goods_stockpile = glass_stockpile
-			amount_for_sale = glass_for_sale # svalue
-			goods_offered = glass_offered
-		}
-	}
-}
-
 SELL_set_TZ_price_modifier = { # used to get local price modifier for the named good
 	# Scope: TZ
 	# This does NOT contain an iteration of all TZs, as it should only be run in TZs that actually supply said good.
@@ -1400,6 +1363,17 @@ SELL_set_TZ_prices = {
 	}
 }
 
+SELL_declare_all_external_available = {
+	# Scope: Governorship
+	# This effect gets the governorship to declare to the tradezone (TZ) what resources it has available to sell
+	# Once all governorships have done this, the TZ will have a stockpile of available goods to sell in order to meet POs
+	# Then the governorships will all get a cut of revenue from these sales
+	every_tradegoods_complex = {
+		APPLY = SELL_declare_external_available
+	}
+	
+}
+
 SELL_declare_external_available = {
 	# Scope: Governorship
 
@@ -1425,13 +1399,18 @@ SELL_declare_external_available = {
 	# The proportion that governorship's available stock makes up of the tradezone total is the...
 	#... share of gross profit that goes back to the governorship when that stockpile is bought from
 
-SELL_calculate_revenue_cut_percentage = { # Calculates how much money the governorship should get for contributing goods to the tradezone's for-sale stockpile
+SELL_calculate_external_revenue_cut_percentage = { # Calculates how much money the governorship should get for contributing goods to the tradezone's for-sale stockpile
 	# This calculates the percentage BEFORE sales are made, and AFTER all the SELL_declare_available actions have been completed
 	# Should only be called if the governorship has actually sold any of the given tradegood. How to limit this to that scenario?
 	# Scope: governorship
 	set_variable = { # Get the total of the goods in the tradezone
-		name = $stockpile_cut_percentage$ # This argument gets a name like "grain_stockpile_cut_percentage"
-		value = $amount_of_goods_offered$ # It starts off just containing the value of the whole stockpile
+		name = external_stockpile_cut_percentage_$tradegood$ # This argument gets a name like "grain_stockpile_cut_percentage"
+		value = external_offered_$tradegood$ # It starts off just containing the value of the whole stockpile
+	}
+	if = {
+		limit = {
+			var:
+		}
 	}
 	change_variable = { # Now divide the amount contributed by the total in the TZ stockpile, getting a percentage.
 		# e.g. if the governorship contributed 150 units and the TZ stockpile has 1000 units, you get 0.15 (15%)

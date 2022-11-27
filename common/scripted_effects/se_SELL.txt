@@ -1343,9 +1343,9 @@ SELL_set_TZ_price_modifier = { # used to get local price modifier for the named 
 		name = $share_of_global_supply$
 		value = global_var:$global_supply$
 	}
-	change_variable = {
-
-	}
+	#change_variable = {
+	#
+	#}
 }
 
 SELL_set_TZ_prices = {
@@ -1391,7 +1391,11 @@ SELL_declare_external_available = {
 		# Add to the tradezone's stockpile
 		change_variable = { # TODO: set stockpile variables back to 0 at the beginning of every quarter, using a SE in the on_action
 			name = TZ_stockpile_$tradegood$ # The trade center variable will have the same name as the governorship one, for ease of reference
-			value = prev.var:external_offered_$tradegood$
+			value = prev.var:external_offered_$tradegood$ # TODO: set this variable at the start of the trade phase
+		}
+		change_variable = { # Save a parallel variable that does not have its value reduced as purchase orders are fulfilled, and can thereby reliably be used to calculate a final cut of income and deductions from governorships
+			name = $tradegood$_available_at_start_of_quarter_tradezone
+			add = prev.TRADE_governorship_for_export_external_$tradegood$
 		}
 	}
 }
@@ -1403,23 +1407,21 @@ SELL_calculate_external_revenue_cut_percentage = { # Calculates how much money t
 	# This calculates the percentage BEFORE sales are made, and AFTER all the SELL_declare_available actions have been completed
 	# Should only be called if the governorship has actually sold any of the given tradegood. How to limit this to that scenario?
 	# Scope: governorship
-	set_variable = { # Get the total of the goods in the tradezone
-		name = external_stockpile_cut_percentage_$tradegood$ # This argument gets a name like "grain_stockpile_cut_percentage"
-		value = external_offered_$tradegood$ # It starts off just containing the value of the whole stockpile
+	set_variable = { # Get the total of the goods that this governorship sent up
+		name = external_stockpile_cut_percentage_$tradegood$
+		value = var:external_offered_$tradegood$
 	}
+
 	if = {
 		limit = {
-			var:
+			var:trade_center.var:TZ_stockpile_$tradegood$ > 0
+		}
+		change_variable = { # Now divide the amount contributed by the total in the internal stockpile, getting a percentage.
+			# e.g. if the governorship contributed 150 units and the internal stockpile has 1000 units, you get 0.15 (15%)
+			name = external_stockpile_cut_percentage_$tradegood$
+			divide = var:trade_center.var:$tradegood$_available_at_start_of_quarter_tradezone # Gets the total initial stockpile from the internal trade scope (country or customs union) e.g. "grain__available_at_start_of_quarter_tradezone"
 		}
 	}
-	change_variable = { # Now divide the amount contributed by the total in the TZ stockpile, getting a percentage.
-		# e.g. if the governorship contributed 150 units and the TZ stockpile has 1000 units, you get 0.15 (15%)
-		name = $stockpile_cut_percentage$
-		divide = var:trade_center.var:$tradezone_stockpile$ # Gets the stockpile from the tradezone e.g. "grain_stockpile"
-	}
-	# Now the stockpile cut percentage variable for this month can be used to divvy out the total
-	# Another scripted effect, SELL_get_cut_of_revenue, will multiply the TZ total revenue by the local stockpile cut percentage var for every good sent to market
-	# So if total TZ revenue were £5,000, we'd multiply that by 0.15 and get this governorship's cut, £750.
 }
 
 SELL_get_cut_of_revenue = {
@@ -1429,7 +1431,7 @@ SELL_get_cut_of_revenue = {
 		save_scope_as = tradezone
 	}
 	set_variable = { # Get the total revenue from the tradezone
-		name = $local_cut_of_revenue$ # This needs to be passed a name in the format "grain_actual_revenue_cut"
+		name = local_external_revenue_cut_$tradegood$
 		value = var:trade_center.var:$tradezone_revenue_var$ # This needs a variable name like "TZ_revenue_total_grain"
 	}
 	change_variable = {

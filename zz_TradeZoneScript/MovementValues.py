@@ -57,12 +57,11 @@ def connection_values(trade_zone_list):
 			if ( regions != zone and regions not in done_zones):
 				print_trade_zone_connection_values(zone, regions,f2)
 		done_zones.append(zone)
-	#NOTE: This is the function that needs fixed. It currently prints connections that are repetitions but idk how to fix it yet.
 
 
 #FUNCTION 1: Purpose - Print all base movement values
 for trade_zone in TradeZones.trade_zones_dict:
   print_movement_script_values(trade_zone)
 
-#FUNCTION 2: Purpose - Print all conncection movement values
+#FUNCTION 2: Purpose - Print all connection movement values
 connection_values(TradeZones.trade_zones)

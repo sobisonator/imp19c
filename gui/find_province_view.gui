@@ -1,0 +1,111 @@
+message_window = {
+	gfxtype = windowgfx
+	name = "find_province_view"
+	
+	#parentanchor = vcenter|hcenter
+	size = { 376 520 }
+	movable = yes
+	position = { 64 146 }
+	
+	blockoverride "Title_text" {
+		text = "FIND_PROVINCE_TITLE"
+	}
+	
+	blockoverride "White_buttons" { 
+		visible = yes
+		button_close = {
+			name = "close_button"
+			position = { -3 2 }
+			parentanchor = top|right
+			shortcut = "close_window"
+			onclick = "[FindProvinceView.OnClose]"
+			onclick = "[ClearHighlightColors]"
+			tooltip = "CLOSE"
+		}
+	}
+	
+	margin_widget = {
+		size = { 311 40 }
+		layoutpolicy_horizontal = expanding
+		position = { 30 41 }
+		using = inputfield
+		
+		editbox = {
+			position = { 12 0 }
+			size = { 100% 34 }
+			name = "find_text"
+			text = ""
+			using = BaseFontM 
+			using = Black_FontColor
+			fontsize = 20
+			maxcharacters = 26
+			focuspolicy = all
+			alwaystransparent = no
+			multiline = no
+			ontextedited = "[FindProvinceView.OnFindTextChanged]"
+		}
+	}
+
+	container = {
+		parentanchor = top|hcenter
+		widgetanchor = top|hcenter
+		position = { 0 88 }
+		
+		check_box_button = {
+			blockoverride "Frame" { frame = "[FindProvinceView.GetExactMatchesFrame]" }
+			blockoverride "On_click" { onclick = "[FindProvinceView.OnExactMatchesClick]" }
+			tooltip = "FIND_PROVINCE_EXACT_MATCHES_TOOLTIP"
+		}
+		
+		textbox = {
+			position = { 44 -1 }
+			autoresize = yes
+			parentanchor = vcenter|left
+			using = FontNormal
+			text = "FIND_PROVINCE_EXACT_MATCHES"
+			tooltip = "FIND_PROVINCE_EXACT_MATCHES_TOOLTIP"
+			#fontcolor = { 0 0 0 1 }
+			font = "BaseFont"
+		}
+	}
+	
+	container = {
+		parentanchor = top|hcenter
+		widgetanchor = top|hcenter
+		position = { 0 130 }
+
+		scrollarea = {
+			size = { 323 370 }
+			parentanchor = top|hcenter
+			widgetanchor = top|hcenter
+			
+			scrollbarpolicy_horizontal = always_off
+
+			using = VerticalScrollAreaCutOff
+			scrollbar_vertical = {
+				using = VerticalScrollBar
+			}
+			
+			scrollwidget = {
+				fixedgridbox = {
+					size = { 280 320 }
+					addcolumn = 320
+					addrow = 32
+					maxhorizontalslots = 1
+					name = "states_grid"
+					datamodel = "[FindProvinceView.GetProvinces]"
+					
+					item = {
+						text_button_square = {
+							size = { 300 26 }
+							blockoverride "Center_text" { text = "[FindProvinceItem.GetText]" }
+							blockoverride "On_click" { onclick = "[FindProvinceItem.OnClick]" }
+							onmousehierarchyenter = "[FindProvinceItem.AddHighlight]"
+						}
+					}
+				}
+			}
+		}
+	}
+}
+

@@ -1,0 +1,1952 @@
+@windowwidth = 724
+@windowheight = 900
+
+base_window = {
+	gfxtype = windowgfx
+	name = "overview_view"
+	parentanchor = top|left
+	widgetanchor = top|left
+	size = { @windowwidth @windowheight }
+	position = { 60	138 }
+	movable = no
+
+	### Audio ###
+	state = {
+		name = _show
+		start_sound = {
+			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
+		}
+	}
+	### Audio ###
+	state = {
+		name = _hide
+		start_sound = {
+			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
+		}
+	}
+	
+	####################
+	### MAIN HEADER
+	####################
+	
+	state = {
+		name = _hide 
+		on_start = "[PdxGuiTriggerAllAnimations('close_ideas')]"
+	}
+	
+	vbox = {
+		using = MainWindowHeaderBox
+		name = "main window box with main header"
+
+		blockoverride "FlagOrIcon"
+		{
+			icon = {
+				texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
+				framesize = { 100 100 }
+				frame = 6
+				position = { -2 -2 }
+				size = { 32 32 }
+				modify_texture = {
+					texture = "gfx/interface/icons/menu_buttons/menu_overview.dds"
+					blend_mode = alphamultiply
+				}
+			}
+		}
+
+		blockoverride "Title_text"
+		{
+			text = "NATION_OVERVIEW_MENU_HEADER" 
+		}
+
+		blockoverride "White_buttons" 
+		{
+			button_back = { 
+				shortcut = "previous_window"
+				onclick = "[OverviewView.OnPrevious]"
+				tooltip = "PREVIOUS_OVERVIEW_VIEW"
+			}
+
+			button_close = {
+				onclick = "[OverviewView.OnClose]"
+				tooltip = "CLOSE"
+				shortcut = "close_window"
+			}
+		}
+
+		vbox = {
+			name = "box for the vertically stacked boxes"
+			layoutpolicy_vertical = expanding
+			layoutpolicy_horizontal = expanding
+			margin = { 14 6 }
+			
+			margin_widget = {
+				name = "decisions and provinces full width"
+				size = { 0 530 }
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				
+				margin_widget = {
+					name = "tabs"
+					size = { 100% 48 }
+					@mincategorybuttonwidth = 292
+					@maxcategorybuttonwidth = 400
+					@mincategorybuttonheight = 28 
+					@maxcategorybuttonheight = 34
+					parentanchor = hcenter
+					hbox = { 
+						margin_top = -2
+						layoutpolicy_vertical = shrinking
+						layoutpolicy_horizontal = shrinking
+					
+						category_tab = {
+							name = "decisions_tab"
+							blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+							blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+							blockoverride "MinVisible" { visible = "[GetVariableSystem.HasValue( 'OverviewTabs', 'Details' )]" }
+							blockoverride "MaxVisible" { visible = "[Not( GetVariableSystem.HasValue( 'OverviewTabs', 'Details' ) )]" }
+							######## Shared Overrides
+							blockoverride "Center_text" { text = "OVERVIEW" }
+							######## Small Button Overrides
+							blockoverride "ClickFunction"
+							{
+								onclick = "[GetVariableSystem.Set( 'OverviewTabs', 'Overview' )]"
+							}
+						}
+
+						category_tab = {
+							name = "provinces_tab"
+							blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+							blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+							blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue( 'OverviewTabs', 'Details' ) )]" }
+							blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue( 'OverviewTabs', 'Details' )]" }
+							######## Shared Overrides
+							blockoverride "Center_text" { text = "ADMINISTRATION_TITLE" }
+							######## Small Button Overrides
+							blockoverride "ClickFunction"
+							{
+								onclick = "[GetVariableSystem.Set( 'OverviewTabs', 'Details' )]"
+							}
+						} 		
+					}
+				}
+				margin_widget = {
+					name = "Decisions Tab"
+					visible = "[Not( GetVariableSystem.HasValue( 'OverviewTabs', 'Details' ) )]"
+					size = { 100% 100% }
+					position = { 0 32 }
+					vbox = {
+						layoutpolicy_horizontal = expanding
+						#layoutpolicy_vertical = expanding
+						margin = { 4 0 }
+						margin_top = 10
+						margin_widget = {
+							name = "widget 1 full width"
+							size = { 0 72 }
+							layoutpolicy_horizontal = expanding
+
+							flowcontainer = {
+								direction = horizontal
+								spacing = 10
+								flowcontainer = {
+									name = "nation and heritage"
+									direction = vertical
+									icon_and_text = {
+										size = { 228 36 }
+
+										blockoverride "Icon" 
+										{
+											size = { 34 34 }
+											texture = "gfx/interface/diplomacy/country_rank.dds"
+											framesize = { 54 54 }
+											frame = "[OverviewView.GetPlayer.GetRankFrame]"
+											tooltip = "[OverviewView.GetPlayer.GetRankInformation]"
+										}
+
+										blockoverride "Text" { text = "[OverviewView.GetPlayer.GetName]" }
+									}
+
+									icon_and_text = {
+										size = { 228 36 }
+
+										blockoverride "Icon" 
+										{
+											size = { 34 34 }
+											texture = "gfx/interface/icons/menu_buttons/menu_government.dds"
+											#framesize = { 50 60 }
+											color = { 0.12 0.12 0.12 1 }
+										}
+
+										blockoverride "Text"
+										{
+											text = "[OverviewView.GetPlayer.GetGovernment.GetName]"
+										}
+									}
+								}
+
+
+								flowcontainer = {
+									direction = vertical
+									name = "provinces and investments"
+									icon_and_text = {
+										size = { 98 36 }
+										tooltip = "[OverviewView.GetPlayer.GetOwnedProvinceTooltip]"
+										
+										blockoverride "Icon" 
+										{
+											using = icon_city
+										}
+										
+										blockoverride "Text"
+										{
+											text = "[OverviewView.GetPlayer.GetOwnedProvinceCount]"
+										}			
+									}
+									icon_and_text = {
+										size = { 98 36 }
+										tooltip = "STATE_FREE_INVESTMENTS_TOOLTIP"
+										
+										blockoverride "Icon" 
+										{
+											texture = "gfx/interface/icons/modifiers/state_free_investments.dds"
+											size = { 36 36 }
+										}
+
+										blockoverride "Text"
+										{
+											text = "[GuiScope.SetRoot( OverviewView.GetPlayer.MakeScope).ScriptValue('free_investments_gov_view')|/0]"
+										}
+									}
+								}
+								flowcontainer = {
+									name = "power base"
+									direction = vertical
+									icon_and_text = {
+										size = { 98 36 }
+										tooltip = "[OverviewView.GetPowerBaseInfo]"
+										
+										blockoverride "Icon" 
+										{
+											#size = { 36 36 }
+											using = icon_power_base
+										}
+
+										blockoverride "Text"
+										{
+											text = "[OverviewView.GetPlayer.GetTotalPowerBase|0]"
+										}
+									}
+
+									icon_and_text = {
+										size = { 98 36 }
+										tooltip = "[OverviewView.GetPowerBaseInfo]"
+										
+										blockoverride "Icon" 
+										{
+											size = { 34 34 }
+											using = icon_disloyal_powerbase
+										}
+										
+										blockoverride "Text"
+										{
+											text = "[OverviewView.GetPlayer.GetNonLoyalPowerBase|R0]"
+										}			
+									}
+								}
+								flowcontainer = {
+									direction = vertical
+									icon_and_text = {
+										size = { 228 36 }
+										#tooltip = "[OverviewView.GetPlayer.GetHeritage.GetTooltip]"
+										
+										datacontext = "[OverviewView.GetPlayer.GetHeritage]"
+										tooltipwidget = { using = heritage_tooltip }
+
+										blockoverride "Icon" 
+										{
+											modifier_icon = {
+												datacontext = "[OverviewView.GetPlayer.GetHeritage.GetModifier]"
+											}
+										}
+										
+										blockoverride "Text"
+										{
+											text = "[OverviewView.GetPlayer.GetHeritage.GetName]"
+										}			
+									}
+
+									flowcontainer = {
+										name = "civilization and unrest"
+										direction = horizontal
+										spacing = 8f
+										
+										icon_and_text = {
+											size = { 110 36 }
+											tooltip = "[OverviewView.GetPlayer.GetModifierTooltip('country_civilization_value')]"
+											
+											blockoverride "Icon" 
+											{
+												using = icon_civilization
+												#size = { 36 36 }
+											}
+
+											blockoverride "Text"
+											{
+												text = "[OverviewView.GetPlayer.GetModifierValue('country_civilization_value')]"
+											}
+										}
+										icon_and_text = {
+											size = { 110 36 }
+											tooltip = "[OverviewView.GetPlayer.GetModifierTooltip('global_unrest')]"
+											
+											blockoverride "Icon" 
+											{
+												size = { 34 34 }
+												using = icon_unrest
+											}
+											
+											blockoverride "Text"
+											{
+												text = "[OverviewView.GetPlayer.GetModifierValue('global_unrest')]"
+											}			
+										}
+									}
+								}
+							}
+						}
+
+						margin_widget = {
+							name = "ideas and pie charts"
+							size = { 0 200 }
+							margin_left = 6
+							layoutpolicy_horizontal = expanding
+							margin_widget = {
+								name = "ideas and bonus"
+								size = { 340 200 }
+								using = NoninteractableBG
+								blockoverride "Margins"
+								{
+									margin = { 4 8 }
+									margin_top = 4
+								}
+								flowcontainer = {
+									direction = vertical
+									spacing = 0
+									position = { 2 0 }
+
+									container = {
+										parentanchor = hcenter
+										flowcontainer = {
+											position = { 10 34 }
+											parentanchor = hcenter
+											spacing = 0
+											name = "dummy_ideas_grid" 
+													
+											container = {
+												button = {
+													name = "space1"
+													using = idea_slot_not_available
+													blockoverride "Size" { size = { 58 58 } }
+													size = { 74 74 }
+												}
+											}
+											container = {
+												button = {
+													name = "space2"
+													using = idea_slot_not_available
+													blockoverride "Size" { size = { 58 58 } }
+													size = { 74 74 }
+												}
+											}
+											container = {
+												button = {
+													name = "space3"
+													using = idea_slot_not_available
+													blockoverride "Size" { size = { 58 58 } }
+													size = { 74 74 }
+												}
+											}
+											container = {
+												button = {
+													name = "space4"
+													using = idea_slot_not_available
+													blockoverride "Size" { size = { 58 58 } }
+													size = { 74 74 }
+												}
+											}
+										} 
+											
+										fixedgridbox = {
+											position = { 10 0 }
+											name = "ideas_grid"
+											flipdirection = yes
+											addcolumn = 74
+											addrow = 110
+											maxhorizontalslots = 4
+											maxverticalslots = 1
+											item = {
+												widget = { 
+													datacontext = "[IdeaItem.GetIdea]" 
+													size = { 74 110 }
+													
+													icon = {
+														parentanchor = hcenter
+														size = { 120 52 }
+														scale = 0.5
+														position = { 0 20 }
+														using = flat_background_white
+														alpha = 0.0
+														modify_texture = {
+															name = "Alpha"
+															texture = "gfx/interface/base_parts/header_l_x60bd_right_cut_alpha.dds"
+															blend_mode = alphamultiply
+															spriteType = Corneredtiled
+															spriteborder = { 60 -10 }
+														}
+													}
+													
+													icon = {
+														parentanchor = hcenter
+														using = positive_color_texture
+														size = { 120 52 }
+														scale = 0.5
+														position = { 0 20 }
+														visible = "[IdeaItem.IsValid]"
+														alpha = 0.0
+														modify_texture = {
+															name = "Alpha"
+															texture = "gfx/interface/base_parts/header_l_x60bd_right_cut_alpha.dds"
+															blend_mode = alphamultiply
+															spriteType = Corneredtiled
+															spriteborder = { 60 -10 }
+														}
+													}
+													
+													icon = {
+														#parentanchor = hcenter
+														using = negative_color_texture
+														size = { 120 52 }
+														scale = 0.5
+														visible = "[IdeaItem.IsMisMatch]"
+														position = { 0 20 }
+														alpha = 0.0
+														modify_texture = {
+															name = "Alpha"
+															texture = "gfx/interface/base_parts/header_l_x60bd_right_cut_alpha.dds"
+															blend_mode = alphamultiply
+															spriteType = Corneredtiled
+															spriteborder = { 60 -10 }
+														}	
+													}
+													### shadow for group icon
+													icon = {
+														size = { 32 32 }
+														texture = "[IdeaItem.GetGroupTexture]"
+														parentanchor = hcenter
+														position = { -2 6 }
+														tooltip = "[IdeaItem.GetGroupMatchingTooltip]"
+														color = { 0 0 0 0.4 }
+													}
+													### group icon
+													icon = {
+														size = { 32 32 }
+														texture = "[IdeaItem.GetGroupTexture]"
+														parentanchor = hcenter
+														position = { 0 4 }
+														tooltip = "[IdeaItem.GetGroupMatchingTooltip]"
+													}
+													
+													button = {
+														name = "Idea Button"
+														position = { 0 16 }
+														tooltipwidget = idea_item_desc_tooltip
+
+														visible = "[IdeaItem.IsValid]"
+														alwaystransparent = no
+														size = { 56 56 }
+														gfxtype = framedbuttongfx
+														widgetanchor = center
+														parentanchor = center	
+														enabled = yes
+														texture = "[IdeaItem.GetIcon]"
+														onclick = "[IdeaItem.OpenSelection]"
+														using = DropShadow
+													}
+													 
+													button = {
+														name = "No Picked Idea"
+														position = { 0 16 }
+														tooltipwidget = no_idea_tooltip
+														visible = "[Not(IdeaItem.IsValid)]"
+														alwaystransparent = no
+														size = { 56 56 }
+														gfxtype = framedbuttongfx
+														widgetanchor = center
+														parentanchor = center	
+														enabled = yes
+														onclick = "[IdeaItem.OpenSelection]"
+														framesize = { 200 200 }
+														upframe = 1
+														overframe = 1
+														downframe = 1
+														disableframe = 1
+														using = button_tiled_texture
+														modify_texture = {
+															name = "Alpha"
+															texture = "gfx/interface/base_parts/button2_inner_x8y8bd_alpha.dds"
+															blend_mode = alphamultiply
+															spriteType = Corneredtiled
+															spriteborder = { 6 6 }
+														}
+														#using = DropShadow
+														icon = {
+															name = "Pattern"
+															texture = "gfx/interface/base_parts/square_button_corner_pattern_x22y22bd.dds"
+															spriteType = Corneredtiled
+															spriteborder = { 11 11 }
+															size = { 100% 100% }
+															parentanchor = bottom
+														}
+														
+														icon = {
+															name = "Idea Mark"
+															widgetanchor = center
+															parentanchor = center	
+															texture = "gfx/interface/base_parts/idea_mark.dds"
+															size = { 70% 70% }
+														}
+													}
+												}
+											}
+										}
+									}
+									### Bonus effects from ideas
+									margin_widget = {
+										size = { 310 98 }
+										
+										textbox = {
+											parentanchor = center
+											autoresize = yes
+											max_width = 306
+											fontsize_min = 14
+											elide = right
+											using = BaseFontS
+											using = Black_FontColor
+											text = "[OverviewView.GetPlayer.GetGovernment.GetBonusDescription]"
+											tooltip = "[OverviewView.GetGovBonusTooltip]"
+											alpha = 0.45
+											visible = "[EqualTo_int32( OverviewView.GetGovBonusFrame, '(int32)1' )]" 
+										}
+										
+										textbox = {
+											parentanchor = center
+											autoresize = yes
+											max_width = 306
+											fontsize_min = 14
+											elide = right
+											using = BaseFontS
+											using = Black_FontColor
+											text = "[OverviewView.GetPlayer.GetGovernment.GetBonusDescription]"
+											tooltip = "[OverviewView.GetGovBonusTooltip]"
+											visible = "[EqualTo_int32( OverviewView.GetGovBonusFrame, '(int32)2' )]"
+										}
+									}
+								}
+							}
+							###################
+							## MODIFIERS, CIVIL WAR RISK, PIE CHARTS
+							###################
+							margin_widget = {
+								position = { 354 2 }
+								#parentanchor = bottom|right
+								size = { 226 70 }
+								overlappingitembox = {
+									datamodel = "[OverviewView.GetCountryModifiers]"
+									size = { 100% 38 }
+									spacing = 1
+									using = NoninteractableBG
+									blockoverride "Margins"
+									{
+										margin = { 4 0 }
+										margin_top = 5
+										margin_bottom = 3
+									}
+									item = {
+										container = {
+											modifier_icon = {
+												datacontext = "[TimedModifier.GetModifier]"
+												tooltip = "[TimedModifier.GetTooltip]"
+											}
+											
+											tooltip = "[TimedModifier.GetTooltip]"
+										}
+									}
+								}
+
+								textbox = {
+									visible = "[IsDataModelEmpty(OverviewView.GetCountryModifiers)]"
+									tooltip = NO_CURRENT_MODIFIERS_PROVINCE
+									size = { 100% 100% }
+									using = Black_FontColor
+									text = None
+									align = center
+								}	
+							}
+
+
+							widget = {
+								name = "civil_war_diamond"
+								size = { 52 52 }
+								parentanchor = right
+								position = { -20 -4 }
+								tooltip = "[OverviewView.GetPlayer.GetPossibleCivilWarTooltip]"
+								
+								icon = {
+									texture = "gfx/interface/map/on_map_siege_bar_bg.dds"
+									size = { 52 52 }
+									parentanchor = center
+									color = { 0.9 0.2 0.2 0.88 }
+								}
+								icon = {
+									using = beige_background
+									size = { 40 40 }
+									parentanchor = center
+									#color = { 0.8 0.2 0.2 0.7 }
+									modify_texture = {
+										texture = "gfx/interface/base_parts/diamond_shape.dds"
+										blend_mode = alphamultiply
+										#spriteType = Corneredtiled
+									}
+								}
+								
+								progresspie = {
+									name = "progress"
+									parentanchor = center
+									size = { 52 52 }
+									texture = "gfx/interface/map/on_map_siege_bar.dds"
+									framesize = { 70 70 }
+									frame = 2
+									value = "[FixedPointToFloat( Multiply_CFixedPoint( OverviewView.GetPlayer.GetProgressTowardsCivilWar, '(CFixedPoint)0.01') )]"
+									#value = "[FixedPointToFloat( Multiply_CFixedPoint( DiplomaticView.GetTargetCountry.GetProgressTowardsCivilWar, '(CFixedPoint)0.01' ) )]"
+									icon = {
+										texture = "gfx/interface/icons/shared_icons/civil_war_active_inactive.dds"
+										frame = "[OverviewView.GetPlayer.GetCivilWarFrame]"
+										framesize = { 50 50 }
+										size = { 31 31 }
+										parentanchor = center
+									}
+								}
+							}
+
+							margin_widget = {
+								size = { 318 230 }
+								#using = NoninteractableBG
+								position = { 0 22 }
+								parentanchor = right|vcenter
+
+								flowcontainer = {
+									parentanchor = center
+									direction = horizontal
+									spacing = 0
+									
+									widget = {
+										size = { 106 100 }
+										flowcontainer = {
+											direction = vertical
+											parentanchor = hcenter
+											icon_pie = {
+												size = { 64 64 }
+												parentanchor = hcenter
+												datamodel = "[OverviewView.GetPopCultures]"
+												
+												###Slices and Icon
+												blockoverride "SliceTooltip" { tooltip = "[PopCultureItem.GetTooltip]" }
+												blockoverride "SliceValue" { value = "[PopCultureItem.GetSize]" }
+												blockoverride "SliceColor" { color = "[PopCultureItem.GetColor]" }
+												blockoverride "Icon" { 
+													using = icon_culture
+													position = { 0 1 }
+												}
+											}
+
+											tag = {
+												size = { 106 20 }
+												max_width = 106
+												fontsize_min = 14
+												parentanchor = hcenter
+												using = BaseFontS
+												using = Black_FontColor
+												text = "[OverviewView.GetPlayer.GetPrimaryCulture.GetName]"
+												align = center
+											}
+										}
+									}
+									widget = {
+										size = { 106 88 }
+										flowcontainer = {
+											parentanchor = hcenter
+											direction = vertical
+											icon_pie = {
+												size = { 64 64 }
+												parentanchor = hcenter
+												datamodel = "[OverviewView.GetPopReligions]"
+												
+												###Slices and Icon
+												blockoverride "SliceTooltip" { tooltip = "[PopReligionItem.GetName]" }
+												blockoverride "SliceValue" { value = "[PopReligionItem.GetSize]" }
+												blockoverride "SliceColor" { color = "[PopReligionItem.GetColor]" }
+												blockoverride "Icon" { 
+													using = icon_religious
+													position = { 1 0 }
+												}
+											}
+
+											tag = {
+												size = { 106 20 }
+												max_width = 106
+												parentanchor = hcenter
+												fontsize_min = 14
+												using = BaseFontS
+												using = Black_FontColor
+												text = "[OverviewView.GetPlayer.GetReligion.GetName]"
+												#tooltip = "[OverviewView.GetPlayer.GetReligion.GetTooltip]"
+												align = center
+											}
+										}
+									}
+									widget = {
+										size = { 106 88 }
+										flowcontainer = {
+											parentanchor = hcenter
+											direction = vertical
+											icon_pie = {
+												size = { 64 64 }
+												parentanchor = hcenter
+												datamodel = "[OverviewView.GetPopTypes]"
+												
+												###Slices and Icon
+												blockoverride "SliceTooltip" { tooltip = "[PopTypeItem.GetName]" }
+												blockoverride "SliceValue" { value = "[PopTypeItem.GetSize]" }
+												blockoverride "SliceColor" { color = "[PopTypeItem.GetColor]" }
+												blockoverride "Icon" { 
+													using = icon_poptype
+												}
+											}
+
+											tag = {
+												size = { 106 20 }
+												parentanchor = hcenter
+												max_width = 106
+												fontsize_min = 14
+												using = BaseFontS
+												using = Black_FontColor
+												text = "[OverviewView.GetPlayer.GetTotalPopulation]"
+												tooltip = "[OverviewView.GetPlayer.BuildTotalPopulationToolTip]"
+												align = center
+											}
+										}
+									}
+								}
+							}
+						}
+
+						sub_header = {
+							size = { 688 32 }
+							blockoverride "Title_text"
+							{
+								text = "DECISIONS"
+							}
+						}
+						
+						hbox = {
+							layoutpolicy_horizontal = expanding
+							margin_bottom = 26
+							spacing = 4
+							margin_widget = {
+								size = { 336 458 }
+								layoutpolicy_horizontal = fixed
+								
+								scrollarea = {
+									name = "decisions_grid_scrollarea"
+									size = { 100% 454 }
+									position = { 2 -5 }
+									scrollbarpolicy_horizontal = always_off
+									
+									scrollbar_vertical = {
+										using = VerticalScrollBar
+									}
+									
+									using = VerticalScrollAreaCutOff
+									
+									
+									scrollwidget = {
+										dynamicgridbox = {
+											name = "decisions_grid"
+											size = { 100% 44 }
+											position = { 0 4 }
+											
+											datamodel = "[OverviewView.GetDecisions]"
+											
+											item = {
+												widget = {
+													size = { 330 40 }
+													visible = "[DecisionItem.GetDecision.IsPotential(Player.Self)]"
+													tooltipwidget = player_decision_item_tooltip
+
+													onmousehierarchyenter = "[DecisionItem.HighlightProvinces]"
+													onmousehierarchyleave = "[ClearHighlightColors]"
+													check_box_button = {
+														blockoverride "On_click" 
+														{
+															onclick = "[DecisionItem.ToggleAlert]"
+														}
+														position = { 2 0 }
+														parentanchor = vcenter
+														tooltip = "TOGGLE_DECISION_ALERT_TT"
+
+														blockoverride "Icon"
+														{
+															icon = {
+																parentanchor = center					
+																texture = "gfx/interface/icons/shared_icons/notification.dds"
+																framesize = { 30 30 }
+																frame = "[BoolTo1And2(DecisionItem.IsAlertEnabled)]"
+																size = { 22 22 }
+															}
+														}
+													}
+
+													icon = {
+														size = { 40 6 }
+														parentanchor = right
+														position = { 0 0 }
+														texture = "gfx/interface/base_parts/brown_underline_x60bd.dds"
+														spriteType = Corneredtiled
+														spriteborder = { 30 0 }
+													}
+													icon = {
+														size = { 40 6 }
+														parentanchor = bottom|right
+														position = { 0 -1 }
+														texture = "gfx/interface/base_parts/brown_underline_x60bd.dds"
+														spriteType = Corneredtiled
+														spriteborder = { 30 0 }
+													}
+
+													list_button = {	
+														position = { 32 0 }	
+														size = { 264 38 }
+														parentanchor = vcenter
+														name = "decisionbutton"
+														onclick = "[DecisionItem.SetSelected]"
+														down = "[DecisionItem.IsSelected]"
+													}
+													textbox = {
+														text = "[DecisionItem.GetDecision.GetNameWithNoTooltip]"
+														autoresize = yes
+														elide = right
+														position = { 42 -1 }
+														max_width = 252
+														fontsize_min = 12
+														using = BaseFontS
+														using = Black_FontColor
+														parentanchor = vcenter
+														align = left
+													}
+													flowcontainer = {
+														filter_mouse = all
+														position = { -8 0 }
+														parentanchor = right|vcenter
+														ignoreinvisible = yes
+														icon = { ### X if decision cannot be enacted
+															using = negative_color_texture
+															size = { 22 20 }
+															parentanchor = vcenter
+															visible = "[Not( DecisionItem.IsAllowed )]"
+															modify_texture = {
+																name = "Alpha"
+																texture = "gfx/interface/base_parts/ex_mark.dds"
+																framesize = { 50 50 }
+																frame = 2
+																blend_mode = alphamultiply
+															}	
+														}
+														icon = { ### Checkmark if decision can be enacted
+															using = positive_color_texture
+															size = { 22 20 }
+															parentanchor = vcenter
+															visible = "[DecisionItem.IsAllowed]" 
+															modify_texture = {
+																name = "Alpha"
+																texture = "gfx/interface/base_parts/check_mark.dds"
+																framesize = { 50 50 }
+																frame = 2
+																blend_mode = alphamultiply
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+							margin_widget = {
+								size = { 340 470 }
+								using = NoninteractableBG
+								blockoverride "Margins" { 
+									margin = { 1 6 } 
+									margin_bottom = -54
+								}
+								margin_bottom = 12
+								scrollarea = {
+									name = "selected_decision"
+									size = { 340 410 }
+									scrollbarpolicy_horizontal = always_off
+									visible = "[OverviewView.HasSelectedDecision]"
+									scrollbar_vertical = {
+										using = VerticalScrollBar
+									}
+									using = VerticalScrollAreaCutOff
+									scrollwidget = {
+										flowcontainer = {
+											position = { 14 4 }
+											direction = vertical
+											spacing = 16
+											textbox = {
+												visible = "[OverviewView.GetSelectedDecision.GetDecision.IsPotential(Player.Self)]"
+												datacontext = "[OverviewView]"
+												text = "[OverviewView.GetSelectedDecision.GetDecision.GetNameWithNoTooltip]"
+												autoresize = yes
+												elide = right
+												max_width = 315
+												fontsize_min = 13
+												fontsize = 20
+												using = HeaderFont
+												using = Black_FontColor
+												multiline = yes
+											}
+											textbox = {
+												name = "effectdesc"
+												visible = "[OverviewView.GetSelectedDecision.GetDecision.IsPotential(Player.Self)]"
+												text = "[OverviewView.GetSelectedDecision.GetDecision.GetEffectDesc(Player.Self)]"
+												autoresize = yes
+												elide = right
+												max_width = 315
+												fontsize_min = 13
+												using = BaseFontS
+												using = Black_FontColor
+												multiline = yes
+											}
+											textbox = {
+												name = "flavor"
+												visible = "[OverviewView.GetSelectedDecision.GetDecision.IsPotential(Player.Self)]"
+												text = "[OverviewView.GetSelectedDecision.GetDecision.GetDescription(Player.Self)]"
+												autoresize = yes
+												elide = right
+												max_width = 314
+												fontsize_min = 12
+												using = BaseFontS
+												using = Black_FontColor
+												multiline = yes
+											}
+										}
+									}
+								}
+								container = {
+									parentanchor = bottom|hcenter
+									visible = "[OverviewView.HasSelectedDecision]"
+									position = { 0 -6 }
+									text_button_square = {
+										
+										size = { 306 0 }	
+										visible = "[OverviewView.GetSelectedDecision.GetDecision.IsPotential(Player.Self)]"
+										blockoverride "On_click" { 
+											onclick = "[OverviewView.EnactSelectedDecision]"
+											enabled = "[OverviewView.GetSelectedDecision.GetDecision.IsAllowed(Player.Self)]"
+										}
+										blockoverride "Center_text" { text = "ENACT" }
+										tooltipwidget = {
+											player_decision_pop_out = {
+												datacontext = "[OverviewView.GetSelectedDecision.GetDecision]"
+											}
+										}
+									}
+								} 
+							}
+						}
+					}
+				}
+				margin_widget = {
+					name = "Provinces Tab"
+					visible = "[GetVariableSystem.HasValue( 'OverviewTabs', 'Details' )]"
+					size = { 100% 740 } 
+					position = { 0 50 }
+					margin_widget = {
+						name = "tabs"
+						size = { 100% 34 }
+						@pmincategorybuttonwidth = 292
+						@pmaxcategorybuttonwidth = 400
+						@pmincategorybuttonheight = 28 
+						@pmaxcategorybuttonheight = 34
+						parentanchor = hcenter
+						hbox = { 
+							layoutpolicy_vertical = shrinking
+							layoutpolicy_horizontal = shrinking
+						
+							category_tab = {
+								name = "t_governorships_tab"
+								blockoverride "MinSize" { size = { @pmincategorybuttonwidth @pmincategorybuttonheight } }
+								blockoverride "MaxSize" { size = { @pmaxcategorybuttonwidth @pmaxcategorybuttonheight } }
+								blockoverride "MinVisible" { visible = "[GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' )]" }
+								blockoverride "MaxVisible" { visible = "[Not( GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' ) )]" }
+								######## Shared Overrides
+								blockoverride "Center_text" { text = "GOVERNORSHIPS" }
+								######## Small Button Overrides
+								blockoverride "ClickFunction"
+								{
+									onclick = "[GetVariableSystem.Set( 'ManagementTab', 'Govnernorships' )]"
+								}
+							}
+
+							category_tab = {
+								name = "t_provinces_tab"
+								blockoverride "MinSize" { size = { @pmincategorybuttonwidth @pmincategorybuttonheight } }
+								blockoverride "MaxSize" { size = { @pmaxcategorybuttonwidth @pmaxcategorybuttonheight } }
+								blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' ) )]" }
+								blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' )]" }
+								######## Shared Overrides
+								blockoverride "Center_text" { text = "PROVINCES" }
+								######## Small Button Overrides
+								blockoverride "ClickFunction"
+								{
+									onclick = "[GetVariableSystem.Set( 'ManagementTab', 'Provinces' )]"
+								}
+							} 		
+						}
+					}
+					
+					margin_widget = { 
+						name = "Province list"
+						size = { 100% 726 }
+						position = { 0 48 } 
+						visible = "[Not( GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' ) )]"
+						scrollarea = {
+							size = { 100% 100% }
+							scrollbarpolicy_horizontal = always_off
+							
+							using = VerticalScrollAreaCutOff
+							scrollbar_vertical = {
+								using = VerticalScrollBar
+							}
+							
+							scrollwidget = {
+								dynamicgridbox = {
+									datamodel = "[OverviewView.GetGovernorships]"
+									
+									item = {
+										flowcontainer = {
+											direction = vertical
+											ignoreinvisible = yes
+											spacing = 6
+											widget = {
+												size = { 684 64 }
+												category_drop = {
+													size = { 684 60 }
+													onclick = "[GetVariableSystem.Set( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
+													visible = "[Or( Not( GetVariableSystem.Exists( OverviewGovernorshipItem.GetGovernorship.GetName ) ), GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'no' ) )]"
+													parentanchor = vcenter
+													cpt_button = {
+														size = { 40 60 }
+														datacontext = "[OverviewGovernorshipItem.GetGovernorship.GetGovernorOrRuler]"
+													}
+													tag = {
+														position = { 50 0 }
+														parentanchor = vcenter
+														text = "[OverviewGovernorshipItem.GetGovernorship.GetName]"
+													}
+													icon_and_text = {
+														size = { 120 0 }
+														parentanchor = vcenter|right
+														position = { -32 -5 }
+														blockoverride "Icon" { using = icon_poptype }
+														blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.GetTotalPopulation]" }
+														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetPopulationInfo]"
+													}
+													icon_and_text = {
+														size = { 120 0 }
+														parentanchor = vcenter|right
+														position = { -172 -5 }
+														blockoverride "Icon" { using = icon_treasury }
+														blockoverride "Text" { text = "[GuiScope.SetRoot(OverviewGovernorshipItem.GetGovernorship.MakeScope).ScriptValue('ECONOMY_total_tax_from_governorship')|+=]" }
+														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetIncomeBreakdown]" 
+													}
+													
+												}
+												category_drop = {
+													size = { 684 60 }
+													visible = "[GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
+													onclick = "[GetVariableSystem.Set( OverviewGovernorshipItem.GetGovernorship.GetName, 'no' )]"
+													parentanchor = vcenter
+													cpt_button = {
+														size = { 40 60 }
+														datacontext = "[OverviewGovernorshipItem.GetGovernorship.GetGovernorOrRuler]"
+													}
+													tag = {
+														position = { 50 0 }
+														parentanchor = vcenter
+														text = "[OverviewGovernorshipItem.GetGovernorship.GetName]"
+													}
+													icon_and_text = {
+														size = { 120 0 }
+														parentanchor = vcenter|right
+														position = { -32 -5 }
+														blockoverride "Icon" { using = icon_poptype }
+														blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.GetTotalPopulation]" }
+														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetPopulationInfo]"
+													}
+													icon_and_text = {
+														size = { 120 0 }
+														parentanchor = vcenter|right
+														position = { -172 -5 }
+														blockoverride "Icon" { using = icon_treasury }
+														blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.MakeScope.ScriptValue('ECONOMY_total_tax_from_governorship').GetValue|+=]" }
+														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetIncomeBreakdown]" 
+													}
+												}
+											}
+											fixedgridbox = {
+												name = "states_grid"
+												size = { 684 394 }
+												addcolumn = 680
+												addrow = 52
+												visible = "[GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
+												datamodel = "[OverviewGovernorshipItem.GetStates]"
+												
+												item = {
+													container = {
+														onmousehierarchyenter = "[SetHighlightArea( StateItem.GetState.GetArea )]"
+														onmousehierarchyleave = "[ClearHighlightColors]"
+
+														list_entry = { 
+															size = { 684 50 }
+														}
+
+														flowcontainer = {
+															spacing = 4
+															ignoreinvisible = yes
+
+															textbox = {
+																align = left
+																max_width = 174
+																fontsize_min = 14
+																elide = right
+																margin_left = 8
+																parentanchor = vcenter
+																minimumsize = { 174 28 }
+																text = "[StateItem.GetState.GetShortName]"
+																using = BaseFontS
+																using = Black_FontColor
+															}
+															
+															widget = {
+																size = { 20 2 }
+															}
+															
+															textbox = {
+																align = left
+																max_width = 32
+																fontsize_min = 12
+																margin_left = 8
+																parentanchor = vcenter 
+																minimumsize = { 32 14 }
+																text = "[StateItem.GetState.GetTotalPopulation]"
+																using = BaseFontS
+																using = Black_FontColor
+																datacontext = "[StateItem]"
+																tooltip = "ALL_POP_TT_STATE_ITEM"
+															}
+															
+															textbox = {
+																align = left
+																max_width = 56
+																fontsize_min = 12
+																margin_left = 8
+																parentanchor = vcenter 
+																minimumsize = { 56 12 }
+																text = "[StateItem.GetState.GetTradeRoutesShort]"
+																using = BaseFontS
+																using = Black_FontColor
+																datacontext = "[StateItem]"
+																tooltip = "[StateItem.GetState.GetTradeRoutesTooltip]"
+															}
+															
+															icon_and_text_progress_S = {
+																size = { 100 46 }
+																parentanchor = vcenter
+																tooltip = "[StateItem.GetState.GetLoyaltyTooltip]"
+
+																blockoverride "Text"
+																{
+																	text = "[StateItem.GetState.GetStateLoyalty|0]/100"
+																	minimumsize = { 60 24 }
+																}
+
+																blockoverride "Icon"
+																{
+																	texture = "gfx/interface/icons/shared_icons/loyalty.dds"
+																}
+
+																blockoverride "Value"
+																{
+																	### TODO Correct this value
+																	value = "[FixedPointToFloat(StateItem.GetState.GetStateLoyalty)]"
+																}
+
+																#texture = "gfx/interface/icons/shared_icons/state_loyalty_increase.dds"
+																#visible = "[Not(StateItem.GetState.IsCapitalState)]"
+																#size = { 26 26 }
+																#framesize = { 50 50 }
+																#frame = "[StateItem.GetState.GetMonthlyLoyaltyFrame]"
+															
+																blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
+																blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
+															}
+															widget = {
+																size = { 1 2 }
+															}
+															
+															icon_and_text_progress_S = { 
+																parentanchor = vcenter
+																name = "food"
+																size = { 100 46 }
+																tooltip = "[StateItem.GetState.GetFoodTooltip]"
+
+																blockoverride "Icon" 
+																{
+																	texture = "gfx/interface/icons/shared_icons/food.dds"
+																	framesize = { 50 50 }
+																	size = { 26 26 }
+																	frame = "[StateItem.GetState.GetFoodFrame]"
+																}
+
+																blockoverride "Text"
+																{
+																	text = "[StateItem.GetState.GetFood|0]/[StateItem.GetState.GetFoodCapacity|0]"
+																	minimumsize = { 60 24 }
+																}
+
+																blockoverride "Value"
+																{
+																	value = "[FixedPointToFloat(StateItem.GetState.GetFoodCapacityPercent)]"
+																}
+																
+																#progressbar = {
+																#	name = "foodbar_negative"
+																#	size = { 100% 8 }
+																#	position = { 0 0 }
+																#	parentanchor = bottom
+																#	visible = "[LessThan_CFixedPoint(StateItem.GetState.GetMonthlyFood, '(CFixedPoint)0')]"
+																#	using = progressbar_red_horizontal
+																#	value = "[FixedPointToFloat(StateItem.GetState.GetFoodCapacityPercent)]"
+																#}
+																
+																blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
+																blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
+																
+															}
+
+															widget = {
+																size { 4 28 }
+																parentanchor = vcenter
+															}
+
+															icon_button_square = {
+																parentanchor = vcenter
+																size = { 34 34 }
+																datacontext = "[GetScriptedGui('release_subject_button')]"
+																visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+																enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+																tooltip = "RELEASE_SUBJECT_BUTTON_TOOLTIP"
+
+																blockoverride "Icon"
+																{ 
+																	texture = "gfx/interface/icons/shared_icons/release_subject.dds"
+																}
+
+																blockoverride "On_click"
+																{ 
+																	onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+																}
+															}
+
+															icon_button_square = {
+																parentanchor = vcenter
+																size = { 34 34 }
+																datacontext = "[StateItem.GetState]"
+																tooltip = "OVERVIEW_GOVPOL_TOOLTIP"
+																blockoverride "Icon"
+																{ 
+																	texture = "[GetGovernorPolicyIcon(StateItem.GetState.GetGovernorPolicy)]"
+																	size = { 31 31 }
+																}
+
+																
+																blockoverride "On_click"
+																{ 
+																	onclick = "[ChangePolicy(StateItem.GetState)]"
+																}
+															}
+
+															icon_button_square = {
+																visible = "[Not(StateItem.GetState.IsAiAllowedToTrade)]"
+																
+																parentanchor = vcenter
+																size = { 34 34 }
+
+																tooltip = "TRADEROUTE_AUTOMATIC_FOR_STATE"
+																blockoverride "Icon"
+																{
+																	texture = "gfx/interface/icons/shared_icons/trade.dds"
+																	size = { 24 24 }
+																	position = { -6 -3 }
+																	
+																	
+																	icon = {
+																		using = negative_color_texture
+																		size = { 24 22 }
+																		position = { 10 5 }
+																		parentanchor = bottom|right
+																		modify_texture = {
+																			name = "Alpha"
+																			texture = "gfx/interface/base_parts/ex_mark.dds"
+																			framesize = { 50 50 }
+																			frame = 2
+																			blend_mode = alphamultiply
+																		}	
+																	}
+																}
+																
+
+																blockoverride "On_click"
+																{
+																	onclick = "[StateItem.ToggleAiTradeAllowance]"
+																}
+															}
+
+															icon_button_square = {
+																visible = "[StateItem.GetState.IsAiAllowedToTrade]"
+																
+																parentanchor = vcenter
+																size = { 34 34 }
+
+																tooltip = "TRADEROUTE_NOT_AUTOMATIC_FOR_STATE"
+																blockoverride "Icon"
+																{
+																	texture = "gfx/interface/icons/shared_icons/trade.dds"
+																	size = { 30 30 }
+																}
+
+																blockoverride "On_click"
+																{
+																	onclick = "[StateItem.ToggleAiTradeAllowance]"
+																}
+															}
+
+															goto_button = {
+																parentanchor = vcenter
+																size = { 34 34 }
+																datacontext = "[StateItem.GetState]"
+																tooltip = "go_to"
+																
+																blockoverride "On_click"
+																{ 
+																	onclick = "[OnClickOnState(StateItem.GetState)]"
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					margin_widget = { 
+						name = "States list"
+						size = { 100% 726 }
+						position = { 0 48 } 
+						visible = "[GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' )]"
+						
+						margin_widget = { 
+							size = { 100% 46 }
+							position = { 1 0 }
+							flowcontainer = {
+								name = "Sort Buttons"
+								spacing = 3
+						
+								text_button_sort = {
+									name = "sort_name"
+									size = { 121 0 }
+									tooltip = SORT_PROVINCE_TT
+						
+									blockoverride "On_click"
+									{
+										onclick = "[OverviewView.Sort('name')]"
+									}
+									
+									blockoverride "DownState" { down = "[OverviewView.IsSorted('name')]" }
+						
+									blockoverride "Icon"
+									{
+										visible = no
+										texture = "gfx/interface/icons/shared_icons/province.dds"
+										size = { 48 54 }
+									}
+									
+									blockoverride "Button_text"
+									{
+										text = "A_Z"
+									}
+								}
+								
+								
+								text_button_sort = {
+									name = "sort_gov"
+									size = { 32 0 }
+									tooltip = SORT_GOVERNOR_TT
+						
+									blockoverride "On_click"
+									{
+										onclick = "[OverviewView.Sort('governor')]"
+									}
+						
+									blockoverride "DownState" { down = "[OverviewView.IsSorted('governor')]" }
+									
+									blockoverride "Button_text"
+									{
+										text = ""
+									}
+								}
+						
+								text_button_sort = {
+									name = "sort_pops"
+									size = { 34 0 }
+									tooltip = "SORT_POPS_TT"
+									
+						
+									blockoverride "On_click"
+									{
+										onclick = "[OverviewView.Sort('total_population')]"
+									}
+						
+									blockoverride "DownState" { down = "[OverviewView.IsSorted('total_population')]" }
+						
+									blockoverride "Button_text"
+									{
+										text = ""
+									}
+						
+									blockoverride "Icon"
+									{
+										using = icon_pop_type
+										size = { 34 34 }
+									}	
+								}
+								
+								text_button_sort = {
+									name = "sort_trade_routes"
+									size = { 44 0 }
+									tooltip = SORT_TRADE_TT
+									
+						
+									blockoverride "On_click"
+									{
+										onclick = "[OverviewView.Sort('trade')]"
+									}
+									blockoverride "DownState" { down = "[OverviewView.IsSorted('trade')]" }
+						
+									blockoverride "Button_text"
+									{
+										text = ""
+									}
+						
+									blockoverride "Icon"
+									{
+										texture = "gfx/interface/icons/shared_icons/trade.dds"
+									}	
+								}
+								
+								text_button_sort = {
+									name = "sort_loyalty"
+									size = { 100 0 }
+									tooltip = SORT_LOYALTY_TT
+									blockoverride "On_click"
+									{
+										onclick = "[OverviewView.Sort('loyalty')]"
+									}
+						
+									blockoverride "DownState" { down = "[OverviewView.IsSorted('loyalty')]" }
+						
+									blockoverride "Button_text"
+									{
+										text = ""
+									}
+						
+									blockoverride "Icon"
+									{
+										texture = "gfx/interface/icons/shared_icons/loyalty.dds"
+									}	
+								}
+						
+								text_button_sort = {
+									name = "sort_food"
+									size = { 101 0 }
+									tooltip = SORT_FOOD_TT
+									blockoverride "On_click"
+									{
+										onclick = "[OverviewView.Sort('food')]"
+									}
+						
+									blockoverride "DownState" { down = "[OverviewView.IsSorted('food')]" }
+									blockoverride "Button_text"
+									{
+										text = ""
+									}
+						
+									blockoverride "Icon"
+									{
+										texture = "gfx/interface/icons/shared_icons/food.dds"
+										size = { 34 34 }
+									}	
+								}
+								text_button_sort = {
+									name = "sort_integrated_pops"
+									size = { 42 0 }
+									tooltip = SORT_INTEGRATED_POPS_TT
+									blockoverride "On_click"
+									{
+										onclick = "[OverviewView.Sort('integrated_pops')]"
+									}
+						
+									blockoverride "DownState" { down = "[OverviewView.IsSorted('integrated_pops')]" }
+									blockoverride "Button_text"
+									{
+										text = ""
+									}
+						
+									blockoverride "Icon"
+									{
+										using = icon_culture
+										size = { 32 32 }
+									}	
+								}
+								text_button_sort = {
+									name = "sort_religious_unity"
+									size = { 42 0 }
+									tooltip = SORT_RELIGIOUS_UNITY_TT
+									blockoverride "On_click"
+									{
+										onclick = "[OverviewView.Sort('religious_unity')]"
+									}
+						
+									blockoverride "DownState" { down = "[OverviewView.IsSorted('religious_unity')]" }
+									blockoverride "Button_text"
+									{
+										text = ""
+									}
+						
+									blockoverride "Icon"
+									{
+										using = icon_religious
+										size = { 32 32 }
+									}	
+								}
+							}
+						}
+						
+						scrollarea = {
+							size = { 100% 688 }
+							position = { 0 38 }
+							scrollbarpolicy_horizontal = always_off
+							
+							using = VerticalScrollAreaCutOff
+							scrollbar_vertical = {
+								using = VerticalScrollBar
+							}
+							scrollwidget = {
+								fixedgridbox = {
+									name = "states_grid"
+									size = { 688 394 }
+									addcolumn = 688
+									addrow = 54
+									datamodel = "[OverviewView.GetStates]"
+									
+									item = {
+										container = {
+											onmousehierarchyenter = "[SetHighlightArea( StateItem.GetState.GetArea )]"
+											onmousehierarchyleave = "[ClearHighlightColors]"
+
+											list_entry = { 
+												size = { 688 52 }
+											}
+
+											flowcontainer = {
+												spacing = 3
+												ignoreinvisible = yes
+
+												textbox = {
+													align = left
+													max_width = 120
+													fontsize_min = 11
+													elide = right
+													margin_left = 6
+													margin_bottom = 4
+													parentanchor = vcenter
+													minimumsize = { 120 28 }
+													text = "[StateItem.GetState.GetShortName]"
+													using = BaseFontS
+													using = Black_FontColor
+												}
+												
+												cpt_button = {
+													size = { 34 50 }
+													datacontext = "[StateItem.GetState.GetGovernorOrRuler]"
+												}
+												
+												textbox = {
+													align = left
+													max_width = 28
+													fontsize_min = 12
+													margin_left = 8
+													parentanchor = vcenter 
+													minimumsize = { 28 12 }
+													text = "[StateItem.GetState.GetTotalPopulation]"
+													using = BaseFontS
+													using = Black_FontColor
+													datacontext = "[StateItem]"
+													tooltip = "ALL_POP_TT_STATE_ITEM"
+												}
+												
+												textbox = {
+													align = left
+													max_width = 48
+													fontsize_min = 12
+													margin_left = 8
+													parentanchor = vcenter 
+													minimumsize = { 48 12 }
+													text = "[StateItem.GetState.GetTradeRoutesShort]"
+													using = BaseFontS
+													using = Black_FontColor
+													datacontext = "[StateItem]"
+													tooltip = "[StateItem.GetState.GetTradeRoutesTooltip]"
+												}
+												
+												icon_and_text_progress_S = {
+													size = { 100 46 }
+													parentanchor = vcenter
+													tooltip = "[StateItem.GetState.GetLoyaltyTooltip]"
+
+													blockoverride "Text"
+													{
+														text = "[StateItem.GetState.GetStateLoyalty|0]/100"
+														#minimumsize = { 60 24 }
+													}
+
+													blockoverride "Icon"
+													{
+														texture = "gfx/interface/icons/shared_icons/loyalty.dds"
+													}
+
+													blockoverride "Value"
+													{
+														### TODO Correct this value
+														value = "[FixedPointToFloat(StateItem.GetState.GetStateLoyalty)]"
+													}
+
+													#texture = "gfx/interface/icons/shared_icons/state_loyalty_increase.dds"
+													#visible = "[Not(StateItem.GetState.IsCapitalState)]"
+													#size = { 26 26 }
+													#framesize = { 50 50 }
+													#frame = "[StateItem.GetState.GetMonthlyLoyaltyFrame]"
+												
+													blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
+													blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
+												
+												}
+												widget = {
+													size = { 1 2 }
+												}
+												icon_and_text_progress_S = { 
+													parentanchor = vcenter
+													name = "food"
+													size = { 100 46 }
+													#blockoverride "size"
+													#{
+													#	size = { 110 7 }
+													#}
+													tooltip = "[StateItem.GetState.GetFoodTooltip]"
+
+													blockoverride "Icon" 
+													{
+														texture = "gfx/interface/icons/shared_icons/food.dds"
+														framesize = { 50 50 }
+														size = { 26 26 }
+														frame = "[StateItem.GetState.GetFoodFrame]"
+													}
+
+													blockoverride "Text"
+													{
+														text = "[StateItem.GetState.GetFood|0]/[StateItem.GetState.GetFoodCapacity|0]"
+														minimumsize = { 60 24 }
+													}
+
+													blockoverride "Value"
+													{
+														value = "[FixedPointToFloat(StateItem.GetState.GetFoodCapacityPercent)]"
+													}
+													blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
+													blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
+												}
+												widget = {
+													size = { 1 2 }
+												}
+												widget = {
+													size = { 36 24 }
+													datacontext = "[StateItem.GetState]"
+													tooltip = "STATE_INTEGRATED_CULTURE_TT"
+													textbox = { 
+														text = "[GuiScope.SetRoot( StateItem.GetState.MakeScope ).ScriptValue('state_culture_integrated_percent_svalue')|0%]"
+														autoresize = yes
+														using = BaseFontS
+														using = Black_FontColor
+														parentanchor = hcenter|vcenter
+														position = { 0 12 }
+													}
+												}
+												
+												widget = {
+													size = { 36 24 }
+													datacontext = "[StateItem.GetState]"
+													tooltip = "STATE_RELIGION_TT"
+													textbox = { 
+														text = "[GuiScope.SetRoot( StateItem.GetState.MakeScope ).ScriptValue('state_religion_integrated_percent_svalue')|0%]"
+														autoresize = yes
+														using = BaseFontS
+														using = Black_FontColor
+														parentanchor = hcenter|vcenter
+														position = { 0 12 }
+													}
+												}
+												widget = {
+													size = { 1 2 }
+												}
+
+												icon_button_square = {
+													parentanchor = vcenter
+													size = { 34 34 }
+													datacontext = "[GetScriptedGui('release_subject_button')]"
+													visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+													enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+													tooltip = "RELEASE_SUBJECT_BUTTON_TOOLTIP"
+
+													blockoverride "Icon"
+													{ 
+														texture = "gfx/interface/icons/shared_icons/release_subject.dds"
+													}
+
+													blockoverride "On_click"
+													{ 
+														onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+													}
+												}
+
+												icon_button_square = {
+													parentanchor = vcenter
+													size = { 34 34 }
+													datacontext = "[StateItem.GetState]"
+													tooltip = "OVERVIEW_GOVPOL_TOOLTIP"
+													blockoverride "Icon"
+													{ 
+														texture = "[GetGovernorPolicyIcon(StateItem.GetState.GetGovernorPolicy)]"
+													}
+
+													
+													blockoverride "On_click"
+													{ 
+														onclick = "[ChangePolicy(StateItem.GetState)]"
+													}
+												}
+												
+												icon_button_square = {
+													#visible = "[Not(StateItem.GetState.IsAiAllowedToTrade)]"
+													visible = "[StateItem.GetState.IsAiAllowedToTrade]"
+													
+													parentanchor = vcenter
+													size = { 34 34 }
+
+													tooltip = "TRADEROUTE_NOT_AUTOMATIC_FOR_STATE"
+													blockoverride "Icon"
+													{
+														texture = "gfx/interface/icons/shared_icons/trade.dds"
+														size = { 30 30 }
+													}
+
+													blockoverride "On_click"
+													{
+														onclick = "[StateItem.ToggleAiTradeAllowance]"
+													}
+												}
+
+												icon_button_square = {
+													visible = "[Not(StateItem.GetState.IsAiAllowedToTrade)]"
+													#visible = "[StateItem.GetState.IsAiAllowedToTrade]"
+													
+													parentanchor = vcenter
+													size = { 34 34 }
+
+													tooltip = "TRADEROUTE_AUTOMATIC_FOR_STATE"
+													blockoverride "Icon"
+													{
+														texture = "gfx/interface/icons/shared_icons/trade.dds"
+														size = { 24 24 }
+														position = { -6 -3 }
+														
+														
+														icon = {
+															using = negative_color_texture
+															size = { 24 22 }
+															position = { 10 5 }
+															parentanchor = bottom|right
+															modify_texture = {
+																name = "Alpha"
+																texture = "gfx/interface/base_parts/ex_mark.dds"
+																framesize = { 50 50 }
+																frame = 2
+																blend_mode = alphamultiply
+															}	
+														}
+													}
+
+													blockoverride "On_click"
+													{
+														onclick = "[StateItem.ToggleAiTradeAllowance]"
+													}
+												}
+
+												goto_button = {
+													parentanchor = vcenter
+													size = { 34 34 }
+													datacontext = "[StateItem.GetState]"
+													tooltip = "go_to"
+													
+													blockoverride "On_click"
+													{ 
+														onclick = "[OnClickOnState(StateItem.GetState)]"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+	}
+}
+
+
+###### UI Library 
+#
+#
+#	message_window = {
+#		size = { 564 300 }
+#		visible = no #TODO 
+#		blockoverride "Title_text" { text = "Lorem Ipsum" }
+#		
+#		widget = {
+#			size = { 100 140 }
+#			position = { 12 38 }
+#			
+#			icon = {
+#				# ToDo: Delete me.
+#				texture = "gfx/interface/base_parts/button2_inner_x8y8bd_alpha.dds"
+#				size = { 100% 100% }
+#				alpha = 0.2
+#			}
+#			
+#			icon = {
+#				# ToDo: Replace me but keep anchors. 
+#				using = temp_icon
+#				parentanchor = center
+#				widgetanchor = center
+#			}
+#		}
+#		
+#		textbox = {
+#			position = { 0 40 }
+#			maximumsize = { 320 -1 }
+#			parentanchor = top|hcenter
+#			widgetanchor = top|hcenter
+#			text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+#			autoresize = yes
+#			using = BaseFontS
+#			using = Black_FontColor
+#			multiline = yes
+#			
+#			using = NoninteractableBG
+#		}		
+#		
+#		widget = {
+#			size = { 100 140 }
+#			position = { -12 38 }
+#			parentanchor = top|right
+#			widgetanchor = top|right
+#			
+#			icon = {
+#				# ToDo: Delete me.
+#				texture = "gfx/interface/base_parts/button2_inner_x8y8bd_alpha.dds"
+#				size = { 100% 100% }
+#				alpha = 0.2
+#			}
+#			
+#			icon = {
+#				# ToDo: Replace me but keep anchors. 
+#				using = temp_icon
+#				parentanchor = center
+#				widgetanchor = center
+#			}
+#		}		
+#		
+#		flowcontainer = {
+#			name = "Buttons_container"
+#			position = { 0 -12 }
+#			parentanchor = bottom|hcenter
+#			widgetanchor = bottom|hcenter
+#			spacing = 8
+#			
+#			text_button_square = {
+#				size = { 200 26 }
+#				
+#				# ToDo: blockoverride "On_click" { }		
+#	
+#				blockoverride "Center_text" { visible = yes }
+#				blockoverride "Button_text" { text = "Left Button" }			
+#			}	
+#			
+#			text_button_square = {
+#				size = { 200 26 }
+#				
+#				# ToDo: blockoverride "On_click" { }		
+#	
+#				blockoverride "Center_text" { visible = yes }
+#				blockoverride "Button_text" { text = "Right Button" }			
+#			}	
+#		}
+#	}
+}

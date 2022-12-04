@@ -13,6 +13,7 @@ debug_trade.1 = { # Trade setup
 			every_governorships = {
 				TRADE_setup_internal_trade_cuts = yes
 			}
+			TRADE_setup_tax_rates = yes
 		}
 	}
 
@@ -35,15 +36,18 @@ debug_trade.2 = { # Quarterly internal trade simulation
 		#debug_log = "Finished TRADE_update_all_TZ_local_prices, starting TRADE_reset_internal_pools"
 		TRADE_reset_internal_pools = yes
 		#debug_log = "Finished TRADE_reset_internal_pools, starting TRADE_reset_quarterly_trade_scope_values"
-		TRADE_reset_quarterly_trade_scope_values = yes
+		# TRADE_reset_quarterly_trade_scope_values = yes
 		#debug_log = "Finished TRADE_reset_quarterly_trade_scope_values, starting TRADE_reset_all_internal_trade_stockpiles"
-		TRADE_reset_all_internal_trade_stockpiles = yes
+		# TRADE_reset_all_internal_trade_stockpiles = yes # OBSOLETE - merged into TRADE_reset_internal_pools
 		#debug_log = "Finished TRADE_reset_all_internal_trade_stockpiles, starting TRADE_reset_all_internal_trade_revenue_totals"
-		TRADE_reset_all_internal_trade_revenue_totals = yes
+		# TRADE_reset_all_internal_trade_revenue_totals = yes # OBSOLETE - merged into TRADE_reset_internal_pools
 		#debug_log = "Finished TRADE_reset_all_internal_trade_revenue_totals, starting governorship iterations"
-		TRADE_reset_internal_amounts_sold = yes
-		every_country = {
+		# TRADE_reset_internal_amounts_sold = yes
+		every_country_with_more_than_1_governorship = {
 			every_governorships = { # Sell offers
+				limit = {
+					NOT = { has_variable = federation_customs_union }
+				}
 				#debug_log = "Governorship trade stage 1"
 				TRADE_reset_quarterly_governorship_values = yes
 				#debug_log = "Governorship trade stage 2"
@@ -53,10 +57,57 @@ debug_trade.2 = { # Quarterly internal trade simulation
 				# Save the total amount available as a var
 			}
 			every_governorships = { # Purchase orders
+				limit = {
+					NOT = { has_variable = federation_customs_union }
+				}
 				#debug_log = "Governorship trade stage 4"
 				PURCHASE_make_internal_shopping_list = yes
 			}
 			every_governorships = { # Invoices
+				limit = {
+					NOT = { has_variable = federation_customs_union }
+				}
+				#debug_log = "Governorship trade stage 5"
+				SELL_calculate_all_internal_revenue_cut_percentages = yes
+				#debug_log = "Governorship trade stage 6"
+				SELL_get_all_internal_cuts_of_revenue = yes
+				#debug_log = "Governorship trade stage 7"
+				TRADE_set_spender_shares = yes
+				#debug_log = "Governorship trade stage 8"
+				TRADE_set_income_shares = yes
+				#debug_log = "Governorship trade stage 9"
+				PURCHASE_split_all_costs = yes
+				#debug_log = "Governorship trade stage 10"
+				SELL_split_all_income = yes
+				#debug_log = "Governorship trade complete"
+			}
+		}
+		every_federation_country = {
+			every_governorships = { # Sell offers
+				limit = {
+					has_variable = federation_customs_union
+				}
+				#debug_log = "Governorship trade stage 1"
+				TRADE_reset_quarterly_governorship_values = yes
+				#debug_log = "Governorship trade stage 2"
+				TRADE_set_internal_trade_scope = yes
+				#debug_log = "Governorship trade stage 3"
+				SELL_declare_all_internal_available = yes
+				# Save the total amount available as a var
+			}
+		}
+		every_federation_country = {
+			every_governorships = { # Purchase orders
+				limit = {
+					has_variable = federation_customs_union
+				}
+				#debug_log = "Governorship trade stage 4"
+				PURCHASE_make_internal_shopping_list = yes
+			}
+			every_governorships = { # Invoices
+				limit = {
+					has_variable = federation_customs_union
+				}
 				#debug_log = "Governorship trade stage 5"
 				SELL_calculate_all_internal_revenue_cut_percentages = yes
 				#debug_log = "Governorship trade stage 6"

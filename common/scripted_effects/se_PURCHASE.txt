@@ -286,7 +286,7 @@ PURCHASE_make_internal_shopping_list = {
 	}
 }
 
-	PURCHASE_check_shopping_internal = {
+PURCHASE_check_shopping_internal = {
 	# Scope: governorship
 	# Function: The sole purpose of this effect is to only run the purchase order effect if there's actually demand, therefore all of its arguments are basically proxies for the purchase order effect.
 
@@ -311,6 +311,15 @@ PURCHASE_make_internal_shopping_list = {
 		change_local_variable = {
 			name = l_order_size
 			subtract = var:$tradegood$_stockpile
+		}
+		if = {
+			limit = {
+				local_var:l_order_size > var:governorship_trade_capacity
+			}
+			set_local_variable = {
+				name = l_order_size
+				value = var:governorship_trade_capacity
+			}
 		}
 		# Below is commented out: limits the import capacity based on infrastructure
 		# Disabled during testing because buildings aren't set up yet
@@ -345,7 +354,7 @@ PURCHASE_order_internal = {
 	# $order_size$ = local variable, local_var:l_order_size
 	# $internal_sold_total$ = internal_sold_total_grain
 
-	debug_log = "Mking a purchase order for of  $tradegood$"
+	debug_log = "Making a purchase order for  $tradegood$"
 
 	var:internal_trade_scope = {
 		set_local_variable = {
@@ -414,7 +423,6 @@ PURCHASE_transfer_goods_internally = {
 		multiply = owner.capital_scope.governorship.var:trade_center.var:local_price_$tradegood$
 	}
 
-	
 	# SUBTRACT MONEY FROM THE BUYING GOVERNORSHIP'S BALANCE
 	# The balance will then be applied to the governorship wealth pools at the end of the purchase phase
 
@@ -429,8 +437,6 @@ PURCHASE_transfer_goods_internally = {
 			name = internal_sold_total_$tradegood$
 			add = $amount$
 		}
-	}
-	var:internal_trade_scope = {
 		change_variable = {
 			name = internal_total_revenue_$tradegood$
 			add = local_var:this_spend
@@ -470,6 +476,10 @@ PURHCASE_calculate_actual_share_of_spend = {
 PURCHASE_split_costs = {
 	# Scope: governorship
 	# Split the spend for a single category of imported goods
+	PURCHASE_apply_internal_sales_tax = {
+		category = $category$
+	}
+
 	PURHCASE_calculate_actual_share_of_spend = {
 		category = $category$
 		spender = the_state
@@ -530,6 +540,36 @@ PURCHASE_split_costs = {
 	change_variable = {
 		name = slaves_wealth
 		add = local_var:this_spend_on_$category$
+	}
+}
+
+
+PURCHASE_apply_internal_sales_tax = {
+	set_local_variable = {
+		name = this_internal_sales_taxed
+		value = var:governorship_this_quarter_spend_on_$category$
+	}
+
+	change_local_variable = {
+		name = this_internal_sales_taxed
+		multiply = owner.var:internal_sales_tax_rate
+	}
+
+	change_variable = {
+		name = governorship_quarterly_revenue_from_internal_sales_tax_$category$
+		add = local_var:this_internal_sales_taxed
+	}
+
+	owner = {
+		change_variable = {
+			name = national_quarterly_revenue_from_internal_sales_tax_$category$
+			add = local_var:this_internal_sales_taxed
+		}
+	}
+	
+	change_variable = {
+		name = governorship_this_quarter_spend_on_$category$
+		add = local_var:this_internal_sales_taxed # This value is negative
 	}
 }
 

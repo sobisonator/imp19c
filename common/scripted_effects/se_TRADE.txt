@@ -370,6 +370,10 @@ TRADE_set_trade_capacity = {
 
 TRADE_reset_quarterly_governorship_values = {
 	# Scope: governorship
+	# Trade infrastructure limit variable
+	TRADE_set_trade_capacity = yes
+	TRADE_reset_governorship_tax_totals = yes
+	# Income and spend variables
 	set_variable = {
 		name = governorship_this_quarter_income_from_essential_goods
 		value = 0
@@ -402,7 +406,7 @@ TRADE_reset_quarterly_governorship_values = {
 		name = governorship_this_quarter_spend_on_military_goods
 		value = 0
 	}
-	PURCHASE_reset_quarterly_var = yes
+	# PURCHASE_reset_quarterly_var = yes # OSBOLETE - unused
 	SELL_reset_all_internal_amounts_offered = yes
 }
 
@@ -519,7 +523,7 @@ TRADE_set_income_share = {
 TRADE_reset_quarterly_trade_scope_values = {
 	# Scope: random country
 	TRADE_reset_internal_pools = yes
-	SELL_reset_all_internal_trade_stockpiles = yes
+	# SELL_reset_all_internal_trade_stockpiles = yes # OBSOLETE - REMOVE
 }
 
 TRADE_reset_internal_pools = {
@@ -528,18 +532,38 @@ TRADE_reset_internal_pools = {
 			name = internal_income_pool
 			value = 0
 		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_amount_sold
+		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_trade_stockpile
+		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_trade_revenue_total
+		}
+		TRADE_reset_quarterly_tax_totals = yes
 	}
 	every_federation = {
 		set_variable = {
 			name = internal_income_pool
 			value = 0
 		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_amount_sold
+		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_trade_stockpile
+		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_trade_revenue_total
+		}
 	}
-	TRADE_reset_internal_amounts_sold = yes
+	# TRADE_reset_internal_amounts_sold = yes # Replaced by every_tradegoods_complex + TRADE_reset_internal_amount_sold
 }
 
 TRADE_reset_internal_amounts_sold = {
 	# Scope: random country
+	# OBSOLETE - replaced by every_tradegoods_complex {APPLY = TRADE_reset_intenral_amount_sold }
 
 	every_country = {
 		TRADE_reset_internal_amount_sold = { tradegood = grain }
@@ -918,35 +942,17 @@ TRADE_reset_all_internal_trade_stockpiles = {
 	# Scope: Random country
 	# Called: Quarterly
 	# Resets all internal trade stockpiles to 0
-	every_tradegoods_complex = {
-		APPLY = TRADE_reset_internal_trade_stockpile
-	}
+	# OBSOLETE: Merged into TRADE_reset_internal_pools
 }
 
 TRADE_reset_internal_trade_stockpile = {
-	every_country = {
-		set_variable = {
-			name = $tradegood$_stockpile_internal
-			value = 0 
-		}
+	set_variable = {
+		name = $tradegood$_stockpile_internal
+		value = 0 
 	}
-	every_federation = {
-		set_variable = {
-			name = $tradegood$_stockpile_internal
-			value = 0
-		}
-	}
-	every_country = {
-		set_variable = {
-			name = $tradegood$_available_at_start_of_quarter_internal
-			value = 0 
-		}
-	}
-	every_federation = {
-		set_variable = {
-			name = $tradegood$_available_at_start_of_quarter_internal
-			value = 0
-		}
+	set_variable = {
+		name = $tradegood$_available_at_start_of_quarter_internal
+		value = 0 
 	}
 }
 
@@ -954,24 +960,13 @@ TRADE_reset_all_internal_trade_revenue_totals = {
 	# Scope: Random country
 	# Called: Quarterly
 	# Resets all internal trade stockpiles to 0
-	every_tradegoods_complex = {
-		APPLY = TRADE_reset_internal_trade_revenue_total
-	}
-	
+	# OBSOLETE: Merged into TRADE_reset_internal_pools
 }
 
 TRADE_reset_internal_trade_revenue_total = {
-	every_country = {
-		set_variable = {
-			name = internal_total_revenue_$tradegood$
-			value = 0 
-		}
-	}
-	every_federation = {
-		set_variable = {
-			name = internal_total_revenue_$tradegood$
-			value = 0 
-		}
+	set_variable = {
+		name = internal_total_revenue_$tradegood$
+		value = 0 
 	}
 }
 
@@ -1954,4 +1949,59 @@ TRADE_prepare_quarterly_values = {
 	TRADE_reset_all_internal_trade_revenue_totals = yes
 	
 	TRADE_reset_internal_amounts_sold = yes
+}
+
+# Taxes
+
+TRADE_setup_tax_rates = {
+	TRADE_setup_internal_trade_tax = yes
+}
+
+TRADE_setup_internal_trade_tax = {
+	# Scope: country
+	# Function: Create the variables referenced when taxing internal trade
+	# Each tax rate is a percentage, measured from 0 to 1
+	# The value of thing being taxed is then multiplied by the tax rate
+	set_variable = {
+		name = internal_sales_tax_rate
+		value = 0.2 #Debug. Default = 0. This should be on a slider or something
+	}
+}
+
+TRADE_reset_quarterly_tax_totals = {
+	set_variable = {
+		name = national_quarterly_revenue_from_internal_sales_tax_essential_goods
+		value = 0
+	}
+	set_variable = {
+		name = national_quarterly_revenue_from_internal_sales_tax_luxury_goods
+		value = 0
+	}
+	set_variable = {
+		name = national_quarterly_revenue_from_internal_sales_tax_business_goods
+		value = 0
+	}
+	set_variable = {
+		name = national_quarterly_revenue_from_internal_sales_tax_military_goods
+		value = 0
+	}
+}
+
+TRADE_reset_governorship_tax_totals = {
+	set_variable = {
+		name = governorship_quarterly_revenue_from_internal_sales_tax_essential_goods
+		value = 0
+	}
+	set_variable = {
+		name = governorship_quarterly_revenue_from_internal_sales_tax_luxury_goods
+		value = 0
+	}
+	set_variable = {
+		name = governorship_quarterly_revenue_from_internal_sales_tax_business_goods
+		value = 0
+	}
+	set_variable = {
+		name = governorship_quarterly_revenue_from_internal_sales_tax_military_goods
+		value = 0
+	}
 }

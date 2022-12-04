@@ -68,12 +68,14 @@ def write_buildings():
             total_population = get_total_population(row)
             f.write(
                 "   " + row.PROVID + " = {\n" +
-                "       URB_residential_district = " + str(round((total_population/10)*0.8)*((3*int(row.INDUSTRIALISATION)) / 100))) + "\n" + 
+                "       URB_residential_district = " + str(round((total_population/10)*0.8)*((3*int(row.INDUSTRIALISATION)) / 100)) + "\n" + 
                 "       URB_administration_district = " + str(round(int(row.middle_strata) / 10)) + "\n" + 
                 "       URB_commerce_district = " + str(round((int(row.middle_strata) + int(row.upper_strata)) / 10)) + "\n" + 
                 "       URB_cultural_district = " + str(round((int(row.middle_strata) + int(row.upper_strata)) / 13)) + "\n" + 
                 "       EDU_school = " + str(round(int(row.middle_strata) / 10)) + "\n" + 
                 "       INF_sewer_infrastructure = " + str(round((total_population/30)*(int(row.INDUSTRIALISATION) / 100))) + "\n" + 
+                "       IND_resource_gathering_operation = " + str(round((total_population/20)*((3*int(row.INDUSTRIALISATION)) / 100))) + "\n" + 
+                "       INF_depot = " + str(round((total_population/20)*((3*int(row.INDUSTRIALISATION)) / 200))) + "\n" + 
                 "       INF_hospital = " + str(round((int(row.middle_strata)/5)*(int(row.INDUSTRIALISATION) / 100))) + "\n" + 
                 "   }\n"
                 )

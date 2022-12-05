@@ -341,13 +341,35 @@ TRADE_set_internal_trade_scope = {
 	# Called: Every quarter before doing trade
 	if = {
 		limit = {
-			NOT = { has_variable = federation_customs_union }
+			AND = {
+				NOT = { has_variable = federation_customs_union }
+				capital_scope.owner = {
+					NOT = { has_variable = overlord_customs_union }
+				}
+			}
 		}
 		set_variable = {
 			name = internal_trade_scope
 			value = capital_scope.owner
 		}
+
 	}
+	else_if = {
+		limit = {
+			AND = {
+				NOT = { has_variable = federation_customs_union }
+				capital_scope.owner = {
+					is_subject = yes
+					has_variable = overlord_customs_union # Customs unions in dependencies
+				}
+			}
+		}
+		set_variable = {
+			name = internal_trade_scope
+			value = var:overlord_customs_union
+		}
+	}
+
 	else = {
 		set_variable = {
 			name = internal_trade_scope

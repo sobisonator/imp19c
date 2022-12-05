@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sqlite3, csv, gspread, configparser, re, glob, codecs
 from urllib.parse import _NetlocResultMixinStr
 from tkinter import filedialog, messagebox

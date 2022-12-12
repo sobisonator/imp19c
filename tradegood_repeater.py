@@ -1,16 +1,24 @@
 def print_out_good(category, spender):
-	loc = """TRADE_spender_share_percentage_{category}_{spender} = {{
-	value = TRADE_share_of_spend_{category}_{spender}
+	loc = """TRADE_governorship_for_export_grain = {{
+	# Scope: governorship
+	value = GOODS_grain_stockpile
+	subtract = DEMAND_grain
 	if = {{
-			limit = {{
-					AND = {{
-						TRADE_sum_of_{category}_spend_weights > 0
-						TRADE_share_of_spend_{category}_{spender} > 0
-					}}
-			}}
-			divide = TRADE_sum_of_{category}_income_weights
+		limit = {{
+			capital_scope.owner = {{ has_variable = trade_export_focus }} # Could be has_law if we make this a law, TBD
+		}}
+		subtract = TRADE_governorship_for_export_grain
 	}}
-}}\n""".format(spender=spender, category=category)
+	min = 0
+	if = {{
+		limit = {{
+			has_variable = governorship_trade_capacity
+		}}
+		max = var:governorship_trade_capacity
+	}}
+	
+}}
+\n""".format(spender=spender, category=category)
 	print(loc)
 
 #all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]

@@ -31,7 +31,7 @@ debug_trade.2 = { # Quarterly internal trade simulation
 
 	immediate = {
 		debug_log = "Starting debug_trade.2"
-		# TRADE_update_all_global_base_prices = yes # Moved to external trade. NOTE: At game start, there will need to be a special effect that just calculates the starting base price by calculating the external available amounts withouts selling them, before the first ever quarterly internal trade effect
+		TRADE_update_all_global_base_prices = yes # Moved to external trade. NOTE: At game start, there will need to be a special effect that just calculates the starting base price by calculating the external available amounts withouts selling them, before the first ever quarterly internal trade effect
 		#debug_log= "Finished TRADE_update_all_global_base_prices, starting TRADE_update_all_TZ_local_prices"
 		TRADE_update_all_TZ_local_prices = yes
 		#debug_log = "Finished TRADE_update_all_TZ_local_prices, starting TRADE_reset_internal_pools"
@@ -142,17 +142,25 @@ debug_trade.3 = { # Declare external available & update trade prices
 	# . Reset quarterly governorship values - consider merging with internal trade
 	# . Reset quaterly tradezone values
 	# . Every governorship declares external available
-	# . Update trade prices per TZ, based on the amount available there ot of the global total
-	# This is then followed by internal trade effects...
+	# . Update trade prices per TZ, based on the amount available there ot of the global total # The price set at the beginning of this quarter's external trade phase is the starting price for next quarter's internal trade phase
 	# Then the external trade effects follow that.
 		# External shopping list (including purchase orders)
-		# External evenue and spend cuts
+		# External revenue and spend cuts
 
 	immediate = {
 		TRADE_reset_TZ_pools = yes
+		TRADE_update_all_global_base_prices = yes # Debug only - should be reworked to follow declaration of supply and demand
 		every_country = {
 			every_governorships = {
 				SELL_declare_all_external_available = yes
+			}
+		}
+		# Finish all sell declarations before starting to shop
+		every_country = {
+			# This needs to be ORDERED in some way
+			# The first countries to go will get access to the cheapest deals. Some kind of trade power value by which to order them?
+			every_governorships = {
+				PURCHASE_make_external_shopping_list = yes
 			}
 		}
 		debug_log = "Finished debug_trade.3"

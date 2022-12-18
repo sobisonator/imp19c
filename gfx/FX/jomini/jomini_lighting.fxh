@@ -88,7 +88,7 @@ PixelShader =
 			#ifdef morningLight
 				tempp.g *= 0.93;
 				tempp.b *= 0.89;
-				tempp *= 0.95;
+				tempp *= 1.15; #0.95; too dark
 			#endif
 			#ifdef nightLight
 				tempp *= 0.1;

@@ -80,6 +80,7 @@ PixelShader =
 			CalculateLightingFromIBL( MaterialProps, LightingProps, EnvironmentMap, DiffuseIBL, SpecularIBL );
 			
 			float3 tempp = DiffuseLight + SpecularLight + DiffuseIBL + SpecularIBL;
+			tempp *= 1.15; // force brighter lighting (3d map)
 			#ifdef eveningLight
 				tempp.r *= 0.7;
 				tempp.g *= 0.4;
@@ -88,7 +89,7 @@ PixelShader =
 			#ifdef morningLight
 				tempp.g *= 0.93;
 				tempp.b *= 0.89;
-				tempp *= 1.15; #0.95; too dark
+				tempp *= 0.95;
 			#endif
 			#ifdef nightLight
 				tempp *= 0.1;

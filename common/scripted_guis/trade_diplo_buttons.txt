@@ -1,10 +1,16 @@
 ﻿trade_agreement_all_button = {
     scope = country
 	saved_scopes = {
-		recipient
+		target
 	}
-    is_shown = { # Can be omitted as always true
-    	always = yes
+    is_shown = {
+
+    	already_trade_partners = {
+			category = all_categories
+			country_A = ROOT
+			country_B = scope:target
+		}
+
     }
 	ai_is_valid = {
 		# Triggered in AI script, not through the GUI
@@ -12,19 +18,23 @@
 	}
     is_valid = {
     	# always = yes # WiP - add value for AI weighing up the deal.
-    	scope:target = {
-    		opinion = {
-    			target = ROOT
-    			value > 0
-    		}
+
+    	# Condition 1: Does not have trade agreement and needs to be able to offer it if the sub-conditions are met
+    	OR = {
+    		hidden:scope:target = {
+	    		opinion = {
+	    			target = ROOT
+	    			value > 0
+	    		}
+	    	}
+
+	    	# Condition 2: already has trade agreement and needs to be able to cancel it
+	    	hidden:already_trade_partners = {
+				category = all_categories
+				country_A = ROOT
+				country_B = scope:target
+			}
     	}
-    	NOT = {
-			already_trade_partners = {
-    			category = all_categories
-    			country_A = ROOT
-    			country_B = scope:target
-    		}
-		}
     }
     effect = {
     	debug_log = "Attempting to toggle trade agreement"

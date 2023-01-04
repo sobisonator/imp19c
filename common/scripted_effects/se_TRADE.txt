@@ -21,13 +21,12 @@
 	}
 }
 
-# Function:	Add a variable to every governorship that stores the tradezone scope, so that you can easily scope to the TZ from a governorship with minimal performance overhead whenever necessary. This front-loads the performance overhead to the start of the game and any update periods.
-# Scope:	Governorship
-# Called:	1) Whenever the governorship change effects are called (e.g. change of territory)
-#			2) At the beginning of the game
-# NOTE:		Actually calls several other effects that set the variables
-
 TRADE_update_governorship_TZs = {
+	# Function:	Add a variable to every governorship that stores the tradezone scope, so that you can easily scope to the TZ from a governorship with minimal performance overhead whenever necessary. This front-loads the performance overhead to the start of the game and any update periods.
+	# Scope:	Governorship
+	# Called:	1) Whenever the governorship change effects are called (e.g. change of territory)
+	#			2) At the beginning of the game
+	# NOTE:		Actually calls several other effects that set the variables
 	if = {
 		limit = { NOT = { has_variable = trade_center } }
 		capital_scope = {
@@ -1721,22 +1720,75 @@ TRADE_reset_governorship_tax_totals = {
 	}
 }
 
-#### Specific to external trade
+#### Specific to external trade, or where external and internal trade interact.
 
-TRADE_set_preferred_routes = {
+TRADE_get_average_price_of_tradegood = {
+	# Scope: country
+	# Function: get the average price of a tradegood in your nation
+
+	# Single-tradezone countries
+	# If the country has governorships in no more than one tradezone, this is a simple task and should skip all of the hard work ahead. This scenario comes first.
+	if = {
+		limit = {
+			num_of_tradezones = 1
+		}
+		random_governorships = {
+			save_scope_as = random_governorship
+		}
+		set_variable = { # National average price is simply the price in the only TZ
+			name = national_average_price_$tradegood$
+			value = scope:random_governorship.var:trade_center.local_price_$tradegood$
+		}
+	}
+
+	else = {
+		set_variable = {
+			name = national_average_price_$tradegood$
+			value = 0
+		}
+		every_governorships = {
+			set_local_variable = {
+				name = percentage_of_national_production_$tradegood$
+				value = GOODS_governorship_$tradegood$_produced
+			}
+			change_local_variable = {
+				name = percentage_of_national_production_$tradegood$
+				divide = GOODS_national_production_$tradegood$
+			}
+			var:trade_center = {
+				#
+			}
+		}
+	}
+
+}
+
+TRADE_set_preferred_suppliers = {
+	# Scope: governorship
 	# Function: set the preferred routes targeted by purchase orders within every trade zone.
 	# Creates an ordered list of tradezones in each trade center scope for every tradegood.
-	every_trade_center = {
-		every_tradegoods_complex = {
-			APPLY = TRADE_set_preferred_route
-		}
+	every_tradegoods_complex = {
+		APPLY = TRADE_set_preferred_supplier
 	}
 }
 
-TRADE_set_preferred_route = {
-	# Scope: trade center province
+TRADE_get_preferred_supplier = {
+	# Scope: governorship
 	# Function: sets the order of priority for preferred trade routes for the named tradegood
 	# Go out to every trade center and check if it has any stock of the named tradegood available
+
+	# Needs a condition to check what category the goods are.
+	# Maybe a scripted trigger to check based on $goods$, returning $category$ somehow.
+	# A get_category scripted trigger?
+
+
+	owner = {
+		ordered_in_list = {
+			variable = list_of_trade_partners_all_categories
+			order_by = var:average_price_of_$tradegood$
+		}
+	}
+
 	every_trade_center = {
 		limit = {
 			var:$tradegood$_stockpile_TZ > 0 # Don't bother ranking trade centers with no available stock

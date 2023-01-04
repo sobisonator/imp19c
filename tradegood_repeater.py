@@ -1,24 +1,11 @@
-def print_out_good(category, spender):
-	loc = """TRADE_governorship_for_export_grain = {{
-	# Scope: governorship
-	value = GOODS_grain_stockpile
-	subtract = DEMAND_grain
-	if = {{
-		limit = {{
-			capital_scope.owner = {{ has_variable = trade_export_focus }} # Could be has_law if we make this a law, TBD
-		}}
-		subtract = TRADE_governorship_for_export_grain
+def print_out_good(tradegood):
+	loc = """GOODS_national_production_{tradegood} = {{
+	value = 0
+	every_governorships = {{
+		add = GOODS_governorship_{tradegood}_produced
 	}}
-	min = 0
-	if = {{
-		limit = {{
-			has_variable = governorship_trade_capacity
-		}}
-		max = var:governorship_trade_capacity
-	}}
-	
 }}
-\n""".format(spender=spender, category=category)
+\n""".format(tradegood=tradegood)
 	print(loc)
 
 #all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]
@@ -89,6 +76,5 @@ all_goods = {
 	"late_artillery":"military"
 		}
 
-for category in all_categories:
-	for spender in all_spenders:
-		print_out_good(category, spender)
+for tradegood in all_goods:
+        print("value = GOODS_national_production_" + tradegood)

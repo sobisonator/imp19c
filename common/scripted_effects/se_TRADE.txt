@@ -28,6 +28,7 @@ TRADE_update_governorship_TZ_vars = {
 		limit = { $TZ$ = { PROVINCE = yes } }
 		save_scope_as = trade_center_province
 	}
+	# TODO: Remove all existing governorships_in_TZ lists before re-populating the lists, to make sure that no old data is carried over.
 	var:internal_trade_scope = {
 		add_to_variable_list = {
 			name = governorships_in_$TZ$
@@ -381,7 +382,7 @@ TRADE_set_internal_trade_scope = {
 		}
 		set_variable = {
 			name = internal_trade_scope
-			value = var:overlord_customs_union
+			value = capital_scope.owner.var:overlord_customs_union
 		}
 	}
 
@@ -590,7 +591,7 @@ TRADE_reset_internal_pools = {
 			APPLY = TRADE_reset_internal_amount_sold
 		}
 		every_tradegoods_complex = {
-			APPLY = TRADE_reset_internal_trade_stockpiles
+			APPLY = TRADE_reset_internal_trade_stockpiles # Need to add tradezone and category argument
 		}
 		every_tradegoods_complex = {
 			APPLY = TRADE_reset_internal_trade_revenue_total
@@ -609,7 +610,7 @@ TRADE_reset_internal_pools = {
 			APPLY = TRADE_reset_internal_amount_sold
 		}
 		every_tradegoods_complex = {
-			APPLY = TRADE_reset_internal_trade_stockpiles
+			APPLY = TRADE_reset_internal_trade_stockpiles # Need to add tradezone and category argument
 		}
 		every_tradegoods_complex = {
 			APPLY = TRADE_reset_internal_trade_revenue_total
@@ -668,12 +669,11 @@ TRADE_reset_TZ_amount_sold = {
 
 TRADE_reset_internal_trade_stockpiles = {
 	# Scope: Internal trade scope: country or federation province
-	# Function: Set
+	# Function: Set all the stockpiles per tradezone for a trade scope to 0.
+	# The limits allow the effect to skip over any tradezones that are not traded in by that trade scope
 	if = {
 		limit = { 
-			variable_list_size = { 
-				name = governorships_in_india_tradezone
-				target > 0
+			has_variable_list = governorships_in_india_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -682,10 +682,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_east_north_america_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_east_north_america_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -694,10 +691,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_west_north_america_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_west_north_america_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -706,10 +700,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_caribbean_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_caribbean_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -718,10 +709,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_west_south_america_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_west_south_america_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -730,10 +718,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_east_south_america_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_east_south_america_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -742,10 +727,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_south_east_asia_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_south_east_asia_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -754,10 +736,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_indo_china_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_indo_china_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -766,10 +745,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_yellow_sea_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_yellow_sea_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -778,10 +754,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_southern_africa_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_southern_africa_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -790,10 +763,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_west_africa_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_west_africa_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -802,10 +772,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_east_africa_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_east_africa_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -814,10 +781,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_middle_east_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_middle_east_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -826,10 +790,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_western_steppe_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_western_steppe_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -838,10 +799,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_eastern_steppe_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_eastern_steppe_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -850,10 +808,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_upper_yangtzi_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_upper_yangtzi_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -862,10 +817,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_atlantic_seaboard_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_atlantic_seaboard_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -874,10 +826,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_central_europe_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_central_europe_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -886,10 +835,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_west_mediterranean_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_west_mediterranean_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -898,10 +844,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_baltic_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_baltic_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -910,10 +853,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_east_europe_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_east_europe_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -922,10 +862,7 @@ TRADE_reset_internal_trade_stockpiles = {
 	}
 	else_if = {
 		limit = {
-			variable_list_size = {
-				name = governorships_in_east_mediterranean_tradezone
-				target > 0
-			}
+			has_variable_list = governorships_in_east_mediterranean_tradezone
 		}
 		TRADE_reset_internal_trade_stockpile = {
 			tradegood = $tradegood$
@@ -1944,11 +1881,11 @@ TRADE_prepare_quarterly_values = {
 	
 	TRADE_reset_quarterly_trade_scope_values = yes
 	
-	TRADE_reset_all_internal_trade_stockpiles = yes
+	# TRADE_reset_all_internal_trade_stockpiles = yes # REMOVED - OBSOLETE
 	
 	TRADE_reset_all_internal_trade_revenue_totals = yes
 	
-	TRADE_reset_internal_amounts_sold = yes
+	# TRADE_reset_internal_amounts_sold = yes # REMOVED - OBSOLETE
 }
 
 # Taxes

@@ -324,25 +324,33 @@ PURCHASE_check_shopping_internal = {
 
 
 		# If the preferred supplier for the goods is external, and internal trade is not preferred by law, then go external first.
-		if = {
-			limit = {
-				NOT = { var:preferred_supplier = var:internal_trade_scope }
-			}
-		}
+		#if = {
+		#	limit = {
+		#		NOT = { var:preferred_supplier = var:internal_trade_scope }
+		#	}
+		#}
 
 		PURCHASE_order_internal = {
 			tradegood = $tradegood$
-			#for_stockpile = $for_stockpile$
-			#from_stockpile = $from_stockpile$
 			order_size = local_var:l_order_size
 			category = $category$
-			#goods_price = $goods_price$
-			#internal_sold_total = $internal_sold_total$
+			tradezone = TZ_NAME_STRING # Must be derived by checking the favoured tradezone
 		}
 		# If the stockpile is still not full, try to purchase externally.
 		if = {
 			limit = {
 
+			}
+		}
+	}
+}
+
+PURHCASE_get_preferred_tradezone_internal = {
+	# Scope: governorship, to internal trade scope
+	# Function: Get the best value supplier of $tradegood$ in the stockpiles available in the internal trade scope
+	var:internal_trade_scope = {
+			every_in_list = {
+				variable = list_of_tradezones_in_internal_trade_scope
 			}
 		}
 	}
@@ -367,7 +375,7 @@ PURCHASE_order_internal = {
 		}
 		change_local_variable = {
 			name = i_demand_diff
-			subtract = var:$tradegood$_stockpile_internal
+			subtract = var:$tradegood$_stockpile_$tradezone$
 		}
 	}
 

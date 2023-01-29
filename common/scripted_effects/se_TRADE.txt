@@ -1,4 +1,31 @@
-﻿TRADE_save_connection_time_values = {
+﻿TRADE_reset_TZ_internal_rankings = {
+	# Scope: random country
+	# Function: Clear the rankings for internal trades in trade zones
+	# Called: After every internal trade scope is finished doing its internal trade, so that the next scope's governorships rank their preferred supplier zones properly.
+	every_trade_center = {
+		if = {
+			limit = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
+			remove_variable = 1st_rank_internal_supplier_$tradegood$ #Is it even necessary to remove 1st rank? It will always get reset by the ranking effect no matter what
+			if = {
+				limit = { has_variable = 2nd_rank_internal_supplier_$tradegood$ }
+				remove_variable = 2nd_rank_internal_supplier_$tradegood$
+				if = {
+					limit = { has_variable = 3rd_rank_internal_supplier_$tradegood$ }
+					remove_variable = 3rd_rank_internal_supplier_$tradegood$
+					# etc... purely concept at the moment
+				}
+			}
+		}
+	}
+}
+
+TRADE_reset_all_tradegoods_TZ_internal_rankings = {
+	every_tradegood_complex = {
+		APPLY = TRADE_reset_TZ_internal_rankings
+	}
+}
+
+TRADE_save_connection_time_values = {
 	# Scope: random country, scoping to every trade center province
 	# Function: Save variables in each trade center province containing the travel time between two trade zones so that they can be referenced without re-checking svalues every time
 	# The format of these variables is here_to_$tradezone$
@@ -440,7 +467,7 @@ TRADE_update_governorship_TZ_vars = {
 		limit = { $TZ$ = { PROVINCE = yes } }
 		save_scope_as = trade_center_province
 	}
-# TODO: Remove all existing governorships_in_TZ lists before re-populating the lists, to make sure that no old data is carried over.
+	# The list of tradezones in the internal trade scope is cleared and reset every quarter by TRADE_update_governorship_TZs
 	var:internal_trade_scope = {
 		add_to_variable_list = {
 			name = governorships_in_$TZ$

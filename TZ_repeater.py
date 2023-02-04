@@ -2,8 +2,10 @@ def print_TZ_statement(TZ):
 	loc = """	else_if = {{
 		limit = {{
 			AND = {{
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {{
-					has_variable = is_{TZ}_tradezone
+				var:trade_center = {{
+                                        var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {{
+                                                has_variable = is_{TZ}_tradezone
+                                        }}
 				}}
 				var:internal_trade_scope = {{
 					has_variable = $tradegood$_stockpile_{TZ}

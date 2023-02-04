@@ -340,6 +340,7 @@ DEFUNCT_PURCHASE_set_order_size = {
 PURCHASE_check_shopping_internal = {
 	# Scope: governorship
 	# Function: The sole purpose of this effect is to only run the purchase order effect if there's actually demand, therefore all of its arguments are basically proxies for the purchase order effect.
+	save_scope_as = purchaser_governorship
 	set_local_variable = {
 		name = l_demand_diff
 		value = DEMAND_$tradegood$
@@ -359,10 +360,8 @@ PURCHASE_check_shopping_internal = {
 
 	if = {
 		limit = {
-			NOT = {
-				var:trade_center = {
-					has_variable = 1st_rank_internal_supplier_$tradegood$
-				}
+			var:trade_center = {
+				NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
 			}
 		}
 		PURHCASE_get_preferred_tradezone_internal = {
@@ -385,12 +384,16 @@ PURCHASE_check_shopping_internal = {
 	#	}
 	#}
 
-
-	PURCHASE_order_internal = {
-		tradegood = $tradegood$
-		order_size = local_var:l_order_size
-		category = $category$
-		#tradezone = TZ_NAME_STRING # Must be derived by checking the favoured tradezone
+	if = {
+		limit = {
+			local_var:l_order_size > 0
+		}
+		PURCHASE_order_internal = {
+			tradegood = $tradegood$
+			order_size = local_var:l_order_size
+			category = $category$
+			#tradezone = TZ_NAME_STRING # Must be derived by checking the favoured tradezone
+		}
 	}
 	# If the stockpile is still not full, try to purchase externally.
 	#if = {
@@ -1297,15 +1300,16 @@ PURHCASE_get_preferred_tradezone_internal = {
 PURCHASE_try_supplier = {
 	# Scope: governorship
 	# Function: check the name of the current tradezone rank being checked, and poll the corresponding stockpile variable
+	debug_log = "Contacting supplier..."
+	var:trade_center = {
+		var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
+			save_scope_as = target_supplier
+		}
+	}
 	if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_india_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_india
-				}
+			scope:target_supplier = {
+				has_variable = is_india_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1317,13 +1321,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_east_north_america_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_east_north_america
-				}
+			scope:target_supplier = {
+				has_variable = is_east_north_america_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1335,13 +1334,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_west_north_america_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_west_north_america
-				}
+			scope:target_supplier = {
+				has_variable = is_west_north_america_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1353,13 +1347,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_caribbean_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_caribbean
-				}
+			scope:target_supplier = {
+				has_variable = is_caribbean_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1371,13 +1360,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_west_south_america_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_west_south_america
-				}
+			scope:target_supplier = {
+				has_variable = is_west_south_america_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1389,13 +1373,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_east_south_america_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_east_south_america
-				}
+			scope:target_supplier = {
+				has_variable = is_east_south_america_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1407,13 +1386,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_south_east_asia_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_south_east_asia
-				}
+			scope:target_supplier = {
+				has_variable = is_south_east_asia_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1425,13 +1399,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_indo_china_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_indo_china
-				}
+			scope:target_supplier = {
+				has_variable = is_indo_china_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1443,13 +1412,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_yellow_sea_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_yellow_sea
-				}
+			scope:target_supplier = {
+				has_variable = is_yellow_sea_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1461,13 +1425,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_southern_africa_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_southern_africa
-				}
+			scope:target_supplier = {
+				has_variable = is_southern_africa_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1479,13 +1438,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_west_africa_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_west_africa
-				}
+			scope:target_supplier = {
+				has_variable = is_west_africa_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1497,13 +1451,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_east_africa_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_east_africa
-				}
+			scope:target_supplier = {
+				has_variable = is_east_africa_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1515,13 +1464,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_middle_east_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_middle_east
-				}
+			scope:target_supplier = {
+				has_variable = is_middle_east_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1533,13 +1477,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_western_steppe_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_western_steppe
-				}
+			scope:target_supplier = {
+				has_variable = is_western_steppe_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1551,13 +1490,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_eastern_steppe_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_eastern_steppe
-				}
+			scope:target_supplier = {
+				has_variable = is_eastern_steppe_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1569,13 +1503,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_upper_yangtzi_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_upper_yangtzi
-				}
+			scope:target_supplier = {
+				has_variable = is_upper_yangtzi_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1587,13 +1516,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_atlantic_seaboard_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_atlantic_seaboard
-				}
+			scope:target_supplier = {
+				has_variable = is_atlantic_seaboard_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1605,13 +1529,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_central_europe_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_central_europe
-				}
+			scope:target_supplier = {
+				has_variable = is_central_europe_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1623,13 +1542,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_west_mediterranean_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_west_mediterranean
-				}
+			scope:target_supplier = {
+				has_variable = is_west_mediterranean_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1641,13 +1555,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_baltic_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_baltic
-				}
+			scope:target_supplier = {
+				has_variable = is_baltic_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1659,13 +1568,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_east_europe_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_east_europe
-				}
+			scope:target_supplier = {
+				has_variable = is_east_europe_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1677,13 +1581,8 @@ PURCHASE_try_supplier = {
 	}
 	else_if = {
 		limit = {
-			AND = {
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
-					has_variable = is_east_mediterranean_tradezone
-				}
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_east_mediterranean
-				}
+			scope:target_supplier = {
+				has_variable = is_east_mediterranean_tradezone
 			}
 		}
 		PURCHASE_transfer_if_able = {
@@ -1698,13 +1597,16 @@ PURCHASE_try_supplier = {
 PURCHASE_transfer_if_able = {
 	# Scope: governorship
 	# Function: check if there is a sufficient stockpile in the supplier variable
+	debug_log = "Contacting tradezone  $tradezone$ "
 	set_local_variable = {
 		name = i_demand_diff
 		value = $order_size$
 	}
-	change_local_variable = {
-		name = i_demand_diff
-		subtract = var:internal_trade_scope.var:$tradegood$_stockpile_$tradezone$
+	var:internal_trade_scope = {
+		change_local_variable = {
+			name = i_demand_diff
+			subtract = var:$tradegood$_stockpile_$tradezone$
+		}
 	}
 
 	if = { # Only transfer the goods if they from stockpile is actually bigger than the order size
@@ -1741,7 +1643,7 @@ PURCHASE_order_internal = {
 
 	debug_log = "Making a purchase order for  $tradegood$"
 
-	save_scope_as = purchaser_governorship
+	# save_scope_as = purchaser_governorship # Moved back to check shopping
 
 	if = {
 		limit = {
@@ -1756,7 +1658,7 @@ PURCHASE_order_internal = {
 		}
 		if = {
 			limit = {
-				NOT = { has_local_variable = $tradegood$_purchase_order_tender_complete }
+				NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
 				var:trade_center = { has_variable = 2nd_rank_internal_supplier_$tradegood$ }
 			}
 			PURCHASE_try_supplier = {
@@ -1767,7 +1669,7 @@ PURCHASE_order_internal = {
 			}
 			if = {
 				limit = {
-					NOT = { has_local_variable = $tradegood$_purchase_order_tender_complete }
+					NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
 					var:trade_center = { has_variable = 3rd_rank_internal_supplier_$tradegood$ }
 				}
 				PURCHASE_try_supplier = {
@@ -1791,6 +1693,7 @@ PURCHASE_transfer_goods_internally = {
 	# $from_stockpile$ = grain_stockpile_internal, derived from $from_stockpile$ in PURCHASE_order_internal, this is the available stockpile on the whole internal market
 	# $local_price$ = local_price_grain, gets the local price of grain from the governorship owner's capital
 	# $internal_sold_total$ = internal_sold_total_grain, the total amount sold in the internal trade scope, used by the effect to distribute the cut of amount sold to contributing governorships
+	debug_log = "Transferring  $tradegood$  from  $tradezone$  for £  $amount$"
 
 	# ADD TO BUYER'S STOCKPILE
 	change_variable = {
@@ -1813,9 +1716,8 @@ PURCHASE_transfer_goods_internally = {
 	}
 
 	change_local_variable = { # use the price from the seller TZ
-		# TODO: Update this to actually find the price according to the TZ from which the tradegood was bought
 		name = this_spend
-		multiply = owner.capital_scope.governorship.var:trade_center.var:local_price_$tradegood$
+		multiply = global_var:global_$tradezone$_tradezone.var:local_price_$tradegood$
 	}
 
 	# Add transport costs

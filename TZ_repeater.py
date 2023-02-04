@@ -1,20 +1,12 @@
 def print_TZ_statement(TZ):
 	loc = """else_if = {{
-		limit = {{
-			AND = {{
-				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = india
-				var:internal_trade_scope = {{
-					has_variable = $tradegood$_stockpile_{TZ}
-				}}
-			}}
-		}}
-		PURCHASE_transfer_if_able = {{
-			tradezone = {TZ}
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}}
-	}}""".format(TZ=TZ)
+        limit = {{
+                scope:purchaser_TZ_scope = {{
+                        has_variable = is_{TZ}_tradezone
+                }}
+        }}
+        add = var:$tradegood$_supplier_score_here_to_{TZ}_tradezone
+}}""".format(TZ=TZ)
 	print(loc)
 
 #all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]

@@ -1,14 +1,18 @@
 def print_TZ_statement(TZ):
-	loc = """	else_if = {{
+	loc = """else_if = {{
 		limit = {{
-			var:purhcaser_TZ = {{
-				has_variable = is_{TZ}_tradezone
+			AND = {{
+				var:trade_center.var:$supplier_rank$_rank_internal_supplier_$tradegood$ = india
+				var:internal_trade_scope = {{
+					has_variable = $tradegood$_stockpile_{TZ}
+				}}
 			}}
 		}}
-		PURHCASE_get_seller_purchaser_distance_score = {{
+		PURCHASE_transfer_if_able = {{
+			tradezone = {TZ}
+			order_size = $order_size$
 			tradegood = $tradegood$
-			tradezone = $tradezone$
-			purchaser_TZ = {TZ}
+			category = $category$
 		}}
 	}}""".format(TZ=TZ)
 	print(loc)

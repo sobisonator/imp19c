@@ -1598,35 +1598,45 @@ PURCHASE_transfer_if_able = {
 	# Scope: governorship
 	# Function: check if there is a sufficient stockpile in the supplier variable
 	debug_log = "Contacting tradezone  $tradezone$ "
-	set_local_variable = {
-		name = i_demand_diff
-		value = $order_size$
-	}
-	var:internal_trade_scope = {
-		change_local_variable = {
-			name = i_demand_diff
-			subtract = var:$tradegood$_stockpile_$tradezone$
-		}
-	}
-
-	if = { # Only transfer the goods if they from stockpile is actually bigger than the order size
+	if = {
 		limit = {
-			local_var:i_demand_diff < 0 # If the supplier can't meet demand, the purchaser should try again on its next preferred supplier
+			var:internal_trade_scope = {
+				has_variable = $tradegood$_stockpile_$tradezone$_tradezone
+			}
 		}
-		# Add to the purchasing governorship's stockpile
-		PURCHASE_transfer_goods_internally = {
-			tradegood = $tradegood$
-			amount = $order_size$
-			category = $category$
-			tradezone = $tradezone$
+		set_local_variable = {
+			name = i_demand_diff
+			value = $order_size$
 		}
-		owner = {
-			change_variable = {
-				name = country_internal_total_ordered_$tradegood$ # Saves the total amount ordered - Note: not the total amount successfully purchased
-				add = local_var:i_demand_diff
+		var:internal_trade_scope = {
+			change_local_variable = {
+				name = i_demand_diff
+				subtract = var:$tradegood$_stockpile_$tradezone$_tradezone
 			}
 		}
 
+		if = { # Only transfer the goods if they from stockpile is actually bigger than the order size
+			limit = {
+				local_var:i_demand_diff < 0 # If the supplier can't meet demand, the purchaser should try again on its next preferred supplier
+			}
+			# Add to the purchasing governorship's stockpile
+			PURCHASE_transfer_goods_internally = {
+				tradegood = $tradegood$
+				amount = $order_size$
+				category = $category$
+				tradezone = $tradezone$
+			}
+			owner = {
+				change_variable = {
+					name = country_internal_total_ordered_$tradegood$ # Saves the total amount ordered - Note: not the total amount successfully purchased
+					add = local_var:i_demand_diff
+				}
+			}
+
+		}
+	}
+	else = {
+		debug_log = "Internal trade scope did not have  $tradegood$ stockpile in  $tradezone$"
 	}
 	
 }
@@ -1710,7 +1720,7 @@ PURCHASE_transfer_goods_internally = {
 	# SUBTRACT FROM THE SELECTED INTERNAL AVAILABLE STOCKPILE
 	var:internal_trade_scope = {
 		change_variable = {
-			name = $tradegood$_stockpile_$tradezone$
+			name = $tradegood$_stockpile_$tradezone$_tradezone
 			subtract = local_var:this_spend
 		}
 	}

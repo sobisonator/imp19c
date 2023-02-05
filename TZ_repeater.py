@@ -1,7 +1,7 @@
 def print_TZ_statement(TZ):
 	loc = """	set_variable = {{
-		name = $tradegood$_total_revenue_{TZ}
-		value = 0 
+		name = $tradegood$_sold_total_{TZ}
+		value = 0
 	}}""".format(TZ=TZ)
 	print(loc)
 

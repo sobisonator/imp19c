@@ -1629,7 +1629,7 @@ PURCHASE_transfer_if_able = {
 			owner = {
 				change_variable = {
 					name = country_internal_total_ordered_$tradegood$ # Saves the total amount ordered - Note: not the total amount successfully purchased
-					add = local_var:i_demand_diff
+					add = $order_size$
 				}
 			}
 
@@ -1721,7 +1721,7 @@ PURCHASE_transfer_goods_internally = {
 	var:internal_trade_scope = {
 		change_variable = {
 			name = $tradegood$_stockpile_$tradezone$_tradezone
-			subtract = local_var:this_spend
+			subtract = $amount$
 		}
 	}
 
@@ -1730,14 +1730,26 @@ PURCHASE_transfer_goods_internally = {
 		multiply = global_var:global_$tradezone$_tradezone.var:local_price_$tradegood$
 	}
 
-	# Add transport costs
-	change_local_variable = {
-		name = this_spend
-		add = var:trade_center.var:here_to_$tradezone$_tradezone # Note: should this be re-framed as here_from_$tradezone$, so that it can account for the speed of importing being faster in one direction?
-	}
-
 	# SUBTRACT MONEY FROM THE BUYING GOVERNORSHIP'S BALANCE
 	# The balance will then be applied to the governorship wealth pools at the end of the purchase phase
+
+	# Add transport costs
+	if = { # Only add transport costs between tradezones if there is an actual transport cost to account for
+		limit = {
+			var:trade_center = {
+				has_variable = here_to_$tradezone$_tradezone
+			}
+		}
+		change_local_variable = {
+			name = this_spend
+			add = var:trade_center.var:here_to_$tradezone$_tradezone # Note: should this be re-framed as here_from_$tradezone$, so that it can account for the speed of importing being faster in one direction?
+		}
+		change_variable = {
+			name = governorship_this_quarter_spend_on_transport_$tradegood$ # Track the transport costs for the player's benefit
+			add = var:trade_center.var:here_to_$tradezone$_tradezone
+		}
+	}
+	# TODO: Add a way to account for transport costs within a tradezone, too, using trade infrastructure level?
 
 	change_variable = {
 		name = governorship_this_quarter_spend_on_$category$
@@ -1758,7 +1770,7 @@ PURCHASE_transfer_goods_internally = {
 	# TODO: Make this tradezone specific, so the SELL split revenue can then iterate through all variables in the list of available internal trade centers, and split out revenue to the governorships who are members of that TZ, using the variable list governorships_in_$tradezone$
 	var:internal_trade_scope = {
 		change_variable = {
-			name = internal_sold_total_$tradegood$
+			name = $tradegood$_sold_total_$tradezone$
 			add = $amount$
 		}
 		change_variable = {

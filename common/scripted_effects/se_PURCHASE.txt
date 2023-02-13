@@ -364,7 +364,7 @@ PURCHASE_check_shopping_internal = {
 				NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
 			}
 		}
-		PURHCASE_get_preferred_tradezone_internal = {
+		PURCHASE_get_preferred_tradezone_internal = {
 			tradegood = $tradegood$
 			order_size = local_var:l_order_size
 		} # Creates a set of variables in the trade center
@@ -403,7 +403,7 @@ PURCHASE_check_shopping_internal = {
 	#}
 }
 
-PURCHASE_rank_supplier_zone_internal = { # TODO: TAKE THIS OUT OF THE SCRIPT, THIS CODE IS REDUNDANT AS THE CHECK IS DONE AT THE PREVIOUS PHASE - the only purpose of this script is to pass the tradezone, but the previous effect PURHCASE_get_preferred_tradezone_internal already did that...
+PURCHASE_rank_supplier_zone_internal = {
 	# Scope: Trade center province, scoped from a purchaser and being considered to supply tradegoods
 	# Scoped to by a loop of the trade zones available in an internal trade scope
 	# Function: Give a score to this tradezone for the potential purchaser. This score will then be used to rank the provinces. HIGHER score = WORSE deal
@@ -745,7 +745,7 @@ PURCHASE_check_name_and_apply_rank_internal = {
 	}
 }
 
-PURHCASE_get_preferred_tradezone_internal = {
+PURCHASE_get_preferred_tradezone_internal = {
 	# Scope: governorship, to internal trade scope
 	# Function: Get the best value supplier of $tradegood$ in the stockpiles available in the internal trade scope
 	# This checks the names of the potential supplier tradezones; it must then hand over to the next scripted effect, PURCHASE_rank_supplier_zone_internal, to get the name of the purchasing governorship's tradezone
@@ -758,7 +758,6 @@ PURHCASE_get_preferred_tradezone_internal = {
 		save_scope_as = purchaser_TZ_scope
 		every_in_list = {
 			variable = list_of_tradezones_in_internal_trade_scope
-			# TODO: Replace the PURCHASE_rank_supplier_zone_internal calls with PURHCASE_get_seller_purchaser_score_internal calls
 			if = {
 				limit = { has_variable = is_india_tradezone }
 				PURCHASE_rank_supplier_zone_internal = {
@@ -1303,16 +1302,22 @@ PURHCASE_get_preferred_tradezone_internal = {
 }
 
 PURCHASE_get_preferred_tradezone_external = {
-	# Scope: governorship
+	# Scope: governorship, to governorship's tradezone
 	# Function: get the best value supplier of $tradegood$ among (sus???) the purchasing country's trade partners
-	owner = {
-		every_in_list = {
-			variable = list_of_trade_partners_all_categories # For now, we're just sorting all categories - and maybe it would be too demanding to expect to have trade deals for each category
+	var:trade_center = {
+		save_scope_as = current_governorship_trade_center
+		owner = {
+			every_in_list = {
+				variable = list_of_trade_partners_all_categories # For now, we're just sorting all categories - and maybe it would be too demanding to expect to have trade deals for each category
 
-			# TODO:
-			# Add the if_else loop effect with the ranking effect.
-			# Maybe add an argument to the ranking effect that determines external or internal
-			# Rank by tradezone first, then check countries' tariffs etc... this will be complicated
+				# TODO:
+				# Add the if_else loop effect with the ranking effect.
+				# Maybe add an argument to the ranking effect that determines external or internal
+				# Rank by tradezone first, then check countries' tariffs etc... this will be complicated
+
+				# Order of the function:
+				# 2. Rank up to 5 trade partners in the top 3 tradezones
+			}
 		}
 	}
 }

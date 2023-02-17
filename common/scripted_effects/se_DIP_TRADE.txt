@@ -1,0 +1,79 @@
+# Scripted effects for trade diplomacy
+
+DIP_TRADE_toggle_trade_agreement = {
+	debug_log = "Toggling trade agreement"
+	if = {
+		limit = {
+			NOT = {
+				already_trade_partners = {
+					category = $category$
+					country_A = $country_A$
+					country_B = $country_B$
+				}
+			}
+		}
+		DIP_TRADE_create_trade_agreement = {
+    		category = $category$
+    		country_A = $country_A$
+    		country_B = $country_B$
+    	}
+	}
+	else = {
+		DIP_TRADE_cancel_trade_agreement = {
+			category = $category$
+    		country_A = $country_A$
+    		country_B = $country_B$
+		}
+	}
+
+}
+
+DIP_TRADE_create_trade_agreement = {
+	debug_log = "Creating trade agreement"
+	$country_B$ = {
+	    add_to_variable_list = {
+	        name = list_of_trade_partners_$category$
+	        target = $country_A$
+	    }
+	}
+	$country_A$ = {
+		add_to_variable_list = {
+	        name = list_of_trade_partners_$category$
+	        target = $country_B$
+	    }
+	}	
+}
+
+DIP_TRADE_cancel_trade_agreement = { # This should also be run when a tag ceases to exist to make sure that there are no "ghost" trade agreements
+	debug_log = "Cancelling trade agreement"
+	$country_B$ = {
+	    if = {
+		    limit = {
+		        has_variable_list = list_of_trade_partners_$category$
+		        is_target_in_variable_list = {
+		            name = list_of_trade_partners_$category$
+		            target = $country_A$
+		        }
+		    }
+		    remove_list_variable = {
+		        name = list_of_trade_partners_$category$
+		        target = $country_A$
+		    }
+		}
+	}
+	$country_A$ = {
+		if = {
+		    limit = {
+		        has_variable_list = list_of_trade_partners_$category$
+		        is_target_in_variable_list = {
+		            name = list_of_trade_partners_$category$
+		            target = $country_B$
+		        }
+		    }
+		    remove_list_variable = {
+		        name = list_of_trade_partners_$category$
+		        target = $country_B$
+		    }
+		}
+	}	
+}

@@ -358,17 +358,25 @@ PURCHASE_check_shopping_internal = {
 		tradegood = $tradegood$
 	}
 
-	if = {
-		limit = {
-			var:trade_center = {
-				NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
-			}
-		}
-		PURCHASE_get_preferred_tradezone_internal = {
-			tradegood = $tradegood$
-			order_size = local_var:l_order_size
-		} # Creates a set of variables in the trade center
-	}
+	#if = {
+	#	limit = {
+	#		var:trade_center = {
+	#			NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ } # TODO: Fix #this - at the moment the rankings account for order size - so they'll carry over the order size of the first ranking attempt! This is wrong, the order size should be factored in to the selection every time.
+	#			# Therefore, we should use the variable set by the TRADE_ scripted effect to #get the base ranking from connection in the tradezone.
+	#			# Then we should check if there's any difference because of order size and #tradegood price, like this...
+	#			# - Add the order cost to the score of 1st rank. If this is higher than 2nd #rank, then swap the ranks.
+	#				# If not, then keep the ranks the same and make the order!
+	#				# If it was, add the order cost to the new 1st rank (former 2nd) and #compare it to the 3rd rank.
+	#					# etc...
+	#			# The TRADE_ scripted effect should get its scores without any factoring in #of tradegood prices. The scores there are PURELY the distance scores.
+	#			# Tradegood prices are used to check if the rank order needs to be modified #at time of order.
+	#		}
+	#	}
+	#	PURCHASE_get_preferred_tradezone_internal = {
+	#		tradegood = $tradegood$
+	#		order_size = local_var:l_order_size
+	#	} # Creates a set of variables in the trade center
+	#}
 
 	# OBSOLETE: Dealt with by PURCHASE_order_internal
 	# Now check if the stockpiles have availability, in order of rank
@@ -388,11 +396,10 @@ PURCHASE_check_shopping_internal = {
 		limit = {
 			local_var:l_order_size > 0
 		}
-		PURCHASE_order_internal = {
+		PURCHASE_generate_order_internal = {
 			tradegood = $tradegood$
 			order_size = local_var:l_order_size
 			category = $category$
-			#tradezone = TZ_NAME_STRING # Must be derived by checking the favoured tradezone
 		}
 	}
 	# If the stockpile is still not full, try to purchase externally.
@@ -401,6 +408,297 @@ PURCHASE_check_shopping_internal = {
 	#
 	#	}
 	#}
+}
+
+PURCHASE_generate_order_internal = {
+	# Scope: governorship
+	# Function: check the name of the current tradezone and generate a purchaser order command with the appropriate tradezone
+	if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_india_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = india
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_east_north_america_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = east_north_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_west_north_america_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = west_north_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_caribbean_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = caribbean
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_west_south_america_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = west_south_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_east_south_america_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = east_south_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_south_east_asia_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = south_east_asia
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_indo_china_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = indo_china
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_yellow_sea_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = yellow_sea
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_southern_africa_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = southern_africa
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_west_africa_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = west_africa
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_east_africa_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = east_africa
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_middle_east_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = middle_east
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_western_steppe_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = western_steppe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_eastern_steppe_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = eastern_steppe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_upper_yangtzi_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = upper_yangtzi
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_atlantic_seaboard_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = atlantic_seaboard
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_central_europe_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = central_europe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_west_mediterranean_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = west_mediterranean
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_baltic_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = baltic
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_east_europe_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = east_europe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			var:trade_center = {
+				has_variable = is_east_mediterranean_tradezone
+			}
+		}
+		PURCHASE_order_internal = {
+			purchaser_TZ = east_mediterranean
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
 }
 
 PURCHASE_rank_supplier_zone_internal = {
@@ -1322,6 +1620,297 @@ PURCHASE_get_preferred_tradezone_external = {
 	}
 }
 
+PURCHASE_contact_supplier = {
+	# Scope: governorship
+	# Function: check the name of the current tradezone rank being checked, and poll the corresponding stockpile variable
+	if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_india_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = india
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_east_north_america_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = east_north_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_west_north_america_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = west_north_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_caribbean_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = caribbean
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_west_south_america_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = west_south_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_east_south_america_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = east_south_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_south_east_asia_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = south_east_asia
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_indo_china_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = indo_china
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_yellow_sea_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = yellow_sea
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_southern_africa_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = southern_africa
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_west_africa_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = west_africa
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_east_africa_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = east_africa
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_middle_east_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = middle_east
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_western_steppe_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = western_steppe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_eastern_steppe_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = eastern_steppe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_upper_yangtzi_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = upper_yangtzi
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_atlantic_seaboard_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = atlantic_seaboard
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_central_europe_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = central_europe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_west_mediterranean_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = west_mediterranean
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_baltic_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = baltic
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_east_europe_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = east_europe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:preferred_tradezone = {
+				has_variable = is_east_mediterranean_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = east_mediterranean
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+}
+
 PURCHASE_try_supplier = {
 	# Scope: governorship
 	# Function: check the name of the current tradezone rank being checked, and poll the corresponding stockpile variable
@@ -1680,42 +2269,108 @@ PURCHASE_order_internal = {
 
 	# save_scope_as = purchaser_governorship # Moved back to check shopping
 
-	if = {
-		limit = {
-			NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-			var:trade_center = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
-		}
-		PURCHASE_try_supplier = {
-			supplier_rank = 1st
-			tradegood = $tradegood$
-			order_size = $order_size$
-			category = $category$
-		}
-		if = {
-			limit = {
-				NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-				var:trade_center = { has_variable = 2nd_rank_internal_supplier_$tradegood$ }
+	# Set a local variable to record the price of the previous tradezone
+	# Higher score is worse in terms of trade preference
+	set_local_variable = {
+		name = previous_score
+		value = 999999
+	}
+
+	var:internal_trade_scope = {
+		every_in_list = {
+			variable = list_of_tradezones_in_internal_trade_scope
+
+			debug_log = "Iterating through list of tradezones in internal trade scope"
+
+			# Get the total score of this tradezone
+			# The score is the cost of the goods order plus the cost of transport
+			set_local_variable = {
+				name = l_this_total_score
+				value = $order_size$
 			}
-			PURCHASE_try_supplier = {
-				supplier_rank = 2nd
-				tradegood = $tradegood$
-				order_size = $order_size$
-				category = $category$
+			change_local_variable = {
+				name = l_this_total_score
+				multiply = var:local_price_$tradegood$
 			}
+			if = { # Only account for transport costs if they exist - i.e. not polling the local tradezone
+				limit = {
+					scope:purchaser_governorship.var:trade_center = {
+						has_variable = here_to_$purchaser_TZ$_tradezone
+					}
+				}
+				change_local_variable = {
+					name = l_this_total_score
+					add = var:here_to_$purchaser_TZ$_tradezone
+				}
+			}
+
+			set_local_variable = {
+				name = l_this_total_score_diff_previous
+				value = local_var:l_this_total_score
+			}
+
+			change_local_variable = {
+				name = l_this_total_score_diff_previous
+				subtract = local_var:previous_score
+			}
+
 			if = {
 				limit = {
-					NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-					var:trade_center = { has_variable = 3rd_rank_internal_supplier_$tradegood$ }
+					local_var:l_this_total_score_diff_previous < 0
 				}
-				PURCHASE_try_supplier = {
-					supplier_rank = 3rd
-					tradegood = $tradegood$
-					order_size = $order_size$
-					category = $category$
-				}
+				debug_log = "Attempting to save preferred tradezone scope"
+				save_scope_as = preferred_tradezone
+			}
+
+			set_local_variable = {
+				name = previous_score
+				value = local_var:l_this_total_score
 			}
 		}
 	}
+
+	PURCHASE_contact_supplier = {
+		order_size = $order_size$
+		tradegood = $tradegood$
+		category = $category$
+	}
+
+	#if = {
+	#	limit = {
+	#		NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
+	#		var:trade_center = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
+	#	}
+	#	PURCHASE_try_supplier = {
+	#		supplier_rank = 1st
+	#		tradegood = $tradegood$
+	#		order_size = $order_size$
+	#		category = $category$
+	#	}
+	#	if = {
+	#		limit = {
+	#			NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
+	#			var:trade_center = { has_variable = 2nd_rank_internal_supplier_$tradegood$ }
+	#		}
+	#		PURCHASE_try_supplier = {
+	#			supplier_rank = 2nd
+	#			tradegood = $tradegood$
+	#			order_size = $order_size$
+	#			category = $category$
+	#		}
+	#		if = {
+	#			limit = {
+	#				NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
+	#				var:trade_center = { has_variable = 3rd_rank_internal_supplier_$tradegood$ }
+	#			}
+	#			PURCHASE_try_supplier = {
+	#				supplier_rank = 3rd
+	#				tradegood = $tradegood$
+	#				order_size = $order_size$
+	#				category = $category$
+	#			}
+	#		}
+	#	}
+	#}
 }
 
 PURCHASE_transfer_goods_internally = {

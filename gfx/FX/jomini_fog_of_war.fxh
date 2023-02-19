@@ -71,6 +71,7 @@ PixelShader =
 		float3 ApplyFogOfWar( in float3 Color, in float3 Coordinate, PdxTextureSampler2D FogOfWarAlphaMask )
 		{
 			float Alpha = GetFogOfWarAlpha( Coordinate, FogOfWarAlphaMask );
+			Alpha *= 0.8; // darker FOW
 			return FogOfWarBlend( Color, Alpha );
 		}
 		float3 ApplyFogOfWarMultiSampled( in float3 Color, in float3 Coordinate, PdxTextureSampler2D FogOfWarAlphaMask )

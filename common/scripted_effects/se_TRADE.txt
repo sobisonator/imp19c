@@ -979,6 +979,36 @@ TRADE_update_governorship_TZ_vars = {
 	}
 }
 
+TRADE_create_list_of_tradezones_in_trade_partners = {
+	# Scope: country
+	# Function: Create a list of all the tradezones available in all trade partners' territory, so that it can be iterated through for international trade purchases
+	# Runs after all countries have done TRADE_update_governorship_TZ_vars, so that these lists can be used to quickly populated the prospective purchaser's list.
+	save_scope_as = root_country
+
+	every_in_list = {
+		variable = list_of_trade_partners_all_categories
+		every_in_list = {
+			variable = list_of_tradezones_in_internal_trade_scope
+
+			save_scope_as = tradezone_in_trade_partner
+
+			scope:root_country = {
+				if = {
+					limit = {
+						NOT = { 
+							scope:tradezone_in_trade_partner = { is_in_list = list_of_tradezones_in_trade_partners }
+						}
+					}
+				}
+				add_to_variable_list = {
+					name = list_of_tradezones_in_trade_partners
+					target = scope:tradezone_in_trade_partner
+				}
+			}
+		}
+	}
+}
+
 
 TRADE_count_country_TZs = {
 	set_variable = {
@@ -2240,6 +2270,10 @@ TRADE_reset_internal_trade_stockpile = {
 	}
 	set_variable = {
 		name = $tradegood$_available_at_start_of_quarter_$tradezone$
+		value = 0 
+	}
+	set_variable = {
+		name = $tradegood$_available_at_start_of_quarter_internal
 		value = 0 
 	}
 }

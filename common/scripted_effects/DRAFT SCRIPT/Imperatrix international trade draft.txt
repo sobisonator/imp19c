@@ -590,6 +590,24 @@ PURCHASE_transfer_goods_externally = {
 			add = local_var:this_spend
 		}
 	}
+
+	every_in_list = {
+		variable = list_of_trade_partners_all_categories
+		limit = {
+			any_owned_province = {
+				$tradezone$_tradezone = { PROVINCE = yes }
+			}
+		}
+
+		change_variable = {
+			name = $tradegood$_external_income_$tradezone$
+			add = local_var:this_spend
+		}
+		change_variable = {
+			name = $tradegood$_external_sold_total_$tradezone$
+			add = $amount$
+		}
+	}
 	
 }
 
@@ -661,7 +679,7 @@ SELL_get_cut_of_revenue = {
 	# START EXTERNAL #
 	set_variable = {
 		name = local_external_revenue_cut_$tradegood$
-		value = var:trade_center.var:$tradegood$_total_revenue_TZ
+		value = var:internal_trade_scope.var:$tradegood$_external_income_$tradezone$
 	}
 	change_variable = {
 		name = local_external_revenue_cut_$tradegood$
@@ -670,7 +688,7 @@ SELL_get_cut_of_revenue = {
 	# END EXTERNAL #
 
 	change_variable = {
-		name = governorship_this_quarter_income_from_$category$ 
+		name = governorship_this_quarter_income_from_$category$
 		add = var:local_internal_revenue_cut_$tradegood$
 	}
 	change_variable = {
@@ -685,11 +703,9 @@ SELL_get_cut_of_revenue = {
 			name = local_sold_cut_internal
 			value = var:$tradegood$_sold_total_$tradezone$
 		}
-	}
-	var:trade_center = { # Might be better to split this out to minimise scope swapping? To be addressed during optimisation.
 		set_local_variable = {
 			name = local_sold_cut_external
-			value = var:$tradegood$_sold_total_TZ
+			value = var:$tradegood$_external_sold_total_$tradezone$
 		}
 	}
 
@@ -706,11 +722,19 @@ SELL_get_cut_of_revenue = {
 		name = $tradegood$_stockpile
 		subtract = local_var:local_sold_cut_internal
 	}
+	change_variable = {
+		name = $tradegood$_stockpile
+		subtract = local_var:local_sold_cut_external
+	}
 
 	owner = {
 		change_variable = {
 			name = country_internal_total_sold_$tradegood$
-			add = local_var:local_sold_cut
+			add = local_var:local_sold_cut_internal
+		}
+		change_variable = {
+			name = country_external_total_sold_$tradegood$
+			add = local_var:local_sold_cut_external
 		}
 	}
 

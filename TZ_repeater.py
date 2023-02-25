@@ -1,7 +1,18 @@
 def print_TZ_statement(TZ):
-	loc = """	set_variable = {{
-		name = $tradegood$_sold_total_{TZ}
-		value = 0
+	loc = """	else_if = {{
+		limit = {{
+			capital_scope = {{
+				{TZ}_tradezone = {{ PROVINCE = yes }}
+			}}
+		}}
+		SELL_declare_internal_available = {{
+			tradegood = $tradegood$
+			tradezone = {TZ}_tradezone
+		}}
+		SELL_declare_external_available = {{
+                        tradegood = $tradegood$
+                        tradezone = {TZ}_tradezone
+        }}
 	}}""".format(TZ=TZ)
 	print(loc)
 

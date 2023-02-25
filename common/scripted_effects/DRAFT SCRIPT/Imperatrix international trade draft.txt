@@ -561,9 +561,14 @@ PURCHASE_transfer_goods_externally = {
 	}
 
 	owner = {
-		change_variable = { # TODO: Set this variable
+		change_variable = {
 			name = country_external_bought_total_$tradegood$
 			add = $amount$
+		}
+
+		change_local_variable = { # Since this is a local variable, it doesn't actually have to be changed in the owner scope but it doesn't hurt.
+			name = $tradegood$_trade_partner_cap_$tradezone$
+			subtract = $amount$
 		}
 	}
 
@@ -576,7 +581,7 @@ PURCHASE_transfer_goods_externally = {
 			name = $tradegood$_sold_total_TZ
 			add = $amount$
 		}
-		change_variable = {
+		change_variable = { # Why is this being added to at the same time? Is there a reason to measure the income for all tradegoods as well as the income for individual tradegoods? Probably not, but leaving in for now in case removing breaks something.
 			name = TZ_income_pool
 			add = local_var:this_spend
 		}
@@ -588,6 +593,42 @@ PURCHASE_transfer_goods_externally = {
 	
 }
 
+PURCHASE_get_trade_partner_cap = {
+	# Scope: country
+	# Function: Get the cap of resources in a tradezone that are declared by the originating governorship scope's owner's trade partners, so that the country does not buy from non-trade partners
+	# This will be subtracted from when transferring goods.
+
+	set_local_variable = {
+		name = $tradegood$_trade_partner_cap_$tradezone$
+		value = 0
+	}
+
+	every_in_list = {
+		variable = list_of_trade_partners_all_categories
+		limit = {
+			any_owned_province = {
+				$tradezone$_tradezone = { PROVINCE = yes }
+			}
+		}
+
+		change_local_variable = {
+			name = $tradegood$_trade_partner_cap_$tradezone$
+			add = var:country_$tradegood$_offered_external_to_$tradezone$
+		}
+	}
+}
+
+PURCHASE_reset_trade_partner_caps = {
+	# Scope: country
+	# Function: Get the cap of resources offered by all trade partners in all tradezones
+	every_tradegood_complex = {
+		APPLY = PURCHASE_get_trade_partner_cap_by_TZ
+	}
+}
+
+PURCHASE_get_trade_partner_cap_by_TZ = {
+	# Iterate through the TZs and set the trade partner caps for each
+}
 
 
 ######################### SELL ##############################
@@ -679,11 +720,11 @@ SELL_set_revenue_cut_percentage = { # Modified to handle both internal and exter
 	# Scope: governorship
 	# Function: Set the governorship's cut of the total value of the given tradegood sold in this supplier zone (a tradezone within a tag)
 
-	set_variable = { # Get the total of the goods that this governorship sent up
+	set_variable = { # Get the total of the goods that this governorship sent up internally
 		name = internal_stockpile_cut_percentage_$tradegood$
 		value = var:$tradegood$_offered
 	}
-	set_variable = { # Get the total of the goods that this governorship sent up
+	set_variable = { # Get the total of the goods that this governorship sent up externally
 		name = external_stockpile_cut_percentage_$tradegood$
 		value = var:$tradegood$_offered_external
 	}

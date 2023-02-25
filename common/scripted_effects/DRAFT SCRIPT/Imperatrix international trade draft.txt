@@ -363,7 +363,13 @@ PURCHASE_order_external = {
 		}
 	}
 
-	PURCHASE_contact_supplier = { # We'll need a way to split the transfer and such across trade partner countries...
+	PURCHASE_contact_supplier = { # We'll need a way to split the reduction of stockpiles such across trade partner countries' governorships in the chosen tradezone..? Or maybe not, as each governorship still gets a variable containing its contribution cut
+	# For example:
+	# every_trade_partner = {
+	#	limit = {
+	#		has_variable = cut_of_trade_$tradezone$
+	# 	}
+	# }
 		mode = 1 # External
 		order_size = $order_size$
 		tradegood = $tradegood$
@@ -378,11 +384,12 @@ PURCHASE_order_external = {
 PURCHASE_transfer_if_able = {
 	# Scope: governorship
 	# Function: check if there is a sufficient stockpile in the supplier variable
-	debug_log = "Contacting tradezone  $tradezone$ "
+	
 
 	# Internal
 	if = {
 		limit = { mode = 0 }
+		debug_log = "Internally contacting tradezone  $tradezone$ "
 		if = {
 			limit = {
 				var:internal_trade_scope = {
@@ -428,20 +435,21 @@ PURCHASE_transfer_if_able = {
 	# External
 	else_if = {
 		limit = { mode = 1 }
+		debug_log = "Externally contacting tradezone  $tradezone$ "
 		if = {
 			limit = {
-				var:internal_trade_scope = {
-					has_variable = $tradegood$_stockpile_$tradezone$_tradezone
+				global_var:global_$tradezone$_tradezone = {
+					has_variable = $tradegood$_stockpile_TZ
 				}
 			}
 			set_local_variable = {
 				name = i_demand_diff
 				value = $order_size$
 			}
-			var:internal_trade_scope = {
+			global_var:global_$tradezone$_tradezone = {
 				change_local_variable = {
 					name = i_demand_diff
-					subtract = var:$tradegood$_stockpile_$tradezone$_tradezone
+					subtract = var:$tradegood$_stockpile_TZ
 				}
 			}
 
@@ -450,7 +458,7 @@ PURCHASE_transfer_if_able = {
 					local_var:i_demand_diff < 0 # If the supplier can't meet demand, the purchaser should try again on its next preferred supplier
 				}
 				# Add to the purchasing governorship's stockpile
-				PURCHASE_transfer_goods_internally = {
+				PURCHASE_transfer_goods_externally = {
 					tradegood = $tradegood$
 					amount = $order_size$
 					category = $category$
@@ -458,7 +466,7 @@ PURCHASE_transfer_if_able = {
 				}
 				owner = {
 					change_variable = {
-						name = country_internal_total_ordered_$tradegood$ # Saves the total amount ordered - Note: not the total amount successfully purchased
+						name = country_external_total_ordered_$tradegood$ # Saves the total amount ordered - Note: not the total amount successfully purchased
 						add = $order_size$
 					}
 				}
@@ -466,7 +474,246 @@ PURCHASE_transfer_if_able = {
 			}
 		}
 		else = {
-			debug_log = "Internal trade scope did not have  $tradegood$ stockpile in  $tradezone$"
+			debug_log = "Tradezone scope did not have  $tradegood$ stockpile in  $tradezone$"
+		}
+	}
+}
+
+PURCHASE_transfer_goods_externally = {
+	# Scope: governorship
+	# Function: Put goods in the purchasing governorship, subtract goods from the internal trade scope and allocate trade-scope-wide revenue accordingly.
+
+	# Format of arguments:
+	# $target_stockpile$ = grain_stockpile, derived from $for_stockpile$ in PURCHASE_order_internal, the stockpile in the governorship being filled
+	# $amount$ = local variable, derived from $order_size$ in PURCHASE_order_internal
+	# $from_stockpile$ = grain_stockpile_internal, derived from $from_stockpile$ in PURCHASE_order_internal, this is the available stockpile on the whole internal market
+	# $local_price$ = local_price_grain, gets the local price of grain from the governorship owner's capital
+	# $internal_sold_total$ = internal_sold_total_grain, the total amount sold in the internal trade scope, used by the effect to distribute the cut of amount sold to contributing governorships
+	debug_log = "Transferring  $tradegood$  from  $tradezone$"
+
+	# ADD TO BUYER'S STOCKPILE
+	change_variable = {
+		name = $tradegood$_stockpile
+		add = $amount$
+	}
+
+	# ALLOCATE WEALTH FOR THE POOL
+	set_local_variable = {
+		name = this_spend
+		value = $amount$
+	}
+
+	# SUBTRACT FROM THE SELECTED INTERNAL AVAILABLE STOCKPILE
+	global_var:global_$tradezone$_tradezone = {
+		change_variable = {
+			name = $tradegood$_stockpile_TZ
+			subtract = $amount$
+		}
+	}
+
+	change_local_variable = { # use the price from the seller TZ
+		name = this_spend
+		multiply = global_var:global_$tradezone$_tradezone.var:local_price_$tradegood$
+	}
+
+	## PRICE PREMIUM FOR EXTERNAL TRADE
+	# The seller TZ will charge a premium based on the price of the purchaser's TZ, in order to profit from regions where the demand is higher by adjusting their price up by a percentage of the buyer's local price.
+
+	set_local_variable = {
+		name = international_price_premium
+		value = var:trade_center.var:local_price_$tradegood$ # Get the price from the local trade center
+	}
+
+	change_local_variable = {
+		name = international_price_premium
+		multiply = 0.1 # Get 10% of it
+	}
+
+	change_local_variable = {
+		name = this_spend
+		add = local_var:international_price_premium
+	}
+
+	# Add transport costs
+	if = { # Only add transport costs between tradezones if there is an actual transport cost to account for
+		limit = {
+			var:trade_center = {
+				has_variable = here_to_$tradezone$_tradezone
+			}
+		}
+		change_local_variable = {
+			name = this_spend
+			add = var:trade_center.var:here_to_$tradezone$_tradezone # Note: should this be re-framed as here_from_$tradezone$, so that it can account for the speed of importing being faster in one direction?
+		}
+		change_variable = {
+			name = governorship_this_quarter_spend_on_transport_$tradegood$ # Track the transport costs for the player's benefit
+			add = var:trade_center.var:here_to_$tradezone$_tradezone
+		}
+	}
+	# TODO: Add a way to account for transport costs within a tradezone, too, using trade infrastructure level?
+
+	# SUBTRACT MONEY FROM THE BUYING GOVERNORSHIP'S BALANCE
+	# The balance will then be applied to the governorship wealth pools at the end of the purchase phase
+
+	change_variable = {
+		name = governorship_this_quarter_spend_on_$category$
+		subtract = local_var:this_spend # Must be negative so it can be used with add_treasury
+	}
+
+	owner = {
+		change_variable = { # TODO: Set this variable
+			name = country_external_bought_total_$tradegood$
+			add = $amount$
+		}
+	}
+
+	# Mark the goods transfer as complete, so it does not repeat the order in lower ranked tradezones
+	# set_variable = $tradegood$_purchase_order_tender_complete # OBSOLETE
+
+	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
+	global_var:global_$tradezone$_tradezone = {
+		change_variable = {
+			name = $tradegood$_sold_total_TZ
+			add = $amount$
+		}
+		change_variable = {
+			name = TZ_income_pool
+			add = local_var:this_spend
+		}
+		change_variable = {
+			name = $tradegood$_total_revenue_TZ # Adds to the external revenue pile of the seller tradezone
+			add = local_var:this_spend
+		}
+	}
+	
+}
+
+
+
+######################### SELL ##############################
+# These internal calculations could potentially be altered to handle both internal and external amounts in one.
+
+SELL_get_cut_of_revenue = {
+	# Scope: governorship
+	# Called: After all internal POs are completed.
+	# Function: Get the governorship's cut of total revenue AND subtract the resources sold proportionate to their contribution to trade-scope-wide trade.
+	# Quarterly governorship income is only divvied up and given out at the end of both internal and external trade. Gets reset at the beginning of every quarter
+
+	# Format of arguments
+	# $internal_total_revenue$ = internal_total_revenue_grain
+	# $internal_stockpile_cut_percentage$ = internal_stockpile_cut_percentage_grain
+	# $local_cut_of_revenue$ = local_internal_revenue_cut_grain
+	# $stockpile_sold$ = grain_stockpile, the stockpile which is reduced in the governorship to reflect goods sold
+	# $amount_sold_total$ = internal_sold_total_grain, recorded by the transfer of goods effect
+
+	# START INTERNAL #
+	set_variable = { # Get the total internal revenue from the tradezone
+		name = local_internal_revenue_cut_$tradegood$
+		value = var:internal_trade_scope.var:$tradegood$_total_revenue_$tradezone$ # TODO: Update so that this checks income based on the governorship's TZ, as each TZ will have a unique pool of revenue according to the price of tradegoods there.
+	}
+	change_variable = {
+		name = local_internal_revenue_cut_$tradegood$
+		multiply = var:internal_stockpile_cut_percentage_$tradegood$
+	}
+	# END INTERNAL #
+
+	# START EXTERNAL #
+	set_variable = {
+		name = local_external_revenue_cut_$tradegood$
+		value = var:trade_center.var:$tradegood$_total_revenue_TZ
+	}
+	change_variable = {
+		name = local_external_revenue_cut_$tradegood$
+		value = var:external_stockpile_cut_percentage_$tradegood$
+	}
+	# END EXTERNAL #
+
+	change_variable = {
+		name = governorship_this_quarter_income_from_$category$ 
+		add = var:local_internal_revenue_cut_$tradegood$
+	}
+	change_variable = {
+		name = governorship_this_quarter_income_from_$category$
+		add = var:local_external_revenue_cut_$tradegood$
+	}
+
+	# SUBTRACT THE RESOURCES SOLD FROM THE GOVERNORSHIPS ACCORDING TO THEIR CUT
+
+	var:internal_trade_scope = {
+		set_local_variable = {
+			name = local_sold_cut_internal
+			value = var:$tradegood$_sold_total_$tradezone$
+		}
+	}
+	var:trade_center = { # Might be better to split this out to minimise scope swapping? To be addressed during optimisation.
+		set_local_variable = {
+			name = local_sold_cut_external
+			value = var:$tradegood$_sold_total_TZ
+		}
+	}
+
+	change_local_variable = {
+		name = local_sold_cut_internal
+		multiply = var:internal_stockpile_cut_percentage_$tradegood$
+	}
+	change_local_variable = {
+		name = local_sold_cut_external
+		multiply = var:external_stockpile_cut_percentage_$tradegood$
+	}
+
+	change_variable = {
+		name = $tradegood$_stockpile
+		subtract = local_var:local_sold_cut_internal
+	}
+
+	owner = {
+		change_variable = {
+			name = country_internal_total_sold_$tradegood$
+			add = local_var:local_sold_cut
+		}
+	}
+
+}
+
+SELL_set_revenue_cut_percentage = { # Modified to handle both internal and external
+	# Scope: governorship
+	# Function: Set the governorship's cut of the total value of the given tradegood sold in this supplier zone (a tradezone within a tag)
+
+	set_variable = { # Get the total of the goods that this governorship sent up
+		name = internal_stockpile_cut_percentage_$tradegood$
+		value = var:$tradegood$_offered
+	}
+	set_variable = { # Get the total of the goods that this governorship sent up
+		name = external_stockpile_cut_percentage_$tradegood$
+		value = var:$tradegood$_offered_external
+	}
+
+	# INTERNAL
+	if = {
+		limit = {
+			var:internal_trade_scope = {
+				var:$tradegood$_available_at_start_of_quarter_$tradezone$ > 0
+			}
+		}
+		change_variable = { # Now divide the amount contributed by the total in the internal stockpile, getting a percentage.
+			# e.g. if the governorship contributed 150 units and the internal stockpile has 1000 units, you get 0.15 (15%)
+			name = internal_stockpile_cut_percentage_$tradegood$
+			divide = var:internal_trade_scope.var:$tradegood$_available_at_start_of_quarter_$tradezone$ # Gets the stockpile from the internal trade scope (country or customs union) e.g. "grain_available_at_start_of_quarter_india_tradezone" TODO: Make sure this is normalised, the usual format for most of these trade 	effects is to use just the TZ name, not its full label (e.g. "india", not "india_tradezone")
+		}
+	}
+	# EXTERNAL
+	if = {
+		limit = {
+			var:trade_center = {
+				var:$tradegood$_available_at_start_of_quarter_TZ > 0
+			}
+		}
+		change_variable = { # Now divide the amount contributed by the total in the internal stockpile, getting a percentage.
+			# e.g. if the governorship contributed 150 units and the internal stockpile has 1000 units, you get 0.15 (15%)
+			name = internal_stockpile_cut_percentage_$tradegood$
+			divide = var:internal_trade_scope.var:$tradegood$_available_at_start_of_quarter_TZ # Gets the stockpile from the internal trade scope (country or customs union) e.g. "grain_available_at_start_of_quarter_TZ" 
+			# This uses the start of quarter value to get a percentage; the amount actually available at the start of the trade phase is irrelevant for the purposes of getting a percentage and it would cause a performance overhead to have to rely on that as it shrinks while internal orders are completed, so every governorship's contribution would also have to be reduced.
+			# Why is this comment here? Am I overexplaining things? Probably
 		}
 	}
 }

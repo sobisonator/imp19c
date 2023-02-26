@@ -15,7 +15,7 @@ SELL_reset_internal_trade_stockpile = { # Needs to be repeated for every tradego
 	}
 }
 
-SELL_declare_all_internal_available = {
+SELL_declare_all_available = {
 	# Scope: Governorship
 	# Called: At the beginning of every quarter
 	# Tells the internal tradezone all the stockpiles a governorship has available to sell to other governorships in the same country or customs union
@@ -436,6 +436,9 @@ SELL_calculate_all_revenue_cut_percentages = {
 	every_tradegoods_complex = {
 		APPLY = SELL_calculate_revenue_cut_based_on_tradezone
 	}
+	every_tradegoods_complex = {
+		APPLY = SELL_calculate_external_revenue_cut_percentage
+	}
 
 }
 
@@ -634,7 +637,7 @@ SELL_set_revenue_cut_percentage = { # Modified to handle both internal and exter
 		change_variable = { # Now divide the amount contributed by the total in the internal stockpile, getting a percentage.
 			# e.g. if the governorship contributed 150 units and the internal stockpile has 1000 units, you get 0.15 (15%)
 			name = internal_stockpile_cut_percentage_$tradegood$
-			divide = var:internal_trade_scope.var:$tradegood$_available_at_start_of_quarter_TZ # Gets the stockpile from the internal trade scope (country or customs union) e.g. "grain_available_at_start_of_quarter_TZ" 
+			divide = var:trade_center.var:$tradegood$_available_at_start_of_quarter_TZ # Gets the stockpile from the internal trade scope (country or customs union) e.g. "grain_available_at_start_of_quarter_TZ" 
 			# This uses the start of quarter value to get a percentage; the amount actually available at the start of the trade phase is irrelevant for the purposes of getting a percentage and it would cause a performance overhead to have to rely on that as it shrinks while internal orders are completed, so every governorship's contribution would also have to be reduced.
 			# Why is this comment here? Am I overexplaining things? Probably
 		}
@@ -1169,11 +1172,11 @@ SELL_get_cut_of_revenue = {
 	# START EXTERNAL #
 	set_variable = {
 		name = local_external_revenue_cut_$tradegood$
-		value = var:internal_trade_scope.var:$tradegood$_external_income_$tradezone$
+		value = owner.var:$tradegood$_external_income_$tradezone$_tradezone # TODO: Normalise these FOR GOD'S SAKE!!!! They should not end variably with _tradezone or not.
 	}
 	change_variable = {
 		name = local_external_revenue_cut_$tradegood$
-		value = var:external_stockpile_cut_percentage_$tradegood$
+		add = var:external_stockpile_cut_percentage_$tradegood$
 	}
 	# END EXTERNAL #
 
@@ -1193,6 +1196,8 @@ SELL_get_cut_of_revenue = {
 			name = local_sold_cut_internal
 			value = var:$tradegood$_sold_total_$tradezone$
 		}
+	}
+	owner = {
 		set_local_variable = {
 			name = local_sold_cut_external
 			value = var:$tradegood$_external_sold_total_$tradezone$
@@ -1602,7 +1607,7 @@ SELL_declare_external_available = {
 	set_variable = { # Within the governorship scope, track how much was sold so you can then calculate how much of a cut to get
 	# See SELL_calculate_cut to see how the cut of revenue gets calculated
 		name = $tradegood$_offered_external
-		value = TRADE_governorship_for_export_$tradegood$ # TODO - make this a var, because it's referred to 3 times
+		value = TRADE_governorship_for_export_$tradegood$
 	}
 
 	owner = {

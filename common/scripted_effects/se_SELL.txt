@@ -19,7 +19,7 @@ SELL_declare_all_internal_available = {
 	# Scope: Governorship
 	# Called: At the beginning of every quarter
 	# Tells the internal tradezone all the stockpiles a governorship has available to sell to other governorships in the same country or customs union
-
+	save_scope_as = seller_governorship
 
 	every_tradegoods_complex = {
 		APPLY = SELL_declare_available_based_on_TZ
@@ -1607,8 +1607,8 @@ SELL_declare_external_available = {
 
 	owner = {
 		change_variable = {
-			name = country_$tradegood$_offered_external_to_$tradezone$_tradezone
-			add = TRADE_governorship_for_export_$tradegood$
+			name = country_$tradegood$_offered_external_to_$tradezone$
+			add = scope:seller_governorship.TRADE_governorship_for_export_$tradegood$
 		}
 	}
 
@@ -1616,11 +1616,11 @@ SELL_declare_external_available = {
 		# Add to the tradezone's stockpile
 		change_variable = { # TODO: set stockpile variables back to 0 at the beginning of every quarter, using a SE in the on_action
 			name = $tradegood$_stockpile_TZ # The trade center variable will have the same name as the governorship one, for ease of reference
-			add = prev.var:$tradegood$_offered_external # TODO: set this variable at the start of the trade phase
+			add = scope:seller_governorship.var:$tradegood$_offered_external # TODO: set this variable at the start of the trade phase
 		}
 		change_variable = { # Save a parallel variable that does not have its value reduced as purchase orders are fulfilled, and can thereby reliably be used to calculate a final cut of income and deductions from governorships
 			name = $tradegood$_available_at_start_of_quarter_TZ
-			add = prev.TRADE_governorship_for_export_$tradegood$
+			add = scope:seller_governorship.var:$tradegood$_offered_external
 		}
 	}
 }

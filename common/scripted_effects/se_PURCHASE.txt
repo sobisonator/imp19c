@@ -295,19 +295,19 @@ PURCHASE_set_order_size = {
 		limit = {
 			local_var:l_demand_diff > 0
 		}
-		set_local_variable = {
+		set_variable = {
 			name = l_order_size
 			value = DEMAND_$tradegood$
 		}
-		change_local_variable = {
+		change_variable = {
 			name = l_order_size
 			subtract = var:$tradegood$_stockpile
 		}
 		if = { # Limit the amount imported up to trade capacity
 			limit = {
-				local_var:l_order_size > TRADE_governorship_trade_capacity
+				var:l_order_size > TRADE_governorship_trade_capacity
 			}
-			set_local_variable = {
+			set_variable = {
 				name = l_order_size
 				value = var:governorship_trade_capacity
 			}
@@ -318,19 +318,19 @@ PURCHASE_set_order_size = {
 DEFUNCT_PURCHASE_set_order_size = {
 	# Scope: governorship
 	# Function: Get the amount of deficit that needs to be met with the purchase order, then cap it at the governorship's trade capacity.
-	set_local_variable = {
+	set_variable = {
 		name = l_order_size
 		value = DEMAND_$tradegood$
 	}
-	change_local_variable = {
+	change_variable = {
 		name = l_order_size
 		subtract = var:$tradegood$_stockpile
 	}
 	if = { # Limit the amount imported up to trade capacity
 		limit = {
-			local_var:l_order_size > var:governorship_trade_capacity
+			var:l_order_size > var:governorship_trade_capacity
 		}
-		set_local_variable = {
+		set_variable = {
 			name = l_order_size
 			value = var:governorship_trade_capacity
 		}
@@ -353,7 +353,7 @@ PURCHASE_check_shopping_internal = {
 	# If the trade center for this internal tradescope tradescope has not yet ranked this good this quarter, rank it first. Otherwise, skip this step.
 	# TODO: Think of a way to check this. Set a variable unique to the internal trade scope / trade center combination. Should be easy enough...
 
-	# Returns local_var:l_order_size
+	# Returns var:l_order_size
 	PURCHASE_set_order_size = {
 		tradegood = $tradegood$
 	}
@@ -374,7 +374,7 @@ PURCHASE_check_shopping_internal = {
 	#	}
 	#	PURCHASE_get_preferred_tradezone_internal = {
 	#		tradegood = $tradegood$
-	#		order_size = local_var:l_order_size
+	#		order_size = var:l_order_size
 	#	} # Creates a set of variables in the trade center
 	#}
 
@@ -394,22 +394,22 @@ PURCHASE_check_shopping_internal = {
 
 	if = {
 		limit = {
-			local_var:l_order_size > 0
+			var:l_order_size > 0
 		}
 		PURCHASE_generate_order_internal = {
 			tradegood = $tradegood$
-			order_size = local_var:l_order_size
+			order_size = var:l_order_size
 			category = $category$
 		}
 	}
 	# If the stockpile is still not full, try to purchase externally.
 	if = {
 		limit = {
-			local_var:l_order_size > 0 # l_order_size is modified by the transfer goods effect, and subtracts the amount transferred from the order size.
+			var:l_order_size > 0 # l_order_size is modified by the transfer goods effect, and subtracts the amount transferred from the order size.
 		}
 		PURCHASE_generate_order_external = {
 			tradegood = $tradegood$
-			order_size = local_var:l_order_size
+			order_size = var:l_order_size
 			category = $category$
 		}
 	}
@@ -2588,7 +2588,7 @@ PURCHASE_transfer_if_able = {
 				owner = {
 					change_variable = {
 						name = country_internal_total_ordered_$tradegood$ # Saves the total amount ordered - Note: not the total amount successfully purchased
-						add = $order_size$
+						add = scope:purchaser_governorship.$order_size$
 					}
 				}
 
@@ -2632,7 +2632,7 @@ PURCHASE_transfer_if_able = {
 				owner = {
 					change_variable = {
 						name = country_external_total_ordered_$tradegood$ # Saves the total amount ordered - Note: not the total amount successfully purchased
-						add = $order_size$
+						add = scope:purchaser_governorship.$order_size$
 					}
 				}
 
@@ -2907,7 +2907,7 @@ PURCHASE_order_internal = {
 	# Format of arguments:
 	# $for_stockpile$ = grain_stockpile, the stockpile in the governorship scope
 	# $from_stockpile$ = grain_stockpile_internal, the stockpile from the internal trade scope with the sum of all goods available for internal trade
-	# $order_size$ = local variable, local_var:l_order_size
+	# $order_size$ = local variable, var:l_order_size
 	# $internal_sold_total$ = internal_sold_total_grain
 
 	debug_log = "Making a purchase order for  $tradegood$"
@@ -2931,7 +2931,7 @@ PURCHASE_order_internal = {
 			# The score is the cost of the goods order plus the cost of transport
 			set_local_variable = {
 				name = l_this_total_score
-				value = $order_size$
+				value = scope:purchaser_governorship.$order_size$
 			}
 			change_local_variable = {
 				name = l_this_total_score
@@ -3103,18 +3103,12 @@ PURCHASE_transfer_goods_internally = {
 	# Mark the goods transfer as complete, so it does not repeat the order in lower ranked tradezones
 	set_variable = $tradegood$_purchase_order_tender_complete
 
-	# Shrink the order size by the amount transferred so that international orders can be made next, if the order size is still > 0
-	change_local_variable = {
-		name = l_order_size
-		subtract = $amount$
-	}
-
 	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
 	# TODO: Make this tradezone specific, so the SELL split revenue can then iterate through all variables in the list of available internal trade centers, and split out revenue to the governorships who are members of that TZ, using the variable list governorships_in_$tradezone$
 	var:internal_trade_scope = {
 		change_variable = {
 			name = $tradegood$_sold_total_$tradezone$
-			add = $amount$
+			add = scope:purchaser_governorship.var:l_order_size
 		}
 		change_variable = {
 			name = internal_income_pool
@@ -3124,6 +3118,12 @@ PURCHASE_transfer_goods_internally = {
 			name = $tradegood$_total_revenue_$tradezone$ # Adds to the internal revenue pile of the seller tradezone
 			add = local_var:this_spend
 		}
+	}
+
+	# Shrink the order size by the amount transferred so that international orders can be made next, if the order size is still > 0
+	change_variable = {
+		name = l_order_size
+		subtract = $amount$
 	}
 	
 }
@@ -3548,7 +3548,7 @@ PURCHASE_check_shopping_external = {
 			tradegood = $tradegood$
 			#for_stockpile = $for_stockpile$
 			#from_stockpile = $from_stockpile$
-			order_size = local_var:l_order_size
+			order_size = var:l_order_size
 			category = $category$
 			#goods_price = $goods_price$
 			#external_sold_total = $external_sold_total$
@@ -3563,7 +3563,7 @@ PURCHASE_order_external = {
 	# Format of arguments:
 	# $for_stockpile$ = grain_stockpile, the stockpile in the governorship scope
 	# $from_stockpile$ = grain_stockpile_external, the stockpile from the external trade scope with the sum of all goods available for external trade
-	# $order_size$ = local variable, local_var:l_order_size
+	# $order_size$ = local variable, var:l_order_size
 	# $external_sold_total$ = external_sold_total_grain
 
 	debug_log = "Making a purchase order for  $tradegood$"
@@ -3587,7 +3587,7 @@ PURCHASE_order_external = {
 			# The score is the cost of the goods order plus the cost of transport
 			set_local_variable = {
 				name = l_this_total_score
-				value = $order_size$
+				value = scope:purchaser_governorship.$order_size$
 			}
 			change_local_variable = {
 				name = l_this_total_score

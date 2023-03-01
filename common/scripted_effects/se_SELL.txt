@@ -1285,45 +1285,45 @@ SELL_get_cut_of_revenue = {
 
 	# SUBTRACT THE RESOURCES SOLD FROM THE GOVERNORSHIPS ACCORDING TO THEIR CUT
 
-	var:internal_trade_scope = {
-		set_local_variable = {
-			name = local_sold_cut_internal
-			value = var:$tradegood$_sold_total_$tradezone$
-		}
+	# START INTERNAL #
+	set_variable = { # Get the total internal revenue from the tradezone
+		name = local_sold_cut_$tradegood$
+		value = var:internal_trade_scope.var:$tradegood$_sold_total_$tradezone$ # TODO: Update so that this checks income based on the governorship's TZ, as each TZ will have a unique pool of revenue according to the price of tradegoods there.
 	}
-	owner = {
-		set_local_variable = {
-			name = local_sold_cut_external
-			value = var:$tradegood$_external_sold_total_$tradezone$
-		}
-	}
-
-	change_local_variable = {
-		name = local_sold_cut_internal
+	change_variable = {
+		name = local_sold_cut_$tradegood$
 		multiply = var:internal_stockpile_cut_percentage_$tradegood$
 	}
-	change_local_variable = {
-		name = local_sold_cut_external
-		multiply = var:external_stockpile_cut_percentage_$tradegood$
+	# END INTERNAL #
+
+	# START EXTERNAL #
+	set_variable = {
+		name = local_external_sold_cut_$tradegood$
+		value = owner.var:$tradegood$_external_sold_total_$tradezone$ # TODO: Normalise these FOR GOD'S SAKE!!!! They should not end variably with _tradezone or not.
 	}
+	change_variable = {
+		name = local_external_sold_cut_$tradegood$
+		add = var:external_stockpile_cut_percentage_$tradegood$
+	}
+	# END EXTERNAL #
 
 	change_variable = {
 		name = $tradegood$_stockpile
-		subtract = local_var:local_sold_cut_internal
+		subtract = var:local_sold_cut_$tradegood$
 	}
 	change_variable = {
 		name = $tradegood$_stockpile
-		subtract = local_var:local_sold_cut_external
+		subtract = var:local_external_sold_cut_$tradegood$
 	}
 
 	owner = {
 		change_variable = {
 			name = country_internal_total_sold_$tradegood$
-			add = local_var:local_sold_cut_internal
+			add = prev.var:local_sold_cut_$tradegood$
 		}
 		change_variable = {
 			name = country_external_total_sold_$tradegood$
-			add = local_var:local_sold_cut_external
+			add = prev.var:local_external_sold_cut_$tradegood$
 		}
 	}
 

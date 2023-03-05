@@ -2574,9 +2574,11 @@ PURCHASE_transfer_if_able = {
 				}
 			}
 
-			if = { # Only transfer the goods if they from stockpile is actually bigger than the order size
+			if = { 
 				limit = {
-					local_var:i_demand_diff < 0 # If the supplier can't meet demand, the purchaser should try again on its next preferred supplier
+					local_var:i_demand_diff < 0 # Only transfer the goods if they from stockpile is actually bigger than the order size
+					# TODO: If the supplier can't meet demand, the purchaser should try again on its next preferred supplier
+					var:internal_trade_scope.var:$tradegood$_stockpile_$tradezone$_tradezone > 0
 				}
 				# Add to the purchasing governorship's stockpile
 				PURCHASE_transfer_goods_internally = {
@@ -3047,7 +3049,7 @@ PURCHASE_transfer_goods_internally = {
 	var:internal_trade_scope = {
 		change_variable = {
 			name = $tradegood$_stockpile_$tradezone$_tradezone
-			subtract = $amount$
+			subtract = scope:purchaser_governorship.var:l_order_size
 		}
 	}
 	# SUBTRACT FROM THE SELECTED TRADEZONE'S AVAILABLE STOCKPILE

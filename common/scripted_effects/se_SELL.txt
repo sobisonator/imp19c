@@ -704,7 +704,7 @@ SELL_set_revenue_cut_percentage = { # Modified to handle both internal and exter
 	else = {
 		set_variable = { # Get the total of the goods that this governorship sent up externally
 			name = external_stockpile_cut_percentage_$tradegood$
-			value = 0.01
+			value = 0.0001
 		}
 	}
 
@@ -1303,7 +1303,7 @@ SELL_get_cut_of_revenue = {
 	}
 	change_variable = {
 		name = local_external_sold_cut_$tradegood$
-		add = var:external_stockpile_cut_percentage_$tradegood$
+		multiply = var:external_stockpile_cut_percentage_$tradegood$
 	}
 	# END EXTERNAL #
 
@@ -1327,6 +1327,22 @@ SELL_get_cut_of_revenue = {
 		}
 	}
 
+}
+
+SELL_get_external_declare_to_for_sale_diff = {
+	# Scope: trade center province
+	# Function: Get the proportional difference in the amount of goods declared to be available externally at the start of quarter, versus the actual goods available for sale at the international trade phase, so that the tradegood_offered vars can be scaled down appropriately so that seller governorship stockpiles are not overcharged.
+	# e.g., 1000 goods were declared externally available to the TZ, but only 500 were available for sale after internal trade
+	# That means that the subtractions to seller governorships should be based on a percentage only 0.5x as large
+	set_variable = {
+		name = $tradegood$_external_declare_to_for_sale_diff
+		value = $tradegood$_available_before_international_trade
+	}
+
+	change_variable = {
+		name = $tradegood$_external_declare_to_for_sale_diff
+		divide = $tradegood$_available_at_start_of_quarter_TZ
+	}
 }
 
 SELL_split_all_income = {

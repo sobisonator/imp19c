@@ -309,7 +309,7 @@ PURCHASE_set_order_size = {
 		}
 		if = { # Limit the amount imported up to trade capacity
 			limit = {
-				order_size_svalue > var:governorship_trade_capacity
+				order_size_svalue > governorship_trade_capacity_svalue
 			}
 			set_variable = {
 				name = l_order_size
@@ -2650,14 +2650,30 @@ PURCHASE_transfer_if_able = {
 
 			if = { # Only transfer the goods if they from stockpile is actually bigger than the order size
 				limit = {
-					local_var:i_demand_diff < 0 # If the supplier can't meet demand, the purchaser should try again on its next preferred supplier
+					local_var:i_demand_diff > 0
+				}
+				set_global_variable = {
+					name = reduced_order_size
+					value = $order_size$
+				}
+				change_global_variable = {
+					name = reduced_order_size
+					subtract = local_var:i_demand_diff
 				}
 				# Add to the purchasing governorship's stockpile
 				PURCHASE_transfer_goods_externally = {
 					tradegood = $tradegood$
-					amount = global_var:standard_order_size
+					amount = global_var:reduced_order_size
 					category = $category$
 					tradezone = $tradezone$
+				}
+				else = {
+					PURCHASE_transfer_goods_externally = {
+						tradegood = $tradegood$
+						amount = global_var:standard_order_size
+						category = $category$
+						tradezone = $tradezone$
+					}
 				}
 				owner = {
 					change_variable = {
@@ -2704,6 +2720,12 @@ PURCHASE_transfer_goods_externally = {
 			name = $tradegood$_stockpile_TZ
 			subtract = $amount$
 		}
+	}
+
+	# Subtract from the total amount available from trade partners, so future calculations of the available amount don't overestimate the supply before purchasing
+	change_local_variable = {
+		name = $tradegood$_trade_partner_cap_$tradezone$
+		subtract = $amount$
 	}
 
 	change_local_variable = { # use the price from the seller TZ
@@ -2940,7 +2962,7 @@ PURCHASE_order_internal = {
 	# $order_size$ = local variable, var:l_order_size
 	# $internal_sold_total$ = internal_sold_total_grain
 
-	debug_log = "Making a purchase order for  $tradegood$"
+	# debug_log = "Making a purchase order for  $tradegood$"
 
 	# save_scope_as = purchaser_governorship # Moved back to check shopping
 
@@ -3064,7 +3086,7 @@ PURCHASE_transfer_goods_internally = {
 	# ADD TO BUYER'S STOCKPILE
 	change_variable = {
 		name = $tradegood$_stockpile
-		add = global_var:standard_order_size
+		add = $amount$
 	}
 
 	# ALLOCATE WEALTH FOR THE POOL
@@ -3077,7 +3099,7 @@ PURCHASE_transfer_goods_internally = {
 	var:internal_trade_scope = {
 		change_variable = {
 			name = $tradegood$_stockpile_$tradezone$_tradezone
-			subtract = global_var:standard_order_size
+			subtract = $amount$
 		}
 	}
 	# SUBTRACT FROM THE SELECTED TRADEZONE'S AVAILABLE STOCKPILE

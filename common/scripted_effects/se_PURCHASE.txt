@@ -291,6 +291,10 @@ PURCHASE_set_order_size = {
 	# Function: Check if there are enough goods in the target tradezone stockpile
 	# It has to be this way because you can't use a < operator between a svalue and a var
 	# Check if the stockpile is big enough to satisfy demand
+	set_variable = {
+		name = l_order_size
+		value = 0
+	}
 	if = { # It has to be this way I promise
 		limit = {
 			local_var:l_demand_diff > 0
@@ -2599,10 +2603,14 @@ PURCHASE_transfer_if_able = {
 					}
 				}
 				else = {
+					set_global_variable = {
+						name = standard_order_size
+						value = $order_size$
+					}
 					# Add to the purchasing governorship's stockpile
 					PURCHASE_transfer_goods_internally = {
 						tradegood = $tradegood$
-						amount = $order_size$
+						amount = global_var:standard_order_size
 						category = $category$
 						tradezone = $tradezone$
 					}
@@ -2610,7 +2618,7 @@ PURCHASE_transfer_if_able = {
 				owner = {
 					change_variable = {
 						name = country_internal_total_ordered_$tradegood$ # Saves the total amount ordered - Note: not the total amount successfully purchased
-						add = scope:purchaser_governorship.var:l_order_size
+						add = global_var:standard_order_size
 					}
 				}
 
@@ -2624,7 +2632,7 @@ PURCHASE_transfer_if_able = {
 	# External
 	else_if = {
 		limit = { $mode$ = 1 }
-		debug_log = "Externally contacting tradezone  $tradezone$ "
+		# debug_log = "Externally contacting tradezone  $tradezone$ "
 		if = {
 			limit = {
 				global_var:global_$tradezone$_tradezone = {
@@ -3056,7 +3064,7 @@ PURCHASE_transfer_goods_internally = {
 	# ADD TO BUYER'S STOCKPILE
 	change_variable = {
 		name = $tradegood$_stockpile
-		add = scope:purchaser_governorship.var:l_order_size
+		add = global_var:standard_order_size
 	}
 
 	# ALLOCATE WEALTH FOR THE POOL
@@ -3069,7 +3077,7 @@ PURCHASE_transfer_goods_internally = {
 	var:internal_trade_scope = {
 		change_variable = {
 			name = $tradegood$_stockpile_$tradezone$_tradezone
-			subtract = scope:purchaser_governorship.var:l_order_size
+			subtract = global_var:standard_order_size
 		}
 	}
 	# SUBTRACT FROM THE SELECTED TRADEZONE'S AVAILABLE STOCKPILE
@@ -3130,7 +3138,7 @@ PURCHASE_transfer_goods_internally = {
 	var:internal_trade_scope = {
 		change_variable = {
 			name = $tradegood$_sold_total_$tradezone$
-			add = scope:purchaser_governorship.var:l_order_size
+			add = global_var:standard_order_size
 		}
 		change_variable = {
 			name = internal_income_pool

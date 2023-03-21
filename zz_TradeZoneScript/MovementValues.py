@@ -11,7 +11,7 @@ def print_trade_zone_header(trade_zone,file_given):
 def print_trade_zone_connection_values(trade_zone, trade_zone_2,file_given):
 	zone_1 = trade_zone.lower()
 	zone_2 = trade_zone_2.lower()
-	trade_zone_connections = """{zone_1}_x_{zone_2}_svalue = {{
+	trade_zone_connections = """{zone_1}_to_{zone_2}_svalue = {{
 	value = 100 #Base Value
 	subtract = {zone_1}_transportation_svalue
 	subtract = {zone_2}_transportation_svalue
@@ -54,7 +54,7 @@ def connection_values(trade_zone_list):
 	for zone in trade_zone_list:
 		print_trade_zone_header(zone,f2)
 		for regions in trade_zone_list:
-			if ( regions != zone and regions not in done_zones):
+			if ( regions != zone ):
 				print_trade_zone_connection_values(zone, regions,f2)
 		done_zones.append(zone)
 

@@ -1089,7 +1089,7 @@ base_window = {
 						margin = { 10 0 }
 						position = { 0 50 }
 						parentanchor = top|left
-						maximumsize = { 120 -1 }
+						maximumsize = { 200 -1 }
 						text = "NATIONAL_POPULATION"
 						autoresize = yes
 						using = BaseFontM
@@ -1698,26 +1698,111 @@ base_window = {
 									margin_right = 0
 
 
-									category_drop = {
+									vbox = {
+										visible = "[Not(IsDataModelEmpty(DiplomaticView.GetActions))]"
+										margin_left = 0
+										margin_right = 22
 										layoutpolicy_horizontal = expanding
-										size = { 320 32 }
-										blockoverride "Text_alignment" 
-										{ 
-											parentanchor = left|vcenter 
-											align = left
-											position = { 16 -2 }
-											max_width = 320
+
+										category_drop = {
+											name = "close_button_trade_dip"
+											layoutpolicy_horizontal = expanding
+											size = { 0 32 }
+											blockoverride "Text_alignment" 
+											{ 
+												parentanchor = left|vcenter 
+												align = left
+												position = { 16 -2 }
+												max_width = 300
+											}
+											blockoverride "Text" 
+											{
+												text = "Trade Actions" 
+											}
+											blockoverride "On_click" { onclick = "[GetVariableSystem.Set( 'trade_actions_open', 'no' )]" }
+											blockoverride "Down" { visible = yes }
+											blockoverride "Right" { visible = no }
+											blockoverride "RightArrowVisible" { visible = no }
+
+											visible = "[GetVariableSystem.HasValue( 'trade_actions_open', 'yes' )]"
 										}
-										blockoverride "Text" 
+
+										category_drop = {
+											name = "open_button_trade_dip"
+											layoutpolicy_horizontal = expanding
+											size = { 0 32 }
+											blockoverride "Text_alignment" 
+											{ 
+												parentanchor = left|vcenter 
+												align = left
+												position = { 16 -2 }
+												max_width = 300
+											}
+											blockoverride "Text" { text = "Trade Actions" }
+											blockoverride "On_click" { onclick = "[GetVariableSystem.Set( 'trade_actions_open', 'yes' )]" }
+											blockoverride "Down" { visible = no }
+											blockoverride "Right" { visible = yes }
+											blockoverride "RightArrowVisible" { visible = yes }
+										
+											visible = "[Not( GetVariableSystem.HasValue( 'trade_actions_open', 'yes' ) )]"
+										}
+									}
+
+								}
+
+								vbox = {
+									visible = "[And(GetVariableSystem.HasValue( 'trade_actions_open', 'yes' ), And(Not(DiplomaticView.GetTargetCountry.IsBarbarian), Not(EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ))))]"
+									margin_left = 4
+									margin_right = 16
+									margin_top = 10
+									margin_bottom = 5
+									layoutpolicy_horizontal = expanding
+
+									diplomacy_action_button = {
+										size = { 0 22 }
+										layoutpolicy_horizontal = expanding
+										margin = { 14 0 }
+										margin_right = 0
+
+										datacontext = "[GetScriptedGui('trade_agreement_all_button')]"
+										size = { 100% 100% }
+										parentanchor = hcenter
+										layoutpolicy_horizontal = expanding
+
+										enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+
+										blockoverride "On_click"
 										{
-											text = "Trade Actions" 
+											enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
+											onclick = "[ScriptedGui.Execute(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
 										}
-										#blockoverride "On_click" { onclick = "[DiplomaticActionCategory.OnClick]" }
-										blockoverride "Down" { visible = no }
-										blockoverride "Right" { visible = yes }
-										blockoverride "RightArrowVisible" { visible = no }
+
+										blockoverride "Left_text" 
+										{ 
+											margin_left = 24
+											text = "[Select_CString( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'Cancel Trade Agreement: All', 'Offer Trade Agreement: All' )]"
+										}
+										
+										blockoverride "Right_text"
+										{
+											text = "Test"
+											using = Negative_FontColor 
+											tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+										}	
+										
+										blockoverride "Icon" 
+										{
+											framesize = { 46 46 }
+											#visible = "[DiplomaticActionItem.RequireAcceptance]"
+											texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
+											frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
+											tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+										}	
+
+										tooltip =  "[SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_title', 'offer_trade_agreement_all_tt_title' )]#T [DiplomaticView.GetTargetCountry.GetName] #! [SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_body', 'offer_trade_agreement_all_tt_body' )]"
 									}
 								}
+
 								margin_widget = {
 									size = { 0 28 }
 									layoutpolicy_horizontal = expanding
@@ -1729,7 +1814,7 @@ base_window = {
 										layoutpolicy_horizontal = expanding
 										datacontext = "[GetScriptedGui('sell_provinces')]"
 										enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-										visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+										visible = "[And(Not(DiplomaticView.GetTargetCountry.IsBarbarian), Not(EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId )))]"
 										blockoverride "On_click" {
 											onclick = "[ScriptedGui.Execute(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
 											onclick = "[ExecuteConsoleCommand('gui.ClearWidgets sell_provinces_window')]"
@@ -1753,7 +1838,7 @@ base_window = {
 										layoutpolicy_horizontal = expanding
 										datacontext = "[GetScriptedGui('give_up_claims')]"
 										enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-										visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+										visible = "[And(Not(DiplomaticView.GetTargetCountry.IsBarbarian), Not(EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId )))]"
 										blockoverride "On_click" {
 											onclick = "[ScriptedGui.Execute(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
 										}

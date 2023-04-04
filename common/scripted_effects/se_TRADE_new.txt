@@ -1,0 +1,35 @@
+TRADE_add_to_TZ_total_demand_difference = {
+	# Scope: country
+	# Function: add to a variable in the trade center scope that counts up the demand for given tradegood from every governorship in the TZ
+	every_governorships = {
+		save_scope_as = prev_governorship
+		var:trade_center = {
+			change_variable = {
+				name = TZ_total_demand_difference
+				add = scope:prev_governorship.DEMAND_difference_$tradegood$
+			}
+		}
+	}
+}
+
+TRADE_refresh_TZ_total_demand_differences = {
+	# Scope: random country
+	# Function: set the TZ_total_demand variable to exist and set it at 0
+	every_trade_center = {
+		set_variable = {
+			name = TZ_total_demand_difference
+			value = 0 
+		}
+	}
+}
+
+TRADE_every_country_update_all_TZ_total_demand_differences = {
+	# Scope: random country
+	# Function: run TRADE_add_to_TZ_total_demand_difference and TRADE_refresh_TZ_total_demand_differences
+	TRADE_refresh_TZ_total_demand_differences = yes
+	every_country = {
+		every_tradegood_complex = {
+			APPLY = TRADE_add_to_TZ_total_demand_difference
+		}
+	}
+}

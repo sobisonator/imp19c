@@ -1,0 +1,74 @@
+PRICE_grain = {
+	# Scope: governorship
+
+	# Total demand difference in the trade zone
+	if = {
+		limit = { has_variable = trade_center }
+		var:trade_center = {
+			add = var:TZ_total_demand_difference	
+		}
+	}
+	###
+
+	# Total demand difference globally
+	add = PRICE_grain_demand_diff_whole_world
+	###
+
+	# Total demand difference in the federation customs union
+	if = {
+		limit = {
+			has_variable = federation_customs_union
+		}
+		var:federation_customs_union = {
+			
+		}
+	}
+	###
+
+	# Total demand difference in all trade partner countries
+	owner = {
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
+			add = DEMAND_difference_country_grain
+		}
+	}
+	###
+
+	# Total demand difference in the internal trade scope
+	var:internal_trade_scope = {
+
+		if = {
+			limit = {
+				NOT = { has_variable = is_federation_scope }
+			}
+			every_governorships = {
+				limit = {
+					NOT = {has_variable = federation_customs_union }
+				}
+				add = DEMAND_difference_grain
+			}
+		}
+
+		else = {
+			every_in_list = {
+				variable = list_of_members
+				every_governorships = {
+					limit = {
+						has_variable = federation_customs_union
+					}
+					add = DEMAND_difference_grain
+				}
+			}
+		}
+
+	}
+	###
+
+}
+
+PRICE_grain_demand_diff_whole_world = {
+	# Scope: governorship
+	every_trade_center = {
+		add = var:TZ_total_demand_difference
+	}
+}

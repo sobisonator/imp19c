@@ -33,3 +33,74 @@ TRADE_every_country_update_all_TZ_total_demand_differences = {
 		}
 	}
 }
+
+TRADE_first_time_setup_price_TZs = {
+	# Scope: random country
+	# Called: at start of game
+	# Function: Set up the first time prices and set a flag so that demand based on historical prices is not dividing by zero
+	every_country = {
+		every_tradegood_complex = {
+			APPLY = TRADE_update_price_TZs
+		}
+	}
+	every_tradegood_complex = {
+		APPLY = TRADE_update_price_supply_demand_TZs
+	}
+
+	set_global_variable = first_time_price_setup_done
+}
+
+TRADE_update_price_supply_demand_TZs = {
+	# Scope:random country
+	# Function: set the base price for the given tradegood in every tradezone
+	# Reset the total supply and demand in the tradezone to 0
+	every_trade_center = {
+		set_variable = {
+			name = price_$tradegood$
+			value = TZ_demand_$tradegood$
+		}
+		change_variable = {
+			name = price_$tradegood$
+			divide = TZ_supply_$tradegood$
+		}
+
+		# Then zero the demand and supply so it can be updated for next quarter
+		set_variable = {
+			name = TZ_demand_$tradegood$
+			value = 0
+		}
+		set_variable = {
+			name = TZ_supply_$tradegood$
+			value = 0
+		}
+	}
+}
+
+TRADE_update_price_TZs = {
+	# Scope: iterating every country
+	# Function: update the price of tradegoods in the TZ
+	every_governorships = {
+		var:trade_center = {
+			change_variable = {
+				name = TZ_demand_$tradegood$
+				add = prev.DEMAND_$tradegood$
+			}
+			change_variable = {
+				name = TZ_supply_$tradegood$
+				add = prev.GOODS_governorship_$tradegood$_produced
+			}
+		}
+	}
+}
+
+TRADE_set_price_governorship = {
+	# Scope: governorship
+	# Function: Set the price for the given tradegood
+	# Price will be based on the TZ price, modified locally based on the country's trade partners
+	# Save demand this quarter into a variable for last quarter
+	# Price will go down if demand dropped compared to the last check
+	set_variable = {
+		name = price_$tradegood$
+		value = var:trade_center.var:price_$tradegood$
+	}
+}

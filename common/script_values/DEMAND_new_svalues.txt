@@ -44,14 +44,56 @@ DEMAND_fulfilled_food_need_governorship = {
 	add = GOODS_governorship_mediterranean_fruit_produced
 	add = GOODS_governorship_tropical_fruit_produced
 	add = GOODS_governorship_temperate_fruit_produced
+	add = GOODS_governorship_vegetables_produced
 }
 
 ### FOOD
+# Demand must factor in some form of elasticity - substitutions of different food types factor in here.
 # Demand for each food tradegood is equal to:
 # Get the % difference of the tradegood in question vs the average price of all food tradegoods, -1
-# Price = Unfulfilled food need /6 x (1- % difference in price)
-# Divide by 6 for the 6 types of food good
+# Demand = Unfulfilled food need /7 x (1- % difference in price)
+# Divide by 7 for the 7 types of food good
 # e.g. if wheat is 50% more expensive than the average food tradegood, the demand for wheat is:
-# ( Unfulfilled food need / 6) x 0.5
+# ( Unfulfilled food need / 7) x 0.5
 # if vegetables are 25% cheaper than the average food tradegood, the demand of vegetables is:
-# ( Unfulfilled food need / 6 )x 1.25
+# ( Unfulfilled food need / 7 )x 1.25
+
+DEMAND_num_food_tradegoods = {
+	# Records the number of food type tradegoods
+	value = 7
+}
+
+## Food average price in the governorship
+
+DEMAND_food_avg_price = {
+	# SHOULD BE CACHED FOR PERFORMANCE
+	# TODO
+	value = var:price_grain
+	add = var:price_fish
+	add = var:price_livestock
+	add = var:price_mediterranean_fruit
+	add = var:price_tropical_fruit
+	add = var:price_vegetables
+	divide = DEMAND_num_food_tradegoods
+}
+
+## Individual food goods
+
+DEMAND_actual_grain = {
+	value = DEMAND_unfulfilled_food_need_governorship
+	divide = DEMAND_num_food_tradegoods
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_done
+		}
+		divide = DEMAND_grain_price_diff_to_food_avg
+	}
+}
+
+DEMAND_grain_price_diff_to_food_avg = {
+	# Scope: governorship
+	# Function: get the % difference of the price of the given tradegood to the average food goods price
+	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
+	value = var:price_grain
+	divide = DEMAND_food_avg_price
+}

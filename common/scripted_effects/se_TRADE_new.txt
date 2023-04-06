@@ -38,13 +38,20 @@ TRADE_first_time_setup_price_TZs = {
 	# Scope: random country
 	# Called: at start of game
 	# Function: Set up the first time prices and set a flag so that demand based on historical prices is not dividing by zero
+	every_tradegood_complex = {
+		APPLY = TRADE_update_price_supply_demand_TZs
+	}
 	every_country = {
 		every_tradegood_complex = {
 			APPLY = TRADE_update_price_TZs
 		}
 	}
-	every_tradegood_complex = {
-		APPLY = TRADE_update_price_supply_demand_TZs
+	every_country = {
+		every_governorships = {
+			every_tradegood_complex = {
+				APPLY = TRADE_set_price_governorship
+			}
+		}
 	}
 
 	set_global_variable = first_time_price_setup_done
@@ -55,23 +62,26 @@ TRADE_update_price_supply_demand_TZs = {
 	# Function: set the base price for the given tradegood in every tradezone
 	# Reset the total supply and demand in the tradezone to 0
 	every_trade_center = {
-		set_variable = {
-			name = price_$tradegood$
-			value = TZ_demand_$tradegood$
-		}
-		change_variable = {
-			name = price_$tradegood$
-			divide = TZ_supply_$tradegood$
+		if = {
+			limit = { has_global_variable = first_time_price_setup_done }
+			set_variable = {
+				name = price_$tradegood$
+				value = var:TZ_demand_$tradegood$
+			}
+			change_variable = {
+				name = price_$tradegood$
+				divide = var:TZ_supply_$tradegood$
+			}
 		}
 
 		# Then zero the demand and supply so it can be updated for next quarter
 		set_variable = {
 			name = TZ_demand_$tradegood$
-			value = 0
+			value = 1
 		}
 		set_variable = {
 			name = TZ_supply_$tradegood$
-			value = 0
+			value = 1
 		}
 	}
 }
@@ -81,13 +91,23 @@ TRADE_update_price_TZs = {
 	# Function: update the price of tradegoods in the TZ
 	every_governorships = {
 		var:trade_center = {
-			change_variable = {
-				name = TZ_demand_$tradegood$
-				add = prev.DEMAND_$tradegood$
+			if = {
+				limit = {
+					prev.DEMAND_actual_$tradegood$ > 0
+				}
+				change_variable = {
+					name = TZ_demand_$tradegood$
+					add = prev.DEMAND_actual_$tradegood$
+				}
 			}
-			change_variable = {
-				name = TZ_supply_$tradegood$
-				add = prev.GOODS_governorship_$tradegood$_produced
+			if = {
+				limit = {
+					prev.DEMAND_difference_$tradegood$ > 0
+				}
+				change_variable = {
+					name = TZ_supply_$tradegood$
+					add = prev.DEMAND_difference_$tradegood$
+				}
 			}
 		}
 	}

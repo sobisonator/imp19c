@@ -2,26 +2,54 @@ def print_out_good(tradegood_name, category_name):
 	tradegood = tradegood_name
 	category = category_name
 	tradegood_caps = tradegood.upper()
-	loc = """DEMAND_difference_{tradegood} = {{
-	value = GOODS_governorship_{tradegood}_produced
-	subtract = DEMAND_{tradegood}
-}}""".format(tradegood=tradegood,category=category,tradegood_caps = tradegood_caps)
+	loc = """# {tradegood}
+DEMAND_actual_{tradegood} = {{
+	value = DEMAND_{tradegood}
+	if = {{
+		limit = {{
+			has_global_variable = first_time_price_setup_done
+			DEMAND_{tradegood} > 0
+		}}
+		divide = DEMAND_{tradegood}_price_diff_to_food_avg
+	}}
+	max = DEMAND_unfulfilled_food_need_governorship
+	min = 0
+}}
+
+DEMAND_{tradegood} = {{
+	value = 0
+	if = {{
+		limit = {{ DEMAND_unfulfilled_food_need_governorship > 0 }}
+		value = DEMAND_unfulfilled_food_need_governorship
+		divide = DEMAND_num_food_tradegoods
+	}}
+}}
+
+DEMAND_{tradegood}_price_diff_to_food_avg = {{
+	# Scope: governorship
+	# Function: get the % difference of the price of the given tradegood to the average food goods price
+	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
+	value = var:price_{tradegood}
+	divide = DEMAND_food_avg_price
+}}
+# End {tradegood}""".format(tradegood=tradegood,category=category,tradegood_caps = tradegood_caps)
 	print(loc)
 
 
 #all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]
-all_categories = ["essential_goods","luxury_goods","business_goods","military_goods"]
+all_categories = ["food","essential_goods","luxury_goods","business_goods","military_goods"]
 
 all_spenders = ["upper_strata","middle_strata","lower_strata","proletariat","tribesmen","indentured","slaves","the_state"]
 
 all_goods = {
-	"grain":"essential_goods",
-	"fish":"essential_goods",
-	"livestock":"essential_goods",
-	"tropical_fruit":"essential_goods",
-	"mediterranean_fruit":"essential_goods",
-	"temperate_fruit":"essential_goods",
-	"processed_foods":"essential_goods",
+	"grain":"food",
+	"fish":"food",
+	"livestock":"food",
+        "vegetables":"food",
+	"tropical_fruit":"food",
+	"mediterranean_fruit":"food",
+	"temperate_fruit":"food",
+	"processed_foods":"food",
 	"clothing":"essential_goods",
 	"furniture":"essential_goods",
 	"pharmaceuticals":"essential_goods",
@@ -78,4 +106,5 @@ all_goods = {
         }
 
 for tradegood, category in all_goods.items():
-    print_out_good(tradegood, category)
+        if category == "food":
+                print_out_good(tradegood, category)

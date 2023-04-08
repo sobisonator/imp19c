@@ -2,11 +2,10 @@ TRADE_add_to_TZ_total_demand_difference = {
 	# Scope: country
 	# Function: add to a variable in the trade center scope that counts up the demand for given tradegood from every governorship in the TZ
 	every_governorships = {
-		save_scope_as = prev_governorship
 		var:trade_center = {
 			change_variable = {
 				name = TZ_total_demand_difference
-				add = scope:prev_governorship.DEMAND_difference_$tradegood$
+				add = prev.DEMAND_difference_$tradegood$
 			}
 		}
 	}
@@ -34,33 +33,95 @@ TRADE_every_country_update_all_TZ_total_demand_differences = {
 	}
 }
 
-TRADE_first_time_setup_price_TZs = {
+TRADE_first_time_setup_price_TZs_food = {
 	# Scope: random country
 	# Called: at start of game
 	# Function: Set up the first time prices and set a flag so that demand based on historical prices is not dividing by zero
-	every_tradegood_complex = {
-		APPLY = TRADE_update_price_supply_demand_TZs
+
+	TRADE_update_price_supply_demand_TZs = {
+		tradegood = grain
 	}
-	every_country = {
-		every_tradegood_complex = {
-			APPLY = TRADE_update_price_TZs
-		}
+	TRADE_update_price_supply_demand_TZs = {
+		tradegood = livestock
+	}
+	TRADE_update_price_supply_demand_TZs = {
+		tradegood = fish
+	}
+	TRADE_update_price_supply_demand_TZs = {
+		tradegood = vegetables
+	}
+	TRADE_update_price_supply_demand_TZs = {
+		tradegood = tropical_fruit
+	}
+	TRADE_update_price_supply_demand_TZs = {
+		tradegood = mediterranean_fruit
+	}
+	TRADE_update_price_supply_demand_TZs = {
+		tradegood = temperate_fruit
+	}
+	TRADE_update_price_supply_demand_TZs = {
+		tradegood = processed_foods
 	}
 	every_country = {
 		every_governorships = {
-			every_tradegood_complex = {
-				APPLY = TRADE_set_price_governorship
+			TRADE_update_price_TZs = {
+				tradegood = grain
+			}
+			TRADE_update_price_TZs = {
+				tradegood = livestock
+			}
+			TRADE_update_price_TZs = {
+				tradegood = fish
+			}
+			TRADE_update_price_TZs = {
+				tradegood = vegetables
+			}
+			TRADE_update_price_TZs = {
+				tradegood = tropical_fruit
+			}
+			TRADE_update_price_TZs = {
+				tradegood = mediterranean_fruit
+			}
+			TRADE_update_price_TZs = {
+				tradegood = temperate_fruit
+			}
+			TRADE_update_price_TZs = {
+				tradegood = processed_foods
+			}
+			TRADE_set_price_governorship = {
+				tradegood = grain
+			}
+			TRADE_set_price_governorship = {
+				tradegood = livestock
+			}
+			TRADE_set_price_governorship = {
+				tradegood = fish
+			}
+			TRADE_set_price_governorship = {
+				tradegood = vegetables
+			}
+			TRADE_set_price_governorship = {
+				tradegood = tropical_fruit
+			}
+			TRADE_set_price_governorship = {
+				tradegood = mediterranean_fruit
+			}
+			TRADE_set_price_governorship = {
+				tradegood = temperate_fruit
+			}
+			TRADE_set_price_governorship = {
+				tradegood = processed_foods
 			}
 		}
 	}
 }
 
 TRADE_first_time_setup_simulation_run = {
-	TRADE_first_time_setup_price_TZs = yes
-	set_global_variable = first_time_price_setup_done
-	TRADE_first_time_setup_price_TZs = yes
-	TRADE_first_time_setup_price_TZs = yes
-	TRADE_first_time_setup_price_TZs = yes
+	TRADE_first_time_setup_price_TZs_food = yes
+	set_global_variable = first_time_price_setup_food_done
+	TRADE_first_time_setup_price_TZs_food = yes
+	TRADE_first_time_setup_price_TZs_food = yes
+	TRADE_first_time_setup_price_TZs_food = yes
 }
 
 TRADE_update_price_supply_demand_TZs = {
@@ -93,27 +154,32 @@ TRADE_update_price_supply_demand_TZs = {
 }
 
 TRADE_update_price_TZs = {
-	# Scope: iterating every country
+	# Scope: iterating every governorship
 	# Function: update the price of tradegoods in the TZ
-	every_governorships = {
-		var:trade_center = {
-			if = {
-				limit = {
-					prev.DEMAND_actual_$tradegood$ > 0
-				}
-				change_variable = {
-					name = TZ_demand_$tradegood$
-					add = prev.DEMAND_actual_$tradegood$
-				}
+	var:trade_center = {
+		if = {
+			limit = {
+				prev.DEMAND_actual_$tradegood$ > 0
+				has_global_variable = first_time_price_setup_done
 			}
-			if = {
-				limit = {
-					prev.DEMAND_difference_$tradegood$ > 0
-				}
-				change_variable = {
-					name = TZ_supply_$tradegood$
-					add = prev.DEMAND_difference_$tradegood$
-				}
+			change_variable = {
+				name = TZ_demand_$tradegood$
+				add = prev.DEMAND_actual_$tradegood$
+			}
+		}
+		else = {
+			change_variable = {
+				name = TZ_demand_$tradegood$
+				add = prev.DEMAND_$tradegood$
+			}
+		}
+		if = {
+			limit = {
+				prev.DEMAND_difference_$tradegood$ > 0
+			}
+			change_variable = {
+				name = TZ_supply_$tradegood$
+				add = prev.DEMAND_difference_$tradegood$
 			}
 		}
 	}

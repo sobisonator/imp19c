@@ -86,8 +86,8 @@ DEMAND_num_food_tradegoods = {
 ## Food average price in the governorship
 
 DEMAND_food_avg_price = {
-	# SHOULD BE CACHED FOR PERFORMANCE
-	# TODO
+	# Gets the mean
+	# CACHED FOR PERFORMANCE
 	value = var:price_grain
 	add = var:price_fish
 	add = var:price_livestock
@@ -97,6 +97,188 @@ DEMAND_food_avg_price = {
 	add = var:price_vegetables
 	add = var:price_processed_foods
 	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_food_price_MAD = {
+	# Get the Mean Absolute Deviation for food price
+	value = DEMAND_price_grain_deviation_from_mean_absolute
+	add = DEMAND_price_fish_deviation_from_mean_absolute
+	add = DEMAND_price_livestock_deviation_from_mean_absolute
+	add = DEMAND_price_mediterranean_fruit_deviation_from_mean_absolute
+	add = DEMAND_price_temperate_fruit_deviation_from_mean_absolute
+	add = DEMAND_price_tropical_fruit_deviation_from_mean_absolute
+	add = DEMAND_price_vegetables_deviation_from_mean_absolute
+	add = DEMAND_price_processed_foods_deviation_from_mean_absolute
+	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_food_avg_price_normalised = {
+	# Ignore prices outside of the MAD for average price calculation
+	value = 0
+	if = {
+		limit = { 
+			DEMAND_price_grain_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_grain
+	}
+	if = {
+		limit = { 
+			DEMAND_price_fish_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_fish
+	}
+	if = {
+		limit = { 
+			DEMAND_price_livestock_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_livestock
+	}
+	if = {
+		limit = { 
+			DEMAND_price_mediterranean_fruit_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_mediterranean_fruit
+	}
+	if = {
+		limit = { 
+			DEMAND_price_temperate_fruit_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_temperate_fruit
+	}
+	if = {
+		limit = { 
+			DEMAND_price_tropical_fruit_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_tropical_fruit
+	}
+	if = {
+		limit = { 
+			DEMAND_price_vegetables_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_vegetables
+	}
+	if = {
+		limit = { 
+			DEMAND_price_processed_foods_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_processed_Foods
+	}
+	divide = DEMAND_num_food_tradegoods
+}
+
+# Calculation of price standard deviation
+
+DEMAND_price_grain_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_grain
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_grain_deviation_from_mean_absolute = {
+	value = DEMAND_price_grain_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_grain_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_fish_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_fish
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_fish_deviation_from_mean_absolute = {
+	value = DEMAND_price_fish_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_fish_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_livestock_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_livestock
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_livestock_deviation_from_mean_absolute = {
+	value = DEMAND_price_livestock_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_livestock_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_vegetables_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_vegetables
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_vegetables_deviation_from_mean_absolute = {
+	value = DEMAND_price_vegetables_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_vegetables_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_tropical_fruit_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_tropical_fruit
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_tropical_fruit_deviation_from_mean_absolute = {
+	value = DEMAND_price_tropical_fruit_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_tropical_fruit_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_mediterranean_fruit_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_mediterranean_fruit
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_mediterranean_fruit_deviation_from_mean_absolute = {
+	value = DEMAND_price_mediterranean_fruit_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_mediterranean_fruit_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_temperate_fruit_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_temperate_fruit
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_temperate_fruit_deviation_from_mean_absolute = {
+	value = DEMAND_price_temperate_fruit_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_temperate_fruit_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_processed_foods_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_processed_foods
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_processed_foods_deviation_from_mean_absolute = {
+	value = DEMAND_price_processed_foods_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_processed_foods_deviation_from_mean < 0 }
+		multiply = -1
+	}
 }
 
 ## Individual food goods
@@ -140,7 +322,7 @@ DEMAND_grain_price_diff_to_food_avg = {
 	# Function: get the % difference of the price of the given tradegood to the average food goods price
 	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
 	value = var:price_grain
-	divide = var:var_DEMAND_food_avg_price
+	divide = DEMAND_food_avg_price_normalised
 }
 DEMAND_grain_price_diff_to_food_avg_squared = {
 	# Scope: governorship
@@ -194,7 +376,7 @@ DEMAND_fish_price_diff_to_food_avg = {
 	# Function: get the % difference of the price of the given tradegood to the average food goods price
 	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
 	value = var:price_fish
-	divide = var:var_DEMAND_food_avg_price
+	divide = DEMAND_food_avg_price_normalised
 }
 # End fish
 # livestock
@@ -242,7 +424,7 @@ DEMAND_livestock_price_diff_to_food_avg = {
 	# Function: get the % difference of the price of the given tradegood to the average food goods price
 	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
 	value = var:price_livestock
-	divide = var:var_DEMAND_food_avg_price
+	divide = DEMAND_food_avg_price_normalised
 }
 # End livestock
 # vegetables
@@ -284,7 +466,7 @@ DEMAND_vegetables_price_diff_to_food_avg = {
 	# Function: get the % difference of the price of the given tradegood to the average food goods price
 	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
 	value = var:price_vegetables
-	divide = var:var_DEMAND_food_avg_price
+	divide = DEMAND_food_avg_price_normalised
 }
 # End vegetables
 # tropical_fruit
@@ -332,7 +514,7 @@ DEMAND_tropical_fruit_price_diff_to_food_avg = {
 	# Function: get the % difference of the price of the given tradegood to the average food goods price
 	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
 	value = var:price_tropical_fruit
-	divide = var:var_DEMAND_food_avg_price
+	divide = DEMAND_food_avg_price_normalised
 }
 # End tropical_fruit
 # mediterranean_fruit
@@ -380,7 +562,7 @@ DEMAND_mediterranean_fruit_price_diff_to_food_avg = {
 	# Function: get the % difference of the price of the given tradegood to the average food goods price
 	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
 	value = var:price_mediterranean_fruit
-	divide = var:var_DEMAND_food_avg_price
+	divide = DEMAND_food_avg_price_normalised
 }
 # End mediterranean_fruit
 # temperate_fruit
@@ -428,7 +610,7 @@ DEMAND_temperate_fruit_price_diff_to_food_avg = {
 	# Function: get the % difference of the price of the given tradegood to the average food goods price
 	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
 	value = var:price_temperate_fruit
-	divide = var:var_DEMAND_food_avg_price
+	divide = DEMAND_food_avg_price_normalised
 }
 # End temperate_fruit
 # processed_foods
@@ -470,6 +652,6 @@ DEMAND_processed_foods_price_diff_to_food_avg = {
 	# Function: get the % difference of the price of the given tradegood to the average food goods price
 	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
 	value = var:price_processed_foods
-	divide = var:var_DEMAND_food_avg_price
+	divide = DEMAND_food_avg_price_normalised
 }
 # End processed_foods

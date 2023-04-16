@@ -2,37 +2,20 @@ def print_out_good(tradegood_name, category_name):
 	tradegood = tradegood_name
 	category = category_name
 	tradegood_caps = tradegood.upper()
-	loc = """# {tradegood}
-DEMAND_actual_{tradegood} = {{
-	value = DEMAND_{tradegood}
+	loc = """DEMAND_price_{tradegood}_deviation_from_mean = {{
 	if = {{
-		limit = {{
-			has_global_variable = first_time_price_setup_done
-			DEMAND_{tradegood} > 0
-		}}
-		divide = DEMAND_{tradegood}_price_diff_to_food_avg
+		limit = {{ has_variable = var_DEMAND_food_avg_price }}
 	}}
-	max = DEMAND_unfulfilled_food_need_governorship
-	min = 0
-}}
-
-DEMAND_{tradegood} = {{
-	value = 0
-	if = {{
-		limit = {{ DEMAND_unfulfilled_food_need_governorship > 0 }}
-		value = DEMAND_unfulfilled_food_need_governorship
-		divide = DEMAND_num_food_tradegoods
-	}}
-}}
-
-DEMAND_{tradegood}_price_diff_to_food_avg = {{
-	# Scope: governorship
-	# Function: get the % difference of the price of the given tradegood to the average food goods price
-	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
 	value = var:price_{tradegood}
-	divide = DEMAND_food_avg_price
+	subtract = var:var_DEMAND_food_avg_price
 }}
-# End {tradegood}""".format(tradegood=tradegood,category=category,tradegood_caps = tradegood_caps)
+DEMAND_price_{tradegood}_deviation_from_mean_absolute = {{
+	value = DEMAND_price_{tradegood}_deviation_from_mean
+	if = {{
+		limit = {{ DEMAND_price_{tradegood}_deviation_from_mean < 0 }}
+		multiply = -1
+	}}
+}}""".format(tradegood=tradegood,category=category,tradegood_caps = tradegood_caps)
 	print(loc)
 
 

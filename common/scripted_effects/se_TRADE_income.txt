@@ -15,4 +15,27 @@ TRADE_set_tradegood_balance = {
 		name = this_quarter_balance_$tradegood$
 		multiply = var:price_$tradegood$
 	}
+
+	# Divide demand in the internal trade scope by supply
+	# Then, if under 1, multiply the quarterly balance by that, reflecting that not all goods could be sold
+	var:internal_trade_scope = {
+		set_local_variable = {
+			name = l_ITS_demand_over_supply
+			value = var:demand_ITS_$tradegood$
+		}
+		if = {
+			limit = { NOT = { var:supply_ITS_$tradegood$ = 0 } }
+			change_local_variable = {
+				name = l_ITS_demand_over_supply
+				divide = var:supply_ITS_$tradegood$
+			}
+		}
+	}
+	if = {
+		limit = { local_var:l_ITS_demand_over_supply < 1 }
+		change_variable = {
+			name = this_quarter_balance_$tradegood$
+			multiply = local_var:l_ITS_demand_over_supply
+		}
+	}
 }

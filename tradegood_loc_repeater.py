@@ -2,20 +2,8 @@ def print_out_good(tradegood_name, category_name):
 	tradegood = tradegood_name
 	category = category_name
 	tradegood_caps = tradegood.upper()
-	loc = """DEMAND_price_{tradegood}_deviation_from_mean = {{
-	if = {{
-		limit = {{ has_variable = var_DEMAND_food_avg_price }}
-	}}
-	value = var:price_{tradegood}
-	subtract = var:var_DEMAND_food_avg_price
-}}
-DEMAND_price_{tradegood}_deviation_from_mean_absolute = {{
-	value = DEMAND_price_{tradegood}_deviation_from_mean
-	if = {{
-		limit = {{ DEMAND_price_{tradegood}_deviation_from_mean < 0 }}
-		multiply = -1
-	}}
-}}""".format(tradegood=tradegood,category=category,tradegood_caps = tradegood_caps)
+	loc = '''PROVWINDOW_GOV_{tradegood_caps}_STOCKPILE:0 "[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('GOODS_governorship_{tradegood}_produced')|0]"
+PROVWINDOW_GOV_{tradegood_caps}_PRODUCED_TT:0 "#T {tradegood} produced in [ProvinceWindow.GetState.GetGovernorship.GetName]:#! #G [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('GOODS_governorship_{tradegood}_produced')|0] #! \\n #T Current unfulfilled food demand:#! #X [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_unfulfilled_food_need_governorship')|0]#! \\n #T Current demand for {tradegood}:#! #X [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_actual_{tradegood}')|0]#! \\n #T Trade balance:#! [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_difference_{tradegood}')|0+=] \\n #T Price of {tradegood} compared to average food cost :#! [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_{tradegood}_price_diff_to_food_avg')|%] \\n #T Mean Absolute Deviation from average food cost :#! £[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_food_price_MAD')|3] \\n #T MAD weighted average food cost :#! £[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_food_avg_price_normalised')|3] \\n #T Average food cost :#! £[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_food_avg_price')|3] / unit \\n \\n#T Price of {tradegood} here :#! £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('price_{tradegood}').GetValue|3] / unit\\n#T Amount spent on essential_goods imports last quarter :#! \\n#X £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('governorship_this_quarter_spend_on_essential_goods').GetValue|3]#!\\n    #T Of which tax:#! #X £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('governorship_quarterly_revenue_from_internal_sales_tax_essential_goods').GetValue|3]#! #T at #![ProvinceWindow.GetProvince.GetOwner.MakeScope.Var('internal_sales_tax_rate').GetValue|%] #T tax rate #!\\n#T Amount made from essential_goods exports last quarter :#! \\n#G £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('governorship_this_quarter_income_from_essential_goods').GetValue|3] #! \\n ITS {tradegood} available [ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('internal_trade_scope').GetCountry.MakeScope.Var('supply_ITS_{tradegood}').GetValue|3] \\n Base trade wealth balance for {tradegood}: £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('this_quarter_balance_{tradegood}').GetValue|3]\\n Consumer demand for {tradegood}: [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_consumer_{tradegood}')|0] "'''.format(tradegood=tradegood,category=category,tradegood_caps = tradegood_caps)
 	print(loc)
 
 

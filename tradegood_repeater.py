@@ -1,7 +1,9 @@
 def print_out_good(tradegood):
-	loc = """DEMAND_difference_infrastructure_capped_{tradegood} = {{
-	value = DEMAND_difference_{tradegood}
-	max = TRADE_governorship_trade_capacity
+	loc = """DEMAND_consumer_{tradegood} = {{ # Consumer demand for {tradegood}; the amount bought locally
+	value = DEMAND_total_food_need_governorship
+	divide = DEMAND_{tradegood}_price_diff_to_food_avg
+	max = DEMAND_total_food_need_governorship # Should this be the amount available to buy?
+	divide = DEMAND_num_food_tradegoods
 }}
 """.format(tradegood=tradegood)
 	print(loc)
@@ -12,13 +14,14 @@ all_categories = ["essential_goods","luxury_goods","business_goods","military_go
 all_spenders = ["upper_strata","middle_strata","lower_strata","proletariat","tribesmen","indentured","slaves","the_state"]
 
 all_goods = {
-	"grain":"essential_goods",
-	"fish":"essential_goods",
-	"livestock":"essential_goods",
-	"tropical_fruit":"essential_goods",
-	"mediterranean_fruit":"essential_goods",
-	"temperate_fruit":"essential_goods",
-	"processed_foods":"essential_goods",
+	"grain":"food",
+	"fish":"food",
+	"livestock":"food",
+        "vegetables":"food",
+	"tropical_fruit":"food",
+	"mediterranean_fruit":"food",
+	"temperate_fruit":"food",
+	"processed_foods":"food",
 	"clothing":"essential_goods",
 	"furniture":"essential_goods",
 	"pharmaceuticals":"essential_goods",
@@ -72,7 +75,8 @@ all_goods = {
 	"late_munitions":"military",
 	"early_artillery":"military",
 	"late_artillery":"military"
-		}
+        }
 
-for tradegood in all_goods:
-        print_out_good(tradegood)
+for tradegood, category in all_goods.items():
+        if category == "food":
+                print_out_good(tradegood)

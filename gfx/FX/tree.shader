@@ -371,6 +371,9 @@ PixelShader =
 BlendState BlendState
 {
 	BlendEnable = no
+	# MOD
+	AlphaToCoverage = yes
+	# END MOD
 }
 
 BlendState alpha_to_coverage
@@ -384,17 +387,21 @@ BlendState alpha_to_coverage
 
 RasterizerState ShadowRasterizerState
 {
-	DepthBias = 40000
-	SlopeScaleDepthBias = 2
+	# MOD
+	# DepthBias = 40000
+	# SlopeScaleDepthBias = 2
+	DepthBias = 0
+	SlopeScaleDepthBias = 7
+	# END MOD
 }
-
-DepthStencilState DepthStencilState
-{
-	StencilEnable = no
-	FrontStencilPassOp = replace
-	StencilRef = 1
-}
-
+# MOD
+# DepthStencilState DepthStencilState
+# {
+# 	StencilEnable = no
+# 	FrontStencilPassOp = replace
+# 	StencilRef = 1
+# }
+# END MOD
 
 Effect tree
 {

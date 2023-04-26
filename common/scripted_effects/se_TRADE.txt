@@ -954,7 +954,7 @@ TRADE_update_governorship_TZ_vars = {
 	# Save the list of tradezones present in the internal trade scope
 	save_scope_as = prev_governorship
 	random_trade_center = {
-		limit = { has_variable = is_$TZ$ }
+		limit = { $TZ$ = { PROVINCE = yes } }
 		save_scope_as = trade_center_province
 	}
 	# The list of tradezones in the internal trade scope is cleared and reset every quarter by TRADE_update_governorship_TZs
@@ -969,41 +969,9 @@ TRADE_update_governorship_TZ_vars = {
 					NOT = { is_in_list = list_of_tradezones_in_internal_trade_scope }
 				}
 			}
-			debug_log = "TZ if condition met"
 			add_to_variable_list = { # Keep a list in the internal trade scope of tradezones, so that they can be iterated through when sorting favoured suppliers
 				name = list_of_tradezones_in_internal_trade_scope
-				target = global_var:global_$TZ$
-			}
-		}
-		debug_log = "Done updating governorship TZ vars"
-	}
-}
-
-TRADE_create_list_of_tradezones_in_trade_partners = {
-	# Scope: country
-	# Function: Create a list of all the tradezones available in all trade partners' territory, so that it can be iterated through for international trade purchases
-	# Runs after all countries have done TRADE_update_governorship_TZ_vars, so that these lists can be used to quickly populated the prospective purchaser's list.
-	save_scope_as = root_country
-
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		every_in_list = {
-			variable = list_of_tradezones_in_internal_trade_scope
-
-			save_scope_as = tradezone_in_trade_partner
-
-			scope:root_country = {
-				if = {
-					limit = {
-						NOT = { 
-							scope:tradezone_in_trade_partner = { is_in_list = list_of_tradezones_in_trade_partners }
-						}
-					}
-				}
-				add_to_variable_list = {
-					name = list_of_tradezones_in_trade_partners
-					target = scope:tradezone_in_trade_partner
-				}
+				target = scope:trade_center_province
 			}
 		}
 	}
@@ -1021,11 +989,9 @@ TRADE_count_country_TZs = {
 				has_local_variable = previous_TZ
 				NOT = { var:trade_center = local_var:previous_TZ }
 			}
-			PREV = {
-				change_variable = {
-					name = country_num_of_TZs
-					add = 1
-				}
+			change_variable = {
+				name = country_num_of_TZs
+				add = 1
 			}
 		}
 		set_local_variable = {
@@ -1042,8 +1008,6 @@ TRADE_update_governorship_TZs = {
 	#			2) At the beginning of the game
 	# NOTE:		Actually calls several other effects that set the variables
 	save_scope_as = this_governorship
-
-	debug_log = "Updating governorship TZs"
 
 	# Clear the previous values in the internal trade scope
 	var:internal_trade_scope = {
@@ -1261,7 +1225,7 @@ TRADE_update_governorship_TZs = {
 		capital_scope = {
 			if = {
 				limit = { india_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = india_tradezone
@@ -1270,7 +1234,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { east_north_america_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = east_north_america_tradezone
@@ -1279,7 +1243,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { west_north_america_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = west_north_america_tradezone
@@ -1288,7 +1252,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { caribbean_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = caribbean_tradezone
@@ -1297,7 +1261,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { west_south_america_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = west_south_america_tradezone
@@ -1306,7 +1270,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { east_south_america_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = east_south_america_tradezone
@@ -1315,7 +1279,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { south_east_asia_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = south_east_asia_tradezone
@@ -1324,7 +1288,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { indo_china_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = indo_china_tradezone
@@ -1333,7 +1297,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { yellow_sea_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = yellow_sea_tradezone
@@ -1342,7 +1306,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { southern_africa_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = southern_africa_tradezone
@@ -1351,7 +1315,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { west_africa_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = west_africa_tradezone
@@ -1360,7 +1324,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { east_africa_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = east_africa_tradezone
@@ -1369,7 +1333,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { middle_east_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = middle_east_tradezone
@@ -1378,7 +1342,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { western_steppe_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = western_steppe_tradezone
@@ -1387,7 +1351,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { eastern_steppe_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = eastern_steppe_tradezone
@@ -1396,7 +1360,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { upper_yangtzi_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = upper_yangtzi_tradezone
@@ -1405,7 +1369,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { atlantic_seaboard_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = atlantic_seaboard_tradezone
@@ -1414,7 +1378,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { central_europe_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = central_europe_tradezone
@@ -1423,7 +1387,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { west_mediterranean_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = west_mediterranean_tradezone
@@ -1432,7 +1396,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { baltic_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = baltic_tradezone
@@ -1441,7 +1405,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { east_europe_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = east_europe_tradezone
@@ -1450,7 +1414,7 @@ TRADE_update_governorship_TZs = {
 			}
 			else_if = {
 				limit = { east_mediterranean_tradezone = { PROVINCE = yes } }
-				scope:this_governorship = {
+				prev = {
 					TRADE_update_governorship_TZ_vars = {
 						#governorship_scope = scope:this_governorship
 						TZ = east_mediterranean_tradezone
@@ -1868,18 +1832,6 @@ TRADE_reset_total_ordered_sold_and_bought_pools = {
 		name = country_internal_total_sold_$tradegood$
 		value = 0
 	}
-	set_variable = {
-		name = country_external_total_ordered_$tradegood$
-		value = 0
-	}
-	set_variable = {
-		name = country_external_total_sold_$tradegood$
-		value = 0
-	}
-	set_variable = {
-		name = country_external_bought_total_$tradegood$
-		value = 0
-	}
 }
 
 TRADE_reset_tradegood_total_internal_stockpile = {
@@ -1907,22 +1859,13 @@ TRADE_reset_internal_pools = {
 			APPLY = TRADE_reset_internal_amount_sold
 		}
 		every_tradegoods_complex = {
-			APPLY = TRADE_reset_external_amount_sold
-		}
-		every_tradegoods_complex = {
 			APPLY = TRADE_reset_internal_trade_stockpiles
 		}
 		every_tradegoods_complex = {
 			APPLY = TRADE_reset_internal_trade_revenue_total
 		}
 		every_tradegoods_complex = {
-			APPLY = TRADE_reset_external_income_total
-		}
-		every_tradegoods_complex = {
 			APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
-		}
-		every_tradegoods_complex = {
-			APPLY = TRADE_reset_country_offered_to_tradezone_totals
 		}
 		TRADE_reset_quarterly_tax_totals = yes
 	}
@@ -1951,97 +1894,6 @@ TRADE_reset_internal_pools = {
 	# TRADE_reset_internal_amounts_sold = yes # Replaced by every_tradegoods_complex + TRADE_reset_internal_amount_sold
 }
 
-TRADE_reset_country_offered_to_tradezone_totals = {
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_india_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_east_north_america_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_west_north_america_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_caribbean_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_west_south_america_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_east_south_america_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_south_east_asia_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_indo_china_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_yellow_sea_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_southern_africa_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_west_africa_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_east_africa_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_middle_east_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_western_steppe_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_eastern_steppe_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_upper_yangtzi_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_atlantic_seaboard_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_central_europe_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_west_mediterranean_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_baltic_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_east_europe_tradezone
-		value = 0
-	}
-	set_variable = {
-		name = country_$tradegood$_offered_external_to_east_mediterranean_tradezone
-		value = 0
-	}
-}
-
 TRADE_reset_TZ_pools = {
 	every_trade_center = {
 		set_variable = {
@@ -2049,7 +1901,16 @@ TRADE_reset_TZ_pools = {
 			value = 0
 		}
 		every_tradegoods_complex = {
-			APPLY = TRADE_reset_TZ_trade_stockpiles
+			APPLY = TRADE_reset_TZ_amount_sold
+		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_TZ_trade_stockpile
+		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_TZ_trade_revenue_total
+		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_TZ_total_ordered_sold_and_bought_pools
 		}
 		# TRADE_reset_quarterly_tax_totals = yes # Tax will have to be dealt with in a different scope for external trade
 	}
@@ -2151,97 +2012,13 @@ TRADE_reset_internal_amount_sold = {
 	}
 }
 
-TRADE_reset_external_amount_sold = {
-	# Scope: internal trade scope
+DEFUNCT_TRADE_reset_TZ_amount_sold = {
+	# Scope: trade center province
 
 	# Format of arguments:
-	# $tradegood$_external_sold_total_$tradezone$ = grain_external_sold_total_india
+	# $internal_sold_total$ = internal_sold_total_grain
 	set_variable = {
-		name = $tradegood$_external_sold_total_india
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_east_north_america
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_west_north_america
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_caribbean
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_west_south_america
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_east_south_america
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_south_east_asia
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_indo_china
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_yellow_sea
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_southern_africa
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_west_africa
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_east_africa
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_middle_east
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_western_steppe
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_eastern_steppe
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_upper_yangtzi
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_atlantic_seaboard
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_central_europe
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_west_mediterranean
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_baltic
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_east_europe
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_external_sold_total_east_mediterranean
+		name = TZ_sold_total_$tradegood$
 		value = 0
 	}
 }
@@ -2461,13 +2238,9 @@ TRADE_reset_internal_trade_stockpile = {
 		name = $tradegood$_available_at_start_of_quarter_$tradezone$
 		value = 0 
 	}
-	set_variable = {
-		name = $tradegood$_available_at_start_of_quarter_internal
-		value = 0 
-	}
 }
 
-TRADE_reset_TZ_trade_stockpiles = {
+TRADE_reset_TZ_trade_stockpile = {
 	set_variable = {
 		name = $tradegood$_stockpile_TZ
 		value = 0 
@@ -2475,22 +2248,6 @@ TRADE_reset_TZ_trade_stockpiles = {
 	set_variable = {
 		name = $tradegood$_available_at_start_of_quarter_TZ
 		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_sold_total_TZ
-		value = 0
-	}
-	set_variable = {
-		name = TZ_income_pool
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_total_revenue_TZ
-		value = 0
-	}
-	set_variable = {
-		name = $tradegood$_available_before_international_trade
-		value = 0
 	}
 }
 
@@ -2590,100 +2347,6 @@ TRADE_reset_internal_trade_revenue_total = {
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_east_mediterranean
-		value = 0 
-	}
-	# WiP - etc...
-}
-
-TRADE_reset_external_income_total = {
-	# Scope: internal trade scope
-	# Function: set the total revenue tracking vars to 0, so they can be summed up from scratch again
-	set_variable = {
-		name = $tradegood$_external_income_india_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_east_north_america_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_west_north_america_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_caribbean_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_west_south_america_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_east_south_america_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_south_east_asia_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_indo_china_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_yellow_sea_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_southern_africa_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_west_africa_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_east_africa_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_middle_east_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_western_steppe_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_eastern_steppe_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_upper_yangtzi_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_atlantic_seaboard_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_central_europe_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_west_mediterranean_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_baltic_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_east_europe_tradezone
-		value = 0 
-	}
-	set_variable = {
-		name = $tradegood$_external_income_east_mediterranean_tradezone
 		value = 0 
 	}
 	# WiP - etc...

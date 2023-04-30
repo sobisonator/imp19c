@@ -1,0 +1,341 @@
+TRADE_cache_svalues_governorship_food_prices = {
+	# Scope: governorship
+	# Function: Save svalues as variables so that they do not have to be re-calculated every time they are called
+	# This focuses on saving calculation-heavy svalues that are referenced more than once, reducing the overall number of calculations
+	set_variable = {
+		name = var_governorship_population
+		value = governorship_population
+	}
+	set_variable = {
+		name = var_DEMAND_unfulfilled_food_need_governorship
+		value = DEMAND_unfulfilled_food_need_governorship
+	}
+	set_variable = {
+		name = var_DEMAND_food_avg_price
+		value = DEMAND_food_avg_price
+	}
+}
+
+TRADE_cache_svalues_governorship_food_avg_price = {
+	# Scope: governorship
+	# Function: save the average price of food goods in a governorship
+	set_variable = {
+		name = var_DEMAND_food_avg_price
+		value = DEMAND_food_avg_price
+	}
+	set_variable = {
+		name = var_DEMAND_food_avg_price_normalised
+		value = DEMAND_food_avg_price_normalised
+	}
+}
+
+TRADE_cache_svalues_actual_demands = {
+	every_tradegood_complex = {
+		APPLY = TRADE_cache_svalues_actual_demand
+	}
+}
+
+TRADE_cache_svalues_actual_demand = {
+	# Scope: governorship
+	# Function: save the average price of food goods in a governorship
+	set_variable = {
+		name = var_DEMAND_actual_$tradegood$
+		value = DEMAND_actual_$tradegood$
+	}
+}
+
+TRADE_add_to_country_total_demand_difference = {
+	# Scope: every governorship in a country
+	# Function: add to a variable in the internal trade scope, and the internal trade scope of the capital of all trade partners
+	set_local_variable = {
+		name = l_DEMAND_difference_$tradegood$
+		value = DEMAND_difference_$tradegood$
+	}
+	var:internal_trade_scope = {
+		change_variable = {
+			name = trade_scope_total_demand_difference
+			add = local_var:l_DEMAND_difference_$tradegood$
+		}
+	}
+	owner = {
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
+			capital_scope.governorship = {
+				var:internal_trade_scope = {
+					change_variable = {
+						name = trade_scope_total_demand_difference
+						add = local_var:l_DEMAND_difference_$tradegood$
+					}
+				}
+			}
+		}
+	}
+}
+
+TRADE_refresh_country_total_demand_differences = {
+	# Scope: every country
+	# Function: set the trade_scope_total_demand_difference variable to exist and set it at 0
+	set_variable = {
+		name = trade_scope_total_demand_difference
+		value = 0 
+	}
+}
+
+TRADE_refresh_federation_CU_total_demand_differences = {
+	# Scope: random country
+	# Function: set the trade_scope_total_demand_difference variable to exist and set it at 0
+	every_federation = {
+		set_variable = {
+			name = trade_scope_total_demand_difference
+			value = 0 
+		}
+	}
+}
+
+TRADE_country_update_all_total_demand_differences = {
+	# Scope: random country
+	# Function: run TRADE_add_to_country_total_demand_difference in every country
+	every_tradegood_complex = { # TODO: Break this down into categories for which trade deals can be struck (e.g. food, industrial, military...)
+		APPLY = TRADE_add_to_country_total_demand_difference
+	}
+}
+
+TRADE_first_time_setup_price_countries_food = {
+	# Scope: random country
+	# Called: at start of game
+	# Function: Set up the first time prices and set a flag so that demand based on historical prices is not dividing by zero
+
+	#TRADE_update_price_supply_demand_internal_trade_scopes = {
+	#	tradegood = grain
+	#}
+	#TRADE_update_price_supply_demand_internal_trade_scopes = {
+	#	tradegood = livestock
+	#}
+	#TRADE_update_price_supply_demand_internal_trade_scopes = {
+	#	tradegood = fish
+	#}
+	#TRADE_update_price_supply_demand_internal_trade_scopes = {
+	#	tradegood = vegetables
+	#}
+	#TRADE_update_price_supply_demand_internal_trade_scopes = {
+	#	tradegood = tropical_fruit
+	#}
+	#TRADE_update_price_supply_demand_internal_trade_scopes = {
+	#	tradegood = mediterranean_fruit
+	#}
+	#TRADE_update_price_supply_demand_internal_trade_scopes = {
+	#	tradegood = temperate_fruit
+	#}
+	#TRADE_update_price_supply_demand_internal_trade_scopes = {
+	#	tradegood = processed_foods
+	#}
+	every_tradegood_complex = {
+		APPLY = TRADE_update_price_supply_demand_internal_trade_scopes
+	}
+	every_country = {
+		every_governorships = {
+			TRADE_set_price_governorship = {
+				tradegood = grain
+			}
+			TRADE_set_price_governorship = {
+				tradegood = livestock
+			}
+			TRADE_set_price_governorship = {
+				tradegood = fish
+			}
+			TRADE_set_price_governorship = {
+				tradegood = vegetables
+			}
+			TRADE_set_price_governorship = {
+				tradegood = tropical_fruit
+			}
+			TRADE_set_price_governorship = {
+				tradegood = mediterranean_fruit
+			}
+			TRADE_set_price_governorship = {
+				tradegood = temperate_fruit
+			}
+			TRADE_set_price_governorship = {
+				tradegood = processed_foods
+			}
+			TRADE_cache_svalues_governorship_food_avg_price = yes
+			TRADE_update_price_internal_trade_scopes = {
+				tradegood = grain
+			}
+			TRADE_update_price_internal_trade_scopes = {
+				tradegood = livestock
+			}
+			TRADE_update_price_internal_trade_scopes = {
+				tradegood = fish
+			}
+			TRADE_update_price_internal_trade_scopes = {
+				tradegood = vegetables
+			}
+			TRADE_update_price_internal_trade_scopes = {
+				tradegood = tropical_fruit
+			}
+			TRADE_update_price_internal_trade_scopes = {
+				tradegood = mediterranean_fruit
+			}
+			TRADE_update_price_internal_trade_scopes = {
+				tradegood = temperate_fruit
+			}
+			TRADE_update_price_internal_trade_scopes = {
+				tradegood = processed_foods
+			}
+		}
+	}
+}
+
+TRADE_first_time_setup_simulation_run = {
+	TRADE_first_time_setup_price_countries_food = yes
+	set_global_variable = first_time_price_setup_food_done
+	TRADE_first_time_setup_price_countries_food = yes
+	TRADE_first_time_setup_price_countries_food = yes
+	TRADE_first_time_setup_price_countries_food = yes
+}
+
+TRADE_update_price_supply_demand_internal_trade_scopes = {
+	# Scope:random country
+	# Function: set the base price for the given tradegood in every tradezone
+	# Reset the total supply and demand in the tradezone to 0
+	every_country = {
+		TRADE_update_price_supply_demand = { tradegood = $tradegood$ }
+	}
+	every_federation = {
+		TRADE_update_price_supply_demand = { tradegood = $tradegood$ }
+	}
+}
+
+TRADE_setup_food_avg_price_var = {
+	# Scope: country
+	# Function: Create an average price variable with value 1 if one does not exist
+	if = {
+		limit = { NOT = { has_global_variable = first_time_price_setup_food_done } }
+		every_governorships = {
+			set_variable = {
+				name = var_DEMAND_food_avg_price
+				value = DEMAND_food_avg_price
+			}
+		}
+	}
+}
+
+TRADE_update_price_supply_demand = {
+	# Scope: Internal trade scope
+	# Function: Update the price based on supply and demand, and reset the demand and supply to 1 (not zero, to avoid unintended div/0 errors in cases where there is no demand or supply in the scope)
+	if = {
+		limit = { has_global_variable = first_time_price_setup_food_done }
+		set_variable = {
+			name = price_$tradegood$
+			value = var:demand_ITS_$tradegood$
+		}
+		if = {
+			limit = { var:supply_ITS_$tradegood$ > 0 }
+			change_variable = {
+				name = price_$tradegood$
+				divide = var:supply_ITS_$tradegood$
+			}
+		}
+	}
+	else = {
+		set_variable = {
+			name = price_$tradegood$
+			value = 1
+		}
+	}
+
+	# Then zero the demand and supply so it can be updated for next quarter
+	set_variable = {
+		name = demand_ITS_$tradegood$
+		value = 1
+	}
+	set_variable = {
+		name = supply_ITS_$tradegood$
+		value = 1
+	}
+}
+
+TRADE_update_price_internal_trade_scopes = {
+	# Scope: iterating every governorship
+	# Function: update the price of tradegoods in the internal trade scope based on demand adjusted for the price, to represent elasticity
+	set_variable = {
+		name = var_DEMAND_food_avg_price
+		value = DEMAND_food_avg_price
+	}
+	save_scope_as = root_governorship
+	var:internal_trade_scope = {
+		if = {
+			limit = {
+				has_global_variable = first_time_price_setup_food_done
+			}
+			change_variable = {
+				name = demand_ITS_$tradegood$
+				add = scope:root_governorship.DEMAND_actual_$tradegood$
+			}
+		}
+		else = {
+			change_variable = {
+				name = demand_ITS_$tradegood$
+				add = prev.DEMAND_$tradegood$
+			}
+		}
+		if = {
+			limit = {
+				scope:root_governorship.DEMAND_difference_infrastructure_capped_$tradegood$ > 0
+			}
+			change_variable = {
+				name = supply_ITS_$tradegood$
+				add = scope:root_governorship.DEMAND_difference_infrastructure_capped_$tradegood$
+			}
+		}
+		scope:root_governorship.owner = {
+			set_local_variable = {
+				name = l_export_amount
+				value = scope:root_governorship.DEMAND_difference_infrastructure_capped_$tradegood$
+			}
+			change_local_variable = { # Divide the trade demand and supply between trade partners, to avoid duplication of numbers when you have more than 1 trade partner
+				name = l_export_amount
+				divide = TRADE_number_of_trade_partners_all_categories
+			}
+			every_in_list = {
+				variable = list_of_trade_partners_all_categories
+				if = {
+					limit = {
+						scope:root_governorship.DEMAND_difference_infrastructure_capped_$tradegood$ > 0
+					}
+					capital_scope.governorship = {
+						var:internal_trade_scope = { #TODO: This should be scaled to the number of foreign trade partners, so that it is split between them rather than being multiplied
+							change_variable = {
+								name = supply_ITS_$tradegood$
+								add = scope:root_governorship.DEMAND_difference_infrastructure_capped_$tradegood$
+							}
+						}
+					}
+				}
+				else = {
+					capital_scope.governorship = {
+						var:internal_trade_scope = { #TODO: This should be scaled to the number of foreign trade partners, so that it is split between them rather than being multiplied
+							change_variable = {
+								name = demand_ITS_$tradegood$
+								subtract = scope:root_governorship.DEMAND_difference_infrastructure_capped_$tradegood$
+							}
+						}
+					}					
+				}
+			}
+		}
+	}
+}
+
+TRADE_set_price_governorship = {
+	# Scope: governorship
+	# Function: Set the price for the given tradegood
+	# Price will be based on the TZ price, modified locally based on the country's trade partners
+	# Save demand this quarter into a variable for last quarter
+	# Price will go down if demand dropped compared to the last check
+	set_variable = {
+		name = price_$tradegood$
+		value = var:internal_trade_scope.var:price_$tradegood$
+	}
+}

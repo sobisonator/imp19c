@@ -99,16 +99,25 @@ DEMAND_num_food_tradegoods = {
 ## Food average price in the governorship
 
 DEMAND_food_avg_price = {
-	# Gets the mean
+	# Scope: governorship
+	# Gets the mean of food prices
 	# CACHED FOR PERFORMANCE
-	value = var:price_grain
-	add = var:price_fish
-	add = var:price_livestock
-	add = var:price_mediterranean_fruit
-	add = var:price_temperate_fruit
-	add = var:price_tropical_fruit
-	add = var:price_vegetables
-	add = var:price_processed_foods
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+		}
+		value = var:price_grain
+		add = var:price_fish
+		add = var:price_livestock
+		add = var:price_mediterranean_fruit
+		add = var:price_temperate_fruit
+		add = var:price_tropical_fruit
+		add = var:price_vegetables
+		add = var:price_processed_foods
+	}
+	else = {
+		value = 1
+	}
 	divide = DEMAND_num_food_tradegoods
 }
 
@@ -126,8 +135,14 @@ DEMAND_food_price_MAD = {
 }
 
 DEMAND_food_avg_price_normalised = {
+	# Scope: governorship
 	# Ignore prices outside of the MAD for average price calculation
-	value = 0
+	if = {
+		limit = {
+			NOT = { has_global_variable = first_time_price_setup_food_done }
+		}
+		value = 1
+	}
 	if = {
 		limit = { 
 			DEMAND_price_grain_deviation_from_mean_absolute < DEMAND_food_price_MAD
@@ -177,6 +192,7 @@ DEMAND_food_avg_price_normalised = {
 		add = var:price_processed_foods
 	}
 	divide = DEMAND_num_food_tradegoods
+	min = 0.0001
 }
 
 # Calculation of price standard deviation
@@ -306,8 +322,7 @@ DEMAND_actual_grain = {
 		}
 		if = {
 			limit = {
-				# DEMAND_grain_price_diff_to_food_avg < 1
-				always = yes
+				NOT = { DEMAND_grain_price_diff_to_food_avg = 0 }
 			}
 			divide = DEMAND_grain_price_diff_to_food_avg
 		}
@@ -408,8 +423,7 @@ DEMAND_actual_fish = {
 		}
 		if = {
 			limit = {
-				# DEMAND_fish_price_diff_to_food_avg < 1
-				always = yes
+				NOT = { DEMAND_fish_price_diff_to_food_avg = 0 }
 			}
 			divide = DEMAND_fish_price_diff_to_food_avg
 		}
@@ -454,8 +468,7 @@ DEMAND_actual_livestock = {
 		}
 		if = {
 			limit = {
-				# DEMAND_livestock_price_diff_to_food_avg < 1
-				always = yes
+				NOT = { DEMAND_livestock_price_diff_to_food_avg = 0 }
 			}
 			divide = DEMAND_livestock_price_diff_to_food_avg
 		}
@@ -500,8 +513,7 @@ DEMAND_actual_vegetables = {
 		}
 		if = {
 			limit = {
-				# DEMAND_vegetables_price_diff_to_food_avg < 1
-				always = yes
+				NOT = { DEMAND_vegetables_price_diff_to_food_avg = 0 }
 			}
 			divide = DEMAND_vegetables_price_diff_to_food_avg
 		}
@@ -540,8 +552,7 @@ DEMAND_actual_tropical_fruit = {
 		}
 		if = {
 			limit = {
-				# DEMAND_tropical_fruit_price_diff_to_food_avg < 1
-				always = yes
+				NOT = { DEMAND_tropical_fruit_price_diff_to_food_avg = 0 }
 			}
 			divide = DEMAND_tropical_fruit_price_diff_to_food_avg
 		}
@@ -586,8 +597,7 @@ DEMAND_actual_mediterranean_fruit = {
 		}
 		if = {
 			limit = {
-				# DEMAND_mediterranean_fruit_price_diff_to_food_avg < 1
-				always = yes
+				NOT = { DEMAND_mediterranean_fruit_price_diff_to_food_avg = 0 }
 			}
 			divide = DEMAND_mediterranean_fruit_price_diff_to_food_avg
 		}
@@ -632,8 +642,7 @@ DEMAND_actual_temperate_fruit = {
 		}
 		if = {
 			limit = {
-				# DEMAND_temperate_fruit_price_diff_to_food_avg < 1
-				always = yes
+				NOT = { DEMAND_temperate_fruit_price_diff_to_food_avg = 0 }
 			}
 			divide = DEMAND_temperate_fruit_price_diff_to_food_avg
 		}
@@ -678,8 +687,7 @@ DEMAND_actual_processed_foods = {
 		}
 		if = {
 			limit = {
-				# DEMAND_processed_foods_price_diff_to_food_avg < 1
-				always = yes
+				NOT = { DEMAND_processed_foods_price_diff_to_food_avg = 0 }
 			}
 			divide = DEMAND_processed_foods_price_diff_to_food_avg
 		}

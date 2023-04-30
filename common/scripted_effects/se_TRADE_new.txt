@@ -10,6 +10,10 @@ TRADE_cache_svalues_governorship_food_prices = {
 		name = var_DEMAND_unfulfilled_food_need_governorship
 		value = DEMAND_unfulfilled_food_need_governorship
 	}
+	set_variable = {
+		name = var_DEMAND_food_avg_price
+		value = DEMAND_food_avg_price
+	}
 }
 
 TRADE_cache_svalues_governorship_food_avg_price = {
@@ -203,6 +207,20 @@ TRADE_update_price_supply_demand_internal_trade_scopes = {
 	}
 }
 
+TRADE_setup_food_avg_price_var = {
+	# Scope: country
+	# Function: Create an average price variable with value 1 if one does not exist
+	if = {
+		limit = { NOT = { has_global_variable = first_time_price_setup_food_done } }
+		every_governorships = {
+			set_variable = {
+				name = var_DEMAND_food_avg_price
+				value = DEMAND_food_avg_price
+			}
+		}
+	}
+}
+
 TRADE_update_price_supply_demand = {
 	# Scope: Internal trade scope
 	# Function: Update the price based on supply and demand, and reset the demand and supply to 1 (not zero, to avoid unintended div/0 errors in cases where there is no demand or supply in the scope)
@@ -253,7 +271,7 @@ TRADE_update_price_internal_trade_scopes = {
 			}
 			change_variable = {
 				name = demand_ITS_$tradegood$
-				add = prev.DEMAND_actual_$tradegood$
+				add = scope:root_governorship.DEMAND_actual_$tradegood$
 			}
 		}
 		else = {

@@ -1,0 +1,766 @@
+governorship_population_10th = {
+	# 10% of governorship population
+	value = var:var_governorship_population
+	divide = 10
+}
+
+DEMAND_need_life_goods = {
+	# Per pop
+	value = 0.2
+}
+
+DEMAND_luxury_foods = {
+	# Per middle and upper strata pop
+	value = governorship_middle_strata
+	add = governorship_upper_strata
+	multiply = 0.1
+}
+
+DEMAND_unfulfilled_food_need_governorship = {
+	# Scope: governorship
+	value = DEMAND_total_food_need_governorship
+	subtract = DEMAND_fulfilled_food_need_governorship
+}
+
+DEMAND_unfulfilled_food_need_governorship_plus_luxury = {
+	# Scope: governorship
+	value = var:var_DEMAND_unfulfilled_food_need_governorship
+	#add = DEMAND_luxury_foods
+}
+
+DEMAND_total_food_need_governorship = {
+	# Scope: governorship
+	add = var:var_governorship_population
+	multiply = DEMAND_need_life_goods
+}
+
+DEMAND_total_actual_demand_food = {
+	# Scope: governorship
+	add = var:var_DEMAND_actual_grain
+	add = var:var_DEMAND_actual_livestock
+	add = var:var_DEMAND_actual_vegetables
+	add = var:var_DEMAND_actual_fish
+	add = var:var_DEMAND_actual_tropical_fruit
+	add = var:var_DEMAND_actual_mediterranean_fruit
+	add = var:var_DEMAND_actual_temperate_fruit
+	add = var:var_DEMAND_actual_processed_foods
+}
+
+DEMAND_fulfilled_food_need_governorship = {
+	# Scope = governorship
+	# Non-food farming and hunting - provides quarter food
+	add = GOODS_governorship_wool_produced
+	add = GOODS_governorship_opium_produced
+	add = GOODS_governorship_tobacco_produced
+	add = GOODS_governorship_fur_produced
+	add = GOODS_governorship_whales_produced
+	add = GOODS_governorship_wood_produced
+	add = GOODS_governorship_hardwood_produced
+	add = GOODS_governorship_rubber_produced
+	divide = 2
+
+	# Cash crops - provide half food
+	add = GOODS_governorship_chocolate_produced
+	add = GOODS_governorship_spices_produced
+	add = GOODS_governorship_tea_produced
+	add = GOODS_governorship_sugar_produced
+	add = GOODS_governorship_coffee_produced
+	add = GOODS_governorship_cotton_produced
+	divide = 2
+
+	# Fully food goods
+	add = GOODS_governorship_fish_produced
+	add = GOODS_governorship_grain_produced
+	add = GOODS_governorship_livestock_produced
+	add = GOODS_governorship_mediterranean_fruit_produced
+	add = GOODS_governorship_tropical_fruit_produced
+	add = GOODS_governorship_temperate_fruit_produced
+	add = GOODS_governorship_vegetables_produced
+	add = GOODS_governorship_processed_foods_produced
+}
+
+### FOOD
+
+# Demand must factor in some form of elasticity - substitutions of different food types factor in here.
+# Demand for each food tradegood is equal to:
+# Get the % difference of the tradegood in question vs the average price of all food tradegoods, -1
+# Demand = Unfulfilled food need /7 x (1- % difference in price)
+# Divide by 7 for the 7 types of food good
+# e.g. if wheat is 50% more expensive than the average food tradegood, the demand for wheat is:
+# ( Unfulfilled food need / 7) x 0.5
+# if vegetables are 25% cheaper than the average food tradegood, the demand of vegetables is:
+# ( Unfulfilled food need / 7 )x 1.25
+
+DEMAND_num_food_tradegoods = {
+	# Records the number of food type tradegoods
+	value = 8
+}
+
+## Food average price in the governorship
+
+DEMAND_food_avg_price = {
+	# Scope: governorship
+	# Gets the mean of food prices
+	# CACHED FOR PERFORMANCE
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+		}
+		value = var:price_grain
+		add = var:price_fish
+		add = var:price_livestock
+		add = var:price_mediterranean_fruit
+		add = var:price_temperate_fruit
+		add = var:price_tropical_fruit
+		add = var:price_vegetables
+		add = var:price_processed_foods
+	}
+	else = {
+		value = 1
+	}
+	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_food_price_MAD = {
+	# Get the Mean Absolute Deviation for food price
+	value = DEMAND_price_grain_deviation_from_mean_absolute
+	add = DEMAND_price_fish_deviation_from_mean_absolute
+	add = DEMAND_price_livestock_deviation_from_mean_absolute
+	add = DEMAND_price_mediterranean_fruit_deviation_from_mean_absolute
+	add = DEMAND_price_temperate_fruit_deviation_from_mean_absolute
+	add = DEMAND_price_tropical_fruit_deviation_from_mean_absolute
+	add = DEMAND_price_vegetables_deviation_from_mean_absolute
+	add = DEMAND_price_processed_foods_deviation_from_mean_absolute
+	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_food_avg_price_normalised = {
+	# Scope: governorship
+	# Ignore prices outside of the MAD for average price calculation
+	if = {
+		limit = {
+			NOT = { has_global_variable = first_time_price_setup_food_done }
+		}
+		value = 1
+	}
+	if = {
+		limit = { 
+			DEMAND_price_grain_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_grain
+	}
+	if = {
+		limit = { 
+			DEMAND_price_fish_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_fish
+	}
+	if = {
+		limit = { 
+			DEMAND_price_livestock_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_livestock
+	}
+	if = {
+		limit = { 
+			DEMAND_price_mediterranean_fruit_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_mediterranean_fruit
+	}
+	if = {
+		limit = { 
+			DEMAND_price_temperate_fruit_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_temperate_fruit
+	}
+	if = {
+		limit = { 
+			DEMAND_price_tropical_fruit_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_tropical_fruit
+	}
+	if = {
+		limit = { 
+			DEMAND_price_vegetables_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_vegetables
+	}
+	if = {
+		limit = { 
+			DEMAND_price_processed_foods_deviation_from_mean_absolute < DEMAND_food_price_MAD
+		}
+		add = var:price_processed_foods
+	}
+	divide = DEMAND_num_food_tradegoods
+	min = 0.0001
+}
+
+# Calculation of price standard deviation
+
+DEMAND_price_grain_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_grain
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_grain_deviation_from_mean_absolute = {
+	value = DEMAND_price_grain_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_grain_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_fish_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_fish
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_fish_deviation_from_mean_absolute = {
+	value = DEMAND_price_fish_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_fish_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_livestock_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_livestock
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_livestock_deviation_from_mean_absolute = {
+	value = DEMAND_price_livestock_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_livestock_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_vegetables_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_vegetables
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_vegetables_deviation_from_mean_absolute = {
+	value = DEMAND_price_vegetables_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_vegetables_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_tropical_fruit_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_tropical_fruit
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_tropical_fruit_deviation_from_mean_absolute = {
+	value = DEMAND_price_tropical_fruit_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_tropical_fruit_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_mediterranean_fruit_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_mediterranean_fruit
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_mediterranean_fruit_deviation_from_mean_absolute = {
+	value = DEMAND_price_mediterranean_fruit_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_mediterranean_fruit_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_temperate_fruit_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_temperate_fruit
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_temperate_fruit_deviation_from_mean_absolute = {
+	value = DEMAND_price_temperate_fruit_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_temperate_fruit_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+DEMAND_price_processed_foods_deviation_from_mean = {
+	if = {
+		limit = { has_variable = var_DEMAND_food_avg_price }
+	}
+	value = var:price_processed_foods
+	subtract = var:var_DEMAND_food_avg_price
+}
+DEMAND_price_processed_foods_deviation_from_mean_absolute = {
+	value = DEMAND_price_processed_foods_deviation_from_mean
+	if = {
+		limit = { DEMAND_price_processed_foods_deviation_from_mean < 0 }
+		multiply = -1
+	}
+}
+
+## Individual food goods
+
+# grain
+DEMAND_actual_grain = {
+	value = DEMAND_grain
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+			DEMAND_grain > 0
+		}
+		if = {
+			limit = {
+				NOT = { DEMAND_grain_price_diff_to_food_avg = 0 }
+			}
+			divide = DEMAND_grain_price_diff_to_food_avg
+		}
+	}
+	max = var:var_DEMAND_unfulfilled_food_need_governorship # Should be plus luxury
+	min = DEMAND_consumer_minus_produced_grain
+}
+
+DEMAND_consumer_minus_produced_grain = {
+	value = DEMAND_consumer_grain
+	subtract = GOODS_governorship_grain_produced
+	min = 0
+}
+
+DEMAND_grain = {
+	value = 0
+	if = {
+		limit = { 
+			has_variable = var_DEMAND_unfulfilled_food_need_governorship
+			var:var_DEMAND_unfulfilled_food_need_governorship > 0
+		}
+		value = var:var_DEMAND_unfulfilled_food_need_governorship
+		divide = DEMAND_num_food_tradegoods
+	}
+}
+
+DEMAND_consumer_grain = { # Consumer demand for grain; the amount bought locally
+	value = DEMAND_total_food_need_governorship
+	divide = DEMAND_grain_price_diff_to_food_avg
+	max = DEMAND_total_food_need_governorship # Should this be the amount available to buy?
+	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_consumer_fish = { # Consumer demand for fish; the amount bought locally
+	value = DEMAND_total_food_need_governorship
+	divide = DEMAND_fish_price_diff_to_food_avg
+	max = DEMAND_total_food_need_governorship # Should this be the amount available to buy?
+	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_consumer_livestock = { # Consumer demand for livestock; the amount bought locally
+	value = DEMAND_total_food_need_governorship
+	divide = DEMAND_livestock_price_diff_to_food_avg
+	max = DEMAND_total_food_need_governorship # Should this be the amount available to buy?
+	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_consumer_vegetables = { # Consumer demand for vegetables; the amount bought locally
+	value = DEMAND_total_food_need_governorship
+	divide = DEMAND_vegetables_price_diff_to_food_avg
+	max = DEMAND_total_food_need_governorship # Should this be the amount available to buy?
+	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_consumer_tropical_fruit = { # Consumer demand for tropical_fruit; the amount bought locally
+	value = DEMAND_total_food_need_governorship
+	divide = DEMAND_tropical_fruit_price_diff_to_food_avg
+	max = DEMAND_total_food_need_governorship # Should this be the amount available to buy?
+	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_consumer_mediterranean_fruit = { # Consumer demand for mediterranean_fruit; the amount bought locally
+	value = DEMAND_total_food_need_governorship
+	divide = DEMAND_mediterranean_fruit_price_diff_to_food_avg
+	max = DEMAND_total_food_need_governorship # Should this be the amount available to buy?
+	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_consumer_temperate_fruit = { # Consumer demand for temperate_fruit; the amount bought locally
+	value = DEMAND_total_food_need_governorship
+	divide = DEMAND_temperate_fruit_price_diff_to_food_avg
+	max = DEMAND_total_food_need_governorship # Should this be the amount available to buy?
+	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_consumer_processed_foods = { # Consumer demand for processed_foods; the amount bought locally
+	value = DEMAND_total_food_need_governorship
+	divide = DEMAND_processed_foods_price_diff_to_food_avg
+	max = DEMAND_total_food_need_governorship # Should this be the amount available to buy?
+	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_grain_price_diff_to_food_avg = {
+	# Scope: governorship
+	# Function: get the % difference of the price of the given tradegood to the average food goods price
+	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
+	value = var:price_grain
+	divide = var:var_DEMAND_food_avg_price_normalised
+}
+DEMAND_grain_price_diff_to_food_avg_squared = {
+	# Scope: governorship
+	# Function: Used to scale down demand in a logarithmic scale when price diff is above 100%
+	value = DEMAND_grain_price_diff_to_food_avg
+	multiply = DEMAND_grain_price_diff_to_food_avg
+}
+# End grain
+# fish
+DEMAND_actual_fish = {
+	value = DEMAND_fish
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+			DEMAND_fish > 0
+		}
+		if = {
+			limit = {
+				NOT = { DEMAND_fish_price_diff_to_food_avg = 0 }
+			}
+			divide = DEMAND_fish_price_diff_to_food_avg
+		}
+	}
+	if = {
+		limit = {
+			GOODS_governorship_fish_produced < governorship_population_10th
+		}
+		#add = DEMAND_luxury_foods
+	}
+	max = var:var_DEMAND_unfulfilled_food_need_governorship # Should be plus luxury
+	min = DEMAND_consumer_minus_produced_fish
+}
+
+DEMAND_consumer_minus_produced_fish = {
+	value = DEMAND_consumer_fish
+	subtract = GOODS_governorship_fish_produced
+	min = 0
+}
+
+DEMAND_fish = {
+	value = 0
+	if = {
+		limit = { 
+			has_variable = var_DEMAND_unfulfilled_food_need_governorship
+			var:var_DEMAND_unfulfilled_food_need_governorship > 0
+		}
+		value = var:var_DEMAND_unfulfilled_food_need_governorship
+		divide = DEMAND_num_food_tradegoods
+	}
+}
+
+DEMAND_fish_price_diff_to_food_avg = {
+	# Scope: governorship
+	# Function: get the % difference of the price of the given tradegood to the average food goods price
+	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
+	value = var:price_fish
+	divide = var:var_DEMAND_food_avg_price_normalised
+}
+# End fish
+# livestock
+DEMAND_actual_livestock = {
+	value = DEMAND_livestock
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+			DEMAND_livestock > 0
+		}
+		if = {
+			limit = {
+				NOT = { DEMAND_livestock_price_diff_to_food_avg = 0 }
+			}
+			divide = DEMAND_livestock_price_diff_to_food_avg
+		}
+	}
+	if = {
+		limit = {
+			GOODS_governorship_livestock_produced < governorship_population_10th
+		}
+		#add = DEMAND_luxury_foods
+	}
+	max = var:var_DEMAND_unfulfilled_food_need_governorship # Should be plus luxury
+	min = DEMAND_consumer_minus_produced_livestock
+}
+
+DEMAND_consumer_minus_produced_livestock = {
+	value = DEMAND_consumer_livestock
+	subtract = GOODS_governorship_livestock_produced
+	min = 0
+}
+
+DEMAND_livestock = {
+	value = 0
+	if = {
+		limit = { 
+			has_variable = var_DEMAND_unfulfilled_food_need_governorship
+			var:var_DEMAND_unfulfilled_food_need_governorship > 0
+		}
+		value = var:var_DEMAND_unfulfilled_food_need_governorship
+		divide = DEMAND_num_food_tradegoods
+	}
+}
+
+DEMAND_livestock_price_diff_to_food_avg = {
+	# Scope: governorship
+	# Function: get the % difference of the price of the given tradegood to the average food goods price
+	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
+	value = var:price_livestock
+	divide = var:var_DEMAND_food_avg_price_normalised
+}
+# End livestock
+# vegetables
+DEMAND_actual_vegetables = {
+	value = DEMAND_vegetables
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+			DEMAND_vegetables > 0
+		}
+		if = {
+			limit = {
+				NOT = { DEMAND_vegetables_price_diff_to_food_avg = 0 }
+			}
+			divide = DEMAND_vegetables_price_diff_to_food_avg
+		}
+	}
+	max = var:var_DEMAND_unfulfilled_food_need_governorship # Should be plus luxury
+	min = DEMAND_consumer_minus_produced_vegetables
+}
+
+DEMAND_consumer_minus_produced_vegetables = {
+	value = DEMAND_consumer_vegetables
+	subtract = GOODS_governorship_vegetables_produced
+	min = 0
+}
+
+DEMAND_vegetables = {
+	value = 0
+	if = {
+		limit = { 
+			has_variable = var_DEMAND_unfulfilled_food_need_governorship
+			var:var_DEMAND_unfulfilled_food_need_governorship > 0
+		}
+		value = var:var_DEMAND_unfulfilled_food_need_governorship
+		divide = DEMAND_num_food_tradegoods
+	}
+}
+
+DEMAND_vegetables_price_diff_to_food_avg = {
+	# Scope: governorship
+	# Function: get the % difference of the price of the given tradegood to the average food goods price
+	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
+	value = var:price_vegetables
+	divide = var:var_DEMAND_food_avg_price_normalised
+}
+# End vegetables
+# tropical_fruit
+DEMAND_actual_tropical_fruit = {
+	value = DEMAND_tropical_fruit
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+			DEMAND_tropical_fruit > 0
+		}
+		if = {
+			limit = {
+				NOT = { DEMAND_tropical_fruit_price_diff_to_food_avg = 0 }
+			}
+			divide = DEMAND_tropical_fruit_price_diff_to_food_avg
+		}
+	}
+	if = {
+		limit = {
+			GOODS_governorship_tropical_fruit_produced < governorship_population_10th
+		}
+		#add = DEMAND_luxury_foods
+	}
+	max = var:var_DEMAND_unfulfilled_food_need_governorship # Should be plus luxury
+	min = DEMAND_consumer_minus_produced_tropical_fruit
+}
+
+DEMAND_consumer_minus_produced_tropical_fruit = {
+	value = DEMAND_consumer_tropical_fruit
+	subtract = GOODS_governorship_tropical_fruit_produced
+	min = 0
+}
+
+DEMAND_tropical_fruit = {
+	value = 0
+	if = {
+		limit = { 
+			has_variable = var_DEMAND_unfulfilled_food_need_governorship
+			var:var_DEMAND_unfulfilled_food_need_governorship > 0
+		}
+		value = var:var_DEMAND_unfulfilled_food_need_governorship
+		divide = DEMAND_num_food_tradegoods
+	}
+}
+
+DEMAND_tropical_fruit_price_diff_to_food_avg = {
+	# Scope: governorship
+	# Function: get the % difference of the price of the given tradegood to the average food goods price
+	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
+	value = var:price_tropical_fruit
+	divide = var:var_DEMAND_food_avg_price_normalised
+}
+# End tropical_fruit
+# mediterranean_fruit
+DEMAND_actual_mediterranean_fruit = {
+	value = DEMAND_mediterranean_fruit
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+			DEMAND_mediterranean_fruit > 0
+		}
+		if = {
+			limit = {
+				NOT = { DEMAND_mediterranean_fruit_price_diff_to_food_avg = 0 }
+			}
+			divide = DEMAND_mediterranean_fruit_price_diff_to_food_avg
+		}
+	}
+	if = {
+		limit = {
+			GOODS_governorship_mediterranean_fruit_produced < governorship_population_10th
+		}
+		#add = DEMAND_luxury_foods
+	}
+	max = var:var_DEMAND_unfulfilled_food_need_governorship # Should be plus luxury
+	min = DEMAND_consumer_minus_produced_mediterranean_fruit
+}
+
+DEMAND_consumer_minus_produced_mediterranean_fruit = {
+	value = DEMAND_consumer_mediterranean_fruit
+	subtract = GOODS_governorship_mediterranean_fruit_produced
+	min = 0
+}
+
+DEMAND_mediterranean_fruit = {
+	value = 0
+	if = {
+		limit = { 
+			has_variable = var_DEMAND_unfulfilled_food_need_governorship
+			var:var_DEMAND_unfulfilled_food_need_governorship > 0
+		}
+		value = var:var_DEMAND_unfulfilled_food_need_governorship
+		divide = DEMAND_num_food_tradegoods
+	}
+}
+
+DEMAND_mediterranean_fruit_price_diff_to_food_avg = {
+	# Scope: governorship
+	# Function: get the % difference of the price of the given tradegood to the average food goods price
+	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
+	value = var:price_mediterranean_fruit
+	divide = var:var_DEMAND_food_avg_price_normalised
+}
+# End mediterranean_fruit
+# temperate_fruit
+DEMAND_actual_temperate_fruit = {
+	value = DEMAND_temperate_fruit
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+			DEMAND_temperate_fruit > 0
+		}
+		if = {
+			limit = {
+				NOT = { DEMAND_temperate_fruit_price_diff_to_food_avg = 0 }
+			}
+			divide = DEMAND_temperate_fruit_price_diff_to_food_avg
+		}
+	}
+	if = {
+		limit = {
+			GOODS_governorship_temperate_fruit_produced < governorship_population_10th
+		}
+		#add = DEMAND_luxury_foods
+	}
+	max = var:var_DEMAND_unfulfilled_food_need_governorship # Should be plus luxury
+	min = DEMAND_consumer_minus_produced_temperate_fruit
+}
+
+DEMAND_consumer_minus_produced_temperate_fruit = {
+	value = DEMAND_consumer_temperate_fruit
+	subtract = GOODS_governorship_temperate_fruit_produced
+	min = 0
+}
+
+DEMAND_temperate_fruit = {
+	value = 0
+	if = {
+		limit = { 
+			has_variable = var_DEMAND_unfulfilled_food_need_governorship
+			var:var_DEMAND_unfulfilled_food_need_governorship > 0
+		}
+		value = var:var_DEMAND_unfulfilled_food_need_governorship
+		divide = DEMAND_num_food_tradegoods
+	}
+}
+
+DEMAND_temperate_fruit_price_diff_to_food_avg = {
+	# Scope: governorship
+	# Function: get the % difference of the price of the given tradegood to the average food goods price
+	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
+	value = var:price_temperate_fruit
+	divide = var:var_DEMAND_food_avg_price_normalised
+}
+# End temperate_fruit
+# processed_foods
+DEMAND_actual_processed_foods = {
+	value = DEMAND_processed_foods
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+			DEMAND_processed_foods > 0
+		}
+		if = {
+			limit = {
+				NOT = { DEMAND_processed_foods_price_diff_to_food_avg = 0 }
+			}
+			divide = DEMAND_processed_foods_price_diff_to_food_avg
+		}
+	}
+	max = var:var_DEMAND_unfulfilled_food_need_governorship # Should be plus luxury
+	min = DEMAND_consumer_minus_produced_processed_foods
+}
+
+DEMAND_consumer_minus_produced_processed_foods = {
+	value = DEMAND_consumer_processed_foods
+	subtract = GOODS_governorship_processed_foods_produced
+	min = 0
+}
+
+DEMAND_processed_foods = {
+	value = 0
+	if = {
+		limit = { 
+			has_variable = var_DEMAND_unfulfilled_food_need_governorship
+			var:var_DEMAND_unfulfilled_food_need_governorship > 0
+		}
+		value = var:var_DEMAND_unfulfilled_food_need_governorship
+		divide = DEMAND_num_food_tradegoods
+	}
+}
+
+DEMAND_processed_foods_price_diff_to_food_avg = {
+	# Scope: governorship
+	# Function: get the % difference of the price of the given tradegood to the average food goods price
+	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
+	value = var:price_processed_foods
+	divide = var:var_DEMAND_food_avg_price_normalised
+}
+# End processed_foods

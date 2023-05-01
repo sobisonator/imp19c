@@ -1,11 +1,11 @@
 def print_out_good(tradegood):
-	loc = """GOODS_national_production_{tradegood} = {{
-	value = 0
-	every_governorships = {{
-		add = GOODS_governorship_{tradegood}_produced
-	}}
+	loc = """DEMAND_consumer_{tradegood} = {{ # Consumer demand for {tradegood}; the amount bought locally
+	value = DEMAND_total_food_need_governorship
+	divide = DEMAND_{tradegood}_price_diff_to_food_avg
+	max = DEMAND_total_food_need_governorship # Should this be the amount available to buy?
+	divide = DEMAND_num_food_tradegoods
 }}
-\n""".format(tradegood=tradegood)
+""".format(tradegood=tradegood)
 	print(loc)
 
 #all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]
@@ -14,13 +14,14 @@ all_categories = ["essential_goods","luxury_goods","business_goods","military_go
 all_spenders = ["upper_strata","middle_strata","lower_strata","proletariat","tribesmen","indentured","slaves","the_state"]
 
 all_goods = {
-	"grain":"essential_goods",
-	"fish":"essential_goods",
-	"livestock":"essential_goods",
-	"tropical_fruit":"essential_goods",
-	"mediterranean_fruit":"essential_goods",
-	"temperate_fruit":"essential_goods",
-	"processed_foods":"essential_goods",
+	"grain":"food",
+	"fish":"food",
+	"livestock":"food",
+        "vegetables":"food",
+	"tropical_fruit":"food",
+	"mediterranean_fruit":"food",
+	"temperate_fruit":"food",
+	"processed_foods":"food",
 	"clothing":"essential_goods",
 	"furniture":"essential_goods",
 	"pharmaceuticals":"essential_goods",
@@ -74,7 +75,8 @@ all_goods = {
 	"late_munitions":"military",
 	"early_artillery":"military",
 	"late_artillery":"military"
-		}
+        }
 
-for tradegood in all_goods:
-        print("value = GOODS_national_production_" + tradegood)
+for tradegood, category in all_goods.items():
+        if category == "food":
+                print_out_good(tradegood)

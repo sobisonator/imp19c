@@ -1,3 +1,69 @@
 # Functional effects for calculations
 
-# Prefix = ECON
+# Prefix = FUNC
+
+FUNC_get_std_deviation = {
+	
+}
+
+FUNC_sqrt = {
+	# Function: Get the square root of $input$ N and save it as local variable $output$ X
+	# Uses Newton's method:
+	#	x = 2^ceil(numbits(N)/2)
+	#	loop:
+    #		y = floor((x + floor(N/x))/2)
+    #		if y >= x
+    #    		return x
+    #		x = y
+	set_local_variable = {
+		name = X
+		value = 2
+	}
+
+	set_local_variable = {
+		name = X_to_power_of
+		value = $input$
+	}
+	change_local_variable = {
+		name = X_to_power_of
+		divide = 2
+	}
+	round_local_variable = {
+		name = X_to_power_of
+		nearest = 1
+	}
+
+	while = {
+		limit = {
+			always = yes
+		}
+
+		change_local_variable = {
+			name = X
+			multiply = 2
+		}
+
+		count = local_var:x_to_power_of
+	}
+
+	while = {
+		limit = {
+			local_var:Y < local_var:X
+		}
+	}
+}
+
+sqrt = { # Using Tobbzn's method
+	set_local_variable = { name = param value = $input$ }
+    set_local_variable = { name = x value = local_var:param }
+    set_local_variable = { name = y value = 1 }
+    set_local_variable = { name = e value = 0.001 }
+    set_local_variable = { name = condition value = { value = local_var:x subtract = local_var:y } }
+    while = {
+        limit = { local_var:condition > local_var:e }
+        set_local_variable = { name = x value = {value = local_var:x add = local_var:y  divide = 2} }
+        set_local_variable = { name = y value = {value = local_var:x divide = local_var:param } }
+        set_local_variable = { name = condition value = { value = local_var:x subtract = local_var:y } }
+    }
+    set_local_variable = { name = result value = local_var:x }
+}

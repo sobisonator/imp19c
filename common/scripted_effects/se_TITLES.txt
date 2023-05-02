@@ -1,0 +1,100 @@
+# Scripted effects for the noble titles feature, including active monarchies, inactive claims to monarchies, and non-ruler noble titles.
+
+TITLES_give_active_HOS_title = {
+	# Scope: character
+	# Function: Add to a list of countries for which this character actively is the head of state
+	# The target must be a country scope
+	char:$char_id$ = {
+		add_to_variable_list = {
+			name = active_HOS_titles
+			target = $target_country$
+		}		
+	}
+
+}
+
+TITLES_apply_starting_HOS_titles = {
+
+	# Uses scripted lists defined by character ID in TITLE_lists
+	
+	every_TITLE_HOS_$char_id$ = {
+		save_scope_as = target_country
+		TITLES_give_active_HOS_title = { 
+			char_id = $char_id$
+			target_country = scope:target_country
+		}
+	}
+
+}
+
+TITLES_set_as_HOS_of_abs_monarchy = {
+	TITLES_give_active_HOS_title = {
+		char_id = $char_id$
+		target_country = char:$char_id$.employer
+	}
+}
+
+TITLES_apply_all_starting_titles = {
+
+	# Emperor Alexander of Russia
+	TITLES_apply_starting_HOS_titles = { char_id = 147 }
+
+	# Kaiser Franz of Austria
+	TITLES_apply_starting_HOS_titles = { char_id = 130 }
+
+	# George III von Hanover
+	TITLES_apply_starting_HOS_titles = { char_id = 87 }
+
+	# Louis XVIII de Bourbon
+	TITLES_apply_starting_HOS_titles = { char_id = 411 }
+
+	# Friedrich Wilhelm von Hohenzollern
+	TITLES_apply_starting_HOS_titles = { char_id = 175 }
+
+	# Karl XIII von Holstein-Gottorp
+	TITLES_apply_starting_HOS_titles = { char_id = 166 }
+
+	# Fernando VII de Borbon
+	TITLES_apply_starting_HOS_titles = { char_id = 22 }
+
+	# Ferdinand IV di Borbone-Sicilia
+	TITLES_apply_starting_HOS_titles = { char_id = 110 }
+
+	# Maria Francisca de Braganca
+	TITLES_apply_starting_HOS_titles = { char_id = 2 }
+
+	every_country = {
+		limit = {
+			is_monarchy = yes
+		}
+		every_character = {
+			limit = {
+				is_ruler = yes
+				employer = {
+					NOT = { government = hereditary_dictatorship }
+				}
+			}
+			add_to_variable_list = {
+				name = active_HOS_titles
+				target = employer
+			}	
+		}
+
+
+		# Finally, set the variable in the country tag that stores the character ID
+		every_character = {
+			limit = {
+				has_variable_list = active_HOS_titles
+			}
+			save_scope_as = monarch_scope
+			every_in_list = {
+				variable = active_HOS_titles
+				set_variable = {
+					name = monarch_character
+					value = scope:monarch_scope
+				}
+			}
+		}
+	}
+
+}

@@ -1,5 +1,33 @@
 # Scripted effects for the noble titles feature, including active monarchies, inactive claims to monarchies, and non-ruler noble titles.
 
+TITLES_clear_all_country_HOS_states = {
+	# Scope: Country
+	# Function: Clear the head of state titles in all countries
+	every_country = {
+		limit = {
+			has_variable = monarch_character
+			any_character = {
+				has_variable_list = active_HOS_titles
+			}
+		}
+		TITLES_clear_country_HOS_variable
+		every_character = {
+			limit = { has_variable_list = active_HOS_titles }
+			every_in_list = {
+				variable = active_HOS_titles
+				remove_from_list = active_HOS_titles
+			}
+		}
+	}
+
+}
+
+TITLES_clear_country_HOS_variable = {
+	# Scope: Country
+	# Function: Clear the head of state titles in the scoped country
+	remove_variable = monarch_character
+}
+
 TITLES_give_active_HOS_title = {
 	# Scope: character
 	# Function: Add to a list of countries for which this character actively is the head of state
@@ -16,7 +44,8 @@ TITLES_give_active_HOS_title = {
 TITLES_apply_starting_HOS_titles = {
 
 	# Uses scripted lists defined by character ID in TITLE_lists
-	
+
+
 	every_TITLE_HOS_$char_id$ = {
 		save_scope_as = target_country
 		TITLES_give_active_HOS_title = { 
@@ -35,6 +64,10 @@ TITLES_set_as_HOS_of_abs_monarchy = {
 }
 
 TITLES_apply_all_starting_titles = {
+
+	# TESTING PURPOSES ONLY: Clear HOS states before running
+	TITLES_clear_all_country_HOS_states = yes
+	########################################################
 
 	# Emperor Alexander of Russia
 	TITLES_apply_starting_HOS_titles = { char_id = 147 }
@@ -63,6 +96,9 @@ TITLES_apply_all_starting_titles = {
 	# Maria Francisca de Braganca
 	TITLES_apply_starting_HOS_titles = { char_id = 2 }
 
+	# Akbar Shah II Gurkani
+	TITLES_apply_starting_HOS_titles = { char_id = 97 }
+
 	every_country = {
 		limit = {
 			is_monarchy = yes
@@ -81,6 +117,9 @@ TITLES_apply_all_starting_titles = {
 		}
 
 
+		
+	}
+	every_country = {
 		# Finally, set the variable in the country tag that stores the character ID
 		every_character = {
 			limit = {

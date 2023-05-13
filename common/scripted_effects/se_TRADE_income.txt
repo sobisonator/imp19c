@@ -76,3 +76,91 @@ TRADE_set_tradegood_balance = {
 		}
 	}
 }
+
+#### Distribution of the balance to pops
+
+TRADE_calculate_local_wholesale_shares_for_category = {
+	# Scope: governorship
+	# Function: Calculate what percentage of wholesale profits goes to each pop, and save it as a variable.
+	# Can be repeated for any category; this holds the definitions for the different trader groups
+	TRADE_calculate_local_wholesale_share_percentage = {
+		trader = upper_strata
+		category = $category$
+	}
+	TRADE_calculate_local_wholesale_share_percentage = {
+		trader = middle_strata
+		category = $category$
+	}
+	TRADE_calculate_local_wholesale_share_percentage = {
+		trader = lower_strata
+		category = $category$
+	}
+	TRADE_calculate_local_wholesale_share_percentage = {
+		trader = proletariat
+		category = $category$
+	}
+	TRADE_calculate_local_wholesale_share_percentage = {
+		trader = indentured
+		category = $category$
+	}
+	TRADE_calculate_local_wholesale_share_percentage = {
+		trader = tribesmen
+		category = $category$
+	}
+	TRADE_calculate_local_wholesale_share_percentage = {
+		trader = slaves
+		category = $category$
+	}
+
+}
+
+TRADE_calculate_local_wholesale_share_percentage = {
+	# Scope: governorship
+	# Function: Calculate the percentage share of wholesale income for the given spender type
+	# Args:
+	# category = "food" etc.
+	# trader = "upper_strata" etc.
+	if = {
+		limit = {
+			NOT = { TRADE_local_wholesale_share_weight_$trader$_$category$ = 0 }
+			NOT = { TRADE_local_wholesale_share_weight_total_$category$ = 0 }
+		}
+
+		set_variable = {
+			name = TRADE_local_wholesale_share_percentage_$trader$_$category$
+			value = TRADE_local_wholesale_share_weight_$trader$_$category$
+		}
+		change_variable = {
+			name = TRADE_local_wholesale_share_percentage_$trader$_$category$
+			divide = TRADE_local_wholesale_share_weight_total_$category$
+		}
+
+	}
+	else = {
+		set_variable = {
+			name = TRADE_local_wholesale_share_percentage_$trader$_$category$
+			value = 0
+		}
+	}
+}
+
+TRADE_calculate_local_wholesale_income_total_food = {
+	# Scope: governorship
+	# Function: Get the total wholesale income for a period, by multiplying the goods sold to traders by locals.
+	# Get the amount for export and divide it by the marked up price
+	# Args:
+	# category = "food" etc.
+	set_variable = {
+		name = TRADE_local_wholesale_income_total_food
+		value = var:this_quarter_balance_
+	}
+}
+
+TRADE_calculate_local_wholesale_income = {
+	# Scope: governorship
+	# Function: Calculate the actual wholesale income for the named trader group and category, by multiplying the total wholesale income by their percentage share
+	set_variable = {
+		name = TRADE_local_wholesale_income_$trader$_$category$
+		value = TRADE_local_wholesale_income_total
+	}
+}

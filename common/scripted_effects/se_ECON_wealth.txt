@@ -116,3 +116,103 @@ WEALTH_apply_growth_rate_all_debug = {
 	}
 }
 
+WEALTH_modify_pending_change = {
+	# Scope: Governorship
+	# Called: ad-hoc
+	# Function: Add wealth to a pending change
+	# Every quarter, the pending change is applied to the pop group, and the previous quarter's ammount is stored so that it can be compared in terms of relative growth/shrinkage of wealth	
+	# Args:
+	# poptype = poptype
+	# function = add or subtract (or multiply or divide if feeling frisky)
+	# conditions = conditions for adding the wealth to the poptype's pool. Use "always = yes" if no conditions
+	# amount = number amount or reference to var/svalue with number amount
+	if = {
+		limit = {
+			$conditions$
+		}
+		change_variable = {
+			name = PENDING_$poptype$_wealth
+			$function$ = $amount$
+		}
+	}
+}
+
+WEALTH_startup_set_pending_change_variables = {
+	# Scope: governorship
+	# Called: at start of game
+	# Function: Prevent the need for an if check in the modify or apply pending change scripted effect, by setting up empty pending wealth change variables at game start
+	set_variable = {
+		name = PENDING_upper_strata_wealth
+		value = 0
+	}
+	set_variable = {
+		name = PENDING_middle_strata_wealth
+		value = 0
+	}
+	set_variable = {
+		name = PENDING_lower_strata_wealth
+		value = 0
+	}
+	set_variable = {
+		name = PENDING_proletariat_wealth
+		value = 0
+	}
+	set_variable = {
+		name = PENDING_indentured_wealth
+		value = 0
+	}
+	set_variable = {
+		name = PENDING_tribesmen_wealth
+		value = 0
+	}
+	set_variable = {
+		name = PENDING_slaves_wealth
+		value = 0
+	}
+}
+
+WEALTH_apply_pending_changes = {
+	# Scope: Governorship
+	# Called: quarterly
+	# Function: Run all WEALTH_apply_pending_change effects for poptypes
+	WEALTH_apply_pending_change = {
+		poptype = upper_strata
+	}
+	WEALTH_apply_pending_change = {
+		poptype = middle_strata
+	}
+	WEALTH_apply_pending_change = {
+		poptype = lower_strata
+	}
+	WEALTH_apply_pending_change = {
+		poptype = proletariat
+	}
+	WEALTH_apply_pending_change = {
+		poptype = indentured
+	}
+	WEALTH_apply_pending_change = {
+		poptype = tribesmen
+	}
+	WEALTH_apply_pending_change = {
+		poptype = slaves
+	}
+}
+
+WEALTH_apply_pending_change = {
+	# Scope: Governorship
+	# Called: quarterly
+	# Function: Add the pending wealth changes to every pop's wealth pool, then reset them to 0
+	# Also save the last quarter's for each group so it can be used for comparisons
+	set_variable = {
+		name = last_quarter_$poptype$_wealth
+		value = $poptype$_wealth
+	}
+	change_variable = {
+		name = $poptype$_wealth
+		add = PENDING_$poptype$_wealth
+	}
+	set_variable = {
+		name = PENDING_$poptype$_wealth
+		value = 0
+	}
+}

@@ -114,6 +114,42 @@ TRADE_calculate_local_wholesale_shares_for_category = {
 
 }
 
+
+TRADE_calculate_local_merchant_shares_for_category = {
+	# Scope: governorship
+	# Function: Calculate what percentage of wholesale profits goes to each pop, and save it as a variable.
+	# Can be repeated for any category; this holds the definitions for the different trader groups
+	TRADE_calculate_local_merchant_share_percentage = {
+		trader = upper_strata
+		category = $category$
+	}
+	TRADE_calculate_local_merchant_share_percentage = {
+		trader = middle_strata
+		category = $category$
+	}
+	TRADE_calculate_local_merchant_share_percentage = {
+		trader = lower_strata
+		category = $category$
+	}
+	TRADE_calculate_local_merchant_share_percentage = {
+		trader = proletariat
+		category = $category$
+	}
+	TRADE_calculate_local_merchant_share_percentage = {
+		trader = indentured
+		category = $category$
+	}
+	TRADE_calculate_local_merchant_share_percentage = {
+		trader = tribesmen
+		category = $category$
+	}
+	TRADE_calculate_local_merchant_share_percentage = {
+		trader = slaves
+		category = $category$
+	}
+
+}
+
 TRADE_calculate_local_wholesale_share_percentage = {
 	# Scope: governorship
 	# Function: Calculate the percentage share of wholesale income for the given spender type
@@ -143,6 +179,40 @@ TRADE_calculate_local_wholesale_share_percentage = {
 	else = {
 		set_variable = {
 			name = TRADE_local_wholesale_share_percentage_$trader$_$category$
+			value = 0
+		}
+	}
+}
+
+TRADE_calculate_local_merchant_share_percentage = {
+	# Scope: governorship
+	# Function: Calculate the percentage share of merchant income and spending (i.e., buying wholesale goods for export) for the given spender type
+	# Args:
+	# category = "food" etc.
+	# trader = "upper_strata" etc.
+	if = {
+		limit = {
+			NOT = { TRADE_local_merchant_share_weight_$trader$_$category$ = 0 }
+			NOT = { TRADE_local_merchant_share_weight_total_$category$ = 0 }
+		}
+
+		set_variable = {
+			name = TRADE_local_merchant_share_percentage_$trader$_$category$
+			value = TRADE_local_merchant_share_weight_$trader$_$category$
+		}
+		change_variable = {
+			name = TRADE_local_merchant_share_percentage_$trader$_$category$
+			divide = TRADE_local_merchant_share_weight_total_$category$
+		}
+		change_variable = { # Get the actual amount they will get paid
+			name = TRADE_local_merchant_share_percentage_$trader$_$category$
+			multiply = TRADE_local_merchant_share_percentage_modifier_$trader$_$category$
+		}
+
+	}
+	else = {
+		set_variable = {
+			name = TRADE_local_merchant_share_percentage_$trader$_$category$
 			value = 0
 		}
 	}
@@ -273,4 +343,84 @@ TRADE_calculate_local_wholesale_income = {
 TRADE_grant_wholesale_income = {
 	# Scope: governorship
 	# Function: Grant the specified pop group the amount of income from wholesale
+}
+
+# MERCHANT INCOME
+
+TRADE_calculate_local_merchant_income_total_food = {
+	# Scope: governorship
+	# Function: Get the total merchant income for a period, by getting the profit of goods sold extraregionally.
+	# category = "food" etc.
+	set_variable = {
+		name = TRADE_local_merchant_income_total_food
+		value = var:this_quarter_balance_grain
+	}
+	change_variable = {
+		name = TRADE_local_merchant_income_total_food
+		add = var:this_quarter_balance_livestock
+	}
+	change_variable = {
+		name = TRADE_local_merchant_income_total_food
+		add = var:this_quarter_balance_vegetables
+	}
+	change_variable = {
+		name = TRADE_local_merchant_income_total_food
+		add = var:this_quarter_balance_fish
+	}
+	change_variable = {
+		name = TRADE_local_merchant_income_total_food
+		add = var:this_quarter_balance_tropical_fruit
+	}
+	change_variable = {
+		name = TRADE_local_merchant_income_total_food
+		add = var:this_quarter_balance_mediterranean_fruit
+	}
+	change_variable = {
+		name = TRADE_local_merchant_income_total_food
+		add = var:this_quarter_balance_temperate_fruit
+	}
+}
+
+TRADE_calculate_local_merchant_income_all_pops_food = {
+	TRADE_calculate_local_merchant_income = {
+		trader = upper_strata
+		category = food
+	}
+	TRADE_calculate_local_merchant_income = {
+		trader = middle_strata
+		category = food
+	}
+	TRADE_calculate_local_merchant_income = {
+		trader = lower_strata
+		category = food
+	}
+	TRADE_calculate_local_merchant_income = {
+		trader = proletariat
+		category = food
+	}
+	TRADE_calculate_local_merchant_income = {
+		trader = tribesmen
+		category = food
+	}
+	TRADE_calculate_local_merchant_income = {
+		trader = indentured
+		category = food
+	}
+	TRADE_calculate_local_merchant_income = {
+		trader = slaves
+		category = food
+	}
+}
+
+TRADE_calculate_local_merchant_income = {
+	# Scope: governorship
+	# Function: Calculate the actual merchant income for the named trader group and category, by multiplying the total merchant income by their percentage share
+	set_variable = {
+		name = TRADE_local_merchant_income_$trader$_$category$
+		value = var:TRADE_local_merchant_income_total_$category$
+	}
+	change_variable = {
+		name = TRADE_local_merchant_income_$trader$_$category$
+		multiply = var:TRADE_local_merchant_share_percentage_$trader$_$category$
+	}
 }

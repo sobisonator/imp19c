@@ -14,6 +14,10 @@ TRADE_cache_svalues_governorship_food_prices = {
 		name = var_DEMAND_food_avg_price
 		value = DEMAND_food_avg_price
 	}
+	set_variable = {
+		name = var_WEALTH_governorship_per_capita
+		value = WEALTH_governorship_per_capita
+	}
 }
 
 TRADE_cache_svalues_governorship_food_avg_price = {
@@ -337,5 +341,60 @@ TRADE_set_price_governorship = {
 	set_variable = {
 		name = price_$tradegood$
 		value = var:internal_trade_scope.var:price_$tradegood$
+	}
+}
+
+TRADE_save_previous_demand = {
+	# Scope: governorship
+	# Function: Save the demand for the given tradegood, so that it can be used as a reference point for bounding the change in demand in the next trade check
+	# Also save 110% and 90% of that value, for use as the bounds
+	set_variable = {
+		name = previous_tick_demand_$tradegood$
+		value = DEMAND_actual_$tradegood$
+	}
+
+	set_variable = {
+		name = previous_tick_demand_$tradegood$_110_percent
+		value = var:previous_tick_demand_$tradegood$
+	}
+	change_variable = {
+		name = previous_tick_demand_$tradegood$_110_percent
+		multiply = 1.1
+	}
+
+	set_variable = {
+		name = previous_tick_demand_$tradegood$_90_percent
+		value = var:previous_tick_demand_$tradegood$
+	}
+	change_variable = {
+		name = previous_tick_demand_$tradegood$_90_percent
+		multiply = 0.9
+	}
+}
+
+TRADE_save_previous_demand_all_food = {
+	TRADE_save_previous_demand = {
+		tradegood = grain
+	}
+	TRADE_save_previous_demand = {
+		tradegood = livestock
+	}
+	TRADE_save_previous_demand = {
+		tradegood = fish
+	}
+	TRADE_save_previous_demand = {
+		tradegood = vegetables
+	}
+	TRADE_save_previous_demand = {
+		tradegood = tropical_fruit
+	}
+	TRADE_save_previous_demand = {
+		tradegood = mediterranean_fruit
+	}
+	TRADE_save_previous_demand = {
+		tradegood = temperate_fruit
+	}
+	TRADE_save_previous_demand = {
+		tradegood = processed_foods
 	}
 }

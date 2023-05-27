@@ -2,8 +2,26 @@ def print_out_good(tradegood):
 	loc = """DEMAND_consumer_{tradegood} = {{ # Consumer demand for {tradegood}; the amount bought locally
 	value = DEMAND_total_food_need_governorship
 	divide = DEMAND_{tradegood}_price_diff_to_food_avg
-	max = DEMAND_total_food_need_governorship # Should this be the amount available to buy?
+	divide = DEMAND_{tradegood}_price_diff_to_food_avg
+	max = DEMAND_total_food_need_governorship_doubled # Should this be the amount available to buy?
 	divide = DEMAND_num_food_tradegoods
+	if = {{
+		limit = {{
+			NOT = {{ DEMAND_{tradegood}_price_div_per_capita_wealth = 0 }}
+		}}
+		divide = DEMAND_{tradegood}_price_div_per_capita_wealth
+	}}
+}}
+
+DEMAND_{tradegood}_price_div_per_capita_wealth = {{ # Price of {tradegood} divided by per capita wealth, used to multiply consumer demand - consumers turn away from food goods that cost too much compared to the wealth they have.
+	if = {{
+		limit = {{ has_variable = PRICE_{tradegood} }}
+		value = var:PRICE_{tradegood}
+	}}
+	if = {{
+		limit = {{ has_variable = var_WEALTH_governorship_per_capita }}
+		divide = var:var_WEALTH_governorship_per_capita
+	}}	
 }}
 """.format(tradegood=tradegood)
 	print(loc)

@@ -254,27 +254,31 @@ ECON_update_wealth_list = {
 		}
 		every_in_list = {
 			variable = list_of_wealth_distribution
-			remove_variable = storing_wealth_data_for
-			remove_variable = wealth_data_type_tooltip
-			remove_variable = wealth_data_value
+			remove_variable = storing_WEALTH_national_data_for
+			remove_variable = WEALTH_national_data_type_tooltip
+			remove_variable = WEALTH_national_data_value
+			remove_variable = WEALTH_national_percentage
 			remove_variable = derived_colour
 			remove_from_list = list_of_wealth_distribution
 		}
 	}
 	ECON_add_to_wealth_list = {
 		POP_LOC_NAME = UPPER_STRATA
-		poptype = upper_strata
+		specifier = upper_strata
 		derived_colour = culture_group:north_ugric
+		data_name = WEALTH_national
 	}
 	ECON_add_to_wealth_list = {
 		POP_LOC_NAME = MIDDLE_STRATA
-		poptype = middle_strata
+		specifier = middle_strata
 		derived_colour = culture_group:south_celtic
+		data_name = WEALTH_national
 	}
 	ECON_add_to_wealth_list = {
 		POP_LOC_NAME = LOWER_STRATA
-		poptype = lower_strata
+		specifier = lower_strata
 		derived_colour = culture_group:east_slavic
+		data_name = WEALTH_national
 	}
 }
 
@@ -283,9 +287,9 @@ ECON_add_to_wealth_list = {
 	# Function: Add values to a list of provinces with variables storing different wealth types and the names of the types
 	save_scope_as = origin
 	random_province = {
-		#limit = {
-			#NOT = { has_variable = storing_wealth_data_for }
-		#}
+		limit = {
+			NOT = { has_variable = storing_wealth_data_for }
+		}
 		save_scope_as = random_province_scope
 	}
 	add_to_variable_list = {
@@ -294,20 +298,28 @@ ECON_add_to_wealth_list = {
 	}
 	scope:random_province_scope = {
 		set_variable = {
-			name = storing_wealth_data_for
+			name = storing_$data_name$_data_for
 			value = scope:origin
 		}
 		set_variable = {
-			name = wealth_data_type_tooltip
+			name = $data_name$_data_type_tooltip
 			value = flag:$POP_LOC_NAME$_WEALTH
 		}
 		set_variable = {
-			name = wealth_data_value
-			value = scope:origin.WEALTH_national_$poptype$
+			name = $data_name$_data_value
+			value = scope:origin.$data_name$_$specifier$
 		}
 		set_variable = {
 			name = derived_colour
 			value = $derived_colour$
+		}
+		set_variable = {
+			name = $data_name$_percentage
+			value = scope:origin.$data_name$_$specifier$ # Needed for calculating percentage
+		}
+		change_variable = {
+			name = $data_name$_percentage 
+			divide = scope:origin.$data_name$_total
 		}
 	}
 }

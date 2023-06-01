@@ -11,6 +11,9 @@
 
 TRADE_local_wholesale_share_weight_upper_strata_food = {
 	value = governorship_upper_strata # Upper strata own a considerable share of food farming by default
+	multiply = 2
+	add = governorship_indentured # By default, upper strata get free access to all of theg produce of indentured pops
+	add = governorship_slaves # By default, upper strata get free access to all of the produce of slaves
 }
 TRADE_local_wholesale_share_weight_middle_strata_food = {
 	value = 0 # By default, middle strata do not take part in food farming	
@@ -88,33 +91,78 @@ TRADE_local_wholesale_share_percentage_modifier_slaves_food = {
 ## It also determines who pays the local wholesalers to buy goods off them
 ## This is distinct to consumer spend shares, which is local purchasing from merchants
 
-TRADE_merchant_share_weight_upper_strata_food = {
+TRADE_local_merchant_share_weight_upper_strata_food = {
 	value = governorship_upper_strata
-	multiply = 100
 }
 
-TRADE_merchant_share_weight_middle_strata_food = {
+TRADE_local_merchant_share_weight_middle_strata_food = {
 	value = governorship_middle_strata
-	multiply = 30
+	multiply = 0.1
 }
 
-TRADE_merchant_share_weight_lower_strata_food = {
+TRADE_local_merchant_share_weight_lower_strata_food = {
 	value = 0 # By default, lower strata do not directly participate in import/export trade
 }
 
-TRADE_merchant_share_weight_proletariat_food = {
+TRADE_local_merchant_share_weight_proletariat_food = {
 	value = 0 # By default, lower strata do not directly participate in import/export trade
 }
 
-TRADE_merchant_share_weight_indentured_food = {
+TRADE_local_merchant_share_weight_indentured_food = {
 	value = 0 # By default, lower strata do not directly participate in import/export trade
 }
 
-TRADE_merchant_share_weight_slaves_food = {
+TRADE_local_merchant_share_weight_slaves_food = {
 	value = 0 # By default, lower strata do not directly participate in import/export trade
 }
 
-# Consumer shares: which groups are spending on goods bought locally.
+TRADE_local_merchant_share_weight_total_food = {
+	add = TRADE_local_merchant_share_weight_upper_strata_food
+	add = TRADE_local_merchant_share_weight_middle_strata_food
+	add = TRADE_local_merchant_share_weight_lower_strata_food
+	add = TRADE_local_merchant_share_weight_proletariat_food
+	add = TRADE_local_merchant_share_weight_indentured_food
+	add = TRADE_local_merchant_share_weight_tribesmen_food
+	add = TRADE_local_merchant_share_weight_slaves_food
+}
+
+# Actual paid out - although a share may be available to a group, that group may not be fully compensated for it.
+# Values must be between 0 to 1
+# 1 = 100%, the group gets paid the full amount
+# 0 = 0%, the group has all of their produced taxed in kind, or sequestered
+# This can represent levies of goods in lieu of monetary taxes, or  exploitative labour
+TRADE_local_merchant_share_percentage_modifier_upper_strata_food = {
+	value = 1
+	#min = 0
+	#max = 1
+}
+TRADE_local_merchant_share_percentage_modifier_middle_strata_food = {
+	value = 1
+	#min = 0
+	#max = 1
+}
+TRADE_local_merchant_share_percentage_modifier_lower_strata_food = {
+	value = 1
+	#min = 0
+	#max = 1
+}
+TRADE_local_merchant_share_percentage_modifier_proletariat_food = {
+	value = 1
+	#min = 0
+	#max = 1
+}
+TRADE_local_merchant_share_percentage_modifier_indentured_food = {
+	value = 0
+	#min = 0
+	#max = 1
+}
+TRADE_local_merchant_share_percentage_modifier_slaves_food = {
+	value = 0
+	#min = 0
+	#max = 1
+}
+
+# Consumer spending shares: which groups are spending on goods bought locally.
 # This money is sent to merchants
 # When importing, the actual amount of wealth transferred is reduced based on how much could actually be imported, with an additional amount derived from this_quarter_balance_$tradegood$ if the balance is negative. Otherwise, the amount ignores exports (positive balance) and just accounts for consumer demand.
 # The higher the price, the more of the share goes towards upper classes
@@ -143,3 +191,7 @@ TRADE_consumer_share_weight_indentured_food = {
 TRADE_consumer_share_weight_indentured_food = {
 	value = 0 # By default, slave pops do not spend on food, but are paid for by their owners
 }
+
+# Wages are treated separately within the JOBS system, which is governed largely by buildings
+# Wages owed for each job are increased by buildings, then scaled by the wages multiplier for that job.
+# Resource extraction jobs' wages are determined by the number of pops rather than the number of RGOs

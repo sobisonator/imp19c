@@ -1,0 +1,97 @@
+# TODO: This would be more efficiently done mostly in scripted effects, which would cut down the amount of repetition. Same for food demand. Will need to be re-worked once ready.
+
+# All values are governorship scope
+
+# META VALUES
+# Luxuries only paid for by the pops demanding them, in the ratio that pops demand them
+
+# Base demand: how much each strata's share of the payout for luxuries will be weighted (as consumers, not as merchants), and how much every luxury good gets as a base demand from this poptype in the governorship.
+
+DEMAND_luxury_base_upper_strata = {
+	value = governorship_upper_strata
+	multiply = WEALTH_governorship_upper_strata_per_capita
+	divide = 100
+}
+
+DEMAND_luxury_base_middle_strata = {
+	value = governorship_middle_strata
+	multiply = WEALTH_governorship_middle_strata_per_capita
+	divide = 100
+}
+
+DEMAND_luxury_base_lower_strata = {
+	value = governorship_lower_strata
+	multiply = WEALTH_governorship_lower_strata_per_capita
+	divide = 100
+}
+
+DEMAND_luxury_base_proletariat = {
+	value = governorship_proletariat
+	multiply = WEALTH_governorship_proletariat_per_capita
+	divide = 100
+}
+
+DEMAND_luxury_base_indentured = {
+	value = governorship_indentured
+	multiply = WEALTH_governorship_indentured_per_capita
+	divide = 100
+}
+
+DEMAND_luxury_base_tribesmen = {
+	value = governorship_tribesmen
+	multiply = WEALTH_governorship_tribesmen_per_capita
+	divide = 100
+}
+
+DEMAND_luxury_base_slaves = {
+	value = governorship_slaves
+	multiply = WEALTH_governorship_slaves_per_capita
+	divide = 100
+}
+
+DEMAND_luxury_base_total = { 
+	value = DEMAND_luxury_base_upper_strata
+	add = DEMAND_luxury_base_middle_strata
+	add = DEMAND_luxury_base_lower_strata
+	add = DEMAND_luxury_base_proletariat
+	add = DEMAND_luxury_base_indentured
+	add = DEMAND_luxury_base_tribesmen
+	add = DEMAND_luxury_base_slaves
+}
+
+# PER GOOD
+
+# Luxury clothing
+DEMAND_luxury_clothing = {
+	value = DEMAND_luxury_base_total
+}
+
+DEMAND_luxury_clothing_div_average_wealth = {
+	value = var:price_luxury_clothing
+	divide = WEALTH_governorship_per_capita # TODO: Cache this value
+}
+
+DEMAND_fashionability_luxury_clothing = { # Measure of how fashionable the luxury is
+	# Should be between 0 and 2 (possibly higher, but rarely)
+	value = 1 # Default, modified by conditions in the region/country.
+}
+
+DEMAND_actual_luxury_clothing = {
+	value = DEMAND_luxury_clothing
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_luxuries_done
+			DEMAND_luxury_clothing > 0
+		}
+		if = {
+			limit = {
+				NOT = { DEMAND_luxury_clothing_div_average_wealth = 0 }
+			}
+			divide = DEMAND_luxury_clothing_div_average_wealth
+		}
+	}
+	multiply = DEMAND_fashionability_luxury_clothing
+}
+# End luxury clothing
+
+DEMAND_actual_luxury_furniture

@@ -1,0 +1,47 @@
+DEMAND_get_luxury_demand = {
+	# Scope: governorship
+	# Function: Count the amount of demand for the given luxury tradegood.
+	# Outputs a var, DEMAND_luxury_$tradegood$
+	set_variable = {
+		name = DEMAND_luxury_$tradegood$
+		value = DEMAND_luxury_base_total
+	}
+
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_luxuries_done
+			DEMAND_luxury_clothing > 0
+		}
+		set_local_variable = {
+			name = l_$tradegood$_div_average_governorship_wealth
+			value = var:price_$tradegood$
+		}
+		change_local_variable = {
+			name = l_$tradegood$_div_average_governorship_wealth
+			divide = WEALTH_governorship_per_capita # TODO: Cache this value
+		}
+		change_variable = {
+			name = DEMAND_luxury_$tradegood$
+			divide = local_var:l_$tradegood$_div_average_governorship_wealth
+		}
+	}
+	change_variable = {
+		name = DEMAND_luxury_$tradegood$
+		multiply = var:DEMAND_fashionability_luxury_clothing
+	}
+
+	every_governorship_state = {
+		every_state_province = {
+			every_pops_in_province = {
+				limit = {
+					culture_is_infatuated = { tradegood = luxury_clothing }
+				}
+				change_variable = {
+					name = DEMAND_luxury_$tradegood$
+					add = 0.1 # Work on scale
+				}
+			}
+		}
+	}
+	
+}

@@ -19,7 +19,7 @@ debug_trade.1 = { # Set food price equilibrium @ start of game
 	}
 }
 
-debug_trade.2 = {
+debug_trade.2 = { # Necessary for all trade calculations
 	type = country_event
 	title = "TEST"
 	desc = "TEST"
@@ -68,7 +68,7 @@ debug_trade.5 = {
 	desc = "TEST"
 	picture = aqueducts
 	immediate = {
-		TRADE_first_time_setup_simulation_run = yes
+		TRADE_first_time_setup_simulation_run_food = yes
 	}
 }
 
@@ -123,7 +123,49 @@ debug_trade.8 = { # Set the percentage shares of wholesale costs and set the tot
 	}
 }
 
-debug_trade.99 = { # Normal food trade
+debug_trade.9 = { # Set luxury demand variables in all provinces, with all the necessary first time trade setup wrapped in
+	type = country_event
+	title = "TEST"
+	desc = "TEST"
+	picture = aqueducts
+
+	immediate = {
+		# Basic setup
+		trigger_event = { id = debug_trade.2 }
+		trigger_event = { id = debug_trade.3 }
+		trigger_event = { id = debug_trade.10 } # Replaces debug_trade.4, swapping out the cache food prices with caching all tradegoods
+
+		# Luxury demand specific
+		every_country = {
+			every_governorships = {
+				DEMAND_get_luxury_demand_all_first_time = yes
+			}
+		}
+
+		# trigger_event = { id = debug_trade.11 } # Equivalent of 6, but for luxuries
+		# trigger_event = { id = debug_trade.12 } # Equivalent of 7, but for luxuries
+	}
+}
+
+debug_trade.10 = {
+	type = country_event
+	title = "TEST"
+	desc = "TEST"
+	picture = aqueducts
+	immediate = {
+		every_country = {
+			TRADE_setup_tax_rates = yes
+			every_governorships = {
+				TRADE_set_internal_trade_scope = yes
+				TRADE_update_governorship_TZs = yes
+				TRADE_cache_svalues_governorship_trade = yes
+				TRADE_country_update_all_total_demand_differences = yes
+			}
+		}
+	}
+}
+
+debug_trade.99 = { # Single iteration of food trade
 	type = country_event
 	title = "TEST"
 	desc = "TEST"

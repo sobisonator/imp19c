@@ -1,29 +1,6 @@
 def print_out_good(tradegood):
-	loc = """DEMAND_consumer_{tradegood} = {{ # Consumer demand for {tradegood}; the amount bought locally
-	value = DEMAND_total_food_need_governorship
-	divide = DEMAND_{tradegood}_price_diff_to_food_avg
-	divide = DEMAND_{tradegood}_price_diff_to_food_avg
-	max = DEMAND_total_food_need_governorship_doubled # Should this be the amount available to buy?
-	divide = DEMAND_num_food_tradegoods
-	if = {{
-		limit = {{
-			NOT = {{ DEMAND_{tradegood}_price_div_per_capita_wealth = 0 }}
-		}}
-		divide = DEMAND_{tradegood}_price_div_per_capita_wealth
-	}}
-}}
-
-DEMAND_{tradegood}_price_div_per_capita_wealth = {{ # Price of {tradegood} divided by per capita wealth, used to multiply consumer demand - consumers turn away from food goods that cost too much compared to the wealth they have.
-	if = {{
-		limit = {{ has_variable = PRICE_{tradegood} }}
-		value = var:PRICE_{tradegood}
-	}}
-	if = {{
-		limit = {{ has_variable = var_WEALTH_governorship_per_capita }}
-		divide = var:var_WEALTH_governorship_per_capita
-	}}	
-}}
-""".format(tradegood=tradegood)
+	loc = """PROVWINDOW_GOV_{TRADEGOOD}_STOCKPILE:0 "[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('GOODS_governorship_{tradegood}_produced')|0]"
+PROVWINDOW_GOV_{TRADEGOOD}_PRODUCED_TT:0 "#T {tradegood} produced in [ProvinceWindow.GetState.GetGovernorship.GetName]:#! #G [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('GOODS_governorship_{tradegood}_produced')|0] #! \\n #T {tradegood} needed for import last quarter:#! [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_actual_{tradegood}')|0]#! \\n #T {tradegood} consumed locally:#! [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_consumer_{tradegood}')|0]#! \\n #T Export/import balance:#! [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_difference_infrastructure_capped_{tradegood}')|0+=] (capped) / [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_difference_{tradegood}')|0] (actual) \\n \\n#T Price of {tradegood} in [ProvinceWindow.GetState.GetGovernorship.GetName] :#! £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('price_{tradegood}').GetValue|3] / unit\\n#T Merchant balance for {tradegood} imports last quarter:#! £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('this_quarter_balance_{tradegood}').GetValue|3+=]#!\\n    #T From which taxes and tariffs:#! #X £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('governorship_quarterly_revenue_from_internal_sales_tax_essential_goods').GetValue|3]#! #T at #![ProvinceWindow.GetProvince.GetOwner.MakeScope.Var('internal_sales_tax_rate').GetValue|%] #T tax rate #!" """.format(tradegood=tradegood,TRADEGOOD=tradegood.upper())
 	print(loc)
 
 #all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]

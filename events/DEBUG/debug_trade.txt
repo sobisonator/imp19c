@@ -8,18 +8,37 @@ debug_trade.1 = { # Trade setup
 
 	immediate = {
 		#MOVEMENT_get_TZ_distances = yes # Commented out for now - needs fixing, svalues are improperly named.
-		TRADE_reset_all_tradegoods_TZ_internal_rankings = yes
-		TRADE_prepare_quarterly_values = yes
-		TRADE_save_connection_time_values = yes
+		trigger_event = { id = debug_trade.101 }
+		trigger_event = { id = debug_trade.102 } # quarterly values
+		trigger_event = { id = debug_trade.103 } # quarterly values
+		# trigger_event = { id = debug_trade.104 } # quarterly values # Split up into sub-events
 		every_country = {
-			every_governorships = {
-				TRADE_reset_purchase_order_tender_completions = yes
-				TRADE_set_internal_trade_scope = yes # Repeats an effect run by oa_economy_setup, needs to be run quarterly after that
-				TRADE_update_governorship_TZs = yes
-				TRADE_setup_internal_trade_cuts = yes
-				TRADE_reset_quarterly_governorship_values = yes # Not actually obsolete - this deals with governorship scope, while TRADE_reset_quarterly_values deals with global level
-			}
-			TRADE_setup_tax_rates = yes
+			trigger_event = { id = debug_trade.1041 }
+			trigger_event = { id = debug_trade.1042 }
+			trigger_event = { id = debug_trade.1043 }
+			trigger_event = { id = debug_trade.1044 }
+			trigger_event = { id = debug_trade.1045 }
+			trigger_event = { id = debug_trade.1046 }
+			TRADE_reset_quarterly_tax_totals = yes
+		}
+		every_federation = {
+			trigger_event = { id = debug_trade.1041 }
+			trigger_event = { id = debug_trade.1042 }
+			trigger_event = { id = debug_trade.1043 }
+			trigger_event = { id = debug_trade.1044 }
+			trigger_event = { id = debug_trade.1045 }
+			trigger_event = { id = debug_trade.1046 }
+		}
+		# trigger_event = { id = debug_trade.105 } # quarterly values - This just repeats debug_trade.104
+		trigger_event = { id = debug_trade.106 } # quarterly values
+		trigger_event = { id = debug_trade.107 }
+		every_country = {
+				trigger_event = { id = debug_trade.108 }
+				trigger_event = { id = debug_trade.109 } # Repeats an effect run by oa_economy_setup, needs to be run quarterly after that
+				trigger_event = { id = debug_trade.110 }
+				trigger_event = { id = debug_trade.111 }
+				trigger_event = { id = debug_trade.112 } # Not actually obsolete - this deals with governorship scope, while TRADE_reset_quarterly_values deals with global level
+			trigger_event = { id = debug_trade.113 }
 		}
 	}
 
@@ -27,6 +46,190 @@ debug_trade.1 = { # Trade setup
 		name = "TEST"
 	}
 }
+
+# For speed testing and lag diagnosis:
+debug_trade.101 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_reset_all_tradegoods_TZ_internal_rankings = yes
+	}
+}
+debug_trade.102 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_update_all_global_base_prices = yes
+	}
+}
+debug_trade.103 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_update_all_TZ_local_prices = yes
+	}
+}
+debug_trade.104 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_reset_internal_pools = yes
+	}
+}
+debug_trade.1041 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		set_variable = {
+			name = internal_income_pool
+			value = 0
+		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_tradegood_total_internal_stockpile
+		}
+	}
+}
+debug_trade.1042 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_amount_sold
+		}
+	}
+}
+debug_trade.1043 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_trade_stockpiles
+		}
+	}
+}
+debug_trade.1044 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_trade_revenue_total
+		}
+	}
+}
+debug_trade.1045 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+		}
+	}
+}
+debug_trade.1046 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_reset_quarterly_tax_totals = yes
+	}
+}
+debug_trade.105 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_reset_quarterly_trade_scope_values = yes
+	}
+}
+debug_trade.106 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_reset_all_internal_trade_revenue_totals = yes
+	}
+}
+debug_trade.107 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_save_connection_time_values = yes
+	}
+}
+debug_trade.108 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_governorships = {
+			TRADE_reset_purchase_order_tender_completions = yes
+		}
+	}
+}
+debug_trade.109 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_governorships = {
+			TRADE_set_internal_trade_scope = yes
+		}
+	}
+}
+
+debug_trade.110 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_governorships = {
+			TRADE_update_governorship_TZs = yes
+		}
+	}
+}
+
+debug_trade.111 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_governorships = {
+			TRADE_setup_internal_trade_cuts = yes
+		}
+	}
+}
+
+debug_trade.112 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_governorships = {
+			TRADE_reset_quarterly_governorship_values = yes
+		}
+	}
+}
+
+debug_trade.113 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_setup_tax_rates = yes
+	}
+}
+
+
 
 debug_trade.2 = { # Quarterly internal trade simulation
 	type = country_event
@@ -190,6 +393,34 @@ debug_trade.3 = {
 		every_in_list = {
 			variable = governorships_in_atlantic_seaboard_tradezone
 			add_treasury = 100
+		}
+	}
+
+	option = {
+		name = "TEST"
+	}
+}
+
+debug_trade.4 = { # Trade setup, non-test version
+	type = country_event
+	title = "TEST"
+	desc = "TEST"
+	picture = aqueducts
+
+	immediate = {
+		#MOVEMENT_get_TZ_distances = yes # Commented out for now - needs fixing, svalues are improperly named.
+		TRADE_reset_all_tradegoods_TZ_internal_rankings = yes
+		TRADE_prepare_quarterly_values = yes
+		TRADE_save_connection_time_values = yes
+		every_country = {
+			every_governorships = {
+				TRADE_reset_purchase_order_tender_completions = yes
+				TRADE_set_internal_trade_scope = yes # Repeats an effect run by oa_economy_setup, needs to be run quarterly after that
+				TRADE_update_governorship_TZs = yes
+				TRADE_setup_internal_trade_cuts = yes
+				TRADE_reset_quarterly_governorship_values = yes # Not actually obsolete - this deals with governorship scope, while TRADE_reset_quarterly_values deals with global level
+			}
+			TRADE_setup_tax_rates = yes
 		}
 	}
 

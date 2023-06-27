@@ -1794,6 +1794,21 @@ PURCHASE_transfer_goods_internally = {
 	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
 	# TODO: Make this tradezone specific, so the SELL split revenue can then iterate through all variables in the list of available internal trade centers, and split out revenue to the governorships who are members of that TZ, using the variable list governorships_in_$tradezone$
 	var:internal_trade_scope = {
+	if = { # Make sure that the total_revenue variable started at 0 this cycle
+			limit = {
+				NOT = { has_variable = total_sold_and_revenue_reset } # Needs to be removed at the end of the trade.2 event
+			}
+			# Reset total revenue and total sold to 0
+			set_variable = { 
+				name = $tradegood$_total_revenue_$tradezone$
+				value = 0
+			}
+			set_variable = { 
+				name = $tradegood$_sold_total_$tradezone$
+				value = 0
+			}
+			set_variable = total_sold_and_revenue_reset
+		}
 		change_variable = {
 			name = $tradegood$_sold_total_$tradezone$
 			add = $amount$

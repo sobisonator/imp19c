@@ -1031,44 +1031,60 @@ SELL_get_internal_cut_of_revenue = {
 	# $local_cut_of_revenue$ = local_internal_revenue_cut_grain
 	# $stockpile_sold$ = grain_stockpile, the stockpile which is reduced in the governorship to reflect goods sold
 	# $amount_sold_total$ = internal_sold_total_grain, recorded by the transfer of goods effect
-
-	set_variable = { # Get the total revenue from the tradezone
-		name = local_internal_revenue_cut_$tradegood$
-		value = var:internal_trade_scope.var:$tradegood$_total_revenue_$tradezone$ # TODO: Update so that this checks income based on the governorship's TZ, as each TZ will have a unique pool of revenue according to the price of tradegoods there.
-	}
-	change_variable = {
-		name = local_internal_revenue_cut_$tradegood$
-		multiply = var:internal_stockpile_cut_percentage_$tradegood$
-	}
-
-	change_variable = {
-		name = governorship_this_quarter_income_from_$category$ # Quarterly governorship income is only divvied up and given out at the end of both internal and external trade. Gets reset at the beginning of every quarter
-		add = var:local_internal_revenue_cut_$tradegood$
-	}
-
-	# SUBTRACT THE RESOURCES SOLD FROM THE GOVERNORSHIPS ACCORDING TO THEIR CUT
-
-	var:internal_trade_scope = {
-		set_local_variable = {
-			name = local_sold_cut
-			value = var:$tradegood$_sold_total_$tradezone$
+	if = {
+		limit = {
+			var:internal_trade_scope = {
+				has_variable = $tradegood$_total_revenue_$tradezone$
+			}
 		}
-	}
-
-	change_local_variable = {
-		name = local_sold_cut
-		multiply = var:internal_stockpile_cut_percentage_$tradegood$
-	}
-
-	change_variable = {
-		name = $tradegood$_stockpile
-		subtract = local_var:local_sold_cut
-	}
-
-	owner = {
+		if = {
+			limit = {
+				NOT = { has_variable = local_revenue_cut_reset_$tradegood$ }
+			}
+			set_variable = local_revenue_cut_reset_$tradegood$ # Must be cleared at end of trade phase
+			set_variable = {
+				name = local_internal_revenue_cut_$tradegood$
+				value = 0
+			}
+		}
+		change_variable = { # Get the total revenue from the tradezone
+			name = local_internal_revenue_cut_$tradegood$
+			add = var:internal_trade_scope.var:$tradegood$_total_revenue_$tradezone$ # TODO: Update so that this checks income based on the governorship's TZ, as each TZ will have a unique pool of revenue according to the price of tradegoods there.
+		}
 		change_variable = {
-			name = country_internal_total_sold_$tradegood$
-			add = local_var:local_sold_cut
+			name = local_internal_revenue_cut_$tradegood$
+			multiply = var:internal_stockpile_cut_percentage_$tradegood$
+		}
+
+		change_variable = {
+			name = governorship_this_quarter_income_from_$category$ # Quarterly governorship income is only divvied up and given out at the end of both internal and external trade. Gets reset at the beginning of every quarter
+			add = var:local_internal_revenue_cut_$tradegood$
+		}
+
+		# SUBTRACT THE RESOURCES SOLD FROM THE GOVERNORSHIPS ACCORDING TO THEIR CUT
+
+		var:internal_trade_scope = {
+			set_local_variable = {
+				name = local_sold_cut
+				value = var:$tradegood$_sold_total_$tradezone$
+			}
+		}
+
+		change_local_variable = {
+			name = local_sold_cut
+			multiply = var:internal_stockpile_cut_percentage_$tradegood$
+		}
+
+		change_variable = {
+			name = $tradegood$_stockpile
+			subtract = local_var:local_sold_cut
+		}
+
+		owner = {
+			change_variable = {
+				name = country_internal_total_sold_$tradegood$
+				add = local_var:local_sold_cut
+			}
 		}
 	}
 

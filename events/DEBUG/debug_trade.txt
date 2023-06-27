@@ -14,20 +14,22 @@ debug_trade.1 = { # Trade setup
 		# trigger_event = { id = debug_trade.104 } # quarterly values # Split up into sub-events
 		every_country = {
 			trigger_event = { id = debug_trade.1041 }
-			trigger_event = { id = debug_trade.1042 }
+			# trigger_event = { id = debug_trade.1042 }
+			# trigger_event = { id = debug_trade.1047 } # Combined 42 and 44
 			trigger_event = { id = debug_trade.1043 }
-			trigger_event = { id = debug_trade.1044 }
+			#trigger_event = { id = debug_trade.1044 }
 			trigger_event = { id = debug_trade.1045 }
 			trigger_event = { id = debug_trade.1046 }
 			TRADE_reset_quarterly_tax_totals = yes
 		}
 		every_federation = {
-			trigger_event = { id = debug_trade.1041 }
-			trigger_event = { id = debug_trade.1042 }
-			trigger_event = { id = debug_trade.1043 }
-			trigger_event = { id = debug_trade.1044 }
-			trigger_event = { id = debug_trade.1045 }
-			trigger_event = { id = debug_trade.1046 }
+			trigger_event = { id = debug_trade.1051 } # Province version
+			# trigger_event = { id = debug_trade.10522 } # Province version
+			# trigger_event = { id = debug_trade.1057 } # Combined 52 and 54
+			trigger_event = { id = debug_trade.1053 } # Province version
+			# trigger_event = { id = debug_trade.10544 } # Province version
+			trigger_event = { id = debug_trade.1055 } # Province version
+			trigger_event = { id = debug_trade.1056 } # Province version
 		}
 		# trigger_event = { id = debug_trade.105 } # quarterly values - This just repeats debug_trade.104
 		trigger_event = { id = debug_trade.106 } # quarterly values
@@ -107,6 +109,16 @@ debug_trade.1042 = {
 		}
 	}
 }
+debug_trade.1047 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_trt_ias
+		}
+	}
+}
 debug_trade.1043 = {
 	type = country_event
 	hidden = yes
@@ -139,6 +151,81 @@ debug_trade.1045 = {
 }
 debug_trade.1046 = {
 	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_reset_quarterly_tax_totals = yes
+	}
+}
+debug_trade.1051 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		set_variable = {
+			name = internal_income_pool
+			value = 0
+		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_tradegood_total_internal_stockpile
+		}
+		every_tradegoods_complex = {
+			APPLY = TRADE_setup_governorship_for_export_internal_vars
+		}
+	}
+}
+debug_trade.1052 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_amount_sold
+		}
+	}
+}
+debug_trade.1057 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_trt_ias
+		}
+	}
+}
+debug_trade.1053 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_trade_stockpiles
+		}
+	}
+}
+debug_trade.1054 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_internal_trade_revenue_total
+		}
+	}
+}
+debug_trade.1055 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegoods_complex = {
+			APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+		}
+	}
+}
+debug_trade.1056 = {
+	type = province_event
 	hidden = yes
 
 	immediate = {
@@ -502,6 +589,24 @@ debug_trade.219 = {
 	}
 }
 
+debug_trade.220 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		TRADE_clear_total_sold_and_revenue_flag = yes
+	}
+}
+
+debug_trade.221 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			TRADE_clear_local_revenue_cut_flag = yes
+		}
+	}
+}
+
 debug_trade.2 = { # Quarterly internal trade simulation
 	type = country_event
 	title = "TEST"
@@ -509,21 +614,20 @@ debug_trade.2 = { # Quarterly internal trade simulation
 	picture = aqueducts
 
 	immediate = {
-		debug_log = "Starting debug_trade.2"
 		trigger_event = { id = debug_trade.201 }
 		trigger_event = { id = debug_trade.202 }
 		every_country = {
 			trigger_event = { id = debug_trade.2031 }
-			trigger_event = { id = debug_trade.2032 }
+			#trigger_event = { id = debug_trade.2032 }
 			trigger_event = { id = debug_trade.2033 }
-			trigger_event = { id = debug_trade.2034 }
+			#trigger_event = { id = debug_trade.2034 }
 			trigger_event = { id = debug_trade.2035 }
 		}
 		every_federation = {
 			trigger_event = { id = debug_trade.2031 }
-			trigger_event = { id = debug_trade.2032 }
+			#trigger_event = { id = debug_trade.2032 }
 			trigger_event = { id = debug_trade.2033 }
-			trigger_event = { id = debug_trade.2034 }
+			#trigger_event = { id = debug_trade.2034 }
 			trigger_event = { id = debug_trade.2035 }
 		}
 		every_internal_trade_viable_country = {
@@ -558,7 +662,12 @@ debug_trade.2 = { # Quarterly internal trade simulation
 				trigger_event = { id = debug_trade.219 }
 			#}
 		}
-		debug_log = "Finished debug_trade.2"
+		every_country = {
+			trigger_event = { id = debug_trade.220 }
+		}
+		every_federation = {
+			trigger_event = { id = debug_trade.220 }
+		}
 	}
 
 	option = {
@@ -608,7 +717,7 @@ debug_trade.2 = { # Quarterly internal trade simulation
 	
 #}
 
-debug_trade.2 = { # Quarterly internal trade simulation
+debug_trade.5 = { # Quarterly internal trade simulation
 	type = country_event
 	title = "TEST"
 	desc = "TEST"

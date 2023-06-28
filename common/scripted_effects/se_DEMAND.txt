@@ -1,3 +1,63 @@
+DEMAND_get_food_demand = {
+	# Scope: governorship
+	# Function: Calculate demand from food for the given food tradegood in this governorship.
+	# Sets a a var, DEMAND_food_$tradegood$
+	# This may be additional to other sources of demand for this tradegood not from food.
+	# DEMAND_$tradegood$ is ultimately used in PURCHASE_set_order_size to set the size of the order, after subtracting the size of the local tradegood stockpile
+	# Takes arguments:
+	# tradegood = the tradegood for which to calculate demand
+
+	# This is a reimplementation of the demand svalues
+
+	# The base of food demand is derived from essentials
+	set_variable = {
+		name = DEMAND_food_$tradegood$
+		value = DEMAND_essentials # DEMAND_svalues
+	}
+
+	set_local_variable = {
+		name = l_DEMAND_$tradegood$_price_diff_to_food_mean
+		value = var:price_$tradegood$
+	}
+
+	change_local_variable = {
+		name = l_DEMAND_$tradegood$_price_diff_to_food_mean
+		divide = var:var_DEMAND_food_mean_price_normalised
+	}
+
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+			DEMAND_grain > 0
+		}
+		if = {
+			limit = {
+				NOT = { DEMAND_$tradegood$_price_diff_to_food_mean = 0 }
+			}
+			change_variable = {
+				name = DEMAND_food_$tradegood$
+				divide = local_var:l_DEMAND_$tradegood$_price_diff_to_food_mean
+			}
+		}
+	}
+
+	# The old system bounded this between a max of unfulfilled food need (i.e. demand minus local production) and a min of DEMAND_consumer_minus_produced_$tradegood$, but the order size effectively does this job by subtracting the local amount available before making an order.
+
+	if = {
+		limit = {
+			has_variable = previous_tick_demand_$tradegood$
+		}
+		FUNC_bound_variable = {
+			variable = DEMAND_food_$tradegood$
+			max = previous_tick_demand_$tradegood$_110_percent
+			max_type = 'var:'
+			min = previous_tick_demand_$tradegood$_90_percent
+			min_type = 'var:'
+		}
+	}
+
+}
+
 DEMAND_get_luxury_demand = {
 	# Scope: governorship
 	# Function: Count the amount of demand for the given luxury tradegood.

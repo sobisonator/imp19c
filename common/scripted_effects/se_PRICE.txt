@@ -1,103 +1,317 @@
-PRICE_set_tradegood_price_deviation_from_mean_absolute = {
+PRICE_update_price = {
+	# Scope: Governorship
+	# Function: Update the price based on supply and demand, and reset the demand and supply to 1 (not zero, to avoid unintended div/0 errors in cases where there is no demand or supply in the scope)
+	# The price is also bound so it does not change too drastically
+	if = {
+		limit = { has_global_variable = first_time_price_setup_food_done }
+		# Get 110% and 90% of the previous price as upper and lower bounds
+		if = {
+			limit = { has_variable = price_$tradegood$ }
+			set_variable = {
+				name = previous_price_$tradegood$
+				value = var:price_$tradegood$
+			}
+			set_variable = {
+				name = previous_price_$tradegood$_110
+				value = var:previous_price_$tradegood$
+			}
+			change_variable = {
+				name = previous_price_$tradegood$_110
+				multiply = 1.1
+			}
+			set_variable = {
+				name = previous_price_$tradegood$_90
+				value = var:previous_price_$tradegood$
+			}
+			change_variable = {
+				name = previous_price_$tradegood$_90
+				multiply = 0.9
+			}
+		}
+		set_variable = {
+			name = price_$tradegood$
+			value = var:demand_ITS_$tradegood$
+		}
+		if = {
+			limit = { var:supply_ITS_$tradegood$ > 0 }
+			change_variable = {
+				name = price_$tradegood$
+				divide = var:supply_ITS_$tradegood$
+			}
+		}
+		# Apply upper and lower bounds
+		if = {
+			limit = {
+				var:price_$tradegood$ > var:previous_price_$tradegood$_110
+			}
+			set_variable = {
+				name = price_$tradegood$
+				value = var:previous_price_$tradegood$_110
+			}
+		}
+		else_if = {
+			limit = {
+				var:price_$tradegood$ < var:previous_price_$tradegood$_90
+			}
+			set_variable = {
+				name = price_$tradegood$
+				value = var:previous_price_$tradegood$_90
+			}
+		}
+	}
+	else = {
+		set_variable = {
+			name = price_$tradegood$
+			value = 1
+		}
+	}
+
+	# Then reset the demand and supply so it can be updated for next quarter
 	set_variable = {
-		name = 
+		name = demand_ITS_$tradegood$
+		value = 1
+	}
+	set_variable = {
+		name = supply_ITS_$tradegood$
+		value = 1
 	}
 }
 
-PRICE_set_food_mean_price = {
-	
+# Food prices
+# Order of running:
+# . TRADE_cache_svalues_governorship_trade
+# . PRICE_get_food_price_mean
+# . PRICE_get_all_food_deviations_from_mean_absolute
+# . PRICE_set_food_price_MAD
+# . PRICE_set_PRICE_food_mean_normalised
+# . DEMAND_get_food_demand for every food tradegood
+
+PRICE_get_food_price_mean = {
+	# Scope: Governorship
+	# Function: Get the mean food price in the governorship
+	if = {
+		limit = {
+			has_global_variable = first_time_price_setup_food_done
+		}
+		set_variable = {
+			name = PRICE_food_mean
+			value = var:price_grain
+		}
+		change_variable = {
+			name = PRICE_food_mean
+			add = var:price_fish
+		}
+		change_variable = {
+			name = PRICE_food_mean
+			add = var:price_livestock
+		}
+		change_variable = {
+			name = PRICE_food_mean
+			add = var:price_mediterranean_fruit
+		}
+		change_variable = {
+			name = PRICE_food_mean
+			add = var:price_temperate_fruit
+		}
+		change_variable = {
+			name = PRICE_food_mean
+			add = var:price_tropical_fruit
+		}
+		change_variable = {
+			name = PRICE_food_mean
+			add = var:price_vegetables
+		}
+		change_variable = {
+			name = PRICE_food_mean
+			add = var:price_processed_foods
+		}
+	}
+	else = {
+		value = 1
+	}
+	change_variable = {
+		name = PRICE_food_mean 
+		divide = DEMAND_num_food_tradegoods
+	}
 }
 
-PRICE_set_food_mean_absolute_deviation = {
-	
+PRICE_get_all_food_deviations_from_mean_absolute = {
+	# Scope: Country, per tradezone
+	# Function: Get the absolute deviation of each food price from the mean food price
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = grain
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = fish
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = livestock
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = mediterranean_fruit
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = temperate_fruit
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = tropical_fruit
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = vegetables
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = processed_foods
+	}
 }
 
-PRICE_set_food_mean_price_normalised = {
-	# Scope: governorship
+PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+	# Scope: Governorship
+	# Function: While iterating through all tradegoods, set the deviation of this tradegood's price from the Mean Absolute Deviation
+	set_variable = {
+		name = PRICE_$tradegood$_deviation_from_mean_absolute
+		value = var:price_grain
+	}
+	change_variable = {
+		name = PRICE_$tradegood$_deviation_from_mean_absolute
+		subtract = var:PRICE_food_mean # var:var_DEMAND_food_avg_price # TODO: Bring in the get effect for this
+	}
+	if = {
+		limit = { var:PRICE_$tradegood$_deviation_from_mean_absolute < 0 }
+		change_variable = {
+			name = PRICE_$tradegood$_deviation_from_mean_absolute
+			multiply = -1
+		}
+	}
+}
+
+PRICE_set_food_price_MAD = {
+	# Scope: Governorship
+	# Function: Set the mean absolute deviation for food tradegoods
+	set_variable = {
+		name = PRICE_food_MAD
+		value = var:PRICE_grain_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_fish_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_livestock_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_mediterranean_fruit_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_temperate_fruit_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_tropical_fruit_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_vegetables_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_processed_foods_deviation_from_mean_absolute
+	}
+
+	change_variable = {
+		name = PRICE_food_MAD
+		divide = DEMAND_num_food_tradegoods
+	}
+}
+
+PRICE_set_food_mean_normalised_price = {
+	# Scope: Governorship
 	# Ignore prices outside of the MAD for average price calculation
 	if = {
 		limit = {
 			NOT = { has_global_variable = first_time_price_setup_food_done }
 		}
 		set_variable = {
-			name = food_mean_price_normalised
+			name = PRICE_food_mean_normalised
 			value = 1
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_grain_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:PRICE_grain_deviation_from_mean_absolute < var:PRICE_food_MAD
 		}
 		change_variable = {
-			name = food_mean_price_normalised
+			name = PRICE_food_mean_normalised
 			add = var:price_grain
 		}
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_fish_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:PRICE_fish_deviation_from_mean_absolute < var:PRICE_food_MAD
 		}
 		change_variable = {
-			name = food_mean_price_normalised
+			name = PRICE_food_mean_normalised
 			add = var:price_fish
 		}
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_livestock_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:PRICE_livestock_deviation_from_mean_absolute < var:PRICE_food_MAD
 		}
 		change_variable = {
-			name = food_mean_price_normalised
+			name = PRICE_food_mean_normalised
 			add = var:price_livestock
 		}
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_mediterranean_fruit_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:PRICE_mediterranean_fruit_deviation_from_mean_absolute < var:PRICE_food_MAD
 		}
 		change_variable = {
-			name = food_mean_price_normalised
+			name = PRICE_food_mean_normalised
 			add = var:price_mediterranean_fruit
 		}
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_temperate_fruit_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:PRICE_temperate_fruit_deviation_from_mean_absolute < var:PRICE_food_MAD
 		}
 		change_variable = {
-			name = food_mean_price_normalised
+			name = PRICE_food_mean_normalised
 			add = var:price_temperate_fruit
 		}
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_tropical_fruit_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:PRICE_tropical_fruit_deviation_from_mean_absolute < var:PRICE_food_MAD
 		}
 		change_variable = {
-			name = food_mean_price_normalised
+			name = PRICE_food_mean_normalised
 			add = var:price_tropical_fruit
 		}
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_vegetables_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:PRICE_vegetables_deviation_from_mean_absolute < var:PRICE_food_MAD
 		}
 		change_variable = {
-			name = food_mean_price_normalised
+			name = PRICE_food_mean_normalised
 			add = var:price_vegetables
 		}
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_processed_foods_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:PRICE_processed_foods_deviation_from_mean_absolute < var:PRICE_food_MAD
 		}
 		change_variable = {
-			name = food_mean_price_normalised
+			name = PRICE_food_mean_normalised
 			add = var:price_processed_foods
 		}
 	}
 	divide = DEMAND_num_food_tradegoods
 	FUNC_bound_variable = {
-		variable = food_mean_price_normalised
+		variable = PRICE_food_mean_normalised
 		max = NONE
 		max_type = ''
 		min = 0.0001

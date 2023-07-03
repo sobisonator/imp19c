@@ -1426,6 +1426,7 @@ SELL_set_TZ_price_modifier = { # used to get local price modifier for the named 
 
 SELL_set_TZ_prices = {
 	# Scope: TZ
+	# Function:
 	# This effect determines the sale price modifier on the global price of the given tradegood
 	# This does NOT contain an iteration of all TZs, as it should only be run in TZs that actually supply said good.
 		# the on_action should have the every_in_global_list, with a limit that they have a variable for that tradegood
@@ -1433,9 +1434,58 @@ SELL_set_TZ_prices = {
 	# Format of arguments:
 	# $local_price$ = local_price_grain
 	# $global_price$ = global_price_grain
+	save_scope_as = current_TZ
+
 	set_variable = {
-		name = local_price_$tradegood$
-		value = global_var:global_price_$tradegood$
+		name = total_sold_TZ_$tradegood$
+		value = 0.01 # Base value, needs to be != to avoid div/0 errors
+	}
+	set_local_variable = {
+		name = l_total_demand_TZ_$tradegood$
+		value = 0
+	}
+	every_region = {
+		limit = {
+			any_region_province = {
+				has_owner = yes
+				state.governorship = {
+					var:trade_center = scope:current_TZ
+				}
+			}
+		}
+		every_region_province = {
+			limit = {
+				has_owner = yes
+				state.governorship = {
+					NOT = { has_local_variable = iterated_TZ_demand }
+				}
+			}
+			state.governorship = {
+				change_local_variable = {
+					name = l_total_demand_TZ_$tradegood$
+					add = DEMAND_$tradegood$ # This should probably be cached. TODO
+				}
+				set_local_variable = iterated_TZ_demand
+			}
+		}
+	}
+	set_variable = {
+		name = total_demand_TZ_$tradegood$
+		value = local_var:l_total_demand_TZ_$tradegood$
+	}
+
+	if = {
+		limit = { has_global_variable = first_time_generic_price_setup_done }
+		PRICE_update_price_TZ = {
+			tradegood = $tradegood$
+		}
+	}
+	if = {
+		limit = { NOT = { has_global_variable = first_time_generic_price_setup_done } }
+		set_variable = {
+			name = local_price_$tradegood$
+			value = global_var:global_price_$tradegood$
+		}
 	}
 }
 

@@ -1,5 +1,51 @@
+PRICE_update_price_TZ = {
+	if = {
+
+		limit = { has_variable = local_price_$tradegood$ }
+
+		set_variable = {
+			name = previous_price_$tradegood$
+			value = var:local_price_$tradegood$
+		}
+		set_variable = {
+			name = previous_price_$tradegood$_110
+			value = var:previous_price_$tradegood$
+		}
+		change_variable = {
+			name = previous_price_$tradegood$_110
+			multiply = 1.1
+		}
+		set_variable = {
+			name = previous_price_$tradegood$_90
+			value = var:previous_price_$tradegood$
+		}
+		change_variable = {
+			name = previous_price_$tradegood$_90
+			multiply = 0.9
+		}
+
+		set_variable = {
+			name = local_price_$tradegood$
+			value = var:total_demand_TZ_$tradegood$
+		}
+		change_variable = {
+			name = local_price_$tradegood$
+			divide = var:total_sold_TZ_$tradegood$
+		}
+
+		FUNC_clamp_variable = {
+			variable = local_price_$tradegood$
+			max = previous_price_$tradegood$_110
+			max_type = var:
+			min = previous_price_$tradegood$_90
+			min_type = var:
+		}
+
+	}
+}
+
 PRICE_update_price = {
-	# Scope: Governorship
+	# Scope: Internal trade scope
 	# Function: Update the price based on supply and demand, and reset the demand and supply to 1 (not zero, to avoid unintended div/0 errors in cases where there is no demand or supply in the scope)
 	# The price is also bound so it does not change too drastically
 	if = {
@@ -310,7 +356,7 @@ PRICE_set_food_mean_normalised_price = {
 		}
 	}
 	divide = DEMAND_num_food_tradegoods
-	FUNC_bound_variable = {
+	FUNC_clamp_variable = {
 		variable = PRICE_food_mean_normalised
 		max = NONE
 		max_type = ''

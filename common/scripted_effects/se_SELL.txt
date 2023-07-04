@@ -1436,26 +1436,37 @@ SELL_set_TZ_prices = {
 	# $global_price$ = global_price_grain
 	save_scope_as = current_TZ
 
-	set_variable = {
-		name = total_sold_TZ_$tradegood$
+	set_local_variable = {
+		name = l_total_demand_TZ_$tradegood$
 		value = 0.01 # Base value, needs to be != to avoid div/0 errors
 	}
 	set_local_variable = {
-		name = l_total_demand_TZ_$tradegood$
-		value = 0
+		name = l_total_supply_TZ_$tradegood$
+		value = 0.01 # Base value, needs to be != to avoid div/0 errors
 	}
 	every_country = {
 		every_governorships = {
+			limit = {
+				var:trade_center = scope:current_TZ
+			}
 			change_local_variable = {
 				name = l_total_demand_TZ_$tradegood$
 				add = DEMAND_$tradegood$ # This should probably be cached. TODO
 			}
-			set_local_variable = iterated_TZ_demand
+			change_local_variable = {
+				name = l_total_supply_TZ_$tradegood$
+				add = TRADE_governorship_for_export_internal_$tradegood$ # This should probably be cached. TODO
+			}
+			# set_local_variable = iterated_TZ_demand
 		}
 	}
 	set_variable = {
 		name = total_demand_TZ_$tradegood$
 		value = local_var:l_total_demand_TZ_$tradegood$
+	}
+	set_variable = {
+		name = total_supply_TZ_$tradegood$
+		value = local_var:l_total_supply_TZ_$tradegood$
 	}
 
 	if = {
@@ -1464,13 +1475,15 @@ SELL_set_TZ_prices = {
 			tradegood = $tradegood$
 		}
 	}
-	if = {
-		limit = { NOT = { has_global_variable = first_time_generic_price_setup_done } }
+	else = {
 		set_variable = {
 			name = local_price_$tradegood$
 			value = global_var:global_price_$tradegood$
 		}
 	}
+
+	remove_local_variable = l_total_demand_TZ_$tradegood$
+
 }
 
 SELL_declare_all_external_available = {

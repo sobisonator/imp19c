@@ -378,12 +378,33 @@ PURCHASE_check_shopping_internal = {
 			category = $category$
 		}
 	}
+	# EXTERNAL
 	# If the stockpile is still not full, try to purchase externally.
-	#if = {
-	#	limit = {
-	#
-	#	}
-	#}
+	# Reset demand diff
+	set_local_variable = {
+		name = l_demand_diff
+		value = DEMAND_$tradegood$
+	}
+	change_local_variable = {
+		name = l_demand_diff
+		subtract = var:$tradegood$_stockpile
+	}
+
+	# Returns var:l_order_size
+	PURCHASE_set_order_size = {
+		tradegood = $tradegood$
+	}
+
+	if = {
+		limit = {
+			var:l_order_size > 0
+		}
+		PURCHASE_order_external = {
+			tradegood = $tradegood$
+			order_size = scope:purchaser_governorship.var:l_order_size
+			category = $category$
+		}
+	}
 }
 
 PURCHASE_rank_supplier_zone_internal = {
@@ -1714,16 +1735,18 @@ PURCHASE_transfer_goods_internally = {
 	# $internal_sold_total$ = internal_sold_total_grain, the total amount sold in the internal trade scope, used by the effect to distribute the cut of amount sold to contributing governorships
 	debug_log = "Transferring  $tradegood$  from  $tradezone$"
 
-	# ADD TO BUYER'S STOCKPILE
-	change_variable = {
-		name = $tradegood$_stockpile
-		add = $amount$
-	}
+	scope:purchaser_governorship = {
+		# ADD TO BUYER'S STOCKPILE
+		change_variable = {
+			name = $tradegood$_stockpile
+			add = $amount$
+		}
 
-	# ALLOCATE WEALTH FOR THE POOL
-	set_local_variable = {
-		name = this_spend
-		value = $amount$
+		# ALLOCATE WEALTH FOR THE POOL
+		set_local_variable = {
+			name = this_spend
+			value = $amount$
+		}
 	}
 
 	# SUBTRACT FROM THE SELECTED INTERNAL AVAILABLE STOCKPILE
@@ -1750,38 +1773,40 @@ PURCHASE_transfer_goods_internally = {
 	# SUBTRACT MONEY FROM THE BUYING GOVERNORSHIP'S BALANCE
 	# The balance will then be applied to the governorship wealth pools at the end of the purchase phase
 
-	# Add transport costs
-	if = { # Only add transport costs between tradezones if there is an actual transport cost to account for
-		limit = {
-			var:trade_center = {
-				has_variable = here_to_$tradezone$_tradezone
+	scope:purchaser_governorship = {
+		# Add transport costs
+		if = { # Only add transport costs between tradezones if there is an actual transport cost to account for
+			limit = {
+				var:trade_center = {
+					has_variable = here_to_$tradezone$_tradezone
+				}
+			}
+			change_local_variable = {
+				name = this_spend
+				add = var:trade_center.var:here_to_$tradezone$_tradezone # Note: should this be re-framed as here_from_$tradezone$, so that it can account for the speed of importing being faster in one direction?
+			}
+			change_variable = {
+				name = governorship_this_quarter_spend_on_transport_$tradegood$ # Track the transport costs for the player's benefit
+				add = var:trade_center.var:here_to_$tradezone$_tradezone
 			}
 		}
-		change_local_variable = {
-			name = this_spend
-			add = var:trade_center.var:here_to_$tradezone$_tradezone # Note: should this be re-framed as here_from_$tradezone$, so that it can account for the speed of importing being faster in one direction?
-		}
+		# TODO: Add a way to account for transport costs within a tradezone, too, using trade infrastructure level?
+
 		change_variable = {
-			name = governorship_this_quarter_spend_on_transport_$tradegood$ # Track the transport costs for the player's benefit
-			add = var:trade_center.var:here_to_$tradezone$_tradezone
+			name = governorship_this_quarter_spend_on_$category$
+			subtract = local_var:this_spend # Must be negative so it can be used with add_treasury
 		}
-	}
-	# TODO: Add a way to account for transport costs within a tradezone, too, using trade infrastructure level?
 
-	change_variable = {
-		name = governorship_this_quarter_spend_on_$category$
-		subtract = local_var:this_spend # Must be negative so it can be used with add_treasury
-	}
-
-	owner = {
-		change_variable = {
-			name = country_internal_bought_total_$tradegood$
-			add = $amount$
+		owner = {
+			change_variable = {
+				name = country_internal_bought_total_$tradegood$
+				add = $amount$
+			}
 		}
-	}
 
-	# Mark the goods transfer as complete, so it does not repeat the order in lower ranked tradezones
-	set_variable = $tradegood$_purchase_order_tender_complete
+		# Mark the goods transfer as complete, so it does not repeat the order in lower ranked tradezones
+		set_variable = $tradegood$_purchase_order_tender_complete
+	}
 
 	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
 	# TODO: Make this tradezone specific, so the SELL split revenue can then iterate through all variables in the list of available internal trade centers, and split out revenue to the governorships who are members of that TZ, using the variable list governorships_in_$tradezone$
@@ -2251,18 +2276,45 @@ PURCHASE_check_shopping_external = {
 
 PURCHASE_order_external = {
 	# Scope: governorship
-	# Buy from the external trade scope's stockpile, be it country or customs union
+	# Function: Buy from stockpiles in other trade scopes
+	# Called: By PURCHASE_check_shopping_internal, if PURCHASE_order_internal does not succeed in filling up the stockpile
+	if = {
+		limit = { has_variable_list = list_of_trade_partners_all_categories }
+		ordered_in_list = {
+			# TODO: Break this list down down by the $category$ in question, as trade agreements can be for all or some categories.
+			variable = list_of_trade_partners_all_categories
+			order_by = { # Order by highest rank seller's capital's best ranked tradezone stockpile size, largest to smallest. Buy from the biggest stockpile, as it will be pre-sorted on price by the other trade scopes ranking them.
+				value = 0
+				if = {
+					limit = {
+						capital_scope.governorship.var:internal_trade_scope = {
+							has_variable = 1st_rank_internal_supplier_$tradegood$
+						}
+					}
+					add = var:1st_rank_internal_supplier_$tradegood$.var:$tradegood$_stockpile_$tradezone$_tradezone
+				}
+				# TODO: Add a way of affecting the order by the distance between scope:purchaser_governorship and the seller tradezone
+				#if = {
+				#	limit = {
+				#		scope:purchaser_governorship.var:trade_center = {
+				#			has_variable = here_to_$tradezone$_tradezone
+				#		}
+				#	}
+				#	add = scope:purchaser_governorship.var:trade_center.var:here_to_$tradezone$_tradezone
+				#}
+			}
 
-	# Format of arguments:
-	# $for_stockpile$ = grain_stockpile, the stockpile in the governorship scope
-	# $from_stockpile$ = grain_stockpile_external, the stockpile from the external trade scope with the sum of all goods available for external trade
-	# $order_size$ = local variable, global_var:l_order_size
-	# $external_sold_total$ = external_sold_total_grain
+			capital_scope.governorship = { # Capital of the seller's country acts as the trader, handling the transfer on behalf of the purchaser governorship
+				PURCHASE_try_supplier = {
+					supplier_rank = 1st
+					order_size = $order_size$
+					tradegood = $tradegood$
+					category = $category$
+				}
+			}
 
-	debug_log = "Making a purchase order for  $tradegood$"
-
-	# Try the most desirable trade route first
-
+		}
+	}
 }
 
 

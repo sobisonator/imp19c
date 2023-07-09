@@ -2279,40 +2279,44 @@ PURCHASE_order_external = {
 	# Function: Buy from stockpiles in other trade scopes
 	# Called: By PURCHASE_check_shopping_internal, if PURCHASE_order_internal does not succeed in filling up the stockpile
 	if = {
-		limit = { has_variable_list = list_of_trade_partners_all_categories }
-		ordered_in_list = {
-			# TODO: Break this list down down by the $category$ in question, as trade agreements can be for all or some categories.
-			variable = list_of_trade_partners_all_categories
-			order_by = { # Order by highest rank seller's capital's best ranked tradezone stockpile size, largest to smallest. Buy from the biggest stockpile, as it will be pre-sorted on price by the other trade scopes ranking them.
-				value = 0
-				if = {
-					limit = {
-						capital_scope.governorship.var:internal_trade_scope = {
-							has_variable = 1st_rank_internal_supplier_$tradegood$
+		limit = { 
+			owner = { has_variable_list = list_of_trade_partners_all_categories }
+		}
+		owner = {
+			ordered_in_list = {
+				# TODO: Break this list down down by the $category$ in question, as trade agreements can be for all or some categories.
+				variable = list_of_trade_partners_all_categories
+				order_by = { # Order by highest rank seller's capital's best ranked tradezone stockpile size, largest to smallest. Buy from the biggest stockpile, as it will be pre-sorted on price by the other trade scopes ranking them.
+					value = 0
+					if = {
+						limit = {
+							capital_scope.governorship.var:internal_trade_scope = {
+								has_variable = 1st_rank_internal_supplier_$tradegood$
+							}
 						}
+						add = var:1st_rank_internal_supplier_$tradegood$.var:$tradegood$_stockpile_$tradezone$_tradezone
 					}
-					add = var:1st_rank_internal_supplier_$tradegood$.var:$tradegood$_stockpile_$tradezone$_tradezone
+					# TODO: Add a way of affecting the order by the distance between scope:purchaser_governorship and the seller tradezone
+					#if = {
+					#	limit = {
+					#		scope:purchaser_governorship.var:trade_center = {
+					#			has_variable = here_to_$tradezone$_tradezone
+					#		}
+					#	}
+					#	add = scope:purchaser_governorship.var:trade_center.var:here_to_$tradezone$_tradezone
+					#}
 				}
-				# TODO: Add a way of affecting the order by the distance between scope:purchaser_governorship and the seller tradezone
-				#if = {
-				#	limit = {
-				#		scope:purchaser_governorship.var:trade_center = {
-				#			has_variable = here_to_$tradezone$_tradezone
-				#		}
-				#	}
-				#	add = scope:purchaser_governorship.var:trade_center.var:here_to_$tradezone$_tradezone
-				#}
-			}
 
-			capital_scope.governorship = { # Capital of the seller's country acts as the trader, handling the transfer on behalf of the purchaser governorship
-				PURCHASE_try_supplier = {
-					supplier_rank = 1st
-					order_size = $order_size$
-					tradegood = $tradegood$
-					category = $category$
+				capital_scope.governorship = { # Capital of the seller's country acts as the trader, handling the transfer on behalf of the purchaser governorship
+					PURCHASE_try_supplier = {
+						supplier_rank = 1st
+						order_size = $order_size$
+						tradegood = $tradegood$
+						category = $category$
+					}
 				}
-			}
 
+			}
 		}
 	}
 }

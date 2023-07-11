@@ -396,10 +396,13 @@ PURCHASE_check_shopping_internal = {
 		tradegood = $tradegood$
 	}
 
+	debug_log = "About to check purchase order external trigger"
+
 	if = {
 		limit = {
 			var:l_order_size > 0
 		}
+		debug_log = "Purchase order external triggers YES"
 		PURCHASE_order_external = {
 			tradegood = $tradegood$
 			order_size = scope:purchaser_governorship.var:l_order_size
@@ -2302,7 +2305,7 @@ PURCHASE_order_external = {
 								has_variable = 1st_rank_internal_supplier_$tradegood$
 							}
 						}
-						add = var:1st_rank_internal_supplier_$tradegood$.var:$tradegood$_stockpile_$tradezone$_tradezone
+						add = var:1st_rank_internal_supplier_$tradegood$.var:local_price_$tradegood$
 					}
 					# TODO: Add a way of affecting the order by the distance between scope:purchaser_governorship and the seller tradezone
 					#if = {
@@ -2319,9 +2322,7 @@ PURCHASE_order_external = {
 
 					if = {
 						limit = {
-							var:trade_center = {
-								NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
-							}
+							NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
 						}
 						PURCHASE_get_preferred_tradezone_internal = {
 							tradegood = $tradegood$
@@ -2336,9 +2337,8 @@ PURCHASE_order_external = {
 						category = $category$
 					}
 
-					var:trade_center = { # Remove the 1st rank supplier
-						remove_variable = 1st_rank_internal_supplier_$tradegood$
-					}
+					# Remove the 1st rank supplier that was used just for external trade
+					remove_variable = 1st_rank_internal_supplier_$tradegood$
 				}
 
 			}

@@ -57,6 +57,10 @@ PURCHASE_make_internal_shopping_list = {
 		category = essential_goods
 	}
 	PURCHASE_check_shopping_internal = { 
+		tradegood = vegetables 
+		category = essential_goods
+	}
+	PURCHASE_check_shopping_internal = { 
 		tradegood = tropical_fruit 
 		category = essential_goods
 	}
@@ -726,9 +730,9 @@ PURHCASE_get_seller_purchaser_score_internal = {
 }
 
 PURCHASE_check_name_and_apply_rank_internal = {
-	# Scope: trade center province
+	# Scope: trade center province, to the governorship which is ranking the tradezone
 	# Function: Check what the name of the tradezone is, and give the ranking variable the corresponding value
-	scope:purchaser_governorship = {
+	scope:ranking_governorship = {
 		if = {
 			limit = {
 				NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
@@ -770,6 +774,7 @@ PURCHASE_get_preferred_tradezone_internal = {
 	# Also, condense the if_else list into a single scripted effect that can be re-used by the external ranking script
 
 	var:trade_center = { save_scope_as = purchaser_TZ_scope }
+	save_scope_as = ranking_governorship # Usually the same as purchaser governorship, except for during international trade
 	var:internal_trade_scope = {
 		
 		every_in_list = {
@@ -2289,11 +2294,25 @@ PURCHASE_order_external = {
 	# Function: Buy from stockpiles in other trade scopes
 	# Called: By PURCHASE_check_shopping_internal, if PURCHASE_order_internal does not succeed in filling up the stockpile
 	debug_log = "Making an EXTERNAL purchase order for $tradegood$"
-	if = {
-		limit = { 
-			capital_scope.owner = { has_variable_list = list_of_trade_partners_all_categories }
-		}
-		capital_scope.owner = {
+	capital_scope.owner = {
+		if = {
+			limit = { 
+				has_variable_list = list_of_trade_partners_all_categories
+			}
+			every_in_list = {
+				variable = list_of_trade_partners_all_categories
+				capital_scope.governorship = {
+					if = {
+						limit = {
+							NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
+						}
+						PURCHASE_get_preferred_tradezone_internal = {
+							tradegood = $tradegood$
+							order_size = scope:purchaser_governorship.var:l_order_size
+						} # Creates a set of variables in the trade center
+					}
+				}
+			}
 			ordered_in_list = {
 				# TODO: Break this list down down by the $category$ in question, as trade agreements can be for all or some categories.
 				variable = list_of_trade_partners_all_categories
@@ -2305,7 +2324,7 @@ PURCHASE_order_external = {
 								has_variable = 1st_rank_internal_supplier_$tradegood$
 							}
 						}
-						add = var:1st_rank_internal_supplier_$tradegood$.var:local_price_$tradegood$
+						add = capital_scope.governorship.var:1st_rank_internal_supplier_$tradegood$.var:local_price_$tradegood$
 					}
 					# TODO: Add a way of affecting the order by the distance between scope:purchaser_governorship and the seller tradezone
 					#if = {
@@ -2319,16 +2338,6 @@ PURCHASE_order_external = {
 				}
 
 				capital_scope.governorship = { # Capital of the seller's country acts as the trader, handling the transfer on behalf of the purchaser governorship
-
-					if = {
-						limit = {
-							NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
-						}
-						PURCHASE_get_preferred_tradezone_internal = {
-							tradegood = $tradegood$
-							order_size = scope:purchaser_governorship.var:l_order_size
-						} # Creates a set of variables in the trade center
-					}
 
 					PURCHASE_try_supplier = {
 						supplier_rank = 1st

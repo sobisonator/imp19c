@@ -2276,6 +2276,9 @@ PURCHASE_check_shopping_external = {
 	if = { # It has to be this way I promise
 		limit = {
 			local_var:l_demand_diff > 0
+			OR = { # TODO: Add a check to see if the relevant trade agreement for the $tradegood$ is available. Should probably be a scripted trigger
+				capital_scope.owner = { has_variable_list = list_of_trade_partners_all_categories }
+			}
 		}
 		PURCHASE_order_external = {
 			tradegood = $tradegood$
@@ -2336,18 +2339,27 @@ PURCHASE_order_external = {
 					#	add = scope:purchaser_governorship.var:trade_center.var:here_to_$tradezone$_tradezone
 					#}
 				}
-
-				capital_scope.governorship = { # Capital of the seller's country acts as the trader, handling the transfer on behalf of the purchaser governorship
-
-					PURCHASE_try_supplier = {
-						supplier_rank = 1st
-						order_size = $order_size$
-						tradegood = $tradegood$
-						category = $category$
+				if = {
+					limit = { # Do only one attempt with the best ranked external trade partner
+						scope:purchaser_governorship = { 
+							NOT = { has_local_variable = external_trade_done_$tradegood$ }
+						}
 					}
+					capital_scope.governorship = { # Capital of the seller's country acts as the trader, handling the transfer on behalf of the purchaser governorship
 
-					# Remove the 1st rank supplier that was used just for external trade
-					remove_variable = 1st_rank_internal_supplier_$tradegood$
+						PURCHASE_try_supplier = {
+							supplier_rank = 1st
+							order_size = $order_size$
+							tradegood = $tradegood$
+							category = $category$
+						}
+
+						# Remove the 1st rank supplier that was used just for external trade
+						remove_variable = 1st_rank_internal_supplier_$tradegood$
+					}
+					scope:purchaser_governorship = {
+						set_local_variable = external_trade_done_$tradegood$
+					}
 				}
 
 			}

@@ -12,9 +12,14 @@ debug_trade.1 = { # Trade setup
 
 	immediate = {
 		#MOVEMENT_get_TZ_distances = yes # Commented out for now - needs fixing, svalues are improperly named.
-		trigger_event = { id = debug_trade.102 } # quarterly values
-		trigger_event = { id = debug_trade.103 } # quarterly values
+		every_country = {
+			trigger_event = { id = debug_trade.109 } # Update internal trade scope
+			trigger_event = { id = debug_trade.110 } # Update TZ vars
+			trigger_event = { id = debug_trade.103 } # Set up TZ prices
+		}
+		# trigger_event = { id = debug_trade.102 } # global base prices - defunct
 		# trigger_event = { id = debug_trade.104 } # quarterly values # Split up into sub-events
+		trigger_event = { id = debug_trade.1031 } # Update TZ prices
 		every_country = {
 			trigger_event = { id = debug_trade.101 }
 			trigger_event = { id = debug_trade.1041 }
@@ -39,8 +44,8 @@ debug_trade.1 = { # Trade setup
 		trigger_event = { id = debug_trade.106 } # quarterly values
 		trigger_event = { id = debug_trade.107 }
 		every_country = {
-				trigger_event = { id = debug_trade.108 }
-				trigger_event = { id = debug_trade.109 } # Repeats an effect run by oa_economy_setup, needs to be run quarterly after that
+				# trigger_event = { id = debug_trade.108 } # Moved back to beginning to provide vars for debug_trade.102
+				# trigger_event = { id = debug_trade.109 } # Repeats an effect run by oa_economy_setup, needs to be run quarterly after that # Moved back to beginning to provide vars for debug_trade.102
 				trigger_event = { id = debug_trade.110 }
 				trigger_event = { id = debug_trade.111 }
 				trigger_event = { id = debug_trade.112 } # Not actually obsolete - this deals with governorship scope, while TRADE_reset_quarterly_values deals with global level
@@ -78,6 +83,14 @@ debug_trade.103 = {
 
 	immediate = {
 		TRADE_update_all_TZ_local_prices = yes
+	}
+}
+debug_trade.1031 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		SELL_update_TZ_prices = yes
 	}
 }
 debug_trade.104 = {
@@ -339,7 +352,15 @@ debug_trade.202 = {
 	type = country_event
 	hidden = yes
 	immediate = {
-		TRADE_update_all_TZ_local_prices = yes
+		SELL_set_TZ_prices = yes
+	}
+}
+debug_trade.2021 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		SELL_update_TZ_prices = yes
 	}
 }
 debug_trade.203 = {
@@ -693,15 +714,16 @@ debug_trade.2 = { # Quarterly internal trade simulation
 	picture = aqueducts
 
 	immediate = {
-		trigger_event = { id = debug_trade.201 }
-		trigger_event = { id = debug_trade.202 }
+		# trigger_event = { id = debug_trade.201 } # Global base prices - defunct
 		every_country = {
+			trigger_event = { id = debug_trade.202 }
 			trigger_event = { id = debug_trade.2031 }
 			#trigger_event = { id = debug_trade.2032 }
 			trigger_event = { id = debug_trade.2033 }
 			#trigger_event = { id = debug_trade.2034 }
 			trigger_event = { id = debug_trade.2035 }
 		}
+		trigger_event = { id = debug_trade.2021 }
 		every_federation = {
 			trigger_event = { id = debug_trade.2091 }
 			#trigger_event = { id = debug_trade.2032 }

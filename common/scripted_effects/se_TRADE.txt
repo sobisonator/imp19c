@@ -467,30 +467,30 @@ TRADE_score_country_connections = {
 }
 
 TRADE_reset_TZ_internal_rankings = {
-	# Scope: random country
+	# Scope: Every governorship
 	# Function: Clear the rankings for internal trades in trade zones
 	# Called: After every internal trade scope is finished doing its internal trade, so that the next scope's governorships rank their preferred supplier zones properly.
-	every_trade_center = {
+	if = {
+		limit = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
+		remove_variable = 1st_rank_internal_supplier_$tradegood$ #Is it even necessary to remove 1st rank? It will always get reset by the ranking effect no matter what
 		if = {
-			limit = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
-			remove_variable = 1st_rank_internal_supplier_$tradegood$ #Is it even necessary to remove 1st rank? It will always get reset by the ranking effect no matter what
+			limit = { has_variable = 2nd_rank_internal_supplier_$tradegood$ }
+			remove_variable = 2nd_rank_internal_supplier_$tradegood$
 			if = {
-				limit = { has_variable = 2nd_rank_internal_supplier_$tradegood$ }
-				remove_variable = 2nd_rank_internal_supplier_$tradegood$
-				if = {
-					limit = { has_variable = 3rd_rank_internal_supplier_$tradegood$ }
-					remove_variable = 3rd_rank_internal_supplier_$tradegood$
-					# etc... purely concept at the moment
-				}
+				limit = { has_variable = 3rd_rank_internal_supplier_$tradegood$ }
+				remove_variable = 3rd_rank_internal_supplier_$tradegood$
+				# etc... purely concept at the moment
 			}
 		}
 	}
 }
 
 TRADE_reset_all_tradegoods_TZ_internal_rankings = {
-	every_tradegood_complex = {
-		APPLY = TRADE_reset_TZ_internal_rankings
-	}	
+	every_governorships = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_TZ_internal_rankings
+		}	
+	}
 }
 
 TRADE_reset_purchase_order_tender_completions = {
@@ -979,6 +979,7 @@ TRADE_update_governorship_TZ_vars = {
 
 
 TRADE_count_country_TZs = {
+	save_scope_as = country_scope
 	set_variable = {
 		name = country_num_of_TZs
 		value = 0
@@ -989,9 +990,11 @@ TRADE_count_country_TZs = {
 				has_local_variable = previous_TZ
 				NOT = { var:trade_center = local_var:previous_TZ }
 			}
-			change_variable = {
-				name = country_num_of_TZs
-				add = 1
+			scope:country_scope = {
+				change_variable = {
+					name = country_num_of_TZs
+					add = 1
+				}
 			}
 		}
 		set_local_variable = {
@@ -1917,6 +1920,185 @@ TRADE_reset_TZ_pools = {
 	# TRADE_reset_internal_amounts_sold = yes # Replaced by every_tradegoods_complex + TRADE_reset_internal_amount_sold
 }
 
+TRADE_reset_trt_ias = {
+	set_variable = {
+		name = $tradegood$_sold_total_india
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_east_north_america
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_west_north_america
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_caribbean
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_west_south_america
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_east_south_america
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_south_east_asia
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_indo_china
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_yellow_sea
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_southern_africa
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_west_africa
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_east_africa
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_middle_east
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_western_steppe
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_eastern_steppe
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_upper_yangtzi
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_atlantic_seaboard
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_central_europe
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_west_mediterranean
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_baltic
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_east_europe
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_sold_total_east_mediterranean
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_india
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_east_north_america
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_west_north_america
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_caribbean
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_west_south_america
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_east_south_america
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_south_east_asia
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_indo_china
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_yellow_sea
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_southern_africa
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_west_africa
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_east_africa
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_middle_east
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_western_steppe
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_eastern_steppe
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_upper_yangtzi
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_atlantic_seaboard
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_central_europe
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_west_mediterranean
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_baltic
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_east_europe
+		value = 0
+	}
+	set_variable = {
+		name = $tradegood$_total_revenue_east_mediterranean
+		value = 0
+	}
+}
+
 TRADE_reset_internal_amount_sold = {
 	# Scope: internal trade scope
 
@@ -2010,6 +2192,26 @@ TRADE_reset_internal_amount_sold = {
 		name = $tradegood$_sold_total_east_mediterranean
 		value = 0
 	}
+}
+
+TRADE_clear_total_sold_and_revenue_flag = {
+	# Scope: every internal trade scope
+	# Called: at end of trade phase
+	# Function: clear the variable whose absence flags that sold total and total revenue vars need to be reset to 0
+	remove_variable = total_sold_and_revenue_reset
+}
+
+TRADE_clear_local_revenue_cut_flags = {
+	# Scope: governorship
+	# Called: at end of trade phase
+	# Function: clear the variable whose absence flags that the total revenue cut var for each tradegood in every governorship has not been updated
+	every_tradegood_complex = {
+		APPLY = TRADE_clear_local_revenue_cut_flag
+	}
+}
+
+TRADE_clear_local_revenue_cut_flag = {
+	remove_variable = local_revenue_cut_reset_$tradegood$
 }
 
 DEFUNCT_TRADE_reset_TZ_amount_sold = {
@@ -2232,22 +2434,22 @@ TRADE_reset_internal_trade_stockpile = {
 	# Function: Reset the temporary stockpiles used for trading to 0
 	set_variable = {
 		name = $tradegood$_stockpile_$tradezone$
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_available_at_start_of_quarter_$tradezone$
-		value = 0 
+		value = 0
 	}
 }
 
 TRADE_reset_TZ_trade_stockpile = {
 	set_variable = {
 		name = $tradegood$_stockpile_TZ
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_available_at_start_of_quarter_TZ
-		value = 0 
+		value = 0
 	}
 }
 
@@ -2263,278 +2465,98 @@ TRADE_reset_internal_trade_revenue_total = {
 	# Function: set the total revenue tracking vars to 0, so they can be summed up from scratch again
 	set_variable = {
 		name = $tradegood$_total_revenue_india
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_east_north_america
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_west_north_america
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_caribbean
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_west_south_america
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_east_south_america
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_south_east_asia
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_indo_china
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_yellow_sea
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_southern_africa
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_west_africa
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_east_africa
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_middle_east
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_western_steppe
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_eastern_steppe
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_upper_yangtzi
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_atlantic_seaboard
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_central_europe
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_west_mediterranean
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_baltic
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_east_europe
-		value = 0 
+		value = 0
 	}
 	set_variable = {
 		name = $tradegood$_total_revenue_east_mediterranean
-		value = 0 
+		value = 0
 	}
 	# WiP - etc...
 }
 
 TRADE_update_all_global_base_prices = {
-	TRADE_update_global_base_price = {
-		tradegood = grain
-	}
-	TRADE_update_global_base_price = {
-		tradegood = fur
-	}
-	TRADE_update_global_base_price = {
-		tradegood = industrial_fibres
-	}
-	TRADE_update_global_base_price = {
-		tradegood = textile_fibres
-	}
-	TRADE_update_global_base_price = {
-		tradegood = wool
-	}
-	TRADE_update_global_base_price = {
-		tradegood = silk
-	}
-	TRADE_update_global_base_price = {
-		tradegood = wood
-	}
-	TRADE_update_global_base_price = {
-		tradegood = stone
-	}
-	TRADE_update_global_base_price = {
-		tradegood = sulphur
-	}
-	TRADE_update_global_base_price = {
-		tradegood = whales
-	}
-	TRADE_update_global_base_price = {
-		tradegood = gems
-	}
-	TRADE_update_global_base_price = {
-		tradegood = peat
-	}
-	TRADE_update_global_base_price = {
-		tradegood = tin
-	}
-	TRADE_update_global_base_price = {
-		tradegood = inorganic_compounds
-	}
-	TRADE_update_global_base_price = {
-		tradegood = copper
-	}
-	TRADE_update_global_base_price = {
-		tradegood = iron
-	}
-	TRADE_update_global_base_price = {
-		tradegood = gold
-	}
-	TRADE_update_global_base_price = {
-		tradegood = silver
-	}
-	TRADE_update_global_base_price = {
-		tradegood = lead
-	}
-	TRADE_update_global_base_price = {
-		tradegood = coal
-	}
-	TRADE_update_global_base_price = {
-		tradegood = oil
-	}
-	TRADE_update_global_base_price = {
-		tradegood = tea
-	}
-	TRADE_update_global_base_price = {
-		tradegood = coffee
-	}
-	TRADE_update_global_base_price = {
-		tradegood = opium
-	}
-	TRADE_update_global_base_price = {
-		tradegood = tobacco
-	}
-	TRADE_update_global_base_price = {
-		tradegood = sugar
-	}
-	TRADE_update_global_base_price = {
-		tradegood = hardwood
-	}
-	TRADE_update_global_base_price = {
-		tradegood = rubber
-	}
-	TRADE_update_global_base_price = {
-		tradegood = dye
-	}
-	TRADE_update_global_base_price = {
-		tradegood = spices
-	}
-	TRADE_update_global_base_price = {
-		tradegood = temperate_fruit
-	}
-	TRADE_update_global_base_price = {
-		tradegood = tropical_fruit
-	}
-	TRADE_update_global_base_price = {
-		tradegood = mediterranean_fruit
-	}
-	TRADE_update_global_base_price = {
-		tradegood = chocolate
-	}
-	TRADE_update_global_base_price = {
-		tradegood = livestock
-	}
-	TRADE_update_global_base_price = {
-		tradegood = salt
-	}
-	TRADE_update_global_base_price = {
-		tradegood = fish
-	}
-	TRADE_update_global_base_price = {
-		tradegood = clothing
-	}
-	TRADE_update_global_base_price = {
-		tradegood = luxury_clothing
-	}
-	TRADE_update_global_base_price = {
-		tradegood = furniture
-	}
-	TRADE_update_global_base_price = {
-		tradegood = luxury_furniture
-	}
-	TRADE_update_global_base_price = {
-		tradegood = alcohol
-	}
-	TRADE_update_global_base_price = {
-		tradegood = glass
-	}
-	TRADE_update_global_base_price = {
-		tradegood = chemicals
-	}
-	TRADE_update_global_base_price = {
-		tradegood = rare_alloys
-	}
-	TRADE_update_global_base_price = {
-		tradegood = construction_materials
-	}
-	TRADE_update_global_base_price = {
-		tradegood = early_munitions
-	}
-	TRADE_update_global_base_price = {
-		tradegood = late_munitions
-	}
-	TRADE_update_global_base_price = {
-		tradegood = naval_supplies
-	}
-	TRADE_update_global_base_price = {
-		tradegood = steel_ships
-	}
-	TRADE_update_global_base_price = {
-		tradegood = wooden_ships
-	}
-	TRADE_update_global_base_price = {
-		tradegood = steel
-	}
-	TRADE_update_global_base_price = {
-		tradegood = bronze
-	}
-	TRADE_update_global_base_price = {
-		tradegood = machine_parts
-	}
-	TRADE_update_global_base_price = {
-		tradegood = early_artillery
-	}
-	TRADE_update_global_base_price = {
-		tradegood = late_artillery
-	}
-	TRADE_update_global_base_price = {
-		tradegood = electronics
-	}
-	TRADE_update_global_base_price = {
-		tradegood = pharmaceuticals
-	}
-	TRADE_update_global_base_price = {
-		tradegood = motors
-	}
-	TRADE_update_global_base_price = {
-		tradegood = processed_foods
-	}
-	TRADE_update_global_base_price = {
-		tradegood = petrochemicals
+	every_tradegood_complex = {
+		APPLY = TRADE_update_global_base_price
 	}
 }
 
@@ -2595,14 +2617,14 @@ TRADE_update_global_base_price = {
 
 }
 
-TRADE_update_all_TZ_local_prices = {
-	every_trade_center = {
-		limit = { always = yes } # Debug purposes only, this should contain an actual limit checking if the TZ actually has any stock of the named tradegood
-		every_tradegood_complex = {
-			APPLY = SELL_set_TZ_prices
-		}
-	}
-}
+# DEFUNCT - see SELL_set_TZ_prices_OLD for what this used to do
+#TRADE_update_all_TZ_local_prices = {
+#	every_trade_center = {
+#		every_tradegood_complex = {
+#			APPLY = SELL_set_TZ_prices
+#		}
+#	}
+#}
 
 TRADE_set_all_local_internal_cuts_of_revenue = {
 	# Scope: governorship
@@ -3145,6 +3167,13 @@ TRADE_setup_internal_trade_tax = {
 	set_variable = {
 		name = internal_sales_tax_rate
 		value = 0.2 #Debug. Default = 0. This should be on a slider or something
+	}
+}
+
+TRADE_setup_governorship_for_export_internal_vars = {
+	set_variable = {
+		name = $tradegood$_available_at_start_of_quarter_internal
+		value = 0
 	}
 }
 

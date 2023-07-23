@@ -55,6 +55,7 @@ TRADE_governorship_infrastructure_capacity_svalue = {
 	add = TRADE_river_port_bonus
 	add = TRADE_commerce_district_bonus
 	add = TRADE_depot_bonus
+	add = governorship_population
 }
 
 # Bonuses from individual infrastructure buildings
@@ -738,6 +739,26 @@ TRADE_governorship_for_export_internal_grain = {
 			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_grain
+	}
+	min = 0
+	if = {
+		limit = {
+			has_variable = governorship_trade_capacity
+		}
+		max = var:governorship_trade_capacity
+	}
+	
+}
+
+TRADE_governorship_for_export_internal_vegetables = {
+	# Scope: governorship
+	value = GOODS_vegetables_stockpile
+	subtract = DEMAND_vegetables
+	if = {
+		limit = {
+			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+		}
+		subtract = TRADE_governorship_for_export_vegetables
 	}
 	min = 0
 	if = {
@@ -1877,6 +1898,16 @@ TRADE_governorship_for_export_grain = {
 	multiply = TRADE_country_export_stock_modifier
 	multiply = TRADE_governorship_export_stock_modifier
 	subtract = TRADE_governorship_export_threshold_grain # Keep up to threshold
+	max = var:grain_stockpile # Do not sell more than you have
+	max = var:governorship_trade_capacity
+	min = 0
+}
+
+TRADE_governorship_for_export_vegetables = {
+	value = TRADE_governorship_export_cap_vegetables # Sell up to cap
+	multiply = TRADE_country_export_stock_modifier
+	multiply = TRADE_governorship_export_stock_modifier
+	subtract = TRADE_governorship_export_threshold_vegetables # Keep up to threshold
 	max = var:grain_stockpile # Do not sell more than you have
 	max = var:governorship_trade_capacity
 	min = 0

@@ -276,6 +276,7 @@ SELL_declare_available_based_on_TZ = {
 
 SELL_declare_internal_available = { # WiP: Rename to declare_available as this will be used for both internal and external
 	# Scope: Governorship
+	save_scope_as = origin_governorship
 	set_variable = { # Within the governorship scope, track how much was sold so you can then calculate how much of a cut to get
 	# See SELL_calculate_cut to see how the cut of revenue gets calculated
 		name = $tradegood$_offered
@@ -300,7 +301,7 @@ SELL_declare_internal_available = { # WiP: Rename to declare_available as this w
 		}
 		change_variable = { # Save a parallel variable that tracks the total amount offered within the internal market
 			name = $tradegood$_available_at_start_of_quarter_internal
-			add = prev.var:$tradegood$_offered
+			add = scope:origin_governorship.var:$tradegood$_offered
 		}
 	} 
 }
@@ -1030,44 +1031,58 @@ SELL_get_internal_cut_of_revenue = {
 	# $local_cut_of_revenue$ = local_internal_revenue_cut_grain
 	# $stockpile_sold$ = grain_stockpile, the stockpile which is reduced in the governorship to reflect goods sold
 	# $amount_sold_total$ = internal_sold_total_grain, recorded by the transfer of goods effect
-
-	set_variable = { # Get the total revenue from the tradezone
-		name = local_internal_revenue_cut_$tradegood$
-		value = var:internal_trade_scope.var:$tradegood$_total_revenue_$tradezone$ # TODO: Update so that this checks income based on the governorship's TZ, as each TZ will have a unique pool of revenue according to the price of tradegoods there.
-	}
-	change_variable = {
-		name = local_internal_revenue_cut_$tradegood$
-		multiply = var:internal_stockpile_cut_percentage_$tradegood$
-	}
-
-	change_variable = {
-		name = governorship_this_quarter_income_from_$category$ # Quarterly governorship income is only divvied up and given out at the end of both internal and external trade. Gets reset at the beginning of every quarter
-		add = var:local_internal_revenue_cut_$tradegood$
-	}
-
-	# SUBTRACT THE RESOURCES SOLD FROM THE GOVERNORSHIPS ACCORDING TO THEIR CUT
-
-	var:internal_trade_scope = {
-		set_local_variable = {
-			name = local_sold_cut
-			value = var:$tradegood$_sold_total_$tradezone$
+	if = {
+		limit = {
+			var:internal_trade_scope = {
+				has_variable = $tradegood$_total_revenue_$tradezone$
+			}
 		}
-	}
-
-	change_local_variable = {
-		name = local_sold_cut
-		multiply = var:internal_stockpile_cut_percentage_$tradegood$
-	}
-
-	change_variable = {
-		name = $tradegood$_stockpile
-		subtract = local_var:local_sold_cut
-	}
-
-	owner = {
+		if = {
+			limit = {
+				NOT = { has_variable = local_revenue_cut_reset_$tradegood$ }
+			}
+			set_variable = local_revenue_cut_reset_$tradegood$ # Must be cleared at end of trade phase
+			set_variable = {
+				name = local_internal_revenue_cut_$tradegood$
+				value = 0
+			}
+		}
+		change_variable = { # Get the total revenue from the tradezone
+			name = local_internal_revenue_cut_$tradegood$
+			add = var:internal_trade_scope.var:$tradegood$_total_revenue_$tradezone$ # TODO: Update so that this checks income based on the governorship's TZ, as each TZ will have a unique pool of revenue according to the price of tradegoods there.
+		}
 		change_variable = {
-			name = country_internal_total_sold_$tradegood$
-			add = local_var:local_sold_cut
+			name = local_internal_revenue_cut_$tradegood$
+			multiply = var:internal_stockpile_cut_percentage_$tradegood$
+		}
+
+		change_variable = {
+			name = governorship_this_quarter_income_from_$category$ # Quarterly governorship income is only divvied up and given out at the end of both internal and external trade. Gets reset at the beginning of every quarter
+			add = var:local_internal_revenue_cut_$tradegood$
+		}
+
+		# SUBTRACT THE RESOURCES SOLD FROM THE GOVERNORSHIPS ACCORDING TO THEIR CUT
+
+		set_variable = { # Get the total internal revenue from the tradezone
+			name = local_sold_cut_$tradegood$
+			value = var:internal_trade_scope.var:$tradegood$_sold_total_$tradezone$ 
+		}
+
+		change_variable = {
+			name = local_sold_cut_$tradegood$
+			multiply = var:internal_stockpile_cut_percentage_$tradegood$
+		}
+
+		change_variable = {
+			name = $tradegood$_stockpile
+			subtract = var:local_sold_cut_$tradegood$
+		}
+
+		owner = {
+			change_variable = {
+				name = country_internal_total_sold_$tradegood$
+				add = prev.var:local_sold_cut_$tradegood$
+			}
 		}
 	}
 
@@ -1410,7 +1425,83 @@ SELL_set_TZ_price_modifier = { # used to get local price modifier for the named 
 }
 
 SELL_set_TZ_prices = {
+	# Scope: every country
+	# Function: Trigger SELL_set_TZ_prices_by_country in every country, then trigger PRICE_update_price_TZ in every trade center
+	SELL_set_TZ_prices_by_country = yes
+}
+
+SELL_update_TZ_prices = {
+	# Scope: random country
+	# Function: Update the TZ prices using the values set in SELL_set_TZ_prices. This is run in a separate effect to prevent too much duplication of the every_country loop in the main trade effect
+	every_trade_center = {
+		every_tradegood_complex = {
+			APPLY = PRICE_update_price_TZ
+		}
+	}
+}
+
+SELL_set_TZ_prices_by_country = {
+	# Scope: country
+	# Function: Child function of SELL_set_TZ_prices, parent function of SELL_set_TZ_prices_by_country_governorship
+	every_governorships = {
+		every_tradegood_complex = {
+			APPLY = SELL_set_TZ_prices_by_country_governorship
+		}
+	}
+}
+
+SELL_set_TZ_prices_by_country_governorship = {
+	# Scope: Every governorships, from every country. Runs within an every_tradegood_complex
+	# Function: Replicate the functionality of SELL_set_TZ_prices but from the every_country loop, for optimisation
+
+	# Note for future optimisation: might want to put a check here or at some point to prevent calculating demand if there is none, or prevent adding supply if there is none
+
+	save_scope_as = contributing_governorship
+
+	var:trade_center = {
+		if = {
+			limit = {
+				NOT = {
+					has_variable = total_demand_TZ_$tradegood$
+				}
+			}
+			set_variable = {
+				name = total_demand_TZ_$tradegood$
+				value = 0.01 # Minimum, to avoid div/0 errors
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_variable = total_supply_TZ_$tradegood$
+				}
+			}
+			set_variable = {
+				name = total_supply_TZ_$tradegood$
+				value = 0.01 # Minimum, to avoid div/0 errors
+			}
+		}
+
+		change_variable = {
+			name = total_demand_TZ_$tradegood$
+			add = scope:contributing_governorship.DEMAND_$tradegood$
+		}
+
+		change_variable = {
+			name = total_supply_TZ_$tradegood$
+			add = scope:contributing_governorship.TRADE_governorship_for_export_internal_$tradegood$
+		}
+		change_variable = {
+			name = total_supply_TZ_$tradegood$
+			add = scope:contributing_governorship.var:$tradegood$_stockpile
+		}
+	}
+
+}
+
+SELL_set_TZ_prices_OLD = {
 	# Scope: TZ
+	# Function:
 	# This effect determines the sale price modifier on the global price of the given tradegood
 	# This does NOT contain an iteration of all TZs, as it should only be run in TZs that actually supply said good.
 		# the on_action should have the every_in_global_list, with a limit that they have a variable for that tradegood
@@ -1418,10 +1509,65 @@ SELL_set_TZ_prices = {
 	# Format of arguments:
 	# $local_price$ = local_price_grain
 	# $global_price$ = global_price_grain
-	set_variable = {
-		name = local_price_$tradegood$
-		value = global_var:global_price_$tradegood$
+	save_scope_as = current_TZ
+
+	set_local_variable = {
+		name = l_total_demand_TZ_$tradegood$
+		value = 0.01 # Base value, needs to be != to avoid div/0 errors
 	}
+	set_local_variable = {
+		name = l_total_supply_TZ_$tradegood$
+		value = 0.01 # Base value, needs to be != to avoid div/0 errors
+	}
+	every_country = {
+		limit = {
+			any_governorships = {
+				var:trade_center = scope:current_TZ
+			}
+		}
+		every_governorships = {
+			limit = {
+				var:trade_center = scope:current_TZ
+			}
+			change_local_variable = {
+				name = l_total_demand_TZ_$tradegood$
+				add = DEMAND_$tradegood$ # This should probably be cached. TODO
+			}
+			change_local_variable = {
+				name = l_total_supply_TZ_$tradegood$
+				add = TRADE_governorship_for_export_internal_$tradegood$ # This should probably be cached. TODO
+			}
+			change_local_variable = {
+				name = l_total_supply_TZ_$tradegood$
+				add = var:$tradegood$_stockpile
+			}
+			# set_local_variable = iterated_TZ_demand
+		}
+	}
+	set_variable = {
+		name = total_demand_TZ_$tradegood$
+		value = local_var:l_total_demand_TZ_$tradegood$
+	}
+	set_variable = {
+		name = total_supply_TZ_$tradegood$
+		value = local_var:l_total_supply_TZ_$tradegood$
+	}
+
+	#if = {
+	#	limit = { has_global_variable = first_time_generic_price_setup_done }
+		PRICE_update_price_TZ = {
+			tradegood = $tradegood$
+		}
+	#}
+	#else = {
+	#	set_variable = {
+	#		name = local_price_$tradegood$
+	#		value = global_var:global_price_$tradegood$
+	#	}
+	#}
+
+	remove_local_variable = l_total_demand_TZ_$tradegood$
+
 }
 
 SELL_declare_all_external_available = {

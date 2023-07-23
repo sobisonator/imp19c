@@ -1824,6 +1824,28 @@ PURCHASE_transfer_goods_internally = {
 	#	}
 	#}
 
+	if = {
+		limit = { # If the buyer and sellers are not in the same tradezone
+			NOT = {
+				global_var:global_$tradezone$_tradezone = scope:purchaser_governorship.var:trade_center
+			}
+		}
+		PURCHASE_update_shipping = {
+			origin_tradezone_name = $tradezone$
+			origin_tradezone = global_var:global_$tradezone$_tradezone
+			destination_tradezone = scope:purchaser_governorship.var:trade_center
+			order_size = $amount$
+		}
+	}
+	else = {
+		scope:purchaser_governorship.var:trade_center = {
+			change_variable = {
+				name = TZ_shipping
+				add = $amount$
+			}
+		}
+	}
+
 	# SUBTRACT MONEY FROM THE BUYING GOVERNORSHIP'S BALANCE
 	# The balance will then be applied to the governorship wealth pools at the end of the purchase phase
 
@@ -2456,4 +2478,783 @@ PURCHASE_rank_deals = { # Rank tradezones by total costs for the named tradegood
 			}
 		}
 	}
+}
+
+# SHIPPING FUNCTIONS
+
+PURCHASE_reset_shipping_variables = {
+    set_global_variable = {
+	    name = india_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = east_north_america_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = west_north_america_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = caribbean_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = west_south_america_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = east_south_america_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = south_east_asia_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = indo_china_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = yellow_sea_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = southern_africa_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = west_africa_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = east_africa_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = middle_east_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = western_steppe_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = eastern_steppe_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = upper_yangtzi_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = atlantic_seaboard_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = central_europe_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = west_mediterranean_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = baltic_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = east_europe_shipping
+	    value = 0
+    }
+    set_global_variable = {
+	    name = east_mediterranean_shipping
+	    value = 0
+    }
+}
+
+PURCHASE_update_shipping = {
+
+	# Part 1: Update shipping trafic in origin and destination tradezones
+
+	change_global_variable = {
+		name = $origin_tradezone_name$_shipping
+		add = $order_size$
+	}
+	$destination_tradezone$ = {
+		change_variable = {
+			name = TZ_shipping
+			add = $order_size$
+		}
+	}
+
+	# Part 2: Update shipping traffic in en-route locations
+
+	if = { # 1: India <-> European Atlantic Coast
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_india_tradezone
+					}
+					$destination_tradezone$ = {
+						OR = {
+							has_variable = is_west_mediterranean_tradezone
+							has_variable = is_atlantic_seaboard_tradezone
+							has_variable = is_east_south_america_tradezone
+						}
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_india_tradezone
+					}
+					$origin_tradezone$ = {
+						OR = {
+							has_variable = is_west_mediterranean_tradezone
+							has_variable = is_atlantic_seaboard_tradezone
+							has_variable = is_east_south_america_tradezone
+						}
+					}
+				}
+			}
+		}
+		PURCHASE_india_to_european_atlantic_shipping = {
+			order_size = $order_size$ 
+		}
+	}
+
+	else_if = { # 2: India <-> Northern American Atlantic Coast
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_india_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_east_north_america_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_india_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_east_north_america_tradezone
+					}
+				}
+			}
+		}
+		PURCHASE_india_to_northern_american_atlantic_shipping = {
+			order_size = $order_size$ 
+		}
+	}
+
+	else_if = { # 3: Yellow sea <-> Northern American Atlantic Coast
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_yellow_sea_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_east_north_america_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_yellow_sea_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_east_north_america_tradezone
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOT = { has_global_variable = panama_canal_built }
+			}
+			PURCHASE_china_to_india_shipping = {
+				order_size = $order_size$
+			}
+			PURCHASE_india_to_northern_american_atlantic_shipping = { 
+				order_size = $order_size$ 
+			}
+		}
+		else = {
+			change_global_variable = {
+				name = caribbean_shipping
+				add = $order_size$
+			}
+		}
+		
+	}
+
+	else_if = { # 4: Yellow Sea <-> India
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_yellow_sea_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_india_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_yellow_sea_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_india_tradezone
+					}
+				}
+			}
+		}
+		PURCHASE_china_to_india_shipping = {
+			order_size = $order_size$
+		}
+	}
+
+	else_if = { # 5: Eastern Steppe <-> India
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_eastern_steppe_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_india_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_eastern_steppe_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_india_tradezone
+					}
+				}
+			}
+		}
+		change_global_variable = {
+			name = yellow_sea_shipping
+			add = $order_size$
+		}
+		PURCHASE_china_to_india_shipping = {
+			order_size = $order_size$
+		}
+	}
+
+	else_if = { # 6: East Europe <-> West Mediterranean (black sea route)
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_east_europe_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_west_mediterranean_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_east_europe_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_west_mediterranean_tradezone
+					}
+				}
+			}
+		}
+		change_global_variable = {
+			name = east_mediterannean_shipping
+			add = $order_size$
+		}
+	}
+
+	else_if = { # 7: East Europe <-> Atlantic seaboard (split between Baltic and Med)
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_east_europe_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_atlantic_seaboard_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_east_europe_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_atlantic_seaboard_tradezone
+					}
+				}
+			}
+		}
+		PURCHASE_east_europe_atlantic_seaboard_shipping = {
+			order_size = $order_size$
+		}
+
+	}
+
+	else_if = { # 8: India <-> East Mediterranean (via middle east)
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_india_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_east_mediterranean_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_india_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_east_mediterranean_tradezone
+					}
+				}
+			}
+		}
+		change_global_variable = {
+			name = middle_east_shipping
+			add = $order_size$
+		}
+	}
+
+	else_if = { # 9: West South America <-> East North America
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_west_south_america_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_east_north_america_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_west_south_america_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_east_north_america_tradezone
+					}
+				}
+			}
+		}
+		
+		PURCHASE_west_south_america_to_east_north_america_shipping = {
+			order_size = $order_size$
+		}
+		
+	}
+
+	else_if = { # 10: West South America <-> Atlantic Seaboard
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_west_south_america_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_atlantic_seaboard_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_west_south_america_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_atlantic_seaboard_tradezone
+					}
+				}
+			}
+		}
+		PURCHASE_west_south_america_to_east_north_america_shipping = {
+			order_size = $order_size$
+		}
+		if = {
+			limit = {
+				has_global_variable = panama_canal_built
+			}
+			change_global_variable = {
+				name = east_north_america_shipping
+				value = $order_size$
+			}
+		}
+		else = {
+			change_global_variable = {
+				name = west_africa_shipping
+				value = $order_size$
+			}
+		}
+	}
+
+	else_if = { # 11: East South America <-> Atlantic seaboard
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_east_south_america_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_atlantic_seaboard_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_east_south_america_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_atlantic_seaboard_tradezone
+					}
+				}
+			}
+		}
+		
+		change_global_variable = {
+			name = west_africa_shipping
+			value = $order_size$
+		}
+		
+	}
+
+	else_if = { # 12: East Europe <-> Central Europe
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_east_europe_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_central_europe_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_east_europe_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_central_europe_tradezone
+					}
+				}
+			}
+		}
+		
+		change_global_variable = {
+			name = baltic_shipping
+			value = $order_size$
+		}
+		
+	}
+
+	else_if = { # 13: Western Steppe <-> Atlantic seaboard (split between Baltic and Med)
+		limit = {
+			OR = {
+				AND = {
+					$origin_tradezone$ = {
+						has_variable = is_east_europe_tradezone
+					}
+					$destination_tradezone$ = {
+						has_variable = is_atlantic_seaboard_tradezone
+					}
+				}
+
+				AND = {
+					$destination_tradezone$ = {
+						has_variable = is_east_europe_tradezone
+					}
+					$origin_tradezone$ = {
+						has_variable = is_atlantic_seaboard_tradezone
+					}
+				}
+			}
+		}
+		change_global_variable = {
+			name = east_europe_shipping
+			add = $order_size$
+		}
+		PURCHASE_east_europe_atlantic_seaboard_shipping = {
+			order_size = $order_size$
+		}
+
+	}
+
+
+}
+
+PURCHASE_east_europe_atlantic_seaboard_shipping = {
+	set_local_variable = {
+		name = l_shipping_value
+		value = $order_size$
+	}
+	change_local_variable = {
+		name = l_shipping_value
+		multiply = 0.5
+	}
+
+	change_global_variable = {
+		name = east_mediterannean_shipping
+		add = local_var:l_shipping_value
+	}
+	change_global_variable = {
+		name = west_mediterannean_shipping
+		add = local_var:l_shipping_value
+	}
+
+	change_global_variable = {
+		name = baltic_shipping
+		add = local_var:l_shipping_value
+	}
+}
+
+PURCHASE_west_south_america_to_east_north_america_shipping = {
+	if = {
+		limit = {
+			NOT = {
+				has_global_variable = panama_canal_built
+			}
+		}
+		set_local_variable = {
+			name = l_shipping_value
+			value = $order_size$
+		}
+		change_local_variable = {
+			name = l_shipping_value
+			multiply = 0.33
+		}
+
+		change_global_variable = {
+			name = west_north_america_tradezone
+			add = local_var:l_shipping_value
+		}
+		change_global_variable = {
+			name = caribbean_tradezone
+			add = local_var:l_shipping_value
+		}
+		change_global_variable = {
+			name = east_south_america_tradezone
+			add = local_var:l_shipping_value
+		}
+	}
+	else = {
+		change_global_variable = {
+			name = caribbean_tradezone
+			add = $order_size$
+		}
+	}
+}
+
+PURCHASE_china_to_india_shipping = {
+	change_global_variable = {
+		name = indo_china_shipping
+		add = $order_size$
+	}
+	change_global_variable = {
+		name = south_east_asia_shipping
+		add = $order_size$
+	}
+}
+
+PURCHASE_india_to_northern_american_atlantic_shipping = {
+	change_global_variable = {
+		name = east_africa_shipping
+		add = $order_size$
+	}
+	change_global_variable = {
+		name = southern_africa_shipping
+		add = $order_size$
+	}
+	change_global_variable = {
+		name = west_africa_shipping
+		add = $order_size$
+	}
+	change_global_variable = {
+		name = caribbean_shipping
+		add = $order_size$
+	}
+}
+
+PURCHASE_india_to_european_atlantic_shipping = {
+	change_global_variable = {
+		name = east_africa_shipping
+		add = $order_size$
+	}
+	if = {
+		limit = {
+			NOT = { has_global_variable = suez_canal_built }
+		}
+		change_global_variable = {
+			name = southern_africa_shipping
+			add = $order_size$
+		}
+		change_global_variable = {
+			name = west_africa_shipping
+			add = $order_size$
+		}
+	}
+	else = {
+		change_global_variable = {
+			name = east_mediterranean_shipping
+			add = $order_size$
+		}
+		change_global_variable = {
+			name = west_mediterranean_shipping
+			add = $order_size$
+		}
+	}
+}
+
+PURCHASE_update_all_quarterly_shipping = {
+	global_var:global_india_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:india_shipping
+	    }
+    }
+    global_var:global_east_north_america_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:east_north_america_shipping
+	    }
+    }
+    global_var:global_west_north_america_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:west_north_america_shipping
+	    }
+    }
+    global_var:global_caribbean_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:caribbean_shipping
+	    }
+    }
+    global_var:global_west_south_america_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:west_south_america_shipping
+	    }
+    }
+    global_var:global_east_south_america_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:east_south_america_shipping
+	    }
+    }
+    global_var:global_south_east_asia_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:south_east_asia_shipping
+	    }
+    }
+    global_var:global_indo_china_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:indo_china_shipping
+	    }
+    }
+    global_var:global_yellow_sea_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:yellow_sea_shipping
+	    }
+    }
+    global_var:global_southern_africa_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:southern_africa_shipping
+	    }
+    }
+    global_var:global_west_africa_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:west_africa_shipping
+	    }
+    }
+    global_var:global_east_africa_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:east_africa_shipping
+	    }
+    }
+    global_var:global_middle_east_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:middle_east_shipping
+	    }
+    }
+    global_var:global_western_steppe_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:western_steppe_shipping
+	    }
+    }
+    global_var:global_eastern_steppe_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:eastern_steppe_shipping
+	    }
+    }
+    global_var:global_upper_yangtzi_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:upper_yangtzi_shipping
+	    }
+    }
+    global_var:global_atlantic_seaboard_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:atlantic_seaboard_shipping
+	    }
+    }
+    global_var:global_central_europe_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:central_europe_shipping
+	    }
+    }
+    global_var:global_west_mediterranean_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:west_mediterranean_shipping
+	    }
+    }
+    global_var:global_baltic_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:baltic_shipping
+	    }
+    }
+    global_var:global_east_europe_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:east_europe_shipping
+	    }
+    }
+    global_var:global_east_mediterranean_tradezone = {
+	    set_variable = {
+		    name = TZ_shipping
+		    value = global_var:east_mediterranean_shipping
+	    }
+    }
 }

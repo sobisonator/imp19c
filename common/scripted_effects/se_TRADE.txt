@@ -486,11 +486,10 @@ TRADE_reset_TZ_internal_rankings = {
 }
 
 TRADE_reset_all_tradegoods_TZ_internal_rankings = {
-	every_governorships = {
-		every_tradegood_complex = {
-			APPLY = TRADE_reset_TZ_internal_rankings
-		}	
-	}
+	# Scope: country
+	every_tradegood_complex = {
+		APPLY = TRADE_reset_TZ_internal_rankings
+	}	
 }
 
 TRADE_reset_purchase_order_tender_completions = {
@@ -1582,12 +1581,12 @@ TRADE_set_internal_trade_scope = {
 		limit = {
 			AND = {
 				NOT = { has_variable = federation_customs_union }
-				capital_scope.owner = {
+				owner = {
 					NOT = { has_variable = overlord_customs_union }
 				}
 			}
 		}
-		capital_scope.owner = {
+		owner = {
 			save_scope_as = internal_trade_scope
 		}
 		set_variable = {
@@ -1601,20 +1600,20 @@ TRADE_set_internal_trade_scope = {
 		limit = {
 			AND = {
 				NOT = { has_variable = federation_customs_union }
-				capital_scope.owner = {
+				owner = {
 					is_subject = yes
 					has_variable = overlord_customs_union # Customs unions in dependencies
 				}
 			}
 		}
-		capital_scope.owner = {
-			var:overlord_customs_union = {
-				save_scope_as = internal_trade_scope
-			}
-		}
+#		owner = {
+#			var:overlord_customs_union = {
+#				save_scope_as = internal_trade_scope
+#			}
+#		}
 		set_variable = {
 			name = internal_trade_scope
-			value = scope:internal_trade_scope
+			value = owner.var:overlord_customs_union
 		}
 	}
 
@@ -3305,7 +3304,7 @@ TRADE_get_preferred_supplier = {
 	# A get_category scripted trigger?
 
 
-	capital_scope.owner = {
+	owner = {
 		ordered_in_list = {
 			variable = list_of_trade_partners_all_categories
 			order_by = var:average_price_of_$tradegood$

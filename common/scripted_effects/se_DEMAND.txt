@@ -10,9 +10,24 @@
 	# This is a reimplementation of the demand svalues
 
 	# The base of food demand is derived from essentials
+	if = {
+		limit = {
+			NOT = { has_variable = var_DEMAND_unfulfilled_food_need_governorship }
+		}
+		set_variable = {
+			name = var_DEMAND_unfulfilled_food_need_governorship
+			value = DEMAND_unfulfilled_food_need_governorship
+		}
+	}
+
 	set_variable = {
 		name = DEMAND_food_$tradegood$
-		value = DEMAND_essentials # DEMAND_svalues
+		value = var:var_DEMAND_unfulfilled_food_need_governorship
+	}
+
+	change_variable = {
+		name = DEMAND_food_$tradegood$
+		divide = DEMAND_num_food_tradegoods
 	}
 
 	set_local_variable = {
@@ -22,13 +37,13 @@
 
 	change_local_variable = {
 		name = l_DEMAND_$tradegood$_price_diff_to_food_mean
-		divide = var:PRICE_food_mean_normalised
+		divide = var:PRICE_food_mean_normalised # Set by PRICE_set_food_mean_normalised_price
 	}
 
 	if = {
 		limit = {
 			has_global_variable = first_time_price_setup_food_done
-			DEMAND_grain > 0
+			DEMAND_$tradegood$ > 0
 		}
 		if = {
 			limit = {
@@ -155,5 +170,99 @@ DEMAND_get_luxury_demand_all_first_time = {
 	DEMAND_get_luxury_demand = { tradegood = chocolate }
 	DEMAND_get_luxury_demand = { tradegood = salt }
 	DEMAND_get_luxury_demand = { tradegood = alcohol }
-	set_global_variable = first_time_price_setup_food_done
+	set_global_variable = first_time_price_setup_luxury_done
+}
+
+DEMAND_set_demand_from_industry = {
+	# Scope: Governorship
+	# Function: Set the demand generated for a tradegood from every industry, per industry present.
+	# This should use the svalues for predefined demand levels, for consistency (see DEMAND_svalues). Values may be 0
+	set_variable = {
+		name = DEMAND_$tradegood$_from_industry
+		value = 0
+	}
+
+	if = { # alcohol
+		limit = {
+			INDUSTRY_factories_assigned_alcohol > 0
+		}
+		set_local_variable = {
+			name = l_DEMAND_$tradegood$_from_industry_alcohol
+			value = INDUSTRY_factories_assigned_alcohol
+		}
+		if = {
+			limit = { $alcohol$ > 0 }
+			change_local_variable = {
+				name = l_DEMAND_$tradegood$_from_industry_alcohol
+				multiply = $alcohol$
+			}
+			change_variable = {
+				name = DEMAND_$tradegood$_from_industry
+				add = local_var:l_DEMAND_$tradegood$_from_industry_alcohol
+			}
+		}
+	}
+
+	# WiP. Repeat, for every industry.
+
+}
+
+DEMAND_set_demand_from_pops = {
+	# Scope: governorship
+	# Function: Set how much the demand for a good from pops is, per poptype present in a governorship.
+	# This should use the svalues for predefined demand levels, for consistency (see DEMAND_svalues). Values may be 0
+
+	set_variable = {
+		name = DEMAND_$tradegood$_from_pops
+		value = 0
+	}
+
+	set_local_variable = {
+		name = l_DEMAND_$tradegood$_from_lower_strata
+		value = governorship_lower_strata
+	}
+	if = {
+		limit = { $lower_strata$ > 0 }
+		change_local_variable = {
+			name = l_DEMAND_$tradegood$_from_lower_strata
+			multiply = $lower_strata$
+		}
+		change_variable = {
+			name = DEMAND_$tradegood$_from_pops
+			add = local_var:l_DEMAND_$tradegood$_from_lower_strata
+		}
+	}
+
+	# WiP. Repeat, for every poptype
+
+}
+
+DEMAND_set_demand = {
+	# Scope: governorship
+	# Function: Set the overall demand for a tradegood.
+	set_variable = {
+		name = DEMAND_$tradegood$
+		value = 0
+	}
+
+	if = {
+		limit = {
+			has_variable = DEMAND_$tradegood$_from_pops
+		}
+		change_variable = {
+			name = DEMAND_$tradegood$
+			add = var:DEMAND_$tradegood$_from_pops
+		}
+	}
+
+	if = {
+		limit = {
+			has_variable = DEMAND_$tradegood$_from_industry
+		}
+		change_variable = {
+			name = DEMAND_$tradegood$
+			add = var:DEMAND_$tradegood$_from_industry
+		}
+	}
+
 }

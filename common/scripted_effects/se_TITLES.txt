@@ -45,9 +45,26 @@ TITLES_apply_starting_HOS_titles = {
 
 	# Uses scripted lists defined by character ID in TITLE_lists
 
+	ordered_TITLE_HOS_$char_id$ = {
+		order_by = { # Pick the primary title by getting the largest
+			value = country_population 
+			add = num_of_cities
+		}
 
-	every_TITLE_HOS_$char_id$ = {
 		save_scope_as = target_country
+
+		char:$char_id$ = {
+			if = {
+				limit = {
+					NOT = { has_variable = primary_title }
+				}
+				set_variable = {
+					name = primary_title
+					value = scope:target_country
+				}
+			}
+		}
+
 		TITLES_give_active_HOS_title = { 
 			char_id = $char_id$
 			target_country = scope:target_country

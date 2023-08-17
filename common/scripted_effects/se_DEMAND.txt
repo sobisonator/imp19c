@@ -1,4 +1,4 @@
-﻿DEMAND_get_food_demand = {
+﻿DEMAND_set_demand_from_food = {
 	# Scope: governorship
 	# Function: Calculate demand from food for the given food tradegood in this governorship.
 	# Sets a a var, DEMAND_food_$tradegood$
@@ -25,9 +25,14 @@
 		value = var:var_DEMAND_unfulfilled_food_need_governorship
 	}
 
-	change_variable = {
-		name = DEMAND_food_$tradegood$
-		divide = DEMAND_num_food_tradegoods
+	if = {
+		limit = {
+			var:DEMAND_food_$tradegood$ > 0
+		}
+		change_variable = {
+			name = DEMAND_food_$tradegood$
+			divide = DEMAND_num_food_tradegoods
+		}
 	}
 
 	set_local_variable = {
@@ -96,7 +101,7 @@
 
 }
 
-DEMAND_get_luxury_demand = {
+DEMAND_set_demand_from_luxury = {
 	# Scope: governorship
 	# Function: Count the amount of demand for the given luxury tradegood.
 	# Sets a var, DEMAND_luxury_$tradegood$
@@ -146,49 +151,71 @@ DEMAND_get_luxury_demand = {
 
 }
 
-DEMAND_get_luxury_demand_all = {
-	DEMAND_get_luxury_demand = { tradegood = luxury_clothing }
-	DEMAND_get_luxury_demand = { tradegood = luxury_furniture }
-	DEMAND_get_luxury_demand = { tradegood = spices }
-	DEMAND_get_luxury_demand = { tradegood = tobacco }
-	DEMAND_get_luxury_demand = { tradegood = opium }
-	DEMAND_get_luxury_demand = { tradegood = sugar }
-	DEMAND_get_luxury_demand = { tradegood = gems }
-	DEMAND_get_luxury_demand = { tradegood = chocolate }
-	DEMAND_get_luxury_demand = { tradegood = salt }
-	DEMAND_get_luxury_demand = { tradegood = alcohol }
+DEMAND_set_demand_from_luxury_all = {
+	DEMAND_set_demand_from_luxury = { tradegood = luxury_clothing }
+	DEMAND_set_demand_from_luxury = { tradegood = luxury_furniture }
+	DEMAND_set_demand_from_luxury = { tradegood = spices }
+	DEMAND_set_demand_from_luxury = { tradegood = tobacco }
+	DEMAND_set_demand_from_luxury = { tradegood = opium }
+	DEMAND_set_demand_from_luxury = { tradegood = sugar }
+	DEMAND_set_demand_from_luxury = { tradegood = gems }
+	DEMAND_set_demand_from_luxury = { tradegood = chocolate }
+	DEMAND_set_demand_from_luxury = { tradegood = salt }
+	DEMAND_set_demand_from_luxury = { tradegood = alcohol }
 }
 
-DEMAND_get_luxury_demand_all_first_time = {
-	DEMAND_get_luxury_demand = { tradegood = luxury_clothing }
-	DEMAND_get_luxury_demand = { tradegood = luxury_furniture }
-	DEMAND_get_luxury_demand = { tradegood = spices }
-	DEMAND_get_luxury_demand = { tradegood = tobacco }
-	DEMAND_get_luxury_demand = { tradegood = opium }
-	DEMAND_get_luxury_demand = { tradegood = sugar }
-	DEMAND_get_luxury_demand = { tradegood = gems }
-	DEMAND_get_luxury_demand = { tradegood = chocolate }
-	DEMAND_get_luxury_demand = { tradegood = salt }
-	DEMAND_get_luxury_demand = { tradegood = alcohol }
+DEMAND_set_demand_from_luxury_all_first_time = {
+	DEMAND_set_demand_from_luxury = { tradegood = luxury_clothing }
+	DEMAND_set_demand_from_luxury = { tradegood = luxury_furniture }
+	DEMAND_set_demand_from_luxury = { tradegood = spices }
+	DEMAND_set_demand_from_luxury = { tradegood = tobacco }
+	DEMAND_set_demand_from_luxury = { tradegood = opium }
+	DEMAND_set_demand_from_luxury = { tradegood = sugar }
+	DEMAND_set_demand_from_luxury = { tradegood = gems }
+	DEMAND_set_demand_from_luxury = { tradegood = chocolate }
+	DEMAND_set_demand_from_luxury = { tradegood = salt }
+	DEMAND_set_demand_from_luxury = { tradegood = alcohol }
 	set_global_variable = first_time_price_setup_luxury_done
 }
 
-DEMAND_set_demand_from_industry = {
+DEMAND_set_demand_from_industry_all = {
 	# Scope: Governorship
 	# Function: Set the demand generated for a tradegood from every industry, per industry present.
 	# This should use the svalues for predefined demand levels, for consistency (see DEMAND_svalues). Values may be 0
-	set_variable = {
-		name = DEMAND_$tradegood$_from_industry
-		value = 0
-	}
+	
 
-	DEMAND_set_demand_from_industry_step = {
+	DEMAND_set_demand_from_industry = {
 		tradegood = $tradegood$
-		industry = alcohol
+		alcohol = 0 # TODO: Sort into alphabetical order of all industries
+		furniture = 0
+		luxury_furniture = 0
 	}
 
 	# WiP. Repeat, for every industry.
 
+}
+
+DEMAND_set_demand_from_industry = {
+	set_variable = {
+		name = DEMAND_$tradegood$_from_industry
+		value = 0
+	}
+	DEMAND_set_demand_from_industry_step = {
+		tradegood = $tradegood$
+		industry = alcohol
+		amount = $alcohol$
+	}
+	DEMAND_set_demand_from_industry_step = {
+		tradegood = $tradegood$
+		industry = furniture
+		amount = $furniture$
+	}
+	DEMAND_set_demand_from_industry_step = {
+		tradegood = $tradegood$
+		industry = luxury_furniture
+		amount = $luxury_furniture$
+	}
+	# etc...
 }
 
 DEMAND_set_demand_from_industry_step = {
@@ -203,7 +230,7 @@ DEMAND_set_demand_from_industry_step = {
 			value = INDUSTRY_factories_assigned_$industry$
 		}
 		if = {
-			limit = { $industry$ > 0 }
+			limit = { $amount$ > 0 }
 			change_local_variable = {
 				name = l_DEMAND_$tradegood$_from_industry_$industry$
 				multiply = $industry$
@@ -217,15 +244,21 @@ DEMAND_set_demand_from_industry_step = {
 }
 
 DEMAND_set_demand_from_pops = {
-	# Scope: governorship
-	# Function: Set how much the demand for a good from pops is, per poptype present in a governorship.
-	# This should use the svalues for predefined demand levels, for consistency (see DEMAND_svalues). Values may be 0
-
 	set_variable = {
 		name = DEMAND_$tradegood$_from_pops
 		value = 0
 	}
 
+	DEMAND_set_demand_from_pops_step = {
+		tradegood = $tradegood$
+		lower_strata
+	}
+}
+
+DEMAND_set_demand_from_pops_step = {
+	# Scope: governorship
+	# Function: Set how much the demand for a good from pops is, per poptype present in a governorship.
+	# This should use the svalues for predefined demand levels, for consistency (see DEMAND_svalues). Values may be 0
 	set_local_variable = {
 		name = l_DEMAND_$tradegood$_from_lower_strata
 		value = governorship_lower_strata

@@ -1,4 +1,37 @@
-﻿DEMAND_set_demand_from_food = {
+﻿DEMAND_set_demand_from_food_all = {
+	# Scope: Governorship
+	# Function: Set the food demand for all tradegoods which have demand from food need
+
+	set_variable = {
+		name = var_DEMAND_unfulfilled_food_need_governorship
+		value = DEMAND_unfulfilled_food_need_governorship
+	}
+
+	DEMAND_set_demand_from_food = {
+		tradegood = grain
+	}
+	DEMAND_set_demand_from_food = {
+		tradegood = livestock
+	}
+	DEMAND_set_demand_from_food = {
+		tradegood = temperate_fruit
+	}
+	DEMAND_set_demand_from_food = {
+		tradegood = mediterranean_fruit
+	}
+	DEMAND_set_demand_from_food = {
+		tradegood = tropical_fruit
+	}
+	DEMAND_set_demand_from_food = {
+		tradegood = vegetables
+	}
+	DEMAND_set_demand_from_food = {
+		tradegood = processed_foods
+	}
+
+}
+
+DEMAND_set_demand_from_food = {
 	# Scope: governorship
 	# Function: Calculate demand from food for the given food tradegood in this governorship.
 	# Sets a a var, DEMAND_food_$tradegood$
@@ -10,15 +43,6 @@
 	# This is a reimplementation of the demand svalues
 
 	# The base of food demand is derived from essentials
-	if = {
-		limit = {
-			NOT = { has_variable = var_DEMAND_unfulfilled_food_need_governorship }
-		}
-		set_variable = {
-			name = var_DEMAND_unfulfilled_food_need_governorship
-			value = DEMAND_unfulfilled_food_need_governorship
-		}
-	}
 
 	set_variable = {
 		name = DEMAND_food_$tradegood$
@@ -37,7 +61,7 @@
 
 	set_local_variable = {
 		name = l_DEMAND_$tradegood$_price_diff_to_food_mean
-		value = var:price_$tradegood$
+		value = var:trade_center.var:local_price_$tradegood$
 	}
 
 	change_local_variable = {
@@ -67,7 +91,7 @@
 		limit = {
 			has_variable = previous_tick_food_demand_$tradegood$
 		}
-		FUNC_bound_variable = {
+		FUNC_clamp_variable = {
 			variable = DEMAND_food_$tradegood$
 			max = previous_tick_food_demand_$tradegood$_110_percent
 			max_type = 'var:'
@@ -99,6 +123,7 @@
 		multiply = 0.9
 	}
 
+
 }
 
 DEMAND_set_demand_from_luxury = {
@@ -119,7 +144,7 @@ DEMAND_set_demand_from_luxury = {
 		}
 		set_local_variable = {
 			name = l_$tradegood$_div_average_governorship_wealth
-			value = var:price_$tradegood$
+			value = var:trade_center.var:local_price_$tradegood$
 		}
 		change_local_variable = {
 			name = l_$tradegood$_div_average_governorship_wealth
@@ -285,6 +310,16 @@ DEMAND_set_demand = {
 	set_variable = {
 		name = DEMAND_$tradegood$
 		value = 0
+	}
+
+	if = {
+		limit = {
+			has_variable = DEMAND_$tradegood$_from_food
+		}
+		change_variable = {
+			name = DEMAND_$tradegood$
+			add = var:DEMAND_$tradegood$_from_food
+		}
 	}
 
 	if = {

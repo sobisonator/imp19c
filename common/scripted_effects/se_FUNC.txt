@@ -5,28 +5,42 @@
 	# max_type and min_type should be '' if they're svalues, or 'var:' if they're variables
 	# The variable to be bounded must not include it's var: prefix
 
-	set_local_variable = { # Set a local variable so that the variable being compared against can go in an svaulue on the right side of comparison operations. Used by svalue FUNC_comparison_variable_holder
-		name = l_variable_holder
-		value = var:$variable$
-	}
-
 	if = {
 		limit = { NOT = { $max_type$$max$ = 0 } }
+		set_local_variable = {
+			name = l_comparison_diff
+			value = $max_type$$max$
+		}
+		change_local_variable = {
+			name = l_comparison_diff
+			subtract = var:$variable$
+		}
 		if = {
 			limit = {
-				$max_type$$max$ < FUNC_comparison_variable_holder
+				local_var:l_comparison_diff < 0
 			}
 			set_variable = {
 				name = $variable$
 				value = $max_type$$max$
 			}
 		}
-	} 
+	}
+
+	
+
 	if = {
 		limit = { NOT = { $min_type$$min$ = 0 } }
+		set_local_variable = {
+			name = l_comparison_diff
+			value = var:$variable$
+		}
+		change_local_variable = {
+			name = l_comparison_diff
+			subtract = $min_type$$min$
+		}
 		if = {
 			limit = {
-				$min_type$$min$ > FUNC_comparison_variable_holder
+				local_var:l_comparison_diff < 0
 			}
 			set_variable = {
 				name = $variable$

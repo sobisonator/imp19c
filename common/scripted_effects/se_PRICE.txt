@@ -174,9 +174,6 @@ PRICE_get_food_price_mean = {
 		name = PRICE_food_mean
 		add = var:local_price_processed_foods
 	}
-	else = {
-		value = 1
-	}
 	change_variable = {
 		name = PRICE_food_mean 
 		divide = DEMAND_num_food_tradegoods
@@ -283,11 +280,12 @@ PRICE_set_food_mean_normalised_price = {
 
 	set_variable = {
 		name = PRICE_food_mean_normalised
-		value = 0.1
+		value = 0
 	}
+	debug_log = "Setting PRICE_set_food_mean_normalised_price"
 	if = {
 		limit = { 
-			var:PRICE_grain_deviation_from_mean_absolute < var:PRICE_food_MAD
+			var:PRICE_grain_deviation_from_mean_absolute < svalue_PRICE_food_MAD
 		}
 		change_variable = {
 			name = PRICE_food_mean_normalised
@@ -296,7 +294,7 @@ PRICE_set_food_mean_normalised_price = {
 	}
 	if = {
 		limit = { 
-			var:PRICE_fish_deviation_from_mean_absolute < var:PRICE_food_MAD
+			var:PRICE_fish_deviation_from_mean_absolute < svalue_PRICE_food_MAD
 		}
 		change_variable = {
 			name = PRICE_food_mean_normalised
@@ -305,7 +303,7 @@ PRICE_set_food_mean_normalised_price = {
 	}
 	if = {
 		limit = { 
-			var:PRICE_livestock_deviation_from_mean_absolute < var:PRICE_food_MAD
+			var:PRICE_livestock_deviation_from_mean_absolute < svalue_PRICE_food_MAD
 		}
 		change_variable = {
 			name = PRICE_food_mean_normalised
@@ -314,7 +312,7 @@ PRICE_set_food_mean_normalised_price = {
 	}
 	if = {
 		limit = { 
-			var:PRICE_mediterranean_fruit_deviation_from_mean_absolute < var:PRICE_food_MAD
+			var:PRICE_mediterranean_fruit_deviation_from_mean_absolute < svalue_PRICE_food_MAD
 		}
 		change_variable = {
 			name = PRICE_food_mean_normalised
@@ -323,7 +321,7 @@ PRICE_set_food_mean_normalised_price = {
 	}
 	if = {
 		limit = { 
-			var:PRICE_temperate_fruit_deviation_from_mean_absolute < var:PRICE_food_MAD
+			var:PRICE_temperate_fruit_deviation_from_mean_absolute < svalue_PRICE_food_MAD
 		}
 		change_variable = {
 			name = PRICE_food_mean_normalised
@@ -332,7 +330,7 @@ PRICE_set_food_mean_normalised_price = {
 	}
 	if = {
 		limit = { 
-			var:PRICE_tropical_fruit_deviation_from_mean_absolute < var:PRICE_food_MAD
+			var:PRICE_tropical_fruit_deviation_from_mean_absolute < svalue_PRICE_food_MAD
 		}
 		change_variable = {
 			name = PRICE_food_mean_normalised
@@ -341,7 +339,7 @@ PRICE_set_food_mean_normalised_price = {
 	}
 	if = {
 		limit = { 
-			var:PRICE_vegetables_deviation_from_mean_absolute < var:PRICE_food_MAD
+			var:PRICE_vegetables_deviation_from_mean_absolute < svalue_PRICE_food_MAD
 		}
 		change_variable = {
 			name = PRICE_food_mean_normalised
@@ -350,19 +348,28 @@ PRICE_set_food_mean_normalised_price = {
 	}
 	if = {
 		limit = { 
-			var:PRICE_processed_foods_deviation_from_mean_absolute < var:PRICE_food_MAD
+			var:PRICE_processed_foods_deviation_from_mean_absolute < svalue_PRICE_food_MAD
 		}
 		change_variable = {
 			name = PRICE_food_mean_normalised
 			add = var:local_price_processed_foods
 		}
 	}
-	divide = DEMAND_num_food_tradegoods
-	FUNC_clamp_variable = {
-		variable = PRICE_food_mean_normalised
-		max = NONE
-		max_type = ''
-		min = 0.0001
-		min_type = ''
+	if = {
+		limit = {
+			var:PRICE_food_mean_normalised > 0
+		}
+		change_variable = {
+			name = PRICE_food_mean_normalised
+			divide = DEMAND_num_food_tradegoods
+		}
 	}
+	
+	#FUNC_clamp_variable = {
+	#	variable = PRICE_food_mean_normalised
+	#	max = NONE
+	#	max_type = ''
+	#	min = 0.0001
+	#	min_type = ''
+	#}
 }

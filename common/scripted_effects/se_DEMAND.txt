@@ -159,6 +159,232 @@ DEMAND_set_demand_from_food = {
 
 }
 
+DEMAND_scale_down_food_demand = {
+	# Scope: governorship
+	# Function: Get the difference between var_DEMAND_unfulfilled_food_need_governorship and the total of all the DEMAND_food_$tradegood$ values.
+	# Portion out that difference to each tradegood based on the size of the local stockpiles, with tradegoods with larger stockpiles getting a larger amount
+	# Subtract the resulting amount from DEMAND_food_$tradegood$, so that that the total of all food demand does not exceed the actual amount needed, and so that food available locally in excess can be sold despite a need to import other food types.
+	
+
+	set_local_variable = {
+		name = l_DEMAND_total_all_food_goods_minus_need
+		value = var:DEMAND_food_grain
+	}
+	change_local_variable = {
+		name = l_DEMAND_total_all_food_goods_minus_need
+		add = var:DEMAND_food_livestock
+	}
+	change_local_variable = {
+		name = l_DEMAND_total_all_food_goods_minus_need
+		add = var:DEMAND_food_vegetables
+	}
+	change_local_variable = {
+		name = l_DEMAND_total_all_food_goods_minus_need
+		add = var:DEMAND_food_temperate_fruit
+	}
+	change_local_variable = {
+		name = l_DEMAND_total_all_food_goods_minus_need
+		add = var:DEMAND_food_tropical_fruit
+	}
+	change_local_variable = {
+		name = l_DEMAND_total_all_food_goods_minus_need
+		add = var:DEMAND_food_mediterranean_fruit
+	}
+	change_local_variable = {
+		name = l_DEMAND_total_all_food_goods_minus_need
+		add = var:DEMAND_food_fish
+	}
+	change_local_variable = {
+		name = l_DEMAND_total_all_food_goods_minus_need
+		add = var:DEMAND_food_processed_foods
+	}
+
+	change_local_variable = {
+		name = l_DEMAND_total_all_food_goods_minus_need
+		subtract = var:var_DEMAND_unfulfilled_food_need_governorship
+	}
+
+	if = { # If there is more demand than is actually needed to fulfil food need here...
+		limit = {
+			local_var:l_DEMAND_total_all_food_goods_minus_need > 0
+		}
+		DEMAND_get_stockpile_percentages_all_tradegoods = yes
+		DEMAND_subtract_excess_food_demand_from_tradegood = {
+			tradegood = grain
+		}
+		DEMAND_subtract_excess_food_demand_from_tradegood = {
+			tradegood = livestock
+		}
+		DEMAND_subtract_excess_food_demand_from_tradegood = {
+			tradegood = vegetables
+		}
+		DEMAND_subtract_excess_food_demand_from_tradegood = {
+			tradegood = temperate_fruit
+		}
+		DEMAND_subtract_excess_food_demand_from_tradegood = {
+			tradegood = tropical_fruit
+		}
+		DEMAND_subtract_excess_food_demand_from_tradegood = {
+			tradegood = mediterranean_fruit
+		}
+		DEMAND_subtract_excess_food_demand_from_tradegood = {
+			tradegood = fish
+		}
+		DEMAND_subtract_excess_food_demand_from_tradegood = {
+			tradegood = processed_foods
+		}
+	}
+}
+
+DEMAND_get_stockpile_percentages_all_tradegoods = {
+	# Scope: Governorship
+	# Function: Get the percentage of $tradegood$ out of all food tradegoods' stockpiles
+	set_local_variable = {
+		name = l_DEMAND_all_food_tradegood_totals
+		value = var:grain_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_all_food_tradegood_totals
+		add = var:livestock_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_all_food_tradegood_totals
+		add = var:vegetables_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_all_food_tradegood_totals
+		add = var:temperate_fruit_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_all_food_tradegood_totals
+		add = var:tropical_fruit_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_all_food_tradegood_totals
+		add = var:mediterranean_fruit_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_all_food_tradegood_totals
+		add = var:fish_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_all_food_tradegood_totals
+		add = var:processed_foods_stockpile
+	}
+
+	# Grain
+	set_local_variable = {
+		name = l_DEMAND_stockpile_percentage_grain
+		value = var:grain_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_stockpile_percentage_grain
+		divide = local_var:l_DEMAND_all_food_tradegood_totals
+	}
+
+	# livestock
+	set_local_variable = {
+		name = l_DEMAND_stockpile_percentage_livestock
+		value = var:livestock_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_stockpile_percentage_livestock
+		divide = local_var:l_DEMAND_all_food_tradegood_totals
+	}
+
+	# Vegetables
+	set_local_variable = {
+		name = l_DEMAND_stockpile_percentage_vegetables
+		value = var:vegetables_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_stockpile_percentage_vegetables
+		divide = local_var:l_DEMAND_all_food_tradegood_totals
+	}
+
+	# Temperate fruit
+	set_local_variable = {
+		name = l_DEMAND_stockpile_percentage_temperate_fruit
+		value = var:temperate_fruit_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_stockpile_percentage_temperate_fruit
+		divide = local_var:l_DEMAND_all_food_tradegood_totals
+	}
+
+	# Tropical fruit
+	set_local_variable = {
+		name = l_DEMAND_stockpile_percentage_tropical_fruit
+		value = var:tropical_fruit_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_stockpile_percentage_tropical_fruit
+		divide = local_var:l_DEMAND_all_food_tradegood_totals
+	}
+
+	# Mediterranean fruit
+	set_local_variable = {
+		name = l_DEMAND_stockpile_percentage_mediterranean_fruit
+		value = var:mediterranean_fruit_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_stockpile_percentage_mediterranean_fruit
+		divide = local_var:l_DEMAND_all_food_tradegood_totals
+	}
+
+	# Fish
+	set_local_variable = {
+		name = l_DEMAND_stockpile_percentage_fish
+		value = var:fish_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_stockpile_percentage_fish
+		divide = local_var:l_DEMAND_all_food_tradegood_totals
+	}
+
+	# Processed foods
+	set_local_variable = {
+		name = l_DEMAND_stockpile_percentage_processed_foods
+		value = var:processed_foods_stockpile
+	}
+	change_local_variable = {
+		name = l_DEMAND_stockpile_percentage_processed_foods
+		divide = local_var:l_DEMAND_all_food_tradegood_totals
+	}
+
+}
+
+DEMAND_subtract_excess_food_demand_from_tradegood = {
+	# Scope: Governorship
+	# Function: Subtract the proportionate l_DEMAND_total_all_food_goods_minus_need from the DEMAND_food_$tradegood$ of the given tradegood
+	# Takes arguments:
+	# $tradegood$ = the tradegood for which to calculate demand
+	set_local_variable = {
+		name = l_DEMAND_amount_to_subtract
+		value = local_var:l_DEMAND_total_all_food_goods_minus_need
+	}
+
+	change_local_variable = {
+		name = l_DEMAND_amount_to_subtract
+		multiply = local_var:l_DEMAND_stockpile_percentage_$tradegood$
+	}
+
+	change_variable = {
+		name = DEMAND_food_$tradegood$
+		subtract = local_var:l_DEMAND_amount_to_subtract
+	}
+
+	if = {
+		limit = {
+			var:DEMAND_food_$tradegood$ < 0
+		}
+		set_variable = {
+			name = DEMAND_food_$tradegood$
+			value = 0
+		}
+	}
+}
+
 DEMAND_set_demand_from_luxury = {
 	# Scope: governorship
 	# Function: Count the amount of demand for the given luxury tradegood.

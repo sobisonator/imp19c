@@ -1,5 +1,5 @@
 SHIPPING_natural_harbour_bonus = {
-	value = 5
+	value = 10
 }
 
 SHIPPING_trade_chokepoint_bonus = {
@@ -12,8 +12,18 @@ SHIPPING_major_estuary_bonus = {
 
 SHIPPING_port_bonus = {
 	value = num_of_port_building
+	add = num_of_river_port_building
 	multiply = civilization_value
 	divide = 10
+	if = {
+		limit = {
+			OR = {
+				has_variable = major_estuary
+				has_variable = trade_chokepoint
+			}
+		}
+		multiply = 1.5
+	}
 }
 
 SHIPPING_commerce_district_bonus = {
@@ -22,6 +32,21 @@ SHIPPING_commerce_district_bonus = {
 
 SHIPPING_railway_bonus = {
 	value = num_of_INF_railway_upgrade
+}
+
+SHIPPING_depots_ports_and_river_ports = {
+	value = num_of_INF_depot
+	add = num_of_port_building
+	add = num_of_river_port_building
+}
+
+SHIPPING_governorship_infrastructure_capacity_bonus = {
+	value = 0
+	governorship = {
+		add = TRADE_governorship_infrastructure_capacity_svalue
+		divide = governorship_num_provinces 
+	}
+	max = num_of_INF_depot
 }
 
 governorship_num_provinces = {
@@ -39,9 +64,16 @@ SHIPPING_province_power = {
 
 	value = 0
 
-	governorship = {
-		add = TRADE_governorship_infrastructure_capacity_svalue
-		divide = governorship_num_provinces # TODO: Implement this value
+	add = SHIPPING_governorship_infrastructure_capacity_bonus
+
+	if = {
+		limit = {
+			OR = {
+				is_coastal = yes
+				has_minor_river = yes
+			}
+		}
+		add = 1
 	}
 
 	add = SHIPPING_port_bonus
@@ -87,4 +119,17 @@ SHIPPING_province_power = {
 		}
 		add = 50 # TBD - needs balancing
 	}
+
+	if = {
+		limit = {
+			OR = {
+				terrain = low_mountain
+				terrain = extreme_mountain
+			}
+		}
+		subtract = 5
+	}
+
+	min = 0
+
 }

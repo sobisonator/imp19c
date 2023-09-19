@@ -34,11 +34,12 @@ SHIPPING_railway_bonus = {
 	value = num_of_INF_railway_upgrade
 }
 
-SHIPPING_depots_ports_river_ports_and_canals = {
+SHIPPING_depots_ports_river_ports_and_canals_bonus = {
 	value = num_of_INF_depot
 	add = num_of_port_building
 	add = num_of_river_port_building
 	add = num_of_INF_canal
+	multiply = 0.25
 }
 
 SHIPPING_governorship_infrastructure_capacity_bonus = {
@@ -70,6 +71,7 @@ SHIPPING_province_power = {
 	add = SHIPPING_port_bonus
 	add = SHIPPING_commerce_district_bonus
 	add = SHIPPING_railway_bonus
+	add = SHIPPING_depots_ports_river_ports_and_canals_bonus
 
 	if = {
 		limit = {
@@ -114,16 +116,6 @@ SHIPPING_province_power = {
 	if = {
 		limit = {
 			OR = {
-				terrain = low_mountain
-				terrain = extreme_mountain
-			}
-		}
-		subtract = 5
-	}
-
-	if = {
-		limit = {
-			OR = {
 				is_coastal = yes
 				has_minor_river = yes
 			}
@@ -133,16 +125,18 @@ SHIPPING_province_power = {
 
 	if = {
 		limit = {
-			OR = {
-				NOT = { has_province_rank = city }
-				NOT = { has_province_rank = city_metropolis }
-			}
-			OR = {
-				NOT = { is_coastal = yes }
-				NOT = { has_minor_river = yes }
+			NOT = {
+				state = {
+					any_province = {
+						OR = {
+							is_coastal = yes
+							has_minor_river = yes
+						}
+					}
+				}
 			}
 		}
-		max = 1 # Inland non-city provinces can only contribute 0 or 1 to shipping
+		max = 1 # Completely landlocked non-city provinces can only contribute 0 or 1 to shipping
 	}
 
 	min = 0

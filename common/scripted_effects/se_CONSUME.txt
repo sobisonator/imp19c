@@ -1,0 +1,44 @@
+CONSUME_setup_all_variables = {
+	every_tradegood_complex = {
+		APPLY = CONSUME_setup_variables_tradegood
+	}
+}
+
+CONSUME_setup_variables_tradegood = {
+	# Scope: Governorship
+	# Function: Set up the variables for a tradegood
+	set_variable = {
+		name = shortage_$tradegood$ # Basis for the shortage malus
+		value = 0
+	}
+}
+
+CONSUME_all_stockpiles = {
+	# Scope: Governorship
+	# Function: trigger CONSUME_from_stockpile for every tradegood stockpile in a governorship
+	every_tradegood_complex = {
+		APPLY = CONSUME_from_stockpile
+	}
+}
+
+CONSUME_from_stockpile = {
+	# Scope: Governorship
+	# Function: Subtract from the stockpile based on demand, or if the demand cannot be met, add to a variable to indicate shortage
+	change_variable = {
+		name = $tradegood$_stockpile
+		subtract = DEMAND_$tradegood$
+	}
+	if = {
+		limit = {
+			var:$tradegood$_stockpile < 0
+		}
+		change_variable = {
+			name = shortage_$tradegood$
+			add = var:$tradegood$_stockpile
+		}
+		set_variable = {
+			name = $tradegood$_stockpile
+			value = 0
+		}
+	}
+}

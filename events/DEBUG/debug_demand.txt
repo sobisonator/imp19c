@@ -1,21 +1,30 @@
 namespace = debug_demand
 
-debug_demand.1 = { # Set variable with argument in name
+debug_demand.1 = { # Set food demand
 	type = country_event
 	title = "TEST"
 	desc = "TEST"
 	picture = aqueducts
 
 	immediate = {
-		every_trade_center = {
-			PRICE_set_food_mean_normalised_price = yes
-		}
-		every_country = {
-			every_governorships = {
-				# Step 1: set base demand, responding to the price of food
-				DEMAND_set_demand_from_food_all = yes
-				# Step 2: balance base demand so that it does not exceed actual unfulfilled food need
-				DEMAND_scale_down_food_demand = yes
+		if = {
+			limit = { 
+				NOT = { has_global_variable = food_demand_updated } 
+			} # Limit so this can be fired in on_action events block without triggering for every country
+			every_trade_center = {
+				PRICE_set_food_mean_normalised_price = yes
+			}
+			every_country = {
+				every_governorships = {
+					# Step 1: set base demand, responding to the price of food
+					DEMAND_set_demand_from_food_all = yes
+					# Step 2: balance base demand so that it does not exceed actual unfulfilled food need
+					DEMAND_scale_down_food_demand = yes
+				}
+			}
+			set_global_variable = {
+				name = food_demand_updated
+				days = 2
 			}
 		}
 	}

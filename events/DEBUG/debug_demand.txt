@@ -5,6 +5,7 @@ debug_demand.1 = { # Set food demand
 	title = "TEST"
 	desc = "TEST"
 	picture = aqueducts
+	hidden = yes
 
 	immediate = {
 		if = {
@@ -37,7 +38,39 @@ debug_demand.1 = { # Set food demand
 		}
 	}
 
-	option = {
-		name = "TEST"
+}
+
+debug_demand.2 = { # Set luxury demand
+	type = country_event
+	title = "TEST"
+	desc = "TEST"
+	picture = aqueducts
+	hidden = yes
+
+	immediate = {
+		if = {
+			limit = { 
+				NOT = { has_global_variable = luxury_demand_updated } 
+			} # Limit so this can be fired in on_action events block without triggering for every country
+			every_country = {
+				every_governorships = {
+					# Step 1: set base demand, responding to the price of food
+					DEMAND_set_demand_from_luxury_all = yes
+				}
+			}
+			set_global_variable = {
+				name = luxury_demand_updated
+				days = 2
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_global_variable = first_time_luxury_demand_updated
+					}
+					set_global_variable = first_time_luxury_demand_updated # This triggers a part of DEMAND_set_demand_from_food to limit demand for tradegoods with no stockpile available locally, reducing the early spiking and diving of food demand
+				}
+			}
+		}
 	}
+
 }

@@ -1656,8 +1656,8 @@ PURCHASE_try_supplier = {
 }
 
 PURCHASE_transfer_if_able = {
-	# Scope: governorship
-	# Function: check if there is a sufficient stockpile in the supplier variable
+	# Scope: governorship of the selling trade scope
+	# Function: check if there is a sufficient stockpile in the supplier trade scope
 	debug_log = "Contacting tradezone  $tradezone$ "
 	if = {
 		limit = {
@@ -1665,48 +1665,55 @@ PURCHASE_transfer_if_able = {
 				has_variable = $tradegood$_stockpile_$tradezone$_tradezone
 			}
 		}
-		debug_log = "Tradezone has been contacted"
-		set_local_variable = {
-			name = i_demand_diff
-			value = $order_size$
-		}
-		var:internal_trade_scope = {
-			debug_log = "Internal trade scope while attempting transfer is: "
-			debug_log_scopes = yes
-			change_local_variable = {
-				name = i_demand_diff
-				subtract = var:$tradegood$_stockpile_$tradezone$_tradezone
-			}
-		}
-
-		set_variable = { # Set a variable to be modified down in case it can't be fulfilled completely by the supplier stockpile
-			name = this_order_size
-			value = $order_size$
-		}
-
-		if = { # Account for inability to fulfil the whole order: if the order size minus the stockpile is positive, lower the order size by that amount
+		if = {
 			limit = {
-				local_var:i_demand_diff > 0
+				var:internal_trade_scope = {
+					var:$tradegood$_stockpile_$tradezone$_tradezone > 0
+				}
 			}
-			change_variable = {
+			debug_log = "Tradezone has been contacted"
+			set_local_variable = {
+				name = i_demand_diff
+				value = $order_size$
+			}
+			var:internal_trade_scope = {
+				debug_log = "Internal trade scope while attempting transfer is: "
+				debug_log_scopes = yes
+				change_local_variable = {
+					name = i_demand_diff
+					subtract = var:$tradegood$_stockpile_$tradezone$_tradezone
+				}
+			}
+
+			set_variable = { # Set a variable to be modified down in case it can't be fulfilled completely by the supplier stockpile
 				name = this_order_size
-				subtract = local_var:i_demand_diff
+				value = $order_size$
+			}
+
+			if = { # Account for inability to fulfil the whole order: if the order size minus the stockpile is positive, lower the order size by that amount
+				limit = {
+					local_var:i_demand_diff > 0
+				}
+				change_variable = {
+					name = this_order_size
+					subtract = local_var:i_demand_diff
+				}
+			}
+			# Add to the purchasing governorship's stockpile
+			PURCHASE_transfer_goods_internally = {
+				tradegood = $tradegood$
+				amount = scope:purchaser_governorship.var:this_order_size
+				category = $category$
+				tradezone = $tradezone$
+			}
+			owner = {
+				change_variable = {
+					name = country_internal_total_ordered_$tradegood$ # Saves the total amount ordered - Note: not the total amount successfully purchased
+					add = $order_size$
+				}
 			}
 		}
-		# Add to the purchasing governorship's stockpile
-		PURCHASE_transfer_goods_internally = {
-			tradegood = $tradegood$
-			amount = scope:purchaser_governorship.var:this_order_size
-			category = $category$
-			tradezone = $tradezone$
 		}
-		owner = {
-			change_variable = {
-				name = country_internal_total_ordered_$tradegood$ # Saves the total amount ordered - Note: not the total amount successfully purchased
-				add = $order_size$
-			}
-		}
-	}
 	else = {
 		debug_log = "Internal trade scope did not have  $tradegood$ stockpile in  $tradezone$"
 	}
@@ -2456,6 +2463,8 @@ PURCHASE_order_external = {
 						}
 					}
 					capital_scope.governorship = { # Capital of the seller's country acts as the trader, handling the transfer on behalf of the purchaser governorship
+
+						save_scope_as = seller_trade_scope
 
 						PURCHASE_try_supplier = {
 							supplier_rank = 1st

@@ -955,6 +955,10 @@ TRADE_update_governorship_TZ_vars = {
 	random_trade_center = {
 		limit = { $TZ$ = { PROVINCE = yes } }
 		save_scope_as = trade_center_province
+		set_global_variable = {
+			name = handling_trade_center_province
+			value = scope:trade_center_province
+		}
 	}
 	# The list of tradezones in the internal trade scope is cleared and reset every quarter by TRADE_update_governorship_TZs
 	var:internal_trade_scope = {
@@ -1423,10 +1427,18 @@ TRADE_update_governorship_TZs = {
 					}
 				}
 			}
+			else = {
+				prev = {
+					TRADE_update_governorship_TZ_vars = {
+						#governorship_scope = scope:this_governorship
+						TZ = east_mediterranean_tradezone # FAILSAFE - MUST BE REMOVED!
+					}
+				}
+			}
 		}
 		set_variable = { # Save the reference to the trade center scope in the governorship
 			name = trade_center
-			value = scope:trade_center_province
+			value = global_var:handling_trade_center_province
 		}
 	}  
 }

@@ -1423,10 +1423,22 @@ SELL_set_TZ_price_modifier = { # used to get local price modifier for the named 
 	#}
 }
 
-SELL_set_TZ_prices = { # OBSOLETE
+SELL_set_TZ_prices = {
 	# Scope: every country
-	# Function: Trigger SELL_set_TZ_prices_by_country in every country, then trigger PRICE_update_price_TZ in every trade center
-	SELL_set_TZ_prices_by_country = yes
+	# Function: Trigger SELL_set_TZ_prices_by_country in every country
+	if = {
+		limit = {
+			has_variable = trade_center
+		}
+		SELL_set_TZ_prices_by_country = yes
+	}
+	else = {
+		every_governorships = {
+			TRADE_set_internal_trade_scope = yes
+			TRADE_update_governorship_TZs = yes
+		}
+		SELL_set_TZ_prices_by_country = yes
+	}
 }
 
 SELL_update_TZ_prices = {
@@ -1443,19 +1455,8 @@ SELL_set_TZ_prices_by_country = {
 	# Scope: country
 	# Function: Parent function of SELL_set_TZ_prices_by_country_governorship
 	every_governorships = {
-		if = {
-			limit = {
-				has_variable = trade_center
-			}
-			every_tradegood_complex = {
-				APPLY = SELL_set_TZ_prices_by_country_governorship
-			}
-			debug_log = "Good trade center def"
-			debug_log_scopes = yes
-		}
-		else = {
-			debug_log = "Bad trade center def:"
-			debug_log_scopes = yes
+		every_tradegood_complex = {
+			APPLY = SELL_set_TZ_prices_by_country_governorship
 		}
 	}
 }
@@ -1467,6 +1468,17 @@ SELL_set_TZ_prices_by_country_governorship = {
 	# Note for future optimisation: might want to put a check here or at some point to prevent calculating demand if there is none, or prevent adding supply if there is none
 
 	save_scope_as = contributing_governorship
+
+	TRADE_set_internal_trade_scope = yes
+	TRADE_update_governorship_TZs = yes
+
+	if = {
+		limit = {
+			NOT = {
+				has_variable = trade_center
+			}
+		}
+	}
 
 	var:trade_center = {
 		if = {

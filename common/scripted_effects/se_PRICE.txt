@@ -1,4 +1,42 @@
-﻿PRICE_update_price_TZ = {
+﻿PRICE_update_TZ_prices_log = {
+	# Scope: random country
+	# Function: Update the TZ prices using the values set in SELL_set_TZ_prices. This is run in a separate effect to prevent too much duplication of the every_country loop in the main trade effect
+	if = {
+		limit = {
+			has_global_variable = done_first_time_log_scale
+		}
+		PRICE_get_all_global_average_prices = yes
+	}
+	every_trade_center = {
+		every_tradegood_complex = {
+			APPLY = PRICE_update_price_TZ
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				has_global_variable = done_first_time_log_scale
+			}
+		}
+		PRICE_get_all_global_average_prices = yes
+		every_trade_center = {
+			every_tradegood_complex = {
+				APPLY = PRICE_update_price_TZ
+			}
+		}
+		set_global_variable = done_first_time_log_scale
+	}
+}
+
+PRICE_update_TZ_prices = {
+	every_trade_center = {
+		every_tradegood_complex = {
+			APPLY = PRICE_update_price_TZ
+		}
+	}
+}
+
+PRICE_update_price_TZ = {
 	# Scope: Trade center province
 	# Function: Update the price based on demand and sold in the tradezone
 	if = {
@@ -37,6 +75,48 @@
 		divide = var:total_supply_TZ_$tradegood$
 	}
 
+	if = {
+		limit = {
+			var:local_price_$tradegood$ > 10000
+		}
+		change_variable = {
+			name = local_price_$tradegood$
+			multiply = 0.005
+		}
+	}
+
+	# Finally, scale down to 10% of the above-calculated value, to fit in with the general scale of wealth in the game
+	change_variable = {
+		name = local_price_$tradegood$
+		multiply = 0.1
+	}
+
+	#if = {
+	#	limit = {
+	#		has_global_variable = global_average_price_$tradegood$
+	#	}
+	#	set_local_variable = {
+	#		name = local_price_global_avg_diff
+	#		value = var:local_price_$tradegood$
+	#	}
+	#	change_local_variable = {
+	#		name = local_price_global_avg_diff
+	#		subtract = global_var:global_average_price_$tradegood$
+	#	}
+	#	if = {
+	#		limit = {
+	#			var:local_price_$tradegood$ > 0
+	#		}
+	#		PRICE_log_scale_tradegood_price = {
+	#			tradegood = $tradegood$
+	#		}
+	#	}
+		# Only remove demand and supply vars if we won't need them for the second run when accounting for average prices the first time
+		
+	#}
+	remove_variable = total_demand_TZ_$tradegood$
+	remove_variable = total_supply_TZ_$tradegood$
+
 	#if = {
 	#	limit = { has_variable = local_price_$tradegood$ }
 	#
@@ -49,9 +129,89 @@
 	#	}
 	#
 	#}
+
 }
 
-PRICE_update_price = {
+PRICE_log_scale_tradegood_price = {
+	# Scope: trade center province
+	# Function: Normalise the price downwards, especially for tradegoods that are not present in a tradezone, so they're not ridiculously expensive
+	set_local_variable = {
+		name = price_reciprocal_plus_1
+		value = 1
+	}
+	change_local_variable = {
+		name = price_reciprocal_plus_1
+		divide = var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = price_reciprocal_plus_1
+		add = 1
+	}
+
+	# To the power of n
+	set_local_variable = {
+		name = n_times_multiplied
+		value = var:local_price_$tradegood$
+	}
+
+	while = {
+		limit = {
+			local_var:n_times_multiplied > 0
+		}
+		count = var:local_price_$tradegood$
+		change_variable = {
+			name = local_price_$tradegood$
+			multiply = local_var:price_reciprocal_plus_1
+		}
+		change_local_variable = {
+			name = n_times_multiplied
+			subtract = 1
+		}
+	}
+}
+
+PRICE_get_all_global_average_prices = {
+	every_tradegood_complex = {
+		APPLY = PRICE_reset_global_average_prices
+	}
+	every_trade_center = {
+		PRICE_sumup_price_TZ = yes
+	}
+	every_tradegood_complex = {
+		APPLY = PRICE_get_global_average_from_summed_prices
+	}
+}
+
+PRICE_reset_global_average_prices = {
+	set_global_variable = {
+		name = global_average_price_$tradegood$
+		value = 0
+	}
+}
+
+PRICE_sumup_price_TZ = {
+	every_tradegood_complex = {
+		APPLY = PRICE_sumup_price
+	}
+}
+
+PRICE_sumup_price = {
+	# Scope: Random country
+	# Function: Get the global average price of the given tradegood
+	change_global_variable = {
+		name = global_average_price_$tradegood$
+		add = var:local_price_$tradegood$
+	}
+}
+
+PRICE_get_global_average_from_summed_prices = {
+	change_global_variable = {
+		name = global_average_price_$tradegood$
+		divide = 22 # Number of tradezones - SHOULD BE A SVALUE!
+	}
+}
+
+PRICE_update_price = { # OBSOLETE - I think?
 	# Scope: Internal trade scope
 	# Function: Update the price based on supply and demand, and reset the demand and supply to 1 (not zero, to avoid unintended div/0 errors in cases where there is no demand or supply in the scope)
 	# The price is also bound so it does not change too drastically

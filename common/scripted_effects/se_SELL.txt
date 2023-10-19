@@ -1441,16 +1441,6 @@ SELL_set_TZ_prices = {
 	}
 }
 
-SELL_update_TZ_prices = {
-	# Scope: random country
-	# Function: Update the TZ prices using the values set in SELL_set_TZ_prices. This is run in a separate effect to prevent too much duplication of the every_country loop in the main trade effect
-	every_trade_center = {
-		every_tradegood_complex = {
-			APPLY = PRICE_update_price_TZ
-		}
-	}
-}
-
 SELL_set_TZ_prices_by_country = {
 	# Scope: country
 	# Function: Parent function of SELL_set_TZ_prices_by_country_governorship
@@ -1463,7 +1453,7 @@ SELL_set_TZ_prices_by_country = {
 
 SELL_set_TZ_prices_by_country_governorship = {
 	# Scope: Every governorships, from every country. Runs within an every_tradegood_complex
-	# Function: Replicate the functionality of SELL_set_TZ_prices but from the every_country loop, for optimisation
+	# Function: Add the supply and demand from all governorships to the tradezone, which is then used by PRICE_update_TZ_prices. Done from the every_country loop, for optimisation, rather than every trade center doing it for every region.
 
 	# Note for future optimisation: might want to put a check here or at some point to prevent calculating demand if there is none, or prevent adding supply if there is none
 
@@ -1471,14 +1461,6 @@ SELL_set_TZ_prices_by_country_governorship = {
 
 	TRADE_set_internal_trade_scope = yes
 	TRADE_update_governorship_TZs = yes
-
-	if = {
-		limit = {
-			NOT = {
-				has_variable = trade_center
-			}
-		}
-	}
 
 	var:trade_center = {
 		if = {

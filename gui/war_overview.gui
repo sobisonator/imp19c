@@ -74,8 +74,10 @@ template WarParticipants
 
 base_window = {
 	name = "war_overview"
-	parentanchor = center|center
 	size = { 818 712 }
+	parentanchor = bottom
+	position = { 55 5 }
+	movable = no
 	state = {
 		name = _show
 		on_start = "[GetVariableSystem.Set( 'show_alternative_peace_deals', 'no' )]"
@@ -610,28 +612,18 @@ base_window = {
 		visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
 		tooltip = "[WarOverview.GetWarScoreTooltip]"
 	}	
-	
+
 	text_button_square = {
-		position = { -140 -20 }
-		name = "decline_button"
-		visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
-		blockoverride "Center_text" { text = "WAR_OVERVIEW_SUE_FOR_PEACE" }
-		blockoverride "On_click" { onclick = "[WarOverview.OnSueForPeace]" }
-		tooltip = "WAR_OVERVIEW_SUE_FOR_PEACE_TOOLTIP"
-		parentanchor = bottom|hcenter
-		size = { 250 24 }
-	}
-	text_button_square = {
-		position = { 140 -20 }
+		position = { 0 -20 }
 		name = "alt_view"
 		datacontext = "[GetScriptedGui('alt_peace_button')]"
 		visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
-		blockoverride "Center_text" { text = "Alternative Peace" }
+		blockoverride "Center_text" { text = "Sue for peace" }
 		blockoverride "On_click" { 
 			onclick = "[GetVariableSystem.Set( 'show_alternative_peace_deals', 'yes' )]" 
 			onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
 		}
-		tooltip = "#T Alternative Peace#!"
+		tooltip = "#T Sue for peace#!"
 		parentanchor = bottom|hcenter
 		size = { 250 24 }
 	}
@@ -878,7 +870,7 @@ base_window = {
 		}
 		#Peace Deal buttons
 		vbox = {
-			position = { 15 -50 }
+			position = { 15 -150 }
 			layoutpolicy_vertical = expanding
 			layoutpolicy_horizontal = expanding
 			
@@ -1102,7 +1094,64 @@ base_window = {
 					}
 				}
 			}
+
 		}
+
+		margin_widget = {
+			size = { 100% 40% }
+			position  = { -175 200 }
+			vbox = {
+				margin_top = 45
+				margin_bottom = 15
+				scrollarea = {
+					size = { 200 0 }
+					layoutpolicy_vertical = expanding
+
+					scrollbarpolicy_horizontal = always_off
+
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+					using = VerticalScrollAreaCutOff
+					scrollwidget = {
+						dynamicgridbox = {
+							datamodel = "[Player.MakeScope.GetList('provinces_available_for_offer')]"
+							item = {
+								flowcontainer = {
+									spacing = 4
+									margin_bottom = 4
+									direction = vertical
+									goto_button = {
+										size = { 26 26 }
+										parentanchor = vcenter
+										tooltip = "go_to"
+										blockoverride "On_click" {
+							                onclick = "[OnClickOnProvince(Scope.GetProvince)]"
+							                onmousehierarchyenter = "[SetHighlightProvince(Scope.GetProvince.GetId)]"
+							                onmousehierarchyleave = "[ClearHighlightColors]"
+						              	}
+									}
+									margin_widget = {
+										size = { 100% 100% }
+										margin_left = 100
+										margin_top = -34
+										text_button_square = {
+											size = { 100% 100% }
+											blockoverride "Center_text" {
+												text = "[Scope.GetProvince.GetName]"
+											}
+											onmousehierarchyenter = "[SetHighlightProvince(Scope.GetProvince.GetId)]"
+			                				onmousehierarchyleave = "[ClearHighlightColors]"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		textbox = {
 			parentanchor = center
 			position = { -67 60 }
@@ -1114,7 +1163,7 @@ base_window = {
 		}
 		textbox = {
 			parentanchor = center
-			position = { -85 -120 }
+			position = { -85 -200 }
 			using = BaseFontM
 			using = Black_FontColor
 			fontsize = 30

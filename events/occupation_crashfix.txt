@@ -29,3 +29,36 @@ occupation_crashfix.1 = {		#Legendary crash bugfix
 		}
 	}
 }
+
+occupation_crashfix.2 = { # Temporarily hand control of all provinces to the warleader
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_province = {
+			limit = {
+				has_owner = yes
+			}
+			save_scope_as = occupied_province
+			if = {
+				limit = {
+					NOT = { controller = owner }
+				}
+				owner = {
+					every_countries_at_war_with = {
+						limit = {
+							NOT = { THIS = scope:occupied_province.controller }
+							any_current_war = {
+								any_war_participant = { THIS = scope:occupied_province.owner }
+								any_war_participant = { THIS = scope:occupied_province.controller }
+								is_war_leader = PREV
+							}
+						}
+						scope:occupied_province = { set_controller = PREV }
+					}
+				}
+			}
+		}
+	}
+
+}

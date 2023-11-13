@@ -956,14 +956,14 @@ base_window = {
 										diplomacy_action_button = {
 											size = { 250 30 }
 											#position = { -50 5 }
-											name = "province_button"
+											name = "governorship_button"
 											datacontext = "[GetScriptedGui('select_governorship_from_defender')]"
 											blockoverride "Left_text" {
-												text = "[Scope.GetGovernorship.GetNameWithNoTooltip]"
+												text = "@[Scope.Governorship.GetOwner.GetFlag]! [Scope.Governorship.GetNameWithNoTooltip]"
 											}
 											blockoverride "Right_text"
 											{
-												text = "warscore cost"
+												text = "00"
 												#using = Negative_FontColor  # Make conditional
 												#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
 											}
@@ -975,10 +975,49 @@ base_window = {
 												#frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
 												#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
 											}	
-											onmousehierarchyenter = "[SetHighlightRegion(Scope.GetGovernorship.GetRegion)]"
+											onmousehierarchyenter = "[SetHighlightProvince(Scope.Governorship.GetCapital.GetId)]"
 			                				onmousehierarchyleave = "[ClearHighlightColors]"
-			                				tooltip = "Test tooltip for governorship button"
+			                				tooltip = "@[Scope.Governorship.GetOwner.GetFlag]! [Scope.Governorship.GetOwner.GetAdjective] region of [Scope.Governorship.GetName] "
 			                				# parentanchor
+			                				blockoverride "On_click" { onclick = "[GetVariableSystem.Set( 'show_states_in_governorship', Scope.Governorship.GetName )]" }
+			                				 
+										}
+									}
+									dynamicgridbox = {
+										datamodel = "[Scope.Governorship.MakeScope.GetList('states_available_from_defender')]"
+										# visible = parent governorship has been clicked on
+										visible = "[GetVariableSystem.HasValue( 'show_states_in_governorship', Scope.Governorship.GetName )]"
+										item = {
+											flowcontainer = {
+												margin_left = 40
+												diplomacy_action_button = {
+													size = { 235 30 }
+													name = "state_button"
+													datacontext = "[GetScriptedGui('select_state_from_defender')]"
+													blockoverride "Left_text" {
+														text = "[Scope.State.GetShortName]"
+													}
+													blockoverride "Right_text"
+													{
+														text = "00"
+														#using = Negative_FontColor  # Make conditional
+														#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+													}
+													blockoverride "Icon" 
+													{
+														framesize = { 46 46 }
+														#visible = "[DiplomaticActionItem.RequireAcceptance]"
+														texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
+														#frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
+														#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+													}	
+													onmousehierarchyenter = "[SetHighlightArea(Scope.State.GetArea)]"
+					                				onmousehierarchyleave = "[ClearHighlightColors]"
+					                				tooltip = "@[Scope.Governorship.GetOwner.GetFlag]! [Scope.Governorship.GetOwner.GetAdjective] region of [Scope.Governorship.GetName] "
+					                				# parentanchor
+					                				onclick = "[GetVariableSystem.Set( 'show_areas_in_governorship', 'yes' )]" 
+												}
+											}
 										}
 									}
 								}

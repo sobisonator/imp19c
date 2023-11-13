@@ -763,11 +763,45 @@ alt_peace_button = {
 			}
 		}
 
+		# Make this a scripted effect to easily double it up for defender and attacker
+
 		clear_variable_list = provinces_available_from_defender
-		clear_variable_list = provinces_available_for_demand
+		clear_variable_list = states_available_from_defender
+		clear_variable_list = governorships_available_from_defender
+		clear_variable_list = provinces_available_from_attacker
 
 		scope:player = {
 			save_scope_as = peace_root
+		}
+
+		every_war_defender = {
+			every_governorships = {
+				save_scope_as = this_governorship
+				scope:peace_root = {
+					add_to_variable_list = {
+						name = governorships_available_from_defender
+						target = scope:this_governorship
+					}
+				}
+				every_governorship_state = {
+					save_scope_as = this_state
+					scope:peace_root = {
+						add_to_variable_list = {
+							name = states_available_from_defender
+							target = scope:this_state
+						}
+					}
+					every_state_province = {
+						save_scope_as = this_province
+						scope:peace_root = {
+							add_to_variable_list = {
+								name = provinces_available_from_defender
+								target = scope:this_province
+							}
+						}
+					}
+				}
+			}
 		}
 
 		every_war_defender = {
@@ -1325,6 +1359,28 @@ select_province_from_defender = {
 		is_target_in_variable_list = {
 			name = provinces_available_from_defender
 			target = scope:province
+		}
+	}
+
+	ai_is_valid = {
+		always = no
+	}
+
+	is_valid = {
+		always = yes
+	}
+}
+
+select_governorship_from_defender = {
+	scope = country
+
+	saved_scopes = governorship
+
+	is_shown = {
+		has_variable_list = governorships_available_from_defender
+		is_target_in_variable_list = {
+			name = governorships_available_from_defender
+			target = scope:governorship
 		}
 	}
 

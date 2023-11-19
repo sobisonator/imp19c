@@ -41,9 +41,19 @@ PixelShader =
 	}
 }
 
+# MOD
+#// Avoid rendering rivers under terrain
+RasterizerState RasterizerState
+{
+	DepthBias = -2000
+	SlopeScaleDepthBias = -10
+}
+# END MOD
+
+
 Effect river_surface
 {
 	VertexShader = "VertexShader"
 	PixelShader = "PS_surface"
-	Defines = { "RIVER" }#"WATER_LOCAL_SPACE_NORMALS" }
+	Defines = { "RIVER" }
 }

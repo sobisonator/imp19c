@@ -1,0 +1,425 @@
+# LAND: Set of scripts to manage the transfer and updating of values to do with land ownership, governorships etc.
+
+# Sketch for land transfer effect
+
+LAND_get_new_governorship_cache = { # POSSIBLY DEFUNCT
+	# Scope: province
+	# Function: Get a new_governorship_cache scope corresponding to this province's region
+	# Should only be called as a child of LAND_transfer_provinces
+
+	# Create a scope to store the values for the new or extended governorship
+	
+	# Do this for every region in the list of provinces being transferred
+
+	# Might have to think of this differently if new or extended - needs some working out
+
+	# Values from this cache scope (a random province) will then be saved in the new governorship, after all the provinces in the list have been transferred to it.
+
+	# Case 1: The province's region hasn't had a new governorship cache created for it yet
+	random_province = {
+		limit = {
+			NOT = {
+				has_variable = is_new_governorship_cache
+				scope:province_under_transfer.area.region = {
+					is_in_list = scope:province_transfer_handler.regions_iterated
+				}
+			}
+		}
+		save_scope_as = new_governorship_cache
+		set_variable = {
+			name = governorship_cache_for_region
+			value = scope:province_under_transfer.area.region
+			days = 1
+		}
+		scope:province_transfer_handler = {
+			add_to_variable_list = {
+				name = regions_iterated
+				target = scope:province_under_transfer.area.region
+			}
+			add_to_variable_list = {
+				name = new_governorship_caches
+				target = scope:new_governorship_cache
+			}
+		}
+	}
+
+	# Case 2: we have already created a new governorship cache for this province's region
+	if = {
+		limit = {
+			area.region = {
+				is_in_list = scope:province_transfer_handler.regions_iterated
+			}
+		}
+		# Then go to that new governorship cache and save it as new governorship cache
+		scope:province_transfer_handler = {
+			random_in_list = {
+				variable = new_governorship_caches
+				limit = {
+					var:governorship_cache_for_region = scope:province_under_transfer.area.region
+				}
+				save_scope_as = new_governorship_cache
+			}
+		}
+	}	
+}
+
+LAND_get_share_of_governorship_wealth_var = {
+	# Scope: province
+	# Function: Get the amount of a governorship wealth pool held in the province based on the number of corresponding pops
+	set_variable = {
+		name = $poptype$_wealth
+		value = state.governorship.var:$poptype$_wealth
+	}
+	# Divide by the number of this poptype in the governorship
+	if = {
+		limit = {
+			state.governorship.governorship_$poptype$ > 0
+		}
+		change_variable = {
+			name = $poptype$_wealth
+			divide = state.governorship.governorship_$poptype$
+		}
+	}
+	change_variable = {
+		name = $poptype$_wealth
+		multiply = num_of_$poptype$
+	}
+}
+
+LAND_get_share_of_governorship_stockpile_var = {
+	# Scope: province
+	# Function: Get the amount of a governorship tradegood stockpile held in the province based on the number of trade buildings
+	if = {
+		limit = {
+			state.governorship.var:$tradegood$_stockpile > 0
+		}
+		set_variable = {
+			name = $tradegood$_stockpile
+			value = state.governorship.var:$tradegood$_stockpile
+		}
+		# Divide by the number of this poptype in the governorship
+		if = {
+			limit = {
+				state.governorship.SHIPPING_depots_ports_river_ports_and_canals_bonus_governorship > 0
+			}
+			change_variable = {
+				name = $tradegood$_stockpile
+				divide = state.governorship.SHIPPING_depots_ports_river_ports_and_canals_bonus_governorship
+			}
+		}
+		change_variable = {
+			name = $tradegood$_stockpile
+			multiply = SHIPPING_depots_ports_river_ports_and_canals_bonus
+		}
+	}
+}
+
+LAND_cache_values_for_new_governorship = {
+	# Scope: province
+	# Function: Set up variables at 0 to hold the sums of governorship-level pools owed to the new governorship to be formed (or merged into an existing governorship if being taken over by a country that already partially owns the same region)
+
+	# Save the old governorship scope as well, so we can subtract these variables from it when we're transferring them over to the new governorship
+	state.governorship = {
+		save_scope_as = old_governorship
+	}
+	set_variable = {
+		name = old_governorship
+		value = scope:old_governorship
+	}
+	
+	every_tradegood_complex = {
+		APPLY = LAND_get_share_of_governorship_stockpile_var
+	}
+
+	LAND_get_share_of_governorship_wealth_var = {
+		poptype = upper_strata
+	}
+	LAND_get_share_of_governorship_wealth_var = {
+		poptype = middle_strata
+	}
+	LAND_get_share_of_governorship_wealth_var = {
+		poptype = lower_strata
+	}
+	LAND_get_share_of_governorship_wealth_var = {
+		poptype = proletariat
+	}
+	LAND_get_share_of_governorship_wealth_var = {
+		poptype = tribesmen
+	}
+	LAND_get_share_of_governorship_wealth_var = {
+		poptype = slaves
+	}
+}
+
+LAND_update_new_governorship_var = {
+	# Scope: province
+	# Function: After the ownership has been transferred, update the new governorship's variables with the shares of stockpiles and wealth pools, while subtracting them from the old governorship if it still exist
+	save_scope_as = origin_province
+	state.governorship = {
+		if = {
+			limit = {
+				has_variable = $variable$
+			}
+			change_variable = {
+				name = $variable$
+				add = scope:origin_province.var:$variable$
+			}
+		}
+		else = {
+			if = {
+				limit = {
+					scope:origin_province = {
+						has_variable = $variable$
+					}
+				}
+				set_variable = {
+					name = $variable$
+					value = scope:origin_province.var:$variable$
+				}
+			}
+			else = {
+				set_variable = {
+					name = $variable$
+					value = $default$
+				}
+			}
+		}
+	}
+
+	var:old_governorship = {
+		change_variable = {
+			name = $variable$
+			subtract = scope:origin_province.var:$variable$
+		}
+	}
+
+	remove_variable = $variable$
+}
+
+LAND_update_new_governorship_stockpile = {
+	# Scope: province
+	# Function: After the ownership has been transferred, update the new governorship's variables with the shares of stockpiles and wealth pools, while subtracting them from the old governorship if it still exist
+	save_scope_as = origin_province
+	state.governorship = {
+		if = {
+			limit = {
+				has_variable = $tradegood$_stockpile
+			}
+			change_variable = {
+				name = $tradegood$_stockpile
+				add = scope:origin_province.var:$tradegood$_stockpile
+			}
+		}
+		else = {
+			if = {
+				limit = {
+					scope:origin_province = {
+						has_variable = $tradegood$_stockpile
+					}
+				}
+				set_variable = {
+					name = $tradegood$_stockpile
+					value = scope:origin_province.var:$tradegood$_stockpile
+				}
+			}
+			else = { # If this is a brand new governorship from uncolonised
+				set_variable = {
+					name = $tradegood$_stockpile
+					value = 0
+				}
+			}
+		}
+	}
+
+	var:old_governorship = {
+		change_variable = {
+			name = $tradegood$_stockpile
+			subtract = scope:origin_province.var:$tradegood$_stockpile
+		}
+	}
+
+	remove_variable = $tradegood$_stockpile
+}
+
+LAND_transfer_provinces = {
+	# Scope: Country
+	# Function: Transfer ownership of a province to a tag
+	# Arguments required:
+	# $origin_governorship$ = The original governorship
+	# $target_provinces$ = List of target provinces, between 1 and x
+	# $grantee$ = The receiving tag
+
+	# Cache all the values from the old governorship
+
+	# Count the number of pops and jobs in the old governorship, before the provinces were transferred over, to get the ratio for swapping wealth and stockpiles over if it's a partial change of ownership
+		# Only do this IF they have a governorship
+
+	# Count the number of pops and buildings in the target provinces
+
+	# Get that as a ratio of the origin governorship's, giving you the percentage of the total wealth that should be transferred across
+
+	# Save the values for the new governorship in the given province, just for holding. These will last until we hand them over to the new governorship
+
+	# Give the provinces to the grantee
+
+	# But first, select a random province that can be referenced by scope to act as a handler scope for all values during the transfer
+
+	random_province = {
+		limit = {
+			NOT = {
+				has_variable = is_province_transfer_handler
+			}
+		}
+		set_variable = {
+			name = is_province_transfer_handler
+			days = 1
+		}
+		save_scope_as = province_transfer_handler
+	}
+
+	every_in_list = {
+		variable = $target_provinces$
+
+		if = {
+			limit = {
+				NOT = {
+					owner = $grantee$
+				}
+			}
+			save_scope_as = province_under_transfer
+
+			# Get a new_governorship_cache scope corresponding to this province's region. This is where we will add up the variables to be given to the new governorship, such as pop wealth pools and tradegood stockpiles, that should be shared out based on the summed-up province attributes.
+
+			if = { # Only execute this block if the province is part of an existing governorship.
+			# Otherwise, set up values from 0, and create local wealth based on the base values from the pops
+				limit = {
+					has_owner = yes
+				}
+
+				#state.governorship = {
+				#	if = {
+				#		limit = {
+				#			NOT = {
+				#				has_variable = governorship_counted
+				#			}
+				#		}
+				#		LAND_cache_values_for_new_governorship = yes
+				#	}
+				#}
+
+				LAND_cache_values_for_new_governorship = yes
+
+			}
+
+			set_conquered_by = $grantee$
+
+			LAND_update_new_governorship_var = {
+				variable = upper_strata_wealth
+				default = WEALTH_starting_upper_strata
+			}
+			LAND_update_new_governorship_var = {
+				variable = middle_strata_wealth
+				default = WEALTH_starting_middle_strata_province
+			}
+			LAND_update_new_governorship_var = {
+				variable = lower_strata_wealth
+				default = WEALTH_starting_lower_strata_province
+			}
+			LAND_update_new_governorship_var = {
+				variable = proletariat_wealth
+				default = WEALTH_starting_proletariat_province
+			}
+			LAND_update_new_governorship_var = {
+				variable = tribesmen_wealth
+				default = WEALTH_starting_tribesmen_province
+			}
+			LAND_update_new_governorship_var = {
+				variable = slaves_wealth
+				default = WEALTH_starting_slaves_province
+			}
+			LAND_update_new_governorship_var = {
+				variable = indentured_wealth
+				default = WEALTH_starting_indentured_province
+			}
+			# WiP, etc...
+
+			every_tradegood_complex = {
+				APPLY = LAND_update_new_governorship_stockpile
+			}
+
+			remove_variable = old_governorship
+		}
+
+	}
+}
+
+LAND_cache_all_old_governorship_values = {
+	# Scope: Governorship
+	# Function: Cache all the variables from a governorship that need to be carried over or split up if provinces change ownership
+
+	save_scope_as = old_governorship
+
+	random_province = {
+		limit = {
+			NOT = {
+				has_variable = is_old_governorship_cache
+			}
+		}
+		save_scope_as = old_governorship_cache
+		set_variable = {
+			name = is_old_governorship_cache
+			days = 1
+		}
+	}
+
+	set_variable = {
+		name = old_governorship_cache
+		value = scope:old_governorship_cache
+	}
+
+	scope:old_governorship_cache = {
+
+		# WEALTH
+		LAND_cache_old_governorship_value = {
+			var_name = upper_strata_wealth
+		}
+		LAND_cache_old_governorship_value = {
+			var_name = middle_strata_wealth
+		}
+		LAND_cache_old_governorship_value = {
+			var_name = lower_strata_wealth
+		}
+		LAND_cache_old_governorship_value = {
+			var_name = proletariat_wealth
+		}
+		LAND_cache_old_governorship_value = {
+			var_name = tribesmen_wealth
+		}
+		LAND_cache_old_governorship_value = {
+			var_name = slaves_wealth
+		}
+
+		every_tradegood_complex = {
+			APPLY = LAND_cache_old_governorship_tradegood_stockpile
+		}
+	}
+
+}
+
+LAND_cache_old_governorship_tradegood_stockpile = {
+	# Scope: province
+	# Function: Save a tradegood stockpile from a governorship
+	set_variable = {
+		name = $var_name$_old
+		value = scope:old_governorship.var:$tradegood$_stockpile
+	}
+}
+
+LAND_cache_old_governorship_value = {
+	# Scope: province
+	# Function: Save named values from a governorship
+	set_variable = {
+		name = $var_name$_old
+		value = scope:old_governorship.var:$var_name$
+	}
+}

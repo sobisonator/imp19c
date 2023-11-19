@@ -1,0 +1,535 @@
+﻿PRICE_update_TZ_prices_log = {
+	# Scope: random country
+	# Function: Update the TZ prices using the values set in SELL_set_TZ_prices. This is run in a separate effect to prevent too much duplication of the every_country loop in the main trade effect
+	if = {
+		limit = {
+			has_global_variable = done_first_time_log_scale
+		}
+		PRICE_get_all_global_average_prices = yes
+	}
+	every_trade_center = {
+		every_tradegood_complex = {
+			APPLY = PRICE_update_price_TZ
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				has_global_variable = done_first_time_log_scale
+			}
+		}
+		PRICE_get_all_global_average_prices = yes
+		every_trade_center = {
+			every_tradegood_complex = {
+				APPLY = PRICE_update_price_TZ
+			}
+		}
+		set_global_variable = done_first_time_log_scale
+	}
+}
+
+PRICE_update_TZ_prices = {
+	every_trade_center = {
+		every_tradegood_complex = {
+			APPLY = PRICE_update_price_TZ
+		}
+	}
+}
+
+PRICE_update_price_TZ = {
+	# Scope: Trade center province
+	# Function: Update the price based on demand and sold in the tradezone
+	if = {
+
+		limit = { has_variable = local_price_$tradegood$ }
+
+		set_variable = {
+			name = previous_price_$tradegood$
+			value = var:local_price_$tradegood$
+		}
+		#set_variable = {
+		#	name = previous_price_$tradegood$_110
+		#	value = var:previous_price_$tradegood$
+		#}
+		#change_variable = {
+		#	name = previous_price_$tradegood$_110
+		#	multiply = 1.1
+		#}
+		#set_variable = {
+		#	name = previous_price_$tradegood$_90
+		#	value = var:previous_price_$tradegood$
+		#}
+		#change_variable = {
+		#	name = previous_price_$tradegood$_90
+		#	multiply = 0.9
+		#}
+
+	}
+
+	set_variable = {
+		name = local_price_$tradegood$
+		value = var:total_demand_TZ_$tradegood$
+	}
+	change_variable = {
+		name = local_price_$tradegood$
+		divide = var:total_supply_TZ_$tradegood$
+	}
+
+	if = {
+		limit = {
+			var:local_price_$tradegood$ > 10000
+		}
+		change_variable = {
+			name = local_price_$tradegood$
+			multiply = 0.005
+		}
+	}
+
+	# Finally, scale down to 10% of the above-calculated value, to fit in with the general scale of wealth in the game
+	change_variable = {
+		name = local_price_$tradegood$
+		multiply = 0.1
+	}
+
+	#if = {
+	#	limit = {
+	#		has_global_variable = global_average_price_$tradegood$
+	#	}
+	#	set_local_variable = {
+	#		name = local_price_global_avg_diff
+	#		value = var:local_price_$tradegood$
+	#	}
+	#	change_local_variable = {
+	#		name = local_price_global_avg_diff
+	#		subtract = global_var:global_average_price_$tradegood$
+	#	}
+	#	if = {
+	#		limit = {
+	#			var:local_price_$tradegood$ > 0
+	#		}
+	#		PRICE_log_scale_tradegood_price = {
+	#			tradegood = $tradegood$
+	#		}
+	#	}
+		# Only remove demand and supply vars if we won't need them for the second run when accounting for average prices the first time
+		
+	#}
+	remove_variable = total_demand_TZ_$tradegood$
+	remove_variable = total_supply_TZ_$tradegood$
+
+	#if = {
+	#	limit = { has_variable = local_price_$tradegood$ }
+	#
+	#	FUNC_clamp_variable = {
+	#		variable = local_price_$tradegood$
+	#		max = previous_price_$tradegood$_110
+	#		max_type = var:
+	#		min = previous_price_$tradegood$_90
+	#		min_type = var:
+	#	}
+	#
+	#}
+
+}
+
+PRICE_log_scale_tradegood_price = {
+	# Scope: trade center province
+	# Function: Normalise the price downwards, especially for tradegoods that are not present in a tradezone, so they're not ridiculously expensive
+	set_local_variable = {
+		name = price_reciprocal_plus_1
+		value = 1
+	}
+	change_local_variable = {
+		name = price_reciprocal_plus_1
+		divide = var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = price_reciprocal_plus_1
+		add = 1
+	}
+
+	# To the power of n
+	set_local_variable = {
+		name = n_times_multiplied
+		value = var:local_price_$tradegood$
+	}
+
+	while = {
+		limit = {
+			local_var:n_times_multiplied > 0
+		}
+		count = var:local_price_$tradegood$
+		change_variable = {
+			name = local_price_$tradegood$
+			multiply = local_var:price_reciprocal_plus_1
+		}
+		change_local_variable = {
+			name = n_times_multiplied
+			subtract = 1
+		}
+	}
+}
+
+PRICE_get_all_global_average_prices = {
+	every_tradegood_complex = {
+		APPLY = PRICE_reset_global_average_prices
+	}
+	every_trade_center = {
+		PRICE_sumup_price_TZ = yes
+	}
+	every_tradegood_complex = {
+		APPLY = PRICE_get_global_average_from_summed_prices
+	}
+}
+
+PRICE_reset_global_average_prices = {
+	set_global_variable = {
+		name = global_average_price_$tradegood$
+		value = 0
+	}
+}
+
+PRICE_sumup_price_TZ = {
+	every_tradegood_complex = {
+		APPLY = PRICE_sumup_price
+	}
+}
+
+PRICE_sumup_price = {
+	# Scope: Random country
+	# Function: Get the global average price of the given tradegood
+	change_global_variable = {
+		name = global_average_price_$tradegood$
+		add = var:local_price_$tradegood$
+	}
+}
+
+PRICE_get_global_average_from_summed_prices = {
+	change_global_variable = {
+		name = global_average_price_$tradegood$
+		divide = 22 # Number of tradezones - SHOULD BE A SVALUE!
+	}
+}
+
+PRICE_update_price = { # OBSOLETE - I think?
+	# Scope: Internal trade scope
+	# Function: Update the price based on supply and demand, and reset the demand and supply to 1 (not zero, to avoid unintended div/0 errors in cases where there is no demand or supply in the scope)
+	# The price is also bound so it does not change too drastically
+	if = {
+		limit = { has_global_variable = first_time_price_setup_done }
+		# Get 110% and 90% of the previous price as upper and lower bounds
+		if = {
+			limit = { has_variable = price_$tradegood$ }
+			set_variable = {
+				name = previous_price_$tradegood$
+				value = var:price_$tradegood$
+			}
+			set_variable = {
+				name = previous_price_$tradegood$_110
+				value = var:previous_price_$tradegood$
+			}
+			change_variable = {
+				name = previous_price_$tradegood$_110
+				multiply = 1.1
+			}
+			set_variable = {
+				name = previous_price_$tradegood$_90
+				value = var:previous_price_$tradegood$
+			}
+			change_variable = {
+				name = previous_price_$tradegood$_90
+				multiply = 0.9
+			}
+		}
+		set_variable = {
+			name = price_$tradegood$
+			value = var:demand_ITS_$tradegood$
+		}
+		if = {
+			limit = { var:supply_ITS_$tradegood$ > 0 }
+			change_variable = {
+				name = price_$tradegood$
+				divide = var:supply_ITS_$tradegood$
+			}
+		}
+		# Apply upper and lower bounds
+		if = {
+			limit = {
+				var:price_$tradegood$ > var:previous_price_$tradegood$_110
+			}
+			set_variable = {
+				name = price_$tradegood$
+				value = var:previous_price_$tradegood$_110
+			}
+		}
+		else_if = {
+			limit = {
+				var:price_$tradegood$ < var:previous_price_$tradegood$_90
+			}
+			set_variable = {
+				name = price_$tradegood$
+				value = var:previous_price_$tradegood$_90
+			}
+		}
+	}
+	else = {
+		set_variable = {
+			name = price_$tradegood$
+			value = 1
+		}
+	}
+
+	# Then reset the demand and supply so it can be updated for next quarter
+	set_variable = {
+		name = demand_ITS_$tradegood$
+		value = 1
+	}
+	set_variable = {
+		name = supply_ITS_$tradegood$
+		value = 1
+	}
+}
+
+# Food prices
+# Order of running:
+# . TRADE_cache_svalues_governorship_trade
+# . PRICE_get_food_price_mean
+# . PRICE_get_all_food_deviations_from_mean_absolute
+# . PRICE_set_food_price_MAD
+# . PRICE_set_PRICE_food_mean_normalised
+# . DEMAND_get_food_demand for every food tradegood
+
+PRICE_get_food_price_mean = {
+	# Scope: Trade center province
+	# Function: Get the mean food price in the governorship
+	set_variable = {
+		name = PRICE_food_mean
+		value = var:local_price_grain
+	}
+	change_variable = {
+		name = PRICE_food_mean
+		add = var:local_price_fish
+	}
+	change_variable = {
+		name = PRICE_food_mean
+		add = var:local_price_livestock
+	}
+	change_variable = {
+		name = PRICE_food_mean
+		add = var:local_price_mediterranean_fruit
+	}
+	change_variable = {
+		name = PRICE_food_mean
+		add = var:local_price_temperate_fruit
+	}
+	change_variable = {
+		name = PRICE_food_mean
+		add = var:local_price_tropical_fruit
+	}
+	change_variable = {
+		name = PRICE_food_mean
+		add = var:local_price_vegetables
+	}
+	change_variable = {
+		name = PRICE_food_mean
+		add = var:local_price_processed_foods
+	}
+	change_variable = {
+		name = PRICE_food_mean 
+		divide = DEMAND_num_food_tradegoods
+	}
+}
+
+PRICE_get_all_food_deviations_from_mean_absolute = {
+	# Scope: Country, per tradezone
+	# Function: Get the absolute deviation of each food price from the mean food price
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = grain
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = fish
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = livestock
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = mediterranean_fruit
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = temperate_fruit
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = tropical_fruit
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = vegetables
+	}
+	PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+		tradegood = processed_foods
+	}
+}
+
+PRICE_get_price_tradegood_deviation_from_mean_absolute = {
+	# Scope: Trade center province
+	# Function: While iterating through all tradegoods, set the deviation of this tradegood's price from the Mean Absolute Deviation
+	set_variable = {
+		name = PRICE_$tradegood$_deviation_from_mean_absolute
+		value = var:local_price_$tradegood$
+	}
+	change_variable = {
+		name = PRICE_$tradegood$_deviation_from_mean_absolute
+		subtract = var:PRICE_food_mean # var:var_DEMAND_food_avg_price # TODO: Bring in the get effect for this
+	}
+	if = {
+		limit = { var:PRICE_$tradegood$_deviation_from_mean_absolute < 0 }
+		change_variable = {
+			name = PRICE_$tradegood$_deviation_from_mean_absolute
+			multiply = -1
+		}
+	}
+}
+
+PRICE_set_food_price_MAD = {
+	# Scope: Trade center province
+	# Function: Set the mean absolute deviation for food tradegoods
+	set_variable = {
+		name = PRICE_food_MAD
+		value = var:PRICE_grain_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_fish_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_livestock_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_mediterranean_fruit_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_temperate_fruit_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_tropical_fruit_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_vegetables_deviation_from_mean_absolute
+	}
+	change_variable = {
+		name = PRICE_food_MAD
+		add = var:PRICE_processed_foods_deviation_from_mean_absolute
+	}
+
+	change_variable = {
+		name = PRICE_food_MAD
+		divide = DEMAND_num_food_tradegoods
+	}
+}
+
+PRICE_set_food_mean_normalised_price = {
+	# Scope: Trade center province
+	# Ignore prices outside of the MAD for average price calculation
+	PRICE_get_food_price_mean = yes
+	PRICE_get_all_food_deviations_from_mean_absolute = yes
+	PRICE_set_food_price_MAD = yes
+
+	set_variable = {
+		name = PRICE_food_mean_normalised
+		value = 0
+	}
+	debug_log = "Setting PRICE_set_food_mean_normalised_price"
+	if = {
+		limit = { 
+			var:PRICE_grain_deviation_from_mean_absolute < svalue_PRICE_food_MAD
+		}
+		change_variable = {
+			name = PRICE_food_mean_normalised
+			add = var:local_price_grain
+		}
+	}
+	if = {
+		limit = { 
+			var:PRICE_fish_deviation_from_mean_absolute < svalue_PRICE_food_MAD
+		}
+		change_variable = {
+			name = PRICE_food_mean_normalised
+			add = var:local_price_fish
+		}
+	}
+	if = {
+		limit = { 
+			var:PRICE_livestock_deviation_from_mean_absolute < svalue_PRICE_food_MAD
+		}
+		change_variable = {
+			name = PRICE_food_mean_normalised
+			add = var:local_price_livestock
+		}
+	}
+	if = {
+		limit = { 
+			var:PRICE_mediterranean_fruit_deviation_from_mean_absolute < svalue_PRICE_food_MAD
+		}
+		change_variable = {
+			name = PRICE_food_mean_normalised
+			add = var:local_price_mediterranean_fruit
+		}
+	}
+	if = {
+		limit = { 
+			var:PRICE_temperate_fruit_deviation_from_mean_absolute < svalue_PRICE_food_MAD
+		}
+		change_variable = {
+			name = PRICE_food_mean_normalised
+			add = var:local_price_temperate_fruit
+		}
+	}
+	if = {
+		limit = { 
+			var:PRICE_tropical_fruit_deviation_from_mean_absolute < svalue_PRICE_food_MAD
+		}
+		change_variable = {
+			name = PRICE_food_mean_normalised
+			add = var:local_price_tropical_fruit
+		}
+	}
+	if = {
+		limit = { 
+			var:PRICE_vegetables_deviation_from_mean_absolute < svalue_PRICE_food_MAD
+		}
+		change_variable = {
+			name = PRICE_food_mean_normalised
+			add = var:local_price_vegetables
+		}
+	}
+	if = {
+		limit = { 
+			var:PRICE_processed_foods_deviation_from_mean_absolute < svalue_PRICE_food_MAD
+		}
+		change_variable = {
+			name = PRICE_food_mean_normalised
+			add = var:local_price_processed_foods
+		}
+	}
+	if = {
+		limit = {
+			var:PRICE_food_mean_normalised > 0
+		}
+		change_variable = {
+			name = PRICE_food_mean_normalised
+			divide = DEMAND_num_food_tradegoods
+		}
+	}
+	
+	#FUNC_clamp_variable = {
+	#	variable = PRICE_food_mean_normalised
+	#	max = NONE
+	#	max_type = ''
+	#	min = 0.0001
+	#	min_type = ''
+	#}
+}

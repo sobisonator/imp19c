@@ -1,113 +1,89 @@
-﻿# Employment
+﻿# Wages owed for each job are increased by buildings, then scaled by the wages multiplier for that job.
+# Resource extraction jobs' wages are determined by the number of pops rather than the number of RGOs
+# Who pays out the wages is determined by who owns the respective industry
 
-##### OLD - PRE NOVEMBER 2022 REWORK
+# The number of job slots for each job (job slots = building slots for buildings associated with the given job) is determined by:
+# + The number of pops educated to that level
+# - The number of used up job slots (i.e. buildings) in the same education level
 
-## Jobs
+##################
+# Job slot values
+# Province scope
+##################
 
-### Country level
-
-JOBS_national_subsistence_slots = {
-	value = 0
-	every_owned_province = {
-		add = JOBS_slots_subsistence
-	}
+# Jobs capped by higher education
+JOBS_administrators = {
+	value = num_of_URB_administration_district
 }
 
-JOBS_national_private_service_modifier = { # Factors increasing the available private service jobs nationwide
-	value = 1
-	if = {
-		limit = {
-			owner = { has_law = independent_bar }
-		}
-		add = 0.1
-	}
+JOBS_health_workers = {
+	value = num_of_INF_hospital
 }
 
-JOBS_national_civil_service_modifier = { # Factors increasing the available private service jobs nationwide
-	value = 1
-	if = {
-		limit = { 
-			owner = { has_law = bureaucratic_judiciary }
-		}
-		add = 0.2
-	}
-	if = {
-		limit = { 
-			owner = {
-				OR = {
-					has_law = state_distribution # land law
-					has_law = registered_land # land law
-				}
-			}
-		}
-		add = 0.1
-	}
-	if = {
-		limit = { 
-			owner = { has_law = civil_judiciary }
-		}
-		add = 0.1
-	}
-	if = {
-		limit = { 
-			owner = { has_law = immigration_closed_borders }
-		}
-		subtract = 0.1
-	}
-	if = {
-		limit = { 
-			owner = { has_law = emigration_closed_borders }
-		}
-		subtract = 0.1
-	}
-	if = {
-		limit = { 
-			owner = { has_law = emigration_passports }
-		}
-		add = 0.1
-	}
+JOBS_educators = {
+	value = num_of_EDU_school
+	add = num_of_EDU_university
 }
 
-### Province level
-
-#### Available slots
-
-# All job slots except for subsistence are taken directly from the number of buildings
-
-JOBS_slots_subsistence = {
-	# This represents subsistence farmers (lower strata), artisans & merchants (middle strata) and traditional landed nobility (upper strata). Tribesmen can only ever occupy subsitence type jobs. Reduced food consumption, very low output
-	value = total_population
-	if = {
-		limit = {
-			civilization_value > 0
-		}
-		multiply = inverse_industrialisation
-	}
-	multiply = province_rural_percentage_modifier
-	round = yes
+JOBS_arts_workers = {
+	value = num_of_URB_cultural_district
 }
 
-# Military job slots are not calculated as the roles are filled on an as-needed basis
-# WIP update: military job slots could depend on fortresses and arsenals - needs work
-
-#### Filled slots
-
-##### OLD - PRE NOVEMBER 2022 REWORK
-
-##### NEW
-
-JOBS_slots_filled = {
-	value = 0
+# Jobs capped by basic education
+JOBS_infrastructure_workers = {
+	value = num_of_INF_depot
+	add = num_of_INF_canal
+	add = num_of_INF_railway_upgrade
+	add = num_of_INF_sewer_infrastructure
+	add = num_of_river_port_building
+	add = num_of_port_building
 }
 
-JOBS_slots_from_IND_resource_gathering_operation = {
+JOBS_clerks = {
+	value = num_of_URB_commerce_district
+}
+
+# Jobs not capped by education
+
+JOBS_military = {
+	value = num_of_arsenal_building
+	add = num_of_fortress_building
+}
+
+JOBS_resource_gatherer = {
 	value = num_of_IND_resource_gathering_operation
 }
 
-JOBS_IND_resource_gathering_operation_cap = {
-	if = {
-		limit = {
-			job_slots_filled_trigger = yes
-		}
-	}
+JOBS_industrial_worker = {
+	value = num_of_IND_industrial_estate
+}
+
+JOBS_subsistence_worker = { # Workers not employed by buildings, but working due to lack of industrialisation
+	value = total_population
+	multiply = inverse_industrialisation # If industrialisation is 0, this will be 100
+}
+
+
+##############
+# Meta-values
+##############
+
+JOBS_num_used_slots = {
+	# Scope: province
+	value = JOBS_subsistence_worker
+	add = JOBS_industrial_worker
+	add = JOBS_resource_gatherer
+	add = JOBS_military
+	add = JOBS_clerks
+	add = JOBS_infrastructure_workers
+	add = JOBS_arts_workers
+	add = JOBS_educators
+	add = JOBS_health_workers
+	add = JOBS_administrators
+}
+
+JOBS_unemployed_pops_province = {
+	# Scope: province
+	value = total_population
+	subtract = JOBS_num_used_slots
 }

@@ -1,16 +1,5 @@
 ﻿# MODIFIERS
 
-## SCORING CALCULATION VALUES
-
-previous_score_svalue = { # Svalue for use in right-side comparison in PURCHASE_order_internal
-	if = {
-		limit = {
-			has_variable = previous_score
-		}
-		value = var:previous_score
-	}
-}
-
 ## EXPORT MODIFIERS
 
 TRADE_country_export_stock_modifier = { # At the national level, modifies the amount of every governorship's stockpile that's available for trade
@@ -26,6 +15,21 @@ TRADE_governorship_export_stock_modifier = { # At the governorship level, modifi
 	value = 1
 	# Modified by local ordnances
 	max = 1 # You can never sell more than 100% of your stockpile!
+}
+
+TRADE_number_of_trade_partners_food_goods = {
+	# Gets the number of trade partners to divide exports and demand between them
+	value = 0
+	if = {
+		limit = { has_variable_list = list_of_trade_partners_food_goods }
+		every_in_list = {
+			variable = list_of_trade_partners_food_goods
+			add = 1
+		}
+	}
+	else = {
+		value = 1
+	}
 }
 
 ### INFRASTRUCTURE LIMITS
@@ -731,9 +735,29 @@ TRADE_governorship_for_export_internal_grain = {
 	subtract = DEMAND_grain
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_grain
+	}
+	min = 0
+	if = {
+		limit = {
+			has_variable = governorship_trade_capacity
+		}
+		max = var:governorship_trade_capacity
+	}
+	
+}
+
+TRADE_governorship_for_export_internal_vegetables = {
+	# Scope: governorship
+	value = GOODS_vegetables_stockpile
+	subtract = DEMAND_vegetables
+	if = {
+		limit = {
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+		}
+		subtract = TRADE_governorship_for_export_vegetables
 	}
 	min = 0
 	if = {
@@ -751,7 +775,7 @@ TRADE_governorship_for_export_internal_fish = {
 	subtract = DEMAND_fish
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_fish
 	}
@@ -770,7 +794,7 @@ TRADE_governorship_for_export_internal_livestock = {
 	subtract = DEMAND_livestock
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_livestock
 	}
@@ -789,7 +813,7 @@ TRADE_governorship_for_export_internal_tropical_fruit = {
 	subtract = DEMAND_tropical_fruit
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_tropical_fruit
 	}
@@ -808,7 +832,7 @@ TRADE_governorship_for_export_internal_mediterranean_fruit = {
 	subtract = DEMAND_mediterranean_fruit
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_mediterranean_fruit
 	}
@@ -827,7 +851,7 @@ TRADE_governorship_for_export_internal_temperate_fruit = {
 	subtract = DEMAND_temperate_fruit
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_temperate_fruit
 	}
@@ -846,7 +870,7 @@ TRADE_governorship_for_export_internal_processed_foods = {
 	subtract = DEMAND_processed_foods
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_processed_foods
 	}
@@ -865,7 +889,7 @@ TRADE_governorship_for_export_internal_clothing = {
 	subtract = DEMAND_clothing
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_clothing
 	}
@@ -884,7 +908,7 @@ TRADE_governorship_for_export_internal_furniture = {
 	subtract = DEMAND_furniture
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_furniture
 	}
@@ -903,7 +927,7 @@ TRADE_governorship_for_export_internal_pharmaceuticals = {
 	subtract = DEMAND_pharmaceuticals
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_pharmaceuticals
 	}
@@ -922,7 +946,7 @@ TRADE_governorship_for_export_internal_coal = {
 	subtract = DEMAND_coal
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_coal
 	}
@@ -941,7 +965,7 @@ TRADE_governorship_for_export_internal_whales = {
 	subtract = DEMAND_whales
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_whales
 	}
@@ -960,7 +984,7 @@ TRADE_governorship_for_export_internal_alcohol = {
 	subtract = DEMAND_alcohol
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_alcohol
 	}
@@ -979,7 +1003,7 @@ TRADE_governorship_for_export_internal_gems = {
 	subtract = DEMAND_gems
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_gems
 	}
@@ -998,7 +1022,7 @@ TRADE_governorship_for_export_internal_opium = {
 	subtract = DEMAND_opium
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_opium
 	}
@@ -1017,7 +1041,7 @@ TRADE_governorship_for_export_internal_tobacco = {
 	subtract = DEMAND_tobacco
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_tobacco
 	}
@@ -1036,7 +1060,7 @@ TRADE_governorship_for_export_internal_chocolate = {
 	subtract = DEMAND_chocolate
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_chocolate
 	}
@@ -1055,7 +1079,7 @@ TRADE_governorship_for_export_internal_coffee = {
 	subtract = DEMAND_coffee
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_coffee
 	}
@@ -1074,7 +1098,7 @@ TRADE_governorship_for_export_internal_tea = {
 	subtract = DEMAND_tea
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_tea
 	}
@@ -1093,7 +1117,7 @@ TRADE_governorship_for_export_internal_spices = {
 	subtract = DEMAND_spices
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_spices
 	}
@@ -1112,7 +1136,7 @@ TRADE_governorship_for_export_internal_sugar = {
 	subtract = DEMAND_sugar
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_sugar
 	}
@@ -1131,7 +1155,7 @@ TRADE_governorship_for_export_internal_luxury_clothing = {
 	subtract = DEMAND_luxury_clothing
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_luxury_clothing
 	}
@@ -1150,7 +1174,7 @@ TRADE_governorship_for_export_internal_luxury_furniture = {
 	subtract = DEMAND_luxury_furniture
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_luxury_furniture
 	}
@@ -1169,7 +1193,7 @@ TRADE_governorship_for_export_internal_glass = {
 	subtract = DEMAND_glass
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_glass
 	}
@@ -1188,7 +1212,7 @@ TRADE_governorship_for_export_internal_motors = {
 	subtract = DEMAND_motors
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_motors
 	}
@@ -1207,7 +1231,7 @@ TRADE_governorship_for_export_internal_fur = {
 	subtract = DEMAND_fur
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_fur
 	}
@@ -1226,7 +1250,7 @@ TRADE_governorship_for_export_internal_industrial_fibres = {
 	subtract = DEMAND_industrial_fibres
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_industrial_fibres
 	}
@@ -1245,7 +1269,7 @@ TRADE_governorship_for_export_internal_textile_fibres = {
 	subtract = DEMAND_textile_fibres
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_textile_fibres
 	}
@@ -1264,7 +1288,7 @@ TRADE_governorship_for_export_internal_wool = {
 	subtract = DEMAND_wool
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_wool
 	}
@@ -1283,7 +1307,7 @@ TRADE_governorship_for_export_internal_silk = {
 	subtract = DEMAND_silk
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_silk
 	}
@@ -1302,7 +1326,7 @@ TRADE_governorship_for_export_internal_wood = {
 	subtract = DEMAND_wood
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_wood
 	}
@@ -1321,7 +1345,7 @@ TRADE_governorship_for_export_internal_stone = {
 	subtract = DEMAND_stone
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_stone
 	}
@@ -1340,7 +1364,7 @@ TRADE_governorship_for_export_internal_sulphur = {
 	subtract = DEMAND_sulphur
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_sulphur
 	}
@@ -1359,7 +1383,7 @@ TRADE_governorship_for_export_internal_peat = {
 	subtract = DEMAND_peat
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_peat
 	}
@@ -1378,7 +1402,7 @@ TRADE_governorship_for_export_internal_tin = {
 	subtract = DEMAND_tin
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_tin
 	}
@@ -1397,7 +1421,7 @@ TRADE_governorship_for_export_internal_inorganic_compounds = {
 	subtract = DEMAND_inorganic_compounds
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_inorganic_compounds
 	}
@@ -1416,7 +1440,7 @@ TRADE_governorship_for_export_internal_copper = {
 	subtract = DEMAND_copper
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_copper
 	}
@@ -1435,7 +1459,7 @@ TRADE_governorship_for_export_internal_iron = {
 	subtract = DEMAND_iron
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_iron
 	}
@@ -1454,7 +1478,7 @@ TRADE_governorship_for_export_internal_gold = {
 	subtract = DEMAND_gold
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_gold
 	}
@@ -1473,7 +1497,7 @@ TRADE_governorship_for_export_internal_silver = {
 	subtract = DEMAND_silver
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_silver
 	}
@@ -1492,7 +1516,7 @@ TRADE_governorship_for_export_internal_dye = {
 	subtract = DEMAND_dye
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_dye
 	}
@@ -1511,7 +1535,7 @@ TRADE_governorship_for_export_internal_lead = {
 	subtract = DEMAND_lead
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_lead
 	}
@@ -1530,7 +1554,7 @@ TRADE_governorship_for_export_internal_oil = {
 	subtract = DEMAND_oil
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_oil
 	}
@@ -1549,7 +1573,7 @@ TRADE_governorship_for_export_internal_hardwood = {
 	subtract = DEMAND_hardwood
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_hardwood
 	}
@@ -1568,7 +1592,7 @@ TRADE_governorship_for_export_internal_rubber = {
 	subtract = DEMAND_rubber
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_rubber
 	}
@@ -1587,7 +1611,7 @@ TRADE_governorship_for_export_internal_salt = {
 	subtract = DEMAND_salt
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_salt
 	}
@@ -1606,7 +1630,7 @@ TRADE_governorship_for_export_internal_electronics = {
 	subtract = DEMAND_electronics
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_electronics
 	}
@@ -1625,7 +1649,7 @@ TRADE_governorship_for_export_internal_construction_materials = {
 	subtract = DEMAND_construction_materials
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_construction_materials
 	}
@@ -1644,7 +1668,7 @@ TRADE_governorship_for_export_internal_steel = {
 	subtract = DEMAND_steel
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_steel
 	}
@@ -1663,7 +1687,7 @@ TRADE_governorship_for_export_internal_bronze = {
 	subtract = DEMAND_bronze
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_bronze
 	}
@@ -1682,7 +1706,7 @@ TRADE_governorship_for_export_internal_machine_parts = {
 	subtract = DEMAND_machine_parts
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_machine_parts
 	}
@@ -1701,7 +1725,7 @@ TRADE_governorship_for_export_internal_chemicals = {
 	subtract = DEMAND_chemicals
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_chemicals
 	}
@@ -1720,7 +1744,7 @@ TRADE_governorship_for_export_internal_naval_supplies = {
 	subtract = DEMAND_naval_supplies
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_naval_supplies
 	}
@@ -1739,7 +1763,7 @@ TRADE_governorship_for_export_internal_steel_ships = {
 	subtract = DEMAND_steel_ships
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_steel_ships
 	}
@@ -1758,7 +1782,7 @@ TRADE_governorship_for_export_internal_wooden_ships = {
 	subtract = DEMAND_wooden_ships
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_wooden_ships
 	}
@@ -1777,7 +1801,7 @@ TRADE_governorship_for_export_internal_petrochemicals = {
 	subtract = DEMAND_petrochemicals
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_petrochemicals
 	}
@@ -1796,7 +1820,7 @@ TRADE_governorship_for_export_internal_early_munitions = {
 	subtract = DEMAND_early_munitions
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_early_munitions
 	}
@@ -1815,7 +1839,7 @@ TRADE_governorship_for_export_internal_late_munitions = {
 	subtract = DEMAND_late_munitions
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_late_munitions
 	}
@@ -1834,7 +1858,7 @@ TRADE_governorship_for_export_internal_early_artillery = {
 	subtract = DEMAND_early_artillery
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_early_artillery
 	}
@@ -1853,7 +1877,7 @@ TRADE_governorship_for_export_internal_late_artillery = {
 	subtract = DEMAND_late_artillery
 	if = {
 		limit = {
-			capital_scope.owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
+			owner = { has_variable = trade_export_focus } # Could be has_law if we make this a law, TBD
 		}
 		subtract = TRADE_governorship_for_export_late_artillery
 	}
@@ -1873,6 +1897,16 @@ TRADE_governorship_for_export_grain = {
 	multiply = TRADE_country_export_stock_modifier
 	multiply = TRADE_governorship_export_stock_modifier
 	subtract = TRADE_governorship_export_threshold_grain # Keep up to threshold
+	max = var:grain_stockpile # Do not sell more than you have
+	max = var:governorship_trade_capacity
+	min = 0
+}
+
+TRADE_governorship_for_export_vegetables = {
+	value = TRADE_governorship_export_cap_vegetables # Sell up to cap
+	multiply = TRADE_country_export_stock_modifier
+	multiply = TRADE_governorship_export_stock_modifier
+	subtract = TRADE_governorship_export_threshold_vegetables # Keep up to threshold
 	max = var:grain_stockpile # Do not sell more than you have
 	max = var:governorship_trade_capacity
 	min = 0

@@ -1,5 +1,4 @@
-yearly_country_pulse =
-{
+﻿yearly_country_pulse = {
 	on_actions = {
 		quarterly_trade_pulse
 		delay = { days = 91 }
@@ -9,21 +8,50 @@ yearly_country_pulse =
 		delay = { days = 273 }
 		quarterly_trade_pulse
 	}
-
 }
 
 quarterly_trade_pulse = {
 	effect = {
+
+		#-------------------------------------------
+		#-            Production                   -
+		#-------------------------------------------
 		every_governorships = {
+			limit = {
+				NOT = {
+					has_variable = internal_trade_scope
+				}
+			}
+			TRADE_set_internal_trade_scope = yes
+			TRADE_update_governorship_TZs = yes # In case new governorships are formed. TODO: slot this into the territory ownership changed effect once that is made
+		}
+		every_governorships = {
+			TRADE_governorship_get_pops_this_quarter = yes
 			GOODS_governorship_produce_all_raw = yes
 			GOODS_governorship_produce_all_manufactured = yes
-
-			#----------------------------------
-			#-        Purchase Effects        -
-			#----------------------------------
-
-			#Reset WEALTH_governorship_total every quarter for every country.
-			PURCHASE_reset_quarterly_var = yes
+			CONSUME_all_stockpiles = yes
 		}
+
+		#-------------------------------------------
+		#-            Consumption                  -
+		#-------------------------------------------
+
+		#-------------------------------------------
+		#-        Trade: selling and buying        -
+		#-------------------------------------------
+		if = {
+			limit = {
+				NOT = { has_global_variable = done_quarterly_trade }
+			}
+			set_global_variable = {
+				name = done_quarterly_trade
+				days = 1
+			}
+		}
+	}
+	events = {
+		debug_demand.1
+		debug_demand.2
+		debug_trade.2
 	}
 }

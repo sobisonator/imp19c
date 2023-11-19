@@ -6,7 +6,7 @@ base_window = {
 	name = "settings" #name used in console command to open widget
     gfxtype = windowgfx
     parentanchor = center
-    size = { 470 170 }
+    size = { 470 365 }
     vbox = {
         using = MainWindowHeaderBox
 
@@ -20,65 +20,185 @@ base_window = {
     }
     button_close = {
         onclick = "[ExecuteConsoleCommand('GUI.ClearWidgets settings')]"
+        onclick = "[GetVariableSystem.Clear('graphic_settings')]"
         tooltip = "CLOSE"
         parentanchor = top|right
-        position = { -7 14}
+        position = { -13 14 }
     }
     sub_header = {
         size = { 464 30 }
         position = { 4 55 }
         blockoverride "Title_text" { text = "Lighting Modes" }
     }
+
+    sub_header = {
+        size = { 464 30 }
+        position = { 4 160 }
+        blockoverride "Title_text" { text = "Gui Lighting" }
+    }
+
+    #sub_header = {
+    #    size = { 464 30 }
+    #    position = { 4 265 }
+    #    blockoverride "Title_text" { text = "Map Icons" }
+    #}
+
     @col_1 = 110
-    @button_height = 140    
+    @col_2 = 210
+    @col_3 = 310
+    @button_height = 140
+    @bottom_button_height = 82     
     @row_1 = 35
     @row_2 = @[row_1 + (button_height + 1) * 1]
     @row_3 = @[row_1 + (button_height + 1) * 2]
 
-    text_button_square = {
-        size = { 120 28 }
-        position = { @row_1 @col_1 }
-        enabled = "[Not(Or(GetVariableSystem.Exists('evening_mode'), GetVariableSystem.Exists('night_mode')))]"
-        #enabled = "[Not(Or(GetVariableSystem.Exists('evening_mode'), GetVariableSystem.Exists('night_mode')), Or(GetVariableSystem.Exists('dyn_morning_mode'), GetVariableSystem.Exists('dyn_night_mode')), GetVariableSystem.Exists('dyn_full_mode'))]"
-        tooltip = "morning_mode_tt"
-        blockoverride "Center_text"
-        {
-            text = "Morning"
+    @bottom_row_1 = 35
+    @bottom_row_2 = @[row_1 + (bottom_button_height + 1) * 1]
+    @bottom_row_3 = @[row_1 + (bottom_button_height + 1) * 2]
+    @bottom_row_4 = @[row_1 + (bottom_button_height + 1) * 3]
+    @bottom_row_5 = @[row_1 + (bottom_button_height + 1) * 4]
+    container = {
+        name = "lighting_modes"
+        text_button_square = {
+            size = { 120 28 }
+            position = { @row_1 @col_1 }
+            enabled = "[Not(Or(GetVariableSystem.Exists('evening_mode'), GetVariableSystem.Exists('night_mode')))]"
+            #enabled = "[Not(Or(GetVariableSystem.Exists('evening_mode'), GetVariableSystem.Exists('night_mode')), Or(GetVariableSystem.Exists('dyn_morning_mode'), GetVariableSystem.Exists('dyn_night_mode')), GetVariableSystem.Exists('dyn_full_mode'))]"
+            tooltip = "morning_mode_tt"
+            blockoverride "Center_text"
+            {
+                text = "Morning"
+            }
+            blockoverride "On_click"
+            {
+                onclick = "[GetVariableSystem.Toggle( 'morning_mode' )]"
+                onclick = "[ExecuteConsoleCommand('shader_debug morningLight')]"
+            }
         }
-        blockoverride "On_click"
-        {
-            onclick = "[GetVariableSystem.Toggle( 'morning_mode' )]"
-            onclick = "[ExecuteConsoleCommand('shader_debug morningLight')]"
+        text_button_square = {
+            size = { 120 28 }
+            position = { @row_2 @col_1 }
+            enabled = "[Not(Or(GetVariableSystem.Exists('morning_mode'), GetVariableSystem.Exists('night_mode')))]"
+            tooltip = "evening_mode_tt"
+            blockoverride "Center_text"
+            {
+                text = "Evening"
+            }
+            blockoverride "On_click"
+            {
+                onclick = "[GetVariableSystem.Toggle( 'evening_mode' )]"
+                onclick = "[ExecuteConsoleCommand('shader_debug eveningLight')]"
+            }
+        }
+        text_button_square = {
+            size = { 120 28 }
+            position = { @row_3 @col_1 }
+            enabled = "[Not(Or(GetVariableSystem.Exists('evening_mode'), GetVariableSystem.Exists('morning_mode')))]"
+            tooltip = "night_mode_tt"
+            blockoverride "Center_text"
+            {
+                text = "Night"
+            }
+            blockoverride "On_click"
+            {
+                onclick = "[GetVariableSystem.Toggle( 'night_mode' )]"
+                onclick = "[ExecuteConsoleCommand('shader_debug nightLight')]"
+            }
         }
     }
-    text_button_square = {
-        size = { 120 28 }
-        position = { @row_2 @col_1 }
-        enabled = "[Not(Or(GetVariableSystem.Exists('morning_mode'), GetVariableSystem.Exists('night_mode')))]"
-        tooltip = "evening_mode_tt"
-        blockoverride "Center_text"
-        {
-            text = "Evening"
+
+    container = {
+        name = "gui_lighting"
+        text_button_square = {
+            size = { 70 28 }
+            position = { @bottom_row_1 @col_2 }
+            enabled = "[Not(Or( Or( GetVariableSystem.Exists('gui_zero_eight'), GetVariableSystem.Exists('gui_zero_nine')), Or(GetVariableSystem.Exists('gui_one_one'), GetVariableSystem.Exists('gui_one_two'))))]"
+            tooltip = "Multiply Gui lighting by 0.7"
+            blockoverride "Center_text"
+            {
+                text = "0.7"
+            }
+            blockoverride "On_click"
+            {
+                onclick = "[GetVariableSystem.Toggle( 'gui_zero_seven' )]"
+                onclick = "[ExecuteConsoleCommand('shader_debug gui_zero_seven')]"
+            }
         }
-        blockoverride "On_click"
-        {
-            onclick = "[GetVariableSystem.Toggle( 'evening_mode' )]"
-            onclick = "[ExecuteConsoleCommand('shader_debug eveningLight')]"
+        text_button_square = {
+            size = { 70 28 }
+            position = { @bottom_row_2 @col_2 }
+            enabled = "[Not(Or( Or( GetVariableSystem.Exists('gui_zero_seven'), GetVariableSystem.Exists('gui_zero_nine')), Or(GetVariableSystem.Exists('gui_one_one'), GetVariableSystem.Exists('gui_one_two'))))]"
+            tooltip = "Multiply Gui lighting by 0.8"
+            blockoverride "Center_text"
+            {
+                text = "0.8"
+            }
+            blockoverride "On_click"
+            {
+                onclick = "[GetVariableSystem.Toggle( 'gui_zero_eight' )]"
+                onclick = "[ExecuteConsoleCommand('shader_debug gui_zero_eight')]"
+            }
+        }
+        text_button_square = {
+            size = { 70 28 }
+            position = { @bottom_row_3 @col_2 }
+            enabled = "[Not(Or( Or( GetVariableSystem.Exists('gui_zero_seven'), GetVariableSystem.Exists('gui_zero_eight')), Or(GetVariableSystem.Exists('gui_one_one'), GetVariableSystem.Exists('gui_one_two'))))]"
+            tooltip = "Multiply Gui lighting by 0.9"
+            blockoverride "Center_text"
+            {
+                text = "0.9"
+            }
+            blockoverride "On_click"
+            {
+                onclick = "[GetVariableSystem.Toggle( 'gui_zero_nine' )]"
+                onclick = "[ExecuteConsoleCommand('shader_debug gui_zero_nine')]"
+            }
+        }
+        text_button_square = {
+            size = { 70 28 }
+            position = { @bottom_row_4 @col_2 }
+            enabled = "[Not(Or( Or( GetVariableSystem.Exists('gui_zero_seven'), GetVariableSystem.Exists('gui_zero_eight')), Or(GetVariableSystem.Exists('gui_zero_nine'), GetVariableSystem.Exists('gui_one_two'))))]"
+            tooltip = "Multiply Gui lighting by 1.1"
+            blockoverride "Center_text"
+            {
+                text = "1.1"
+            }
+            blockoverride "On_click"
+            {
+                onclick = "[GetVariableSystem.Toggle( 'gui_one_one' )]"
+                onclick = "[ExecuteConsoleCommand('shader_debug gui_one_one')]"
+            }
+        }
+        text_button_square = {
+            size = { 70 28 }
+            position = { @bottom_row_5 @col_2 }
+            enabled = "[Not(Or( Or( GetVariableSystem.Exists('gui_zero_seven'), GetVariableSystem.Exists('gui_zero_eight')), Or(GetVariableSystem.Exists('gui_zero_nine'), GetVariableSystem.Exists('gui_one_one'))))]"
+            tooltip = "Multiply Gui lighting by 1.2"
+            blockoverride "Center_text"
+            {
+                text = "1.2"
+            }
+            blockoverride "On_click"
+            {
+                onclick = "[GetVariableSystem.Toggle( 'gui_one_two' )]"
+                onclick = "[ExecuteConsoleCommand('shader_debug gui_one_two')]"
+            }
         }
     }
-    text_button_square = {
-        size = { 120 28 }
-        position = { @row_3 @col_1 }
-        enabled = "[Not(Or(GetVariableSystem.Exists('evening_mode'), GetVariableSystem.Exists('morning_mode')))]"
-        tooltip = "night_mode_tt"
-        blockoverride "Center_text"
-        {
-            text = "Night"
-        }
-        blockoverride "On_click"
-        {
-            onclick = "[GetVariableSystem.Toggle( 'night_mode' )]"
-            onclick = "[ExecuteConsoleCommand('shader_debug nightLight')]"
-        }
-    }
+    #container = {
+    #    name = "map_icons_toggle"
+    #    text_button_square = {
+    #        size = { 230 28 }
+    #        position = { 120 @col_3 }
+    #        tooltip = "Toggle Dark/Light Map Icons"
+    #        blockoverride "Center_text"
+    #        {
+    #            text = "Toggle Dark Map Icons"
+    #        }
+    #        blockoverride "On_click"
+    #        {
+    #            onclick = "[GetVariableSystem.Toggle( 'dark_map_icons' )]"
+    #        }
+    #    }
+    #}
 }

@@ -28,7 +28,7 @@ base_window = {
 		using = MainWindowHeaderBox
 		
 		blockoverride "Title_text" { 
-			text = "[CharacterWindow.GetCharacter.GetName]" 
+			text = "[CharacterWindow.GetCharacter.Custom('TITLES_character_name')]" 
 		}
 		
 		blockoverride "White_buttons"
@@ -79,10 +79,62 @@ base_window = {
 						layoutpolicy_horizontal = expanding
 						margin_right = 8
 						margin_widget = {
-							size = { 0 288 }
+							size = { 0 322 }
 							layoutpolicy_horizontal = expanding
 							margin_right = 5
 							margin_left = 5
+							container = {
+								visible = "yes" # TODO: Change to only be visible when there are states to be shown
+							    position = { 0 255 }
+							    alwaystransparent = no
+								container = {
+									position = { 0 0 } 
+									textbox = {
+										position = { 0 -2 }
+										size = { 82 30 }
+										autoresize = yes
+										text = "Monarch in:"
+										font = HeaderFont
+										fontsize = 20
+										using = Button_FontColor
+										alpha = 0.8
+									}
+								}
+							    overlappingitembox = {
+							    #TODO make this work for more than 13 subjects...
+							        size = { 600 30 }
+							        position = { 130 0 }
+							        #maximumsize = { 100 680 }
+							        flipdirection = yes
+							        # datamodel_wrap = 13
+							        datamodel = "[CharacterWindow.GetCharacter.MakeScope.GetList('active_HOS_titles')]"
+							        item = {
+							            country_flag = {
+							                datacontext = "[Scope.Country]"
+							                tooltip = "COUNTRY_SHORTHAND_INFO"
+							                parentanchor = vcenter
+							            
+							                blockoverride "flag"
+							                {
+							                    texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+							                    frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+							                    framesize = { 56 56 }
+							                    tooltip = "[Country.Custom('TITLES_personal_union_ruler')] of [Country.GetName]"
+							                }
+
+							                blockoverride "size"
+							                {
+							                    size = { 32 32 }
+							                }
+
+							                blockoverride "click"
+							                {
+							                    onclick = "[OpenDiplomacy(Country.GetCountry)]"
+							                }
+							            }
+							        }
+							    }
+							}
 							cpt_button_large_with_data = {
 								blockoverride "ShowIcons" { visible = no }
 								scissor = yes
@@ -229,6 +281,7 @@ base_window = {
 							layoutpolicy_horizontal = expanding
 							margin_left = 10
 							allow_outside = yes
+
 							container = {
 								name = "Family and Relationships"
 								sub_header_v = {

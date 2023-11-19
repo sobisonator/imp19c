@@ -2,5 +2,59 @@ PEACE_create_peace_lists = {
 	# Scope: War
 	# Called: On start of war, + whenever a new tag joins war.
 	# Function: Create lists for storing demands for every member of the war
+	every_country = {
+		limit = {
+			
+		}
+	}
 
+}
+
+PEACE_register_country = {
+	# Scope: Country
+	# Function: register a country for a player-led peace deal, for use in WAR_scripted_guis
+	save_scope_as = target_country
+	$war_scope$ = {
+		add_to_variable_list = {
+			name = countries_registered_in_war
+			target = scope:target_country
+		}
+	}	
+	scope:target_country = {
+		add_to_variable_list = {
+			name = list_of_wars_in_country
+			target = $war_scope$
+		}
+		if = {
+			limit = {
+				NOT = {
+					any_in_list = {
+						variable = war_scope_provinces
+
+						var:war_scope = $war_scope$
+					}
+				}
+			}
+			random_province = { # Add a province to store lists and variables specific to demands relating to this country in this war
+				limit = {
+					NOT = {
+						has_variable = war_scope_province_for
+					}
+				}
+				save_scope_as = war_scope_province
+				set_variable = {
+					name = war_scope
+					value = $war_scope$
+				}
+				set_variable = {
+					name = war_scope_province_for
+					value = scope:target_country
+				}
+			}
+			add_to_variable_list = {
+				name = war_scope_provinces
+				target = scope:war_scope_province
+			}
+		}
+	}
 }

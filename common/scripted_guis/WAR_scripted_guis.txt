@@ -1395,10 +1395,13 @@ select_state_from_defender = {
 
 }
 
-select_province_from_defender = {
+select_province_from_defender = { # Default recipient: occupier, or warleader if unoccupied.
 	scope = state
 
-	saved_scopes = province
+	saved_scopes = {
+		province
+		war
+	}
 
 	ai_is_valid = {
 		always = no
@@ -1416,11 +1419,34 @@ select_province_from_defender = {
 		}
 	}
 
+	effect = {
+		scope:province = {
+			if = {
+				limit = {
+					NOT = {
+						controller = owner
+					}
+				}
+				controller = {
+					any_in_list = {
+						variable = war_scope_provinces
+						limit = {
+							var:war_scope = #current war from the waroverview context, how to get this?
+						}
+					}
+				}
+			}
+		}
+	}
+
 }
 
-# FOR AI USAGE ONLY
+select_province_from_defender_rightclick = { # Specify recipient from popup dropdown
+	
+}
+
 # Used to trigger the effect that creates the war lists when a war starts
-war_setup_button_ai = {
+war_setup_button = {
 	scope = war
 
 	saved_scopes = {
@@ -1444,85 +1470,15 @@ war_setup_button_ai = {
 		root = {
 			save_scope_as = war_scope
 		}
-
-		if = {
-			limit = {
-				NOT = {
-					has_variable = war_scope_province
-				}
-			}
-
-			random_province = {
-				set_variable = {
-					name = war_scope
-					value = scope:war_scope
-				}
-				save_scope_as = war_scope_province
-			}
-
-			set_variable = {
-				name = war_scope_province
-				value = scope:war_scope_province
-			}
-		}
-
 		every_war_attacker = {
-			save_scope_as = target_country
-			scope:war_scope = {
-				add_to_variable_list = {
-					name = countries_registered_in_war
-					target = scope:target_country
-				}
-			}
-			scope:target_country = {
-				if = {
-					limit = {
-						NOT = {
-							is_in_variable_list = {
-								name = list_of_wars_in_country_prov
-								target = scope:war_scope.var:war_scope_province
-							}
-						}
-					}
-					add_to_variable_list = {
-						name = list_of_wars_in_country_prov
-						target = scope:war_scope.var:war_scope_province
-					}
-				}
-				add_to_variable_list = {
-					name = list_of_wars_in_country
-					target = scope:war_scope
-				}
+			PEACE_register_country = {
+				war_scope = scope:war_scope
 			}
 		}
 
 		every_war_defender = {
-			save_scope_as = target_country
-			scope:war_scope = {
-				add_to_variable_list = {
-					name = countries_registered_in_war
-					target = scope:target_country
-				}
-			}
-			scope:target_country = {
-				if = {
-					limit = {
-						NOT = {
-							is_in_variable_list = {
-								name = list_of_wars_in_country_prov
-								target = scope:war_scope.var:war_scope_province
-							}
-						}
-					}
-					add_to_variable_list = {
-						name = list_of_wars_in_country_prov
-						target = scope:war_scope.var:war_scope_province
-					}
-				}
-				add_to_variable_list = {
-					name = list_of_wars_in_country
-					target = scope:war_scope
-				}
+			PEACE_register_country = {
+				war_scope = scope:war_scope
 			}
 		}
 

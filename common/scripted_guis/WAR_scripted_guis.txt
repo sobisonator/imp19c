@@ -765,14 +765,16 @@ alt_peace_button = {
 
 		# Make this a scripted effect to easily double it up for defender and attacker
 
+		# Defender
 		clear_variable_list = provinces_available_from_defender
 		clear_variable_list = states_available_from_defender
 		clear_variable_list = governorships_available_from_defender
+		# Attacker
 		clear_variable_list = provinces_available_from_attacker
+		# Both
+		clear_variable_list = provinces_available_from_both
 
-		scope:player = {
-			save_scope_as = peace_root
-		}
+		save_scope_as = peace_root
 
 		every_war_defender = {
 			every_governorships = {
@@ -799,18 +801,12 @@ alt_peace_button = {
 								target = scope:this_province
 							}
 						}
-					}
-				}
-			}
-		}
-
-		every_war_defender = {
-			every_owned_province = {
-				save_scope_as = this_province
-				scope:peace_root = {
-					add_to_variable_list = {
-						name = provinces_available_from_defender
-						target = scope:this_province
+						scope:peace_root = {
+							add_to_variable_list = {
+								name = provinces_available_from_both
+								target = scope:this_province
+							}
+						}
 					}
 				}
 			}
@@ -1428,11 +1424,13 @@ select_province_from_defender = { # Default recipient: occupier, or warleader if
 					}
 				}
 				controller = {
-					any_in_list = {
-						variable = war_scope_provinces
-						limit = {
-							var:war_scope = #current war from the waroverview context, how to get this?
-						}
+					PEACE_toggle_request_province = yes
+				}
+			}
+			else = {
+				scope:war = {
+					attacker_warleader = {
+						PEACE_toggle_request_province = yes
 					}
 				}
 			}

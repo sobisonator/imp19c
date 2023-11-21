@@ -59,6 +59,34 @@ PEACE_register_country = {
 	}
 }
 
+PEACE_request_province_default_warleader_occupier = {
+	# Scope: state
+	# Called: Whenever a war scripted GUI triggers the default demand behaviour to request a province for the warleader or occupier of a province
+	$province_scope$ = {
+		if = {
+			limit = {
+				NOT = {
+					controller = owner
+				}
+			}
+			controller = {
+				PEACE_toggle_request_province = {
+					province_scope = $province_scope$
+				}
+			}
+		}
+		else = {
+			scope:war = {
+				attacker_warleader = {
+					PEACE_toggle_request_province = {
+						province_scope = $province_scope$
+					}
+				}
+			}
+		}
+	}
+}
+
 PEACE_toggle_request_province = {
 	# Scope: country
 	# Called: From WAR_scripted_guis select_province_from_defender when clicked
@@ -80,15 +108,15 @@ PEACE_toggle_request_province = {
 				NOT = {
 					is_target_in_variable_list = {
 						name = peace_requested_provinces
-						target = scope:province
+						target = $province_scope$
 					}
 				}
 			}
 			add_to_variable_list = {
 				name = peace_requested_provinces
-				target = scope:province
+				target = $province_scope$
 			}
-			scope:province = {
+			$province_scope$ = {
 				set_variable = {
 					name = PEACE_requested_by
 					value = scope:requestor
@@ -98,9 +126,9 @@ PEACE_toggle_request_province = {
 		else = {
 			remove_list_variable = {
 				name = peace_requested_provinces
-				target = scope:province
+				target = $province_scope$
 			}
-			scope:province = {
+			$province_scope$ = {
 				remove_variable = PEACE_requested_by
 			}
 		}

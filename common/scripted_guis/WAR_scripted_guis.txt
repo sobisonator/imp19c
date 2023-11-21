@@ -779,6 +779,7 @@ alt_peace_button = {
 		every_war_defender = {
 			every_governorships = {
 				save_scope_as = this_governorship
+				clear_variable_list = states_available_from_defender
 				scope:peace_root = {
 					add_to_variable_list = {
 						name = governorships_available_from_defender
@@ -787,6 +788,7 @@ alt_peace_button = {
 				}
 				every_governorship_state = {
 					save_scope_as = this_state
+					clear_variable_list = provinces_available_from_defender
 					scope:this_governorship = {
 						add_to_variable_list = {
 							name = states_available_from_defender
@@ -1391,6 +1393,33 @@ select_state_from_defender = {
 
 }
 
+select_state_from_defender_rightclick = { # Select all provinces in state
+	scope = state
+
+	saved_scopes = {
+		war
+	}
+
+	ai_is_valid = {
+		always = no
+	}
+
+	is_valid = {
+		always = yes
+	}
+
+	effect = {
+		every_in_list = {
+			variable = provinces_available_from_defender
+			save_scope_as = target_province
+			PEACE_request_province_default_warleader_occupier = {
+				province_scope = scope:target_province
+			}
+		}
+	}
+
+}
+
 select_province_from_defender = { # Default recipient: occupier, or warleader if unoccupied.
 	scope = state
 
@@ -1408,32 +1437,16 @@ select_province_from_defender = { # Default recipient: occupier, or warleader if
 	}
 
 	is_shown = {
-		has_variable_list = states_available_from_defender
+		has_variable_list = provinces_available_from_defender
 		is_target_in_variable_list = {
-			name = states_available_from_defender
+			name = provinces_available_from_defender
 			target = scope:province
 		}
 	}
 
 	effect = {
-		scope:province = {
-			if = {
-				limit = {
-					NOT = {
-						controller = owner
-					}
-				}
-				controller = {
-					PEACE_toggle_request_province = yes
-				}
-			}
-			else = {
-				scope:war = {
-					attacker_warleader = {
-						PEACE_toggle_request_province = yes
-					}
-				}
-			}
+		PEACE_request_province_default_warleader_occupier = {
+			province_scope = scope:province
 		}
 	}
 

@@ -711,6 +711,7 @@ extort_population_button_cancel = {
 }
 alt_peace_button = {
 	scope = war
+
 	saved_scopes = {
 		player
 	}
@@ -718,11 +719,18 @@ alt_peace_button = {
 		always = no
 	}
 	effect = {
+		save_scope_as = peace_root
 		every_war_attacker = {
 			limit = {
 				NOT = { THIS = root.attacker_warleader }
 			}
 			scope:player = {
+				add_to_variable_list = {
+					name = war_attacker_list
+					target = prev
+				}
+			}
+			scope:peace_root = {
 				add_to_variable_list = {
 					name = war_attacker_list
 					target = prev
@@ -734,6 +742,12 @@ alt_peace_button = {
 				NOT = { THIS = root.defender_warleader }
 			}
 			scope:player = {
+				add_to_variable_list = {
+					name = war_defender_list
+					target = prev
+				}
+			}
+			scope:peace_root = {
 				add_to_variable_list = {
 					name = war_defender_list
 					target = prev
@@ -777,8 +791,6 @@ alt_peace_button = {
 		clear_variable_list = provinces_available_from_attacker
 		# Both
 		clear_variable_list = provinces_available_from_both
-
-		save_scope_as = peace_root
 
 		every_war_defender = {
 			save_scope_as = target_defender
@@ -1426,13 +1438,14 @@ select_state_from_defender_rightclick = { # Select all provinces in state
 			save_scope_as = target_province
 			PEACE_request_province_default_warleader_occupier = {
 				province_scope = scope:target_province
+				attacker_demand = 1
 			}
 		}
 	}
 
 }
 
-select_province_from_defender = { # Default recipient: occupier, or warleader if unoccupied.
+select_province_from_defender = { # Default recipient: warleader
 	scope = state
 
 	saved_scopes = {
@@ -1457,8 +1470,42 @@ select_province_from_defender = { # Default recipient: occupier, or warleader if
 	}
 
 	effect = {
-		PEACE_request_province_default_warleader_occupier = {
+		PEACE_request_province = {
 			province_scope = scope:province
+			attacker_demand = 1
+		}
+	}
+
+}
+
+select_province_from_attacker = { # Default recipient: warleader
+	scope = state
+
+	saved_scopes = {
+		province
+		war
+	}
+
+	ai_is_valid = {
+		always = no
+	}
+
+	is_valid = {
+		always = yes
+	}
+
+	is_shown = {
+		has_variable_list = provinces_available_from_attacker
+		is_target_in_variable_list = {
+			name = provinces_available_from_attacker
+			target = scope:province
+		}
+	}
+
+	effect = {
+		PEACE_request_province = {
+			province_scope = scope:province
+			attacker_demand = 0
 		}
 	}
 
@@ -1466,6 +1513,76 @@ select_province_from_defender = { # Default recipient: occupier, or warleader if
 
 select_province_from_defender_rightclick = { # Specify recipient from popup dropdown
 	
+}
+
+select_peace_recipient_country_defender = { # Clickable flags for choosing who requests provinces
+	scope = country
+
+	saved_scopes = {
+		war
+	}
+
+	ai_is_valid = {
+		always = no
+	}
+
+	is_valid = {
+		always = yes
+	}
+
+	is_shown = {
+		scope:war = {
+			has_variable_list = war_defender_list
+			is_target_in_variable_list = {
+				name = war_defender_list
+				target = scope:country
+			}
+		}
+	}
+
+	effect = {
+		scope:war = {
+			set_variable = {
+				name = recipient_country_defender
+				value = ROOT
+			}
+		}
+	}
+}
+
+select_peace_recipient_country_attacker = { # Clickable flags for choosing who requests provinces
+	scope = country
+
+	saved_scopes = {
+		war
+	}
+
+	ai_is_valid = {
+		always = no
+	}
+
+	is_valid = {
+		always = yes
+	}
+
+	is_shown = {
+		scope:war = {
+			has_variable_list = war_attacker_list
+			is_target_in_variable_list = {
+				name = war_attacker_list
+				target = scope:country
+			}
+		}
+	}
+
+	effect = {
+		scope:war = {
+			set_variable = {
+				name = recipient_country_attacker
+				value = ROOT
+			}
+		}
+	}
 }
 
 # Used to trigger the effect that creates the war lists when a war starts

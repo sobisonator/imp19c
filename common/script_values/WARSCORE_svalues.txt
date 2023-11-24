@@ -1,0 +1,141 @@
+WARSCORE_province_value = { # The total value of a province in warscore
+	value = 0
+	add = WARSCORE_pops_bonus
+	add = WARSCORE_pop_cap_bonus
+	add = WARSCORE_city_bonus
+	add = WARSCORE_buildings_bonus
+
+	# Special, applied when demanded by a specific country
+	add = WARSCORE_demand_my_culture
+
+	min = 1
+}
+
+WARSCORE_pop_cap_bonus = {
+	value = population_cap
+	multiply = 0.005
+}
+
+WARSCORE_city_bonus = {
+	value = 0
+	if = {
+		limit = {
+			NOT = {
+				has_province_rank = settlement
+			}
+		}
+		value = 1
+	}
+}
+
+WARSCORE_pops_bonus = { # Sum of the bonus warscore cost from all pops in a province
+	value = WARSCORE_upper_strata
+	add = WARSCORE_middle_strata
+	add = WARSCORE_lower_strata
+	add = WARSCORE_proletariat
+	add = WARSCORE_tribesmen
+	add = WARSCORE_slaves
+	add = WARSCORE_indentured
+	add = WARSCORE_primary_culture_bonus
+	subtract = WARSCORE_demand_my_culture
+	multiply = 0.01
+}
+
+WARSCORE_primary_culture_bonus = {
+	value = 0
+	every_pops_in_province = {
+		limit = {
+			pop_culture = prev.owner.culture
+		}
+		add = 2
+	}
+}
+
+WARSCORE_accepted_culture_bonus = {
+	value = 0
+	#every_pops_in_province = {
+	#	limit = {
+	#		culture = {
+	#			has_pop_type_right
+	#		}
+	#	}
+	#}
+}
+
+WARSCORE_upper_strata = {
+	value = num_of_upper_strata
+	multiply = 4
+}
+
+WARSCORE_middle_strata = {
+	value = num_of_middle_strata
+	multiply = 2
+}
+
+WARSCORE_lower_strata = {
+	value = num_of_lower_strata
+}
+
+WARSCORE_proletariat = {
+	value = num_of_proletariat
+}
+
+WARSCORE_tribesmen = {
+	value = num_of_tribesmen
+}
+
+WARSCORE_slaves = {
+	value = num_of_slaves
+}
+
+WARSCORE_indentured = {
+	value = num_of_indentured
+}
+
+WARSCORE_buildings_bonus = {
+	value = num_of_used_building_slots
+	multiply = 0.75
+}
+
+WARSCORE_shipping_bonus = {
+	value = SHIPPING_province_power
+	multiply = 0.1
+}
+
+WARSCORE_capital_bonus = {
+	value = 0
+	if = {
+		limit = {
+			is_capital = yes
+		}
+		add = 10
+	}
+}
+
+# Modifiers from the demander, which may make a province cheaper once it is selected by a certain country
+# TODO: Make a tooltip showing what the warscore would be with the currently selected country from the peace view
+
+WARSCORE_demand_my_culture = { # Province has pops of the same primary culture as the demander
+	value = 0
+	if = {
+		limit = {
+			has_variable = PEACE_requested_by
+		}
+		if = {
+			limit = {
+				any_pops_in_province = {
+					pop_culture = ROOT.var:PEACE_requested_by.culture
+				}
+			}
+			every_pops_in_province = {
+				if = {
+					limit = {
+						pop_culture = ROOT.var:PEACE_requested_by.culture
+					}
+					subtract = 0.2
+				}
+			}
+		}
+	}
+
+}

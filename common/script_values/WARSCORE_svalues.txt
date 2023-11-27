@@ -1,31 +1,73 @@
+WARSCORE_cost_total_attacker = {
+	# Scope: war
+	# Stores the total of the attacker's current demands
+	value = 0
+	every_war_attacker = {
+		every_in_list = {
+			variable = war_scope_provinces
+			limit = {
+				var:war_scope = ROOT
+			}
+
+			every_in_list = {
+				variable = peace_requested_provinces
+				add = var:WARSCORE_province_value_cached
+				add = WARSCORE_demand_my_culture_for_total
+			}
+		}
+	}
+}
+
+
+
+WARSCORE_cost_total_defender = {
+	# Scope: war
+	# Stores the total of the attacker's current demands
+	value = 0
+	every_war_defender = {
+		every_in_list = {
+			variable = war_scope_provinces
+			limit = {
+				var:war_scope = ROOT
+			}
+
+			every_in_list = {
+				variable = peace_requested_provinces
+
+				add = WARSCORE_province_value
+			}
+		}
+	}
+}
+
 WARSCORE_province_value = { # The total value of a province in warscore
+	# Scope: province (duh)
 	value = 0
 	add = WARSCORE_pops_bonus
 	add = WARSCORE_pop_cap_bonus
 	add = WARSCORE_city_bonus
 	add = WARSCORE_buildings_bonus
 
-	# Special, applied when demanded by a specific country
-	add = WARSCORE_demand_my_culture
+	multiply = 0.5
 
 	min = 1
 }
 
 WARSCORE_pop_cap_bonus = {
 	value = population_cap
-	multiply = 0.005
+	multiply = 0.006
 }
 
 WARSCORE_city_bonus = {
 	value = 0
-	if = {
-		limit = {
-			NOT = {
-				has_province_rank = settlement
-			}
-		}
-		value = 1
-	}
+	#if = {
+	#	limit = {
+	#		NOT = {
+	#			has_province_rank = settlement
+	#		}
+	#	}
+	#	value = 1
+	#}
 }
 
 WARSCORE_pops_bonus = { # Sum of the bonus warscore cost from all pops in a province
@@ -37,8 +79,8 @@ WARSCORE_pops_bonus = { # Sum of the bonus warscore cost from all pops in a prov
 	add = WARSCORE_slaves
 	add = WARSCORE_indentured
 	add = WARSCORE_primary_culture_bonus
-	subtract = WARSCORE_demand_my_culture
-	multiply = 0.01
+	add = WARSCORE_demand_my_culture
+	multiply = WARSCORE_pop_score_modifier
 }
 
 WARSCORE_primary_culture_bonus = {
@@ -47,7 +89,7 @@ WARSCORE_primary_culture_bonus = {
 		limit = {
 			pop_culture = prev.owner.culture
 		}
-		add = 2
+		add = 4
 	}
 }
 
@@ -132,10 +174,38 @@ WARSCORE_demand_my_culture = { # Province has pops of the same primary culture a
 					limit = {
 						pop_culture = ROOT.var:PEACE_requested_by.culture
 					}
-					subtract = 0.2
+					subtract = 2
 				}
 			}
 		}
 	}
 
+}
+
+WARSCORE_demand_my_culture_for_total = { # Because of the way caching works, we need to apply this bonus to the PREV scope for cached values, as opposed to the ROOT scope for calculating it on the fly
+	value = 0
+	if = {
+		limit = {
+			has_variable = PEACE_requested_by
+		}
+		if = {
+			limit = {
+				any_pops_in_province = {
+					pop_culture = PREV.var:PEACE_requested_by.culture
+				}
+			}
+			every_pops_in_province = {
+				if = {
+					limit = {
+						pop_culture = PREV.var:PEACE_requested_by.culture
+					}
+					subtract = WARSCORE_pop_score_modifier
+				}
+			}
+		}
+	}
+}
+
+WARSCORE_pop_score_modifier = {
+	value = 0.07
 }

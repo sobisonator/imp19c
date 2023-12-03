@@ -711,6 +711,7 @@ extort_population_button_cancel = {
 }
 alt_peace_button = {
 	scope = war
+
 	saved_scopes = {
 		player
 	}
@@ -718,11 +719,18 @@ alt_peace_button = {
 		always = no
 	}
 	effect = {
+		save_scope_as = peace_root
 		every_war_attacker = {
 			limit = {
 				NOT = { THIS = root.attacker_warleader }
 			}
 			scope:player = {
+				add_to_variable_list = {
+					name = war_attacker_list
+					target = prev
+				}
+			}
+			scope:peace_root = {
 				add_to_variable_list = {
 					name = war_attacker_list
 					target = prev
@@ -739,6 +747,12 @@ alt_peace_button = {
 					target = prev
 				}
 			}
+			scope:peace_root = {
+				add_to_variable_list = {
+					name = war_defender_list
+					target = prev
+				}
+			}
 		}
 		if = {
 			limit = {
@@ -749,6 +763,7 @@ alt_peace_button = {
 					name = bad_guys_var
 					value = root.defender_warleader
 				}
+				set_variable = viewing_peace_as_attacker
 			}
 		}
 		if = {
@@ -760,23 +775,31 @@ alt_peace_button = {
 					name = bad_guys_var
 					value = root.attacker_warleader
 				}
+				set_variable = viewing_peace_as_defender
 			}
 		}
 
 		# Make this a scripted effect to easily double it up for defender and attacker
 
+		# Lists of participating countries
+		clear_variable_list = defender_tags
+		clear_variable_list = attacker_tags
+
+		# Defender
 		clear_variable_list = provinces_available_from_defender
 		clear_variable_list = states_available_from_defender
 		clear_variable_list = governorships_available_from_defender
+		# Attacker
 		clear_variable_list = provinces_available_from_attacker
-
-		scope:player = {
-			save_scope_as = peace_root
-		}
+		# Both
+		clear_variable_list = provinces_available_from_both
 
 		every_war_defender = {
+			save_scope_as = target_defender
+			clear_variable_list = states_available_from_defender
 			every_governorships = {
 				save_scope_as = this_governorship
+				clear_variable_list = states_available_from_defender
 				scope:peace_root = {
 					add_to_variable_list = {
 						name = governorships_available_from_defender
@@ -785,11 +808,18 @@ alt_peace_button = {
 				}
 				every_governorship_state = {
 					save_scope_as = this_state
+					clear_variable_list = provinces_available_from_defender
 					scope:this_governorship = {
 						add_to_variable_list = {
 							name = states_available_from_defender
 							target = scope:this_state
 						}
+					}
+					scope:target_defender = {
+						add_to_variable_list = {
+							name = states_available_from_defender
+							target = scope:this_state
+						}						
 					}
 					every_state_province = {
 						save_scope_as = this_province
@@ -799,18 +829,12 @@ alt_peace_button = {
 								target = scope:this_province
 							}
 						}
-					}
-				}
-			}
-		}
-
-		every_war_defender = {
-			every_owned_province = {
-				save_scope_as = this_province
-				scope:peace_root = {
-					add_to_variable_list = {
-						name = provinces_available_from_defender
-						target = scope:this_province
+						scope:peace_root = {
+							add_to_variable_list = {
+								name = provinces_available_from_both
+								target = scope:this_province
+							}
+						}
 					}
 				}
 			}
@@ -1395,10 +1419,41 @@ select_state_from_defender = {
 
 }
 
-select_province_from_defender = {
+select_state_from_defender_rightclick = { # Select all provinces in state
 	scope = state
 
-	saved_scopes = province
+	saved_scopes = {
+		war
+	}
+
+	ai_is_valid = {
+		always = no
+	}
+
+	is_valid = {
+		always = yes
+	}
+
+	effect = {
+		every_in_list = {
+			variable = provinces_available_from_defender
+			save_scope_as = target_province
+			PEACE_request_province = {
+				province_scope = scope:target_province
+				attacker_demand = 1
+			}
+		}
+	}
+
+}
+
+select_province_from_defender = { # Default recipient: warleader
+	scope = state
+
+	saved_scopes = {
+		province
+		war
+	}
 
 	ai_is_valid = {
 		always = no
@@ -1409,18 +1464,131 @@ select_province_from_defender = {
 	}
 
 	is_shown = {
-		has_variable_list = states_available_from_defender
+		has_variable_list = provinces_available_from_defender
 		is_target_in_variable_list = {
-			name = states_available_from_defender
+			name = provinces_available_from_defender
 			target = scope:province
+		}
+	}
+
+	effect = {
+		PEACE_request_province = {
+			province_scope = scope:province
+			attacker_demand = 1
 		}
 	}
 
 }
 
-# FOR AI USAGE ONLY
+select_province_from_attacker = { # Default recipient: warleader
+	scope = state
+
+	saved_scopes = {
+		province
+		war
+	}
+
+	ai_is_valid = {
+		always = no
+	}
+
+	is_valid = {
+		always = yes
+	}
+
+	is_shown = {
+		has_variable_list = provinces_available_from_attacker
+		is_target_in_variable_list = {
+			name = provinces_available_from_attacker
+			target = scope:province
+		}
+	}
+
+	effect = {
+		PEACE_request_province = {
+			province_scope = scope:province
+			attacker_demand = 0
+		}
+	}
+
+}
+
+select_province_from_defender_rightclick = { # Specify recipient from popup dropdown
+	
+}
+
+select_peace_recipient_country_defender = { # Clickable flags for choosing who requests provinces
+	scope = country
+
+	saved_scopes = {
+		war
+	}
+
+	ai_is_valid = {
+		always = no
+	}
+
+	is_valid = {
+		always = yes
+	}
+
+	is_shown = {
+		scope:war = {
+			has_variable_list = war_defender_list
+			is_target_in_variable_list = {
+				name = war_defender_list
+				target = scope:country
+			}
+		}
+	}
+
+	effect = {
+		scope:war = {
+			set_variable = {
+				name = recipient_country_defender
+				value = ROOT
+			}
+		}
+	}
+}
+
+select_peace_recipient_country_attacker = { # Clickable flags for choosing who requests provinces
+	scope = country
+
+	saved_scopes = {
+		war
+	}
+
+	ai_is_valid = {
+		always = no
+	}
+
+	is_valid = {
+		always = yes
+	}
+
+	is_shown = {
+		scope:war = {
+			has_variable_list = war_attacker_list
+			is_target_in_variable_list = {
+				name = war_attacker_list
+				target = scope:country
+			}
+		}
+	}
+
+	effect = {
+		scope:war = {
+			set_variable = {
+				name = recipient_country_attacker
+				value = ROOT
+			}
+		}
+	}
+}
+
 # Used to trigger the effect that creates the war lists when a war starts
-war_setup_button_ai = {
+war_setup_button = {
 	scope = war
 
 	saved_scopes = {
@@ -1444,85 +1612,15 @@ war_setup_button_ai = {
 		root = {
 			save_scope_as = war_scope
 		}
-
-		if = {
-			limit = {
-				NOT = {
-					has_variable = war_scope_province
-				}
-			}
-
-			random_province = {
-				set_variable = {
-					name = war_scope
-					value = scope:war_scope
-				}
-				save_scope_as = war_scope_province
-			}
-
-			set_variable = {
-				name = war_scope_province
-				value = scope:war_scope_province
-			}
-		}
-
 		every_war_attacker = {
-			save_scope_as = target_country
-			scope:war_scope = {
-				add_to_variable_list = {
-					name = countries_registered_in_war
-					target = scope:target_country
-				}
-			}
-			scope:target_country = {
-				if = {
-					limit = {
-						NOT = {
-							is_in_variable_list = {
-								name = list_of_wars_in_country_prov
-								target = scope:war_scope.var:war_scope_province
-							}
-						}
-					}
-					add_to_variable_list = {
-						name = list_of_wars_in_country_prov
-						target = scope:war_scope.var:war_scope_province
-					}
-				}
-				add_to_variable_list = {
-					name = list_of_wars_in_country
-					target = scope:war_scope
-				}
+			PEACE_register_country = {
+				war_scope = scope:war_scope
 			}
 		}
 
 		every_war_defender = {
-			save_scope_as = target_country
-			scope:war_scope = {
-				add_to_variable_list = {
-					name = countries_registered_in_war
-					target = scope:target_country
-				}
-			}
-			scope:target_country = {
-				if = {
-					limit = {
-						NOT = {
-							is_in_variable_list = {
-								name = list_of_wars_in_country_prov
-								target = scope:war_scope.var:war_scope_province
-							}
-						}
-					}
-					add_to_variable_list = {
-						name = list_of_wars_in_country_prov
-						target = scope:war_scope.var:war_scope_province
-					}
-				}
-				add_to_variable_list = {
-					name = list_of_wars_in_country
-					target = scope:war_scope
-				}
+			PEACE_register_country = {
+				war_scope = scope:war_scope
 			}
 		}
 

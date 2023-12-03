@@ -1,6 +1,180 @@
-PEACE_create_peace_lists = {
-	# Scope: War
-	# Called: On start of war, + whenever a new tag joins war.
-	# Function: Create lists for storing demands for every member of the war
+PEACE_register_country = {
+	# Scope: Country
+	# Function: register a country for a player-led peace deal, for use in WAR_scripted_guis
+	save_scope_as = target_country
+	$war_scope$ = {
+		add_to_variable_list = {
+			name = countries_registered_in_war
+			target = scope:target_country
+		}
+	}	
+	scope:target_country = {
+		add_to_variable_list = {
+			name = list_of_wars_in_country
+			target = $war_scope$
+		}
+		if = {
+			limit = {
+				NOT = {
+					any_in_list = {
+						variable = war_scope_provinces
 
+						var:war_scope = $war_scope$
+					}
+				}
+			}
+			random_province = { # Add a province to store lists and variables specific to demands relating to this country in this war
+				limit = {
+					NOT = {
+						has_variable = war_scope_province_for
+					}
+				}
+				save_scope_as = war_scope_province
+				set_variable = {
+					name = war_scope
+					value = $war_scope$
+				}
+				set_variable = {
+					name = war_scope_province_for
+					value = scope:target_country
+				}
+			}
+			add_to_variable_list = {
+				name = war_scope_provinces
+				target = scope:war_scope_province
+			}
+		}
+	}
+}
+
+PEACE_request_province = {
+	# Scope: state
+	# Called: Whenever a war scripted GUI triggers the default demand behaviour to request a province for the warleader or occupier of a province
+	if = {
+		limit = {
+			AND = {
+				$attacker_demand$ = 1
+				scope:war = {
+					has_variable = recipient_country_attacker
+				}
+			}
+		}
+		PEACE_trigger_toggle_request_province = {
+			province_scope = $province_scope$
+			requestor = scope:war.var:recipient_country_attacker
+		}
+	}
+	else_if = {
+		limit = {
+			AND = {
+				$attacker_demand$ = 0
+				scope:war = {
+					has_variable = recipient_country_defender
+				}
+			}
+		}
+		PEACE_trigger_toggle_request_province = {
+			province_scope = $province_scope$
+			requestor = scope:war.var:recipient_country_defender
+		}
+	}
+	else = {
+		PEACE_trigger_toggle_request_province = {
+			province_scope = $province_scope$
+			requestor = scope:war.attacker_warleader
+		}
+	}
+
+}
+
+PEACE_trigger_toggle_request_province = {
+
+	$requestor$ = {
+		PEACE_toggle_request_province = {
+			province_scope = $province_scope$
+		}
+	}
+	
+}
+
+PEACE_toggle_request_province = {
+	# Scope: country
+	# Called: From WAR_scripted_guis select_province_from_defender when clicked
+
+	# Make sure to clear it from the list first in case it's reserved by a different tag
+
+	save_scope_as = requestor
+
+	$province_scope$ = {
+		if = {
+			limit = {
+				has_variable = PEACE_requested_by
+			}
+			if = {
+				limit = {
+					NOT = {
+						var:PEACE_requested_by = scope:requestor
+					}
+				}
+				var:PEACE_requested_by = {
+					random_in_list = {
+						variable = war_scope_provinces
+						limit = {
+							var:war_scope = scope:war
+						}
+
+						remove_list_variable = {
+							name = peace_requested_provinces
+							target = $province_scope$
+						}
+					}
+				}
+			}
+		}
+	}
+	random_in_list = { # Add the province to the list of provinces they have claimed in the peace deal, using their war scope province (see PEACE_register_country)
+		variable = war_scope_provinces
+		limit = {
+			var:war_scope = scope:war
+		}
+
+		save_scope_as = war_scope_prov
+
+		if = {
+			limit = {
+				NOT = {
+					is_target_in_variable_list = {
+						name = peace_requested_provinces
+						target = $province_scope$
+					}
+				}
+			}
+			add_to_variable_list = {
+				name = peace_requested_provinces
+				target = $province_scope$
+			}
+			$province_scope$ = {
+				set_variable = {
+					name = PEACE_requested_by
+					value = scope:requestor
+				}
+			}
+			$province_scope$ = {
+				set_variable = { # TODO: For some reason this is not catching the WARSCORE_demand_my_culture svalue, so it's not in use ATM
+					name = WARSCORE_province_value_cached
+					value = WARSCORE_province_value
+				}
+			}
+		}
+		else = {
+			remove_list_variable = {
+				name = peace_requested_provinces
+				target = $province_scope$
+			}
+			$province_scope$ = {
+				remove_variable = PEACE_requested_by
+				remove_variable = WARSCORE_province_value_cached
+			}
+		}
+	}
 }

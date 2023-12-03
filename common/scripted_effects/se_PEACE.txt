@@ -179,6 +179,49 @@ PEACE_toggle_request_province = {
 	}
 }
 
+PEACE_get_warscore_balance_player = {
+	set_variable = {
+		name = warscore_balance
+		value = 0
+	}
+	if = { # If the player is a defender, but not the defender warleader...
+		limit = {
+			any_war_defender = {
+				THIS = $player_scope$
+			}
+			NOT = {
+				$player_scope$ = defender_warleader
+			}
+		}
+		$player_scope$ = {
+			save_scope_as = this_country
+			PEACE_get_warscore = {
+				target_country = scope:this_country
+			}
+			scope:war_scope = {
+				change_variable = {
+					name = warscore_balance
+					add = local_var:war_score_from_this
+				}
+			}
+		}
+	}
+
+	# Same for attacker, WiP...
+	attacker_warleader = {
+		save_scope_as = this_country
+		PEACE_get_warscore = {
+			target_country = scope:this_country
+		}
+		scope:war_scope = {
+			change_variable = {
+				name = warscore_balance
+				subtract = local_var:war_score_from_this
+			}
+		}
+	}
+}
+
 PEACE_get_warscore_balance_warleaders = {
 	# Scope: war
 	# Function: Get the balance of warscore from the POV of the attacker (arbitrary, we can invert it for the defender)

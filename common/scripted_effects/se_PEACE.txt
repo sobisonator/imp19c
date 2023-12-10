@@ -180,44 +180,60 @@ PEACE_toggle_request_province = {
 }
 
 PEACE_get_warscore_balance_player = {
+	# Scope: war
 	set_variable = {
 		name = warscore_balance
 		value = 0
 	}
-	if = { # If the player is a defender, but not the defender warleader...
+	if = { # If the player is a defender
 		limit = {
 			any_war_defender = {
 				THIS = $player_scope$
 			}
-			NOT = {
-				$player_scope$ = defender_warleader
-			}
 		}
-		$player_scope$ = {
-			save_scope_as = this_country
-			PEACE_get_warscore = {
-				target_country = scope:this_country
-			}
-			scope:war_scope = {
-				change_variable = {
-					name = warscore_balance
-					add = local_var:war_score_from_this
-				}
-			}
+		PEACE_get_player_vs_rival_warleader_score = {
+			player_scope = $player_scope$
+			rival_warleader = attacker_warleader
+		}
+	}
+	else = {
+		PEACE_get_player_vs_rival_warleader_score = {
+			player_scope = $player_scope$
+			rival_warleader = defender_warleader
 		}
 	}
 
-	# Same for attacker, WiP...
-	attacker_warleader = {
+}
+
+PEACE_get_player_vs_rival_warleader_score = {
+	$player_scope$ = {
 		save_scope_as = this_country
 		PEACE_get_warscore = {
 			target_country = scope:this_country
 		}
-		scope:war_scope = {
+		scope:peace_root = {
 			change_variable = {
 				name = warscore_balance
 				subtract = local_var:war_score_from_this
 			}
+		}
+	}
+	$rival_warleader$ = {
+		save_scope_as = this_country
+		PEACE_get_warscore = {
+			target_country = scope:this_country
+		}
+		scope:peace_root = {
+			change_variable = {
+				name = warscore_balance
+				add = local_var:war_score_from_this
+			}
+		}
+	}
+	$player_scope$ = {
+		set_variable = {
+			name = warscore_balance
+			value = scope:peace_root.var:warscore_balance
 		}
 	}
 }
@@ -263,7 +279,7 @@ PEACE_get_warscore = {
 	# Function: get the warscore of a war participant
 	if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -100
@@ -277,7 +293,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -99
@@ -291,7 +307,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -98
@@ -305,7 +321,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -97
@@ -319,7 +335,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -96
@@ -333,7 +349,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -95
@@ -347,7 +363,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -94
@@ -361,7 +377,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -93
@@ -375,7 +391,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -92
@@ -389,7 +405,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -91
@@ -403,7 +419,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -90
@@ -417,7 +433,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -89
@@ -431,7 +447,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -88
@@ -445,7 +461,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -87
@@ -459,7 +475,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -86
@@ -473,7 +489,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -85
@@ -487,7 +503,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -84
@@ -501,7 +517,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -83
@@ -515,7 +531,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -82
@@ -529,7 +545,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -81
@@ -543,7 +559,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -80
@@ -557,7 +573,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -79
@@ -571,7 +587,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -78
@@ -585,7 +601,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -77
@@ -599,7 +615,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -76
@@ -613,7 +629,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -75
@@ -627,7 +643,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -74
@@ -641,7 +657,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -73
@@ -655,7 +671,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -72
@@ -669,7 +685,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -71
@@ -683,7 +699,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -70
@@ -697,7 +713,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -69
@@ -711,7 +727,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -68
@@ -725,7 +741,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -67
@@ -739,7 +755,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -66
@@ -753,7 +769,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -65
@@ -767,7 +783,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -64
@@ -781,7 +797,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -63
@@ -795,7 +811,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -62
@@ -809,7 +825,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -61
@@ -823,7 +839,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -60
@@ -837,7 +853,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -59
@@ -851,7 +867,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -58
@@ -865,7 +881,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -57
@@ -879,7 +895,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -56
@@ -893,7 +909,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -55
@@ -907,7 +923,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -54
@@ -921,7 +937,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -53
@@ -935,7 +951,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -52
@@ -949,7 +965,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -51
@@ -963,7 +979,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -50
@@ -977,7 +993,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -49
@@ -991,7 +1007,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -48
@@ -1005,7 +1021,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -47
@@ -1019,7 +1035,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -46
@@ -1033,7 +1049,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -45
@@ -1047,7 +1063,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -44
@@ -1061,7 +1077,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -43
@@ -1075,7 +1091,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -42
@@ -1089,7 +1105,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -41
@@ -1103,7 +1119,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -40
@@ -1117,7 +1133,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -39
@@ -1131,7 +1147,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -38
@@ -1145,7 +1161,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -37
@@ -1159,7 +1175,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -36
@@ -1173,7 +1189,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -35
@@ -1187,7 +1203,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -34
@@ -1201,7 +1217,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -33
@@ -1215,7 +1231,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -32
@@ -1229,7 +1245,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -31
@@ -1243,7 +1259,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -30
@@ -1257,7 +1273,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -29
@@ -1271,7 +1287,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -28
@@ -1285,7 +1301,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -27
@@ -1299,7 +1315,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -26
@@ -1313,7 +1329,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -25
@@ -1327,7 +1343,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -24
@@ -1341,7 +1357,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -23
@@ -1355,7 +1371,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -22
@@ -1369,7 +1385,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -21
@@ -1383,7 +1399,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -20
@@ -1397,7 +1413,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -19
@@ -1411,7 +1427,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -18
@@ -1425,7 +1441,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -17
@@ -1439,7 +1455,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -16
@@ -1453,7 +1469,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -15
@@ -1467,7 +1483,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -14
@@ -1481,7 +1497,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -13
@@ -1495,7 +1511,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -12
@@ -1509,7 +1525,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -11
@@ -1523,7 +1539,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -10
@@ -1537,7 +1553,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -9
@@ -1551,7 +1567,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -8
@@ -1565,7 +1581,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -7
@@ -1579,7 +1595,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -6
@@ -1593,7 +1609,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -5
@@ -1607,7 +1623,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -4
@@ -1621,7 +1637,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -3
@@ -1635,7 +1651,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -2
@@ -1649,7 +1665,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = -1
@@ -1663,7 +1679,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 0
@@ -1677,7 +1693,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 1
@@ -1691,7 +1707,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 2
@@ -1705,7 +1721,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 3
@@ -1719,7 +1735,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 4
@@ -1733,7 +1749,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 5
@@ -1747,7 +1763,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 6
@@ -1761,7 +1777,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 7
@@ -1775,7 +1791,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 8
@@ -1789,7 +1805,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 9
@@ -1803,7 +1819,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 10
@@ -1817,7 +1833,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 11
@@ -1831,7 +1847,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 12
@@ -1845,7 +1861,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 13
@@ -1859,7 +1875,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 14
@@ -1873,7 +1889,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 15
@@ -1887,7 +1903,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 16
@@ -1901,7 +1917,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 17
@@ -1915,7 +1931,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 18
@@ -1929,7 +1945,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 19
@@ -1943,7 +1959,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 20
@@ -1957,7 +1973,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 21
@@ -1971,7 +1987,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 22
@@ -1985,7 +2001,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 23
@@ -1999,7 +2015,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 24
@@ -2013,7 +2029,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 25
@@ -2027,7 +2043,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 26
@@ -2041,7 +2057,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 27
@@ -2055,7 +2071,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 28
@@ -2069,7 +2085,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 29
@@ -2083,7 +2099,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 30
@@ -2097,7 +2113,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 31
@@ -2111,7 +2127,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 32
@@ -2125,7 +2141,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 33
@@ -2139,7 +2155,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 34
@@ -2153,7 +2169,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 35
@@ -2167,7 +2183,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 36
@@ -2181,7 +2197,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 37
@@ -2195,7 +2211,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 38
@@ -2209,7 +2225,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 39
@@ -2223,7 +2239,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 40
@@ -2237,7 +2253,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 41
@@ -2251,7 +2267,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 42
@@ -2265,7 +2281,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 43
@@ -2279,7 +2295,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 44
@@ -2293,7 +2309,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 45
@@ -2307,7 +2323,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 46
@@ -2321,7 +2337,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 47
@@ -2335,7 +2351,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 48
@@ -2349,7 +2365,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 49
@@ -2363,7 +2379,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 50
@@ -2377,7 +2393,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 51
@@ -2391,7 +2407,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 52
@@ -2405,7 +2421,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 53
@@ -2419,7 +2435,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 54
@@ -2433,7 +2449,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 55
@@ -2447,7 +2463,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 56
@@ -2461,7 +2477,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 57
@@ -2475,7 +2491,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 58
@@ -2489,7 +2505,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 59
@@ -2503,7 +2519,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 60
@@ -2517,7 +2533,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 61
@@ -2531,7 +2547,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 62
@@ -2545,7 +2561,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 63
@@ -2559,7 +2575,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 64
@@ -2573,7 +2589,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 65
@@ -2587,7 +2603,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 66
@@ -2601,7 +2617,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 67
@@ -2615,7 +2631,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 68
@@ -2629,7 +2645,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 69
@@ -2643,7 +2659,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 70
@@ -2657,7 +2673,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 71
@@ -2671,7 +2687,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 72
@@ -2685,7 +2701,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 73
@@ -2699,7 +2715,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 74
@@ -2713,7 +2729,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 75
@@ -2727,7 +2743,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 76
@@ -2741,7 +2757,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 77
@@ -2755,7 +2771,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 78
@@ -2769,7 +2785,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 79
@@ -2783,7 +2799,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 80
@@ -2797,7 +2813,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 81
@@ -2811,7 +2827,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 82
@@ -2825,7 +2841,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 83
@@ -2839,7 +2855,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 84
@@ -2853,7 +2869,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 85
@@ -2867,7 +2883,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 86
@@ -2881,7 +2897,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 87
@@ -2895,7 +2911,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 88
@@ -2909,7 +2925,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 89
@@ -2923,7 +2939,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 90
@@ -2937,7 +2953,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 91
@@ -2951,7 +2967,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 92
@@ -2965,7 +2981,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 93
@@ -2979,7 +2995,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 94
@@ -2993,7 +3009,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 95
@@ -3007,7 +3023,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 96
@@ -3021,7 +3037,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 97
@@ -3035,7 +3051,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 98
@@ -3049,7 +3065,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 99
@@ -3063,7 +3079,7 @@ PEACE_get_warscore = {
 	}
 	else_if = {
 		limit = {
-			scope:war_scope = {
+			scope:peace_root = {
 				war_score = {
 					target = $target_country$
 					value = 100

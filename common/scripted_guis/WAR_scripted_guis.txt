@@ -720,7 +720,35 @@ alt_peace_button = {
 	}
 	effect = {
 		save_scope_as = peace_root
-		PEACE_get_warscore_balance_warleaders = ye # TODO: Make this conditional, based on the scope suing for peace
+		# Set a province scope to act as a stand-in for the war scope, for use in custom loc, as there is no "war" type for custom loc
+		if = {
+			limit = {
+				NOT = {
+					has_variable = war_scope_standin
+				}
+			}
+			random_province = {
+				limit = {
+					NOT = {
+						has_variable = war_scope_standin_for
+					}
+				}
+				set_variable = {
+					name = war_scope_standin_for
+					value = scope:peace_root
+				}
+				save_scope_as = war_scope_standin
+			}
+			set_variable = {
+				name = war_scope_standin
+				value = scope:war_scope_standin
+			}
+		}
+
+		PEACE_get_warscore_balance_player = {
+			player_scope = scope:player
+		} # TODO: Make this conditional, based on the scope suing for peace
+
 		every_war_attacker = {
 			scope:player = {
 				add_to_variable_list = {

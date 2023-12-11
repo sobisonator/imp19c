@@ -814,66 +814,34 @@ alt_peace_button = {
 		clear_variable_list = governorships_available_from_defender
 		# Attacker
 		clear_variable_list = provinces_available_from_attacker
+		clear_variable_list = states_available_from_attacker
+		clear_variable_list = governorships_available_from_attacker
 		# Both
 		clear_variable_list = provinces_available_from_both
 
 		every_war_defender = {
-			save_scope_as = target_defender
-			clear_variable_list = states_available_from_defender
-			every_governorships = {
-				save_scope_as = this_governorship
-				clear_variable_list = states_available_from_defender
-				scope:peace_root = {
-					add_to_variable_list = {
-						name = governorships_available_from_defender
-						target = scope:this_governorship
-					}
-				}
-				every_governorship_state = {
-					save_scope_as = this_state
-					clear_variable_list = provinces_available_from_defender
-					scope:this_governorship = {
-						add_to_variable_list = {
-							name = states_available_from_defender
-							target = scope:this_state
-						}
-					}
-					scope:target_defender = {
-						add_to_variable_list = {
-							name = states_available_from_defender
-							target = scope:this_state
-						}						
-					}
-					every_state_province = {
-						save_scope_as = this_province
-						scope:this_state = {
-							add_to_variable_list = {
-								name = provinces_available_from_defender
-								target = scope:this_province
-							}
-						}
-						scope:peace_root = {
-							add_to_variable_list = {
-								name = provinces_available_from_both
-								target = scope:this_province
-							}
-						}
-					}
-				}
+			PEACE_register_territories = {
+				affiliation = defender
 			}
 		}
 
 		every_war_attacker = {
-			every_owned_province = {
-				save_scope_as = this_province
-				scope:peace_root = {
-					add_to_variable_list = {
-						name = provinces_available_from_attacker
-						target = scope:this_province
-					}
-				}
-			}		
+			PEACE_register_territories = {
+				affiliation = attacker
+			}
 		}
+
+		#every_war_attacker = {
+		#	every_owned_province = {
+		#		save_scope_as = this_province
+		#		scope:peace_root = {
+		#			add_to_variable_list = {
+		#				name = provinces_available_from_attacker
+		#				target = scope:this_province
+		#			}
+		#		}
+		#	}		
+		#}
 
 	}
 }
@@ -1433,10 +1401,21 @@ select_state_from_defender = {
 	}
 
 	is_shown = {
-		has_variable_list = states_available_from_defender
-		is_target_in_variable_list = {
-			name = states_available_from_defender
-			target = scope:state
+		OR = {
+			AND = {
+				has_variable_list = states_available_from_defender
+				is_target_in_variable_list = {
+					name = states_available_from_defender
+					target = scope:state
+				}
+			}
+			AND = {
+				has_variable_list = states_available_from_attacker
+				is_target_in_variable_list = {
+					name = states_available_from_attacker
+					target = scope:state
+				}
+			}	
 		}
 	}
 
@@ -1464,6 +1443,34 @@ select_state_from_defender_rightclick = { # Select all provinces in state
 			PEACE_request_province = {
 				province_scope = scope:target_province
 				attacker_demand = 1
+			}
+		}
+	}
+
+}
+
+select_state_from_attacker_rightclick = { # Select all provinces in state
+	scope = state
+
+	saved_scopes = {
+		war
+	}
+
+	ai_is_valid = {
+		always = no
+	}
+
+	is_valid = {
+		always = yes
+	}
+
+	effect = {
+		every_in_list = {
+			variable = provinces_available_from_attacker
+			save_scope_as = target_province
+			PEACE_request_province = {
+				province_scope = scope:target_province
+				attacker_demand = 0
 			}
 		}
 	}

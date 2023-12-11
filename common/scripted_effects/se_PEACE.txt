@@ -47,44 +47,106 @@ PEACE_register_country = {
 	}
 }
 
+PEACE_register_territories = {
+	# Scope: Country, called within an every_defender or every_attacker loop in the war scope
+	# Function: Save lists of states and provinces available per country, so they can be selected from a hierarchical dropdown
+	# ARGUMENTS: 
+	# Affiliation = defender OR attacker
+	save_scope_as = target_defender
+	clear_variable_list = states_available_from_defender
+	clear_variable_list = states_available_from_attacker
+	every_governorships = {
+		save_scope_as = this_governorship
+		clear_variable_list = states_available_from_defender
+		clear_variable_list = states_available_from_attacker
+		scope:peace_root = {
+			add_to_variable_list = {
+				name = governorships_available_from_$affiliation$
+				target = scope:this_governorship
+			}
+		}
+		every_governorship_state = {
+			save_scope_as = this_state
+			clear_variable_list = provinces_available_from_defender
+			clear_variable_list = provinces_available_from_attacker
+			scope:this_governorship = {
+				add_to_variable_list = {
+					name = states_available_from_$affiliation$
+					target = scope:this_state
+				}
+			}
+			scope:target_defender = {
+				add_to_variable_list = {
+					name = states_available_from_$affiliation$
+					target = scope:this_state
+				}						
+			}
+			every_state_province = {
+				save_scope_as = this_province
+				scope:this_state = {
+					add_to_variable_list = {
+						name = provinces_available_from_$affiliation$
+						target = scope:this_province
+					}
+				}
+				scope:peace_root = {
+					add_to_variable_list = {
+						name = provinces_available_from_both
+						target = scope:this_province
+					}
+				}
+			}
+		}
+	}
+}
+
 PEACE_request_province = {
 	# Scope: state
 	# Called: Whenever a war scripted GUI triggers the default demand behaviour to request a province for the warleader or occupier of a province
 	if = {
 		limit = {
-			AND = {
-				$attacker_demand$ = 1
+			$attacker_demand$ = 1
+		}
+		if = {
+			limit = {
 				scope:war = {
 					has_variable = recipient_country_attacker
 				}
 			}
+			PEACE_trigger_toggle_request_province = {
+				province_scope = $province_scope$
+				requestor = scope:war.var:recipient_country_attacker
+			}
 		}
-		PEACE_trigger_toggle_request_province = {
-			province_scope = $province_scope$
-			requestor = scope:war.var:recipient_country_attacker
+		else = {
+			PEACE_trigger_toggle_request_province = {
+				province_scope = $province_scope$
+				requestor = scope:war.attacker_warleader
+			}
 		}
 	}
-	else_if = {
+	if = {
 		limit = {
-			AND = {
-				$attacker_demand$ = 0
+			$attacker_demand$ = 0
+		}
+		if = {
+			limit = {
 				scope:war = {
 					has_variable = recipient_country_defender
 				}
 			}
+			PEACE_trigger_toggle_request_province = {
+				province_scope = $province_scope$
+				requestor = scope:war.var:recipient_country_defender
+			}
 		}
-		PEACE_trigger_toggle_request_province = {
-			province_scope = $province_scope$
-			requestor = scope:war.var:recipient_country_defender
+		else = {
+			PEACE_trigger_toggle_request_province = {
+				province_scope = $province_scope$
+				requestor = scope:war.defender_warleader
+			}
 		}
 	}
-	else = {
-		PEACE_trigger_toggle_request_province = {
-			province_scope = $province_scope$
-			requestor = scope:war.attacker_warleader
-		}
-	}
-
 }
 
 PEACE_trigger_toggle_request_province = {

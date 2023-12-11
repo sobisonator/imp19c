@@ -955,309 +955,39 @@ base_window = {
 
 		}
 
-		margin_widget = {
-			size = { 100% 40% }
-			position  = { -175 180 }
-			textbox = {
-				parentanchor = top
-				position = { 300 -10 }
-				using = BaseFontM
-				using = Black_FontColor
-				fontsize = 20
+		PeaceNegotiationBlock = {
+		}
 
-				text = "Defenders' concessions"
+		PeaceNegotiationBlock = {
+			blockoverride "position" {
+				position  = { 175 180 }
 			}
-			text_button_square = {
-				position = { 410 40 }
-				size = { 150 24 }
-				name = "select_defender_provinces_button"
-				#datacontext = "[GetScriptedGui('send_final_offer_button')]"
-				blockoverride "Center_text" { text = "Provinces" }
-				#blockoverride "On_click" { 
-				#	onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-				#	onclick = "[WarOverview.OnClose]"
-				#	enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-				#}
-				tooltip = "Add provinces to the deal"
-				blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_peace_minor" }
-				widgetanchor = bottom|right
+			blockoverride "title_text" {
+				text = "Attackers' concessions"
 			}
-			text_button_square = {
-				position = { 560 40 }
-				size = { 150 24 }
-				name = "select_other_deals_button"
-				#datacontext = "[GetScriptedGui('send_final_offer_button')]"
-				blockoverride "Center_text" { text = "Other deals" }
-				#blockoverride "On_click" { 
-				#	onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-				#	onclick = "[WarOverview.OnClose]"
-				#	enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-				#}
-				tooltip = "Add other stipulations to the deal"
-				blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_peace_minor" }
-				widgetanchor = bottom|right
+			blockoverride "country_list" {
+				datamodel = "[Player.MakeScope.GetList('war_attacker_list')]"
 			}
-			vbox = {
-				margin_top = 45
-				margin_bottom = 15
-				scrollarea = {
-					size = { 300 250 }
-					layoutpolicy_vertical = expanding
-
-					scrollbarpolicy_horizontal = always_off
-
-					scrollbar_vertical = {
-						using = VerticalScrollBar
-					}
-					using = VerticalScrollAreaCutOff
-					scrollwidget = {
-						dynamicgridbox = {
-							datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
-							item = {
-								flowcontainer = {
-									spacing = 4
-									margin_bottom = 4
-									direction = vertical
-									flowcontainer = {
-										name = "country_buttons"
-										direction = horizontal
-										ignoreinvisible = yes
-
-										diplomacy_action_button = {
-											size = { 290 30 }
-											#position = { -50 5 }
-											name = "country_button_open_states"
-											datacontext = "[GetScriptedGui('select_defender_country')]"
-											blockoverride "Left_text" {
-												text = "@[Scope.GetCountry.GetFlag]! [Scope.GetCountry.GetName]"
-											}
-											blockoverride "Right_text"
-											{
-												text = "00"
-												#using = Negative_FontColor  # Make conditional
-												#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											}
-											blockoverride "Icon" 
-											{
-												framesize = { 46 46 }
-												#visible = "[DiplomaticActionItem.RequireAcceptance]"
-												texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
-												#frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
-												#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											}	
-											onmousehierarchyenter = "[SetHighlightCountry(Scope.GetCountry)]"
-			                				onmousehierarchyleave = "[ClearHighlightColors]"
-			                				tooltip = "@[Scope.GetCountry.GetFlag]! [Scope.GetCountry.GetName]"
-			                				# parentanchor
-			                				# Onlick needs to use scripted GUI to toggle the script variable for states visible. GUI variable no good for this.
-			                				blockoverride "On_click" { 
-			                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.AccessParent.FindChild('state_buttons').Show]"
-			                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('country_button_open_states').Hide]"
-			                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('country_button_close_states').Show]"
-			                				}
-
-			                				 
-										}
-										diplomacy_action_button = {
-											size = { 290 30 }
-											visible = no
-											#position = { -50 5 }
-											name = "country_button_close_states"
-											datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
-											datacontext = "[GetScriptedGui('select_defender_country')]"
-											blockoverride "Left_text" {
-												text = "@[Scope.GetCountry.GetFlag]! [Scope.GetCountry.GetName]"
-											}
-											blockoverride "Right_text"
-											{
-												text = "00"
-												#using = Negative_FontColor  # Make conditional
-												#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											}
-											blockoverride "Icon" 
-											{
-												framesize = { 46 46 }
-												#visible = "[DiplomaticActionItem.RequireAcceptance]"
-												texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
-												#frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
-												#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											}	
-											onmousehierarchyenter = "[SetHighlightCountry(Scope.GetCountry)]"
-			                				onmousehierarchyleave = "[ClearHighlightColors]"
-			                				tooltip = "@[Scope.GetCountry.GetFlag]! [Scope.GetCountry.GetName]"
-			                				# parentanchor
-			                				# Onlick needs to use scripted GUI to toggle the script variable for states visible. GUI variable no good for this.
-			                				blockoverride "On_click" { 
-			                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.AccessParent.FindChild('state_buttons').Hide]"
-			                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('country_button_close_states').Hide]"
-			                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('country_button_open_states').Show]"
-			                				}
-
-			                				 
-										}
-									}
-									flowcontainer = {
-										ignoreinvisible = yes
-										dynamicgridbox = {
-											name = "state_buttons"
-											datamodel = "[Scope.Country.MakeScope.GetList('states_available_from_defender')]"
-											# visible = parent governorship has the visibility script variable = 1
-											visible = no
-											item = {
-												flowcontainer = {
-													margin_left = 20
-													ignoreinvisible = yes
-													visible = no
-													diplomacy_action_button = {
-														size = { 270 30 }
-														name = "state_button_show_provinces"
-														datacontext = "[GetScriptedGui('select_state_from_defender')]"
-														blockoverride "Left_text" {
-															text = "[Scope.State.GetShortName]"
-														}
-														blockoverride "Right_text"
-														{
-															text = "00"
-															#using = Negative_FontColor  # Make conditional
-															#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-														}
-														blockoverride "Icon" 
-														{
-															framesize = { 46 46 }
-															#visible = "[DiplomaticActionItem.RequireAcceptance]"
-															texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
-															#frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
-															#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-														}	
-														onmousehierarchyenter = "[SetHighlightArea(Scope.State.GetArea)]"
-						                				onmousehierarchyleave = "[ClearHighlightColors]"
-						                				tooltip = "@[Scope.Governorship.GetOwner.GetFlag]! [Scope.Governorship.GetOwner.GetAdjective] region of [Scope.Governorship.GetName] "
-						                				# parentanchor
-						                				blockoverride "On_click" { 
-						                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('province_buttons').Show]"
-						                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('state_button_show_provinces').Hide]"
-						                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('state_button_hide_provinces').Show]"
-						                					onrightclick = "[GetScriptedGui('select_state_from_defender_rightclick').Execute( GuiScope.SetRoot( Scope.State.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope ).End )]"
-						                				} 
-													}
-
-													diplomacy_action_button = {
-														size = { 270 30 }
-														name = "state_button_hide_provinces"
-														visible = no
-														datacontext = "[GetScriptedGui('select_state_from_defender')]"
-														blockoverride "Left_text" {
-															text = "[Scope.State.GetShortName]"
-														}
-														blockoverride "Right_text"
-														{
-															text = "00"
-															#using = Negative_FontColor  # Make conditional
-															#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-														}
-														blockoverride "Icon" 
-														{
-															framesize = { 46 46 }
-															#visible = "[DiplomaticActionItem.RequireAcceptance]"
-															texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
-															#frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
-															#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-														}	
-														onmousehierarchyenter = "[SetHighlightArea(Scope.State.GetArea)]"
-						                				onmousehierarchyleave = "[ClearHighlightColors]"
-						                				tooltip = "@[Scope.Governorship.GetOwner.GetFlag]! [Scope.Governorship.GetOwner.GetAdjective] region of [Scope.Governorship.GetName] "
-						                				# parentanchor
-						                				blockoverride "On_click" { 
-						                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('province_buttons').Hide]"
-						                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('state_button_show_provinces').Show]"
-						                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('state_button_hide_provinces').Hide]"
-						                					onrightclick = "[GetScriptedGui('select_state_from_defender_rightclick').Execute( GuiScope.SetRoot( Scope.State.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope ).End )]"
-						                				} 
-													}
-													flowcontainer = {
-														margin_top = 32
-														margin_left = -255
-														ignoreinvisible = yes
-														allow_outside = yes
-														dynamicgridbox = {
-															datamodel = "[Scope.GetState.MakeScope.GetList('provinces_available_from_defender')]"
-															name = "province_buttons"
-															visible = no
-															item = {
-																flowcontainer = {
-																	ignoreinvisible = yes
-																	country_flag = {
-																		position = { 3 50 }
-																		parentanchor = top|left
-																		tooltip = "[Scope.GetProvince.MakeScope.GetVariable('PEACE_requested_by').GetCountry.GetName]"
-																		blockoverride "flag"
-																		{
-																			texture = "[Scope.GetProvince.MakeScope.GetVariable('PEACE_requested_by').GetCountry.AccessCoatOfArms.GetTexture('(int32)32','(int32)32')]"
-																			frame = "[Scope.GetProvince.MakeScope.GetVariable('PEACE_requested_by').GetCountry.AccessCoatOfArms.GetFrame('(int32)32','(int32)32')]"
-																			framesize = { 32 32 }
-																		}
-
-																		
-																		blockoverride "size"
-																		{
-																			size = { 28 28 }
-																		}
-																		
-																		blockoverride "show_as_button"
-																		{
-																			visible = no
-																		}
-																		blockoverride "show_as_icon"
-																		{
-																			visible = yes
-																		}
-																	}
-																	diplomacy_action_button = {
-																		size = { 255 30 }
-																		name = "province_button_unselected"
-																		datacontext = "[GetScriptedGui('select_province_from_defender')]"
-																		blockoverride "Left_text" {
-																			text = "[Scope.GetProvince.Custom('peace_province_selection_loc')]"
-																		}
-																		blockoverride "Right_text"
-																		{
-																			text = "[GuiScope.SetRoot( Scope.Province.MakeScope ).ScriptValue('WARSCORE_province_value')|1]"
-																			#using = Negative_FontColor  # Make conditional
-																			#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-																		}
-																		blockoverride "Icon" 
-																		{
-																			framesize = { 46 46 }
-																			#visible = "[DiplomaticActionItem.RequireAcceptance]"
-																			texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
-																			#frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
-																			#tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-																		}	
-																		onmousehierarchyenter = "[SetHighlightProvince(Scope.GetProvince.GetId)]"
-										                				onmousehierarchyleave = "[ClearHighlightColors]"
-										                				tooltip = "@[Scope.GetProvince.GetOwner.GetFlag]! [Scope.GetProvince.GetOwner.GetAdjective] province of [Scope.GetProvince.GetName] "
-										                				# parentanchor
-
-										                				# Left click to reserve for occupier
-
-										                				# Right click to select a recipient for reservation
-										                				blockoverride "On_click" { 
-										                					onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Scope.GetProvince.GetState.MakeScope ).AddScope('province', Scope.GetProvince.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope ).End )]"
-										                				}
-																	}
-																}
-															}
-														}										
-													}
-												}
-											}
-										}										
-									}
-								}
-							}
-						}
-					}
-				}
+			blockoverride "country_item_buttoncontext" {
+				datacontext = "[GetScriptedGui('select_attacker_country')]"
+			}
+			blockoverride "country_item_buttoncontext" {
+				datacontext = "[GetScriptedGui('select_attacker_country')]"
+			}
+			blockoverride "state_list" {
+				datamodel = "[Scope.Country.MakeScope.GetList('states_available_from_attacker')]"
+			}
+			blockoverride "state_item_buttoncontext" {
+				datacontext = "[GetScriptedGui('select_state_from_defender')]"
+			}
+			blockoverride "state_item_rightclick_script" {
+				onrightclick = "[GetScriptedGui('select_state_from_attacker_rightclick').Execute( GuiScope.SetRoot( Scope.State.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope ).End )]"
+			}
+			blockoverride "province_list" {
+				datamodel = "[Scope.GetState.MakeScope.GetList('provinces_available_from_attacker')]"
+			}
+			blockoverride "province_item_buttoncontext" {
+				datacontext = "[GetScriptedGui('select_province_from_attacker')]"
 			}
 		}
 
@@ -1271,7 +1001,7 @@ base_window = {
 					texture = "gfx/interface/icons/shared_icons/warscore_cost.dds" 
 				}
 				blockoverride "Text" { 
-					text = "[GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).ScriptValue('WARSCORE_cost_total_attacker')|1]"
+					text = "[GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).ScriptValue('WARSCORE_cost_total_attacker')|1]" # TODO: Make this Custom text that's conditional on if the viewer is attacker or defender
 					using = BaseFontL
 					using = Black_FontColor
 					visible = yes # Var is attacker > 0

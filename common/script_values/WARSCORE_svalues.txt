@@ -1,4 +1,9 @@
 WARSCORE_cost_total_attacker = {
+	value = WARSCORE_cost_total_provinces_attacker
+	subtract = WARSCORE_cost_total_provinces_defender
+}
+
+WARSCORE_cost_total_provinces_attacker = {
 	# Scope: war
 	# Stores the total of the attacker's current demands
 	value = 0
@@ -12,17 +17,14 @@ WARSCORE_cost_total_attacker = {
 			every_in_list = {
 				variable = peace_requested_provinces
 				add = var:WARSCORE_province_value_cached
-				add = WARSCORE_demand_my_culture_for_total
 			}
 		}
 	}
 }
 
-
-
-WARSCORE_cost_total_defender = {
+WARSCORE_cost_total_provinces_defender = {
 	# Scope: war
-	# Stores the total of the attacker's current demands
+	# Stores the total of the defender's current demands
 	value = 0
 	every_war_defender = {
 		every_in_list = {
@@ -33,8 +35,7 @@ WARSCORE_cost_total_defender = {
 
 			every_in_list = {
 				variable = peace_requested_provinces
-
-				add = WARSCORE_province_value
+				add = var:WARSCORE_province_value_cached
 			}
 		}
 	}
@@ -48,7 +49,7 @@ WARSCORE_province_value = { # The total value of a province in warscore
 	add = WARSCORE_city_bonus
 	add = WARSCORE_buildings_bonus
 
-	multiply = 0.5
+	multiply = 0.1
 
 	min = 1
 }
@@ -166,13 +167,13 @@ WARSCORE_demand_my_culture = { # Province has pops of the same primary culture a
 		if = {
 			limit = {
 				any_pops_in_province = {
-					pop_culture = ROOT.var:PEACE_requested_by.culture
+					pop_culture = PREV.var:PEACE_requested_by.culture
 				}
 			}
 			every_pops_in_province = {
 				if = {
 					limit = {
-						pop_culture = ROOT.var:PEACE_requested_by.culture
+						pop_culture = PREV.var:PEACE_requested_by.culture
 					}
 					subtract = 2
 				}
@@ -182,30 +183,78 @@ WARSCORE_demand_my_culture = { # Province has pops of the same primary culture a
 
 }
 
-WARSCORE_demand_my_culture_for_total = { # Because of the way caching works, we need to apply this bonus to the PREV scope for cached values, as opposed to the ROOT scope for calculating it on the fly
-	value = 0
-	if = {
-		limit = {
-			has_variable = PEACE_requested_by
-		}
-		if = {
-			limit = {
-				any_pops_in_province = {
-					pop_culture = PREV.var:PEACE_requested_by.culture
-				}
-			}
-			every_pops_in_province = {
-				if = {
-					limit = {
-						pop_culture = PREV.var:PEACE_requested_by.culture
-					}
-					subtract = WARSCORE_pop_score_modifier
-				}
-			}
-		}
-	}
-}
-
 WARSCORE_pop_score_modifier = {
 	value = 0.07
+}
+
+
+# AI acceptance values
+
+
+## MANPOWER
+WARSCORE_ai_acceptance_manpower_modifier_defender = {
+	# Scope: war
+	value = 0
+	every_war_defender = {
+		add = manpower
+	}
+	multiply = 0.02
+}
+
+WARSCORE_ai_acceptance_manpower_modifier_attacker = {
+	# Scope: war
+	value = 0
+	every_war_attacker = {
+		add = manpower
+	}
+	multiply = 0.02
+}
+
+WARSCORE_ai_acceptance_war_exhaustion_modifier_defender = {
+	value = defender_warleader.has_war_exhaustion
+}
+
+WARSCORE_ai_acceptance_war_exhaustion_modifier_attacker = {
+	value = attacker_warleader.has_war_exhaustion
+}
+
+WARSCORE_ai_base_reluctance = {
+	value = -10
+}
+
+## TOTAL
+WARSCORE_ai_defender_acceptance = {
+	# Scope: war
+	# Refers to the willingness of the defender warleader to accept a peace deal
+	value = 0
+	add = WARSCORE_ai_base_reluctance
+
+	# Effect from warscore, could be positive or negative
+	add = var:warscore_balance
+
+	# Negatives, i.e. factors against signing peace
+	subtract = WARSCORE_cost_total_provinces_attacker
+	subtract = WARSCORE_ai_acceptance_manpower_modifier_defender
+
+	# Positive, i.e. factors FOR signing peace
+	add = WARSCORE_cost_total_provinces_defender
+	add = WARSCORE_ai_acceptance_war_exhaustion_modifier_defender
+}
+
+WARSCORE_ai_attacker_acceptance = {
+	# Scope: war
+	# Refers to the willingness of the attacker warleader to accept a peace deal
+	value = 0
+	add = WARSCORE_ai_base_reluctance
+
+	# Effect from warscore, could be positive or negative
+	add = var:warscore_balance
+
+	# Negatives, i.e. factors against signing peace
+	subtract = WARSCORE_cost_total_provinces_defender
+	subtract = WARSCORE_ai_acceptance_manpower_modifier_attacker
+
+	# Positive, i.e. factors FOR signing peace
+	add = WARSCORE_cost_total_provinces_attacker
+	add = WARSCORE_ai_acceptance_war_exhaustion_modifier_attacker
 }

@@ -1,0 +1,260 @@
+WARSCORE_cost_total_attacker = {
+	value = WARSCORE_cost_total_provinces_attacker
+	subtract = WARSCORE_cost_total_provinces_defender
+}
+
+WARSCORE_cost_total_provinces_attacker = {
+	# Scope: war
+	# Stores the total of the attacker's current demands
+	value = 0
+	every_war_attacker = {
+		every_in_list = {
+			variable = war_scope_provinces
+			limit = {
+				var:war_scope = ROOT
+			}
+
+			every_in_list = {
+				variable = peace_requested_provinces
+				add = var:WARSCORE_province_value_cached
+			}
+		}
+	}
+}
+
+WARSCORE_cost_total_provinces_defender = {
+	# Scope: war
+	# Stores the total of the defender's current demands
+	value = 0
+	every_war_defender = {
+		every_in_list = {
+			variable = war_scope_provinces
+			limit = {
+				var:war_scope = ROOT
+			}
+
+			every_in_list = {
+				variable = peace_requested_provinces
+				add = var:WARSCORE_province_value_cached
+			}
+		}
+	}
+}
+
+WARSCORE_province_value = { # The total value of a province in warscore
+	# Scope: province (duh)
+	value = 0
+	add = WARSCORE_pops_bonus
+	add = WARSCORE_pop_cap_bonus
+	add = WARSCORE_city_bonus
+	add = WARSCORE_buildings_bonus
+
+	multiply = 0.1
+
+	min = 1
+}
+
+WARSCORE_pop_cap_bonus = {
+	value = population_cap
+	multiply = 0.006
+}
+
+WARSCORE_city_bonus = {
+	value = 0
+	#if = {
+	#	limit = {
+	#		NOT = {
+	#			has_province_rank = settlement
+	#		}
+	#	}
+	#	value = 1
+	#}
+}
+
+WARSCORE_pops_bonus = { # Sum of the bonus warscore cost from all pops in a province
+	value = WARSCORE_upper_strata
+	add = WARSCORE_middle_strata
+	add = WARSCORE_lower_strata
+	add = WARSCORE_proletariat
+	add = WARSCORE_tribesmen
+	add = WARSCORE_slaves
+	add = WARSCORE_indentured
+	add = WARSCORE_primary_culture_bonus
+	add = WARSCORE_demand_my_culture
+	multiply = WARSCORE_pop_score_modifier
+}
+
+WARSCORE_primary_culture_bonus = {
+	value = 0
+	every_pops_in_province = {
+		limit = {
+			pop_culture = prev.owner.culture
+		}
+		add = 4
+	}
+}
+
+WARSCORE_accepted_culture_bonus = {
+	value = 0
+	#every_pops_in_province = {
+	#	limit = {
+	#		culture = {
+	#			has_pop_type_right
+	#		}
+	#	}
+	#}
+}
+
+WARSCORE_upper_strata = {
+	value = num_of_upper_strata
+	multiply = 4
+}
+
+WARSCORE_middle_strata = {
+	value = num_of_middle_strata
+	multiply = 2
+}
+
+WARSCORE_lower_strata = {
+	value = num_of_lower_strata
+}
+
+WARSCORE_proletariat = {
+	value = num_of_proletariat
+}
+
+WARSCORE_tribesmen = {
+	value = num_of_tribesmen
+}
+
+WARSCORE_slaves = {
+	value = num_of_slaves
+}
+
+WARSCORE_indentured = {
+	value = num_of_indentured
+}
+
+WARSCORE_buildings_bonus = {
+	value = num_of_used_building_slots
+	multiply = 0.75
+}
+
+WARSCORE_shipping_bonus = {
+	value = SHIPPING_province_power
+	multiply = 0.1
+}
+
+WARSCORE_capital_bonus = {
+	value = 0
+	if = {
+		limit = {
+			is_capital = yes
+		}
+		add = 10
+	}
+}
+
+# Modifiers from the demander, which may make a province cheaper once it is selected by a certain country
+# TODO: Make a tooltip showing what the warscore would be with the currently selected country from the peace view
+
+WARSCORE_demand_my_culture = { # Province has pops of the same primary culture as the demander
+	value = 0
+	if = {
+		limit = {
+			has_variable = PEACE_requested_by
+		}
+		if = {
+			limit = {
+				any_pops_in_province = {
+					pop_culture = PREV.var:PEACE_requested_by.culture
+				}
+			}
+			every_pops_in_province = {
+				if = {
+					limit = {
+						pop_culture = PREV.var:PEACE_requested_by.culture
+					}
+					subtract = 2
+				}
+			}
+		}
+	}
+
+}
+
+WARSCORE_pop_score_modifier = {
+	value = 0.07
+}
+
+
+# AI acceptance values
+
+
+## MANPOWER
+WARSCORE_ai_acceptance_manpower_modifier_defender = {
+	# Scope: war
+	value = 0
+	every_war_defender = {
+		add = manpower
+	}
+	multiply = 0.02
+}
+
+WARSCORE_ai_acceptance_manpower_modifier_attacker = {
+	# Scope: war
+	value = 0
+	every_war_attacker = {
+		add = manpower
+	}
+	multiply = 0.02
+}
+
+WARSCORE_ai_acceptance_war_exhaustion_modifier_defender = {
+	value = defender_warleader.has_war_exhaustion
+}
+
+WARSCORE_ai_acceptance_war_exhaustion_modifier_attacker = {
+	value = attacker_warleader.has_war_exhaustion
+}
+
+WARSCORE_ai_base_reluctance = {
+	value = -10
+}
+
+## TOTAL
+WARSCORE_ai_defender_acceptance = {
+	# Scope: war
+	# Refers to the willingness of the defender warleader to accept a peace deal
+	value = 0
+	add = WARSCORE_ai_base_reluctance
+
+	# Effect from warscore, could be positive or negative
+	add = var:warscore_balance
+
+	# Negatives, i.e. factors against signing peace
+	subtract = WARSCORE_cost_total_provinces_attacker
+	subtract = WARSCORE_ai_acceptance_manpower_modifier_defender
+
+	# Positive, i.e. factors FOR signing peace
+	add = WARSCORE_cost_total_provinces_defender
+	add = WARSCORE_ai_acceptance_war_exhaustion_modifier_defender
+}
+
+WARSCORE_ai_attacker_acceptance = {
+	# Scope: war
+	# Refers to the willingness of the attacker warleader to accept a peace deal
+	value = 0
+	add = WARSCORE_ai_base_reluctance
+
+	# Effect from warscore, could be positive or negative
+	add = var:warscore_balance
+
+	# Negatives, i.e. factors against signing peace
+	subtract = WARSCORE_cost_total_provinces_defender
+	subtract = WARSCORE_ai_acceptance_manpower_modifier_attacker
+
+	# Positive, i.e. factors FOR signing peace
+	add = WARSCORE_cost_total_provinces_attacker
+	add = WARSCORE_ai_acceptance_war_exhaustion_modifier_attacker
+}

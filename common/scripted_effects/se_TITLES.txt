@@ -1,0 +1,406 @@
+﻿# Scripted effects for the noble titles feature, including active monarchies, inactive claims to monarchies, and non-ruler noble titles.
+
+TITLES_clear_all_country_HOS_states = {
+	# Scope: Country
+	# Function: Clear the head of state titles in all countries
+	every_country = {
+		limit = {
+			has_variable = monarch_character
+			any_character = {
+				has_variable_list = active_HOS_titles
+			}
+		}
+		TITLES_clear_country_HOS_variable = yes
+		every_character = {
+			limit = { has_variable_list = active_HOS_titles }
+			every_in_list = {
+				variable = active_HOS_titles
+				remove_from_list = active_HOS_titles
+			}
+		}
+	}
+
+}
+
+TITLES_clear_country_HOS_variable = {
+	# Scope: Country
+	# Function: Clear the head of state titles in the scoped country
+	remove_variable = monarch_character
+}
+
+TITLES_give_active_HOS_title = {
+	# Scope: character
+	# Function: Add to a list of countries for which this character actively is the head of state
+	# The target must be a country scope
+	char:$char_id$ = {
+		add_to_variable_list = {
+			name = active_HOS_titles
+			target = $target_country$
+		}		
+	}
+
+}
+
+TITLES_apply_starting_HOS_titles = {
+	# Scope: Random country; scopes to characters on-demand
+
+	# Uses scripted lists defined by character ID in TITLE_lists
+
+	ordered_TITLE_HOS_$char_id$ = {
+		order_by = { # Pick the primary title by getting the largest
+			value = country_population 
+			add = num_of_cities
+		}
+
+		max = 999
+
+		save_scope_as = target_country
+
+		char:$char_id$ = {
+			if = {
+				limit = {
+					NOT = { has_variable = primary_title }
+				}
+				set_variable = {
+					name = primary_title
+					value = scope:target_country
+				}
+			}
+		}
+
+		TITLES_give_active_HOS_title = { 
+			char_id = $char_id$
+			target_country = scope:target_country
+		}
+	}
+
+}
+
+TITLES_set_as_HOS_of_abs_monarchy = {
+	TITLES_give_active_HOS_title = {
+		char_id = $char_id$
+		target_country = char:$char_id$.employer
+	}
+}
+
+TITLES_apply_all_starting_titles = {
+
+	# TESTING PURPOSES ONLY: Clear HOS states before running
+	TITLES_clear_all_country_HOS_states = yes
+	########################################################
+
+	# Emperor Alexander of Russia
+	TITLES_apply_starting_HOS_titles = { char_id = 147 }
+
+	# Kaiser Franz of Austria
+	TITLES_apply_starting_HOS_titles = { char_id = 130 }
+
+	# George III von Hanover
+	TITLES_apply_starting_HOS_titles = { char_id = 87 }
+
+	# Louis XVIII de Bourbon
+	TITLES_apply_starting_HOS_titles = { char_id = 411 }
+
+	# Friedrich Wilhelm von Hohenzollern
+	TITLES_apply_starting_HOS_titles = { char_id = 175 }
+
+	# Karl XIII von Holstein-Gottorp
+	TITLES_apply_starting_HOS_titles = { char_id = 166 }
+
+	# Fernando VII de Borbon
+	TITLES_apply_starting_HOS_titles = { char_id = 22 }
+
+	# Ferdinand IV di Borbone-Sicilia
+	TITLES_apply_starting_HOS_titles = { char_id = 110 }
+
+	# Maria Francisca de Braganca
+	TITLES_apply_starting_HOS_titles = { char_id = 2 }
+
+	# Akbar Shah II Gurkani
+	TITLES_apply_starting_HOS_titles = { char_id = 97 }
+
+	# Jiaqing Di Yongyan
+	TITLES_apply_starting_HOS_titles = { char_id = 224 }
+
+	# Yamato Kokau
+	TITLES_apply_starting_HOS_titles = { char_id = 459 }
+
+	# Mahmud II Osmanli
+	TITLES_apply_starting_HOS_titles = { char_id = 45 }
+
+	# Pratap Singh Bhonsle
+	TITLES_apply_starting_HOS_titles = { char_id = 461 }
+
+	every_country = {
+		limit = {
+			is_monarchy = yes
+		}
+		every_character = {
+			limit = {
+				is_ruler = yes
+				employer = {
+					NOT = { government = hereditary_dictatorship }
+					NOT = { primary_culture = japanese } # Reserved for the Japanese emperor 
+					NOT = { overlord = c:MRT } # Reserved for the Maratha emperor
+				}
+			}
+			add_to_variable_list = {
+				name = active_HOS_titles
+				target = employer
+			}
+			if = {
+				limit = {
+					NOT = { has_variable = primary_title }
+				}
+				set_variable = {
+					name = primary_title
+					value = employer
+				}
+			}	
+		}
+
+
+		
+	}
+	every_country = {
+		# Finally, set the variable in the country tag that stores the character ID
+		every_character = {
+			limit = {
+				has_variable_list = active_HOS_titles
+			}
+			save_scope_as = monarch_scope
+			every_in_list = {
+				variable = active_HOS_titles
+				set_variable = {
+					name = monarch_character
+					value = scope:monarch_scope
+				}
+			}
+		}
+	}
+
+}
+
+TITLES_set_predefined_country_ranks = {
+	# Scope: random country
+	# Called: at game start
+	# Function: Saves a variable in the country scope that stores the country's titular rank (e.g. duke, prince, king, emperor...) so that it shows up in personal unions or if the title is split off from a personal union, its new monarch gets the correct rank.
+	# This version is for pre-defined countries
+
+	# The values are as follows:
+	# 1 = county
+	# 2 = principality
+	# 3 = duchy
+	# 4 = grand duchy
+	# 5 = kingdom
+	# 6 = empire
+
+	# Russian personal unions:
+	c:FIN = {
+		set_variable = {
+			name = country_title_rank
+			value = 4
+		}
+	}
+	c:POL = {
+		set_variable = {
+			name = country_title_rank
+			value = 5
+		}
+	}
+	c:LIV = {
+		set_variable = {
+			name = country_title_rank
+			value = 3
+		}
+	}
+	c:EST = {
+		set_variable = {
+			name = country_title_rank
+			value = 3
+		}
+	}
+	c:COU = {
+		set_variable = {
+			name = country_title_rank
+			value = 3
+		}
+	}
+
+	# Austrian personal unions:
+	c:LBV = {
+		set_variable = {
+			name = country_title_rank
+			value = 5
+		}
+	}
+	c:HUN = {
+		set_variable = {
+			name = country_title_rank
+			value = 5
+		}
+	}
+	c:CRO = {
+		set_variable = {
+			name = country_title_rank
+			value = 5
+		}
+	}
+	c:TRS = {
+		set_variable = {
+			name = country_title_rank
+			value = 2
+		}
+	}
+
+	# British personal unions:
+	c:GBR = {
+		set_variable = {
+			name = country_title_rank
+			value = 5
+		}
+	}
+	c:HAN = {
+		set_variable = {
+			name = country_title_rank
+			value = 5
+		}
+	}
+
+	# Swedish personal unions:
+	c:NOR = {
+		set_variable = {
+			name = country_title_rank
+			value = 5
+		}
+	}
+
+	# Danish personal unions:
+	c:SHL = {
+		set_variable = {
+			name = country_title_rank
+			value = 3
+		}
+	}
+	c:HOL = {
+		set_variable = {
+			name = country_title_rank
+			value = 3
+		}
+	}
+	c:LBG = {
+		set_variable = {
+			name = country_title_rank
+			value = 3
+		}
+	}
+
+	# Prussian personal unions:
+	c:POZ = {
+		set_variable = {
+			name = country_title_rank
+			value = 4
+		}
+	}
+
+	# Dutch personal unions:
+	c:LUX = {
+		set_variable = {
+			name = country_title_rank
+			value = 4
+		}
+	}
+
+	# Neapolitan personal unions:
+	c:SIC = {
+		set_variable = {
+			name = country_title_rank
+			value = 5
+		}
+	}
+
+	# Brazilian personal unions:
+	c:POR = {
+		set_variable = {
+			name = country_title_rank
+			value = 5
+		}
+	}
+
+	# Other monarchies
+	c:FRA = {
+		set_variable = {
+			name = country_title_rank
+			value = 5
+		}
+	}
+}
+
+TITLES_set_country_rank_from_government_type = {
+	# Scope: country
+	# Function: Saves a variable in the country scope that stores the country's titular rank (e.g. duke, prince, king, emperor...) so that it shows up in personal unions or if the title is split off from a personal union, its new monarch gets the correct rank.
+	# This version uses the government type to set up defaults
+
+	# The values are as follows:
+	# 1 = county
+	# 2 = principality
+	# 3 = duchy
+	# 4 = grand duchy
+	# 5 = kingdom
+	# 6 = empire
+
+	if = {
+		limit = {
+			government = absolute_county
+		}
+		set_variable = {
+			name = country_title_rank
+			value = 1
+		}
+	}
+	else_if = {
+		limit = {
+			government = absolute_principality
+		}
+		set_variable = {
+			name = country_title_rank
+			value = 2
+		}
+	}
+	else_if = {
+		limit = {
+			government = absolute_duchy
+		}
+		set_variable = {
+			name = country_title_rank
+			value = 3
+		}
+	}
+	else_if = {
+		limit = {
+			government = absolute_grand_duchy
+		}
+		set_variable = {
+			name = country_title_rank
+			value = 4
+		}
+	}
+	else_if = {
+		limit = {
+			government = absolute_kingdom
+		}
+		set_variable = {
+			name = country_title_rank
+			value = 5
+		}
+	}
+	else_if = {
+		limit = {
+			government = imperial_monarchy
+		}
+		set_variable = {
+			name = country_title_rank
+			value = 6
+		}
+	}
+}

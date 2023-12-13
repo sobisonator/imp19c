@@ -74,8 +74,10 @@ template WarParticipants
 
 base_window = {
 	name = "war_overview"
-	parentanchor = center|center
 	size = { 818 712 }
+	parentanchor = bottom
+	position = { 55 5 }
+	movable = no
 	state = {
 		name = _show
 		on_start = "[GetVariableSystem.Set( 'show_alternative_peace_deals', 'no' )]"
@@ -610,28 +612,18 @@ base_window = {
 		visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
 		tooltip = "[WarOverview.GetWarScoreTooltip]"
 	}	
-	
+
 	text_button_square = {
-		position = { -140 -20 }
-		name = "decline_button"
-		visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
-		blockoverride "Center_text" { text = "WAR_OVERVIEW_SUE_FOR_PEACE" }
-		blockoverride "On_click" { onclick = "[WarOverview.OnSueForPeace]" }
-		tooltip = "WAR_OVERVIEW_SUE_FOR_PEACE_TOOLTIP"
-		parentanchor = bottom|hcenter
-		size = { 250 24 }
-	}
-	text_button_square = {
-		position = { 140 -20 }
+		position = { 0 -20 }
 		name = "alt_view"
 		datacontext = "[GetScriptedGui('alt_peace_button')]"
 		visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
-		blockoverride "Center_text" { text = "Alternative Peace" }
+		blockoverride "Center_text" { text = "Sue for peace" }
 		blockoverride "On_click" { 
 			onclick = "[GetVariableSystem.Set( 'show_alternative_peace_deals', 'yes' )]" 
 			onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
 		}
-		tooltip = "#T Alternative Peace#!"
+		tooltip = "#T Sue for peace#!"
 		parentanchor = bottom|hcenter
 		size = { 250 24 }
 	}
@@ -701,6 +693,7 @@ base_window = {
 			position = { 3 50 }
 			parentanchor = top|left
 			tooltip = "[WarOverview.GetWar.GetDefenderWarLeader.GetName]"
+			datacontext = "[GetScriptedGui('select_peace_recipient_country_defender')]"
 			
 			blockoverride "flag"
 			{
@@ -716,17 +709,37 @@ base_window = {
 			
 			blockoverride "show_as_button"
 			{
-				visible = no
+				visible = yes
 			}
 			blockoverride "show_as_icon"
 			{
 				visible = yes
+			}
+			onmousehierarchyenter = "[SetHighlightCountry(WarOverview.GetWar.GetDefenderWarLeader.GetCountry)]"
+			onmousehierarchyleave = "[ClearHighlightColors]"
+			blockoverride "click"
+			{
+				onclick = "[GetVariableSystem.Set( 'recipient_country_defender', WarOverview.GetWar.GetDefenderWarLeader.GetTag )]"
+				onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.GetDefenderWarLeader.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
+			}
+			icon = {
+				texture = "gfx/interface/base_parts/background_black_texture.dds"
+				size = { 180 86 }
+				position = { 0 3 }
+				parentanchor = right
+				visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_defender', WarOverview.GetWar.GetDefenderWarLeader.GetTag ))]"
+				modify_texture = {
+					name = "linealpha"
+					texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
+					blend_mode = alphamultiply
+				}
 			}
 		}
 		country_flag = {
 			position = { -3 50 }
 			parentanchor = top|right
 			tooltip = "[WarOverview.GetWar.GetAttackerWarLeader.GetName]"
+			datacontext = "[GetScriptedGui('select_peace_recipient_country_attacker')]"
 			
 			blockoverride "flag"
 			{
@@ -742,11 +755,30 @@ base_window = {
 			
 			blockoverride "show_as_button"
 			{
-				visible = no
+				visible = yes
 			}
 			blockoverride "show_as_icon"
 			{
 				visible = yes
+			}
+			onmousehierarchyenter = "[SetHighlightCountry(WarOverview.GetWar.GetAttackerWarLeader.GetCountry)]"
+			onmousehierarchyleave = "[ClearHighlightColors]"
+			blockoverride "click"
+			{
+				onclick = "[GetVariableSystem.Set( 'recipient_country_attacker', WarOverview.GetWar.GetAttackerWarLeader.GetTag )]"
+				onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.GetAttackerWarLeader.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
+			}
+			icon = {
+				texture = "gfx/interface/base_parts/background_black_texture.dds"
+				size = { 180 86 }
+				position = { 0 3 }
+				parentanchor = right
+				visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_attacker', WarOverview.GetWar.GetAttackerWarLeader.GetTag ))]"
+				modify_texture = {
+					name = "linealpha"
+					texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
+					blend_mode = alphamultiply
+				}
 			}
 		}
 		#Bottom Flags
@@ -767,12 +799,12 @@ base_window = {
 					
 					item = {
 						country_flag = {
-							datacontext = "[Scope.Country]"
-							tooltip = "[Country.GetName]"
+							datacontext = "[GetScriptedGui('select_peace_recipient_country_defender')]"
+							tooltip = "[Scope.Country.GetName]"
 							blockoverride "flag"
 							{
-								texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
-								frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+								texture = "[Scope.Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+								frame = "[Scope.Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
 								framesize = { 56 56 }
 							}
 							
@@ -780,15 +812,33 @@ base_window = {
 							{
 								size = { 56 56 }
 							}
-							
 							blockoverride "show_as_button"
 							{
-								visible = no
+								visible = yes
 							}
 							blockoverride "show_as_icon"
 							{
 								visible = yes
 							}
+							onmousehierarchyenter = "[SetHighlightCountry(Scope.GetCountry)]"
+							onmousehierarchyleave = "[ClearHighlightColors]"
+							blockoverride "click"
+							{
+								onclick = "[GetVariableSystem.Set( 'recipient_country_defender', Scope.GetCountry.GetTag )]"
+								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Scope.Country.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
+							}
+            				icon = {
+								texture = "gfx/interface/base_parts/background_black_texture.dds"
+								size = { 170 86 }
+								position = { 0 0 }
+								parentanchor = right
+								visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_defender', Scope.GetCountry.GetTag ))]"
+								modify_texture = {
+									name = "linealpha"
+									texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
+									blend_mode = alphamultiply
+								}
+							}	
 						}
 					}
 				}
@@ -811,13 +861,12 @@ base_window = {
 					parentanchor = hcenter
 					item = {
 						country_flag = {
-							datacontext = "[Scope.Country]"
-							tooltip = "[Country.GetName]"
-							
+							datacontext = "[GetScriptedGui('select_peace_recipient_country_attacker')]"
+							tooltip = "[Scope.Country.GetName]"
 							blockoverride "flag"
 							{
-								texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
-								frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+								texture = "[Scope.Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+								frame = "[Scope.Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
 								framesize = { 56 56 }
 							}
 							
@@ -825,13 +874,33 @@ base_window = {
 							{
 								size = { 56 56 }
 							}
+							
 							blockoverride "show_as_button"
 							{
-								visible = no
+								visible = yes
 							}
 							blockoverride "show_as_icon"
 							{
 								visible = yes
+							}
+							onmousehierarchyenter = "[SetHighlightCountry(Scope.GetCountry)]"
+							onmousehierarchyleave = "[ClearHighlightColors]"
+							blockoverride "click"
+							{
+								onclick = "[GetVariableSystem.Set( 'recipient_country_attacker', Scope.GetCountry.GetTag )]"
+								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Scope.Country.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
+							}
+            				icon = {
+								texture = "gfx/interface/base_parts/background_black_texture.dds"
+								size = { 170 86 }
+								position = { 0 0 }
+								parentanchor = right
+								visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_attacker', Scope.GetCountry.GetTag ))]"
+								modify_texture = {
+									name = "linealpha"
+									texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
+									blend_mode = alphamultiply
+								}
 							}
 						}
 					}
@@ -872,283 +941,56 @@ base_window = {
 				blockoverride "Value" { 
 					value = "[IntToFloat( Abs_int32(WarOverview.GetWarScore) )]" 
 				}
-				blockoverride "Text" { text = "[WarOverview.GetWarScore]" }
+				blockoverride "Text" { text = "[WarOverview.GetWar.MakeScope.GetVariable('warscore_balance').GetValue|0]" } # EGG
 				tooltip = "[WarOverview.GetWarScoreTooltip]"
 			}
 		}
 		#Peace Deal buttons
 		vbox = {
-			position = { 15 -50 }
+			position = { 15 -150 }
 			layoutpolicy_vertical = expanding
 			layoutpolicy_horizontal = expanding
 			
-			margin_widget = {
-				size = { 530 62 }
-				flowcontainer = {
-					direction = horizontal
-					spacing = 40
-					container = {
-						icon_button_square_sound = {
-							datacontext = "[GetScriptedGui('demand_reparations_button')]"
-							size = { 60 60 }
-							visible = "[Not(GetVariableSystem.Exists('reparations_up'))]"
-							blockoverride "On_click"
-							{
-								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[GetVariableSystem.Toggle('reparations_up')]"
-							}
-							tooltip = "DEMAND_REPARATIONS_TT"
-							blockoverride "ClickSound"
-							{
-								clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_offer_accept"
-								oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-							}
-							blockoverride "Icon" 
-							{
-							 	texture = "gfx/interface/icons/shared_icons/cost.dds" size = { 55 55 }
-							}
-						}
-						icon_button_square_sound = {
-							datacontext = "[GetScriptedGui('demand_reparations_button_cancel')]"
-							size = { 60 60 }
-							visible = "[GetVariableSystem.Exists('reparations_up')]"
-							blockoverride "On_click"
-							{
-								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[GetVariableSystem.Toggle('reparations_up')]"
-							}
-							tooltip = "#T Cancel Reparations#!"
-							blockoverride "ClickSound"
-							{
-								clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_offer_decline"
-								oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-							}
-							blockoverride "Icon" 
-							{
-							 	texture = "gfx/interface/icons/shared_icons/cost.dds" size = { 55 55 }
-							}
-							blockoverride "Glow"
-							{
-								glow_radius = 3
-								color = { 1.0 0.85 0.45 0.9 }
-							}
-						}
-					}
-					container = {
-						icon_button_square_sound = {
-							datacontext = "[GetScriptedGui('destablize_peace_button')]"
-							size = { 60 60 }
-							visible = "[Not(GetVariableSystem.Exists('destablize_up'))]"
-							blockoverride "On_click"
-							{
-								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[GetVariableSystem.Toggle('destablize_up')]"
-							}
-							tooltip = "DESTABILIZE_TT"
-							blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_offer_accept" }
-							blockoverride "Icon" 
-							{
-							 	texture = "gfx/interface/icons/shared_icons/stability.dds" size = { 50 50 }
-							}
-						}
-						icon_button_square_sound = {
-							datacontext = "[GetScriptedGui('destablize_peace_button_cancel')]"
-							size = { 60 60 }
-							visible = "[GetVariableSystem.Exists('destablize_up')]"
-							blockoverride "On_click"
-							{
-								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[GetVariableSystem.Toggle('destablize_up')]"
-							}
-							tooltip = "#T Cancel Destabilization#!"
-							blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_offer_decline" }
-							blockoverride "Icon" 
-							{
-							 	texture = "gfx/interface/icons/shared_icons/stability.dds" size = { 50 50 }
-							}
-							blockoverride "Glow"
-							{
-								glow_radius = 2
-								color = { 1.0 0.85 0.45 0.8 }
-							}
-						}
-					}
-					container = {
-						icon_button_square_sound = {
-							datacontext = "[GetScriptedGui('delegitimize_administration_button')]"
-							size = { 60 60 }
-							visible = "[Not(GetVariableSystem.Exists('delegitimize_up'))]"
-							blockoverride "On_click"
-							{
-								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[GetVariableSystem.Toggle('delegitimize_up')]"
-							}
-							tooltip = "DELEGITIMIZE_TT"
-							blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_offer_accept" }
-							blockoverride "Icon" 
-							{
-							 	texture = "gfx/interface/icons/shared_icons/legitimacy.dds" size = { 50 50 }
-							}
-						}
-						icon_button_square_sound = {
-							datacontext = "[GetScriptedGui('delegitimize_administration_button_cancel')]"
-							size = { 60 60 }
-							visible = "[GetVariableSystem.Exists('delegitimize_up')]"
-							blockoverride "On_click"
-							{
-								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[GetVariableSystem.Toggle('delegitimize_up')]"
-							}
-							tooltip = "#T Cancel Delegitimize Administration#!"
-							blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_offer_decline" }
-							blockoverride "Icon" 
-							{
-							 	texture = "gfx/interface/icons/shared_icons/legitimacy.dds" size = { 50 50 }
-							}
-							blockoverride "Glow"
-							{
-								glow_radius = 2
-								color = { 1.0 0.85 0.45 0.8 }
-							}
-						}						
-					}
-					container = {
-						icon_button_square_sound = {
-							datacontext = "[GetScriptedGui('steal_knowledge_button')]"
-							size = { 60 60 }
-							visible = "[Not(GetVariableSystem.Exists('steal_knowledge_up'))]"
-							blockoverride "On_click"
-							{
-								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[GetVariableSystem.Toggle('steal_knowledge_up')]"
-							}
-							tooltip = "STEAL_KNOWLEDGE_TT"
-							blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_offer_accept" }
-							blockoverride "Icon" 
-							{
-							 	texture = "gfx/interface/icons/shared_icons/research.dds" size = { 50 50 }
-							}
-						}
-						icon_button_square_sound = {
-							datacontext = "[GetScriptedGui('steal_knowledge_button_cancel')]"
-							size = { 60 60 }
-							visible = "[GetVariableSystem.Exists('steal_knowledge_up')]"
-							blockoverride "On_click"
-							{
-								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[GetVariableSystem.Toggle('steal_knowledge_up')]"
-							}
-							tooltip = "#T Cancel Steal Knowledge#!"
-							blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_offer_decline" }
-							blockoverride "Icon" 
-							{
-							 	texture = "gfx/interface/icons/shared_icons/research.dds" size = { 50 50 }
-							}
-							blockoverride "Glow"
-							{
-								glow_radius = 2
-								color = { 1.0 0.85 0.45 0.8 }
-							}
-						}						
-					}
-					container = {
-						icon_button_square_sound = {
-							datacontext = "[GetScriptedGui('extort_population_button')]"
-							size = { 60 60 }
-							visible = "[Not(GetVariableSystem.Exists('extort_population_up'))]"
-							blockoverride "On_click"
-							{
-								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[GetVariableSystem.Toggle('extort_population_up')]"
-							}
-							tooltip = "EXTORT_POPULATION_TT"
-							blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_offer_accept" }
-							blockoverride "Icon" 
-							{
-							 	texture = "gfx/interface/icons/shared_icons/population.dds" size = { 50 50 }
-							}
-						}
-						icon_button_square_sound = {
-							datacontext = "[GetScriptedGui('extort_population_button_cancel')]"
-							size = { 60 60 }
-							visible = "[GetVariableSystem.Exists('extort_population_up')]"
-							blockoverride "On_click"
-							{
-								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-								onclick = "[GetVariableSystem.Toggle('extort_population_up')]"
-							}
-							tooltip = "#T Cancel Extort Population#!"
-							blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_offer_decline" }
-							blockoverride "Icon" 
-							{
-							 	texture = "gfx/interface/icons/shared_icons/population.dds" size = { 50 50 }
-							}
-							blockoverride "Glow"
-							{
-								glow_radius = 2
-								color = { 1.0 0.85 0.45 0.8 }
-							}
-						}						
-					}
-				}
-			}
-		}
-		textbox = {
-			parentanchor = center
-			position = { -67 60 }
-			using = BaseFontM
-			using = Black_FontColor
-			fontsize = 20
+			
 
-			text = "Demand Gold"
 		}
-		textbox = {
-			parentanchor = center
-			position = { -85 -120 }
-			using = BaseFontM
-			using = Black_FontColor
-			fontsize = 30
 
-			text = "Peace Deals"
+		PeaceNegotiationBlock = {
 		}
-		flowcontainer = {
-			parentanchor = center
-			position = { -5 100 }
-			direction = horizontal
-			spacing = 10
-			button_minus_war = {
-				#size = { 50 50 }
-				datacontext = "[GetScriptedGui('subtract_demand_gold_button')]"					
-				blockoverride "On_click"
-				{
-					enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-					onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-				} 
-				tooltip = "DEMAND_LESS_GOLD_TT"
-				using = tooltip_se
+
+		PeaceNegotiationBlock = {
+			blockoverride "position" {
+				position  = { 175 180 }
 			}
-			button_plus_war = {
-				#size = { 30 30 }
-				datacontext = "[GetScriptedGui('add_demand_gold_button')]"					
-				blockoverride "On_click"
-				{
-					enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-					onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-				} 
-				tooltip = "DEMAND_MORE_GOLD_TT" 
-				using = tooltip_se
+			blockoverride "title_text" {
+				text = "Attackers' concessions"
+			}
+			blockoverride "country_list" {
+				datamodel = "[Player.MakeScope.GetList('war_attacker_list')]"
+			}
+			blockoverride "country_item_buttoncontext" {
+				datacontext = "[GetScriptedGui('select_attacker_country')]"
+			}
+			blockoverride "country_item_buttoncontext" {
+				datacontext = "[GetScriptedGui('select_attacker_country')]"
+			}
+			blockoverride "state_list" {
+				datamodel = "[Scope.Country.MakeScope.GetList('states_available_from_attacker')]"
+			}
+			blockoverride "state_item_buttoncontext" {
+				datacontext = "[GetScriptedGui('select_state_from_defender')]"
+			}
+			blockoverride "state_item_rightclick_script" {
+				onrightclick = "[GetScriptedGui('select_state_from_attacker_rightclick').Execute( GuiScope.SetRoot( Scope.State.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope ).End )]"
+			}
+			blockoverride "province_list" {
+				datamodel = "[Scope.GetState.MakeScope.GetList('provinces_available_from_attacker')]"
+			}
+			blockoverride "province_item_buttoncontext" {
+				datacontext = "[GetScriptedGui('select_province_from_attacker')]"
 			}
 		}
+
 		flowcontainer = {
 			position = { -15 145 }
 			spacing = 10 
@@ -1159,9 +1001,10 @@ base_window = {
 					texture = "gfx/interface/icons/shared_icons/warscore_cost.dds" 
 				}
 				blockoverride "Text" { 
-					text = "[Player.MakeScope.Var('current_warscore_cost').GetValue|0]"
+					text = "[GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).ScriptValue('WARSCORE_cost_total_attacker')|1]" # TODO: Make this Custom text that's conditional on if the viewer is attacker or defender
 					using = BaseFontL
 					using = Black_FontColor
+					visible = yes # Var is attacker > 0
 				}
 				tooltip = "WRITE_ME"
 				position = { -30 -184 }
@@ -1195,7 +1038,7 @@ base_window = {
 				onclick = "[WarOverview.OnClose]"
 				enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
 			}
-			tooltip = "PEACE_ACCEPTANCE_TOOLTIP"
+			tooltip = "[WarOverview.GetWar.MakeScope.GetVariable('war_scope_standin').GetProvince.Custom('peace_ai_acceptance_loc')]" # TODO: Put this in custom loc and break it down by the factors that make up acceptance value
 			blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_peace_minor" }
 			widgetanchor = bottom|right
 		}

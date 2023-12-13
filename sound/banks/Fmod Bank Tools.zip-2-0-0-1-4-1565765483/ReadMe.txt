@@ -1,4 +1,4 @@
-How To Use:
+﻿How To Use:
 ...........
 
 First place bank files into the bank folder you want to extract. Once extracted, 

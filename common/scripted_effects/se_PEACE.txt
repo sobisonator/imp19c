@@ -1,0 +1,3168 @@
+PEACE_register_country = {
+	# Scope: Country
+	# Function: register a country for a player-led peace deal, for use in WAR_scripted_guis
+	save_scope_as = target_country
+	$war_scope$ = {
+		add_to_variable_list = {
+			name = countries_registered_in_war
+			target = scope:target_country
+		}
+	}	
+	scope:target_country = {
+		add_to_variable_list = {
+			name = list_of_wars_in_country
+			target = $war_scope$
+		}
+		if = {
+			limit = {
+				NOT = {
+					any_in_list = {
+						variable = war_scope_provinces
+
+						var:war_scope = $war_scope$
+					}
+				}
+			}
+			random_province = { # Add a province to store lists and variables specific to demands relating to this country in this war
+				limit = {
+					NOT = {
+						has_variable = war_scope_province_for
+					}
+				}
+				save_scope_as = war_scope_province
+				set_variable = {
+					name = war_scope
+					value = $war_scope$
+				}
+				set_variable = {
+					name = war_scope_province_for
+					value = scope:target_country
+				}
+			}
+			add_to_variable_list = {
+				name = war_scope_provinces
+				target = scope:war_scope_province
+			}
+		}
+	}
+}
+
+PEACE_register_territories = {
+	# Scope: Country, called within an every_defender or every_attacker loop in the war scope
+	# Function: Save lists of states and provinces available per country, so they can be selected from a hierarchical dropdown
+	# ARGUMENTS: 
+	# Affiliation = defender OR attacker
+	save_scope_as = target_defender
+	clear_variable_list = states_available_from_defender
+	clear_variable_list = states_available_from_attacker
+	every_governorships = {
+		save_scope_as = this_governorship
+		clear_variable_list = states_available_from_defender
+		clear_variable_list = states_available_from_attacker
+		scope:peace_root = {
+			add_to_variable_list = {
+				name = governorships_available_from_$affiliation$
+				target = scope:this_governorship
+			}
+		}
+		every_governorship_state = {
+			save_scope_as = this_state
+			clear_variable_list = provinces_available_from_defender
+			clear_variable_list = provinces_available_from_attacker
+			scope:this_governorship = {
+				add_to_variable_list = {
+					name = states_available_from_$affiliation$
+					target = scope:this_state
+				}
+			}
+			scope:target_defender = {
+				add_to_variable_list = {
+					name = states_available_from_$affiliation$
+					target = scope:this_state
+				}						
+			}
+			every_state_province = {
+				save_scope_as = this_province
+				scope:this_state = {
+					add_to_variable_list = {
+						name = provinces_available_from_$affiliation$
+						target = scope:this_province
+					}
+				}
+				scope:peace_root = {
+					add_to_variable_list = {
+						name = provinces_available_from_both
+						target = scope:this_province
+					}
+				}
+			}
+		}
+	}
+}
+
+PEACE_request_province = {
+	# Scope: state
+	# Called: Whenever a war scripted GUI triggers the default demand behaviour to request a province for the warleader or occupier of a province
+	if = {
+		limit = {
+			$attacker_demand$ = 1
+		}
+		if = {
+			limit = {
+				scope:war = {
+					has_variable = recipient_country_attacker
+				}
+			}
+			PEACE_trigger_toggle_request_province = {
+				province_scope = $province_scope$
+				requestor = scope:war.var:recipient_country_attacker
+			}
+		}
+		else = {
+			PEACE_trigger_toggle_request_province = {
+				province_scope = $province_scope$
+				requestor = scope:war.attacker_warleader
+			}
+		}
+	}
+	if = {
+		limit = {
+			$attacker_demand$ = 0
+		}
+		if = {
+			limit = {
+				scope:war = {
+					has_variable = recipient_country_defender
+				}
+			}
+			PEACE_trigger_toggle_request_province = {
+				province_scope = $province_scope$
+				requestor = scope:war.var:recipient_country_defender
+			}
+		}
+		else = {
+			PEACE_trigger_toggle_request_province = {
+				province_scope = $province_scope$
+				requestor = scope:war.defender_warleader
+			}
+		}
+	}
+}
+
+PEACE_trigger_toggle_request_province = {
+
+	$requestor$ = {
+		PEACE_toggle_request_province = {
+			province_scope = $province_scope$
+		}
+	}
+	
+}
+
+PEACE_toggle_request_province = {
+	# Scope: country
+	# Called: From WAR_scripted_guis select_province_from_defender when clicked
+
+	# Make sure to clear it from the list first in case it's reserved by a different tag
+
+	save_scope_as = requestor
+
+	$province_scope$ = {
+		if = {
+			limit = {
+				has_variable = PEACE_requested_by
+			}
+			if = {
+				limit = {
+					NOT = {
+						var:PEACE_requested_by = scope:requestor
+					}
+				}
+				var:PEACE_requested_by = {
+					random_in_list = {
+						variable = war_scope_provinces
+						limit = {
+							var:war_scope = scope:war
+						}
+
+						remove_list_variable = {
+							name = peace_requested_provinces
+							target = $province_scope$
+						}
+					}
+				}
+			}
+		}
+	}
+	random_in_list = { # Add the province to the list of provinces they have claimed in the peace deal, using their war scope province (see PEACE_register_country)
+		variable = war_scope_provinces
+		limit = {
+			var:war_scope = scope:war
+		}
+
+		save_scope_as = war_scope_prov
+
+		if = {
+			limit = {
+				NOT = {
+					is_target_in_variable_list = {
+						name = peace_requested_provinces
+						target = $province_scope$
+					}
+				}
+			}
+			add_to_variable_list = { # List of requested provinces, specific to this requestor's perspective of the war
+				name = peace_requested_provinces
+				target = $province_scope$
+			}
+			var:war_scope = { # List of all requested provinces, agnostic of requestor
+				add_to_variable_list = {
+					name = peace_requested_provinces
+					target = $province_scope$
+				}				
+			}
+			$province_scope$ = {
+				set_variable = {
+					name = PEACE_requested_by
+					value = scope:requestor
+				}
+			}
+			$province_scope$ = {
+				set_variable = {
+					name = WARSCORE_province_value_cached
+					value = WARSCORE_province_value
+				}
+			}
+		}
+		else = {
+			remove_list_variable = {
+				name = peace_requested_provinces
+				target = $province_scope$
+			}
+			var:war_scope = {
+				remove_list_variable = {
+					name = peace_requested_provinces
+					target = $province_scope$
+				}				
+			}
+			$province_scope$ = {
+				remove_variable = PEACE_requested_by
+				remove_variable = WARSCORE_province_value_cached
+			}
+		}
+	}
+}
+
+PEACE_get_warscore_balance_player = {
+	# Scope: war
+	set_variable = {
+		name = warscore_balance
+		value = 0
+	}
+	if = { # If the player is a defender
+		limit = {
+			any_war_defender = {
+				THIS = $player_scope$
+			}
+		}
+		PEACE_get_player_vs_rival_warleader_score = {
+			player_scope = $player_scope$
+			rival_warleader = attacker_warleader
+		}
+	}
+	else = {
+		PEACE_get_player_vs_rival_warleader_score = {
+			player_scope = $player_scope$
+			rival_warleader = defender_warleader
+		}
+	}
+
+}
+
+PEACE_get_player_vs_rival_warleader_score = {
+	$player_scope$ = {
+		save_scope_as = this_country
+		PEACE_get_warscore = {
+			target_country = scope:this_country
+		}
+		scope:peace_root = {
+			change_variable = {
+				name = warscore_balance
+				subtract = local_var:war_score_from_this
+			}
+		}
+	}
+	$rival_warleader$ = {
+		save_scope_as = this_country
+		PEACE_get_warscore = {
+			target_country = scope:this_country
+		}
+		scope:peace_root = {
+			change_variable = {
+				name = warscore_balance
+				add = local_var:war_score_from_this
+			}
+		}
+	}
+	$player_scope$ = {
+		set_variable = {
+			name = warscore_balance
+			value = scope:peace_root.var:warscore_balance
+		}
+	}
+}
+
+PEACE_get_warscore_balance_warleaders = {
+	# Scope: war
+	# Function: Get the balance of warscore from the POV of the attacker (arbitrary, we can invert it for the defender)
+	# Called: When the peace window is opened, and it will need to be refreshed every day while the peace overview is open otherwise the warscore won't update
+	# Unless we have a button to recalculate warscore!
+	save_scope_as = war_scope
+	set_variable = {
+		name = warscore_balance
+		value = 0
+	}
+	defender_warleader = {
+		save_scope_as = this_country
+		PEACE_get_warscore = {
+			target_country = scope:this_country
+		}
+		scope:war_scope = {
+			change_variable = {
+				name = warscore_balance
+				add = local_var:war_score_from_this
+			}
+		}
+	}
+	attacker_warleader = {
+		save_scope_as = this_country
+		PEACE_get_warscore = {
+			target_country = scope:this_country
+		}
+		scope:war_scope = {
+			change_variable = {
+				name = warscore_balance
+				subtract = local_var:war_score_from_this
+			}
+		}
+	}
+}
+
+PEACE_get_warscore = {
+	# Scope: war
+	# Function: get the warscore of a war participant
+	if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -100
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -100
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -99
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -99
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -98
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -98
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -97
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -97
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -96
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -96
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -95
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -95
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -94
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -94
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -93
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -93
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -92
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -92
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -91
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -91
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -90
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -90
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -89
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -89
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -88
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -88
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -87
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -87
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -86
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -86
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -85
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -85
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -84
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -84
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -83
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -83
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -82
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -82
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -81
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -81
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -80
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -80
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -79
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -79
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -78
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -78
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -77
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -77
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -76
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -76
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -75
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -75
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -74
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -74
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -73
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -73
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -72
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -72
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -71
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -71
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -70
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -70
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -69
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -69
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -68
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -68
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -67
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -67
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -66
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -66
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -65
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -65
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -64
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -64
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -63
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -63
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -62
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -62
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -61
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -61
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -60
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -60
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -59
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -59
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -58
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -58
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -57
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -57
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -56
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -56
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -55
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -55
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -54
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -54
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -53
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -53
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -52
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -52
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -51
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -51
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -50
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -50
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -49
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -49
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -48
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -48
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -47
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -47
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -46
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -46
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -45
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -45
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -44
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -44
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -43
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -43
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -42
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -42
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -41
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -41
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -40
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -40
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -39
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -39
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -38
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -38
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -37
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -37
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -36
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -36
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -35
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -35
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -34
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -34
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -33
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -33
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -32
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -32
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -31
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -31
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -30
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -30
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -29
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -29
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -28
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -28
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -27
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -27
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -26
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -26
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -25
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -25
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -24
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -24
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -23
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -23
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -22
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -22
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -21
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -21
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -20
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -20
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -19
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -19
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -18
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -18
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -17
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -17
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -16
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -16
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -15
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -15
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -14
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -14
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -13
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -13
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -12
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -12
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -11
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -11
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -10
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -10
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -9
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -9
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -8
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -8
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -7
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -7
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -6
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -6
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -5
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -5
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -4
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -4
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -3
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -3
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -2
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -2
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = -1
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = -1
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 0
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 0
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 1
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 1
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 2
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 2
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 3
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 3
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 4
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 4
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 5
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 5
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 6
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 6
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 7
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 7
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 8
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 8
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 9
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 9
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 10
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 10
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 11
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 11
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 12
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 12
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 13
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 13
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 14
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 14
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 15
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 15
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 16
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 16
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 17
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 17
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 18
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 18
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 19
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 19
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 20
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 20
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 21
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 21
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 22
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 22
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 23
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 23
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 24
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 24
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 25
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 25
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 26
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 26
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 27
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 27
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 28
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 28
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 29
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 29
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 30
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 30
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 31
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 31
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 32
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 32
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 33
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 33
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 34
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 34
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 35
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 35
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 36
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 36
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 37
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 37
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 38
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 38
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 39
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 39
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 40
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 40
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 41
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 41
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 42
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 42
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 43
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 43
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 44
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 44
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 45
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 45
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 46
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 46
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 47
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 47
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 48
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 48
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 49
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 49
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 50
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 50
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 51
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 51
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 52
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 52
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 53
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 53
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 54
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 54
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 55
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 55
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 56
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 56
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 57
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 57
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 58
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 58
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 59
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 59
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 60
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 60
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 61
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 61
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 62
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 62
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 63
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 63
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 64
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 64
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 65
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 65
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 66
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 66
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 67
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 67
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 68
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 68
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 69
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 69
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 70
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 70
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 71
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 71
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 72
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 72
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 73
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 73
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 74
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 74
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 75
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 75
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 76
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 76
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 77
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 77
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 78
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 78
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 79
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 79
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 80
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 80
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 81
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 81
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 82
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 82
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 83
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 83
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 84
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 84
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 85
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 85
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 86
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 86
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 87
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 87
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 88
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 88
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 89
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 89
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 90
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 90
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 91
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 91
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 92
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 92
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 93
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 93
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 94
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 94
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 95
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 95
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 96
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 96
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 97
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 97
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 98
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 98
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 99
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 99
+		}
+	}
+	else_if = {
+		limit = {
+			scope:peace_root = {
+				war_score = {
+					target = $target_country$
+					value = 100
+				}
+			}
+		}
+		set_local_variable = {
+			name = war_score_from_this
+			value = 100
+		}
+	}
+}

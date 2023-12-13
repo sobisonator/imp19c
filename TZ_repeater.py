@@ -1,11 +1,8 @@
-def print_TZ_statement(TZ, i):
-	loc = """	else_if = {{
-			limit = {{ {TZ}_tradezone = {{ PROVINCE = yes }} }}
-			MAPMODE_set_city_status = {{
-				mapmode_type = mapmode_colour
-				number = {i}
-			}}
-		}}""".format(TZ=TZ, i=i)
+def print_TZ_statement(TZ):
+	loc = """    set_global_variable = {{
+	    name = {tradezone}_shipping
+	    value = 0
+    }}""".format(tradezone=TZ)
 	print(loc)
 
 #all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]
@@ -31,7 +28,6 @@ all_TZs = ["india",
            "baltic",
            "east_europe",
            "east_mediterranean"]
-i = 1
+
 for TZ in all_TZs:
-        print_TZ_statement(TZ = TZ, i=i)
-        i = i+1
+        print_TZ_statement(TZ = TZ)

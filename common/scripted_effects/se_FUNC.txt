@@ -1,0 +1,52 @@
+﻿FUNC_clamp_variable = {
+	# Scope: Any
+	# Function: Set a max and min (optional) for the given variable
+	# Special arguments
+	# max_type and min_type should be '' if they're svalues, or 'var:' if they're variables
+	# The variable to be bounded must not include it's var: prefix
+
+	if = {
+		limit = { NOT = { $max_type$$max$ = 0 } }
+		set_local_variable = {
+			name = l_comparison_diff
+			value = $max_type$$max$
+		}
+		change_local_variable = {
+			name = l_comparison_diff
+			subtract = var:$variable$
+		}
+		if = {
+			limit = {
+				local_var:l_comparison_diff < 0
+			}
+			set_variable = {
+				name = $variable$
+				value = $max_type$$max$
+			}
+		}
+	}
+
+	
+
+	if = {
+		limit = { NOT = { $min_type$$min$ = 0 } }
+		set_local_variable = {
+			name = l_comparison_diff
+			value = var:$variable$
+		}
+		change_local_variable = {
+			name = l_comparison_diff
+			subtract = $min_type$$min$
+		}
+		if = {
+			limit = {
+				local_var:l_comparison_diff < 0
+			}
+			set_variable = {
+				name = $variable$
+				value = $min_type$$min$
+			}
+		}
+	} 
+
+}

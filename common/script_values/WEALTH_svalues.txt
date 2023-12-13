@@ -1,7 +1,35 @@
-# Localised wealth
+﻿# Localised wealth
 
 # 0.01 unit of wealth = enough to sustain 1 pop (4,000 people) at subsistence level for 1 quarter-year.
 # These are matched in scale to Amenities. 0.01 amenities is the base amount consumed by 1 pop
+
+WEALTH_upper_strata_mod = {
+	value = 11.4
+}
+
+WEALTH_middle_strata_mod = {
+	value = 3.9
+}
+
+WEALTH_lower_strata_mod = {
+	value = 0.4
+}
+
+WEALTH_proletariat_mod = {
+	value = 0.3
+}
+
+WEALTH_slaves_mod = {
+	value = 0.1
+}
+
+WEALTH_indentured_mod = {
+	value = 0.3
+}
+
+WEALTH_tribesmen_mod = {
+	value = 0.3
+}
 
 ### Governorship level
 
@@ -11,109 +39,154 @@
 
 WEALTH_starting_upper_strata = {
 	value = governorship_upper_strata
-	multiply = 1.14
+	multiply = WEALTH_upper_strata_mod
 }
 
 WEALTH_starting_middle_strata = {
 	value = governorship_middle_strata
-	multiply = 0.39
+	multiply = WEALTH_middle_strata_mod
 }
 
 WEALTH_starting_lower_strata = {
 	value = governorship_lower_strata
-	multiply = 0.04
+	multiply = WEALTH_lower_strata_mod
 }
 
 WEALTH_starting_proletariat = {
 	value = governorship_proletariat
-	multiply = 0.03
+	multiply = WEALTH_proletariat_mod
 }
 
 WEALTH_starting_slaves = {
 	value = governorship_slaves
-	multiply = 0.01
+	multiply = WEALTH_slaves_mod
 }
 
 WEALTH_starting_indentured = {
 	value = governorship_indentured
-	multiply = 0.03
+	multiply = WEALTH_indentured_mod
 }
 
 WEALTH_starting_tribesmen = {
 	value = governorship_tribesmen
-	multiply = 0.03
+	multiply = WEALTH_tribesmen_mod
 }
+
+# Values for province transfer from uncolonised
+
+WEALTH_starting_upper_strata_province = {
+	value = num_of_upper_strata
+	multiply = WEALTH_upper_strata_mod
+}
+
+WEALTH_starting_middle_strata_province = {
+	value = num_of_middle_strata
+	multiply = WEALTH_middle_strata_mod
+}
+
+WEALTH_starting_lower_strata_province = {
+	value = num_of_upper_strata
+	multiply = WEALTH_lower_strata_mod
+}
+
+WEALTH_starting_proletariat_province = {
+	value = num_of_upper_strata
+	multiply = WEALTH_proletariat_mod
+}
+
+WEALTH_starting_tribesmen_province = {
+	value = num_of_upper_strata
+	multiply = WEALTH_tribesmen_mod
+}
+
+WEALTH_starting_slaves_province = {
+	value = num_of_upper_strata
+	multiply = WEALTH_slaves_mod
+}
+
+WEALTH_starting_indentured_province = {
+	value = num_of_upper_strata
+	multiply = WEALTH_indentured_mod
+}
+
 
 # Variables to svalues 
 
 WEALTH_governorship_upper_strata = { # Amount of wealth owned by the local upper strata. Pulls from the variable.
+	value = 0
 	if = {
 		limit = {
 			has_global_variable = wealth_setup_done
 		}
 		value = var:upper_strata_wealth
 	}
-	
+	min = 0.001
 }
 
 WEALTH_governorship_middle_strata = { # Amount of wealth owned by the local upper strata. Pulls from the variable.
+	value = 0
 	if = {
 		limit = {
 			has_global_variable = wealth_setup_done
 		}
 		value = var:middle_strata_wealth
 	}
-	
+	min = 0.001
 }
 
 WEALTH_governorship_lower_strata = { # Amount of wealth owned by the local upper strata. Pulls from the variable.
+	value = 0
 	if = {
 		limit = {
 			has_global_variable = wealth_setup_done
 		}
 		value = var:lower_strata_wealth
 	}
-	
+	min = 0.001
 }
 
 WEALTH_governorship_proletariat = { # Amount of wealth owned by the local proletariat. Pulls from the variable.
+	value = 0
 	if = {
 		limit = {
 			has_global_variable = wealth_setup_done
 		}
 		value = var:proletariat_wealth
 	}
-	
+	min = 0.001
 }
 
 WEALTH_governorship_slaves = { # Amount of wealth owned by the local slaves. Pulls from the variable.
+	value = 0
 	if = {
 		limit = {
 			has_global_variable = wealth_setup_done
 		}
 		value = var:slaves_wealth
 	}
-	
+	min = 0.001
 }
 
 WEALTH_governorship_indentured = { # Amount of wealth owned by the local upper strata. Pulls from the variable.
+	value = 0
 	if = {
 		limit = {
 			has_global_variable = wealth_setup_done
 		}
 		value = var:indentured_wealth
 	}
-	
+	min = 0.001
 }
 
 WEALTH_governorship_tribesmen = { # Amount of wealth owned by the local tribesmen. Pulls from the variable.
+	value = 0
 	if = {
 		limit = {
 			has_global_variable = wealth_setup_done
 		}
 		value = var:tribesmen_wealth
 	}
-
+	min = 0.001
 }
 
 # Wealth from assets
@@ -249,41 +322,16 @@ WEALTH_governorship_total = {
 	}
 }
 
-WEALTH_governorship_total_adjusted = { # Adjusted for number of provinces in the governorship
-	if = {
-		limit = {
-			has_global_variable = wealth_setup_done
-		}
-		value = WEALTH_governorship_total
-		if = {
-			limit = { WEALTH_num_of_governorship_provinces > 0 }
-			divide = WEALTH_num_of_governorship_provinces
-		}
-	}
-}
-
-WEALTH_num_of_governorship_provinces = {
-	# Scope: governorship
-	value = 0
-	every_governorship_state = {
-		every_state_province = {
-			add = 1
-		}
-	}
-	multiply = 0.05
-}
-
 WEALTH_governorship_per_capita = {
+	value = 0
 	if = {
 		limit = {
 			has_global_variable = wealth_setup_done
 		}
 		value = WEALTH_governorship_total
-		if = {
-			limit = { governorship_population > 0 }
-			divide = governorship_population
-		}
+		divide = governorship_population
 	}
+	min = 0.001 # To avoid div/0
 }
 
 WEALTH_governorship_upper_strata_per_capita = {
@@ -385,4 +433,44 @@ WEALTH_national_per_capita = {
 		value = WEALTH_total_private_moveable_wealth
 		divide = country_population
 	}
+}
+
+WEALTH_national_upper_strata = {
+	value = 0
+	if = {
+		limit = {
+			has_global_variable = wealth_setup_done
+		}
+		every_governorships = {
+			add = var:upper_strata_wealth
+		}
+	}
+}
+
+WEALTH_national_middle_strata = {
+	value = 0
+	if = {
+		limit = {
+			has_global_variable = wealth_setup_done
+		}
+		every_governorships = {
+			add = var:middle_strata_wealth
+		}
+	}
+}
+
+WEALTH_national_lower_strata = {
+	value = 0
+	if = {
+		limit = {
+			has_global_variable = wealth_setup_done
+		}
+		every_governorships = {
+			add = var:lower_strata_wealth
+		}
+	}
+}
+
+WEALTH_national_total = {
+	value = WEALTH_total_private_moveable_wealth
 }

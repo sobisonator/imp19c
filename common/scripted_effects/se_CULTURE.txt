@@ -1,0 +1,68 @@
+CULTURE_set_islamic_alcohol_taboo = {
+	# Scope: Country
+	# Function: Add a taboo to all cultures with majority muslim population within this country
+	if = {
+		limit = {
+			any_owned_province = {
+				any_pops_in_province = {
+					muslim_group_trigger_pop = yes
+				}
+			}
+		}
+		every_country_culture = {
+			save_scope_as = alcohol_taboo_culture
+			set_local_variable = {
+				name = total_culture_pops
+				value = 0
+			}
+			set_local_variable = {
+				name = culture_pops_muslim
+				value = 0 
+			}
+			ROOT = {
+				every_owned_province = {
+					limit = {
+						any_pops_in_province = {
+							pop_culture = scope:alcohol_taboo_culture.culture
+						}
+					}
+					every_pops_in_province = {
+						limit = {
+							pop_culture = scope:alcohol_taboo_culture.culture
+						}
+						change_local_variable = {
+							name = total_culture_pops
+							add = 1
+						}
+						if = {
+							limit = {
+								muslim_group_trigger_pop = yes
+							}
+							change_local_variable = {
+								name = culture_pops_muslim
+								add = 1
+							}
+						}
+					}
+				}
+			}
+			set_local_variable = {
+				name = culture_percent_muslim
+				value = local_var:culture_pops_muslim
+			}
+			change_local_variable = {
+				name = culture_percent_muslim
+				divide = local_var:total_culture_pops
+			}
+			if = {
+				limit = {
+					local_var:culture_percent_muslim > 0.5
+				}
+				add_country_culture_modifier = {
+					name = taboo_with_alcohol
+					duration = -1
+				}
+			}
+		}
+	}
+}

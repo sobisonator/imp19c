@@ -1096,6 +1096,16 @@ base_window = {
 						using = Black_FontColor
 					}
 
+					cpt_button = {
+						size = { 41 63 }
+						position = { -8 75 }
+						block "Context" 
+						{
+							datacontext = "[DiplomaticView.GetTargetCountry.MakeScope.Var('monarch_character').GetCharacter]"
+							visible = "[DiplomaticView.GetTargetCountry.MakeScope.Var('monarch_character').IsSet]"
+						}
+					}
+
 					textbox = {
 						margin = { 10 0 }
 						position = { -30 0 }
@@ -1584,6 +1594,7 @@ base_window = {
 							}
 						}
 					}
+
 					scrollarea = {
 						size = { 342 298 }
 						position = { 0 88 }
@@ -1592,11 +1603,11 @@ base_window = {
 						scrollbar_vertical = {
 							using = VerticalScrollBar
 						}
-					
+
 						scrollwidget = {
-							
+
 							vbox = {
-							
+
 								vbox = {
 									visible = "[DiplomaticView.HasDiplomaticPending]"
 									layoutpolicy_horizontal = expanding
@@ -1622,9 +1633,11 @@ base_window = {
 									layoutpolicy_vertical = preferred
 									margin_left = 8
 									margin_right = 10
+									#margin_top = -35
 									datacontext = "[DiplomaticView.GetDefaultActionCategory]"
 									using = diplomatic_actions_v2
 								}
+
 								vbox = {
 									name = "actions_grid"
 									layoutpolicy_vertical = shrinking
@@ -1755,9 +1768,9 @@ base_window = {
 									margin_left = 4
 									margin_right = 16
 									margin_top = 10
-									margin_bottom = 5
 									layoutpolicy_horizontal = expanding
 
+									# Trade agreement - all
 									diplomacy_action_button = {
 										size = { 0 22 }
 										layoutpolicy_horizontal = expanding
@@ -1780,7 +1793,52 @@ base_window = {
 										blockoverride "Left_text" 
 										{ 
 											margin_left = 24
-											text = "[Select_CString( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'Cancel Trade Agreement: All', 'Offer Trade Agreement: All' )]"
+											text = "[Select_CString( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'Cancel Trade Agreement: #T All', 'Trade Agreement: #T All' )]"
+										}
+										
+										blockoverride "Right_text"
+										{
+											text = "Test"
+											using = Negative_FontColor
+											# Make fontcolor conditional
+											tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+										}	
+										
+										blockoverride "Icon" 
+										{
+											framesize = { 46 46 }
+											#visible = "[DiplomaticActionItem.RequireAcceptance]"
+											texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
+											frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
+											tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+										}	
+
+										tooltip =  "[SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_title', 'offer_trade_agreement_all_tt_title' )]#T [DiplomaticView.GetTargetCountry.GetName] #! [SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_body', 'offer_trade_agreement_all_tt_body' )]"
+									}
+
+									widget = { size = { 0 4 } } # Adds spacing between diplo buttons
+
+									diplomacy_action_button = {
+										size = { 0 22 }
+										layoutpolicy_horizontal = expanding
+										margin = { 14 0 }
+										margin_right = 0
+
+										datacontext = "[GetScriptedGui('trade_agreement_food_goods_button')]"
+										parentanchor = hcenter
+
+										enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+
+										blockoverride "On_click"
+										{
+											enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
+											onclick = "[ScriptedGui.Execute(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+										}
+
+										blockoverride "Left_text" 
+										{ 
+											margin_left = 24
+											text = "[Select_CString( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'Cancel Trade Agreement: #T Food', 'Trade Agreement: #T Food' )]"
 										}
 										
 										blockoverride "Right_text"
@@ -1799,8 +1857,10 @@ base_window = {
 											tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
 										}	
 
-										tooltip =  "[SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_title', 'offer_trade_agreement_all_tt_title' )]#T [DiplomaticView.GetTargetCountry.GetName] #! [SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_body', 'offer_trade_agreement_all_tt_body' )]"
+										tooltip =  "[SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_title', 'offer_trade_agreement_all_tt_title' )]#T [DiplomaticView.GetTargetCountry.GetName] #! [SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_food_tt_body', 'offer_trade_agreement_food_tt_body' )]"
 									}
+
+									widget = { size = { 0 4 } } # Adds spacing between diplo buttons
 								}
 
 								margin_widget = {
@@ -1826,6 +1886,7 @@ base_window = {
 										}
 									}
 								}
+
 								margin_widget = {
 									size = { 0 28 }
 									layoutpolicy_horizontal = expanding

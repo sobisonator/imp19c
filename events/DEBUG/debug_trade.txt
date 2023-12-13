@@ -1,31 +1,722 @@
 ﻿namespace = debug_trade
 
+#debug_trade.6 = { # Prices setup
+#	#TRADE_first_time_setup_price_countries_food = yes
+#}
+
 debug_trade.1 = { # Trade setup
 	type = country_event
 	title = "TEST"
 	desc = "TEST"
 	picture = aqueducts
+	hidden = yes
 
 	immediate = {
-		#MOVEMENT_get_TZ_distances = yes # Commented out for now - needs fixing, svalues are improperly named.
-		TRADE_reset_all_tradegoods_TZ_internal_rankings = yes
-		TRADE_prepare_quarterly_values = yes
-		TRADE_save_connection_time_values = yes
-		TRADE_reset_TZ_pools = yes
-		every_country = {
-			every_governorships = {
-				TRADE_reset_purchase_order_tender_completions = yes
-				TRADE_set_internal_trade_scope = yes # Repeats an effect run by oa_economy_setup, needs to be run quarterly after that
-				TRADE_update_governorship_TZs = yes
-				TRADE_setup_internal_trade_cuts = yes
-				TRADE_reset_quarterly_governorship_values = yes # Not actually obsolete - this deals with governorship scope, while TRADE_reset_quarterly_values deals with global level
+		if = {
+			limit = {
+				NOT = { has_global_variable = debug_trade_1_done } # Limit so this can be fired in on_action events block without triggering for every country
 			}
-			TRADE_setup_tax_rates = yes
+			#MOVEMENT_get_TZ_distances = yes # Commented out for now - needs fixing, svalues are improperly named.
+			every_country = {
+				trigger_event = { id = debug_trade.109 } # Update internal trade scope
+				trigger_event = { id = debug_trade.110 } # Update TZ vars
+				trigger_event = { id = debug_trade.103 } # Set up TZ prices
+			}
+			# trigger_event = { id = debug_trade.102 } # global base prices - defunct
+			# trigger_event = { id = debug_trade.104 } # quarterly values # Split up into sub-events
+			trigger_event = { id = debug_trade.1031 } # Update TZ prices
+			every_country = {
+				trigger_event = { id = debug_trade.101 }
+				trigger_event = { id = debug_trade.1041 }
+				# trigger_event = { id = debug_trade.1042 }
+				# trigger_event = { id = debug_trade.1047 } # Combined 42 and 44
+				trigger_event = { id = debug_trade.1043 }
+				#trigger_event = { id = debug_trade.1044 }
+				trigger_event = { id = debug_trade.1045 }
+				trigger_event = { id = debug_trade.1046 }
+				TRADE_reset_quarterly_tax_totals = yes
+			}
+			every_federation = {
+				trigger_event = { id = debug_trade.1051 } # Province version
+				# trigger_event = { id = debug_trade.10522 } # Province version
+				# trigger_event = { id = debug_trade.1057 } # Combined 52 and 54
+				trigger_event = { id = debug_trade.1053 } # Province version
+				# trigger_event = { id = debug_trade.10544 } # Province version
+				trigger_event = { id = debug_trade.1055 } # Province version
+				trigger_event = { id = debug_trade.1056 } # Province version
+			}
+			# trigger_event = { id = debug_trade.105 } # quarterly values - This just repeats debug_trade.104
+			trigger_event = { id = debug_trade.106 } # quarterly values
+			trigger_event = { id = debug_trade.107 }
+			every_country = {
+					# trigger_event = { id = debug_trade.108 } # Moved back to beginning to provide vars for debug_trade.102
+					# trigger_event = { id = debug_trade.109 } # Repeats an effect run by oa_economy_setup, needs to be run quarterly after that # Moved back to beginning to provide vars for debug_trade.102
+					trigger_event = { id = debug_trade.110 }
+					trigger_event = { id = debug_trade.111 }
+					trigger_event = { id = debug_trade.112 } # Not actually obsolete - this deals with governorship scope, while TRADE_reset_quarterly_values deals with global level
+				trigger_event = { id = debug_trade.113 }
+			}
+			set_global_variable = debug_trade_1_done
 		}
 	}
 
-	option = {
-		name = "TEST"
+}
+
+# For speed testing and lag diagnosis:
+debug_trade.101 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_governorships = {
+			TRADE_reset_all_tradegoods_TZ_internal_rankings = yes
+			TRADE_governorship_get_pops_this_quarter = yes
+		}
+	}
+}
+debug_trade.102 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_update_all_global_base_prices = yes
+	}
+}
+debug_trade.103 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		SELL_set_TZ_prices = yes
+	}
+}
+debug_trade.1031 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		PRICE_update_TZ_prices = yes
+	}
+}
+debug_trade.104 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_reset_internal_pools = yes
+	}
+}
+debug_trade.1041 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		set_variable = {
+			name = internal_income_pool
+			value = 0
+		}
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_tradegood_total_internal_stockpile
+		}
+		every_tradegood_complex = {
+			APPLY = TRADE_setup_governorship_for_export_internal_vars
+		}
+	}
+}
+debug_trade.1042 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_amount_sold
+		}
+	}
+}
+debug_trade.1047 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_trt_ias
+		}
+	}
+}
+debug_trade.1043 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_trade_stockpiles
+		}
+	}
+}
+debug_trade.1044 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_trade_revenue_total
+		}
+	}
+}
+debug_trade.1045 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+		}
+	}
+}
+debug_trade.1046 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_reset_quarterly_tax_totals = yes
+	}
+}
+debug_trade.1051 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		set_variable = {
+			name = internal_income_pool
+			value = 0
+		}
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_tradegood_total_internal_stockpile
+		}
+		every_tradegood_complex = {
+			APPLY = TRADE_setup_governorship_for_export_internal_vars
+		}
+	}
+}
+debug_trade.1052 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_amount_sold
+		}
+	}
+}
+debug_trade.1057 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_trt_ias
+		}
+	}
+}
+debug_trade.1053 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_trade_stockpiles
+		}
+	}
+}
+debug_trade.1054 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_trade_revenue_total
+		}
+	}
+}
+debug_trade.1055 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+		}
+	}
+}
+debug_trade.1056 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		TRADE_reset_quarterly_tax_totals = yes
+	}
+}
+debug_trade.105 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_reset_quarterly_trade_scope_values = yes
+	}
+}
+debug_trade.106 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_reset_all_internal_trade_revenue_totals = yes
+	}
+}
+debug_trade.107 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_save_connection_time_values = yes
+	}
+}
+debug_trade.108 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_governorships = {
+			TRADE_reset_purchase_order_tender_completions = yes
+		}
+	}
+}
+debug_trade.109 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_governorships = {
+			TRADE_set_internal_trade_scope = yes
+		}
+	}
+}
+
+debug_trade.110 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_governorships = {
+			TRADE_update_governorship_TZs = yes
+		}
+	}
+}
+
+debug_trade.111 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_governorships = {
+			TRADE_setup_internal_trade_cuts = yes
+		}
+	}
+}
+
+debug_trade.112 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_governorships = {
+			TRADE_reset_quarterly_governorship_values = yes
+		}
+	}
+}
+
+debug_trade.113 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		TRADE_setup_tax_rates = yes
+		set_global_variable = first_time_generic_price_setup_done
+	}
+}
+
+## Debug trade 2 breakdown
+
+debug_trade.201 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		TRADE_update_all_global_base_prices = yes
+	}
+}
+debug_trade.202 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		SELL_set_TZ_prices_by_country = yes
+	}
+}
+debug_trade.2021 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		PRICE_update_TZ_prices = yes
+	}
+}
+debug_trade.203 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		TRADE_reset_internal_pools = yes
+	}
+}
+debug_trade.2031 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		set_variable = {
+			name = internal_income_pool
+			value = 0
+		}
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_tradegood_total_internal_stockpile
+		}
+	}
+}
+debug_trade.2032 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_amount_sold
+		}
+	}
+}
+debug_trade.2033 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_trade_stockpiles
+		}
+	}
+}
+debug_trade.2034 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_trade_revenue_total
+		}
+	}
+}
+debug_trade.2035 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+		}
+	}
+}
+debug_trade.2091 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		set_variable = {
+			name = internal_income_pool
+			value = 0
+		}
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_tradegood_total_internal_stockpile
+		}
+	}
+}
+debug_trade.2092 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_amount_sold
+		}
+	}
+}
+debug_trade.2093 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_trade_stockpiles
+		}
+	}
+}
+debug_trade.2094 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_internal_trade_revenue_total
+		}
+	}
+}
+debug_trade.2095 = {
+	type = province_event
+	hidden = yes
+
+	immediate = {
+		every_tradegood_complex = {
+			APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+		}
+	}
+}
+debug_trade.204 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = { # Sell offers
+			limit = {
+				# NOT = { has_variable = federation_customs_union }
+				always = yes
+			}
+			SELL_declare_all_internal_available = yes
+		}
+	}
+}
+debug_trade.205 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = { # Purchase orders
+			limit = {
+				# NOT = { has_variable = federation_customs_union }
+				always = yes
+			}
+			PURCHASE_make_internal_shopping_list = yes
+		}
+	}
+}
+debug_trade.206 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = { # Begin invoices
+			limit = {
+				# NOT = { has_variable = federation_customs_union }
+				always = yes
+			}
+			SELL_calculate_all_internal_revenue_cut_percentages = yes
+		}
+	}
+}
+debug_trade.207 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			limit = {
+				# NOT = { has_variable = federation_customs_union }
+				always = yes
+			}
+			SELL_get_all_internal_cuts_of_revenue = yes
+		}
+	}
+}
+debug_trade.208 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			limit = {
+				# NOT = { has_variable = federation_customs_union }
+				always = yes
+			}
+			TRADE_set_spender_shares = yes
+		}
+	}
+}
+debug_trade.209 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			limit = {
+				# NOT = { has_variable = federation_customs_union }
+				always = yes
+			}
+			TRADE_set_income_shares = yes 
+		}
+	}
+}
+debug_trade.210 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			limit = {
+				# NOT = { has_variable = federation_customs_union }
+				always = yes
+			}
+			PURCHASE_split_all_costs = yes
+		}
+	}
+}
+debug_trade.211 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = { 
+			limit = {
+				# NOT = { has_variable = federation_customs_union }
+				always = yes
+			}
+			SELL_split_all_income = yes
+		}
+	}
+}
+debug_trade.212 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = { # Sell offers
+			limit = {
+				has_variable = federation_customs_union
+			}
+			SELL_declare_all_internal_available = yes
+		}
+	}
+}
+debug_trade.213 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = { # Purchase orders
+			limit = {
+				has_variable = federation_customs_union
+			}
+			PURCHASE_make_internal_shopping_list = yes
+		}
+	}
+}
+debug_trade.214 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = { # Begin invoices
+			limit = {
+				has_variable = federation_customs_union
+			}
+			SELL_calculate_all_internal_revenue_cut_percentages = yes
+		}
+	}
+}
+debug_trade.215 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			limit = {
+				has_variable = federation_customs_union
+			}
+			SELL_get_all_internal_cuts_of_revenue = yes
+		}
+	}
+}
+debug_trade.216 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			limit = {
+				has_variable = federation_customs_union
+			}
+			TRADE_set_spender_shares = yes
+		}
+	}
+}
+debug_trade.217 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			limit = {
+				has_variable = federation_customs_union
+			}
+			TRADE_set_income_shares = yes 
+		}
+	}
+}
+debug_trade.218 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			limit = {
+				has_variable = federation_customs_union
+			}
+			PURCHASE_split_all_costs = yes
+		}
+	}
+}
+debug_trade.219 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			limit = {
+				has_variable = federation_customs_union
+			}
+			SELL_split_all_income = yes
+		}
+	}
+}
+
+debug_trade.220 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		TRADE_clear_total_sold_and_revenue_flag = yes
+	}
+}
+
+debug_trade.221 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			TRADE_clear_local_revenue_cut_flags = yes
+		}
+	}
+}
+
+debug_trade.223 = {
+	type = province_event
+	hidden = yes
+	immediate = {
+		TRADE_clear_total_sold_and_revenue_flag = yes
+	}
+}
+
+debug_trade.225 = {
+	type = country_event
+	hidden = yes
+	immediate = {
+		every_governorships = {
+			TRADE_reset_all_tradegoods_TZ_internal_rankings = yes # Clear the rankings so that they can be recalculated next trade phase
+		}
 	}
 }
 
@@ -34,115 +725,74 @@ debug_trade.2 = { # Quarterly internal trade simulation
 	title = "TEST"
 	desc = "TEST"
 	picture = aqueducts
+	hidden = yes
 
 	immediate = {
-		debug_log = "Starting debug_trade.2"
-		TRADE_create_list_of_tradezones_in_trade_partners = yes
-		TRADE_update_all_global_base_prices = yes # Moved to external trade. NOTE: At game start, there will need to be a special effect that just calculates the starting base price by calculating the external available amounts withouts selling them, before the first ever quarterly internal trade effect
-		#debug_log= "Finished TRADE_update_all_global_base_prices, starting TRADE_update_all_TZ_local_prices"
-		TRADE_update_all_TZ_local_prices = yes
-		#debug_log = "Finished TRADE_update_all_TZ_local_prices, starting TRADE_reset_internal_pools"
-		TRADE_reset_internal_pools = yes
-		#debug_log = "Finished TRADE_reset_internal_pools, starting TRADE_reset_quarterly_trade_scope_values"
-		# TRADE_reset_quarterly_trade_scope_values = yes
-		#debug_log = "Finished TRADE_reset_quarterly_trade_scope_values, starting TRADE_reset_all_internal_trade_stockpiles"
-		# TRADE_reset_all_internal_trade_stockpiles = yes # OBSOLETE - merged into TRADE_reset_internal_pools
-		#debug_log = "Finished TRADE_reset_all_internal_trade_stockpiles, starting TRADE_reset_all_internal_trade_revenue_totals"
-		# TRADE_reset_all_internal_trade_revenue_totals = yes # OBSOLETE - merged into TRADE_reset_internal_pools
-		#debug_log = "Finished TRADE_reset_all_internal_trade_revenue_totals, starting governorship iterations"
-		# TRADE_reset_internal_amounts_sold = yes
-		every_internal_trade_viable_country = {
-			every_governorships = { # Sell offers
-				limit = {
-					NOT = { has_variable = federation_customs_union }
-				}
-				#debug_log = "Governorship trade stage 1"
-				# TRADE_reset_quarterly_governorship_values = yes # Moved into debug_trade.1
-				#debug_log = "Governorship trade stage 2"
-				# TRADE_set_internal_trade_scope = yes # Moved into debug_trade.1 so that it can be used in the pre-trade effects
-				#debug_log = "Governorship trade stage 3"
-				SELL_declare_all_available = yes
-				# Save the total amount available as a var
+		if = {
+			limit = {
+				NOT = { has_global_variable = debug_trade_2_done } # Limit so this can be fired in on_action events block without triggering for every country
 			}
+			# trigger_event = { id = debug_trade.201 } # Global base prices - defunct
+			PURCHASE_reset_shipping_variables = yes
+			every_country = {
 
-			PURCHASE_reset_trade_partner_caps = yes
-
-			every_governorships = { # Purchase orders
-				limit = {
-					NOT = { has_variable = federation_customs_union }
-				}
-				
-				#debug_log = "Governorship trade stage 4"
-				PURCHASE_make_internal_shopping_list = yes
-
+				trigger_event = { id = debug_trade.202 }
+				trigger_event = { id = debug_trade.2031 }
+				#trigger_event = { id = debug_trade.2032 }
+				trigger_event = { id = debug_trade.2033 }
+				#trigger_event = { id = debug_trade.2034 }
+				trigger_event = { id = debug_trade.2035 }
 			}
-			every_governorships = { # Invoices
+			trigger_event = { id = debug_trade.2021 }
+			every_federation = {
+				trigger_event = { id = debug_trade.2091 }
+				#trigger_event = { id = debug_trade.2032 }
+				trigger_event = { id = debug_trade.2093 }
+				#trigger_event = { id = debug_trade.2034 }
+				trigger_event = { id = debug_trade.2095 }
+			}
+			every_internal_trade_viable_country = {
+				trigger_event = { id = debug_trade.204 } # SELL_declare_all_available
+			}
+			every_internal_trade_viable_country = {
+				trigger_event = { id = debug_trade.205 }
+				#every_governorships = { # Invoices
+				#	limit = {
+				#		# NOT = { has_variable = federation_customs_union }
+				#	}
+					trigger_event = { id = debug_trade.206 }
+					trigger_event = { id = debug_trade.207 }
+					trigger_event = { id = debug_trade.208 }
+					trigger_event = { id = debug_trade.209 }
+					trigger_event = { id = debug_trade.210 }
+					trigger_event = { id = debug_trade.211 }
+				#}
+			}
+			every_country = {
+				trigger_event = { id = debug_trade.221 }
+				trigger_event = { id = debug_trade.225 }
+			}
+			#every_trade_center = {
+			#	trigger_event = { id = debug_trade.224 }
+			#}
+			PURCHASE_update_all_quarterly_shipping = yes
+			if = {
 				limit = {
-					NOT = { has_variable = federation_customs_union }
+					NOT = {
+						has_global_variable = first_time_price_setup_done
+					}
 				}
-				#debug_log = "Governorship trade stage 5"
-				SELL_calculate_all_revenue_cut_percentages = yes
-				#debug_log = "Governorship trade stage 6"
-				SELL_get_all_cuts_of_revenue = yes
-				#debug_log = "Governorship trade stage 7"
-				TRADE_set_spender_shares = yes
-				#debug_log = "Governorship trade stage 8"
-				TRADE_set_income_shares = yes
-				#debug_log = "Governorship trade stage 9"
-				PURCHASE_split_all_costs = yes
-				#debug_log = "Governorship trade stage 10"
-				SELL_split_all_income = yes
-				#debug_log = "Governorship trade complete"
+				set_global_variable = {
+					name = first_time_price_setup_done
+				}
+			}
+			set_global_variable = {
+				name = debug_trade_2_done
+				days = 2
 			}
 		}
-		every_federation_country = {
-			every_governorships = { # Sell offers
-				limit = {
-					has_variable = federation_customs_union
-				}
-				#debug_log = "Governorship trade stage 1"
-				# TRADE_reset_quarterly_governorship_values = yes # Moved into debug_trade.1
-				#debug_log = "Governorship trade stage 2"
-				# TRADE_set_internal_trade_scope = yes # Moved into debug_trade.1 so that it can be used in the pre-trade effects
-				#debug_log = "Governorship trade stage 3"
-				SELL_declare_all_available = yes
-				# Save the total amount available as a var
-			}
-		}
-		every_federation_country = {
-			every_governorships = { # Purchase orders
-				limit = {
-					has_variable = federation_customs_union
-				}
-				
-				#debug_log = "Governorship trade stage 4"
-				PURCHASE_make_internal_shopping_list = yes
-			}
-			every_governorships = { # Invoices
-				limit = {
-					has_variable = federation_customs_union
-				}
-				#debug_log = "Governorship trade stage 5"
-				SELL_calculate_all_revenue_cut_percentages = yes
-				#debug_log = "Governorship trade stage 6"
-				SELL_get_all_cuts_of_revenue = yes
-				#debug_log = "Governorship trade stage 7"
-				TRADE_set_spender_shares = yes
-				#debug_log = "Governorship trade stage 8"
-				TRADE_set_income_shares = yes
-				#debug_log = "Governorship trade stage 9"
-				PURCHASE_split_all_costs = yes
-				#debug_log = "Governorship trade stage 10"
-				SELL_split_all_income = yes
-				#debug_log = "Governorship trade complete"
-			}
-		}
-		debug_log = "Finished debug_trade.2"
 	}
 
-	option = {
-		name = "TEST"
-	}
 }
 
 #debug_trade.3 = { # Declare external available & update trade prices
@@ -187,6 +837,83 @@ debug_trade.2 = { # Quarterly internal trade simulation
 	
 #}
 
+debug_trade.5 = { # Quarterly internal trade simulation, non test version
+	type = country_event
+	title = "TEST"
+	desc = "TEST"
+	picture = aqueducts
+
+	immediate = {
+		debug_log = "Starting debug_trade.2"
+		TRADE_update_all_global_base_prices = yes # 201
+		#TRADE_update_all_TZ_local_prices = yes #202
+		TRADE_reset_internal_pools = yes #203
+		every_internal_trade_viable_country = {
+			every_governorships = { # Sell offers
+				limit = {
+					# NOT = { has_variable = federation_customs_union }
+					always = yes
+				}
+				SELL_declare_all_internal_available = yes # 204
+			}
+		}
+		every_internal_trade_viable_country = {
+			every_governorships = { # Purchase orders
+				limit = {
+					# NOT = { has_variable = federation_customs_union }
+					always = yes
+				}
+				PURCHASE_make_internal_shopping_list = yes # 205
+
+			}
+			every_governorships = { # Invoices
+				limit = {
+					# NOT = { has_variable = federation_customs_union }
+					always = yes
+				}
+				SELL_calculate_all_internal_revenue_cut_percentages = yes # 206
+				SELL_get_all_internal_cuts_of_revenue = yes # 207
+				TRADE_set_spender_shares = yes # 208
+				TRADE_set_income_shares = yes # 209
+				PURCHASE_split_all_costs = yes # 210
+				SELL_split_all_income = yes # 211
+			}
+		}
+		every_federation_country = {
+			every_governorships = { # Sell offers
+				limit = {
+					has_variable = federation_customs_union
+				}
+				SELL_declare_all_internal_available = yes # 212
+			}
+		}
+		every_federation_country = {
+			every_governorships = { # Purchase orders
+				limit = {
+					has_variable = federation_customs_union
+				}
+				PURCHASE_make_internal_shopping_list = yes # 213
+			}
+			every_governorships = { # Invoices
+				limit = {
+					has_variable = federation_customs_union
+				}
+				SELL_calculate_all_internal_revenue_cut_percentages = yes # 214
+				SELL_get_all_internal_cuts_of_revenue = yes # 215
+				TRADE_set_spender_shares = yes # 216
+				TRADE_set_income_shares = yes # 217
+				PURCHASE_split_all_costs = yes # 218
+				SELL_split_all_income = yes # 219
+			}
+		}
+		debug_log = "Finished debug_trade.2"
+	}
+
+	option = {
+		name = "TEST"
+	}
+}
+
 debug_trade.3 = {
 	type = country_event
 	title = "TEST"
@@ -196,6 +923,52 @@ debug_trade.3 = {
 	immediate = {
 		every_in_list = {
 			variable = governorships_in_atlantic_seaboard_tradezone
+			add_treasury = 100
+		}
+	}
+
+	option = {
+		name = "TEST"
+	}
+}
+
+debug_trade.4 = { # Trade setup, non-test version
+	type = country_event
+	title = "TEST"
+	desc = "TEST"
+	picture = aqueducts
+
+	immediate = {
+		#MOVEMENT_get_TZ_distances = yes # Commented out for now - needs fixing, svalues are improperly named.
+		TRADE_reset_all_tradegoods_TZ_internal_rankings = yes
+		#TRADE_prepare_quarterly_values = yes
+		TRADE_save_connection_time_values = yes
+		every_country = {
+			every_governorships = {
+				TRADE_reset_purchase_order_tender_completions = yes
+				TRADE_set_internal_trade_scope = yes # Repeats an effect run by oa_economy_setup, needs to be run quarterly after that
+				TRADE_update_governorship_TZs = yes
+				TRADE_setup_internal_trade_cuts = yes
+				TRADE_reset_quarterly_governorship_values = yes # Not actually obsolete - this deals with governorship scope, while TRADE_reset_quarterly_values deals with global level
+			}
+			TRADE_setup_tax_rates = yes
+		}
+	}
+
+	option = {
+		name = "TEST"
+	}
+}
+
+debug_trade.555 = { # Test size of list of internal TZs
+	type = country_event
+	title = "TEST"
+	desc = "TEST"
+	picture = aqueducts
+
+	immediate = {
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			add_treasury = 100
 		}
 	}

@@ -54,6 +54,8 @@ PixelShader =
 			{
 				float Alpha = CalcAlphaDistanceField( FontAtlas, Input.TexCoord );
 				float3 Color = float3( 0.0f, 0.0f, 0.0f );
+				float3 FlatmapColor = Color; // Pre effects color
+
 				Color = ApplyFogOfWar( Color, Input.WorldSpacePos, FogOfWarAlpha );
 
 				float vFogFactor = min(CalculateDistanceFogFactor( Input.WorldSpacePos ),0.6);
@@ -65,6 +67,10 @@ PixelShader =
 
 				float AdjustedAlpha = 0.97;
 				AdjustedAlpha *= SKY_IsCameraTilted() ? 0.0 : AdjustedAlpha;
+
+				// Flatmap color
+				Color = lerp( Color, FlatmapColor, FlatMapLerp);
+
 				return float4( Color, Alpha * AdjustedAlpha );
 			}
 		]]
@@ -88,9 +94,11 @@ RasterizerState RasterizerState
 DepthStencilState DepthStencilState
 {
 	DepthEnable = no
-	StencilEnable = yes
-	FrontStencilFunc = not_equal
-	StencilRef = 1
+	# MOD
+	# StencilEnable = yes
+	# FrontStencilFunc = not_equal
+	# StencilRef = 1
+	# END MOD
 }
 
 

@@ -1,50 +1,44 @@
-﻿# Svalues containing the demand calculations for every type of good
+﻿#### NOTE:
+#### Demand svalues for food and luxuries should be the base value, unless the first demand calculation has been done, which adjusts demand for certain goods based on prices. The svalue should still be used, and an if statement placed therein that checks for whether the first demand calculation has been done.
+
+
+# Svalues containing the demand calculations for every type of good
 
 # 0.1 is the default amount that is sufficient for 1 pop for 1 quarter
 
 # Demand levels
 
 DEMAND_tiny = {
-	value = 0.05
-}
-
-DEMAND_small = {
 	value = 0.1
 }
 
-DEMAND_medium = {
+DEMAND_small = {
 	value = 0.25
 }
 
-DEMAND_large = {
+DEMAND_medium = {
 	value = 0.5
 }
 
-DEMAND_huge = {
+DEMAND_large = {
 	value = 0.75
+}
+
+DEMAND_huge = {
+	value = 1
 }
 
 # Base levels for categories
 
-DEMAND_essentials = {
-	value = governorship_population
-	multiply = DEMAND_small
-}
+# - Obsolete for now
 
-DEMAND_luxury_goods = {
+DEMAND_essentials = {
 	value = governorship_population
 	multiply = DEMAND_tiny
 }
 
-DEMAND_business_goods = {
-	value = governorship_population
-	multiply = DEMAND_small
-}
-
-DEMAND_military_goods = {
-	value = governorship_population
-	multiply = DEMAND_small
-}
+# TODO: Consumer demand should be modified by governorship average industrialisation, as industrialisation represents the amount of people not in subistence living.
+# Average industrialisation should also modify the amount offered up to trade vs the amount consumed locally
 
 # Malus levels. If essential, simply do not add a min value for the malus.
 
@@ -60,12 +54,19 @@ deficit_malus_small = {
 	value = 0.75 # This good provides a minor bonus for the demanding industry
 }
 
+# Food price mean absolute deviation, used in PRICE_set_food_mean_normalised_price to compare a right-side svalue to the individual food types' prices from the mean
+
+svalue_PRICE_food_MAD = {
+	# Scope: Trade center province
+	value = var:PRICE_food_MAD
+}
+
+
 ### Governorship level
 
 #******************************************************
 #*                        Grain                       *
 #******************************************************
-
 
 DEMAND_grain_from_pops = {
 	value = DEMAND_essentials
@@ -97,10 +98,10 @@ DEMAND_grain_industry_alcohol_malus = {
 	min = deficit_malus_large
 }
 
-DEMAND_grain = { # Total
-	value = DEMAND_grain_from_pops
-	add = DEMAND_grain_from_industry_alcohol
-}
+#DEMAND_grain = { # Total
+#	value = DEMAND_grain_from_pops
+#	add = DEMAND_grain_from_industry_alcohol
+#}
 
 DEMAND_grain_weighted = { # This is how we weight the demand for purchase orders of certain goods over others.
 	value = DEMAND_grain
@@ -114,7 +115,7 @@ DEMAND_grain_weighted = { # This is how we weight the demand for purchase orders
 
 DEMAND_mediterranean_fruit_from_pops = {
 	value = governorship_population
-	multiply = DEMAND_small
+	multiply = DEMAND_tiny
 }
 
 #----------------------------------
@@ -143,10 +144,10 @@ DEMAND_mediterranean_fruit_industry_alcohol_malus = {
 	min = deficit_malus_large
 }
 
-DEMAND_mediterranean_fruit = { # Total
-	value = DEMAND_mediterranean_fruit_from_pops
-	add = DEMAND_mediterranean_fruit_from_industry_alcohol
-}
+#DEMAND_mediterranean_fruit = { # Total
+#	value = DEMAND_mediterranean_fruit_from_pops
+#	add = DEMAND_mediterranean_fruit_from_industry_alcohol
+#}
 
 #******************************************************
 #*                        Glass                       *
@@ -183,33 +184,7 @@ DEMAND_glass_industry_alcohol_malus = {
 	min = deficit_malus_small
 }
 
-DEMAND_glass = { # Total
-	value = DEMAND_glass_from_pops
-	add = DEMAND_glass_from_industry_alcohol
-}
 
-## PLACEHOLDERS
-#DEMAND_grain = { # Total
-#	value = 10 # placeholder
-#}
-DEMAND_fish = { # Total
-	value = DEMAND_essentials # placeholder
-}
-DEMAND_livestock = { # Total
-	value = DEMAND_essentials # placeholder
-}
-DEMAND_tropical_fruit = { # Total
-	value = DEMAND_essentials # placeholder
-}
-#DEMAND_mediterranean_fruit = { # Total
-#	value = 10 # placeholder
-#}
-DEMAND_temperate_fruit = { # Total
-	value = DEMAND_essentials # placeholder
-}
-DEMAND_processed_foods = { # Total
-	value = 10 # placeholder
-}
 DEMAND_clothing = { # Total
 	value = 10 # placeholder
 }
@@ -225,39 +200,7 @@ DEMAND_coal = { # Total
 DEMAND_whales = { # Total
 	value = 10 # placeholder
 }
-DEMAND_alcohol = { # Total
-	value = 10 # placeholder
-}
-DEMAND_gems = { # Total
-	value = 10 # placeholder
-}
-DEMAND_opium = { # Total
-	value = 10 # placeholder
-}
-DEMAND_tobacco = { # Total
-	value = 10 # placeholder
-}
-DEMAND_chocolate = { # Total
-	value = 10 # placeholder
-}
-DEMAND_coffee = { # Total
-	value = 10 # placeholder
-}
-DEMAND_tea = { # Total
-	value = 10 # placeholder
-}
-DEMAND_spices = { # Total
-	value = 10 # placeholder
-}
-DEMAND_sugar = { # Total
-	value = 10 # placeholder
-}
-DEMAND_luxury_clothing = { # Total
-	value = 10 # placeholder
-}
-DEMAND_luxury_furniture = { # Total
-	value = 10 # placeholder
-}
+
 #DEMAND_glass = { # Total
 #	value = 10 # placeholder
 #}
@@ -371,4 +314,723 @@ DEMAND_late_artillery = { # Total
 }
 DEMAND_rare_alloys = { # Total
 	value = 10 # placeholder
+}
+
+TRADE_governorship_trade_capacity_negative = { # Used as the inverse cap for importing rather than exporting
+	value = TRADE_governorship_trade_capacity
+	multiply = -1
+}
+
+## Demand difference for export values
+# Applies max of trade infrastructure capacity to the demand difference
+# Represents how much of a good can be physically imported or exported
+
+DEMAND_difference_infrastructure_capped_grain = {
+	value = DEMAND_difference_grain
+	if = {
+		limit = {
+			DEMAND_difference_grain > 0
+		}
+		subtract = DEMAND_consumer_grain
+	}
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_fish = {
+	value = DEMAND_difference_fish
+	if = {
+		limit = {
+			DEMAND_difference_fish > 0
+		}
+		subtract = DEMAND_consumer_fish
+	}
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_livestock = {
+	value = DEMAND_difference_livestock
+	if = {
+		limit = {
+			DEMAND_difference_livestock > 0
+		}
+		subtract = DEMAND_consumer_livestock
+	}
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_vegetables = {
+	value = DEMAND_difference_vegetables
+	if = {
+		limit = {
+			DEMAND_difference_vegetables > 0
+		}
+		subtract = DEMAND_consumer_vegetables
+	}
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_tropical_fruit = {
+	value = DEMAND_difference_tropical_fruit
+	if = {
+		limit = {
+			DEMAND_difference_tropical_fruit > 0
+		}
+		subtract = DEMAND_consumer_tropical_fruit
+	}
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_mediterranean_fruit = {
+	value = DEMAND_difference_mediterranean_fruit
+	if = {
+		limit = {
+			DEMAND_difference_mediterranean_fruit > 0
+		}
+		subtract = DEMAND_consumer_mediterranean_fruit
+	}
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_temperate_fruit = {
+	value = DEMAND_difference_temperate_fruit
+	if = {
+		limit = {
+			DEMAND_difference_temperate_fruit > 0
+		}
+		subtract = DEMAND_consumer_temperate_fruit
+	}
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_processed_foods = {
+	value = DEMAND_difference_processed_foods
+	if = {
+		limit = {
+			DEMAND_difference_processed_foods > 0
+		}
+		subtract = DEMAND_consumer_processed_foods
+	}
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_clothing = {
+	value = DEMAND_difference_clothing
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_furniture = {
+	value = DEMAND_difference_furniture
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_pharmaceuticals = {
+	value = DEMAND_difference_pharmaceuticals
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_coal = {
+	value = DEMAND_difference_coal
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_whales = {
+	value = DEMAND_difference_whales
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_alcohol = {
+	value = DEMAND_difference_alcohol
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_gems = {
+	value = DEMAND_difference_gems
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_opium = {
+	value = DEMAND_difference_opium
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_tobacco = {
+	value = DEMAND_difference_tobacco
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_chocolate = {
+	value = DEMAND_difference_chocolate
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_coffee = {
+	value = DEMAND_difference_coffee
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_tea = {
+	value = DEMAND_difference_tea
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_spices = {
+	value = DEMAND_difference_spices
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_sugar = {
+	value = DEMAND_difference_sugar
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_luxury_clothing = {
+	value = DEMAND_difference_luxury_clothing
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_luxury_furniture = {
+	value = DEMAND_difference_luxury_furniture
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_glass = {
+	value = DEMAND_difference_glass
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_motors = {
+	value = DEMAND_difference_motors
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_fur = {
+	value = DEMAND_difference_fur
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_industrial_fibres = {
+	value = DEMAND_difference_industrial_fibres
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_textile_fibres = {
+	value = DEMAND_difference_textile_fibres
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_wool = {
+	value = DEMAND_difference_wool
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_silk = {
+	value = DEMAND_difference_silk
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_wood = {
+	value = DEMAND_difference_wood
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_stone = {
+	value = DEMAND_difference_stone
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_sulphur = {
+	value = DEMAND_difference_sulphur
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_peat = {
+	value = DEMAND_difference_peat
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_tin = {
+	value = DEMAND_difference_tin
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_inorganic_compounds = {
+	value = DEMAND_difference_inorganic_compounds
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_copper = {
+	value = DEMAND_difference_copper
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_iron = {
+	value = DEMAND_difference_iron
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_gold = {
+	value = DEMAND_difference_gold
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_silver = {
+	value = DEMAND_difference_silver
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_dye = {
+	value = DEMAND_difference_dye
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_lead = {
+	value = DEMAND_difference_lead
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_oil = {
+	value = DEMAND_difference_oil
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_hardwood = {
+	value = DEMAND_difference_hardwood
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_rubber = {
+	value = DEMAND_difference_rubber
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_salt = {
+	value = DEMAND_difference_salt
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_electronics = {
+	value = DEMAND_difference_electronics
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_construction_materials = {
+	value = DEMAND_difference_construction_materials
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_steel = {
+	value = DEMAND_difference_steel
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_bronze = {
+	value = DEMAND_difference_bronze
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_machine_parts = {
+	value = DEMAND_difference_machine_parts
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_chemicals = {
+	value = DEMAND_difference_chemicals
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_naval_supplies = {
+	value = DEMAND_difference_naval_supplies
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_steel_ships = {
+	value = DEMAND_difference_steel_ships
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_wooden_ships = {
+	value = DEMAND_difference_wooden_ships
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_petrochemicals = {
+	value = DEMAND_difference_petrochemicals
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_early_munitions = {
+	value = DEMAND_difference_early_munitions
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_late_munitions = {
+	value = DEMAND_difference_late_munitions
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_early_artillery = {
+	value = DEMAND_difference_early_artillery
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+DEMAND_difference_infrastructure_capped_late_artillery = {
+	value = DEMAND_difference_late_artillery
+	max = TRADE_governorship_trade_capacity
+	min = TRADE_governorship_trade_capacity_negative
+}
+
+## Demand difference values
+# Production minus demand, showing either surplus or deficit
+
+DEMAND_difference_grain = {
+	value = GOODS_governorship_grain_produced
+	if = {
+		limit = { has_global_variable = first_time_price_setup_done }
+		subtract = DEMAND_actual_grain
+	}
+	else = {
+		subtract = DEMAND_grain
+	}
+}
+DEMAND_difference_fish = {
+	value = GOODS_governorship_fish_produced
+	if = {
+		limit = { has_global_variable = first_time_price_setup_done }
+		subtract = DEMAND_actual_fish
+	}
+	else = {
+		subtract = DEMAND_fish
+	}
+}
+DEMAND_difference_livestock = {
+	value = GOODS_governorship_livestock_produced
+	if = {
+		limit = { has_global_variable = first_time_price_setup_done }
+		subtract = DEMAND_actual_livestock
+	}
+	else = {
+		subtract = DEMAND_livestock
+	}
+}
+DEMAND_difference_tropical_fruit = {
+	value = GOODS_governorship_tropical_fruit_produced
+	if = {
+		limit = { has_global_variable = first_time_price_setup_done }
+		subtract = DEMAND_actual_tropical_fruit
+	}
+	else = {
+		subtract = DEMAND_tropical_fruit
+	}
+}
+DEMAND_difference_mediterranean_fruit = {
+	value = GOODS_governorship_mediterranean_fruit_produced
+	if = {
+		limit = { has_global_variable = first_time_price_setup_done }
+		subtract = DEMAND_actual_mediterranean_fruit
+	}
+	else = {
+		subtract = DEMAND_mediterranean_fruit
+	}
+}
+DEMAND_difference_temperate_fruit = {
+	value = GOODS_governorship_temperate_fruit_produced
+	if = {
+		limit = { has_global_variable = first_time_price_setup_done }
+		subtract = DEMAND_actual_temperate_fruit
+	}
+	else = {
+		subtract = DEMAND_temperate_fruit
+	}
+}
+DEMAND_difference_vegetables = {
+	value = GOODS_governorship_vegetables_produced
+	if = {
+		limit = { has_global_variable = first_time_price_setup_done }
+		subtract = DEMAND_actual_vegetables
+	}
+	else = {
+		subtract = DEMAND_vegetables
+	}
+}
+DEMAND_difference_processed_foods = {
+	value = GOODS_governorship_processed_foods_produced
+	if = {
+		limit = { has_global_variable = first_time_price_setup_done }
+		subtract = DEMAND_actual_processed_foods
+	}
+	else = {
+		subtract = DEMAND_processed_foods
+	}
+}
+DEMAND_difference_clothing = {
+	value = GOODS_governorship_clothing_produced
+	subtract = DEMAND_clothing
+}
+DEMAND_difference_furniture = {
+	value = GOODS_governorship_furniture_produced
+	subtract = DEMAND_furniture
+}
+DEMAND_difference_pharmaceuticals = {
+	value = GOODS_governorship_pharmaceuticals_produced
+	subtract = DEMAND_pharmaceuticals
+}
+DEMAND_difference_coal = {
+	value = GOODS_governorship_coal_produced
+	subtract = DEMAND_coal
+}
+DEMAND_difference_whales = {
+	value = GOODS_governorship_whales_produced
+	subtract = DEMAND_whales
+}
+DEMAND_difference_alcohol = {
+	value = GOODS_governorship_alcohol_produced
+	subtract = DEMAND_alcohol
+}
+DEMAND_difference_gems = {
+	value = GOODS_governorship_gems_produced
+	subtract = DEMAND_gems
+}
+DEMAND_difference_opium = {
+	value = GOODS_governorship_opium_produced
+	subtract = DEMAND_opium
+}
+DEMAND_difference_tobacco = {
+	value = GOODS_governorship_tobacco_produced
+	subtract = DEMAND_tobacco
+}
+DEMAND_difference_chocolate = {
+	value = GOODS_governorship_chocolate_produced
+	subtract = DEMAND_chocolate
+}
+DEMAND_difference_coffee = {
+	value = GOODS_governorship_coffee_produced
+	subtract = DEMAND_coffee
+}
+DEMAND_difference_tea = {
+	value = GOODS_governorship_tea_produced
+	subtract = DEMAND_tea
+}
+DEMAND_difference_spices = {
+	value = GOODS_governorship_spices_produced
+	subtract = DEMAND_spices
+}
+DEMAND_difference_sugar = {
+	value = GOODS_governorship_sugar_produced
+	subtract = DEMAND_sugar
+}
+DEMAND_difference_luxury_clothing = {
+	value = GOODS_governorship_luxury_clothing_produced
+	subtract = DEMAND_luxury_clothing
+}
+DEMAND_difference_luxury_furniture = {
+	value = GOODS_governorship_luxury_furniture_produced
+	subtract = DEMAND_luxury_furniture
+}
+DEMAND_difference_glass = {
+	value = GOODS_governorship_glass_produced
+	subtract = DEMAND_glass
+}
+DEMAND_difference_motors = {
+	value = GOODS_governorship_motors_produced
+	subtract = DEMAND_motors
+}
+DEMAND_difference_fur = {
+	value = GOODS_governorship_fur_produced
+	subtract = DEMAND_fur
+}
+DEMAND_difference_industrial_fibres = {
+	value = GOODS_governorship_industrial_fibres_produced
+	subtract = DEMAND_industrial_fibres
+}
+DEMAND_difference_textile_fibres = {
+	value = GOODS_governorship_textile_fibres_produced
+	subtract = DEMAND_textile_fibres
+}
+DEMAND_difference_wool = {
+	value = GOODS_governorship_wool_produced
+	subtract = DEMAND_wool
+}
+DEMAND_difference_silk = {
+	value = GOODS_governorship_silk_produced
+	subtract = DEMAND_silk
+}
+DEMAND_difference_wood = {
+	value = GOODS_governorship_wood_produced
+	subtract = DEMAND_wood
+}
+DEMAND_difference_stone = {
+	value = GOODS_governorship_stone_produced
+	subtract = DEMAND_stone
+}
+DEMAND_difference_sulphur = {
+	value = GOODS_governorship_sulphur_produced
+	subtract = DEMAND_sulphur
+}
+DEMAND_difference_peat = {
+	value = GOODS_governorship_peat_produced
+	subtract = DEMAND_peat
+}
+DEMAND_difference_tin = {
+	value = GOODS_governorship_tin_produced
+	subtract = DEMAND_tin
+}
+DEMAND_difference_inorganic_compounds = {
+	value = GOODS_governorship_inorganic_compounds_produced
+	subtract = DEMAND_inorganic_compounds
+}
+DEMAND_difference_copper = {
+	value = GOODS_governorship_copper_produced
+	subtract = DEMAND_copper
+}
+DEMAND_difference_iron = {
+	value = GOODS_governorship_iron_produced
+	subtract = DEMAND_iron
+}
+DEMAND_difference_gold = {
+	value = GOODS_governorship_gold_produced
+	subtract = DEMAND_gold
+}
+DEMAND_difference_silver = {
+	value = GOODS_governorship_silver_produced
+	subtract = DEMAND_silver
+}
+DEMAND_difference_dye = {
+	value = GOODS_governorship_dye_produced
+	subtract = DEMAND_dye
+}
+DEMAND_difference_lead = {
+	value = GOODS_governorship_lead_produced
+	subtract = DEMAND_lead
+}
+DEMAND_difference_oil = {
+	value = GOODS_governorship_oil_produced
+	subtract = DEMAND_oil
+}
+DEMAND_difference_hardwood = {
+	value = GOODS_governorship_hardwood_produced
+	subtract = DEMAND_hardwood
+}
+DEMAND_difference_rubber = {
+	value = GOODS_governorship_rubber_produced
+	subtract = DEMAND_rubber
+}
+DEMAND_difference_salt = {
+	value = GOODS_governorship_salt_produced
+	subtract = DEMAND_salt
+}
+DEMAND_difference_electronics = {
+	value = GOODS_governorship_electronics_produced
+	subtract = DEMAND_electronics
+}
+DEMAND_difference_construction_materials = {
+	value = GOODS_governorship_construction_materials_produced
+	subtract = DEMAND_construction_materials
+}
+DEMAND_difference_steel = {
+	value = GOODS_governorship_steel_produced
+	subtract = DEMAND_steel
+}
+DEMAND_difference_bronze = {
+	value = GOODS_governorship_bronze_produced
+	subtract = DEMAND_bronze
+}
+DEMAND_difference_machine_parts = {
+	value = GOODS_governorship_machine_parts_produced
+	subtract = DEMAND_machine_parts
+}
+DEMAND_difference_chemicals = {
+	value = GOODS_governorship_chemicals_produced
+	subtract = DEMAND_chemicals
+}
+DEMAND_difference_naval_supplies = {
+	value = GOODS_governorship_naval_supplies_produced
+	subtract = DEMAND_naval_supplies
+}
+DEMAND_difference_steel_ships = {
+	value = GOODS_governorship_steel_ships_produced
+	subtract = DEMAND_steel_ships
+}
+DEMAND_difference_wooden_ships = {
+	value = GOODS_governorship_wooden_ships_produced
+	subtract = DEMAND_wooden_ships
+}
+DEMAND_difference_petrochemicals = {
+	value = GOODS_governorship_petrochemicals_produced
+	subtract = DEMAND_petrochemicals
+}
+DEMAND_difference_early_munitions = {
+	value = GOODS_governorship_early_munitions_produced
+	subtract = DEMAND_early_munitions
+}
+DEMAND_difference_late_munitions = {
+	value = GOODS_governorship_late_munitions_produced
+	subtract = DEMAND_late_munitions
+}
+DEMAND_difference_early_artillery = {
+	value = GOODS_governorship_early_artillery_produced
+	subtract = DEMAND_early_artillery
+}
+DEMAND_difference_late_artillery = {
+	value = GOODS_governorship_late_artillery_produced
+	subtract = DEMAND_late_artillery
 }

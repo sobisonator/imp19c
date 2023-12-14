@@ -354,16 +354,109 @@ PURCHASE_check_shopping_internal = {
 		PURCHASE_set_order_size = {
 			tradegood = $tradegood$
 		}
-
+		# If the preferred supplier for the goods is external, and internal trade is not preferred by law, then go external first.
+		#if = {
+		#	limit = {
+		#		NOT = { var:preferred_supplier = var:internal_trade_scope }
+		#	}
+		#}
 		if = {
 			limit = {
-				NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
+				var:l_order_size > 0
 			}
-			PURCHASE_get_preferred_tradezone_internal = {
+			if = {
+				limit = {
+					NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
+				}
+				PURCHASE_get_preferred_tradezone_internal = {
+					tradegood = $tradegood$
+					order_size = scope:purchaser_governorship.var:l_order_size
+				} # Creates a set of variables in the trade center
+			}
+			PURCHASE_order_internal = {
 				tradegood = $tradegood$
 				order_size = scope:purchaser_governorship.var:l_order_size
-			} # Creates a set of variables in the trade center
+				category = $category$
+			}
 		}
+	}
+
+	### END INTERNAL
+
+	# EXTERNAL
+	# If the stockpile is still not full, try to purchase externally.
+	# Reset demand diff
+	set_local_variable = {
+		name = l_demand_diff
+		value = DEMAND_$tradegood$
+	}
+	change_local_variable = {
+		name = l_demand_diff
+		subtract = var:$tradegood$_stockpile
+	}
+
+	# Returns var:l_order_size
+	PURCHASE_set_order_size = {
+		tradegood = $tradegood$
+	}
+
+	# debug_log = "About to check purchase order external trigger"
+
+	if = {
+		limit = {
+			AND = {
+				local_var:l_demand_diff > 0
+				owner = { has_variable_list = list_of_trade_partners_all_categories }
+			}
+		}
+		# debug_log = "Purchase order external triggers YES"
+		PURCHASE_order_external = {
+			tradegood = $tradegood$
+			order_size = scope:purchaser_governorship.var:l_order_size
+			category = $category$
+		}
+	}
+}
+
+PURCHASE_check_shopping_internal_pre_ranked = {
+	# Scope: governorship
+	# Function: The sole purpose of this effect is to only run the purchase order effect if there's actually demand, therefore all of its arguments are basically proxies for the purchase order effect.
+	save_scope_as = purchaser_governorship
+
+	### BEGIN INTERNAL
+
+	if = { # Only process this if the internal trade scope has any of the goods to offer.
+		limit = {
+			var:internal_trade_scope = {
+				var:$tradegood$_stockpile_total > 0
+			}
+		}
+		set_local_variable = {
+			name = l_demand_diff
+			value = DEMAND_$tradegood$ 
+		}
+		change_local_variable = {
+			name = l_demand_diff
+			subtract = var:$tradegood$_stockpile
+		}
+
+		# If the trade center for this internal tradescope tradescope has not yet ranked this good this quarter, rank it first. Otherwise, skip this step.
+		# TODO: Think of a way to check this. Set a variable unique to the internal trade scope / trade center combination. Should be easy enough...
+
+		# Returns var:l_order_size
+		PURCHASE_set_order_size = {
+			tradegood = $tradegood$
+		}
+
+		#if = {
+		#	limit = {
+		#		NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
+		#	}
+		#	PURCHASE_get_preferred_tradezone_internal = {
+		#		tradegood = $tradegood$
+		#		order_size = scope:purchaser_governorship.var:l_order_size
+		#	} # Creates a set of variables in the trade center
+		#}
 		# If the preferred supplier for the goods is external, and internal trade is not preferred by law, then go external first.
 		#if = {
 		#	limit = {

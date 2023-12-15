@@ -2006,6 +2006,10 @@ PURCHASE_transfer_goods_internally = {
 					has_variable = here_to_$tradezone$_tradezone
 				}
 			}
+			set_local_variable = {
+				name = this_spend_on_transport
+				value = var:trade_center.var:here_to_$tradezone$_tradezone
+			}
 			change_local_variable = {
 				name = this_spend
 				add = var:trade_center.var:here_to_$tradezone$_tradezone # Note: should this be re-framed as here_from_$tradezone$, so that it can account for the speed of importing being faster in one direction?
@@ -2726,20 +2730,7 @@ PURCHASE_reset_shipping_variables = {
 
 PURCHASE_update_shipping = {
 
-	# Part 1: Update shipping trafic in origin and destination tradezones
-
-	change_global_variable = {
-		name = $origin_tradezone_name$_shipping
-		add = $order_size$
-	}
-	$destination_tradezone$ = {
-		change_variable = {
-			name = TZ_shipping
-			add = $order_size$
-		}
-	}
-
-	# Part 2: Update shipping traffic in en-route locations
+	# Part 1: Update shipping traffic in en-route locations, and get the amount by which to divide the spend on transport (2, for origin and destination, + number of intermediate TZs)
 
 	if = { # 1: India <-> European Atlantic Coast
 		limit = {
@@ -3342,6 +3333,30 @@ PURCHASE_update_shipping = {
 		
 	}
 
+	# Part 1: Update shipping trafic in origin and destination tradezones
+
+	# We should assume that local_var:this_spend_on_transport exists, because it is created in the same circumstances, i.e. the purchaser and seller TZs are not the same
+
+	$origin_tradezone$ = {
+		change_variable = {
+			name = TZ_shipping
+			add = $order_size$
+		}
+		change_variable = {
+			name = TZ_shipping_income # TODO: Set up this variable along with the TZ_shipping var
+			add = local_var:this_spend_on_transport # Divided previously
+		}
+	}
+	$destination_tradezone$ = {
+		change_variable = {
+			name = TZ_shipping
+			add = $order_size$
+		}
+		change_variable = {
+			name = TZ_shipping_income # TODO: Set up this variable along with the TZ_shipping var
+			add = local_var:this_spend_on_transport # Divided previously
+		}
+	}
 
 }
 
@@ -3481,6 +3496,12 @@ PURCHASE_india_to_northern_american_atlantic_shipping = {
 }
 
 PURCHASE_india_to_european_atlantic_shipping = {
+	# 2 original provinces + 3 traversed
+	change_local_variable = {
+		name = this_spend_on_transport
+		divide = 5
+	}
+	#
 	change_global_variable = {
 		name = east_africa_shipping
 		add = $order_size$

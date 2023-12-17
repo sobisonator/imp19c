@@ -1,0 +1,60 @@
+# PIECHART UPDATE EVENTS
+# These trigger the creation of special lists that can be referenced as datamodels by the CustomPieChart GUI widget
+
+piechart_update.1 = { # Tradezone shipping power
+	type = country_event # Maybe? Unless it's executed in the province scope. To be checked
+	hidden = yes
+
+	trigger = {
+
+	}
+
+	immediate = {
+
+		every_trade_center = {
+			save_scope_as = current_TZ
+			every_country = {
+				save_scope_as = current_country
+				# Set a tracking province to be used as an item in the piechart datamodel
+				random_province = {
+					limit = {
+						OR = {
+							trigger_if = {
+								limit = {
+									has_variable = tracking_TZ_shipping_for_tag
+								}
+								var:tracking_TZ_shipping_for_tag = scope:current_country
+							}
+							NOT = {
+								has_variable = tracking_TZ_shipping_for_tag
+							}
+						}
+					}
+					save_scope_as = tracking_province
+					set_variable = {
+						name = tracking_TZ_shipping_for_tag
+						value = scope:current_country
+					}
+					set_variable = {
+						name = shipping_power_total
+						value = 0
+					}
+				}
+				# Start adding up the province shipping power
+				every_owned_province = {
+					limit = {
+						state.governorship.var:trade_center = scope:current_TZ
+						SHIPPING_province_power > 0
+					}
+					scope:tracking_province = {
+						change_variable = {
+							name = shipping_power_total
+							add = SHIPPING_province_power
+						}
+					}
+				}
+			}
+		}
+
+	}
+}

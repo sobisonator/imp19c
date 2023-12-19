@@ -2598,12 +2598,19 @@ widget = { #Unused, remove in code
 }
 
 
-### Piracy Haven Icon
+### Piracy Haven Icon - REPURPOSED IN IMP19C TO ACT AS TRADEZONE WIDGET
 widget = {
 	name = "piracy_haven_widget"
 	position = { 0 -56 }
 	widgetanchor = center
-	size = { 318 86 }
+	size = { 368 136 }
+
+	position = top
+
+	state = {
+		name = _show
+		on_start = "[ExecuteConsoleCommand('event piechart_update.1')]"
+	}
 
 	background = {
 		shaderfile = "gfx/FX/pdxgui_default.shader"
@@ -2629,35 +2636,45 @@ widget = {
 		}
 	}
 
-	# Piechart not allowed here, the script is too slow to calculate the data required to display it in the mapiconlayer. Piecharts should be reserved to windows for individual TZs
-	#CustomPiechart = {
-	#	position = { -210 -20 }
-	#	blockoverride "datamodel" {
-	#		datamodel = "[SimpleProvinceIcon.GetProvince.MakeScope.GetList('shipping_power_list')]"
-	#	}
-	#	blockoverride "slice_tooltip" {
-	#		tooltip = "custom_piechart_loc"
-	#	}
-	#	blockoverride "slice_size" {
-	#		value = "[FixedPointToFloat( Scope.GetProvince.MakeScope.GetVariable('WEALTH_national_data_value').GetValue )]"
-	#	}
-	#	blockoverride "tag_text" {
-	#		text = "Piechart!"
-	#	}
-	#}
+	CustomPiechart = {
+		position = { -260 -10 }
+		blockoverride "piechart_size_and_pos" {
+			size = { 100 100 }
+			position = { 0 0 }
+			parentanchor = vcenter
+		}
+		blockoverride "datamodel" {
+			datamodel = "[SimpleProvinceIcon.GetProvince.MakeScope.GetList('shipping_power_list')]"
+		}
+		blockoverride "slice_tooltip" {
+			tooltip = "[Scope.GetProvince.MakeScope.GetVariable('tracking_TZ_shipping_for_tag').GetCountry.GetName] controls #Y [GuiScope.SetRoot( Scope.GetProvince.MakeScope ).ScriptValue('SHIPPING_percentage_in_TZ')|%]#! of shipping here (capacity of [Scope.GetProvince.MakeScope.GetVariable('shipping_power_total').GetValue|0] shipments every quarter)."
+		}
+		blockoverride "slice_size" {
+			value = "[FixedPointToFloat( Scope.GetProvince.MakeScope.GetVariable('shipping_power_total').GetValue )]"
+		}
+		blockoverride "slice_color" {
+			color = "[Scope.GetProvince.MakeScope.GetVariable('tracking_TZ_shipping_for_tag').GetCountry.GetMapColor]"
+		}
+		blockoverride "alpha" {
+			alpha = 1
+		}
+		blockoverride "tag_text" {
+			text = ""
+		}
+	}
 	
 	
 	flowcontainer = {
 		direction = horizontal
-		position = { 54 37 }
+		position = { 120 37 }
 		spacing = 4
 		
-		#icon_and_text = {
-		#	size = { 82 0 }
-		#	blockoverride "Icon" { using = icon_population }
-		#	blockoverride "Text" { text = "[SimpleProvinceIcon.GetProvince.GetState.GetGovernorship.GetTotalPopulation]" }
-		#	tooltip = "[SimpleProvinceIcon.GetProvince.GetState.GetGovernorship.GetPopulationInfo]"
-		#}
+		icon_and_text = {
+			size = { 82 0 }
+			blockoverride "Icon" { texture = "gfx/interface/icons/menu_buttons/menu_trade.dds" }
+			blockoverride "Text" { text = "[GuiScope.SetRoot( SimpleProvinceIcon.GetProvince.GetState.GetGovernorship.MakeScope.Var('trade_center').GetProvince.MakeScope ).ScriptValue('SHIPPING_total_in_TZ')|0]" }
+			tooltip = "Total quarterly capacity for shipments in this tradezone"
+		}
 	}
 }
 

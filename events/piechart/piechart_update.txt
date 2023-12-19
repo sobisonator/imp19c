@@ -3,44 +3,79 @@
 namespace = piechart_update
 
 piechart_update.1 = { # Tradezone shipping power
-	type = country_event # Maybe? Unless it's executed in the province scope. To be checked
+	type = country_event # Executed from console
 	hidden = yes
 
 	immediate = {
+
 		if = {
 			limit = {
 				NOT = {
-					has_global_variable = TZ_piechart_update_flag
+					has_global_variable = update_TZ_shipping_flag
 				}
 			}
-			this_trade_center = { # Work on this
+			every_province = {
+				limit = {
+					has_variable = tracking_TZ_shipping_for_tag
+				}
+				remove_variable = tracking_TZ_shipping_for_tag
+				remove_variable = shipping_power_total
+				remove_variable = tracking_TZ_shipping_for_TZ
+			}
+			every_trade_center = {
+				clear_variable_list = shipping_power_list
 				save_scope_as = current_TZ
 				every_country = {
 					limit = {
-						any_province = {
-							state.governorship.var:trade_center = scope:current_TZ
+						any_owned_province = {
+							state.governorship.var:trade_center = scope:current_TZ	
 						}
 					}
 					save_scope_as = current_country
 					# Set a tracking province to be used as an item in the piechart datamodel
-
+					random_province = {
+						limit = {
+							NOT = {
+								has_variable = tracking_TZ_shipping_for_tag
+							}
+						}
+						save_scope_as = tracking_province
+						set_variable = {
+							name = tracking_TZ_shipping_for_tag
+							value = scope:current_country
+						}
+						set_variable = {
+							name = shipping_power_total
+							value = 0
+						}
+						set_variable = {
+							name = tracking_TZ_shipping_for_TZ # Save reference to the trade center province
+							value = scope:current_TZ
+						}
+					}
 					# Start adding up the province shipping power
 					every_owned_province = {
 						limit = {
 							state.governorship.var:trade_center = scope:current_TZ
-							SHIPPING_province_power > 0
 						}
-						random_province = {
+						save_scope_as = current_province
+						scope:tracking_province = {
 							change_variable = {
 								name = shipping_power_total
-								add = prev.SHIPPING_province_power
+								add = scope:current_province.SHIPPING_province_power
 							}
+						}
+					}
+					scope:current_TZ = {
+						add_to_variable_list = {
+							name = shipping_power_list
+							target = scope:tracking_province
 						}
 					}
 				}
 			}
 			set_global_variable = {
-				name = TZ_piechart_update_flag
+				name = update_TZ_shipping_flag
 				days = 1
 			}
 		}

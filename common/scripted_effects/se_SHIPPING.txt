@@ -81,3 +81,109 @@ SHIPPING_setup_trade_chokepoints_TZ = {
 		set_variable = trade_chokepoint
 	}
 }
+
+SHIPPING_update_TZ_overview_piecharts = {
+	# Scope: country (any)
+	# Function: Create the data structure necessary to populate a CustomPieChart widget for trade power
+	# Also make an ordered list in every TZ of provinces with over 10 trade power ordered by shipping power
+	every_province = {
+		limit = {
+			has_variable = tracking_TZ_shipping_for_tag
+		}
+		remove_variable = tracking_TZ_shipping_for_tag
+		remove_variable = shipping_power_total
+		remove_variable = tracking_TZ_shipping_for_TZ
+	}
+	every_trade_center = {
+		clear_variable_list = shipping_power_list
+		clear_variable_list = top_shipping_provinces_ordered
+		clear_variable_list = top_shipping_provinces
+		save_scope_as = current_TZ
+		every_country = {
+			limit = {
+				any_owned_province = {
+					state.governorship.var:trade_center = scope:current_TZ	
+				}
+			}
+			save_scope_as = current_country
+			# Set a tracking province to be used as an item in the piechart datamodel
+			random_province = {
+				limit = {
+					NOT = {
+						has_variable = tracking_TZ_shipping_for_tag
+					}
+				}
+				save_scope_as = tracking_province
+				set_variable = {
+					name = tracking_TZ_shipping_for_tag
+					value = scope:current_country
+				}
+				set_variable = {
+					name = shipping_power_total
+					value = 0
+				}
+				set_variable = {
+					name = tracking_TZ_shipping_for_TZ # Save reference to the trade center province
+					value = scope:current_TZ
+				}
+			}
+			# Start adding up the province shipping power
+			every_owned_province = {
+				limit = {
+					state.governorship.var:trade_center = scope:current_TZ
+				}
+				save_scope_as = current_province
+				scope:tracking_province = {
+					change_variable = {
+						name = shipping_power_total
+						add = scope:current_province.SHIPPING_province_power
+					}
+				}
+				if = {
+					limit = {
+						SHIPPING_province_power > 10
+					}
+					scope:current_TZ = {
+						add_to_variable_list = {
+							name = top_shipping_provinces
+							target = scope:current_province
+						}
+					}
+				}
+			}
+			scope:current_TZ = {
+				add_to_variable_list = {
+					name = shipping_power_list
+					target = scope:tracking_province
+				}
+			}
+		}
+		# Make sure the contents of top_shipping_provinces is ordered
+		ordered_in_list = {
+			variable = top_shipping_provinces
+			order_by = {
+				value = SHIPPING_province_power
+			}
+			save_scope_as = this_province
+			scope:current_TZ = {
+				add_to_variable_list = {
+					name = top_shipping_provinces_ordered
+					target = scope:this_province
+				}
+			}
+			max = 10
+			check_range_bounds = no
+		}
+	}
+	set_global_variable = {
+		name = update_TZ_shipping_flag
+		days = 1
+	}
+}
+
+SHIPPING_get_all_TZ_ordered_hubs = {
+
+
+
+
+}

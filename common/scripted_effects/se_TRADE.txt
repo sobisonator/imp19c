@@ -942,6 +942,9 @@ tradezone_setup_effect = {
 				name = pirate_haven_modifier
 				duration = -1
 			}
+			every_tradegood_complex = {
+				APPLY = TRADE_setup_import_and_export_trackers
+			}
 		}
 		# Set global variable so that the province can be scoped to by name from anywhere
 		set_global_variable = {
@@ -951,6 +954,56 @@ tradezone_setup_effect = {
 	}
 }
 
+TRADE_setup_import_and_export_trackers = {
+	# Scope: Trade center province
+	# Function: Set up a list of provinces in every TZ that contain varibles for import and export of tradegoods
+	random_province = {
+		limit = {
+			NOT = {
+				has_variable = is_TZ_tradegood_tracker
+			}
+		}
+		set_variable = is_TZ_tradegood_tracker
+		save_scope_as = tracker_province
+		set_variable = {
+			name = tradegood
+			value = flag:$tradegood$
+		}
+		set_variable = {
+			name = amt_imported
+			value = 0
+		}
+		set_variable = {
+			name = amt_exported
+			value = 0
+		}
+		scope:trade_zone_province = {
+			add_to_variable_list = {
+				name = list_of_tradegood_trackers
+				target = scope:tracker_province
+			}
+		}
+	}
+}
+
+TRADE_update_TZ_tradegood_trackers = {
+	# Scope: Country, scoping to every trade center
+	# Function: Reset the quarterly trackers to 0
+	# Called: Every quarterly trade tick
+	every_trade_center = {
+		every_in_list = {
+			variable = list_of_tradegood_trackers
+			set_variable = {
+				name = amt_imported
+				value = 0
+			}
+			set_variable = {
+				name = amt_exported
+				value = 0
+			}
+		}
+	}
+}
 
 TRADE_update_governorship_TZ_vars = {
 	# Scope: Governorship

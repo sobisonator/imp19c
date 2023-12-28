@@ -873,6 +873,10 @@ PURCHASE_get_seller_purchaser_score_internal = {
 				add = var:trade_center.var:here_to_$supplier_TZ$_tradezone
 			}
 		}
+		change_variable = {
+			name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+			multiply = -1
+		}
 	}
 
 
@@ -1933,6 +1937,21 @@ PURCHASE_transfer_goods_internally = {
 	# $local_price$ = local_price_grain, gets the local price of grain from the governorship owner's capital
 	# $internal_sold_total$ = internal_sold_total_grain, the total amount sold in the internal trade scope, used by the effect to distribute the cut of amount sold to contributing governorships
 	debug_log = "Transferring  $tradegood$  from  $tradezone$"
+	debug_log = "SCOPES BELOW."
+	debug_log_scopes = yes
+
+	var:trade_center = {
+		random_in_list = {
+			variable = list_of_tradegood_trackers
+			limit = {
+				var:tradegood = flag:$tradegood$
+			}
+			change_variable = {
+				name = amt_exported
+				add = $amount$
+			}
+		}
+	}
 
 	scope:purchaser_governorship = {
 		# ADD TO BUYER'S STOCKPILE
@@ -2523,7 +2542,8 @@ PURCHASE_order_external = {
 	# Scope: governorship
 	# Function: Buy from stockpiles in other trade scopes
 	# Called: By PURCHASE_check_shopping_internal, if PURCHASE_order_internal does not succeed in filling up the stockpile
-	debug_log = "Making an EXTERNAL purchase order for $tradegood$"
+	debug_log = "SCOPES BELOW. Making an EXTERNAL purchase order for  $tradegood$"
+	debug_log_scopes = yes
 	capital_scope.owner = {
 		if = {
 			limit = { 
@@ -2531,6 +2551,8 @@ PURCHASE_order_external = {
 			}
 			every_in_list = {
 				variable = list_of_trade_partners_all_categories
+				debug_log = "SCOPES BELOW: Checking trade partner for  $tradegood$"
+				debug_log_scopes = yes
 				capital_scope.governorship = {
 					if = {
 						limit = {
@@ -2555,6 +2577,7 @@ PURCHASE_order_external = {
 							}
 						}
 						add = capital_scope.governorship.var:1st_rank_internal_supplier_$tradegood$.var:local_price_$tradegood$
+						multiply = -1
 					}
 					# TODO: Add a way of affecting the order by the distance between scope:purchaser_governorship and the seller tradezone
 					#if = {
@@ -2566,10 +2589,14 @@ PURCHASE_order_external = {
 					#	add = scope:purchaser_governorship.var:trade_center.var:here_to_$tradezone$_tradezone
 					#}
 				}
+				max = 999
+				check_range_bounds = no
+				debug_log = "SCOPES BELOW: Attempting to order  $tradegood$ from supplier"
+				debug_log_scopes = yes
 				if = {
 					limit = { # Do only one attempt with the best ranked external trade partner
 						scope:purchaser_governorship = { 
-							NOT = { has_local_variable = external_trade_done_$tradegood$ }
+							NOT = { has_variable = external_trade_done_$tradegood$ }
 						}
 					}
 					capital_scope.governorship = { # Capital of the seller's country acts as the trader, handling the transfer on behalf of the purchaser governorship
@@ -2583,14 +2610,16 @@ PURCHASE_order_external = {
 							category = $category$
 						}
 
-						# Remove the 1st rank supplier that was used just for external trade
-						remove_variable = 1st_rank_internal_supplier_$tradegood$
 					}
 					scope:purchaser_governorship = {
-						set_local_variable = external_trade_done_$tradegood$
+						debug_log = "SCOPES BELOW. External trade done for  $tradegood$"
+						debug_log_scopes = yes
+						set_variable = {
+							name = external_trade_done_$tradegood$
+							days = 1
+						}
 					}
 				}
-
 			}
 		}
 	}
@@ -2775,6 +2804,7 @@ PURCHASE_update_shipping = {
 				}
 			}
 		}
+		debug_log = "Shipping between India and European Atlantic Coast"
 		PURCHASE_india_to_european_atlantic_shipping = {
 			order_size = $order_size$ 
 		}

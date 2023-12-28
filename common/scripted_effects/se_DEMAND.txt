@@ -415,6 +415,29 @@ DEMAND_set_demand_from_luxury = {
 	# Takes arguments:
 	# tradegood = the tradegood to calculate demand for
 	save_scope_as = luxury_demand_governorship
+	if = {
+		limit = {
+			has_variable = DEMAND_luxury_$tradegood$
+		}
+		# Rubberbanding to prevent massive leaps due to price changes, which has a domino effect on prices
+		set_variable = {
+			name = previous_tick_luxury_demand_$tradegood$_110_percent
+			value = var:DEMAND_luxury_$tradegood$
+		}
+		change_variable = {
+			name = previous_tick_luxury_demand_$tradegood$_110_percent
+			multiply = 1.1
+		}
+
+		set_variable = {
+			name = previous_tick_luxury_demand_$tradegood$_90_percent
+			value = var:DEMAND_luxury_$tradegood$
+		}
+		change_variable = {
+			name = previous_tick_luxury_demand_$tradegood$_90_percent
+			multiply = 0.9
+		}
+	}
 	set_variable = {
 		name = DEMAND_luxury_$tradegood$
 		value = 0
@@ -477,6 +500,13 @@ DEMAND_set_demand_from_luxury = {
 	#	name = DEMAND_luxury_$tradegood$
 	#	multiply = var:DEMAND_fashionability_$tradegood$
 	#}
+	FUNC_clamp_variable = {
+		max_type = var:
+		max = previous_tick_luxury_demand_$tradegood$_110_percent
+		min_type = var:
+		min = previous_tick_luxury_demand_$tradegood$_90_percent
+		variable = DEMAND_luxury_$tradegood$
+	}
 
 }
 

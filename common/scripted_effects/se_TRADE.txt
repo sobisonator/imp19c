@@ -966,6 +966,10 @@ TRADE_setup_import_and_export_trackers = {
 		set_variable = is_TZ_tradegood_tracker
 		save_scope_as = tracker_province
 		set_variable = {
+			name = tracker_for_TZ
+			value = scope:trade_zone_province
+		}
+		set_variable = {
 			name = tradegood
 			value = flag:$tradegood$
 		}
@@ -975,6 +979,10 @@ TRADE_setup_import_and_export_trackers = {
 		}
 		set_variable = {
 			name = amt_exported
+			value = 0
+		}
+		set_variable = {
+			name = price
 			value = 0
 		}
 		scope:trade_zone_province = {
@@ -991,6 +999,7 @@ TRADE_update_TZ_tradegood_trackers = {
 	# Function: Reset the quarterly trackers to 0
 	# Called: Every quarterly trade tick
 	every_trade_center = {
+		save_scope_as = root_TZ
 		every_in_list = {
 			variable = list_of_tradegood_trackers
 			set_variable = {
@@ -1001,6 +1010,21 @@ TRADE_update_TZ_tradegood_trackers = {
 				name = amt_exported
 				value = 0
 			}
+			every_tradegood_complex = {
+				APPLY = TRADE_update_TZ_tradegood_price_tracker
+			}
+		}
+	}
+}
+
+TRADE_update_TZ_tradegood_price_tracker = {
+	if = {
+		limit = {
+			flag:$tradegood$ = var:tradegood
+		}
+		set_variable = {
+			name = price
+			value = scope:root_TZ.var:local_price_$tradegood$
 		}
 	}
 }

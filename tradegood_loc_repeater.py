@@ -2,9 +2,17 @@ def print_out_good(tradegood_name):
 	tradegood = tradegood_name
 	tradegood_caps = tradegood.upper()
 	loc = '''    text = {{
-        localization_key = tracker_price_{tradegood}
+        localization_key = tracker_price_{tradegood}_expensive
         trigger = {{
             var:tradegood = flag:{tradegood}
+            var:tracker_for_TZ.var:local_price_{tradegood} > global_mean_price_{tradegood}
+        }}
+    }}
+    text = {{
+        localization_key = tracker_price_{tradegood}_cheap
+        trigger = {{
+            var:tradegood = flag:{tradegood}
+            var:tracker_for_TZ.var:local_price_{tradegood} <= global_mean_price_{tradegood}
         }}
     }}'''.format(tradegood=tradegood)
 	print(loc)

@@ -1,0 +1,173 @@
+TRADE_setup_governorship_TZ_references = {
+	# Scope: Governorship
+	# Function: Set up a set of Province objects to contain the unique data for this governorship's trade rankings, which is designed to reduce the performance impact of tradezone ranking
+	# Called: Whenever a governorship is created, including at game start
+	if = {
+		limit = {
+			NOT = {
+				has_variable = governorship_TZ_references_done
+			}
+		}
+		save_scope_as = root_governorship
+		every_trade_center = {
+			save_scope_as = this_TZ
+			random_province = {
+				save_scope_as = TZ_reference_scope
+				limit = {
+					NOT = {
+						has_variable = is_TZ_reference
+					}
+				}
+				set_variable = is_TZ_reference
+				set_variable = {
+					name = root_governorship
+					value = scope:root_governorship
+				}
+				set_variable = {
+					name = TZ_scope
+					value = scope:this_TZ
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_setup_TZ_reference_tradegood_scores
+				}
+				scope:root_governorship = {
+					add_to_variable_list = {
+						name = list_of_TZ_references
+						target = scope:TZ_reference_scope
+					}
+				}
+			}
+		}
+	}
+}
+
+TRADE_setup_TZ_reference_tradegood_score = {
+	# Scope: Province (governorship TZ reference province)
+	# Function: Set up the variables needed for ranking a tradegood from a tradezone to the root governorship of this TZ reference province
+	# Called: By TRADE_setup_governorship_TZ_references
+	set_variable = {
+		name = $tradegood$_supplier_score_here_from_origin # Origin = the tradezone referenced in the origin scope
+		value = 0 # This needs to be set to the TZ distance 
+	}
+}
+
+PURCHASE_get_preferred_tradezone_internal = {
+	# Scope: governorship
+	# Function: Get the best value supplier of $tradegood$ in the stockpiles available in the internal trade scope
+	# This checks the names of the potential supplier tradezones; it must then hand over to the next scripted effect, PURCHASE_rank_supplier_zone_internal, to get the name of the purchasing governorship's tradezone
+	# Arguments:
+	# $tradegood$
+	# $order_size$
+	if = {
+		limit = {
+			var:internal_trade_scope = {
+				num_TZ_in_ITS > 1 # Has more than 1 tradezone to score
+			}
+		}
+		var:trade_center = { save_scope_as = purchaser_TZ_scope }
+		save_scope_as = ranking_governorship # Usually the same as purchaser governorship, except for during international trade
+
+		every_in_list
+
+		# STRUCTURE BELOW RELYING ON ITS AS THE ROOT SCOPE MAY BE OBSOLETE
+		var:internal_trade_scope = {
+			every_in_list = {
+				variable = list_of_tradezones_in_internal_trade_scope
+				debug_log = "Checking tradezone for score"
+
+				save_scope_as = this_TZ
+
+				PURCHASE_score_supplier_zone_internal = {
+					purchaser_TZ = scope:purchaser_TZ_scope
+					supplier_TZ = scope:this_TZ
+					tradegood = $tradegood$
+					order_size = $order_size$
+				}
+			}
+			ordered_in_list = {
+				variable = list_of_tradezones_in_internal_trade_scope
+				order_by = {
+					scope:purchaser_governorship = {
+						random_in_list = {
+							variable = list_of_TZ_references
+							limit = {
+								var:TZ_scope = PREV.PREV # [THIS = list item] > [PREV = purchaser governorship] > [PREV = ordered tradezone]
+							}
+							value = var:$tradegood$_supplier_score_here_from_origin
+						}
+					}
+				}
+		}
+}
+
+PURCHASE_score_supplier_zone_internal = {
+	# Scope: Trade center province
+	# Function: Takes a string substitution from TRADE_rank_supplier_zone_internal to turn the dynamically passed tradezone of the purchaser into part of the tradezone distance variable name
+
+	# Creates a score variable that is formatted like:
+	# grain_supplier_score_here_to_india_tradezone
+	# This is then used by the purchaser TZ to rank the best suppliers
+
+	# Total score is the price of the order plus cost of transport
+
+	# Steps:
+	# Add the movement cost between tradezones (0 if the same tradezone) - how to find this reasonably? We need to identify the variable for this tradezone to the originator province's tradezone. This would be easier if the movement cost variables were saved in the trade center province scopes so we could grab them right away...
+	# distance = var:here_to_$tradezone$
+	# Add the price of the tradegood in that tradezone (modified somehow to add up sensibly)
+	# (for international trade, we'll want to factor in tariff rates, but that shouldn't matter in customs unions)
+	scope:purchaser_governorship = {
+		set_variable = {
+			name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+			value = var:trade_center.var:local_price_$tradegood$
+		}
+		change_variable = {
+			name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+			multiply = $order_size$
+		}
+		if = { # If the stockpile is lower than the order size, add the difference to the score so that areas with low prices but also very little stock are not procured from, resulting in unfulfilled orders when slightly more expensive but plentiful stocks are available in the trade scope
+			limit = {
+				var:internal_trade_scope = {
+					has_variable = $tradegood$_stockpile_$supplier_TZ$_tradezone
+				}
+			}
+			debug_log = "Buying from $purchaser_TZ$ and accounting for available stockpile in  $supplier_TZ$"
+			set_local_variable = {
+				name = l_order_size_diff
+				value = $order_size$
+			}
+			change_local_variable = {
+				name = l_order_size_diff
+				subtract = var:internal_trade_scope.var:$tradegood$_stockpile_$supplier_TZ$_tradezone
+			}
+			if = {
+				limit = {
+					local_var:l_order_size_diff > 0
+				}
+				change_variable = {
+					name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+					subtract = local_var:l_order_size_diff
+				}
+			}
+		}
+		if = {
+			limit = {
+				var:trade_center = {
+					has_variable = here_to_$supplier_TZ$_tradezone
+					NOT = {
+						has_variable = is_$supplier_TZ$_tradezone
+					}
+				}
+			}
+			change_variable = {
+				name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+				add = var:trade_center.var:here_to_$supplier_TZ$_tradezone
+			}
+		}
+		change_variable = {
+			name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+			multiply = -1
+		}
+	}
+
+
+}

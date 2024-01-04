@@ -12,19 +12,19 @@ TRADE_setup_governorship_TZ_references = {
 		every_trade_center = {
 			save_scope_as = this_TZ
 			random_province = {
-				save_scope_as = TZ_reference_scope
 				limit = {
 					NOT = {
 						has_variable = is_TZ_reference
 					}
 				}
+				save_scope_as = TZ_reference_scope
 				set_variable = is_TZ_reference
 				set_variable = {
 					name = root_governorship
 					value = scope:root_governorship
 				}
 				set_variable = {
-					name = TZ_scope
+					name = this_TZ
 					value = scope:this_TZ
 				}
 				every_tradegood_complex = {
@@ -41,7 +41,7 @@ TRADE_setup_governorship_TZ_references = {
 	}
 }
 
-TRADE_setup_TZ_reference_tradegood_score = {
+TRADE_setup_governorship_TZ_reference_tradegood_score = {
 	# Scope: Province (governorship TZ reference province)
 	# Function: Set up the variables needed for ranking a tradegood from a tradezone to the root governorship of this TZ reference province
 	# Called: By TRADE_setup_governorship_TZ_references
@@ -50,6 +50,42 @@ TRADE_setup_TZ_reference_tradegood_score = {
 		value = 0 # This needs to be set to the TZ distance 
 	}
 }
+
+TRADE_setup_all_TZ_travel_time_records = {
+	every_trade_center = {
+		TRADE_setup_TZ_travel_time_records = yes
+	}
+}
+
+TRADE_setup_TZ_connection_time_records = {
+	# Scope: Province (trade center province)
+	# Function: set up province objects to record the travel time values between this tradezone and every other tradezone
+	# Called: At beginning of game (the related update effect is every trade tick)
+	save_scope_as = root_TZ
+	every_trade_center = {
+		save_scope_as = destination_TZ
+		random_province = {
+			NOT = {
+				has_variable = is_TZ_travel_time_record
+			}
+			save_scope_as = TZ_travel_time_record
+			set_variable = is_TZ_travel_time_record
+			set_variable = {
+				name = root_TZ
+				value = scope:root_TZ
+			}
+			set_variable = {
+				name = destination_TZ
+				value = scope:destination_TZ
+			}
+			set_variable = {
+				name = connection_time_destination_to_root_TZ
+				value = var:destination_TZ.var:here_to_$ROOT_TZ$_tradezone # TODO: Write a script to get the right value based on the identity of ROOT_TZ
+			}
+		}
+	}
+}
+
 
 PURCHASE_get_preferred_tradezone_internal = {
 	# Scope: governorship
@@ -67,7 +103,20 @@ PURCHASE_get_preferred_tradezone_internal = {
 		var:trade_center = { save_scope_as = purchaser_TZ_scope }
 		save_scope_as = ranking_governorship # Usually the same as purchaser governorship, except for during international trade
 
-		every_in_list
+		every_in_list = {
+			variable = list_of_TZ_references
+			limit = {
+				var:internal_trade_scope = {
+					is_target_in_variable_list = {
+						name = list_of_tradezones_in_internal_trade_scope
+						target = PREV
+					}
+				}
+			}
+			set_variable = {
+				name = $tradegood$_supplier_score_here_from_origin
+			}
+		}
 
 		# STRUCTURE BELOW RELYING ON ITS AS THE ROOT SCOPE MAY BE OBSOLETE
 		var:internal_trade_scope = {

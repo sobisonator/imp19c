@@ -1,4 +1,4 @@
-﻿
+
 #*************************************************
 #*            The Purchase Order Plan            *
 #*************************************************
@@ -373,10 +373,24 @@ PURCHASE_check_shopping_internal = {
 					order_size = scope:purchaser_governorship.var:l_order_size
 				} # Creates a set of variables in the trade center
 			}
-			PURCHASE_order_internal = {
-				tradegood = $tradegood$
-				order_size = scope:purchaser_governorship.var:l_order_size
-				category = $category$
+			set_local_variable = {
+				name = TZs_tried
+				value = 0
+			}
+			while = {
+				limit = {
+					var:l_order_size > 0
+					local_var:TZs_tried < var:internal_trade_scope.num_TZ_in_ITS
+				}
+				PURCHASE_order_internal = {
+					tradegood = $tradegood$
+					order_size = scope:purchaser_governorship.var:l_order_size
+					category = $category$
+				}
+				change_local_variable = {
+					name = TZs_tried
+					add = 1
+				}
 			}
 		}
 	}
@@ -463,14 +477,23 @@ PURCHASE_check_shopping_internal_pre_ranked = {
 		#		NOT = { var:preferred_supplier = var:internal_trade_scope }
 		#	}
 		#}
-		if = {
+		set_local_variable = {
+			name = TZs_tried
+			value = 0
+		}
+		while = {
 			limit = {
 				var:l_order_size > 0
+				local_var:TZs_tried < var:internal_trade_scope.num_TZ_in_ITS
 			}
 			PURCHASE_order_internal = {
 				tradegood = $tradegood$
 				order_size = scope:purchaser_governorship.var:l_order_size
 				category = $category$
+			}
+			change_local_variable = {
+				name = TZs_tried
+				add = 1
 			}
 		}
 	}
@@ -478,21 +501,7 @@ PURCHASE_check_shopping_internal_pre_ranked = {
 	### END INTERNAL
 
 	# EXTERNAL
-	# If the stockpile is still not full, try to purchase externally.
-	# Reset demand diff
-	set_local_variable = {
-		name = l_demand_diff
-		value = DEMAND_$tradegood$
-	}
-	change_local_variable = {
-		name = l_demand_diff
-		subtract = var:$tradegood$_stockpile
-	}
-
-	# Returns var:l_order_size
-	PURCHASE_set_order_size = {
-		tradegood = $tradegood$
-	}
+	# Order size should be above 0 already
 
 	# debug_log = "About to check purchase order external trigger"
 
@@ -1436,6 +1445,8 @@ PURCHASE_get_preferred_tradezone_internal = {
 
 }
 
+
+
 PURCHASE_get_preferred_tradezone_external = {
 	# Scope: governorship, to governorship's tradezone
 	# Function: get the best value supplier of $tradegood$ among (sus???) the purchasing country's trade partners
@@ -1807,6 +1818,12 @@ PURCHASE_transfer_if_able = {
 				change_variable = {
 					name = country_internal_total_ordered_$tradegood$ # Saves the total amount ordered - Note: not the total amount successfully purchased
 					add = $order_size$
+				}
+			}
+			scope:purchaser_governorship = {
+				change_variable = {
+					name = l_order_size
+					subtract = scope:seller_governorship.var:this_order_size
 				}
 			}
 		}

@@ -2009,9 +2009,45 @@ PURCHASE_transfer_goods_internally = {
 		}
 	}
 
-	change_local_variable = { # use the price from the seller TZ
+	change_local_variable = { # use the price from the seller TZ, marked up to the midpoint between seller and purchaser
 		name = this_spend
 		multiply = global_var:global_$tradezone$_tradezone.var:local_price_$tradegood$
+	}
+
+	if = {
+		limit = {
+			NOT = {
+				global_var:global_$tradezone$_tradezone = scope:purchaser_governorship.var:trade_center
+			}
+		}
+		# Mark up to exploit the price in the purchaser TZ
+		set_local_variable = {
+			name = price_markup
+			value = scope:purchaser_governorship.var:trade_center.var:local_price_$tradegood$
+		}
+		# If the purchaser's TZ's price is higher than the seller's
+		change_local_variable = {
+			name = price_markup
+			subtract = global_var:global_$tradezone$_tradezone.var:local_price_$tradegood$
+		}
+		if = {
+			limit = {
+				local_var:price_markup > 0
+			}
+			change_local_variable = { # meet 25% of the way between prices
+				name = price_markup
+				multiply = 0.25
+			}
+			change_local_variable = {
+				name = price_markup
+				multiply = $amount$
+			}
+		}
+
+		change_local_variable = {
+			name = this_spend
+			add = local_var:price_markup
+		}
 	}
 
 	# Update the amount sold from the seller TZ. This is used to update the price: the total demand in the seller TZ is divided by the amount sold in that TZ
@@ -2072,14 +2108,17 @@ PURCHASE_transfer_goods_internally = {
 
 		change_variable = {
 			name = governorship_this_quarter_spend_on_$category$
-			subtract = local_var:this_spend # Must be negative so it can be used with add_treasury
+			add = local_var:this_spend
 		}
 
-		owner = {
-			change_variable = {
-				name = country_internal_bought_total_$tradegood$
-				add = $amount$
-			}
+		change_variable = {
+			name = governorship_this_quarter_spend_on_$tradegood$
+			add = local_var:this_spend
+		}
+
+		change_variable = {
+			name = governorship_this_quarter_imported_$tradegood$
+			add = $amount$ # Must be negative so it can be used with add_treasury
 		}
 
 		# Mark the goods transfer as complete, so it does not repeat the order in lower ranked tradezones

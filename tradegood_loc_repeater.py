@@ -1,12 +1,13 @@
 def print_out_good(tradegood_name):
   tradegood = tradegood_name
   tradegood_caps = tradegood.upper()
-  loc = '''PROVWINDOW_GOV_{tradegood_caps}_STOCKPILE:0 "[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('GOODS_{tradegood}_stockpile')|0]"
-PROVWINDOW_GOV_{tradegood_caps}_PRODUCED_TT:0 "#T {tradegood} produced in [ProvinceWindow.GetState.GetGovernorship.GetName]#!: [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('GOODS_governorship_{tradegood}_produced')|0] \\n\\n #T Current {tradegood} demand#!: [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_{tradegood}')|0] \\n #T {tradegood} offered to market from here last quarter:#! [ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('{tradegood}_offered').GetValue|0] \\n [ProvinceWindow.GetProvince.Custom('internal_trade_scope_custom_loc_{tradegood}')] \\n\\n#T Governorship trade infrastructure capacity:#! [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('TRADE_governorship_infrastructure_capacity_svalue')|0] \\n\\n#T Price of {tradegood} here :#! £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('trade_center').GetProvince.MakeScope.Var('local_price_{tradegood}').GetValue|3] / unit\\n#T Amount spent on {tradegood} imports last quarter :#! \\n#X £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('governorship_this_quarter_spend_on_{tradegood}').GetValue|3]#!\\n    #T Of which tax:#! #X £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('governorship_quarterly_revenue_from_internal_sales_tax_{tradegood}').GetValue|3]#! #T at #![ProvinceWindow.GetProvince.GetOwner.MakeScope.Var('internal_sales_tax_rate').GetValue|%] #T tax rate #!\\n#T Amount made from {tradegood} exports last quarter :#! \\n#G £[ProvinceWindow.GetState.GetGovernorship.MakeScope.Var('local_internal_revenue_cut_{tradegood}').GetValue|3] #!"'''.format(tradegood=tradegood, tradegood_caps=tradegood.upper())
+  loc = '''PRICE_global_mean_{tradegood} = {{
+  value = global_var:global_mean_price_{tradegood}
+}}'''.format(tradegood=tradegood)
   print(loc)
 
 
-#all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]
+#all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","{tradegood}","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]
 all_categories = ["food","essential_goods","luxury_goods","business_goods","military_goods"]
 
 all_spenders = ["upper_strata","middle_strata","lower_strata","proletariat","tribesmen","indentured","slaves","the_state"]
@@ -15,7 +16,7 @@ all_goods = {
   "grain":"food",
   "fish":"food",
   "livestock":"food",
-        "vegetables":"food",
+  "vegetables":"food",
   "tropical_fruit":"food",
   "mediterranean_fruit":"food",
   "temperate_fruit":"food",

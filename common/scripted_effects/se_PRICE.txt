@@ -59,9 +59,14 @@ PRICE_update_global_mean_price = {
 }
 
 PRICE_add_to_global_mean_price_tradegood = {
-	change_global_variable = {
-		name = global_mean_price_$tradegood$
-		add = var:local_price_$tradegood$
+	if = {
+		limit = {
+			var:local_price_$tradegood$ < 1000
+		}
+		change_global_variable = {
+			name = global_mean_price_$tradegood$
+			add = var:local_price_$tradegood$
+		}
 	}
 }
 
@@ -72,6 +77,27 @@ PRICE_update_TZ_prices = {
 		}
 	}
 	PRICE_update_all_global_mean_prices = yes
+	every_trade_center = {
+		every_tradegood_complex = {
+			APPLY = PRICE_normalise_price
+		}
+	}
+}
+
+PRICE_normalise_price = {
+	if = {
+		limit = {
+			var:local_price_$tradegood$ > 1000
+		}
+		change_variable = {
+			name = local_price_$tradegood$
+			multiply = 0.0001
+		}
+		change_variable = {
+			name = local_price_$tradegood$
+			add = global_var:global_mean_price_$tradegood$
+		}
+	}
 }
 
 PRICE_update_price_TZ = {
@@ -104,6 +130,19 @@ PRICE_update_price_TZ = {
 
 	}
 
+	# Account for exports
+	random_in_list = {
+		variable = list_of_tradegood_trackers
+		limit = {
+			var:tradegood = flag:$tradegood$
+		}
+		save_scope_as = this_tradegood
+	}
+	change_variable = {
+		name = total_demand_TZ_$tradegood$
+		add = scope:this_tradegood.var:amt_exported
+	}
+
 	set_variable = {
 		name = local_price_$tradegood$
 		value = var:total_demand_TZ_$tradegood$
@@ -113,20 +152,16 @@ PRICE_update_price_TZ = {
 		divide = var:total_supply_TZ_$tradegood$
 	}
 
+	# Finally, scale down to 10% of the above-calculated value, to fit in with the general scale of wealth in the game
+	# Don't do this for outliers
 	if = {
 		limit = {
-			var:local_price_$tradegood$ > 10000
+			var:local_price_$tradegood$ < 1000
 		}
 		change_variable = {
 			name = local_price_$tradegood$
-			multiply = 0.005
+			multiply = 0.1
 		}
-	}
-
-	# Finally, scale down to 10% of the above-calculated value, to fit in with the general scale of wealth in the game
-	change_variable = {
-		name = local_price_$tradegood$
-		multiply = 0.1
 	}
 
 	#if = {

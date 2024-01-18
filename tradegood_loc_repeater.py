@@ -1,9 +1,38 @@
 def print_out_good(tradegood_name):
   tradegood = tradegood_name
   tradegood_caps = tradegood.upper()
-  loc = '''PRICE_global_mean_{tradegood} = {{
-  value = global_var:global_mean_price_{tradegood}
-}}'''.format(tradegood=tradegood)
+  loc = '''                TradeGoodOverviewItem = {{
+                        blockoverride "image_and_tooltip"
+                        {{
+                          tooltip = "{tradegood}"
+                          texture = "gfx/interface/icons/tradegoods/{tradegood}.dds"
+                        }}
+                        blockoverride "produced_text"
+                        {{
+                          text = "[GuiScope.SetRoot(TradeView.GetPlayer.MakeScope).ScriptValue('GOODS_national_production_{tradegood}')|0]"
+                        }}
+                        blockoverride "top_producers_datamodel"
+                        {{
+                          datamodel = "[Player.MakeScope.GetList('top_producers_{tradegood}')]"
+                        }}
+                        blockoverride "top_producers_tooltip"
+                        {{
+                    tooltip = "[Scope.GetCountry.GetName], producing [GuiScope.SetRoot(Scope.GetCountry.MakeScope).ScriptValue('GOODS_national_production_{tradegood}')|0] units"
+                        }}
+                        blockoverride "demand_text"
+                        {{
+                          text = "[GuiScope.SetRoot(TradeView.GetPlayer.MakeScope).ScriptValue('DEMAND_country_{tradegood}')|0]"
+                        }}
+                        blockoverride "balance_text_and_tooltip"
+                        {{
+                          tooltip = "Income £[GuiScope.SetRoot(TradeView.GetPlayer.MakeScope).ScriptValue('TRADE_total_revenue_{tradegood}')|+=3] / Expenditure £[GuiScope.SetRoot(TradeView.GetPlayer.MakeScope).ScriptValue('TRADE_total_expenditure_{tradegood}')|+=3]"
+                          text = "£[GuiScope.SetRoot(TradeView.GetPlayer.MakeScope).ScriptValue('TRADE_cash_balance_{tradegood}')|+=3]"
+                        }}
+                        blockoverride "global_price_text"
+                        {{
+                          text = "£[GuiScope.SetRoot(TradeView.GetPlayer.MakeScope).ScriptValue('PRICE_global_mean_{tradegood}')|3]"
+                        }}
+                }}'''.format(tradegood=tradegood)
   print(loc)
 
 

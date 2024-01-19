@@ -1,4 +1,5 @@
 CONSUME_setup_all_variables = {
+	# Called: every quarter by oa_wealth_changes
 	every_tradegood_complex = {
 		APPLY = CONSUME_setup_variables_tradegood
 	}
@@ -23,7 +24,7 @@ CONSUME_all_stockpiles = {
 
 CONSUME_from_stockpile = {
 	# Scope: Governorship
-	# Function: Subtract from the stockpile based on demand, or if the demand cannot be met, add to a variable to indicate shortage
+	# Function: Get the percentage shortage of a tradegood in this governorship
 	change_variable = {
 		name = $tradegood$_stockpile
 		subtract = DEMAND_$tradegood$
@@ -33,17 +34,26 @@ CONSUME_from_stockpile = {
 			var:$tradegood$_stockpile < 0
 		}
 		set_variable = {
+			name = shortage_$tradegood$
+			value = var:$tradegood$_stockpile
+		}
+		change_variable = {
+			name = shortage_$tradegood$
+			multiply = -1 # Make positive
+		}
+		change_variable = {
+			name = shortage_$tradegood$
+			divide = DEMAND_$tradegood$
+		}
+		set_variable = {
 			name = $tradegood$_stockpile
 			value = 0
 		}
-		if = {
-			limit = {
-				NOT = { var:shortage_$tradegood$ > DEMAND_$tradegood$ } # Prevent the shortage from growing infinitely, beyond the demand for the tradegood
-			}
-			change_variable = {
-				name = shortage_$tradegood$
-				subtract = var:$tradegood$_stockpile # Subtract so it's positive, easier to use in other calculations
-			}
+	}
+	else = {
+		set_variable = {
+			name = shortage_$tradegood$
+			value = 0
 		}
 	}
 }

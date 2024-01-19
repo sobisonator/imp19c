@@ -1,4 +1,4 @@
-﻿namespace = debug_trade
+namespace = debug_trade
 
 #debug_trade.6 = { # Prices setup
 #	#TRADE_first_time_setup_price_countries_food = yes
@@ -56,6 +56,7 @@ debug_trade.1 = { # Trade setup
 					trigger_event = { id = debug_trade.112 } # Not actually obsolete - this deals with governorship scope, while TRADE_reset_quarterly_values deals with global level
 				trigger_event = { id = debug_trade.113 }
 			}
+			TRADE_update_TZ_tradegood_trackers = yes
 			set_global_variable = debug_trade_1_done
 		}
 	}
@@ -278,6 +279,7 @@ debug_trade.107 = {
 
 	immediate = {
 		TRADE_save_connection_time_values = yes
+		TRADE_update_all_route_connection_times = yes
 	}
 }
 debug_trade.108 = {
@@ -351,12 +353,17 @@ debug_trade.201 = {
 	hidden = yes
 	immediate = {
 		TRADE_update_all_global_base_prices = yes
+		TRADE_save_connection_time_values = yes
+		TRADE_update_all_route_connection_times = yes
 	}
 }
 debug_trade.202 = {
 	type = country_event
 	hidden = yes
 	immediate = {
+		every_governorships = {
+			TRADE_reset_quarterly_governorship_values = yes
+		}
 		SELL_set_TZ_prices_by_country = yes
 	}
 }
@@ -507,6 +514,14 @@ debug_trade.205 = {
 			}
 			PURCHASE_make_internal_shopping_list = yes
 		}
+		# Clear the rankings in all trade partners' capitals made by external trade checks
+		#every_in_list = {
+		#	variable = list_of_trade_partners_all_categories
+		#	capital_scope.governorship = {
+		#		# Remove the 1st rank supplier that was used just for external trade
+		#	remove_variable = 1st_rank_internal_supplier_$tradegood$
+		#	}
+		#}
 	}
 }
 debug_trade.206 = {
@@ -735,12 +750,11 @@ debug_trade.2 = { # Quarterly internal trade simulation
 			# trigger_event = { id = debug_trade.201 } # Global base prices - defunct
 			PURCHASE_reset_shipping_variables = yes
 			every_country = {
-
 				trigger_event = { id = debug_trade.202 }
 				trigger_event = { id = debug_trade.2031 }
 				#trigger_event = { id = debug_trade.2032 }
 				trigger_event = { id = debug_trade.2033 }
-				#trigger_event = { id = debug_trade.2034 }
+				trigger_event = { id = debug_trade.2034 }
 				trigger_event = { id = debug_trade.2035 }
 			}
 			trigger_event = { id = debug_trade.2021 }
@@ -748,7 +762,7 @@ debug_trade.2 = { # Quarterly internal trade simulation
 				trigger_event = { id = debug_trade.2091 }
 				#trigger_event = { id = debug_trade.2032 }
 				trigger_event = { id = debug_trade.2093 }
-				#trigger_event = { id = debug_trade.2034 }
+				trigger_event = { id = debug_trade.2094 }
 				trigger_event = { id = debug_trade.2095 }
 			}
 			every_internal_trade_viable_country = {
@@ -771,11 +785,14 @@ debug_trade.2 = { # Quarterly internal trade simulation
 			every_country = {
 				trigger_event = { id = debug_trade.221 }
 				trigger_event = { id = debug_trade.225 }
+				every_governorships = {
+					CONSUME_all_stockpiles = yes
+				}
 			}
+			TRADE_update_TZ_tradegood_trackers = yes
 			#every_trade_center = {
 			#	trigger_event = { id = debug_trade.224 }
 			#}
-			PURCHASE_update_all_quarterly_shipping = yes
 			if = {
 				limit = {
 					NOT = {

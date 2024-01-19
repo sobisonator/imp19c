@@ -356,14 +356,43 @@ LAND_transfer_province = {
 			variable = indentured_wealth
 			default = WEALTH_starting_indentured_province
 		}
+		set_variable = {
+			name = governorship_population
+			value = total_population
+		}
+		LAND_update_new_governorship_var = {
+			variable = governorship_population
+			default = 0
+		}
 		# WiP, etc...
 
 		every_tradegood_complex = {
 			APPLY = LAND_update_new_governorship_stockpile
 		}
 
+		state.governorship = {
+			LAND_update_trade_center_and_internal_trade_scope = yes
+			DEMAND_update_all_vars = yes
+		}
+
 		remove_variable = old_governorship
 	}	
+}
+
+LAND_update_trade_center_and_internal_trade_scope = {
+	# Scope: Governorship
+	# Function: Create the trade center var in a governorship, if it does not exist
+	# Called: Whenever a governorship changes hands, is created or needs to have its trade scopes updated
+	if = {
+		limit = {
+			NOR = {
+				has_variable = internal_trade_scope
+				has_variable = trade_center
+			}
+		}
+		TRADE_set_internal_trade_scope = yes
+		TRADE_update_governorship_TZs = yes
+	}
 }
 
 LAND_cache_all_old_governorship_values = {

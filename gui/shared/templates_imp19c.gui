@@ -1,6 +1,103 @@
 types Imp19c_Types
 {
 
+type TradeGoodOverviewItem = flowcontainer {
+	spacing = 103
+	background = {
+		name = "Base"
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		using = flat_background_black
+		spriteType = Corneredtiled
+	}
+	icon = {
+		size = { 55 55 }
+		position = { 0 -10 }
+		block "image_and_tooltip" {
+			tooltip = "Tin"
+			texture = "gfx/interface/icons/tradegoods/tin.dds"
+		}
+	}
+	textbox = {
+		size = { 35 30 }
+		parentanchor = vcenter
+		using = BaseFontL
+		using = Black_FontColor
+		tooltip = "Produced"
+		block "produced_text" {
+			text = "[GuiScope.SetRoot(TradeView.GetPlayer.MakeScope).ScriptValue('GOODS_national_production_tin')|0]"
+		}
+	}
+	textbox = {
+		size = { 10 30 }
+		parentanchor = vcenter
+		using = BaseFontL
+		using = Black_FontColor
+		tooltip = "Demand"
+		block "demand_text" {
+			text = "[GuiScope.SetRoot(TradeView.GetPlayer.MakeScope).ScriptValue('DEMAND_country_tin')|0]"
+		}
+	}
+	textbox = {
+		size = { 45 30 }
+		parentanchor = vcenter
+		using = BaseFontL
+		using = Black_FontColor
+		block "balance_text_and_tooltip" {
+			tooltip = "Balance"
+			text = "[GuiScope.SetRoot(TradeView.GetPlayer.MakeScope).ScriptValue('DEMAND_shortage_country_tin')|%]"
+		}
+	}
+	textbox = {
+		size = { 20 30 }
+		parentanchor = left|center
+		using = BaseFontL
+		using = Black_FontColor
+		tooltip = "Market Price"
+		block "global_price_text" {
+			text = "£[GuiScope.SetRoot(TradeView.GetPlayer.MakeScope).ScriptValue('PRICE_global_mean_tin')|3]"
+		}
+	}
+
+	textbox = {
+		size = { 200 30 }
+		parentanchor = left|center
+		using = BaseFontL
+		using = Black_FontColor
+        overlappingitembox = {
+            size = { 850 78 }
+			block "top_producers_datamodel" {
+				datamodel = "[Player.MakeScope.GetList('top_producers_grain')]"
+			}
+            
+			item = {
+			    country_flag = {
+			    	block "top_producers_tooltip" {
+			        	tooltip = "[Scope.GetCountry.GetName], producing [GuiScope.SetRoot(Scope.GetCountry.MakeScope).ScriptValue('GOODS_national_production_grain')|0] units"
+			    	}
+			        datacontext = "[Scope.GetCountry]"
+
+			        blockoverride "flag"
+					{
+					texture = "[Scope.GetCountry.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+					frame = "[Scope.GetCountry.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+						framesize = { 56 56 }
+					}
+			        
+			        blockoverride "size"
+			        {
+			            size = { 30 30 }
+			        }
+					blockoverride "show_as_button"
+					{
+						visible = yes
+					}
+			    }
+			}
+        }
+	}
+	widget = { size = { 0 0 }}
+}
+
 type CustomPieChart = widget {
 	block "widget_size_and_pos" {
 		size = { 100 100 }
@@ -27,7 +124,7 @@ type CustomPieChart = widget {
 				block "slice_size" {
 					 # value = "[FixedPointToFloat( Scope.GetProvince.MakeScope.GetVariable('your_value').GetValue )]"
 				}
-				block "slice_color" { # DO NOT CHANGE IF USING THE PROVINCE METHOD FOR CUSTOM VALUES
+				block "slice_color" { # Not recommended to change if you are using the province object method for custom values, unless you have a variable in that province that you can derive a colour from
 					color = "[Scope.GetProvince.MakeScope.GetVariable('derived_colour').CultureGroup.GetColor]"
 				}
 				block "alpha" {

@@ -36,13 +36,22 @@ MANUFACTURE_combine_resources = {
 
 	# Update demand
 	change_variable = {
-		name = DEMAND_$input_1$
+		name = DEMAND_from_industry_$input_1$
 		add = local_var:actual_input_1_amt
 	}
 	change_variable = {
-		name = DEMAND_$input_2$
+		name = DEMAND_from_$output$_industry_$input_1$
+		add = local_var:actual_input_1_amt
+	}
+	change_variable = {
+		name = DEMAND_from_industry_$input_2$
 		add = local_var:actual_input_2_amt
 	}
+	change_variable = {
+		name = DEMAND_from_$output$_industry_$input_2$
+		add = local_var:actual_input_2_amt
+	}
+
 	if = { # Only proceed if both resources are available here
 		limit = {
 			var:$input_1$_stockpile > 0
@@ -139,6 +148,31 @@ MANUFACTURE_combine_resources = {
 	}
 }
 
+MANUFACTURE_reset_demand_from_industry = {
+	# Scope: governorship
+	# Function: Set the demand from every industry for the given tradegood to 0, so that it can be recalculated when manufacturing takes place
+	# Generic
+	set_variable = {
+		name = DEMAND_from_industry_$tradegood$
+		value = 0
+	}
+	# Specific industries
+	set_variable = {
+		name = DEMAND_from_glass_industry_$tradegood$
+		value = 0
+	}
+}
+
+MANUFACTURE_all = {
+	every_tradegood_complex = {
+		APPLY = MANUFACTURE_reset_demand_from_industry
+	}
+
+	MANUFACTURE_glass = yes
+}
+
+
+
 MANUFACTURE_glass = {
 	# Scope: Governorship
 	# Function: Increase the glass stockpile according to the availability of resources in the glass recipe
@@ -162,8 +196,5 @@ MANUFACTURE_glass = {
 	change_variable = {
 		name = glass_stockpile
 		add = var:manufactured_this_quarter_glass
-	}
-	owner = {
-		add_treasury = var:manufactured_this_quarter_glass
 	}
 }

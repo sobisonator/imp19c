@@ -1,0 +1,200 @@
+MANUFACTURE_convert_resource = {
+	# Scope: Governorship
+	# Function: Convert one resource into a different manufactured resource, scaled to the amount of resource available
+}
+
+MANUFACTURE_combine_resources = {
+	# Scope: Governorship
+	# Function: Combine between 2, that must all be available to work, to make a different manufactured resource
+	# Only actually reduce the stockpile sizes if all necessary resources are available
+
+	# Scale to the size of the industry in this governorship
+	set_local_variable = {
+		name = actual_input_1_amt
+		value = $input_1_amt$
+	}
+	change_local_variable = {
+		name = actual_input_1_amt
+		multiply = var:INDUSTRY_factories_assigned_$output$
+	}
+	set_local_variable = {
+		name = actual_input_2_amt
+		value = $input_2_amt$
+	}
+	change_local_variable = {
+		name = actual_input_2_amt
+		multiply = var:INDUSTRY_factories_assigned_$output$
+	}
+	set_local_variable = {
+		name = actual_output_amt
+		value = $output_amt$
+	}
+	change_local_variable = {
+		name = actual_output_amt
+		multiply = var:INDUSTRY_factories_assigned_$output$
+	}
+
+	# Update demand
+	change_variable = {
+		name = DEMAND_from_industry_$input_1$
+		add = local_var:actual_input_1_amt
+	}
+	change_variable = {
+		name = DEMAND_from_$output$_industry_$input_1$
+		add = local_var:actual_input_1_amt
+	}
+	change_variable = {
+		name = DEMAND_from_industry_$input_2$
+		add = local_var:actual_input_2_amt
+	}
+	change_variable = {
+		name = DEMAND_from_$output$_industry_$input_2$
+		add = local_var:actual_input_2_amt
+	}
+
+	if = { # Only proceed if both resources are available here
+		limit = {
+			var:$input_1$_stockpile > 0
+			var:$input_2$_stockpile > 0
+		}
+		# Consume from the stockpiles
+		change_variable = {
+			name = $input_1$_stockpile
+			subtract = local_var:actual_input_1_amt
+		}
+		CONSUME_update_shortage = {
+			tradegood = $input_1$
+		}
+		change_variable = {
+			name = $input_2$_stockpile
+			subtract = local_var:actual_input_2_amt
+		}
+		CONSUME_update_shortage = {
+			tradegood = $input_2$
+		}
+		# Scale the impact of shortages based on how much of each resource is needed
+		set_local_variable = {
+			name = $input_1$_shortage_impact
+			value = local_var:actual_input_1_amt
+		}
+		change_local_variable = {
+			name = $input_1$_shortage_impact
+			multiply = var:shortage_$input_1$
+		}
+		set_local_variable = {
+			name = $input_2$_shortage_impact
+			value = local_var:actual_input_2_amt
+		}
+		change_local_variable = {
+			name = $input_2$_shortage_impact
+			multiply = var:shortage_$input_2$
+		}
+		# Calculate the impact of the shortage
+		set_local_variable = {
+			name = total_input_need
+			value = local_var:actual_input_1_amt
+		}
+		change_local_variable = {
+			name = total_input_need
+			add = local_var:actual_input_2_amt
+		}
+		set_local_variable = {
+			name = total_shortage_impact_malus
+			value = local_var:$input_1$_shortage_impact
+		}
+		change_local_variable = {
+			name = total_shortage_impact_malus
+			add = local_var:$input_2$_shortage_impact
+		}
+		change_local_variable = {
+			name = total_shortage_impact_malus
+			divide = local_var:total_input_need
+		}
+		set_local_variable = {
+			name = total_shortage_impact
+			value = 1
+		}
+		change_local_variable = {
+			name = total_shortage_impact
+			subtract = total_shortage_impact_malus
+		}
+		# Apply the impact of the shortage
+		set_local_variable = {
+			name = this_manufactured_$output$
+			value = local_var:actual_output_amt
+		}
+		change_local_variable = {
+			name = this_manufactured_$output$
+			multiply = local_var:total_shortage_impact
+		}
+		change_variable = {
+			name = manufactured_this_quarter_$output$
+			add = local_var:this_manufactured_$output$
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				var:$input_1$_stockpile = 0
+			}
+			set_variable = $output$_industry_has_no_$input_1$
+		}
+		if = {
+			limit = {
+				var:$input_2$_stockpile = 0
+			}
+			set_variable = $output$_industry_has_no_$input_2$
+		}
+	}
+}
+
+MANUFACTURE_reset_demand_from_industry = {
+	# Scope: governorship
+	# Function: Set the demand from every industry for the given tradegood to 0, so that it can be recalculated when manufacturing takes place
+	# Generic
+	set_variable = {
+		name = DEMAND_from_industry_$tradegood$
+		value = 0
+	}
+	# Specific industries
+	set_variable = {
+		name = DEMAND_from_glass_industry_$tradegood$
+		value = 0
+	}
+}
+
+MANUFACTURE_all = {
+	every_tradegood_complex = {
+		APPLY = MANUFACTURE_reset_demand_from_industry
+	}
+
+	MANUFACTURE_glass = yes
+}
+
+
+
+MANUFACTURE_glass = {
+	# Scope: Governorship
+	# Function: Increase the glass stockpile according to the availability of resources in the glass recipe
+	# Called: At game start, then every quarter after trade, by the master MANUFACTURE effect
+	set_variable = {
+		name = manufactured_this_quarter_glass
+		value = 0
+	}
+
+	MANUFACTURE_combine_resources = {
+		input_1 = coal
+		input_1_amt = 1
+
+		input_2 = inorganic_compounds
+		input_2_amt = 1
+
+		output = glass
+		output_amt = 2
+	}
+
+	change_variable = {
+		name = glass_stockpile
+		add = var:manufactured_this_quarter_glass
+	}
+}

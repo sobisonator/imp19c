@@ -67,274 +67,65 @@ base_window = {
 			}
 		}
 		margin_widget = {
-			size = { 0 110 }
-			margin_top = -8
+			size = { 0 140 }
 			layoutpolicy_horizontal = expanding
 			hbox = {
-				name = "diplo_view_top_row"
-				layoutpolicy_horizontal = expanding
-				layoutpolicy_vertical = expanding
-				margin_left = @window_margin_left
-				margin_right = @window_margin_right
-
-				margin_widget = {
-					size = { 72 100 }
-
-					banner_migrant_horde = {
-						datacontext = "[DiplomaticView.GetTargetCountry]"
-						
-						scale = 0.9 
-						visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)0')]"
-						tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
-					}
-
-					banner_city_state = {
-						datacontext = "[DiplomaticView.GetTargetCountry]"
-						
-						visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)1')]"
-						tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
-					}
-					
-					banner_local_power = {
-						datacontext = "[DiplomaticView.GetTargetCountry]"
-						
-						visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)2')]"
-						tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
-					}
-					
-					banner_regional_power = {
-						datacontext = "[DiplomaticView.GetTargetCountry]"
-						
-						visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)3')]"
-						tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
-					}
-					banner_major_power = {
-						datacontext = "[DiplomaticView.GetTargetCountry]"
-						
-						visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)4')]"
-						tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
-					}
-					
-					banner_great_power = {
-						datacontext = "[DiplomaticView.GetTargetCountry]"
-						 
-						visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)5')]"
-						tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
+				margin_left = -2
+				margin_top = 5
+				icon = {
+					size = { 634 145 }
+					using = flat_background_white
+					#texture = "gfx/interface/base_parts/background_red.dds"
+					spriteType = corneredstretched
+					position = { 0 0 }
+					modify_texture = {
+						name = "Alpha"
+						size = { 630 160 }
+						blend_mode = alphamultiply
+						texture = "gfx/interface/base_parts/horizontal_gradient_stretch_sides_black.dds"
 					}
 				}
-				
-				hbox = {
-					layoutpolicy_horizontal = expanding
-					spacing = 7
-					
-					flowcontainer = { 
-						direction = vertical
-						
-						ignoreinvisible = yes
-						name = "name_and_stability_box"
-						@icon_width = 100
-
-						widget = {
-							size = { 3 3 }	
-						}
-						icon_and_text = {
-							size = { @icon_width 0 }
-							tooltip = "[DiplomaticView.GetTargetCountry.GetName]"
-							blockoverride "LineSize"
-							{
-								size = { 200 4 }
-							} 
-							blockoverride "Icon"
-							{
-								visible = no
-							}
-							blockoverride "Text"
-							{
-								position = { 0 -27 }
-								text = "[DiplomaticView.GetTargetCountry.GetNameWithNoTooltip]"
-								align = bottom|left
-								size = { 110 48 }
-								multiline = yes
-								fontsize_min = 12
-								using = BaseFontS
-								using = Black_FontColor
-							}
-						}
-						widget = { size = { 0 12 } }
-						icon_and_text = {
-							size = { @icon_width 0 }
-							visible = "[Not( DiplomaticView.GetTargetCountry.IsBarbarian )]"
-							blockoverride "Icon"
-							{
-								texture = "gfx/interface/icons/shared_icons/stability.dds"
-							}
-							blockoverride "Text"
-							{
-								text = "[DiplomaticView.GetTargetCountry.GetStability|2]"
-							}
-							tooltip = "[DiplomaticView.GetTargetCountry.GetStabilityTooltip]"
-						}
-						icon_and_text = {
-							size = { @icon_width 0 }
-							visible = "[DiplomaticView.GetTargetCountry.IsBarbarian]"
-							tooltip = "[DiplomaticView.GetHorde.GetArmy.GetTooltip]"
-							blockoverride "Icon"
-							{
-								texture = "gfx/interface/icons/shared_icons/land_combat.dds"
-							}
-							blockoverride "Text"
-							{
-								text = "[DiplomaticView.GetHorde.GetArmy.GetVisualStrength]"
-							}
-						}
+			}
+		
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				flowcontainer = {
+					direction = vertical
+					ignoreinvisible = yes
+					widget = {
+						size = { 3 3 }	
 					}
-
-					margin_widget = {
-						name = "gold and manpower"
-						size = { @icon_width 130 }
-						margin_top = 16
-						#margin_left = 16
-						#parentanchor = vcenter
-						layoutpolicy_horizontal = expanding
-						widget = {
-							position = { 0 18 }
-							size = { @icon_width 26 }
-							using = underline_for_text
-							tooltip = "UNABLE_TO_SEE_ENEMY_GOLD"
-							visible = "[Not( DiplomaticView.GetTargetCountry.IsBarbarian )]"
-						}
-
-						flowcontainer = {
-							position = { 0 12 }
-							ignoreinvisible = yes
-							visible = "[And( Not( EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ) ), Not(DiplomaticView.GetTargetCountry.IsBarbarian) )]"
-							datamodel = "[Player.MakeScope.GetList('foreign_intel')]"
-							item = {
-								icon_and_text = {
-									size = { @icon_width 0 }
-									datacontext = "[Scope.Country]"
-									visible = "[EqualTo_int32( Country.GetId, DiplomaticView.GetTargetCountry.GetId )]"
-									blockoverride "Icon"
-									{
-										texture = "gfx/interface/icons/shared_icons/treasury.dds"
-									}
-									blockoverride "Text"
-									{
-										text = "[Country.GetTreasury|0]"
-									}
-
-									tooltip = "[Country.GetTreasuryTooltip]"
-								}
+					icon = { #religion
+						size = { 200 32 }
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background
+							color = { 0 0 0 0.2 }
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
 							}
+							size = { 260 32 }
 						}
-						 
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background_white
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
+							}
+							size = { 250 32 }
+						}
 						icon_and_text = {
-							position = { 0 12 }
-							size = { @icon_width 0 }
-							visible = "[And( Not(DiplomaticView.GetTargetCountry.IsBarbarian), EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ) )]"
-							blockoverride "Icon"
-							{
-								texture = "gfx/interface/icons/shared_icons/treasury.dds"
-							}
-							blockoverride "Text"
-							{
-								text = "[DiplomaticView.GetTargetCountry.GetTreasury|0]"
-							}
-							tooltip = "[DiplomaticView.GetTargetCountry.GetTreasuryTooltip]"
-						}
-
-						widget = {
-							position = { 0 62 }
-							size = { @icon_width 26 }
-							using = underline_for_text
-							tooltip = "UNABLE_TO_SEE_ENEMY_MANPOWER"
-							visible = "[Not( DiplomaticView.GetTargetCountry.IsBarbarian )]"
-						}
-
-						flowcontainer = {
-							position = { 0 56 }
-							ignoreinvisible = yes
-							visible = "[And( Not( EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ) ), Not(DiplomaticView.GetTargetCountry.IsBarbarian) )]"
-							datamodel = "[Player.MakeScope.GetList('foreign_intel')]"
-							item = {
-								icon_and_text = {
-									size = { 110 0 }
-									datacontext = "[Scope.Country]"
-									visible = "[EqualTo_int32( Country.GetId, DiplomaticView.GetTargetCountry.GetId )]"
-									blockoverride "Icon"
-									{
-										texture = "gfx/interface/icons/shared_icons/manpower.dds"
-									}
-									blockoverride "Text"
-									{
-										text = "[Country.GetManpower]"
-									}
-									tooltip = "[Country.GetManpowerTooltip]"
-								}
-							}
-						}
-						
-						icon_and_text = {
-							position = { 0 56 }
-							size = { @icon_width 0 }
-							visible = "[And( Not(DiplomaticView.GetTargetCountry.IsBarbarian), EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ) )]"
-							blockoverride "Icon"
-							{
-								texture = "gfx/interface/icons/shared_icons/manpower.dds"
-							}
-							blockoverride "Text"
-							{
-								text = "[DiplomaticView.GetTargetCountry.GetManpower]"
-							}
-							tooltip = "[DiplomaticView.GetTargetCountry.GetManpowerTooltip]"
-						}
-					}
-					 
-					flowcontainer = {
-						name = "population_and_territories"
-						direction = vertical
-						ignoreinvisible = yes
-						spacing = 12
-
-						icon_and_text = {
-							size = { 90 0 }
+							position = { 10 0 }
 							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-							blockoverride "Icon"
-							{
-								texture = "gfx/interface/icons/shared_icons/pop_type.dds"
-							}
-							blockoverride "Text"
-							{
-								text = "[DiplomaticView.GetTargetCountry.GetTotalPopulation]"
-							}
-							tooltip = "[DiplomaticView.GetTargetCountry.BuildTotalPopulationToolTip]"
-						}
-						
-						icon_and_text = {
-							size = { 90 0 }
-							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-							blockoverride "Icon"
-							{
-								texture = "gfx/interface/icons/shared_icons/city.dds"
-							}
-							blockoverride "Text"
-							{
-								text = "[DiplomaticView.GetTargetCountry.GetOwnedProvinceCount]"
-							}
-							tooltip = "[DiplomaticView.GetTargetCountry.GetOwnedProvinceTooltip]"
-						}
-					} 
-
-					flowcontainer = {
-						visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-						direction = vertical
-						ignoreinvisible = yes
-						spacing = 12
-
-						icon_and_text = {
-							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-							size = { 150 0 }
-							tooltip = "[DiplomaticView.GetTargetCountry.GetReligion.GetTooltip]"
+							size = { 190 0 }
 							blockoverride "Icon"
 							{
 								texture = "gfx/interface/icons/powers/religious.dds"
@@ -342,11 +133,43 @@ base_window = {
 							blockoverride "Text"
 							{
 								text = "[DiplomaticView.GetTargetCountry.GetReligion.GetName]"
+								fontsize = 18
 								using = BaseFontS
 								using = Black_FontColor
 							}
+							tooltip = "[DiplomaticView.GetTargetCountry.GetReligion.GetTooltip]"
+						}
+					}
+					widget = { size = { 0 10 } }
+					icon = { #culture
+						size = { 200 32 }
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background
+							color = { 0 0 0 0.2 }
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
+							}
+							size = { 220 32 }
+						}
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background_white
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
+							}
+							size = { 210 32 }
 						}
 						icon_and_text = {
+							position = { 10 0 }
 							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
 							size = { 150 0 }
 							blockoverride "Icon"
@@ -356,65 +179,291 @@ base_window = {
 							blockoverride "Text"
 							{
 								text = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetName]"
+								fontsize = 18
 								using = BaseFontS
 								using = Black_FontColor
 							}
+							tooltip = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetTooltip]"
 						}
 					}
-
-					vbox = {
-						spacing = 4
-						button_round = {
-							size = { 40 40 }
-							blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/population.dds" }
-							blockoverride "On_click" { onclick = "[DiplomaticView.ViewCharacters]" }
-							tooltip = "SHOW_THEIR_CHARACTERS"
+					widget = { size = { 0 10 } }
+					icon = { #manpower
+						size = { 160 32 }
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background
+							color = { 0 0 0 0.2 }
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
+							}
+							size = { 180 32 }
 						}
-					
-						widget = {
-							name = "civil_war_pie"
-							size = { 52 52 }
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background_white
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
+							}
+							size = { 170 32 }
+						}
+						icon_and_text = {
+							position = { 10 0 }
 							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-							tooltip = "[DiplomaticView.GetTargetCountry.GetPossibleCivilWarTooltip]"
-							
-							icon = {
-								texture = "gfx/interface/map/on_map_siege_bar_bg.dds"
-								size = { 52 52 }
-								parentanchor = center
-								color = { 0.9 0.2 0.2 0.88 }
+							size = { 110 0 }
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/shared_icons/manpower.dds"
 							}
-							icon = {
-								using = beige_background
-								size = { 40 40 }
-								parentanchor = center
-								#color = { 0.8 0.2 0.2 0.7 }
-								modify_texture = {
-									texture = "gfx/interface/base_parts/diamond_shape.dds"
-									blend_mode = alphamultiply
-									#spriteType = Corneredtiled
-								}
+							blockoverride "Text"
+							{
+								text = "[DiplomaticView.GetTargetCountry.GetManpower]"
+								fontsize = 18
+								using = BaseFontS
+								using = Black_FontColor
 							}
+							tooltip = "[DiplomaticView.GetTargetCountry.GetManpowerTooltip]"
+						}
+					}
+				}
+				flowcontainer = {
+					direction = vertical
+					ignoreinvisible = yes
+					size = { 220 100 }
+					icon = { #flag
+						parentanchor = center
+						size = { 72 100 }
+							banner_migrant_horde = {
+							datacontext = "[DiplomaticView.GetTargetCountry]"
 							
-							progresspie = {
-								name = "progress"
-								parentanchor = center
-								size = { 52 52 }
-								texture = "gfx/interface/map/on_map_siege_bar.dds"
-								framesize = { 70 70 }
-								frame = 2
-								value = "[FixedPointToFloat( Multiply_CFixedPoint( DiplomaticView.GetTargetCountry.GetProgressTowardsCivilWar, '(CFixedPoint)0.01' ) )]"
-								icon = {
-									texture = "gfx/interface/icons/shared_icons/civil_war_active_inactive.dds"
-									frame = "[DiplomaticView.GetTargetCountry.GetCivilWarFrame]"
-									framesize = { 50 50 }
-									size = { 31 31 }
-									parentanchor = center
-								}
+							scale = 0.9 
+							visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)0')]"
+							tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
+						}
+							banner_city_state = {
+							datacontext = "[DiplomaticView.GetTargetCountry]"
+							
+							visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)1')]"
+							tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
+						}
+						
+						banner_local_power = {
+							datacontext = "[DiplomaticView.GetTargetCountry]"
+							
+							visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)2')]"
+							tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
+						}
+						
+						banner_regional_power = {
+							datacontext = "[DiplomaticView.GetTargetCountry]"
+							
+							visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)3')]"
+							tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
+						}
+						banner_major_power = {
+							datacontext = "[DiplomaticView.GetTargetCountry]"
+								visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)4')]"
+							tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
+						}
+						
+						banner_great_power = {
+							datacontext = "[DiplomaticView.GetTargetCountry]"
+							 
+							visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)5')]"
+							tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
+						}
+					}
+					icon = { #country name
+						parentanchor = center
+						size = { 220 20 }
+						icon_and_text = {
+							size = { 220 }
+							position = { 0 -6 }
+							tooltip = "[DiplomaticView.GetTargetCountry.GetName]"
+							blockoverride "LineSize"
+							{
+								size = { 220 4 }
+							} 
+							blockoverride "Icon"
+							{
+								visible = no
+							}
+							blockoverride "Text"
+							{
+								position = { 0 0 }
+								text = "[DiplomaticView.GetTargetCountry.GetNameWithNoTooltip]"
+								align = center|center
+								multiline = no
+								fontsize = 20
 							}
 						}
 					}
 				}
+				flowcontainer = {
+					direction = vertical
+					ignoreinvisible = yes
+					widget = {
+						size = { 3 3 }	
+					}
+					icon = { #treasury
+						size = { 200 32 }
+						parentanchor = right
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background
+							color = { 0 0 0 0.2 }
+							parentanchor = right
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_left_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
+							}
+							size = { 260 32 }
+						}
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background_white
+							parentanchor = right
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_left_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
+							}
+							size = { 250 32 }
+						}
+						icon_and_text = {
+							position = { -10 0 }
+							parentanchor = right
+							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+							size = { 190 0 }
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/shared_icons/treasury.dds"
+							}
+							blockoverride "Text"
+							{
+							text = "[DiplomaticView.GetTargetCountry.GetTreasury|0]"
+								fontsize = 18
+								using = BaseFontS
+								using = Black_FontColor
+							}
+							tooltip = "[DiplomaticView.GetTargetCountry.GetTreasuryTooltip]"
+						}
+					}
+					widget = { size = { 0 10 } }
+					icon = { #pop
+						size = { 200 32 }
+						parentanchor = right
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background
+							color = { 0 0 0 0.2 }
+							parentanchor = right
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_left_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
+							}
+							size = { 220 32 }
+						}
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background_white
+							parentanchor = right
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_left_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
+							}
+							size = { 210 32 }
+						}
+						icon_and_text = {
+							position = { -10 0 }
+							parentanchor = right
+							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+							size = { 150 0 }
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/shared_icons/pop_type.dds"
+							}
+							blockoverride "Text"
+							{
+								text = "[DiplomaticView.GetTargetCountry.GetTotalPopulation]"
+								fontsize = 18
+								using = BaseFontS
+								using = Black_FontColor
+							}
+							tooltip = "[DiplomaticView.GetTargetCountry.BuildTotalPopulationToolTip]"
+						}
+					}
+					widget = { size = { 0 10 } }
+					icon = { #stability
+							size = { 160 32 }
+							parentanchor = right
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background
+							color = { 0 0 0 0.2 }
+							parentanchor = right
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_left_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
+							}
+							size = { 180 32 }
+						}
+						icon = {
+							shaderfile = "gfx/FX/pdxgui_default.shader"
+							using = flat_background_white
+							parentanchor = right
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/header_s_x104bd_left_cut_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 52 0 }
+							}
+							size = { 170 32 }
+						}
+						icon_and_text = {
+							position = { -10 0 }
+							parentanchor = right
+							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+							size = { 110 0 }
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/shared_icons/stability.dds"
+							}
+							blockoverride "Text"
+							{
+								text = "[DiplomaticView.GetTargetCountry.GetStability|2]"
+								fontsize = 18
+								using = BaseFontS
+								using = Black_FontColor
+							}
+							tooltip = "[DiplomaticView.GetTargetCountry.GetStabilityTooltip]"
+						}
+					}
+				}
 			} 
+
 		}
 
 		margin_widget = {

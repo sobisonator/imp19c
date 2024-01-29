@@ -18,7 +18,7 @@ MANUFACTURE_combine_resources = {
 		if = {
 			limit = {
 				NOT = {
-					has_variable = $output$_industry_demand_calculated
+					has_variable = $input_1$_$input_2$_$output$_industry_demand_calculated
 				}
 			}
 			# Scale to the size of the industry in this governorship
@@ -65,7 +65,7 @@ MANUFACTURE_combine_resources = {
 				add = var:actual_$input_2$_amt_$output$
 			}
 
-			set_variable = $output$_industry_demand_calculated
+			set_variable = $input_1$_$input_2$_$output$_industry_demand_calculated
 		}
 		# Phase 2: Manufacture
 		else = {
@@ -77,7 +77,7 @@ MANUFACTURE_combine_resources = {
 				output = $output$
 				output_amt = var:actual_output_amt_$output$
 			}
-			remove_variable = $output$_industry_demand_calculated
+			remove_variable = $input_1$_$input_2$_$output$_industry_demand_calculated
 		}
 	}
 
@@ -195,7 +195,7 @@ MANUFACTURE_use_bonus_resource = {
 		if = {
 			limit = {
 				NOT = {
-					has_variable = $output$_industry_demand_calculated
+					has_variable = $input$_$output$_bonus_industry_demand_calculated
 				}
 			}
 			# Scale to the size of the industry in this governorship
@@ -208,43 +208,88 @@ MANUFACTURE_use_bonus_resource = {
 				multiply = var:INDUSTRY_factories_assigned_$output$
 			}
 			set_variable = {
-				name = actual_input_2_amt
-				value = $input_2_amt$
+				name = actual_bonus_amt_from_$input$_$output$
+				value = $percentage_bonus$
 			}
 			change_variable = {
-				name = actual_input_2_amt
-				multiply = var:INDUSTRY_factories_assigned_$output$
-			}
-			set_variable = {
-				name = actual_output_amt
-				value = $output_amt$
-			}
-			change_variable = {
-				name = actual_output_amt
+				name = actual_bonus_amt_from_$input$_$output$
 				multiply = var:INDUSTRY_factories_assigned_$output$
 			}
 
 			# Update demand
 			change_variable = {
-				name = DEMAND_from_industry_$input_1$
-				add = var:actual_input_1_amt
+				name = DEMAND_from_industry_$input$
+				add = var:actual_bonus_$input$_amt_$output$
 			}
 			change_variable = {
-				name = DEMAND_from_$output$_industry_$input_1$
-				add = var:actual_input_1_amt
-			}
-			change_variable = {
-				name = DEMAND_from_industry_$input_2$
-				add = var:actual_input_2_amt
-			}
-			change_variable = {
-				name = DEMAND_from_$output$_industry_$input_2$
-				add = var:actual_input_2_amt
+				name = DEMAND_from_$output$_industry_$input$
+				add = var:actual_bonus_$input$_amt_$output$
 			}
 
-			set_variable = $output$_industry_demand_calculated
+			set_variable = $input$_$output$_bonus_industry_demand_calculated
+		}
+		else = {
+			MANUFACTURE_consume_bonus_resource = {
+				input = $input$
+				output = $output$
+				input_amt = var:actual_bonus_$input$_amt_$output$
+				percentage_bonus = $percentage_bonus$
+				essential = $essential$
+			}
+			remove_variable = $input$_$output$_bonus_industry_demand_calculated
 		}
 	}	
+}
+
+MANUFACTURE_consume_bonus_resource = {
+	# Scope: Governorship
+	# Function: Apply the demand, consume available resource and apply the modifier to production if available
+	if = {
+		limit = {
+			var:$input$_stockpile > 0.1
+		}
+		set_local_variable = {
+			name = this_industry_bonus_multiplier_$output$
+			value = $percentage_bonus$
+		}
+		change_local_variable = {
+			name = this_industry_bonus_multiplier_$output$
+			multiply = var:input_availability_$input$
+		}
+		change_local_variable = {
+			name = this_industry_bonus_multiplier_$output$
+			add = 1
+		}
+
+		set_local_variable = {
+			name = input_amt_used
+			value = $input_amt$
+		}
+		change_local_variable = {
+			name = input_amt_used
+			multiply = var:input_availability_$input$
+		}
+		change_variable = {
+			name = $input$_stockpile
+			subtract = local_var:input_amt_used
+		}
+
+		change_variable = {
+			name = industry_production_$output$
+			multiply = local_var:this_industry_bonus_multiplier_$output$
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				$essential$ = 1
+			}
+			change_variable = {
+				name = industry_production_$output$
+				multiply = 0
+			}
+		}
+	}
 }
 
 MANUFACTURE_reset_demand_from_industry = {
@@ -265,18 +310,6 @@ MANUFACTURE_reset_demand_from_industry = {
 MANUFACTURE_reset_all_tradegood_demand = {
 	every_tradegood_complex = {
 		APPLY = MANUFACTURE_reset_demand_from_industry
-	}
-}
-
-MANUFACTURE_all = {
-	MANUFACTURE_reset_production = {
-		output = glass
-	}
-
-	MANUFACTURE_glass = yes
-
-	MANUFACTURE_produce_final = {
-		output = glass
 	}
 }
 
@@ -345,6 +378,45 @@ MANUFACTURE_produce_final = {
 	}
 }
 
+MANUFACTURE_all = {
+	MANUFACTURE_reset_production = {
+		output = glass
+	}
+
+	MANUFACTURE_glass = yes
+
+	MANUFACTURE_produce_final = {
+		output = glass
+	}
+}
+
+MANUFACTURE_example = {
+	# TEMPLATE
+	# Scope: Governorship
+	# Function: Increase the glass stockpile according to the availability of resources in the glass recipe
+	# Called: At game start, then every quarter after trade, by the master MANUFACTURE effect
+	MANUFACTURE_combine_resources = {
+		input_1 = coal
+		input_1_amt = 1
+
+		input_2 = inorganic_compounds
+		input_2_amt = 1
+
+		output = glass
+		output_amt = 2
+	}
+
+	MANUFACTURE_use_bonus_resource = {
+		input = coal
+		input_amt = 1
+
+		output = glass
+		percentage_bonus = 1
+
+		essential = 0 # If 1, no output will be produced if this input is unavailable. Otherwise, the bonus will simply be skipped
+	}
+}
+
 MANUFACTURE_glass = {
 	# Scope: Governorship
 	# Function: Increase the glass stockpile according to the availability of resources in the glass recipe
@@ -360,6 +432,16 @@ MANUFACTURE_glass = {
 
 		output = glass
 		output_amt = 2
+	}
+
+	MANUFACTURE_use_bonus_resource = {
+		input = coal
+		input_amt = 1
+
+		output = glass
+		percentage_bonus = 1
+
+		essential = 0
 	}
 
 }

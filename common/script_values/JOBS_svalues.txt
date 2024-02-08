@@ -39,7 +39,7 @@ JOBS_infrastructure_workers = {
 	add = num_of_port_building
 }
 
-JOBS_clerks = {
+JOBS_clerks_artisans = {
 	value = num_of_URB_commerce_district
 }
 
@@ -58,10 +58,26 @@ JOBS_industrial_worker = {
 	value = num_of_IND_industrial_estate
 }
 
+JOBS_non_subsitence = {
+	value = JOBS_industrial_worker
+	add = JOBS_resource_gatherer
+	add = JOBS_military
+	add = JOBS_clerks_artisans
+	add = JOBS_infrastructure_workers
+	add = JOBS_arts_workers
+	add = JOBS_educators
+	add = JOBS_health_workers
+	add = JOBS_administrators
+}
+
+
+# NOT IN USE:
 JOBS_subsistence_worker = { # Workers not employed by buildings, but working due to lack of industrialisation
 	value = total_population
 	multiply = inverse_industrialisation # If industrialisation is 0, this will be 100
+	subtract = JOBS_non_subsitence
 }
+##
 
 
 ##############
@@ -70,20 +86,28 @@ JOBS_subsistence_worker = { # Workers not employed by buildings, but working due
 
 JOBS_num_used_slots = {
 	# Scope: province
-	value = JOBS_subsistence_worker
-	add = JOBS_industrial_worker
-	add = JOBS_resource_gatherer
-	add = JOBS_military
-	add = JOBS_clerks
-	add = JOBS_infrastructure_workers
-	add = JOBS_arts_workers
-	add = JOBS_educators
-	add = JOBS_health_workers
-	add = JOBS_administrators
+	value = JOBS_non_subsitence
 }
 
 JOBS_unemployed_pops_province = {
 	# Scope: province
 	value = total_population
+	multiply = 0.5
+	subtract = JOBS_num_used_slots
+}
+
+###############
+# Caps
+##############
+
+JOBS_buildings_cap = {
+	# Scope: province
+	value = total_population
+	subtract = num_of_tribesmen
+	multiply = 0.5
+}
+
+JOBS_available_slots = {
+	value = JOBS_buildings_cap
 	subtract = JOBS_num_used_slots
 }

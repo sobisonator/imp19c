@@ -19,6 +19,14 @@ def print_out_good(tradegood_name):
                         {{
                     tooltip = "[Scope.GetCountry.GetName], producing [GuiScope.SetRoot(Scope.GetCountry.MakeScope).ScriptValue('GOODS_national_production_{tradegood}')|0] units"
                         }}
+                        blockoverride "top_consumers_datamodel"
+                        {{
+                          datamodel = "[Player.MakeScope.GetList('top_consumers_{tradegood}')]"
+                        }}
+                        blockoverride "top_consumers_tooltip"
+                        {{
+                          tooltip = "[Scope.GetCountry.GetName], consuming [GuiScope.SetRoot(Scope.GetCountry.MakeScope).ScriptValue('DEMAND_country_{tradegood}')|0] units"
+                        }}
                         blockoverride "demand_text"
                         {{
                           text = "[GuiScope.SetRoot(TradeView.GetPlayer.MakeScope).ScriptValue('DEMAND_country_{tradegood}')|0]"

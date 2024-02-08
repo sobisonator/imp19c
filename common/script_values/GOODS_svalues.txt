@@ -1624,208 +1624,6 @@ GOODS_governorship_fish_produced = {
 	}
 }
 
-### COTTAGE INDUSTRY SVALUES
-### These are svalues for goods production multiplied by 0.01 so that they can be referenced in cottage industry bonuses
-
-GOODS_cottage_industry_from_grain = {
-	value = GOODS_governorship_grain_produced
-	multiply = 0.01
-}
-
-GOODS_cottage_industry_from_mediterranean_fruit = {
-	value = GOODS_governorship_mediterranean_fruit_produced
-	multiply = 0.01
-}
-
-GOODS_cottage_industry_from_fish = {
-	value = GOODS_governorship_fish_produced
-	multiply = 0.01
-}
-
-GOODS_cottage_industry_from_livestock = {
-	value = GOODS_governorship_livestock_produced
-	multiply = 0.01
-}
-
-GOODS_cottage_industry_from_salt = {
-	value = GOODS_governorship_salt_produced
-	multiply = 0.01
-}
-
-GOODS_cottage_industry_from_sugar = {
-	value = GOODS_governorship_sugar_produced
-	multiply = 0.01
-}
-
-GOODS_cottage_industry_from_vegetables = {
-	value = GOODS_governorship_vegetables_produced
-	multiply = 0.01
-}
-
-GOODS_cottage_industry_from_wood = {
-	value = GOODS_governorship_wood_produced
-	multiply = 0.01
-}
-
-### MANUFACTURED GOODS
-
-GOODS_governorship_clothing_produced = {
-	value = INDUSTRY_clothing_factories
-	multiply = 5
-}
-GOODS_governorship_luxury_clothing_produced = {
-	value = INDUSTRY_luxury_clothing_factories
-	multiply = 5
-}
-GOODS_governorship_furniture_produced = {
-	value = INDUSTRY_furniture_factories
-	multiply = 5
-	# COTTAGE INDUSTRIES
-	if = { # Furniture from wood
-		limit = {
-			has_variable = wood
-		}
-		add = GOODS_cottage_industry_from_wood
-	}
-	# DEFICIT MALUSES
-}
-GOODS_governorship_luxury_furniture_produced = {
-	value = INDUSTRY_luxury_furniture_factories
-	multiply = 5
-}
-GOODS_governorship_alcohol_capacity = {
-	value = INDUSTRY_alcohol_factories
-	multiply = 5
-	# COTTAGE INDUSTRIES
-	if = { # Alcohol from grain & vine
-		limit = {
-			OR = {
-				has_variable = produces_grain
-				has_variable = produces_mediterranean_fruit
-			}
-		}
-		add = GOODS_cottage_industry_from_grain
-		add = GOODS_cottage_industry_from_mediterranean_fruit
-	}
-}
-GOODS_governorship_alcohol_produced = {
-	value = GOODS_governorship_alcohol_capacity
-	# DEFICIT MALUSES
-	if = { # Malus from not enough grain
-		limit = {
-			GOODS_grain_stockpile < DEMAND_grain_from_industry_alcohol
-		}
-		multiply = DEMAND_grain_industry_alcohol_malus
-	}
-	if = { # Malus from not enough mediterranean fruit
-		limit = {
-			GOODS_mediterranean_fruit_stockpile < DEMAND_mediterranean_fruit_from_industry_alcohol
-		}
-		multiply = DEMAND_mediterranean_fruit_industry_alcohol_malus
-	}
-	if = { # Malus from not enough Glass
-		limit = {
-			GOODS_glass_stockpile < DEMAND_glass_from_industry_alcohol
-		}
-		multiply = DEMAND_glass_industry_alcohol_malus
-	}
-}
-GOODS_governorship_glass_produced = {
-	value = 0
-	if = {
-		limit = {
-			has_variable = manufactured_this_quarter_glass
-		}
-		add = var:manufactured_this_quarter_glass
-	}
-}
-GOODS_governorship_chemicals_produced = {
-	value = INDUSTRY_chemicals_factories
-	multiply = 5
-}
-GOODS_governorship_rare_alloys_produced = {
-	value = INDUSTRY_rare_alloys_factories
-	multiply = 5
-}
-GOODS_governorship_construction_materials_produced = {
-	value = INDUSTRY_construction_materials_factories
-	multiply = 5
-}
-GOODS_governorship_early_munitions_produced = {
-	value = INDUSTRY_early_munitions_factories
-	multiply = 5
-}
-GOODS_governorship_late_munitions_produced = {
-	value = INDUSTRY_late_munitions_factories
-	multiply = 5
-}
-GOODS_governorship_naval_supplies_produced = {
-	value = INDUSTRY_naval_supplies_factories
-	multiply = 5
-}
-GOODS_governorship_steel_ships_produced = {
-	value = INDUSTRY_steel_ships_factories
-	multiply = 5
-}
-GOODS_governorship_wooden_ships_produced = {
-	value = INDUSTRY_wooden_ships_factories
-	multiply = 5
-}
-GOODS_governorship_steel_produced = {
-	value = INDUSTRY_steel_factories
-	multiply = 5
-}
-GOODS_governorship_bronze_produced = {
-	value = INDUSTRY_bronze_factories
-	multiply = 5
-}
-GOODS_governorship_machine_parts_produced = {
-	value = INDUSTRY_machine_parts_factories
-	multiply = 5
-}
-GOODS_governorship_early_artillery_produced = {
-	value = INDUSTRY_early_artillery_factories
-	multiply = 5
-}
-GOODS_governorship_late_artillery_produced = {
-	value = INDUSTRY_late_artillery_factories
-	multiply = 5
-}
-GOODS_governorship_electronics_produced = {
-	value = INDUSTRY_electronics_factories
-	multiply = 5
-}
-GOODS_governorship_pharmaceuticals_produced = {
-	value = INDUSTRY_pharmaceuticals_factories
-	multiply = 5
-}
-GOODS_governorship_motors_produced = {
-	value = INDUSTRY_motors_factories
-	multiply = 5
-}
-GOODS_governorship_processed_foods_produced = {
-	value = INDUSTRY_processed_foods_factories
-	multiply = 5
-	# Cottage industries - early preservation
-	add = GOODS_cottage_industry_from_fish
-	add = GOODS_cottage_industry_from_livestock
-	add = GOODS_cottage_industry_from_vegetables
-	add = GOODS_cottage_industry_from_salt
-	add = GOODS_cottage_industry_from_sugar
-}
-GOODS_governorship_petrochemicals_produced = {
-	value = INDUSTRY_petrochemicals_factories
-	multiply = 5
-}
-
-# Industrial efficiency from demand
-
-GOODS_governorship_alcohol_effiency = {
-	value = var:alcohol_produced_last_quarter
-	divide = GOODS_governorship_alcohol_capacity
-	multiply = 100
-}
-
 # National values
 
 GOODS_country_total_sold_grain = {
@@ -2376,4 +2174,365 @@ GOODS_country_total_sold_late_artillery = {
     }
     add = var:local_sold_cut_late_artillery
   }
+}
+
+
+GOODS_governorship_rare_alloys_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_rare_alloys
+		}
+		add = var:COTTAGEIND_produced_rare_alloys
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_rare_alloys
+		}
+		add = var:industry_production_rare_alloys
+	}
+}
+
+GOODS_governorship_chemicals_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_chemicals
+		}
+		add = var:COTTAGEIND_produced_chemicals
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_chemicals
+		}
+		add = var:industry_production_chemicals
+	}
+}
+
+GOODS_governorship_construction_materials_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_construction_materials
+		}
+		add = var:COTTAGEIND_produced_construction_materials
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_construction_materials
+		}
+		add = var:industry_production_construction_materials
+	}
+}
+
+GOODS_governorship_early_munitions_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_early_munitions
+		}
+		add = var:COTTAGEIND_produced_early_munitions
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_early_munitions
+		}
+		add = var:industry_production_early_munitions
+	}
+}
+
+GOODS_governorship_late_munitions_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = industry_production_late_munitions
+		}
+		add = var:industry_production_late_munitions
+	}
+}
+
+GOODS_governorship_early_artillery_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_early_artillery
+		}
+		add = var:COTTAGEIND_produced_early_artillery
+	}
+}
+
+GOODS_governorship_late_artillery_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_late_artillery
+		}
+		add = var:COTTAGEIND_produced_late_artillery
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_late_artillery
+		}
+		add = var:industry_production_late_artillery
+	}
+}
+
+GOODS_governorship_naval_supplies_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_naval_supplies
+		}
+		add = var:COTTAGEIND_produced_naval_supplies
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_naval_supplies
+		}
+		add = var:industry_production_naval_supplies
+	}
+}
+
+GOODS_governorship_steel_ships_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = industry_production_steel_ships
+		}
+		add = var:industry_production_steel_ships
+	}
+}
+
+GOODS_governorship_wooden_ships_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_wooden_ships
+		}
+		add = var:COTTAGEIND_produced_wooden_ships
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_wooden_ships
+		}
+		add = var:industry_production_wooden_ships
+	}
+}
+
+GOODS_governorship_electronics_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = industry_production_electronics
+		}
+		add = var:industry_production_electronics
+	}
+}
+
+GOODS_governorship_steel_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = industry_production_steel
+		}
+		add = var:industry_production_steel
+	}
+}
+
+GOODS_governorship_bronze_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_bronze
+		}
+		add = var:COTTAGEIND_produced_bronze
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_bronze
+		}
+		add = var:industry_production_bronze
+	}
+}
+
+GOODS_governorship_clothing_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_clothing
+		}
+		add = var:COTTAGEIND_produced_clothing
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_clothing
+		}
+		add = var:industry_production_clothing
+	}
+}
+
+GOODS_governorship_luxury_clothing_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_luxury_clothing
+		}
+		add = var:COTTAGEIND_produced_luxury_clothing
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_luxury_clothing
+		}
+		add = var:industry_production_luxury_clothing
+	}
+}
+
+GOODS_governorship_furniture_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_furniture
+		}
+		add = var:COTTAGEIND_produced_furniture
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_furniture
+		}
+		add = var:industry_production_furniture
+	}
+}
+
+GOODS_governorship_luxury_furniture_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_luxury_furniture
+		}
+		add = var:COTTAGEIND_produced_luxury_furniture
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_luxury_furniture
+		}
+		add = var:industry_production_luxury_furniture
+	}
+}
+
+GOODS_governorship_alcohol_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_alcohol
+		}
+		add = var:COTTAGEIND_produced_alcohol
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_alcohol
+		}
+		add = var:industry_production_alcohol
+	}
+}
+
+GOODS_governorship_glass_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_glass
+		}
+		add = var:COTTAGEIND_produced_glass
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_glass
+		}
+		add = var:industry_production_glass
+	}
+}
+
+GOODS_governorship_pharmaceuticals_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = COTTAGEIND_produced_pharmaceuticals
+		}
+		add = var:COTTAGEIND_produced_pharmaceuticals
+	}
+	if = {
+		limit = {
+			has_variable = industry_production_pharmaceuticals
+		}
+		add = var:industry_production_pharmaceuticals
+	}
+}
+
+GOODS_governorship_processed_foods_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = industry_production_processed_foods
+		}
+		add = var:industry_production_processed_foods
+	}
+}
+
+GOODS_governorship_motors_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = industry_production_motors
+		}
+		add = var:industry_production_motors
+	}
+}
+
+GOODS_governorship_electronics_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = industry_production_electronics
+		}
+		add = var:industry_production_electronics
+	}
+}
+
+GOODS_governorship_rare_alloys_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = industry_production_rare_alloys
+		}
+		add = var:industry_production_rare_alloys
+	}
+}
+
+GOODS_governorship_chemicals_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = industry_production_chemicals
+		}
+		add = var:industry_production_chemicals
+	}
+}
+
+GOODS_governorship_machine_parts_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = industry_production_machine_parts
+		}
+		add = var:industry_production_machine_parts
+	}
+}
+
+GOODS_governorship_petrochemicals_produced = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = industry_production_petrochemicals
+		}
+		add = var:industry_production_petrochemicals
+	}
 }

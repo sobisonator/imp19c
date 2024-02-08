@@ -1,9 +1,9 @@
-﻿DEMAND_update_all_vars = {
+DEMAND_update_all_vars = {
 	# Scope: Governorship
 	# Function: Update all governorship demand variables
 	# Called: Whenever a governorship needs its demand variables set up or updated
 	DEMAND_set_demand_from_luxury_all = yes
-	DEMAND_set_demand_from_industry_all = yes
+	# DEMAND_set_demand_from_industry_all = yes # Handled by MANUFACTURE_
 	DEMAND_set_demand_from_food_all = yes
 }
 
@@ -566,70 +566,7 @@ DEMAND_update_fasionability = {
 
 #### INDUSTRY DEMAND
 
-DEMAND_set_demand_from_industry_all = {
-	# Scope: Governorship
-	# Function: Set the demand generated for a tradegood from every industry, per industry present.
-	# This should use the svalues for predefined demand levels, for consistency (see DEMAND_svalues). Values may be 0
-	
-
-	DEMAND_set_demand_from_industry = {
-		tradegood = $tradegood$
-		alcohol = 0 # TODO: Sort into alphabetical order of all industries
-		furniture = 0
-		luxury_furniture = 0
-	}
-
-	# WiP. Repeat, for every industry.
-
-}
-
-DEMAND_set_demand_from_industry = {
-	set_variable = {
-		name = DEMAND_$tradegood$_from_industry
-		value = 0
-	}
-	DEMAND_set_demand_from_industry_step = {
-		tradegood = $tradegood$
-		industry = alcohol
-		amount = $alcohol$
-	}
-	DEMAND_set_demand_from_industry_step = {
-		tradegood = $tradegood$
-		industry = furniture
-		amount = $furniture$
-	}
-	DEMAND_set_demand_from_industry_step = {
-		tradegood = $tradegood$
-		industry = luxury_furniture
-		amount = $luxury_furniture$
-	}
-	# etc...
-}
-
-DEMAND_set_demand_from_industry_step = {
-	# Scope: Governorship
-	# Function: Contains one step for updating industry demand, to decrease the number of lines needed in DEMAND_set_demand_from_industry
-	if = { # alcohol
-		limit = {
-			INDUSTRY_factories_assigned_$industry$ > 0
-		}
-		set_local_variable = {
-			name = l_DEMAND_$tradegood$_from_industry_$industry$
-			value = INDUSTRY_factories_assigned_$industry$
-		}
-		if = {
-			limit = { $amount$ > 0 }
-			change_local_variable = {
-				name = l_DEMAND_$tradegood$_from_industry_$industry$
-				multiply = $industry$
-			}
-			change_variable = {
-				name = DEMAND_$tradegood$_from_industry
-				add = local_var:l_DEMAND_$tradegood$_from_industry_$industry$
-			}
-		}
-	}
-}
+# Demand from industry is set by industry production scripts in MANUFACTURE_
 
 DEMAND_set_demand_from_pops = {
 	set_variable = {
@@ -705,4 +642,9 @@ DEMAND_set_demand = {
 		}
 	}
 
+}
+
+DEMAND_update_tradegood = {
+	tradegood = glass
+	industry = 
 }

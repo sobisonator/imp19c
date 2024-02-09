@@ -3,3 +3,63 @@
 	# There must be a local variable called l_variable_holder for this to work
 	value = global_var:l_variable_holder
 }
+
+FUNC_num_governorships = {
+	# Scope: Country
+	every_governorships = {
+		add = 1
+	}
+}
+
+FUNC_num_governorships_with_ports = {
+	# Scope: Country
+	every_governorships = {
+		limit = {
+			any_governorship_state = {
+				any_state_province = {
+					num_of_port_building > 0
+				}
+			}
+		}
+		add = 1
+	}
+}
+
+FUNC_country_total_forts = {
+	# Scope: Country
+	value = 0
+	every_governorships = {
+		every_governorship_state = {
+			every_state_province = {
+				limit = {
+					num_of_fortress_building > 0
+				}
+				add = num_of_fortress_building
+			}
+		}
+	}
+}
+
+FUNC_governorship_ratio_national_forts = {
+	# Scope: Governorship
+	# Function: Get the percentage of the country's forts that are located in this governorship
+	value = 0
+	if = {
+		limit = {
+			owner = {
+				FUNC_country_total_forts > 0 
+			}
+		}
+		every_governorship_state = {
+			every_state_province = {
+				limit = {
+					num_of_fortress_building > 0
+				}
+				add = num_of_fortress_building
+			}
+		}
+		owner = {
+			divide = FUNC_country_total_forts
+		}
+	}
+}

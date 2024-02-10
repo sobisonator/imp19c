@@ -1,16 +1,68 @@
-PURCHASE_check_shopping = {
-	
+PURCHASE_N_ITS_reset_vars = {
+	# Scope: Internal trade scope
+	# Function: Reset all the variables for storing internal orders etc.
+	every_tradegood_complex = {
+		APPLY = PURCHASE_N_ITS_reset_var
+	}
 }
 
-PURCHASE_get_purchase_percentage = {
+PURCHASE_N_ITS_reset_var = {
+	# Scope: Internal trade scope
+	# Function: Reset all PURCHASE_N vars for $tradegood$
+
+	set_variable = {
+		name = ITS_total_ordered_$tradegood$
+		value = 0
+	}
+
+}
+
+PURCHASE_N_submit_order = {
+	save_scope_as = ordering_governorship
+
+	set_variable = {
+		name = order_size_$tradegood$
+		value = DEMAND_$tradegood$
+	}
+
+	change_variable = {
+		name = order_size_$tradegood$
+		subtract = var:$tradegood$_stockpile
+	}
+
+	if = {
+		limit = {
+			var:order_size_$tradegood$ > 0
+		}
+
+		var:internal_trade_scope = {
+			change_variable = {
+				name = ITS_total_ordered_$tradegood$
+				add = scope:ordering_governorship.var:order_size_$tradegood$
+			}
+		}
+	}
+}
+
+PURCHASE_N_get_ITS_purchase_percentage = {
+	# Scope: Governorship
 	# Get this governorship's order for X tradegood as a percentage of X tradegood ordered across the ITS
+	set_variable = {
+		name = ITS_purchase_percentage_$tradegood$
+		value = var:order_size_$tradegood$
+	}
+
+	change_variable = {
+		name = ITS_purchase_percentage_$tradegood$
+		divide = var:internal_trade_scope.var:ITS_total_ordered_$tradegood$
+	}
 }
 
-PURCHASE_aggregate_shopping = {
+PURCHASE_N_aggregate_shopping = {
 	
 }
 
-PURCHASE_order_tradegood = {
+PURCHASE_N_order_tradegood = {
 	# Scope: ITS (Implicitly on behalf of the ITS TZ group)
 	# Acting on behalf of a TZ inside the ITS.
 	# This SE is repeated for every TZ inside the ITS, so that scoring of distances can be done appropriately based on the purchaser TZ
@@ -19,7 +71,38 @@ PURCHASE_order_tradegood = {
 	# ALSO begin counting up the amount of import costs
 }
 
-PURCHASE_distribute_orders = {
+PURCHASE_N_distribute_orders = {
 	# Function: Distribute ordered $tradegood$ to governorships based on the purchase percentage of $tradegood$ they have
 	# Also distribute import costs according to the same percentage
+}
+
+PURCHASE_N_get_average_price = {
+	# Function: Divide the overall spend on $tradegood$ by the number of units purchased
+}
+
+PURCHASE_N_full_cycle = {
+	save_scope_as = ITS_scope
+
+	PURCHASE_N_ITS_reset_vars = yes
+
+	every_internal_trade_scope = {
+		every_in_list = {
+			variable = ITS_list_of_governorships
+
+			every_tradegood_complex = {
+				APPLY = PURCHASE_N_submit_order
+			}
+		}
+	}
+
+	every_internal_trade_scope = {
+		every_in_list = {
+			variable = ITS_list_of_governorships
+
+			every_tradegood_complex = {
+				APPLY = PURCHASE_N_get_ITS_purchase_percentage
+			}
+		}
+	}
+
 }

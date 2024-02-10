@@ -1666,9 +1666,8 @@ TRADE_set_internal_trade_scope = {
 				}
 			}
 		}
-		set_variable = {
-			name = internal_trade_scope
-			value = owner
+		TRADE_create_internal_trade_scope = {
+			scope = owner.capital_scope
 		}
 
 	}
@@ -1683,14 +1682,22 @@ TRADE_set_internal_trade_scope = {
 				}
 			}
 		}
-#		owner = {
-#			var:overlord_customs_union = {
-#				save_scope_as = internal_trade_scope
-#			}
-#		}
-		set_variable = {
-			name = internal_trade_scope
-			value = owner.var:overlord_customs_union
+		if = {
+			limit = { 
+				owner.var:overlord_customs_union = {
+					NOT = {
+						has_variable = overlord_customs_union
+					}
+				}
+			}
+			TRADE_create_internal_trade_scope = {
+				scope = owner.var:overlord_customs_union.capital_scope
+			}
+		}
+		else = {
+			TRADE_create_internal_trade_scope = {
+				scope = owner.var:overlord_customs_union.var:overlord_customs_union.capital_scope
+			}
 		}
 	}
 
@@ -1701,16 +1708,14 @@ TRADE_set_internal_trade_scope = {
 		var:federation_customs_union = {
 			save_scope_as = internal_trade_scope
 		}
-		set_variable = {
-			name = internal_trade_scope
-			value = scope:internal_trade_scope
+		TRADE_create_internal_trade_scope = {
+			scope = scope:internal_trade_scope
 		}
 	}
 
 	else = {
-		set_variable = {
-			name = internal_trade_scope
-			value = owner
+		TRADE_create_internal_trade_scope = {
+			scope = owner.capital_scope
 		}
 	}
 }
@@ -1723,6 +1728,22 @@ TRADE_create_overlord_customs_union = {
 		set_variable = {
 			name = overlord_customs_union
 			value = scope:overlord_scope
+		}
+	}
+}
+
+TRADE_create_internal_trade_scope = {
+	# Scope: Governorship
+	set_variable = {
+		name = internal_trade_scope
+		value = $scope$
+	}
+	save_scope_as = root_governorship
+	$scope$ = {
+		set_variable = is_internal_trade_scope
+		add_to_variable_list = {
+			name = ITS_list_of_governorships
+			target = scope:root_governorship
 		}
 	}
 }

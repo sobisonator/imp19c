@@ -1,20 +1,99 @@
-PURCHASE_N_ITS_reset_vars = {
+PURCHASE_N_ITS_reset_vars_all_tradegoods = {
 	# Scope: Internal trade scope
 	# Function: Reset all the variables for storing internal orders etc.
 	every_tradegood_complex = {
-		APPLY = PURCHASE_N_ITS_reset_var
+		APPLY = PURCHASE_N_ITS_reset_vars
 	}
 }
 
-PURCHASE_N_ITS_reset_var = {
+PURCHASE_N_ITS_reset_vars = {
 	# Scope: Internal trade scope
 	# Function: Reset all PURCHASE_N vars for $tradegood$
 
+}
+
+PURCHASE_N_reset_ITS_TZ_group_total_ordered_var = {
+	# Scope: ITS TZ group province
+	# Function: Reset the values that total up the total ordered for that TZ group in an internal trade scope
 	set_variable = {
-		name = ITS_total_ordered_$tradegood$
+		name = ITS_TZ_group_total_ordered_$tradegood$
 		value = 0
 	}
+}
 
+PURCHASE_N_setup_ITS_TZ_groups = {
+	# Scope: Internal trade scope
+	# Function: Set up the groups of governorships in each tradezone within the Internal Trade Scope
+	save_scope_as = internal_trade_scope
+
+	debug_log = "Setting up ITS TZ Groups"
+
+	# Clear the old contents of the list
+	if = {
+		limit = {
+			has_variable_list = ITS_TZ_groups
+		}
+		every_in_list = {
+			variable = ITS_TZ_groups
+
+			clear_variable_list = TZ_group_governorships
+			remove_variable = is_ITS_TZ_group_for
+		}
+	}
+	clear_variable_list = ITS_TZ_groups
+
+	every_trade_center = {
+		debug_log = "Trade center step:"
+		debug_log_scopes = yes
+		save_scope_as = this_trade_center
+
+		scope:internal_trade_scope = {
+
+			random_province = {
+				limit = {
+					NOT = {
+						has_variable = is_ITS_TZ_group_for
+					}
+				}
+				save_scope_as = ITS_TZ_group_province
+				set_variable = {
+					name = is_ITS_TZ_group_for
+					value = scope:this_trade_center
+				}
+
+				scope:internal_trade_scope = {
+					every_in_list = {
+						variable = ITS_list_of_governorships
+						limit = {
+							var:trade_center = scope:this_trade_center
+						}
+						save_scope_as = this_governorship
+						debug_log = "Giving governorship an ITS TZ group"
+						debug_log_scopes = yes
+						set_variable = {
+							name = ITS_TZ_group
+							value = scope:ITS_TZ_group_province
+						}
+						scope:ITS_TZ_group_province = {
+							add_to_variable_list = {
+								name = TZ_group_governorships
+								target = scope:this_governorship
+							}
+						}
+					}
+				}
+				every_tradegood_complex = {
+					APPLY = PURCHASE_N_reset_ITS_TZ_group_total_ordered_var
+				}
+			}
+
+			add_to_variable_list = {
+				name = ITS_TZ_groups
+				target = scope:ITS_TZ_group_province
+			}
+
+		}
+	}
 }
 
 PURCHASE_N_submit_order = {
@@ -34,10 +113,9 @@ PURCHASE_N_submit_order = {
 		limit = {
 			var:order_size_$tradegood$ > 0
 		}
-
-		var:internal_trade_scope = {
+		var:ITS_TZ_group = {
 			change_variable = {
-				name = ITS_total_ordered_$tradegood$
+				name = ITS_TZ_group_total_ordered_$tradegood$
 				add = scope:ordering_governorship.var:order_size_$tradegood$
 			}
 		}
@@ -47,19 +125,32 @@ PURCHASE_N_submit_order = {
 PURCHASE_N_get_ITS_purchase_percentage = {
 	# Scope: Governorship
 	# Get this governorship's order for X tradegood as a percentage of X tradegood ordered across the ITS
-	set_variable = {
-		name = ITS_purchase_percentage_$tradegood$
-		value = var:order_size_$tradegood$
-	}
-
-	change_variable = {
-		name = ITS_purchase_percentage_$tradegood$
-		divide = var:internal_trade_scope.var:ITS_total_ordered_$tradegood$
+	if = {
+		limit = {
+			var:order_size_$tradegood$ > 0
+		}
+		set_variable = {
+			name = ITS_purchase_percentage_$tradegood$
+			value = var:order_size_$tradegood$
+		}
+		change_variable = {
+			name = ITS_purchase_percentage_$tradegood$
+			divide = var:ITS_TZ_group.var:ITS_TZ_group_total_ordered_$tradegood$
+		}
 	}
 }
 
-PURCHASE_N_aggregate_shopping = {
+
+
+PURCHASE_N_commit_all_orders = {
+	# Scope: Internal trade scope
+	# Function: Go through every tradezone group in the internal trade scope
 	
+}
+
+PURCHASE_N_commit_order = {
+	# Scope: Internal trade scope
+	# Function: Go through every tradezone group in the internal trade scope and order every tradegood based on rankings of distance and cost of other tradezones
 }
 
 PURCHASE_N_order_tradegood = {
@@ -81,9 +172,18 @@ PURCHASE_N_get_average_price = {
 }
 
 PURCHASE_N_full_cycle = {
-	save_scope_as = ITS_scope
+	# Scope: Random country
 
-	PURCHASE_N_ITS_reset_vars = yes
+	every_country = {
+		every_governorships = {
+			TRADE_set_internal_trade_scope = yes
+		}
+	}
+
+	every_internal_trade_scope = {
+		#PURCHASE_N_ITS_reset_vars_all_tradegoods = yes
+		PURCHASE_N_setup_ITS_TZ_groups = yes
+	}
 
 	every_internal_trade_scope = {
 		every_in_list = {

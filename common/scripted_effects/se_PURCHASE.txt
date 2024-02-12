@@ -1,4 +1,4 @@
-﻿
+
 #*************************************************
 #*            The Purchase Order Plan            *
 #*************************************************
@@ -94,7 +94,7 @@ PURCHASE_make_internal_shopping_list = {
 	}
 	PURCHASE_check_shopping_internal = { 
 		tradegood = whales 
-		category = essential_goods
+		category = business_goods
 	}
 	PURCHASE_check_shopping_internal = { 
 		tradegood = alcohol 
@@ -330,8 +330,112 @@ PURCHASE_check_shopping_internal = {
 	# Function: The sole purpose of this effect is to only run the purchase order effect if there's actually demand, therefore all of its arguments are basically proxies for the purchase order effect.
 	save_scope_as = purchaser_governorship
 
-	debug_log_scopes = yes
-	debug_log = "Checking shopping for  $tradegood$  "
+	### BEGIN INTERNAL
+
+	if = { # Only process this if the internal trade scope has any of the goods to offer.
+		limit = {
+			var:internal_trade_scope = {
+				var:$tradegood$_stockpile_total > 0
+			}
+		}
+		set_local_variable = {
+			name = l_demand_diff
+			value = DEMAND_$tradegood$ 
+		}
+		change_local_variable = {
+			name = l_demand_diff
+			subtract = var:$tradegood$_stockpile
+		}
+
+		# If the trade center for this internal tradescope tradescope has not yet ranked this good this quarter, rank it first. Otherwise, skip this step.
+		# TODO: Think of a way to check this. Set a variable unique to the internal trade scope / trade center combination. Should be easy enough...
+
+		# Returns var:l_order_size
+		PURCHASE_set_order_size = {
+			tradegood = $tradegood$
+		}
+		# If the preferred supplier for the goods is external, and internal trade is not preferred by law, then go external first.
+		#if = {
+		#	limit = {
+		#		NOT = { var:preferred_supplier = var:internal_trade_scope }
+		#	}
+		#}
+		if = {
+			limit = {
+				var:l_order_size > 0
+			}
+			if = {
+				limit = {
+					NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
+				}
+				PURCHASE_get_preferred_tradezone_internal = {
+					tradegood = $tradegood$
+					order_size = scope:purchaser_governorship.var:l_order_size
+				} # Creates a set of variables in the trade center
+			}
+			set_local_variable = {
+				name = TZs_tried
+				value = 0
+			}
+			while = {
+				limit = {
+					var:l_order_size > 0
+					local_var:TZs_tried < var:internal_trade_scope.num_TZ_in_ITS
+				}
+				PURCHASE_order_internal = {
+					tradegood = $tradegood$
+					order_size = scope:purchaser_governorship.var:l_order_size
+					category = $category$
+				}
+				change_local_variable = {
+					name = TZs_tried
+					add = 1
+				}
+			}
+		}
+	}
+
+	### END INTERNAL
+
+	# EXTERNAL
+	# If the stockpile is still not full, try to purchase externally.
+	# Reset demand diff
+	set_local_variable = {
+		name = l_demand_diff
+		value = DEMAND_$tradegood$
+	}
+	change_local_variable = {
+		name = l_demand_diff
+		subtract = var:$tradegood$_stockpile
+	}
+
+	# Returns var:l_order_size
+	PURCHASE_set_order_size = {
+		tradegood = $tradegood$
+	}
+
+	# debug_log = "About to check purchase order external trigger"
+
+	if = {
+		limit = {
+			AND = {
+				local_var:l_demand_diff > 0
+				owner = { has_variable_list = list_of_trade_partners_all_categories }
+			}
+		}
+		# debug_log = "Purchase order external triggers YES"
+		PURCHASE_order_external = {
+			tradegood = $tradegood$
+			order_size = scope:purchaser_governorship.var:l_order_size
+			category = $category$
+		}
+	}
+}
+
+PURCHASE_check_shopping_internal_pre_ranked = {
+	# Scope: governorship
+	# Function: The sole purpose of this effect is to only run the purchase order effect if there's actually demand, therefore all of its arguments are basically proxies for the purchase order effect.
+	save_scope_as = purchaser_governorship
 
 	### BEGIN INTERNAL
 
@@ -358,29 +462,38 @@ PURCHASE_check_shopping_internal = {
 			tradegood = $tradegood$
 		}
 
-		if = {
-			limit = {
-				NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
-			}
-			PURCHASE_get_preferred_tradezone_internal = {
-				tradegood = $tradegood$
-				order_size = scope:purchaser_governorship.var:l_order_size
-			} # Creates a set of variables in the trade center
-		}
+		#if = {
+		#	limit = {
+		#		NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
+		#	}
+		#	PURCHASE_get_preferred_tradezone_internal = {
+		#		tradegood = $tradegood$
+		#		order_size = scope:purchaser_governorship.var:l_order_size
+		#	} # Creates a set of variables in the trade center
+		#}
 		# If the preferred supplier for the goods is external, and internal trade is not preferred by law, then go external first.
 		#if = {
 		#	limit = {
 		#		NOT = { var:preferred_supplier = var:internal_trade_scope }
 		#	}
 		#}
-		if = {
+		set_local_variable = {
+			name = TZs_tried
+			value = 0
+		}
+		while = {
 			limit = {
 				var:l_order_size > 0
+				local_var:TZs_tried < var:internal_trade_scope.num_TZ_in_ITS
 			}
 			PURCHASE_order_internal = {
 				tradegood = $tradegood$
 				order_size = scope:purchaser_governorship.var:l_order_size
 				category = $category$
+			}
+			change_local_variable = {
+				name = TZs_tried
+				add = 1
 			}
 		}
 	}
@@ -388,21 +501,7 @@ PURCHASE_check_shopping_internal = {
 	### END INTERNAL
 
 	# EXTERNAL
-	# If the stockpile is still not full, try to purchase externally.
-	# Reset demand diff
-	set_local_variable = {
-		name = l_demand_diff
-		value = DEMAND_$tradegood$
-	}
-	change_local_variable = {
-		name = l_demand_diff
-		subtract = var:$tradegood$_stockpile
-	}
-
-	# Returns var:l_order_size
-	PURCHASE_set_order_size = {
-		tradegood = $tradegood$
-	}
+	# Order size should be above 0 already
 
 	# debug_log = "About to check purchase order external trigger"
 
@@ -782,6 +881,10 @@ PURCHASE_get_seller_purchaser_score_internal = {
 				name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
 				add = var:trade_center.var:here_to_$supplier_TZ$_tradezone
 			}
+		}
+		change_variable = {
+			name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+			multiply = -1
 		}
 	}
 
@@ -1173,7 +1276,7 @@ PURCHASE_get_preferred_tradezone_internal = {
 					    add = scope:purchaser_governorship.var:$tradegood$_supplier_score_here_to_east_mediterranean_tradezone
 					}
 				}
-				max = 6
+				max = 3
 				check_range_bounds = no
 				# save_scope_as = supplier_tradezone_ranked
 				if = {
@@ -1341,6 +1444,8 @@ PURCHASE_get_preferred_tradezone_internal = {
 	}
 
 }
+
+
 
 PURCHASE_get_preferred_tradezone_external = {
 	# Scope: governorship, to governorship's tradezone
@@ -1715,6 +1820,12 @@ PURCHASE_transfer_if_able = {
 					add = $order_size$
 				}
 			}
+			scope:purchaser_governorship = {
+				change_variable = {
+					name = l_order_size
+					subtract = scope:seller_governorship.var:this_order_size
+				}
+			}
 		}
 		}
 	else = {
@@ -1833,7 +1944,7 @@ PURCHASE_order_internal = {
 }
 
 PURCHASE_transfer_goods_internally = {
-	# Scope: governorship
+	# Scope: governorship (seller governorship)
 	# Function: Put goods in the purchasing governorship, subtract goods from the internal trade scope and allocate trade-scope-wide revenue accordingly.
 
 	# Format of arguments:
@@ -1843,6 +1954,21 @@ PURCHASE_transfer_goods_internally = {
 	# $local_price$ = local_price_grain, gets the local price of grain from the governorship owner's capital
 	# $internal_sold_total$ = internal_sold_total_grain, the total amount sold in the internal trade scope, used by the effect to distribute the cut of amount sold to contributing governorships
 	debug_log = "Transferring  $tradegood$  from  $tradezone$"
+	debug_log = "SCOPES BELOW."
+	debug_log_scopes = yes
+
+	var:trade_center = {
+		random_in_list = {
+			variable = list_of_tradegood_trackers
+			limit = {
+				var:tradegood = flag:$tradegood$
+			}
+			change_variable = {
+				name = amt_exported
+				add = $amount$
+			}
+		}
+	}
 
 	scope:purchaser_governorship = {
 		# ADD TO BUYER'S STOCKPILE
@@ -1855,6 +1981,19 @@ PURCHASE_transfer_goods_internally = {
 		set_local_variable = {
 			name = this_spend
 			value = $amount$
+		}
+
+		var:trade_center = {
+			random_in_list = {
+				variable = list_of_tradegood_trackers
+				limit = {
+					var:tradegood = flag:$tradegood$
+				}
+				change_variable = {
+					name = amt_imported
+					add = $amount$
+				}
+			}
 		}
 	}
 
@@ -1870,9 +2009,45 @@ PURCHASE_transfer_goods_internally = {
 		}
 	}
 
-	change_local_variable = { # use the price from the seller TZ
+	change_local_variable = { # use the price from the seller TZ, marked up to the midpoint between seller and purchaser
 		name = this_spend
 		multiply = global_var:global_$tradezone$_tradezone.var:local_price_$tradegood$
+	}
+
+	if = {
+		limit = {
+			NOT = {
+				global_var:global_$tradezone$_tradezone = scope:purchaser_governorship.var:trade_center
+			}
+		}
+		# Mark up to exploit the price in the purchaser TZ
+		set_local_variable = {
+			name = price_markup
+			value = scope:purchaser_governorship.var:trade_center.var:local_price_$tradegood$
+		}
+		# If the purchaser's TZ's price is higher than the seller's
+		change_local_variable = {
+			name = price_markup
+			subtract = global_var:global_$tradezone$_tradezone.var:local_price_$tradegood$
+		}
+		if = {
+			limit = {
+				local_var:price_markup > 0
+			}
+			change_local_variable = { # meet 25% of the way between prices
+				name = price_markup
+				multiply = 0.25
+			}
+			change_local_variable = {
+				name = price_markup
+				multiply = $amount$
+			}
+		}
+
+		change_local_variable = {
+			name = this_spend
+			add = local_var:price_markup
+		}
 	}
 
 	# Update the amount sold from the seller TZ. This is used to update the price: the total demand in the seller TZ is divided by the amount sold in that TZ
@@ -1890,7 +2065,7 @@ PURCHASE_transfer_goods_internally = {
 			}
 		}
 		PURCHASE_update_shipping = {
-			origin_tradezone_name = $tradezone$
+			#origin_tradezone_name = $tradezone$
 			origin_tradezone = global_var:global_$tradezone$_tradezone
 			destination_tradezone = scope:purchaser_governorship.var:trade_center
 			order_size = $amount$
@@ -1916,6 +2091,10 @@ PURCHASE_transfer_goods_internally = {
 					has_variable = here_to_$tradezone$_tradezone
 				}
 			}
+			set_local_variable = {
+				name = this_spend_on_transport
+				value = var:trade_center.var:here_to_$tradezone$_tradezone
+			}
 			change_local_variable = {
 				name = this_spend
 				add = var:trade_center.var:here_to_$tradezone$_tradezone # Note: should this be re-framed as here_from_$tradezone$, so that it can account for the speed of importing being faster in one direction?
@@ -1929,14 +2108,17 @@ PURCHASE_transfer_goods_internally = {
 
 		change_variable = {
 			name = governorship_this_quarter_spend_on_$category$
-			subtract = local_var:this_spend # Must be negative so it can be used with add_treasury
+			add = local_var:this_spend
 		}
 
-		owner = {
-			change_variable = {
-				name = country_internal_bought_total_$tradegood$
-				add = $amount$
-			}
+		change_variable = {
+			name = governorship_this_quarter_spend_on_$tradegood$
+			add = local_var:this_spend
+		}
+
+		change_variable = {
+			name = governorship_this_quarter_imported_$tradegood$
+			add = $amount$ # Must be negative so it can be used with add_treasury
 		}
 
 		# Mark the goods transfer as complete, so it does not repeat the order in lower ranked tradezones
@@ -2416,7 +2598,8 @@ PURCHASE_order_external = {
 	# Scope: governorship
 	# Function: Buy from stockpiles in other trade scopes
 	# Called: By PURCHASE_check_shopping_internal, if PURCHASE_order_internal does not succeed in filling up the stockpile
-	debug_log = "Making an EXTERNAL purchase order for $tradegood$"
+	debug_log = "SCOPES BELOW. Making an EXTERNAL purchase order for  $tradegood$"
+	debug_log_scopes = yes
 	capital_scope.owner = {
 		if = {
 			limit = { 
@@ -2424,6 +2607,8 @@ PURCHASE_order_external = {
 			}
 			every_in_list = {
 				variable = list_of_trade_partners_all_categories
+				debug_log = "SCOPES BELOW: Checking trade partner for  $tradegood$"
+				debug_log_scopes = yes
 				capital_scope.governorship = {
 					if = {
 						limit = {
@@ -2448,6 +2633,7 @@ PURCHASE_order_external = {
 							}
 						}
 						add = capital_scope.governorship.var:1st_rank_internal_supplier_$tradegood$.var:local_price_$tradegood$
+						multiply = -1
 					}
 					# TODO: Add a way of affecting the order by the distance between scope:purchaser_governorship and the seller tradezone
 					#if = {
@@ -2459,10 +2645,14 @@ PURCHASE_order_external = {
 					#	add = scope:purchaser_governorship.var:trade_center.var:here_to_$tradezone$_tradezone
 					#}
 				}
+				max = 1
+				check_range_bounds = no
+				debug_log = "SCOPES BELOW: Attempting to order  $tradegood$ from supplier"
+				debug_log_scopes = yes
 				if = {
 					limit = { # Do only one attempt with the best ranked external trade partner
 						scope:purchaser_governorship = { 
-							NOT = { has_local_variable = external_trade_done_$tradegood$ }
+							NOT = { has_variable = external_trade_done_$tradegood$ } # If we want, we can set this flag only when the order has been fulfilled, in order to try more than one trade partner.
 						}
 					}
 					capital_scope.governorship = { # Capital of the seller's country acts as the trader, handling the transfer on behalf of the purchaser governorship
@@ -2476,14 +2666,16 @@ PURCHASE_order_external = {
 							category = $category$
 						}
 
-						# Remove the 1st rank supplier that was used just for external trade
-						remove_variable = 1st_rank_internal_supplier_$tradegood$
 					}
 					scope:purchaser_governorship = {
-						set_local_variable = external_trade_done_$tradegood$
+						debug_log = "SCOPES BELOW. External trade done for  $tradegood$"
+						debug_log_scopes = yes
+						set_variable = {
+							name = external_trade_done_$tradegood$
+							days = 1
+						}
 					}
 				}
-
 			}
 		}
 	}
@@ -2544,112 +2736,17 @@ PURCHASE_rank_deals = { # Rank tradezones by total costs for the named tradegood
 # SHIPPING FUNCTIONS
 
 PURCHASE_reset_shipping_variables = {
-    set_global_variable = {
-	    name = india_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = east_north_america_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = west_north_america_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = caribbean_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = west_south_america_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = east_south_america_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = south_east_asia_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = indo_china_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = yellow_sea_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = southern_africa_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = west_africa_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = east_africa_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = middle_east_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = western_steppe_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = eastern_steppe_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = upper_yangtzi_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = atlantic_seaboard_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = central_europe_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = west_mediterranean_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = baltic_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = east_europe_shipping
-	    value = 0
-    }
-    set_global_variable = {
-	    name = east_mediterranean_shipping
-	    value = 0
+    every_trade_center = {
+    	set_variable = {
+    		name = TZ_shipping
+    		value = 0
+    	}
     }
 }
 
 PURCHASE_update_shipping = {
 
-	# Part 1: Update shipping trafic in origin and destination tradezones
-
-	change_global_variable = {
-		name = $origin_tradezone_name$_shipping
-		add = $order_size$
-	}
-	$destination_tradezone$ = {
-		change_variable = {
-			name = TZ_shipping
-			add = $order_size$
-		}
-	}
-
-	# Part 2: Update shipping traffic in en-route locations
+	# Part 1: Update shipping traffic in en-route locations, and get the amount by which to divide the spend on transport (2, for origin and destination, + number of intermediate TZs)
 
 	if = { # 1: India <-> European Atlantic Coast
 		limit = {
@@ -2681,6 +2778,7 @@ PURCHASE_update_shipping = {
 				}
 			}
 		}
+		debug_log = "Shipping between India and European Atlantic Coast"
 		PURCHASE_india_to_european_atlantic_shipping = {
 			order_size = $order_size$ 
 		}
@@ -2747,9 +2845,11 @@ PURCHASE_update_shipping = {
 			}
 		}
 		else = {
-			change_global_variable = {
-				name = caribbean_shipping
+			global_var:global_caribbean_tradezone = {
+			change_variable = {
+				name = TZ_shipping
 				add = $order_size$
+			}
 			}
 		}
 		
@@ -2804,9 +2904,11 @@ PURCHASE_update_shipping = {
 				}
 			}
 		}
-		change_global_variable = {
-			name = yellow_sea_shipping
+			global_var:global_yellow_sea_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 		PURCHASE_china_to_india_shipping = {
 			order_size = $order_size$
@@ -2835,9 +2937,11 @@ PURCHASE_update_shipping = {
 				}
 			}
 		}
-		change_global_variable = {
-			name = east_mediterranean_shipping
+			global_var:global_east_mediterranean_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 	}
 
@@ -2891,9 +2995,11 @@ PURCHASE_update_shipping = {
 				}
 			}
 		}
-		change_global_variable = {
-			name = middle_east_shipping
+			global_var:global_middle_east_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 	}
 
@@ -2955,15 +3061,19 @@ PURCHASE_update_shipping = {
 			limit = {
 				has_global_variable = panama_canal_built
 			}
-			change_global_variable = {
-				name = east_north_america_shipping
+				global_var:global_east_north_america_tradezone = {
+			change_variable = {
+				name = TZ_shipping
 				add = $order_size$
+			}
 			}
 		}
 		else = {
-			change_global_variable = {
-				name = west_africa_shipping
+			global_var:global_west_africa_tradezone = {
+			change_variable = {
+				name = TZ_shipping
 				add = $order_size$
+			}
 			}
 		}
 	}
@@ -2991,9 +3101,11 @@ PURCHASE_update_shipping = {
 			}
 		}
 		
-		change_global_variable = {
-			name = west_africa_shipping
+			global_var:global_west_africa_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 		
 	}
@@ -3021,9 +3133,11 @@ PURCHASE_update_shipping = {
 			}
 		}
 		
-		change_global_variable = {
-			name = baltic_shipping
+			global_var:global_baltic_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 		
 	}
@@ -3050,9 +3164,11 @@ PURCHASE_update_shipping = {
 				}
 			}
 		}
-		change_global_variable = {
-			name = east_europe_shipping
+			global_var:global_east_europe_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 		PURCHASE_east_europe_atlantic_seaboard_shipping = {
 			order_size = $order_size$
@@ -3112,9 +3228,11 @@ PURCHASE_update_shipping = {
 			}
 		}
 		
-		change_global_variable = {
-			name = east_mediterranean_shipping
+			global_var:global_east_mediterranean_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 		
 	}
@@ -3142,13 +3260,17 @@ PURCHASE_update_shipping = {
 			}
 		}
 		
-		change_global_variable = {
-			name = east_mediterranean_shipping
+			global_var:global_east_mediterranean_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
 		}
-		change_global_variable = {
-			name = west_mediterranean_shipping
+		}
+			global_var:global_west_mediterranean_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 		
 	}
@@ -3176,13 +3298,17 @@ PURCHASE_update_shipping = {
 			}
 		}
 		
-		change_global_variable = {
-			name = baltic_shipping
+			global_var:global_baltic_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
 		}
-		change_global_variable = {
-			name = atlantic_seaboard_shipping
+		}
+			global_var:global_atlantic_seaboard_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 		PURCHASE_atlantic_seaboard_east_north_america_shipping = {
 			order_size = $order_size$
@@ -3245,13 +3371,31 @@ PURCHASE_update_shipping = {
 		PURCHASE_atlantic_seaboard_east_north_america_shipping = {
 			order_size = $order_size$
 		}
-		change_global_variable = {
-			name = east_north_america_shipping
+			global_var:global_east_north_america_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 		
 	}
 
+	# Part 1: Update shipping trafic in origin and destination tradezones
+
+	# We should assume that local_var:this_spend_on_transport exists, because it is created in the same circumstances, i.e. the purchaser and seller TZs are not the same
+
+	$origin_tradezone$ = {
+		change_variable = {
+			name = TZ_shipping
+			add = $order_size$
+		}
+	}
+	$destination_tradezone$ = {
+		change_variable = {
+			name = TZ_shipping
+			add = $order_size$
+		}
+	}
 
 }
 
@@ -3265,13 +3409,17 @@ PURCHASE_atlantic_seaboard_east_north_america_shipping = {
 		# Do nothing, direct route
 	}
 	else = {
-		change_global_variable = {
-			name = west_africa_shipping
+		global_var:global_west_africa_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
 		}
-		change_global_variable = {
-			name = caribbean_shipping
+		}
+			global_var:global_caribbean_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 	}
 }
@@ -3281,19 +3429,25 @@ PURCHASE_southern_africa_east_mediterranean_shipping = {
 		limit = { 
 			NOT = { has_global_variable = suez_canal_built }
 		}
-		change_global_variable = {
-			name = west_africa_shipping
+			global_var:global_west_africa_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
 		}
-		change_global_variable = {
-			name = west_mediterranean_shipping
+		}
+			global_var:global_west_mediterranean_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 	}
 	else = {
-		change_global_variable = {
-			name = east_africa_shipping
+		global_var:global_east_africa_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 	}
 }
@@ -3308,18 +3462,23 @@ PURCHASE_east_europe_atlantic_seaboard_shipping = {
 		multiply = 0.5
 	}
 
-	change_global_variable = {
-		name = east_mediterranean_shipping
-		add = local_var:l_shipping_value
+	global_var:global_east_mediterranean_tradezone = {
+		change_variable = {
+			name = TZ_shipping
+			add = local_var:l_shipping_value
+		}
 	}
-	change_global_variable = {
-		name = west_mediterranean_shipping
-		add = local_var:l_shipping_value
+	global_var:global_west_mediterranean_tradezone = {
+		change_variable = {
+			name = TZ_shipping
+			add = local_var:l_shipping_value
+		}
 	}
-
-	change_global_variable = {
-		name = baltic_shipping
-		add = local_var:l_shipping_value
+	global_var:global_baltic_tradezone = {
+		change_variable = {
+			name = TZ_shipping
+			add = local_var:l_shipping_value
+		}
 	}
 }
 
@@ -3338,89 +3497,119 @@ PURCHASE_west_south_america_to_east_north_america_shipping = {
 			name = l_shipping_value
 			multiply = 0.33
 		}
-
-		change_global_variable = {
-			name = west_north_america_tradezone
-			add = local_var:l_shipping_value
+		global_var:west_north_america_tradezone = {
+			change_variable = {
+				name = TZ_shipping
+				add = local_var:l_shipping_value
+			}
 		}
-		change_global_variable = {
-			name = caribbean_tradezone
-			add = local_var:l_shipping_value
+		global_var:global_caribbean_tradezone = {
+			change_variable = {
+				name = TZ_shipping
+				add = local_var:l_shipping_value
+			}
 		}
-		change_global_variable = {
-			name = east_south_america_tradezone
-			add = local_var:l_shipping_value
+		global_var:global_east_south_america_tradezone = {
+			change_variable = {
+				name = TZ_shipping
+				add = local_var:l_shipping_value
+			}
 		}
 	}
 	else = {
-		change_global_variable = {
-			name = caribbean_tradezone
+		global_var:global_caribbean_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 	}
 }
 
 PURCHASE_china_to_india_shipping = {
-	change_global_variable = {
-		name = indo_china_shipping
+	global_var:global_indo_china_tradezone = {
+	change_variable = {
+		name = TZ_shipping
 		add = $order_size$
 	}
-	change_global_variable = {
-		name = south_east_asia_shipping
+	}
+		global_var:global_south_east_asia_tradezone = {
+	change_variable = {
+		name = TZ_shipping
 		add = $order_size$
+	}
 	}
 }
 
 PURCHASE_india_to_northern_american_atlantic_shipping = {
-	change_global_variable = {
-		name = east_africa_shipping
+	global_var:global_east_africa_tradezone = {
+	change_variable = {
+		name = TZ_shipping
 		add = $order_size$
 	}
-	change_global_variable = {
-		name = southern_africa_shipping
+	}
+		global_var:global_southern_africa_tradezone = {
+	change_variable = {
+		name = TZ_shipping
 		add = $order_size$
 	}
-	change_global_variable = {
-		name = west_africa_shipping
+	}
+		global_var:global_west_africa_tradezone = {
+	change_variable = {
+		name = TZ_shipping
 		add = $order_size$
 	}
-	change_global_variable = {
-		name = caribbean_shipping
+	}
+		global_var:global_caribbean_tradezone = {
+	change_variable = {
+		name = TZ_shipping
 		add = $order_size$
+	}
 	}
 }
 
 PURCHASE_india_to_european_atlantic_shipping = {
-	change_global_variable = {
-		name = east_africa_shipping
+	global_var:global_east_africa_tradezone = {
+	change_variable = {
+		name = TZ_shipping
 		add = $order_size$
+	}
 	}
 	if = {
 		limit = {
 			NOT = { has_global_variable = suez_canal_built }
 		}
-		change_global_variable = {
-			name = southern_africa_shipping
+			global_var:global_southern_africa_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
 		}
-		change_global_variable = {
-			name = west_africa_shipping
+		}
+			global_var:global_west_africa_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 	}
 	else = {
-		change_global_variable = {
-			name = east_mediterranean_shipping
+		global_var:global_east_mediterranean_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
 		}
-		change_global_variable = {
-			name = west_mediterranean_shipping
+		}
+			global_var:global_west_mediterranean_tradezone = {
+		change_variable = {
+			name = TZ_shipping
 			add = $order_size$
+		}
 		}
 	}
 }
 
 PURCHASE_update_all_quarterly_shipping = {
+	# DEFUNCT
 	global_var:global_india_tradezone = {
 	    set_variable = {
 		    name = TZ_shipping

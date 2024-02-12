@@ -1062,25 +1062,38 @@ SELL_get_internal_cut_of_revenue = {
 
 		# SUBTRACT THE RESOURCES SOLD FROM THE GOVERNORSHIPS ACCORDING TO THEIR CUT
 
-		set_variable = { # Get the total internal revenue from the tradezone
-			name = local_sold_cut_$tradegood$
-			value = var:internal_trade_scope.var:$tradegood$_sold_total_$tradezone$ 
-		}
+		if = {
+			limit = {
+				var:internal_trade_scope = {
+					has_variable = $tradegood$_sold_total_$tradezone$
+				}
+			}
+			set_variable = { # Get the total internal revenue from the tradezone
+				name = local_sold_cut_$tradegood$
+				value = var:internal_trade_scope.var:$tradegood$_sold_total_$tradezone$ 
+			}
 
-		change_variable = {
-			name = local_sold_cut_$tradegood$
-			multiply = var:internal_stockpile_cut_percentage_$tradegood$
-		}
-
-		change_variable = {
-			name = $tradegood$_stockpile
-			subtract = var:local_sold_cut_$tradegood$
-		}
-
-		owner = {
 			change_variable = {
-				name = country_internal_total_sold_$tradegood$
-				add = prev.var:local_sold_cut_$tradegood$
+				name = local_sold_cut_$tradegood$
+				multiply = var:internal_stockpile_cut_percentage_$tradegood$
+			}
+
+			change_variable = {
+				name = $tradegood$_stockpile
+				subtract = var:local_sold_cut_$tradegood$
+			}
+
+			owner = {
+				change_variable = {
+					name = country_internal_total_sold_$tradegood$
+					add = prev.var:local_sold_cut_$tradegood$
+				}
+			}
+		}
+		else = {
+			set_variable = { # Get the total internal revenue from the tradezone
+				name = local_sold_cut_$tradegood$
+				value = 0
 			}
 		}
 	}

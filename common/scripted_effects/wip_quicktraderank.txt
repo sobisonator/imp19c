@@ -1,0 +1,856 @@
+TRADE_setup_governorship_TZ_references = {
+	# Scope: Governorship
+	# Function: Set up a set of Province objects to contain the unique data for this governorship's trade rankings, which is designed to reduce the performance impact of tradezone ranking
+	# NOTE: I don't think this is necessary, we can just get the info from global and scripted lists
+	# Called: Whenever a governorship is created, including at game start
+	if = {
+		limit = {
+			NOT = {
+				has_variable = governorship_TZ_references_done
+			}
+		}
+		save_scope_as = root_governorship
+		every_trade_center = {
+			save_scope_as = this_TZ
+			random_province = {
+				limit = {
+					NOT = {
+						has_variable = is_TZ_reference
+					}
+				}
+				save_scope_as = TZ_reference_scope
+				set_variable = is_TZ_reference
+				set_variable = {
+					name = root_governorship
+					value = scope:root_governorship
+				}
+				set_variable = {
+					name = this_TZ
+					value = scope:this_TZ
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_setup_TZ_reference_tradegood_score
+				}
+				scope:root_governorship = {
+					add_to_variable_list = {
+						name = list_of_TZ_references
+						target = scope:TZ_reference_scope
+					}
+				}
+			}
+		}
+	}
+}
+
+TRADE_setup_governorship_TZ_reference_tradegood_score = {
+	# Scope: Province (governorship TZ reference province)
+	# Function: Set up the variables needed for ranking a tradegood from a tradezone to the root governorship of this TZ reference province
+	# Called: By TRADE_setup_governorship_TZ_references
+	set_variable = {
+		name = $tradegood$_supplier_score_here_from_origin # Origin = the tradezone referenced in the origin scope
+		value = 0 # This needs to be set to the TZ distance 
+	}
+}
+
+TRADE_setup_all_TZ_travel_time_records = {
+	every_trade_center = {
+		TRADE_setup_TZ_travel_time_records = yes
+	}
+}
+
+TRADE_setup_TZ_connection_time_records = { # OBSOLETE - use TRADE_setup_routes and TRADE_update_all_route_connection_times
+	# Scope: Province (trade center province)
+	# Function: set up province objects to record the travel time values between this tradezone and every other tradezone
+	# Called: At beginning of game (the related update effect is every trade tick)
+	save_scope_as = root_TZ
+	every_trade_center = {
+		save_scope_as = destination_TZ
+		random_province = {
+			NOT = {
+				has_variable = is_TZ_travel_time_record
+			}
+			save_scope_as = TZ_travel_time_record
+			set_variable = is_TZ_travel_time_record
+			set_variable = {
+				name = root_TZ
+				value = scope:root_TZ
+			}
+			set_variable = {
+				name = destination_TZ
+				value = scope:destination_TZ
+			}
+			set_variable = {
+				name = connection_time_destination_to_root_TZ
+				value = var:destination_TZ.var:here_to_$ROOT_TZ$_tradezone # TODO: Write a script to get the right value based on the identity of ROOT_TZ
+			}
+		}
+	}
+}
+
+TRADE_update_all_route_connection_times = {
+	# Scope: Country
+	# Function: Update the connection times in all the TZ connection routes to match the latest value
+	# Called: Every trade tick
+	every_in_global_list = {
+		variable = global_routes_list
+
+		TRADE_update_route_connection_time = yes
+	} 
+}
+
+TRADE_update_route_connection_time = {
+	save_scope_as = route
+	if = {
+		limit = {
+			NOT = { 
+				var:destination_TZ = var:origin_TZ
+			}
+		}
+		var:destination_TZ = {
+			switch = { # Switch based on the destination's TZ
+				trigger = has_variable
+
+				is_india_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_india_tradezone
+						}
+					}
+				}
+				is_east_north_america_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_east_north_america_tradezone
+						}
+					}
+				}
+				is_west_north_america_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_west_north_america_tradezone
+						}
+					}
+				}
+				is_caribbean_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_caribbean_tradezone
+						}
+					}
+				}
+				is_west_south_america_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_west_south_america_tradezone
+						}
+					}
+				}
+				is_east_south_america_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_east_south_america_tradezone
+						}
+					}
+				}
+				is_south_east_asia_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_south_east_asia_tradezone
+						}
+					}
+				}
+				is_indo_china_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_indo_china_tradezone
+						}
+					}
+				}
+				is_yellow_sea_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_yellow_sea_tradezone
+						}
+					}
+				}
+				is_southern_africa_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_southern_africa_tradezone
+						}
+					}
+				}
+				is_west_africa_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_west_africa_tradezone
+						}
+					}
+				}
+				is_east_africa_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_east_africa_tradezone
+						}
+					}
+				}
+				is_middle_east_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_middle_east_tradezone
+						}
+					}
+				}
+				is_western_steppe_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_western_steppe_tradezone
+						}
+					}
+				}
+				is_eastern_steppe_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_eastern_steppe_tradezone
+						}
+					}
+				}
+				is_upper_yangtzi_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_upper_yangtzi_tradezone
+						}
+					}
+				}
+				is_atlantic_seaboard_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_atlantic_seaboard_tradezone
+						}
+					}
+				}
+				is_central_europe_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_central_europe_tradezone
+						}
+					}
+				}
+				is_west_mediterranean_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_west_mediterranean_tradezone
+						}
+					}
+				}
+				is_baltic_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_baltic_tradezone
+						}
+					}
+				}
+				is_east_europe_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_east_europe_tradezone
+						}
+					}
+				}
+				is_east_mediterranean_tradezone = {
+					scope:route = {
+						set_variable = {
+							name = connection_time
+							value = var:origin_TZ.var:here_to_east_mediterranean_tradezone
+						}
+					}
+				}
+			}
+		}
+	}
+	else = {
+		set_variable = {
+			name = connection_time
+			value = 0
+		}
+	}
+}
+
+TRADE_setup_routes = {
+	# Scope: Country
+	# Function: Set up a global list of province objects that serve as the routes between tradezones
+	# Called: at game start
+	every_trade_center = {
+		save_scope_as = origin_TZ
+		every_trade_center = {
+			save_scope_as = destination_TZ
+			random_province = {
+				limit = {
+					NOT = {
+						has_variable = is_route_object
+					}
+				}
+				save_scope_as = route_object
+				set_variable = is_route_object
+
+				set_variable = {
+					name = origin_TZ
+					value = scope:origin_TZ
+				}
+				set_variable = {
+					name = destination_TZ
+					value = scope:destination_TZ
+				}
+
+				TRADE_update_route_connection_time = yes
+
+				add_to_global_variable_list = {
+					name = global_routes_list
+					target = scope:route_object
+				}
+
+				scope:origin_TZ = {
+					add_to_variable_list = {
+						name = local_routes_list
+						target = scope:route_object
+					}
+				}
+
+			}
+		}
+	}
+}
+
+
+PURCHASE_get_preferred_tradezone_internal_quickrank = {
+	# Scope: governorship
+	# Function: Get the best value supplier of $tradegood$ in the stockpiles available in the internal trade scope
+	# This checks the names of the potential supplier tradezones; it must then hand over to the next scripted effect, PURCHASE_rank_supplier_zone_internal, to get the name of the purchasing governorship's tradezone
+	# Arguments:
+	# $tradegood$
+	# $order_size$
+	if = {
+		limit = {
+			var:internal_trade_scope.num_TZ_in_ITS > 1 # Has more than 1 tradezone to score
+		}
+		var:trade_center = { save_scope_as = purchaser_TZ_scope }
+		save_scope_as = ranking_governorship # Usually the same as purchaser governorship, except for during international trade
+
+		# STEP 1: Give every accessible trade center a score
+		every_trade_center = {
+			limit = {
+				scope:ranking_governorship.var:internal_trade_scope = {
+					is_target_in_variable_list = {
+						name = list_of_tradezones_in_internal_trade_scope
+						target = PREV
+					}
+				}
+			}
+			save_scope_as = current_scoring_TZ
+			random_in_global_list = {
+				variable = global_routes_list
+				limit = { # Get the matching route
+					var:origin_TZ = scope:current_scoring_TZ
+					var:destination_TZ = scope:purchaser_governorship.var:trade_center # Check the route to the purchaser governorship, not the ranker, as the ranking governorship may be ranking on behalf of an international trade partner
+				}
+				save_scope_as = origin_TZ_route
+			}
+			set_variable = {
+				name = $tradegood$_supplier_score_here_from_origin
+				value = $order_size$
+			}
+			change_variable = {
+				name = $tradegood$_supplier_score_here_from_origin
+				multiply = var:local_price_$tradegood$
+			}
+			change_variable = {
+				name = $tradegood$_supplier_score_here_from_origin
+				add = scope:origin_TZ_route.var:connection_time # Check if this is what it's called
+				# TODO: Make the scale of this 0.01
+			}
+			change_variable = {
+				name = $tradegood$_supplier_score_here_from_origin
+				multiply = -1
+			}
+
+		}
+
+		# STEP 2: Sort the TZs by score
+		var:internal_trade_scope = {
+			ordered_in_list = {
+				variable = list_of_tradezones_in_internal_trade_scope
+				order_by = {
+					value = var:$tradegood$_supplier_score_here_from_origin
+				}
+				max = 3
+				check_range_bounds = no
+				save_scope_as = this_TZ
+				scope:ranking_governorship = {
+					if = {
+						limit = {
+							NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
+						}
+						set_variable = {
+							name = 1st_rank_internal_supplier_$tradegood$
+							value = scope:this_TZ
+						}
+						debug_log = "Awarding 1st rank supplier for  $tradegood$"
+					}
+					else_if = {
+						limit = {
+							NOT = { has_variable = 2nd_rank_internal_supplier_$tradegood$ }
+						}
+						set_variable = {
+							name = 2nd_rank_internal_supplier_$tradegood$
+							value = scope:this_TZ
+						}
+						debug_log = "Awarding 2nd rank supplier for  $tradegood$"
+					}
+					else_if = {
+						limit = {
+							NOT = { has_variable = 3rd_rank_internal_supplier_$tradegood$ }
+						}
+						set_variable = {
+							name = 3rd_rank_internal_supplier_$tradegood$
+							value = scope:this_TZ
+						}
+						debug_log = "Awarding 3rd rank supplier for  $tradegood$"
+					}
+					else_if = {
+						limit = {
+							NOT = { has_variable = 4th_rank_internal_supplier_$tradegood$ }
+						}
+						set_variable = {
+							name = 4th_rank_internal_supplier_$tradegood$
+							value = scope:this_TZ
+						}
+					}
+					else_if = {
+						limit = {
+							NOT = { has_variable = 5th_rank_internal_supplier_$tradegood$ }
+						}
+						set_variable = {
+							name = 5th_rank_internal_supplier_$tradegood$
+							value = scope:this_TZ
+						}
+					}
+					else_if = {
+						limit = {
+							NOT = { has_variable = 6th_rank_internal_supplier_$tradegood$ }
+						}
+						set_variable = {
+							name = 6th_rank_internal_supplier_$tradegood$
+							value = scope:this_TZ
+						}
+					}
+				}
+			}
+		}
+	}
+	else = {
+		set_variable = {
+			name = 1st_rank_internal_supplier_$tradegood$
+			value = var:trade_center
+		}
+	}
+
+}
+
+PURCHASE_score_supplier_zone_internal = {
+	# Scope: Trade center province
+	# Function: Takes a string substitution from TRADE_rank_supplier_zone_internal to turn the dynamically passed tradezone of the purchaser into part of the tradezone distance variable name
+
+	# Creates a score variable that is formatted like:
+	# grain_supplier_score_here_to_india_tradezone
+	# This is then used by the purchaser TZ to rank the best suppliers
+
+	# Total score is the price of the order plus cost of transport
+
+	# Steps:
+	# Add the movement cost between tradezones (0 if the same tradezone) - how to find this reasonably? We need to identify the variable for this tradezone to the originator province's tradezone. This would be easier if the movement cost variables were saved in the trade center province scopes so we could grab them right away...
+	# distance = var:here_to_$tradezone$
+	# Add the price of the tradegood in that tradezone (modified somehow to add up sensibly)
+	# (for international trade, we'll want to factor in tariff rates, but that shouldn't matter in customs unions)
+	scope:purchaser_governorship = {
+		set_variable = {
+			name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+			value = var:trade_center.var:local_price_$tradegood$
+		}
+		change_variable = {
+			name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+			multiply = $order_size$
+		}
+		if = { # If the stockpile is lower than the order size, add the difference to the score so that areas with low prices but also very little stock are not procured from, resulting in unfulfilled orders when slightly more expensive but plentiful stocks are available in the trade scope
+			limit = {
+				var:internal_trade_scope = {
+					has_variable = $tradegood$_stockpile_$supplier_TZ$_tradezone
+				}
+			}
+			debug_log = "Buying from $purchaser_TZ$ and accounting for available stockpile in  $supplier_TZ$"
+			set_local_variable = {
+				name = l_order_size_diff
+				value = $order_size$
+			}
+			change_local_variable = {
+				name = l_order_size_diff
+				subtract = var:internal_trade_scope.var:$tradegood$_stockpile_$supplier_TZ$_tradezone
+			}
+			if = {
+				limit = {
+					local_var:l_order_size_diff > 0
+				}
+				change_variable = {
+					name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+					subtract = local_var:l_order_size_diff
+				}
+			}
+		}
+		if = {
+			limit = {
+				var:trade_center = {
+					has_variable = here_to_$supplier_TZ$_tradezone
+					NOT = {
+						has_variable = is_$supplier_TZ$_tradezone
+					}
+				}
+			}
+			change_variable = {
+				name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+				add = var:trade_center.var:here_to_$supplier_TZ$_tradezone
+			}
+		}
+		change_variable = {
+			name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+			multiply = -1
+		}
+	}
+
+
+}
+
+PURCHASE_try_supplier_quickrank = {
+	# Scope: governorship
+	# Function: check the name of the current tradezone rank being checked, and poll the corresponding stockpile variable
+	debug_log = "Contacting supplier..."
+	var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
+		save_scope_as = target_supplier
+	}
+	random_trade_center = {
+		limit = {
+			THIS = scope:target_supplier
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = india # Can we improve this somehow?
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_india_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = india
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_east_north_america_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = east_north_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_west_north_america_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = west_north_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_caribbean_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = caribbean
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_west_south_america_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = west_south_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_east_south_america_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = east_south_america
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_south_east_asia_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = south_east_asia
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_indo_china_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = indo_china
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_yellow_sea_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = yellow_sea
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_southern_africa_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = southern_africa
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_west_africa_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = west_africa
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_east_africa_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = east_africa
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_middle_east_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = middle_east
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_western_steppe_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = western_steppe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_eastern_steppe_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = eastern_steppe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_upper_yangtzi_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = upper_yangtzi
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_atlantic_seaboard_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = atlantic_seaboard
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_central_europe_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = central_europe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_west_mediterranean_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = west_mediterranean
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_baltic_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = baltic
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_east_europe_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = east_europe
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+	else_if = {
+		limit = {
+			scope:target_supplier = {
+				has_variable = is_east_mediterranean_tradezone
+			}
+		}
+		PURCHASE_transfer_if_able = {
+			tradezone = east_mediterranean
+			order_size = $order_size$
+			tradegood = $tradegood$
+			category = $category$
+		}
+	}
+}

@@ -835,21 +835,22 @@ PURCHASE_get_seller_purchaser_score_internal = {
 	# Add the price of the tradegood in that tradezone (modified somehow to add up sensibly)
 	# (for international trade, we'll want to factor in tariff rates, but that shouldn't matter in customs unions)
 	scope:purchaser_governorship = {
-		set_variable = {
-			name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
-			value = var:trade_center.var:local_price_$tradegood$
-		}
-		change_variable = {
-			name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
-			multiply = $order_size$
-		}
+
 		if = { # If the stockpile is lower than the order size, add the difference to the score so that areas with low prices but also very little stock are not procured from, resulting in unfulfilled orders when slightly more expensive but plentiful stocks are available in the trade scope
 			limit = {
-				var:internal_trade_scope = {
+				scope:ranking_governorship.var:internal_trade_scope = {
 					has_variable = $tradegood$_stockpile_$supplier_TZ$_tradezone
 				}
 			}
-			debug_log = "Buying from $purchaser_TZ$ and accounting for available stockpile in  $supplier_TZ$"
+			set_variable = {
+				name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+				value = global_var:global_$supplier_TZ$_tradezone.var:local_price_$tradegood$
+			}
+			change_variable = {
+				name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+				multiply = $order_size$
+			}
+			debug_log = "Buying from $supplier_TZ$ and accounting for available stockpile in  $supplier_TZ$"
 			set_local_variable = {
 				name = l_order_size_diff
 				value = $order_size$
@@ -860,31 +861,29 @@ PURCHASE_get_seller_purchaser_score_internal = {
 			}
 			if = {
 				limit = {
-					local_var:l_order_size_diff > 0
+					var:trade_center = {
+						has_variable = here_to_$supplier_TZ$_tradezone
+						NOT = {
+							has_variable = is_$supplier_TZ$_tradezone
+						}
+					}
 				}
 				change_variable = {
 					name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
-					subtract = local_var:l_order_size_diff
-				}
-			}
-		}
-		if = {
-			limit = {
-				var:trade_center = {
-					has_variable = here_to_$supplier_TZ$_tradezone
-					NOT = {
-						has_variable = is_$supplier_TZ$_tradezone
-					}
+					add = var:trade_center.var:here_to_$supplier_TZ$_tradezone
 				}
 			}
 			change_variable = {
 				name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
-				add = var:trade_center.var:here_to_$supplier_TZ$_tradezone
+				multiply = -1
 			}
 		}
-		change_variable = {
-			name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
-			multiply = -1
+
+		else = {
+			set_variable = {
+				name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
+				value = 999 # No stock, no point using
+			}
 		}
 	}
 
@@ -1827,7 +1826,7 @@ PURCHASE_transfer_if_able = {
 				}
 			}
 		}
-		}
+	}
 	else = {
 		debug_log = "Internal trade scope did not have  $tradegood$ stockpile in  $tradezone$"
 	}
@@ -2116,13 +2115,32 @@ PURCHASE_transfer_goods_internally = {
 			add = local_var:this_spend
 		}
 
+		if = {
+			limit = {
+				NOT = {
+					has_variable = $tradegood$_imported_from_$tradezone$
+				}
+			}
+			set_variable = {
+				name = $tradegood$_imported_from_$tradezone$
+				value = $amount$
+			}
+		}
+		else = {
+			change_variable = {
+				name = $tradegood$_imported_from_$tradezone$
+				add = $amount$
+			}
+		}
+
 		change_variable = {
 			name = governorship_this_quarter_imported_$tradegood$
-			add = $amount$ # Must be negative so it can be used with add_treasury
+			add = $amount$ 
 		}
 
 		# Mark the goods transfer as complete, so it does not repeat the order in lower ranked tradezones
 		set_variable = $tradegood$_purchase_order_tender_complete
+
 	}
 
 	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
@@ -2645,7 +2663,7 @@ PURCHASE_order_external = {
 					#	add = scope:purchaser_governorship.var:trade_center.var:here_to_$tradezone$_tradezone
 					#}
 				}
-				max = 1
+				max = 3
 				check_range_bounds = no
 				debug_log = "SCOPES BELOW: Attempting to order  $tradegood$ from supplier"
 				debug_log_scopes = yes

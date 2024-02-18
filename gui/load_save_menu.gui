@@ -1,0 +1,367 @@
+template save_game_scroll_area
+{
+	
+	scrollarea = {
+		name = "saved_games_scrollarea"
+		position = { -1 8 }
+		size = { 780 548 }
+		scrollbarpolicy_horizontal = always_off
+		using = VerticalScrollAreaCutOff
+		scrollbar_vertical = {
+			using = VerticalScrollBar
+		}
+		
+		scrollwidget = {
+			fixedgridbox = {
+				name = "saved_games_grid"
+				position = { 0 6 }
+				addcolumn = 394
+				addrow = 76
+				flipdirection = yes
+				datamodel_wrap = 2
+				
+				block "save_game_datamodel"
+				{
+				}
+				
+				item = {
+					widget = {
+						size = { 440 90 }
+						
+						list_button = {
+							position = { 0 0 }
+							size = { 388 70 }
+							onclick = "[SaveGameItem.Select]"
+						}
+						
+						flowcontainer = {
+							widgetanchor = top|right
+							parentanchor = top|right
+							direction = horizontal
+							position = { -68 32 }
+						
+							icon = {
+								size = { 32 32 }
+								using = icon_missing_dlc
+                                visible = "[SaveGameItem.HasMissingDLC]"
+								tooltip = "[SaveGameItem.GetMissingDLCString]"
+							}
+							
+							icon = {
+								size = { 32 32 }
+								texture = "gfx/interface/icons/shared_icons/cloud_save.dds"
+                                visible = "[SaveGameItem.IsCloudSave]"
+								tooltip = "LOAD_CLOUDSAVE_TOOLTIP"
+								enabled = "[Not(SaveGameItem.HasMissingDLC)]"
+							}
+	
+							icon = {
+								size = { 32 32 }
+								using = icon_ironman
+								visible = "[SaveGameItem.IsIronman]"
+								tooltip = "IRONMAN_MODE"
+								enabled = "[Not(SaveGameItem.HasMissingDLC)]"
+							}
+	
+							icon = {
+								size = { 32 32 }
+								using = icon_different_version
+								visible = "[SaveGameItem.IsDifferentVersion]"
+								tooltip = "DIFFERENT_VERSION"
+								enabled = "[Not(SaveGameItem.HasMissingDLC)]"
+							}
+						
+						}
+						
+						tag_dark = {
+							name = "name"
+							position = { 14 5 }
+							size = { 356 26 }
+							text = "[SaveGameItem.GetName]"
+							enabled = "[Not(SaveGameItem.HasMissingDLC)]"
+						}
+						
+						textbox = {
+							name = "date"
+							position = { 14 28 }
+							size = { 200 36 }
+							using = BaseFontS
+							using = Black_FontColor
+							text = "[SaveGameItem.GetRealDate]"
+							alwaystransparent = yes
+							multiline = yes
+							enabled = "[Not(SaveGameItem.HasMissingDLC)]"
+						}
+					}
+				}
+			}
+		}
+	}
+
+	textbox = {
+		name = "cloud_saves_msg"
+		position = { 2 560 }
+		size = { 100% 26 }
+		using = BaseFontM
+		using = Black_FontColor
+		text = "CLOUDSAVE_UNVAVAILABLE_TOOLTIP"
+		multiline = no
+		visible = "[Not(GameIsCloudStorageAvailable)]"
+		align = center
+		fontsize = 20
+	}
+
+}
+
+types LoadSaveTypes {
+	type save_menu = base_sub_window
+	{
+		parentanchor = center
+		alwaystransparent = no
+		movable = no
+		resizable = no
+		size = { 810 774 }
+		layer = top
+		enabled = "[SaveNameWindow.IsWindowEnabled]"
+		
+		blockoverride "Title_text" { 
+			block "save_game_title" { text = "SAVE_GAME" }
+		}
+		
+		blockoverride "White_buttons"
+		{
+			button_close = {
+				tooltip = "CLOSE"
+				onclick = "[SaveNameWindow.Cancel]"
+			}
+		}
+		
+		textbox = {
+			text = "FILE_NAME_INVALID"
+			using = BaseFontM
+			using = Black_FontColor
+			position = { 0 -34 }
+			parentanchor = bottom|hcenter
+			align = center
+			alwaystransparent = yes
+			visible = "[Not(SaveNameWindow.IsSaveNameOk)]"
+		}
+		
+		container = {
+			position = { 14 54 }
+
+			using = save_game_scroll_area
+		}
+		
+		text_button_square = {
+			position = { -18 -18 }
+			size = { 180 28 }
+			parentanchor = bottom|right
+			name = "save_button"
+			blockoverride "On_click"
+			{
+				onclick = "[SaveNameWindow.Save]"
+			}
+			enabled = "[SaveNameWindow.IsSaveOk]"
+			tooltip = "[SaveNameWindow.GetSaveErrors]"
+			blockoverride "Center_text"
+			{
+				block "confirm_button"
+				{
+					text = "SAVE"
+				}
+			}
+			blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_saved" }
+		}
+		
+		text_button_square = {
+			position = { 18 -18 }
+			size = { 180 28 }
+			parentanchor = bottom|left
+			name = "cancel_button"
+			blockoverride "On_click"
+			{
+				onclick = "[SaveNameWindow.Cancel]"
+			}
+			enabled = "[SaveNameWindow.IsSaveOk]"
+			tooltip = "[SaveNameWindow.GetSaveErrors]"
+			blockoverride "Center_text"
+			{
+				text = "CANCEL"
+			}
+			blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_saved" }
+			blockoverride "Shortcut" {
+				shortcut = "close_window"
+			}
+		}
+		
+		checkbox_entry = { 
+			position = { 12 -102 }
+			parentanchor = bottom
+			size = { 34 34 }
+			enabled = "[SaveNameWindow.CanToggleCloudSaves]"
+			blockoverride "Frame"
+			{
+				frame = "[SaveNameWindow.GetCloudSaveFrame]"
+			} 
+			blockoverride "On_click"
+			{
+				onclick = "[SaveNameWindow.OnCloudSaveClick]"
+			}
+			blockoverride "Text" { text = "" }
+			tooltip = "[SaveNameWindow.CloudSaveTooltip]"
+			textbox = {
+				size = { 90% 32 }
+				position = { 30 5 }
+				margin_left = 10
+				parentanchor = top|left
+				maximumsize = { 120 -1 }
+				text = "CLOUD_SAVE"
+				autoresize = yes
+				using = BaseFontM
+				using = Black_FontColor
+			}
+		}
+		
+		flowcontainer = {
+			position = { -4 -62 }
+			parentanchor = bottom|hcenter
+			widgetanchor = bottom|hcenter
+			
+			margin_widget = {
+				size = { 620 40 }
+				using = inputfield
+				margin_right = 22
+				margin_left = 22
+				editbox = {
+					name = "save_name"
+					size = { 600 32 }
+					position = { 12 0 }
+					using = BaseFontM
+					using = Black_FontColor
+					alwaystransparent = no
+					focuspolicy = all
+					multiline = no
+					onreturnpressed = "[SaveNameWindow.Save]"
+					margin_left = 14
+					margin_right = 24
+				}
+			}
+		}
+	}
+
+    type load_menu = base_sub_window
+	{
+		parentanchor = center
+		alwaystransparent = no
+		movable = no
+		resizable = no
+        position = { 0 50 }
+		size = { 810 800 }
+		layer = top
+		blockoverride "Title_text" { text = "LOAD" }	
+		
+		container = {
+			position = { 14 118 }
+
+			using = save_game_scroll_area
+		}
+
+		
+		#widget = {
+		#	name = "frame"
+		#	position = { 16 38 }
+		#	size = { 780 80 }
+		#	list_entry = { size = { 100% 100% } }
+		#}
+
+		widget  = {
+			name = "load_info"
+			size = { 754 100% }
+			position = { 22 28 }
+			
+			textbox = {
+				name = "name"
+				position = { 4 8 }
+				size = { 754 34 }
+				using = BaseFontM
+				using = Black_FontColor
+				text = "[SaveGameItem.GetName]"
+				multiline = yes
+			}
+			
+			flowcontainer = {
+				direction = horizontal
+				position = { 4 36 }
+			
+				textbox = {
+					name = "character"
+					using = BaseFontM
+					using = Black_FontColor
+					text = "[SaveGameItem.GetPlayerName]"
+					autoresize = yes
+				}
+				
+				widget = { 
+					size = { 14 0 }
+				}
+				
+				widget = {
+					textbox = {
+						name = "date" 
+						position = { 0 0 }
+						using = BaseFontM
+						using = Black_FontColor
+						text = "[SaveGameItem.GetDate]"
+						autoresize = yes
+						resizeparent = yes
+					}
+				}
+			}
+			
+			textbox = {
+				name = "date"
+				position = { 4 58 }
+				using = BaseFontM
+				using = Black_FontColor
+				text = "[SaveGameItem.GetRealDate]"
+				autoresize = yes
+			}
+			
+			text_button_square = {
+				name = "delete_button"
+				size = { 228 28 }
+				parentanchor = bottom|left
+				position = { 20 -44 }
+				blockoverride "Shortcut" {
+					shortcut = "delete"
+				}
+				blockoverride "Center_text" { text = "DELETE" }
+				
+				blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_new_game" }
+				blockoverride "On_click"
+				{
+					block "on_delete"
+					{
+					}
+				}
+			}
+			
+			text_button_square = {
+				name = "load_button"
+				size = { 228 28 }
+				parentanchor = bottom|right
+				position = { -8 -44 }
+				blockoverride "Center_text" { text = "LOAD" }
+				
+				enabled = "[SaveGameItem.IsEnabled]"
+				blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_new_game"  }
+				blockoverride "On_click" { 
+					block "on_load"
+					{
+					}
+				}
+			}			
+		}
+    }
+}

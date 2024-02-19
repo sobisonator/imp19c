@@ -1938,7 +1938,7 @@ PURCHASE_order_internal = {
 }
 
 PURCHASE_transfer_goods_internally = {
-	# Scope: governorship (seller governorship)
+	# Scope: governorship (seller scope)
 	# Function: Put goods in the purchasing governorship, subtract goods from the internal trade scope and allocate trade-scope-wide revenue accordingly.
 
 	# Format of arguments:
@@ -2097,6 +2097,12 @@ PURCHASE_transfer_goods_internally = {
 				name = governorship_this_quarter_spend_on_transport_$tradegood$ # Track the transport costs for the player's benefit
 				add = var:trade_center.var:here_to_$tradezone$_tradezone
 			}
+			var:trade_center = {
+				change_variable = {
+					name = TZ_this_quarter_transport_pool
+					add = local_var:this_spend_on_transport
+				}
+			}
 		}
 		# TODO: Add a way to account for transport costs within a tradezone, too, using trade infrastructure level?
 
@@ -2156,7 +2162,6 @@ PURCHASE_transfer_goods_internally = {
 	}
 
 	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
-	# TODO: Make this tradezone specific, so the SELL split revenue can then iterate through all variables in the list of available internal trade centers, and split out revenue to the governorships who are members of that TZ, using the variable list governorships_in_$tradezone$
 	var:internal_trade_scope = {
 		if = { # Make sure that the total_revenue variable started at 0 this cycle
 			limit = {
@@ -2187,6 +2192,12 @@ PURCHASE_transfer_goods_internally = {
 		}
 		change_variable = {
 			name = $tradegood$_total_revenue_$tradezone$ # Adds to the internal revenue pile of the seller tradezone
+			add = local_var:this_spend
+		}
+	}
+	owner = {
+		change_variable = {
+			name = national_trade_income_pool # For nation only as opposed to ITS
 			add = local_var:this_spend
 		}
 	}

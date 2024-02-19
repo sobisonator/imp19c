@@ -1,34 +1,24 @@
 def print_TZ_statement(TZ):
-	loc = """#---------------------------------------
-#Trade Zone: {tradezone}
-#---------------------------------------
-
-{tradezone}_transportation_svalue = {{    
-    value = 0
-    every_{tradezone}_TZ_region = {{
-        if = {{
-            limit = {{
-                any_region_province = {{
-                    OR = {{
-                        any_neighbor_province = {{ has_road_towards = PREV }}
-                        has_building = port_building
-                    }}
-                }}
-            }}
-            every_region_province = {{
-                limit = {{
-                    any_neighbor_province = {{ has_road_towards = PREV }}
-                }}
-                add = railway_bonus
-            }}
-            every_region_province = {{
-                limit = {{
-                    has_building = port_building
-                }}
-                add = port_bonus
-            }}
-        }}
-    }}
+	loc = """SHIPPING_earned_from_{tradezone} = {{
+	value = 0
+	global_var:global_{tradezone}_tradezone = {{
+		if = {{
+			limit = {{
+				any_in_list = {{
+					variable = shipping_power_list
+					var:tracking_TZ_shipping_for_tag = ROOT
+				}}
+			}}
+			add = var:TZ_this_quarter_transport_pool
+			random_in_list = {{
+				variable = shipping_power_list
+				limit = {{
+					var:tracking_TZ_shipping_for_tag = ROOT
+				}}
+				multiply = SHIPPING_percentage_in_TZ
+			}}
+		}}	
+	}}
 }}""".format(tradezone=TZ)
 	print(loc)
 

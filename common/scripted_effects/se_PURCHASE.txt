@@ -373,24 +373,10 @@ PURCHASE_check_shopping_internal = {
 					order_size = scope:purchaser_governorship.var:l_order_size
 				} # Creates a set of variables in the trade center
 			}
-			set_local_variable = {
-				name = TZs_tried
-				value = 0
-			}
-			while = {
-				limit = {
-					var:l_order_size > 0
-					local_var:TZs_tried < var:internal_trade_scope.num_TZ_in_ITS
-				}
-				PURCHASE_order_internal = {
-					tradegood = $tradegood$
-					order_size = scope:purchaser_governorship.var:l_order_size
-					category = $category$
-				}
-				change_local_variable = {
-					name = TZs_tried
-					add = 1
-				}
+			PURCHASE_order_internal = {
+				tradegood = $tradegood$
+				order_size = scope:purchaser_governorship.var:l_order_size
+				category = $category$
 			}
 		}
 	}
@@ -486,6 +472,7 @@ PURCHASE_check_shopping_internal_pre_ranked = {
 				var:l_order_size > 0
 				local_var:TZs_tried < var:internal_trade_scope.num_TZ_in_ITS
 			}
+			debug_log = "Attempting a purchase order as order size is still above 0"
 			PURCHASE_order_internal = {
 				tradegood = $tradegood$
 				order_size = scope:purchaser_governorship.var:l_order_size
@@ -850,14 +837,14 @@ PURCHASE_get_seller_purchaser_score_internal = {
 				name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
 				multiply = $order_size$
 			}
-			debug_log = "Buying from $supplier_TZ$ and accounting for available stockpile in  $supplier_TZ$"
+			debug_log = "Scoring  $tradegood$ from $purchaser_TZ$ and accounting for available stockpile in  $supplier_TZ$"
 			set_local_variable = {
 				name = l_order_size_diff
 				value = $order_size$
 			}
 			change_local_variable = {
 				name = l_order_size_diff
-				subtract = var:internal_trade_scope.var:$tradegood$_stockpile_$supplier_TZ$_tradezone
+				subtract = scope:ranking_governorship.var:internal_trade_scope.var:$tradegood$_stockpile_$supplier_TZ$_tradezone
 			}
 			if = {
 				limit = {
@@ -1809,7 +1796,7 @@ PURCHASE_transfer_if_able = {
 			# Add to the purchasing governorship's stockpile
 			PURCHASE_transfer_goods_internally = {
 				tradegood = $tradegood$
-				amount = scope:seller_governorship.var:this_order_size
+				amount = scope:purchaser_governorship.var:this_order_size
 				category = $category$
 				tradezone = $tradezone$
 			}
@@ -1844,6 +1831,7 @@ PURCHASE_order_internal = {
 	# $internal_sold_total$ = internal_sold_total_grain
 
 	debug_log = "Making a purchase order for  $tradegood$"
+	debug_log_scopes = yes
 
 	# save_scope_as = purchaser_governorship # Moved back to check shopping
 
@@ -1853,11 +1841,13 @@ PURCHASE_order_internal = {
 				num_TZ_in_ITS > 1
 			}
 		}
+		debug_log = "Trying next ranked supplier"
 		if = {
 			limit = {
 				NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-				has_variable = 1st_rank_internal_supplier_$tradegood$
+				scope:ranking_governorship = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
 			}
+			debug_log = "Rank = 1st"
 			PURCHASE_try_supplier = {
 				supplier_rank = 1st
 				tradegood = $tradegood$
@@ -1867,8 +1857,9 @@ PURCHASE_order_internal = {
 			if = {
 				limit = {
 					NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-					has_variable = 2nd_rank_internal_supplier_$tradegood$
+					scope:ranking_governorship = { has_variable = 2nd_rank_internal_supplier_$tradegood$ }
 				}
+				debug_log = "Rank = 2nd"
 				PURCHASE_try_supplier = {
 					supplier_rank = 2nd
 					tradegood = $tradegood$
@@ -1878,8 +1869,9 @@ PURCHASE_order_internal = {
 				if = {
 					limit = {
 						NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-						has_variable = 3rd_rank_internal_supplier_$tradegood$
+						scope:ranking_governorship = { has_variable = 3rd_rank_internal_supplier_$tradegood$ }
 					}
+					debug_log = "Rank = 3rd"
 					PURCHASE_try_supplier = {
 						supplier_rank = 3rd
 						tradegood = $tradegood$
@@ -1889,8 +1881,9 @@ PURCHASE_order_internal = {
 					if = {
 						limit = {
 							NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-							has_variable = 4th_rank_internal_supplier_$tradegood$
+							scope:ranking_governorship = { has_variable = 4th_rank_internal_supplier_$tradegood$ }
 						}
+						debug_log = "Rank = 4th"
 						PURCHASE_try_supplier = {
 							supplier_rank = 4th
 							tradegood = $tradegood$
@@ -1900,8 +1893,9 @@ PURCHASE_order_internal = {
 						if = {
 							limit = {
 								NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-								has_variable = 5th_rank_internal_supplier_$tradegood$
+								scope:ranking_governorship = { has_variable = 5th_rank_internal_supplier_$tradegood$ }
 							}
+							debug_log = "Rank = 5th"
 							PURCHASE_try_supplier = {
 								supplier_rank = 5th
 								tradegood = $tradegood$
@@ -1911,8 +1905,9 @@ PURCHASE_order_internal = {
 							if = {
 								limit = {
 									NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-									has_variable = 6th_rank_internal_supplier_$tradegood$
+									scope:ranking_governorship = { has_variable = 6th_rank_internal_supplier_$tradegood$ }
 								}
+								debug_log = "Rank = 6th"
 								PURCHASE_try_supplier = {
 									supplier_rank = 6th
 									tradegood = $tradegood$
@@ -1943,7 +1938,7 @@ PURCHASE_order_internal = {
 }
 
 PURCHASE_transfer_goods_internally = {
-	# Scope: governorship (seller governorship)
+	# Scope: governorship (seller scope)
 	# Function: Put goods in the purchasing governorship, subtract goods from the internal trade scope and allocate trade-scope-wide revenue accordingly.
 
 	# Format of arguments:
@@ -2102,6 +2097,16 @@ PURCHASE_transfer_goods_internally = {
 				name = governorship_this_quarter_spend_on_transport_$tradegood$ # Track the transport costs for the player's benefit
 				add = var:trade_center.var:here_to_$tradezone$_tradezone
 			}
+			change_variable = {
+				name = governorship_this_quarter_spend_on_transport # Track the transport costs for the player's benefit
+				add = var:trade_center.var:here_to_$tradezone$_tradezone
+			}
+			var:trade_center = {
+				change_variable = {
+					name = TZ_this_quarter_transport_pool
+					add = local_var:this_spend_on_transport
+				}
+			}
 		}
 		# TODO: Add a way to account for transport costs within a tradezone, too, using trade infrastructure level?
 
@@ -2138,13 +2143,29 @@ PURCHASE_transfer_goods_internally = {
 			add = $amount$ 
 		}
 
-		# Mark the goods transfer as complete, so it does not repeat the order in lower ranked tradezones
-		set_variable = $tradegood$_purchase_order_tender_complete
+
+		set_local_variable = {
+			name = l_demand_diff
+			value = DEMAND_$tradegood$
+		}
+		change_local_variable = {
+			name = l_demand_diff
+			subtract = var:$tradegood$_stockpile
+		}
+		if = {
+			limit = {
+				local_var:l_demand_diff <= 0
+			}
+			# Mark the goods transfer as complete, so it does not repeat the order in lower ranked tradezones
+			set_variable = {
+				name = $tradegood$_purchase_order_tender_complete
+				days = 2
+			}
+		}
 
 	}
 
 	# ADD THE AMOUNT SOLD TO THE TOTAL IN THE TRADE SCOPE
-	# TODO: Make this tradezone specific, so the SELL split revenue can then iterate through all variables in the list of available internal trade centers, and split out revenue to the governorships who are members of that TZ, using the variable list governorships_in_$tradezone$
 	var:internal_trade_scope = {
 		if = { # Make sure that the total_revenue variable started at 0 this cycle
 			limit = {
@@ -2663,7 +2684,7 @@ PURCHASE_order_external = {
 					#	add = scope:purchaser_governorship.var:trade_center.var:here_to_$tradezone$_tradezone
 					#}
 				}
-				max = 3
+				max = 6
 				check_range_bounds = no
 				debug_log = "SCOPES BELOW: Attempting to order  $tradegood$ from supplier"
 				debug_log_scopes = yes

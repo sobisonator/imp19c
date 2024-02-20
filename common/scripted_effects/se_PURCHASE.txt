@@ -368,10 +368,11 @@ PURCHASE_check_shopping_internal = {
 				limit = {
 					NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
 				}
-				PURCHASE_get_preferred_tradezone_internal = {
-					tradegood = $tradegood$
-					order_size = scope:purchaser_governorship.var:l_order_size
-				} # Creates a set of variables in the trade center
+				# TODO: Change this to use ranks which are determined at the start of the trade phase.
+				#PURCHASE_get_preferred_tradezone_internal = {
+				#	tradegood = $tradegood$
+				#	order_size = scope:purchaser_governorship.var:l_order_size
+				#} # Creates a set of variables in the trade center
 			}
 			PURCHASE_order_internal = {
 				tradegood = $tradegood$
@@ -400,7 +401,7 @@ PURCHASE_check_shopping_internal = {
 		tradegood = $tradegood$
 	}
 
-	# debug_log = "About to check purchase order external trigger"
+	# #debug_log = "About to check purchase order external trigger"
 
 	if = {
 		limit = {
@@ -409,7 +410,7 @@ PURCHASE_check_shopping_internal = {
 				owner = { has_variable_list = list_of_trade_partners_all_categories }
 			}
 		}
-		# debug_log = "Purchase order external triggers YES"
+		# #debug_log = "Purchase order external triggers YES"
 		PURCHASE_order_external = {
 			tradegood = $tradegood$
 			order_size = scope:purchaser_governorship.var:l_order_size
@@ -472,7 +473,7 @@ PURCHASE_check_shopping_internal_pre_ranked = {
 				var:l_order_size > 0
 				local_var:TZs_tried < var:internal_trade_scope.num_TZ_in_ITS
 			}
-			debug_log = "Attempting a purchase order as order size is still above 0"
+			#debug_log = "Attempting a purchase order as order size is still above 0"
 			PURCHASE_order_internal = {
 				tradegood = $tradegood$
 				order_size = scope:purchaser_governorship.var:l_order_size
@@ -490,7 +491,7 @@ PURCHASE_check_shopping_internal_pre_ranked = {
 	# EXTERNAL
 	# Order size should be above 0 already
 
-	# debug_log = "About to check purchase order external trigger"
+	# #debug_log = "About to check purchase order external trigger"
 
 	if = {
 		limit = {
@@ -499,7 +500,7 @@ PURCHASE_check_shopping_internal_pre_ranked = {
 				owner = { has_variable_list = list_of_trade_partners_all_categories }
 			}
 		}
-		# debug_log = "Purchase order external triggers YES"
+		# #debug_log = "Purchase order external triggers YES"
 		PURCHASE_order_external = {
 			tradegood = $tradegood$
 			order_size = scope:purchaser_governorship.var:l_order_size
@@ -837,7 +838,7 @@ PURCHASE_get_seller_purchaser_score_internal = {
 				name = $tradegood$_supplier_score_here_to_$supplier_TZ$_tradezone
 				multiply = $order_size$
 			}
-			debug_log = "Scoring  $tradegood$ from $purchaser_TZ$ and accounting for available stockpile in  $supplier_TZ$"
+			#debug_log = "Scoring  $tradegood$ from $purchaser_TZ$ and accounting for available stockpile in  $supplier_TZ$"
 			set_local_variable = {
 				name = l_order_size_diff
 				value = $order_size$
@@ -889,7 +890,7 @@ PURCHASE_check_name_and_apply_rank_internal = {
 				name = 1st_rank_internal_supplier_$tradegood$
 				value = global_var:global_$tradezone$_tradezone
 			}
-			debug_log = "Awarding 1st rank supplier for  $tradegood$ to  $tradezone$"
+			#debug_log = "Awarding 1st rank supplier for  $tradegood$ to  $tradezone$"
 		}
 		else_if = {
 			limit = {
@@ -899,7 +900,7 @@ PURCHASE_check_name_and_apply_rank_internal = {
 				name = 2nd_rank_internal_supplier_$tradegood$
 				value = global_var:global_$tradezone$_tradezone
 			}
-			debug_log = "Awarding 2nd rank supplier for  $tradegood$ to  $tradezone$"
+			#debug_log = "Awarding 2nd rank supplier for  $tradegood$ to  $tradezone$"
 		}
 		else_if = {
 			limit = {
@@ -909,7 +910,7 @@ PURCHASE_check_name_and_apply_rank_internal = {
 				name = 3rd_rank_internal_supplier_$tradegood$
 				value = global_var:global_$tradezone$_tradezone
 			}
-			debug_log = "Awarding 3rd rank supplier for  $tradegood$ to  $tradezone$"
+			#debug_log = "Awarding 3rd rank supplier for  $tradegood$ to  $tradezone$"
 		}
 		else_if = {
 			limit = {
@@ -964,7 +965,7 @@ PURCHASE_get_preferred_tradezone_internal = {
 			
 			every_in_list = {
 				variable = list_of_tradezones_in_internal_trade_scope
-				debug_log = "Checking tradezone for score"
+				#debug_log = "Checking tradezone for score"
 
 				if = {
 					limit = { has_variable = is_india_tradezone }
@@ -1457,294 +1458,305 @@ PURCHASE_get_preferred_tradezone_external = {
 PURCHASE_try_supplier = {
 	# Scope: governorship
 	# Function: check the name of the current tradezone rank being checked, and poll the corresponding stockpile variable
-	debug_log = "Contacting supplier..."
-	var:$supplier_rank$_rank_internal_supplier_$tradegood$ = {
+	#debug_log = "Contacting supplier..."
+	global_var:rank_$supplier_rank$_TZ_$tradegood$ = {
 		save_scope_as = target_supplier
 	}
+	debug_log = "Trying supplier now..."
 	if = {
 		limit = {
-			scope:target_supplier = {
-				has_variable = is_india_tradezone
+			var:internal_trade_scope = {
+				is_target_in_variable_list = {
+					name = list_of_tradezones_in_internal_trade_scope
+					target = scope:target_supplier
+				}
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = india
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_east_north_america_tradezone
+		if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_india_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = india
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = east_north_america
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_west_north_america_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_east_north_america_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = east_north_america
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = west_north_america
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_caribbean_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_west_north_america_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = west_north_america
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = caribbean
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_west_south_america_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_caribbean_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = caribbean
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = west_south_america
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_east_south_america_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_west_south_america_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = west_south_america
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = east_south_america
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_south_east_asia_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_east_south_america_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = east_south_america
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = south_east_asia
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_indo_china_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_south_east_asia_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = south_east_asia
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = indo_china
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_yellow_sea_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_indo_china_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = indo_china
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = yellow_sea
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_southern_africa_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_yellow_sea_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = yellow_sea
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = southern_africa
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_west_africa_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_southern_africa_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = southern_africa
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = west_africa
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_east_africa_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_west_africa_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = west_africa
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = east_africa
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_middle_east_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_east_africa_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = east_africa
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = middle_east
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_western_steppe_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_middle_east_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = middle_east
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = western_steppe
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_eastern_steppe_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_western_steppe_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = western_steppe
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = eastern_steppe
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_upper_yangtzi_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_eastern_steppe_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = eastern_steppe
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = upper_yangtzi
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_atlantic_seaboard_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_upper_yangtzi_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = upper_yangtzi
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = atlantic_seaboard
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_central_europe_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_atlantic_seaboard_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = atlantic_seaboard
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = central_europe
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_west_mediterranean_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_central_europe_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = central_europe
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = west_mediterranean
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_baltic_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_west_mediterranean_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = west_mediterranean
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = baltic
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_east_europe_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_baltic_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = baltic
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = east_europe
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
-		}
-	}
-	else_if = {
-		limit = {
-			scope:target_supplier = {
-				has_variable = is_east_mediterranean_tradezone
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_east_europe_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = east_europe
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
 			}
 		}
-		PURCHASE_transfer_if_able = {
-			tradezone = east_mediterranean
-			order_size = $order_size$
-			tradegood = $tradegood$
-			category = $category$
+		else_if = {
+			limit = {
+				scope:target_supplier = {
+					has_variable = is_east_mediterranean_tradezone
+				}
+			}
+			PURCHASE_transfer_if_able = {
+				tradezone = east_mediterranean
+				order_size = $order_size$
+				tradegood = $tradegood$
+				category = $category$
+			}
 		}
 	}
 }
@@ -1752,7 +1764,8 @@ PURCHASE_try_supplier = {
 PURCHASE_transfer_if_able = {
 	# Scope: governorship of the selling trade scope
 	# Function: check if there is a sufficient stockpile in the supplier trade scope
-	debug_log = "Contacting tradezone  $tradezone$ "
+	#debug_log = "Contacting tradezone  $tradezone$ "
+	debug_log = "Checking if able to transfer  $tradegood$ from  $tradezone$"
 	if = {
 		limit = {
 			var:internal_trade_scope = {
@@ -1765,14 +1778,14 @@ PURCHASE_transfer_if_able = {
 					var:$tradegood$_stockpile_$tradezone$_tradezone > 0
 				}
 			}
-			debug_log = "Tradezone has been contacted"
+			#debug_log = "Tradezone has been contacted"
 			set_local_variable = {
 				name = i_demand_diff
 				value = $order_size$
 			}
 			var:internal_trade_scope = {
-				debug_log = "Internal trade scope while attempting transfer is: "
-				debug_log_scopes = yes
+				#debug_log = "Internal trade scope while attempting transfer is: "
+				#debug_log_scopes = yes
 				change_local_variable = {
 					name = i_demand_diff
 					subtract = var:$tradegood$_stockpile_$tradezone$_tradezone
@@ -1796,7 +1809,7 @@ PURCHASE_transfer_if_able = {
 			# Add to the purchasing governorship's stockpile
 			PURCHASE_transfer_goods_internally = {
 				tradegood = $tradegood$
-				amount = scope:purchaser_governorship.var:this_order_size
+				amount = scope:seller_governorship.var:this_order_size
 				category = $category$
 				tradezone = $tradezone$
 			}
@@ -1815,7 +1828,7 @@ PURCHASE_transfer_if_able = {
 		}
 	}
 	else = {
-		debug_log = "Internal trade scope did not have  $tradegood$ stockpile in  $tradezone$"
+		#debug_log = "Internal trade scope did not have  $tradegood$ stockpile in  $tradezone$"
 	}
 	
 }
@@ -1830,8 +1843,8 @@ PURCHASE_order_internal = {
 	# $order_size$ = local variable, global_var:l_order_size
 	# $internal_sold_total$ = internal_sold_total_grain
 
-	debug_log = "Making a purchase order for  $tradegood$"
-	debug_log_scopes = yes
+	#debug_log = "Making a purchase order for  $tradegood$"
+	#debug_log_scopes = yes
 
 	# save_scope_as = purchaser_governorship # Moved back to check shopping
 
@@ -1841,15 +1854,16 @@ PURCHASE_order_internal = {
 				num_TZ_in_ITS > 1
 			}
 		}
-		debug_log = "Trying next ranked supplier"
+		debug_log = "Trying suppliers"
+		#debug_log = "Trying next ranked supplier"
 		if = {
 			limit = {
 				NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-				scope:ranking_governorship = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
+				#scope:ranking_governorship = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
 			}
-			debug_log = "Rank = 1st"
+			#debug_log = "Rank = 1st"
 			PURCHASE_try_supplier = {
-				supplier_rank = 1st
+				supplier_rank = 1
 				tradegood = $tradegood$
 				order_size = $order_size$
 				category = $category$
@@ -1857,11 +1871,11 @@ PURCHASE_order_internal = {
 			if = {
 				limit = {
 					NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-					scope:ranking_governorship = { has_variable = 2nd_rank_internal_supplier_$tradegood$ }
+					#scope:ranking_governorship = { has_variable = 2nd_rank_internal_supplier_$tradegood$ }
 				}
-				debug_log = "Rank = 2nd"
+				#debug_log = "Rank = 2nd"
 				PURCHASE_try_supplier = {
-					supplier_rank = 2nd
+					supplier_rank = 2
 					tradegood = $tradegood$
 					order_size = $order_size$
 					category = $category$
@@ -1869,11 +1883,11 @@ PURCHASE_order_internal = {
 				if = {
 					limit = {
 						NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-						scope:ranking_governorship = { has_variable = 3rd_rank_internal_supplier_$tradegood$ }
+						#scope:ranking_governorship = { has_variable = 3rd_rank_internal_supplier_$tradegood$ }
 					}
-					debug_log = "Rank = 3rd"
+					#debug_log = "Rank = 3rd"
 					PURCHASE_try_supplier = {
-						supplier_rank = 3rd
+						supplier_rank = 3
 						tradegood = $tradegood$
 						order_size = $order_size$
 						category = $category$
@@ -1881,11 +1895,11 @@ PURCHASE_order_internal = {
 					if = {
 						limit = {
 							NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-							scope:ranking_governorship = { has_variable = 4th_rank_internal_supplier_$tradegood$ }
+							#scope:ranking_governorship = { has_variable = 4th_rank_internal_supplier_$tradegood$ }
 						}
-						debug_log = "Rank = 4th"
+						#debug_log = "Rank = 4th"
 						PURCHASE_try_supplier = {
-							supplier_rank = 4th
+							supplier_rank = 4
 							tradegood = $tradegood$
 							order_size = $order_size$
 							category = $category$
@@ -1893,11 +1907,11 @@ PURCHASE_order_internal = {
 						if = {
 							limit = {
 								NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-								scope:ranking_governorship = { has_variable = 5th_rank_internal_supplier_$tradegood$ }
+								#scope:ranking_governorship = { has_variable = 5th_rank_internal_supplier_$tradegood$ }
 							}
-							debug_log = "Rank = 5th"
+							#debug_log = "Rank = 5th"
 							PURCHASE_try_supplier = {
-								supplier_rank = 5th
+								supplier_rank = 5
 								tradegood = $tradegood$
 								order_size = $order_size$
 								category = $category$
@@ -1905,11 +1919,11 @@ PURCHASE_order_internal = {
 							if = {
 								limit = {
 									NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-									scope:ranking_governorship = { has_variable = 6th_rank_internal_supplier_$tradegood$ }
+									#scope:ranking_governorship = { has_variable = 6th_rank_internal_supplier_$tradegood$ }
 								}
-								debug_log = "Rank = 6th"
+								#debug_log = "Rank = 6th"
 								PURCHASE_try_supplier = {
-									supplier_rank = 6th
+									supplier_rank = 6
 									tradegood = $tradegood$
 									order_size = $order_size$
 									category = $category$
@@ -1925,10 +1939,10 @@ PURCHASE_order_internal = {
 		if = {
 			limit = {
 				NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
-				has_variable = 1st_rank_internal_supplier_$tradegood$
+				#has_variable = 1st_rank_internal_supplier_$tradegood$
 			}
 			PURCHASE_try_supplier = {
-				supplier_rank = 1st
+				supplier_rank = 1
 				tradegood = $tradegood$
 				order_size = $order_size$
 				category = $category$
@@ -1947,9 +1961,9 @@ PURCHASE_transfer_goods_internally = {
 	# $from_stockpile$ = grain_stockpile_internal, derived from $from_stockpile$ in PURCHASE_order_internal, this is the available stockpile on the whole internal market
 	# $local_price$ = local_price_grain, gets the local price of grain from the governorship owner's capital
 	# $internal_sold_total$ = internal_sold_total_grain, the total amount sold in the internal trade scope, used by the effect to distribute the cut of amount sold to contributing governorships
-	debug_log = "Transferring  $tradegood$  from  $tradezone$"
-	debug_log = "SCOPES BELOW."
-	debug_log_scopes = yes
+	#debug_log = "Transferring  $tradegood$  from  $tradezone$"
+	#debug_log = "SCOPES BELOW."
+	#debug_log_scopes = yes
 
 	var:trade_center = {
 		random_in_list = {
@@ -2637,43 +2651,18 @@ PURCHASE_order_external = {
 	# Scope: governorship
 	# Function: Buy from stockpiles in other trade scopes
 	# Called: By PURCHASE_check_shopping_internal, if PURCHASE_order_internal does not succeed in filling up the stockpile
-	debug_log = "SCOPES BELOW. Making an EXTERNAL purchase order for  $tradegood$"
-	debug_log_scopes = yes
+	#debug_log = "SCOPES BELOW. Making an EXTERNAL purchase order for  $tradegood$"
+	#debug_log_scopes = yes
 	capital_scope.owner = {
 		if = {
 			limit = { 
 				has_variable_list = list_of_trade_partners_all_categories
 			}
-			every_in_list = {
-				variable = list_of_trade_partners_all_categories
-				debug_log = "SCOPES BELOW: Checking trade partner for  $tradegood$"
-				debug_log_scopes = yes
-				capital_scope.governorship = {
-					if = {
-						limit = {
-							NOT = { has_variable = 1st_rank_internal_supplier_$tradegood$ }
-						}
-						PURCHASE_get_preferred_tradezone_internal = {
-							tradegood = $tradegood$
-							order_size = scope:purchaser_governorship.var:l_order_size
-						} # Creates a set of variables in the trade center
-					}
-				}
-			}
 			ordered_in_list = {
 				# TODO: Break this list down down by the $category$ in question, as trade agreements can be for all or some categories.
 				variable = list_of_trade_partners_all_categories
-				order_by = { # Order by highest rank seller's capital's best ranked tradezone stockpile size, largest to smallest. Buy from the biggest stockpile, as it will be pre-sorted on price by the other trade scopes ranking them.
-					value = 0
-					if = {
-						limit = {
-							capital_scope.governorship = {
-								has_variable = 1st_rank_internal_supplier_$tradegood$
-							}
-						}
-						add = capital_scope.governorship.var:1st_rank_internal_supplier_$tradegood$.var:local_price_$tradegood$
-						multiply = -1
-					}
+				order_by = var:lowest_price_TZ_$tradegood$.var:local_price_$tradegood$
+				#
 					# TODO: Add a way of affecting the order by the distance between scope:purchaser_governorship and the seller tradezone
 					#if = {
 					#	limit = {
@@ -2683,35 +2672,45 @@ PURCHASE_order_external = {
 					#	}
 					#	add = scope:purchaser_governorship.var:trade_center.var:here_to_$tradezone$_tradezone
 					#}
-				}
 				max = 6
 				check_range_bounds = no
-				debug_log = "SCOPES BELOW: Attempting to order  $tradegood$ from supplier"
-				debug_log_scopes = yes
-				if = {
-					limit = { # Do only one attempt with the best ranked external trade partner
-						scope:purchaser_governorship = { 
-							NOT = { has_variable = external_trade_done_$tradegood$ } # If we want, we can set this flag only when the order has been fulfilled, in order to try more than one trade partner.
-						}
+				#debug_log = "SCOPES BELOW: Attempting to order  $tradegood$ from supplier"
+				#debug_log_scopes = yes
+				capital_scope.governorship = { # Capital of the seller's country acts as the trader, handling the transfer on behalf of the purchaser governorship
+
+					save_scope_as = seller_trade_scope
+
+					PURCHASE_try_supplier = {
+						supplier_rank = 1
+						order_size = $order_size$
+						tradegood = $tradegood$
+						category = $category$
 					}
-					capital_scope.governorship = { # Capital of the seller's country acts as the trader, handling the transfer on behalf of the purchaser governorship
 
-						save_scope_as = seller_trade_scope
-
+					if = {
+						limit = {
+							scope:purchaser_governorship = { 
+								NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
+							}
+						}
 						PURCHASE_try_supplier = {
-							supplier_rank = 1st
+							supplier_rank = 2
 							order_size = $order_size$
 							tradegood = $tradegood$
 							category = $category$
 						}
-
-					}
-					scope:purchaser_governorship = {
-						debug_log = "SCOPES BELOW. External trade done for  $tradegood$"
-						debug_log_scopes = yes
-						set_variable = {
-							name = external_trade_done_$tradegood$
-							days = 1
+						if = {
+							limit = {
+								scope:purchaser_governorship = { 
+									NOT = { has_variable = $tradegood$_purchase_order_tender_complete }
+								}
+							}
+							PURCHASE_try_supplier = {
+								supplier_rank = 3
+								order_size = $order_size$
+								tradegood = $tradegood$
+								category = $category$
+							}
 						}
 					}
 				}
@@ -2817,7 +2816,7 @@ PURCHASE_update_shipping = {
 				}
 			}
 		}
-		debug_log = "Shipping between India and European Atlantic Coast"
+		#debug_log = "Shipping between India and European Atlantic Coast"
 		PURCHASE_india_to_european_atlantic_shipping = {
 			order_size = $order_size$ 
 		}

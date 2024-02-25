@@ -1,0 +1,142 @@
+GT_get_market_penetration_country = {
+	# Scope: Country
+	# Function: Get the % market penetration in another country, which tells you how much of a country's shipping you can piggyback off to get access to a TZ's market
+	if = {
+		limit = {
+			$target$ = {
+				is_subject_of = $origin$
+				NOT = {
+					is_subject_type = client_colony
+					is_subject_type = autonomous_colony
+				}
+				$origin$ = {
+					set_variable
+				}
+			}
+
+		}
+	}
+}
+
+GT_all_GT_get_market_penetration_all_TZs = {
+	every_country = {
+		GT_get_market_penetration_all_TZs = yes
+	}
+}
+
+GT_get_market_penetration_all_TZs = {
+	# Scope: country
+	# Function: Get the % of market penetration in every tradezone
+	# This is a function of:
+	# ROOT's Shipping power % in the TZ
+	# ROOT's market penetration in every other country with shipping power in the TZ
+	save_scope_as = root_country
+
+	every_trade_center = {
+
+		save_scope_as = this_TZ
+
+		random_in_list = {
+			variable = shipping_power_list
+			limit = {
+				var:tracking_TZ_shipping_for_tag = scope:root_country
+			}
+
+			save_scope_as = tracking_province
+
+			if = {
+				limit = {
+					has_variable = shipping_power_total
+				}
+				if = {
+					limit = {
+						var:shipping_power_total > 0
+					}
+				}
+				set_variable = {
+					name = market_penetration
+					value = SHIPPING_percentage_in_TZ
+				}
+			}
+			else = {
+				set_variable = {
+					name = market_penetration
+					value = 0
+				}
+			}
+
+			scope:root_country = {
+				every_subject = {
+					limit = {
+						OR = {
+							is_subject_type = client_colony
+							is_subject_type = autonomous_colony
+							is_subject_type = client_state
+							is_subject_type = autonomous_governorship
+							is_subject_type = subsidiary_ally
+							is_subject_type = semi_autonomous_governorship
+						}
+						any_governorships = {
+							var:trade_center = scope:this_TZ
+						}
+					}
+
+					save_scope_as = colony_scope
+
+					scope:this_TZ = {
+						random_in_list = {
+							variable = shipping_power_list
+							limit = {
+								var:tracking_TZ_shipping_for_tag = scope:colony_scope
+								var:shipping_power_total > 0
+							}
+							save_scope_as = colony_scope_shipping_here
+						}
+					}
+
+					scope:tracking_province = {
+						change_variable = {
+							name = market_penetration
+							add = scope:colony_scope_shipping_here.SHIPPING_percentage_in_TZ
+						}
+					}
+				}
+			}
+
+		}
+
+		if = {
+			limit = {
+				has_variable = is_atlantic_seaboard_tradezone
+			}
+			scope:root_country = {
+				set_variable = {
+					name = TZ_penetration_atlantic_seaboard
+					value = scope:tracking_province.var:market_penetration
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_variable = is_india_tradezone
+			}
+			scope:root_country = {
+				set_variable = {
+					name = TZ_penetration_india
+					value = scope:tracking_province.var:market_penetration
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_variable = is_yellow_sea_tradezone
+			}
+			scope:root_country = {
+				set_variable = {
+					name = TZ_penetration_yellow_sea
+					value = scope:tracking_province.var:market_penetration
+				}
+			}
+		}
+	}
+}

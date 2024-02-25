@@ -1,0 +1,57 @@
+Every country gets its market penetration in every TZ.
+Market penetration = {
+    ROOT Shipping power % in TZ
+    ROOT Market penetration % in every other country with shipping power in TZ
+    Countries sharing a customs union with ROOT in TZ share 100% of their market penetration
+}
+
+Every TZ creates TRADEGROUPS, which are the groups of governorships per country or customs union inside of that TZ
+Quickest way to do this?
+
+Every governorship declares its SELL to the TZ AGGREGATE STOCKPILE
+The TZ records the % of TZ AGGREGATE STOCKPILE from each TZ, into each governorship
+Every TZ declares a proportion of its goods to the GLOBAL TZ, based on its trade infrastructure and the country laws
+	When declaring to GLOBAL TZ, the GLOBAL TZ also records the amount declared from each TZ so that it can dole out the export values and transport costs to appropriate TZs
+	Alternatively, each TZ has a global pool for each $tradegood$ that is counted as 100% available..?
+Every governorship also adds the value of the goods it declared to the global TZ (= amount declared x TZ local price)
+	At the end of declare phase this is divided by the total TZ AGGREGATE STOCKPILE of the global TZ to get the global_TZ_price_$tradegood$
+
+Every TZ declares its TZ AGGREGATE STOCKPILE to the global pool GLOBAL STOCKPILE
+Global pool records the % of GLOBAL STOCKPILE from each TZ
+
+Every country then gets its GLOBAL $TRADEGOOD$ MARKET PENETRATION and its $tradegood$ UNIT PRICE
+Global $tradegood$ market penetration = {
+
+    add = global_$tradegood$_contribution_%_TZ_1
+    multiply = ROOT.market_penetration_%_TZ_1
+    ...
+    add = global_$tradegood$_contribution_%_TZ_22
+    multiply = ROOT.market_penetration_%_TZ_22
+
+    add = global_$tradegood$_contribution_%_TZ_global
+    multiply = ROOT.market_penetration_%_TZ_global
+
+    result = A percentage based on the ROOT country's global access to tradegoods
+}
+$tradegood$ unit price = {
+	add = global_$tradegood$_contribution_%_TZ_1
+	multiply = ROOT.market_penetration_%_TZ_1
+	multiply = global_var:TZ_1.local_price_$tradegood$
+	...
+    add = global_$tradegood$_contribution_%_TZ_22
+    multiply = ROOT.market_penetration_%_TZ_22
+    multiply = global_var:TZ_22.local_price_$tradegood$
+
+    add = global_$tradegood$_contribution_%_TZ_global
+    multiply = ROOT.market_penetration_%_TZ_global
+    multiply = global_var:global_TZ_price_$tradegood$
+}
+
+TZs declare their TZ AGGREGATE ORDER to the global pool's GLOBAL ORDER TOTAL
+Global pool records the % of GLOBAL ORDER TOTAL from each TZ
+
+If GLOBAL ORDER TOTAL for $tradegood$ is < GLOBAL STOCKPILE, then every TZ fulfils its whole order
+else, each TZ fulfils its order partially based on the % of GLOBAL ORDER TOTAL
+This gives the FINAL TZ IMPORT
+
+Every governorship is issued a % of the TZ's FINAL TZ IMPORT based on its % of the TZ AGGREGATE ORDER, multiplied down by the % of the owner country's GLOBAL $TRADEGOOD$ MARKET PENETRATION

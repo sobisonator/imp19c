@@ -1,25 +1,17 @@
 def print_TZ_statement(TZ):
-	loc = """SHIPPING_earned_from_{tradezone} = {{
-	value = 0
-	global_var:global_{tradezone}_tradezone = {{
-		if = {{
-			limit = {{
-				any_in_list = {{
-					variable = shipping_power_list
-					var:tracking_TZ_shipping_for_tag = ROOT
-				}}
-			}}
-			add = var:TZ_this_quarter_transport_pool
-			random_in_list = {{
-				variable = shipping_power_list
-				limit = {{
-					var:tracking_TZ_shipping_for_tag = ROOT
-				}}
-				multiply = SHIPPING_percentage_in_TZ
-			}}
-		}}	
-	}}
-}}""".format(tradezone=TZ)
+	loc = """	textbox = {{
+		parentanchor = top
+		position = {{ 85 73 }}
+		using = BaseFontM
+		using = Black_FontColor
+		fontsize = 16
+
+		visible = "[SimpleProvinceIcon.GetProvince.MakeScope.Var('is_{tradezone}_tradezone').IsSet]"
+
+		block = "title_text" {{
+			text = "#T [GuiScope.SetRoot( Player.MakeScope ).ScriptValue('TZ_penetration_{tradezone}')|0%]#!"
+		}}
+	}}""".format(tradezone=TZ)
 	print(loc)
 
 #all_goods = ["grain","fur","industrial_fibres","textile_fibres","wool","silk","wood","stone","sulphur","whales","gems","peat","tin","inorganic_compounds","copper","iron","gold","silver","lead","coal","oil","tea","coffee","opium","tobacco","sugar","hardwood","rubber","dye","spices","temperate_fruit","tropical_fruit","mediterranean_fruit","chocolate","livestock","salt","fish","clothing","luxury_clothing","furniture","luxury_furniture","alcohol","glass","chemicals","rare_alloys","construction_materials","early_munitions","late_munitions","naval_supplies","steel_ships","wooden_ships","steel","bronze","machine_parts","early_artillery","late_artillery","electronics","pharmaceuticals","motors","processed_foods","petrochemicals"]

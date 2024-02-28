@@ -678,3 +678,77 @@ SHIPPING_earned_from_east_mediterranean = {
 		}	
 	}
 }
+
+## TZ penetration values
+# Scope: Country
+
+partial_shipping_india = {
+	value = var:shipping_india
+	multiply = 0.75 # TODO: This should be based on trade laws of the country
+}
+
+minimal_shipping_india = {
+	value = var:shipping_india
+	multiply = 0.66 # TODO: This should be based on trade laws of the country
+}
+
+TZ_penetration_india = {
+	value = var:shipping_india
+
+	every_subject = {
+		limit = {
+			OR = {
+				is_subject_type = client_colony
+				is_subject_type = autonomous_colony
+			}
+			var:shipping_india > 0
+		}
+		add = var:shipping_india
+		every_subject = {
+			limit = {
+				var:shipping_india > 0
+			}
+			add = THIS.partial_shipping_india
+		}
+	}
+
+	every_subject = {
+		limit = {
+			has_variable = overlord_customs_union
+			var:shipping_india > 0
+		}
+		add = var:shipping_india
+	}
+
+	every_in_list = {
+		variable = list_of_trade_partners_all_categories
+		limit = {
+			var:shipping_india > 0
+			NOT = {
+				is_subject_of = ROOT
+			}
+		}
+		add = THIS.minimal_shipping_india
+	}
+
+	if = {
+		limit = {
+			has_variable = member_of_federation
+		}
+		var:member_of_federation = {
+			# TODO: Have this get the shipping value of the governorships in the federation only
+			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
+		}
+	}
+
+	if = {
+		limit = {
+			is_subject = yes
+		}
+		overlord = {
+			add = THIS.var:shipping_india
+		}
+	}
+
+	divide = global_var:global_india_tradezone.SHIPPING_total_in_TZ
+}

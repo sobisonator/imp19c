@@ -9,7 +9,7 @@ def print_TZ_statement(TZ):
 		visible = "[SimpleProvinceIcon.GetProvince.MakeScope.Var('is_{tradezone}_tradezone').IsSet]"
 
 		block = "title_text" {{
-			text = "#T [GuiScope.SetRoot( Player.MakeScope ).ScriptValue('TZ_penetration_{tradezone}')|0%]#!"
+			text = "#T [Player.MakeScope.Var('TZ_penetration_{tradezone}').GetValue|0%]"
 		}}
 	}}""".format(tradezone=TZ)
 	print(loc)

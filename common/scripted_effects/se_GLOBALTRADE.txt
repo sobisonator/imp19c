@@ -1,159 +1,192 @@
-GT_get_market_penetration_country = {
-	# Scope: Country
-	# Function: Get the % market penetration in another country, which tells you how much of a country's shipping you can piggyback off to get access to a TZ's market
-	if = {
-		limit = {
-			$target$ = {
-				is_subject_of = $origin$
-				NOT = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
-				}
-				$origin$ = {
-					set_variable
-				}
-			}
-
-		}
-	}
+GT_do_global_trade = {
+	GT_update_governorship_vars = yes
+	GT_cache_TZ_penetration_values = yes
+	GT_reset_all_TZ_stockpiles = yes
 }
 
-GT_all_GT_get_market_penetration_all_TZs = {
+GT_create_tradegroups = {
+	# Scope: Random country, to every trade center province
+	# Function: Create temporary objects that are used as proxies for groups of governorships within countries 
+}
+
+GT_update_governorship_vars = {
+	# Scope: Random country
+	# Function: Set the trade center variable in every governorship
 	every_country = {
-		GT_get_market_penetration_all_TZs = yes
-	}
-	every_country = {
-		limit = {
-			is_subject = yes
+		every_governorships = {
+				TRADE_governorship_get_pops_this_quarter = yes
+				TRADE_set_internal_trade_scope = yes
+				TRADE_update_governorship_TZs = yes
 		}
-	#	GT_get_all_subject_market_penetration = yes
 	}
 }
 
-GT_get_all_subject_market_penetration = {
-	save_scope_as = subject_country 
-
-	if = {
-		limit = {
-			any_governorships = {
-				var:trade_center = {
-					has_variable = is_india_tradezone
-				}
-			}
-		}
-		overlord = {
-			change_variable = {
-				name = TZ_penetration_india
-				add = scope:subject_country.var:TZ_penetration_india
-			}
-		}
-	}		
-}
-
-GT_get_market_penetration_all_TZs = {
-	# Scope: country
-	# Function: Get the % of market penetration in every tradezone
-	# This is a function of:
-	# ROOT's Shipping power % in the TZ
-	# ROOT's market penetration in every other country with shipping power in the TZ
-	save_scope_as = root_country
-
+GT_reset_all_TZ_stockpiles = {
 	every_trade_center = {
-
-		save_scope_as = this_TZ
-
-		random_in_list = {
-			variable = shipping_power_list
-			limit = {
-				var:tracking_TZ_shipping_for_tag = scope:root_country
-			}
-
-			save_scope_as = tracking_province
-
-			if = {
-				limit = {
-					has_variable = shipping_power_total
-				}
-				if = {
-					limit = {
-						var:shipping_power_total > 0
-					}
-				}
-				set_variable = {
-					name = market_penetration
-					value = SHIPPING_percentage_in_TZ
-				}
-			}
-			else = {
-				set_variable = {
-					name = market_penetration
-					value = 0
-				}
-			}
-
-		}
-
-		if = {
-			limit = {
-				has_variable = is_atlantic_seaboard_tradezone
-			}
-			scope:root_country = {
-				set_variable = {
-					name = TZ_penetration_atlantic_seaboard
-					value = scope:tracking_province.var:market_penetration
-				}
-			}
-		}
-		else_if = {
-			limit = {
-				has_variable = is_india_tradezone
-			}
-			scope:root_country = {
-				set_variable = {
-					name = TZ_penetration_india
-					value = scope:tracking_province.var:market_penetration
-				}
-			}
-		}
-		else_if = {
-			limit = {
-				has_variable = is_yellow_sea_tradezone
-			}
-			scope:root_country = {
-				set_variable = {
-					name = TZ_penetration_yellow_sea
-					value = scope:tracking_province.var:market_penetration
-				}
-			}
+		every_tradegood_complex = {
+			APPLY = GT_set_tradegood_TZ_stockpile_0
 		}
 	}
 }
 
-GT_get_all_market_penetration_new = {
-	every_country = {
-		save_scope_as = this_country
+GT_set_tradegood_TZ_stockpile_0 = {
+	set_variable = {
+		name = TZ_stockpile_$tradegood$
+		value = 0
+	}
+}
 
+GT_declare_sell_to_TZ_aggregate_stockpile = {
+	# Scope: Random country
+	# Function: Every governorship declares its stockpile surplus of every tradegood as available to sell to its local tradezone, and some of it to the "global" tradezone
+	every_country = {
+		every_governorships = {
+
+			save_scope_as = seller_governorship
+
+			every_tradegood_complex = {
+				APPLY = GT_declare_sell_amount
+			}
+			var:trade_center = {
+				every_tradegood_complex = {
+					APPLY = GT_update_TZ_sell_amount
+				}
+			}
+
+		}
+	}
+}
+
+GT_declare_sell_amount = {
+	# Scope: Governorship
+	if = {
+		limit = {
+			var:$tradegood$_stockpile > DEMAND_$tradegood$
+		}
+		set_variable = {
+			name = for_sale_$tradegood$
+			value = $tradegood$_stockpile
+		}
+		change_variable = {
+			name = for_sale_$tradegood$
+			subtract = $tradegood$_stockpile
+		}
+		set_variable = {
+			name = for_sale_local_$tradegood$
+			value = var:for_sale_$tradegood$
+		}
+		change_variable = {
+			name = for_sale_local_$tradegood$
+			multiply = 0.9 # TODO: Use a svalue that represents the percentage to be offered to the global TZ
+		}
+		set_variable = {
+			name = for_sale_global_$tradegood$
+			multiply = 0.1 # TODO: Use a svalue that represents the percentage to be offered to the global TZ
+		}
+	}
+}
+
+GT_update_TZ_sell_amount = {
+	# Scope: trade center province
+	change_variable = {
+		name = TZ_stockpile_$tradegood$
+		add = scope:seller_governorship.var:for_sale_local_$tradegood$
+	}
+	change_global_variable = {
+		name = global_TZ_stockpile_$tradegood$
+		add = scope:seller_governorship.var:for_sale_global_$tradegood$
+	}
+}
+
+GT_cache_TZ_penetration_values = {
+	every_country = {
 		set_variable = {
 			name = TZ_penetration_india
-			value = var:shipping_india
+			value = TZ_penetration_india
 		}
-		every_subject = {
-			limit = {
-				var:shipping_india > 0
-			}
-			save_scope_as = this_subject
-
-			scope:this_country = {
-				change_variable = {
-					name = TZ_penetration_india
-					add = scope:this_subject.var:shipping_india
-				}
-			}
+		set_variable = {
+			name = TZ_penetration_east_north_america
+			value = TZ_penetration_east_north_america
 		}
-
-		change_variable = {
-			name = TZ_penetration_india
-			divide = global_var:global_india_tradezone.SHIPPING_total_in_TZ
+		set_variable = {
+			name = TZ_penetration_west_north_america
+			value = TZ_penetration_west_north_america
+		}
+		set_variable = {
+			name = TZ_penetration_caribbean
+			value = TZ_penetration_caribbean
+		}
+		set_variable = {
+			name = TZ_penetration_west_south_america
+			value = TZ_penetration_west_south_america
+		}
+		set_variable = {
+			name = TZ_penetration_east_south_america
+			value = TZ_penetration_east_south_america
+		}
+		set_variable = {
+			name = TZ_penetration_south_east_asia
+			value = TZ_penetration_south_east_asia
+		}
+		set_variable = {
+			name = TZ_penetration_indo_china
+			value = TZ_penetration_indo_china
+		}
+		set_variable = {
+			name = TZ_penetration_yellow_sea
+			value = TZ_penetration_yellow_sea
+		}
+		set_variable = {
+			name = TZ_penetration_southern_africa
+			value = TZ_penetration_southern_africa
+		}
+		set_variable = {
+			name = TZ_penetration_west_africa
+			value = TZ_penetration_west_africa
+		}
+		set_variable = {
+			name = TZ_penetration_east_africa
+			value = TZ_penetration_east_africa
+		}
+		set_variable = {
+			name = TZ_penetration_middle_east
+			value = TZ_penetration_middle_east
+		}
+		set_variable = {
+			name = TZ_penetration_western_steppe
+			value = TZ_penetration_western_steppe
+		}
+		set_variable = {
+			name = TZ_penetration_eastern_steppe
+			value = TZ_penetration_eastern_steppe
+		}
+		set_variable = {
+			name = TZ_penetration_upper_yangtzi
+			value = TZ_penetration_upper_yangtzi
+		}
+		set_variable = {
+			name = TZ_penetration_atlantic_seaboard
+			value = TZ_penetration_atlantic_seaboard
+		}
+		set_variable = {
+			name = TZ_penetration_central_europe
+			value = TZ_penetration_central_europe
+		}
+		set_variable = {
+			name = TZ_penetration_west_mediterranean
+			value = TZ_penetration_west_mediterranean
+		}
+		set_variable = {
+			name = TZ_penetration_baltic
+			value = TZ_penetration_baltic
+		}
+		set_variable = {
+			name = TZ_penetration_east_europe
+			value = TZ_penetration_east_europe
+		}
+		set_variable = {
+			name = TZ_penetration_east_mediterranean
+			value = TZ_penetration_east_mediterranean
 		}
 	}
 }

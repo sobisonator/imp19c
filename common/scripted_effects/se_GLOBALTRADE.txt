@@ -1,8 +1,15 @@
 GT_do_global_trade = {
+	GT_reset_global_TZ_variables = yes
 	SHIPPING_update_TZ_overview_piecharts = yes
 	GT_update_governorship_vars = yes
 	GT_cache_TZ_penetration_values = yes
 	GT_reset_all_TZ_stockpiles = yes
+	every_country = {
+		every_governorships = {
+			GT_cache_governorship_infrastructure_capacity = yes
+			GT_declare_sell_to_TZ_aggregate_stockpile = yes
+		}
+	}
 }
 
 GT_create_tradegroups = {
@@ -10,14 +17,115 @@ GT_create_tradegroups = {
 	# Function: Create temporary objects that are used as proxies for groups of governorships within countries 
 }
 
+GT_reset_global_TZ_variables = {
+	# Scope: Random country
+	# Function: Specifies the list of global variables to reset for each tradezone
+	every_tradegood_complex = {
+		APPLY = GT_reset_global_TZ_variables_tradegood
+	}
+}
+
+GT_reset_global_TZ_variables_tradegood = {
+	# Scope: Random country
+	# Function: Set $tradegood$ stockpile to 0 for every tradezone
+	set_global_variable = {
+		name = india_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_north_america_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_north_america_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = caribbean_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_south_america_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_south_america_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = south_east_asia_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = indo_china_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = yellow_sea_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = southern_africa_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_africa_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_africa_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = middle_east_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = western_steppe_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = eastern_steppe_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = upper_yangtzi_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = atlantic_seaboard_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = central_europe_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_mediterranean_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = baltic_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_europe_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_mediterranean_stockpile_$tradegood$
+		value = 0
+	}
+}
+
 GT_update_governorship_vars = {
 	# Scope: Random country
 	# Function: Set the trade center variable in every governorship
 	every_country = {
 		every_governorships = {
-				TRADE_governorship_get_pops_this_quarter = yes
-				TRADE_set_internal_trade_scope = yes
-				TRADE_update_governorship_TZs = yes
+			TRADE_governorship_get_pops_this_quarter = yes
+			TRADE_set_internal_trade_scope = yes
+			TRADE_update_governorship_TZs = yes
 		}
 	}
 }
@@ -37,24 +145,25 @@ GT_set_tradegood_TZ_stockpile_0 = {
 	}
 }
 
+GT_cache_governorship_infrastructure_capacity = {
+	# Scope: Governorship
+	# Function: Cache the governorship infrastructure capacity as a var
+	set_variable = {
+		name = governorship_infrastructure_capacity
+		value = TRADE_governorship_infrastructure_capacity_svalue
+	}
+}
+
 GT_declare_sell_to_TZ_aggregate_stockpile = {
-	# Scope: Random country
+	# Scope: Governorship
 	# Function: Every governorship declares its stockpile surplus of every tradegood as available to sell to its local tradezone, and some of it to the "global" tradezone
-	every_country = {
-		every_governorships = {
+	save_scope_as = seller_governorship
 
-			save_scope_as = seller_governorship
-
-			every_tradegood_complex = {
-				APPLY = GT_declare_sell_amount
-			}
-			var:trade_center = {
-				every_tradegood_complex = {
-					APPLY = GT_update_TZ_sell_amount
-				}
-			}
-
-		}
+	every_tradegood_complex = {
+		APPLY = GT_declare_sell_amount
+	}
+	every_tradegood_complex = {
+		APPLY = GT_update_TZ_sell_amount
 	}
 }
 
@@ -66,36 +175,184 @@ GT_declare_sell_amount = {
 		}
 		set_variable = {
 			name = for_sale_$tradegood$
-			value = $tradegood$_stockpile
+			value = var:$tradegood$_stockpile
 		}
 		change_variable = {
 			name = for_sale_$tradegood$
-			subtract = $tradegood$_stockpile
+			subtract = DEMAND_$tradegood$
 		}
-		set_variable = {
-			name = for_sale_local_$tradegood$
-			value = var:for_sale_$tradegood$
+		# Cap at governorship infra capacity
+		set_local_variable = {
+			name = l_governorship_infrastructure_capacity_compare
+			value = var:governorship_infrastructure_capacity
 		}
-		change_variable = {
-			name = for_sale_local_$tradegood$
-			multiply = 0.9 # TODO: Use a svalue that represents the percentage to be offered to the global TZ
+		change_local_variable = {
+			name = l_governorship_infrastructure_capacity_compare
+			subtract = var:for_sale_$tradegood$
 		}
-		set_variable = {
-			name = for_sale_global_$tradegood$
-			multiply = 0.1 # TODO: Use a svalue that represents the percentage to be offered to the global TZ
+		if = {
+			limit = {
+				local_var:l_governorship_infrastructure_capacity_compare < 0
+			}
+			set_variable = {
+				name = for_sale_$tradegood$
+				value = var:governorship_infrastructure_capacity
+			}
 		}
 	}
 }
 
 GT_update_TZ_sell_amount = {
-	# Scope: trade center province
-	change_variable = {
-		name = TZ_stockpile_$tradegood$
-		add = scope:seller_governorship.var:for_sale_local_$tradegood$
+	# Scope: Governorship
+	# Function: Update the amount of $tradegood$ offered in the TZ to which the governorship belongs
+	if = {
+		limit = {
+			has_variable = for_sale_$tradegood$
+		}
+		switch = {
+			trigger = has_variable
+			TZ_is_india_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = india
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_north_america_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = east_north_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_north_america_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = west_north_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_caribbean_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = caribbean
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_south_america_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = west_south_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_south_america_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = east_south_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_south_east_asia_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = south_east_asia
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_indo_china_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = indo_china
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_yellow_sea_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = yellow_sea
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_southern_africa_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = southern_africa
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_africa_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = west_africa
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_africa_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = east_africa
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_middle_east_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = middle_east
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_western_steppe_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = western_steppe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_eastern_steppe_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = eastern_steppe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_upper_yangtzi_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = upper_yangtzi
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_atlantic_seaboard_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = atlantic_seaboard
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_central_europe_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = central_europe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_mediterranean_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = west_mediterranean
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_baltic_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = baltic
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_europe_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = east_europe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_mediterranean_tradezone = {
+				GT_update_TZ_sell_amount_apply_change = {
+					tradezone = east_mediterranean
+					tradegood = $tradegood$
+				}
+			}
+		}
 	}
+}
+
+GT_update_TZ_sell_amount_apply_change = {
+	# Scope: Governorship
+	# Function: Apply the change to the appropriate global variable for the selling governorship's TZ
 	change_global_variable = {
-		name = global_TZ_stockpile_$tradegood$
-		add = scope:seller_governorship.var:for_sale_global_$tradegood$
+		name = $tradezone$_stockpile_$tradegood$
+		add = var:for_sale_$tradegood$
 	}
 }
 

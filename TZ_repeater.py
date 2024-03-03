@@ -1,6 +1,6 @@
 def print_TZ_statement(TZ):
-	loc = """	set_variable = {{
-		name = {tradezone}_tradezone_order_$tradegood$
+	loc = """	set_global_variable = {{
+		name = {tradezone}_payment_pool_$tradegood$
 		value = 0
 	}}""".format(tradezone=TZ)
 	print(loc)

@@ -1,7 +1,7 @@
 def print_TZ_statement(TZ):
-	loc = """	change_variable = {{
-		name = country_global_market_penetration_$tradegood$
-		add = local_var:from_{tradezone}_country_global_market_penetration_$tradegood$
+	loc = """	change_local_variable = {{
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_{tradezone}_global_base_import_price_$tradegood$
 	}}""".format(tradezone=TZ)
 	print(loc)
 

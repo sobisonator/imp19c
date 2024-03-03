@@ -1,7 +1,17 @@
 def print_TZ_statement(TZ):
-	loc = """	change_global_variable = {{
-		name = global_stockpile_$tradegood$
-		add = {tradezone}_stockpile_$tradegood$
+	loc = """	set_global_variable = {{
+		name = {tradezone}_percentage_of_global_stockpile_$tradegood$
+		value = global_var:{tradezone}_stockpile_$tradegood$
+	}}
+	if = {{
+		limit = {{
+			global_var:{tradezone}_stockpile_$tradegood$ > 0
+			global_var:global_stockpile_$tradegood$ > 0
+		}}
+		change_global_variable = {{
+			name = {tradezone}_percentage_of_global_stockpile_$tradegood$
+			divide = global_var:global_stockpile_$tradegood$
+		}}
 	}}""".format(tradezone=TZ)
 	print(loc)
 

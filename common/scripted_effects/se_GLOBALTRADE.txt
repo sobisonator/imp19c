@@ -20,6 +20,8 @@ GT_do_global_trade = {
 	GT_get_global_import_unit_price_all = yes
 	every_country = {
 		GT_get_country_global_market_penetration_all = yes
+		GT_get_country_import_unit_price_all = yes
+		GT_get_order_size_modifier_all = yes
 		every_governorships = {
 			GT_create_order_all = yes
 		}
@@ -1543,6 +1545,41 @@ GT_get_country_unit_price_tradegood = {
 	}
 }
 
+GT_get_order_size_modifier_all = {
+	every_tradegood_complex = {
+		APPLY = GT_get_order_size_modifier_tradegood
+	}
+}
+
+GT_get_order_size_modifier_tradegood = {
+	# Scope: Country
+	# Function: Check if the nationwide demand for $tradegood$ is greater than can be fulfilled by the country's global market access, and if so set the modifier for all order sizes to the appropriate percentage of the market access. All orders for $tradegood$ will be reduced by this amount
+	set_variable = {
+		name = order_size_modifier_$tradegood$
+		value = var:country_global_market_penetration_$tradegood$
+	}
+	change_variable = {
+		name = order_size_modifier_$tradegood$
+		multiply = global_var:global_stockpile_$tradegood$
+	}
+
+	if = {
+		limit = {
+			var:order_size_modifier_$tradegood$ < DEMAND_country_$tradegood$
+		}
+		change_variable = {
+			name = order_size_modifier_$tradegood$
+			divide = DEMAND_country_$tradegood$
+		}
+	}
+	else = {
+		set_variable = {
+			name = order_size_modifier_$tradegood$
+			value = 1
+		}
+	}
+}
+
 GT_create_order_all = {
 	# Scope: Governorship
 	# Function: Create orders for all tradegoods which are then communicated to the TZ
@@ -1553,7 +1590,7 @@ GT_create_order_all = {
 
 GT_create_order_tradegood = {
 	# Scope: Governorship
-	# Function: Get the order for $tradegood$ from the governorship and submit it to the tradezone global order pool
+	# Function: Get the order for $tradegood$ from the governorship and submit it to the country total
 	if = {
 		limit = {
 			var:$tradegood$_stockpile < DEMAND_$tradegood$
@@ -1565,6 +1602,10 @@ GT_create_order_tradegood = {
 		change_variable = {
 			name = order_size_$tradegood$
 			subtract = var:$tradegood$_stockpile
+		}
+		change_variable = {
+			name = order_size_$tradegood$
+			multiply = owner.var:order_size_modifier_$tradegood$
 		}
 		switch = {
 			trigger = has_variable
@@ -1987,11 +2028,29 @@ GT_get_global_import_unit_price_tradegood = {
 	}
 }
 
+GT_get_country_import_unit_price_all = {
+	every_tradegood_complex = {
+		APPLY = GT_get_country_import_unit_price_tradegood
+	}
+}
+
 GT_get_country_import_unit_price_tradegood = {
 	# Scope: Country
 	# Function: Get the unit price for importing $tradegood$ based on the market penetration of the country
 	set_variable = {
 		name = country_unit_price_$tradegood$
-		value = 
+		value = global_var:global_base_import_price_$tradegood$
+	}
+	set_local_variable = {
+		name = country_import_price_div
+		value = 0.5
+	}
+	change_local_variable = {
+		name = country_import_price_div
+		add = var:country_global_market_penetration_$tradegood$
+	}
+	change_variable = {
+		name = country_unit_price_$tradegood$
+		divide = local_var:country_import_price_div
 	}
 }

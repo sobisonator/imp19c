@@ -1554,22 +1554,33 @@ GT_get_order_size_modifier_all = {
 GT_get_order_size_modifier_tradegood = {
 	# Scope: Country
 	# Function: Check if the nationwide demand for $tradegood$ is greater than can be fulfilled by the country's global market access, and if so set the modifier for all order sizes to the appropriate percentage of the market access. All orders for $tradegood$ will be reduced by this amount
-	set_variable = {
-		name = order_size_modifier_$tradegood$
-		value = var:country_global_market_penetration_$tradegood$
-	}
-	change_variable = {
-		name = order_size_modifier_$tradegood$
-		multiply = global_var:global_stockpile_$tradegood$
-	}
-
 	if = {
 		limit = {
-			var:order_size_modifier_$tradegood$ < DEMAND_country_$tradegood$
+			DEMAND_country_$tradegood$ > 0
+		}
+		set_variable = {
+			name = order_size_modifier_$tradegood$
+			value = var:country_global_market_penetration_$tradegood$
 		}
 		change_variable = {
 			name = order_size_modifier_$tradegood$
-			divide = DEMAND_country_$tradegood$
+			multiply = global_var:global_stockpile_$tradegood$
+		}
+
+		if = {
+			limit = {
+				var:order_size_modifier_$tradegood$ < DEMAND_country_$tradegood$
+			}
+			change_variable = {
+				name = order_size_modifier_$tradegood$
+				divide = DEMAND_country_$tradegood$
+			}
+		}
+		else = {
+			set_variable = {
+				name = order_size_modifier_$tradegood$
+				value = 1
+			}
 		}
 	}
 	else = {

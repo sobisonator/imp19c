@@ -1,6 +1,6 @@
 def print_TZ_statement(TZ):
 	loc = """		TZ_is_{tradezone}_tradezone = {{
-			GT_get_order_as_percentage_of_TZ_total_tradegood = {{
+			GT_get_governorship_amount_owed_tradegood = {{
 				tradegood = $tradegood$
 				tradezone = {tradezone}
 			}}

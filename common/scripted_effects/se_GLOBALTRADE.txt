@@ -26,14 +26,25 @@ GT_do_global_trade = {
 			GT_create_order_all = yes
 		}
 	}
-	# TODO: Implement get governorship percentage of TZ order pool all
-	GT_sum_all_TZ_orders_all = yes
+	GT_sum_all_TZ_orders_all = yes # Also gets as a order percentage of supply
+	# DISABLED - not currently needed for anything
+	#every_country = {
+	#	every_governorships = {
+	#		GT_get_order_as_percentage_of_TZ_total_all = yes
+	#	}
+	#}
+	GT_scale_order_size_and_payment_pools = yes
+	# DISABLED - not currently needed for anything
+	#every_country = {
+	#	every_governorships = {
+	#		GT_get_governorship_amount_owed_all = yes
+	#	}
+	#}
 	every_country = {
 		every_governorships = {
-			GT_get_order_as_percentage_of_TZ_total_all = yes
+			GT_scale_wealth_owed_and_order_size_all = yes
 		}
 	}
-	GT_scale_order_size_and_payment_pools = yes
 }
 
 GT_create_tradegroups = {
@@ -1944,21 +1955,22 @@ GT_create_order_tradegood = {
 
 GT_update_TZ_order_amount_apply_change = {
 	# Scope: Governorship
+	# Function: Add the local order for $tradegood$ to the TZ aggregate order, save the price paid for the tradegood, and also add that price paid to the TZ aggregate payment pool
 	change_global_variable = {
 		name = $tradezone$_total_order_size_$tradegood$
 		add = var:order_size_$tradegood$
 	}
-	set_local_variable = {
-		name = this_payment
+	set_variable = {
+		name = wealth_owed_for_$tradegood$
 		value = var:order_size_$tradegood$
 	}
-	change_local_variable = {
-		name = this_payment
+	change_variable = {
+		name = wealth_owed_for_$tradegood$
 		multiply = owner.var:country_unit_price_$tradegood$
 	}
 	change_global_variable = {
 		name = $tradezone$_payment_pool_$tradegood$
-		add = local_var:this_payment
+		add = var:wealth_owed_for_$tradegood$
 	}
 }
 
@@ -2252,16 +2264,16 @@ GT_get_country_import_unit_price_tradegood = {
 		value = global_var:global_base_import_price_$tradegood$
 	}
 	set_local_variable = {
-		name = country_import_price_div
+		name = country_import_price_div_$tradegood$
 		value = 0.5
 	}
 	change_local_variable = {
-		name = country_import_price_div
+		name = country_import_price_div_$tradegood$
 		add = var:country_global_market_penetration_$tradegood$
 	}
 	change_variable = {
 		name = country_unit_price_$tradegood$
-		divide = local_var:country_import_price_div
+		divide = local_var:country_import_price_div_$tradegood$
 	}
 }
 
@@ -2369,12 +2381,12 @@ GT_sum_all_TZ_orders_tradegood = {
 	}
 
 	set_global_variable = {
-		name = global_order_as_percentage_of_supply_$tradegood$
-		value = global_var:global_order_total_$tradegood$
+		name = global_supply_as_percentage_of_order_$tradegood$
+		value = global_var:global_stockpile_$tradegood$
 	}
 	change_global_variable = {
-		name = global_order_as_percentage_of_supply_$tradegood$
-		divide = global_var:global_stockpile_$tradegood$
+		name = global_supply_as_percentage_of_order_$tradegood$
+		divide = global_var:global_order_total_$tradegood$
 	}
 
 }
@@ -2560,95 +2572,95 @@ GT_modify_fulfillable_order_sizes = {
 	# Function: If the global order size exceeds the supply, modify down the order size from every TZ to an actually fulfillable amount
 	if = {
 		limit = {
-			global_var:global_order_as_percentage_of_supply_$tradegood$ < 1
+			global_var:global_supply_as_percentage_of_order_$tradegood$ < 1
 		}
 		change_global_variable = {
 			name = india_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = east_north_america_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = west_north_america_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = caribbean_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = west_south_america_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = east_south_america_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = south_east_asia_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = indo_china_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = yellow_sea_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = southern_africa_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = west_africa_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = east_africa_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = middle_east_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = western_steppe_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = eastern_steppe_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = upper_yangtzi_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = atlantic_seaboard_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = central_europe_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = west_mediterranean_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = baltic_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = east_europe_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 		change_global_variable = {
 			name = east_mediterranean_total_order_size_$tradegood$
-			multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 		}
 	}
 	
@@ -2657,266 +2669,274 @@ GT_modify_fulfillable_order_sizes = {
 GT_scale_payment_pool = {
 	# Function: Modify down the amount due to be paid by multiplying base price by the fulfilment percent, so that tradezones are not overpaying for their orders if they're only partially fulfilling them
 	# TODO: Also make sure the displayed unit prices reflect this
-	change_global_variable = {
-		name = india_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = east_north_america_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = west_north_america_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = caribbean_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = west_south_america_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = east_south_america_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = south_east_asia_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = indo_china_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = yellow_sea_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = southern_africa_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = west_africa_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = east_africa_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = middle_east_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = western_steppe_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = eastern_steppe_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = upper_yangtzi_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = atlantic_seaboard_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = central_europe_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = west_mediterranean_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = baltic_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = east_europe_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
-	}
-	change_global_variable = {
-		name = east_mediterranean_payment_pool_$tradegood$
-		multiply = global_var:global_order_as_percentage_of_supply_$tradegood$
+	if = {
+		limit = {
+			global_var:global_supply_as_percentage_of_order_$tradegood$ < 1
+		}
+		change_global_variable = {
+			name = india_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_north_america_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_north_america_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = caribbean_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_south_america_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_south_america_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = south_east_asia_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = indo_china_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = yellow_sea_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = southern_africa_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_africa_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_africa_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = middle_east_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = western_steppe_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = eastern_steppe_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = upper_yangtzi_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = atlantic_seaboard_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = central_europe_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_mediterranean_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = baltic_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_europe_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_mediterranean_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
 	}
 }
 
 #### vvv NOT YET IMPLEMENTED vvv ####
 
-GT_get_governorship_amount_owed_all = {
+GT_scale_wealth_owed_and_order_size_all = {
+	# Scope: Governorship
+	# Function: 
+	every_tradegood_complex = {
+		APPLY = GT_scale_wealth_owed_and_order_size_tradezone
+	}
+}
+
+GT_scale_wealth_owed_and_order_size_tradezone = {
+	# Scope: Governorship (every governorship limited by governorships that have a nonzero order size)
+	# Function: Pass tradezone to GT_get_governorship_amount_owed
 	if = {
 		limit = {
 			has_variable = order_size_$tradegood$
+			global_var:global_supply_as_percentage_of_order_$tradegood$ < 1
 		}
-		every_tradegood_complex = {
-			APPLY = GT_get_governorship_amount_owed_tradezone
-		}
-	}
-}
+		switch = {
+			trigger = has_variable
 
-GT_get_governorship_amount_owed_tradezone = {
-	# Scope: Governorship (every governorship limited by governorships that have a nonzero order size)
-	# Function: Pass tradezone to GT_get_governorship_amount_owed
-	switch = {
-		trigger = has_variable
-
-		TZ_is_india_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = india
+			TZ_is_india_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = india
+				}
 			}
-		}
-		TZ_is_east_north_america_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = east_north_america
+			TZ_is_east_north_america_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_north_america
+				}
 			}
-		}
-		TZ_is_west_north_america_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = west_north_america
+			TZ_is_west_north_america_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_north_america
+				}
 			}
-		}
-		TZ_is_caribbean_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = caribbean
+			TZ_is_caribbean_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = caribbean
+				}
 			}
-		}
-		TZ_is_west_south_america_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = west_south_america
+			TZ_is_west_south_america_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_south_america
+				}
 			}
-		}
-		TZ_is_east_south_america_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = east_south_america
+			TZ_is_east_south_america_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_south_america
+				}
 			}
-		}
-		TZ_is_south_east_asia_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = south_east_asia
+			TZ_is_south_east_asia_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = south_east_asia
+				}
 			}
-		}
-		TZ_is_indo_china_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = indo_china
+			TZ_is_indo_china_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = indo_china
+				}
 			}
-		}
-		TZ_is_yellow_sea_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = yellow_sea
+			TZ_is_yellow_sea_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = yellow_sea
+				}
 			}
-		}
-		TZ_is_southern_africa_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = southern_africa
+			TZ_is_southern_africa_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = southern_africa
+				}
 			}
-		}
-		TZ_is_west_africa_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = west_africa
+			TZ_is_west_africa_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_africa
+				}
 			}
-		}
-		TZ_is_east_africa_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = east_africa
+			TZ_is_east_africa_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_africa
+				}
 			}
-		}
-		TZ_is_middle_east_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = middle_east
+			TZ_is_middle_east_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = middle_east
+				}
 			}
-		}
-		TZ_is_western_steppe_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = western_steppe
+			TZ_is_western_steppe_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = western_steppe
+				}
 			}
-		}
-		TZ_is_eastern_steppe_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = eastern_steppe
+			TZ_is_eastern_steppe_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = eastern_steppe
+				}
 			}
-		}
-		TZ_is_upper_yangtzi_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = upper_yangtzi
+			TZ_is_upper_yangtzi_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = upper_yangtzi
+				}
 			}
-		}
-		TZ_is_atlantic_seaboard_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = atlantic_seaboard
+			TZ_is_atlantic_seaboard_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = atlantic_seaboard
+				}
 			}
-		}
-		TZ_is_central_europe_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = central_europe
+			TZ_is_central_europe_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = central_europe
+				}
 			}
-		}
-		TZ_is_west_mediterranean_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = west_mediterranean
+			TZ_is_west_mediterranean_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_mediterranean
+				}
 			}
-		}
-		TZ_is_baltic_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = baltic
+			TZ_is_baltic_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = baltic
+				}
 			}
-		}
-		TZ_is_east_europe_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = east_europe
+			TZ_is_east_europe_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_europe
+				}
 			}
-		}
-		TZ_is_east_mediterranean_tradezone = {
-			GT_get_governorship_amount_owed_tradegood = {
-				tradegood = $tradegood$
-				tradezone = east_mediterranean
+			TZ_is_east_mediterranean_tradezone = {
+				GT_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_mediterranean
+				}
 			}
 		}
 	}
 }
 
-GT_get_governorship_amount_owed_tradegood = {
+GT_scale_wealth_owed_and_order_size_tradegood = {
 	# Scope: Governorship (every governorship limited by governorships that have a nonzero order size)
 	# Function: Get the amount a governorship owes to pay for imports of $tradegood$
 	# Given $tradezone$ argument by a switch in the parent effect
-	set_variable = {
-		name = wealth_owed_for_$tradegood$
-		value = global_var:$tradezone$_payment_pool_$tradegood$
-	}
 	change_variable = {
 		name = wealth_owed_for_$tradegood$
-		multiply = var:order_as_percentage_of_TZ_total_$tradegood$
+		multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+	}
+	change_variable = {
+		name = order_size_$tradegood$
+		multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
 	}
 }
 
 # Sum of all payments from each tradezone will be charged to governorships according to their percentage contribution to the order total of each TZ
-# Each tradezone will scale down its total order size based on the global_order_as_percentage_of_supply_$tradegood$, before doling out the imported orders to governorships (see next note)
+# Each tradezone will scale down its total order size based on the global_supply_as_percentage_of_order_$tradegood$, before doling out the imported orders to governorships (see next note)
 # Sum of all imports from the global supply pool will be added to governorships ^^ditto
 # Sum of all income in each tradezone will be paid to governorships according to their percentage contribution to the stockpile of each TZ
 # Sum of all exports from each tradezone will be deducted from governorships ^^ditto

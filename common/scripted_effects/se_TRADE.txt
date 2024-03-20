@@ -990,6 +990,10 @@ TRADE_setup_import_and_export_trackers = {
 				name = list_of_tradegood_trackers
 				target = scope:tracker_province
 			}
+			set_variable = {
+				name = $tradegood$_tracker
+				value = scope:tracker_province
+			}
 		}
 	}
 }
@@ -1018,7 +1022,11 @@ TRADE_update_governorship_TZ_vars = {
 	# Scope: Governorship
 	# Function: Runs as a child of TRADE_update_governorship_TZs
 	# Save the list of tradezones present in the internal trade scope
+	# And save the name of the tradezone as a string in the governorship
 	save_scope_as = prev_governorship
+
+	set_variable = TZ_is_$TZ$
+
 	random_trade_center = {
 		limit = { $TZ$ = { PROVINCE = yes } }
 		save_scope_as = trade_center_province
@@ -1666,8 +1674,9 @@ TRADE_set_internal_trade_scope = {
 				}
 			}
 		}
-		TRADE_create_internal_trade_scope = {
-			scope = owner.capital_scope
+		set_variable = {
+			name = internal_trade_scope
+			value = owner
 		}
 
 	}
@@ -1682,21 +1691,26 @@ TRADE_set_internal_trade_scope = {
 				}
 			}
 		}
+#		owner = {
+#			var:overlord_customs_union = {
+#				save_scope_as = internal_trade_scope
+#			}
+#		}
 		if = {
-			limit = { 
+			limit = {
 				owner.var:overlord_customs_union = {
-					NOT = {
-						has_variable = overlord_customs_union
-					}
+					has_variable = overlord_customs_union
 				}
 			}
-			TRADE_create_internal_trade_scope = {
-				scope = owner.var:overlord_customs_union.capital_scope
+			set_variable = {
+				name = internal_trade_scope
+				value = owner.var:overlord_customs_union.var:overlord_customs_union
 			}
 		}
 		else = {
-			TRADE_create_internal_trade_scope = {
-				scope = owner.var:overlord_customs_union.var:overlord_customs_union.capital_scope
+			set_variable = {
+				name = internal_trade_scope
+				value = owner.var:overlord_customs_union
 			}
 		}
 	}
@@ -1708,14 +1722,16 @@ TRADE_set_internal_trade_scope = {
 		var:federation_customs_union = {
 			save_scope_as = internal_trade_scope
 		}
-		TRADE_create_internal_trade_scope = {
-			scope = scope:internal_trade_scope
+		set_variable = {
+			name = internal_trade_scope
+			value = scope:internal_trade_scope
 		}
 	}
 
 	else = {
-		TRADE_create_internal_trade_scope = {
-			scope = owner.capital_scope
+		set_variable = {
+			name = internal_trade_scope
+			value = owner
 		}
 	}
 }
@@ -1728,32 +1744,6 @@ TRADE_create_overlord_customs_union = {
 		set_variable = {
 			name = overlord_customs_union
 			value = scope:overlord_scope
-		}
-	}
-}
-
-TRADE_create_internal_trade_scope = {
-	# Scope: Governorship
-	set_variable = {
-		name = internal_trade_scope
-		value = $scope$
-	}
-	save_scope_as = root_governorship
-	$scope$ = {
-		set_variable = is_internal_trade_scope
-		if = {
-			limit = {
-				NOT = {
-					is_target_in_variable_list = {
-						name = ITS_list_of_governorships
-						target = scope:root_governorship
-					}
-				}
-			}
-			add_to_variable_list = {
-				name = ITS_list_of_governorships
-				target = scope:root_governorship
-			}
 		}
 	}
 }
@@ -1810,6 +1800,10 @@ TRADE_reset_quarterly_governorship_values = {
 	}
 	every_tradegoods_complex = {
 		APPLY = TRADE_set_this_quarter_spends_on_transport
+	}
+	set_variable = {
+		name = governorship_this_quarter_spend_on_transport
+		value = 0
 	}
 	every_tradegood_complex = {
 		APPLY = TRADE_reset_quarterly_spend_on_tradegood
@@ -1990,6 +1984,10 @@ TRADE_reset_internal_pools = {
 			name = internal_income_pool
 			value = 0
 		}
+		set_variable = {
+			name = national_trade_income_pool
+			value = 0
+		}
 		#TRADE_reset_all_tradegoods_TZ_internal_rankings = yes
 		every_tradegoods_complex = {
 			APPLY = TRADE_reset_tradegood_total_internal_stockpile
@@ -2037,6 +2035,10 @@ TRADE_reset_TZ_pools = {
 	every_trade_center = {
 		set_variable = {
 			name = TZ_income_pool
+			value = 0
+		}
+		set_variable = {
+			name = TZ_this_quarter_transport_pool
 			value = 0
 		}
 		every_tradegoods_complex = {

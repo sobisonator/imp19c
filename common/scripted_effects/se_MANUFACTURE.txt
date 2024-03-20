@@ -252,22 +252,30 @@ MANUFACTURE_consume_bonus_resource = {
 			name = this_industry_bonus_multiplier_$output$
 			value = $percentage_bonus$
 		}
-		change_local_variable = {
-			name = this_industry_bonus_multiplier_$output$
-			multiply = var:input_availability_$input$
-		}
-		change_local_variable = {
-			name = this_industry_bonus_multiplier_$output$
-			add = 1
+
+		if = {
+			limit = {
+				var:input_availability_$input$ < 1
+			}
+			change_local_variable = {
+				name = this_industry_bonus_multiplier_$output$
+				multiply = var:input_availability_$input$
+			}
 		}
 
 		set_local_variable = {
 			name = input_amt_used
 			value = $input_amt$
 		}
-		change_local_variable = {
-			name = input_amt_used
-			multiply = var:input_availability_$input$
+
+		if = {
+			limit = {
+				var:input_availability_$input$ < 1
+			}
+			change_local_variable = {
+				name = input_amt_used
+				multiply = var:input_availability_$input$
+			}
 		}
 		change_variable = {
 			name = $input$_stockpile
@@ -275,8 +283,8 @@ MANUFACTURE_consume_bonus_resource = {
 		}
 
 		change_variable = {
-			name = industry_production_$output$
-			multiply = local_var:this_industry_bonus_multiplier_$output$
+			name = industry_production_bonus_$output$
+			add = local_var:this_industry_bonus_multiplier_$output$
 		}
 	}
 	else = {
@@ -303,6 +311,22 @@ MANUFACTURE_reset_demand_from_industry = {
 	# Specific industries
 	set_variable = {
 		name = DEMAND_from_glass_industry_$tradegood$
+		value = 0
+	}
+	set_variable = {
+		name = DEMAND_from_machine_parts_industry_$tradegood$
+		value = 0
+	}
+	set_variable = {
+		name = DEMAND_from_clothing_industry_$tradegood$
+		value = 0
+	}
+	set_variable = {
+		name = DEMAND_from_bronze_industry_$tradegood$
+		value = 0
+	}
+	set_variable = {
+		name = DEMAND_from_luxury_clothing_industry_$tradegood$
 		value = 0
 	}
 }
@@ -356,12 +380,16 @@ MANUFACTURE_reset_production = {
 	if = {
 		limit = {
 			NOT = {
-				has_global_variable = MANUFACTURE_production_phase
+				has_local_variable = MANUFACTURE_production_phase
 			}
 		}
 		set_variable = {
 			name = industry_production_$output$
 			value = 0
+		}
+		set_variable = {
+			name = industry_production_bonus_$output$
+			value = 1 # Multiplier, modified by bonus resources
 		}
 	}
 }
@@ -369,7 +397,11 @@ MANUFACTURE_reset_production = {
 MANUFACTURE_produce_final = {
 	if = {
 		limit = {
-			has_global_variable = MANUFACTURE_production_phase
+			has_local_variable = MANUFACTURE_production_phase
+		}
+		change_variable = {
+			name = industry_production_$output$
+			multiply = local_var:industry_production_bonus_$output$
 		}
 		change_variable = {
 			name = $output$_stockpile
@@ -379,6 +411,8 @@ MANUFACTURE_produce_final = {
 }
 
 MANUFACTURE_all = {
+	#MANUFACTURE_reset_all_tradegood_demand = yes
+
 	MANUFACTURE_reset_production = {
 		output = glass
 	}
@@ -477,7 +511,7 @@ MANUFACTURE_glass = {
 		input_amt = 1
 
 		output = rare_alloys
-		percentage_bonus = 5
+		percentage_bonus = 2
 
 		essential = 0
 	}
@@ -555,7 +589,7 @@ MANUFACTURE_rare_alloys = {
 		input_amt = 1
 
 		output = rare_alloys
-		percentage_bonus = 5
+		percentage_bonus = 2
 
 		essential = 0
 	}
@@ -576,7 +610,7 @@ MANUFACTURE_clothing = {
 		input_2_amt = 1
 
 		output = clothing
-		output_amt = 10
+		output_amt = 4
 	}
 
 	MANUFACTURE_use_bonus_resource = {
@@ -584,7 +618,7 @@ MANUFACTURE_clothing = {
 		input_amt = 5
 
 		output = clothing
-		percentage_bonus = 1
+		percentage_bonus = 0.7
 
 		essential = 0
 	}
@@ -594,7 +628,7 @@ MANUFACTURE_clothing = {
 		input_amt = 1
 
 		output = clothing
-		percentage_bonus = 5
+		percentage_bonus = 2
 
 		essential = 0
 	}
@@ -673,7 +707,7 @@ MANUFACTURE_luxury_clothing = {
 		input_amt = 1
 
 		output = clothing
-		percentage_bonus = 5
+		percentage_bonus = 2
 
 		essential = 0
 	}
@@ -712,7 +746,7 @@ MANUFACTURE_bronze = {
 		input_amt = 1
 
 		output = bronze
-		percentage_bonus = 5
+		percentage_bonus = 2
 
 		essential = 0
 	}
@@ -771,7 +805,7 @@ MANUFACTURE_machine_parts = {
 		input_amt = 1
 
 		output = clothing
-		percentage_bonus = 5
+		percentage_bonus = 2
 
 		essential = 0
 	}

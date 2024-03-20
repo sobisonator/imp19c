@@ -1,0 +1,212 @@
+namespace = trade
+
+trade.1 = { # Trade setup
+	type = country_event
+	title = "TEST"
+	desc = "TEST"
+	picture = aqueducts
+	hidden = yes
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = { has_global_variable = trade_1_done } # Limit so this can be fired in on_action events block without triggering for every country
+			}
+			#MOVEMENT_get_TZ_distances = yes # Commented out for now - needs fixing, svalues are improperly named.
+			every_country = {
+				every_governorships = {
+					TRADE_governorship_get_pops_this_quarter = yes
+					TRADE_set_internal_trade_scope = yes
+					TRADE_update_governorship_TZs = yes
+				}
+				SELL_set_TZ_prices = yes
+			}
+			PRICE_update_TZ_prices = yes
+			every_country = {
+				every_governorships = {
+					TRADE_reset_all_tradegoods_TZ_internal_rankings = yes
+					TRADE_governorship_get_pops_this_quarter = yes
+				}
+				set_variable = {
+					name = internal_income_pool
+					value = 0
+				}
+				set_variable = {
+					name = national_trade_income_pool
+					value = 0
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_tradegood_total_internal_stockpile
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_setup_governorship_for_export_internal_vars
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_internal_trade_stockpiles
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+				}
+				TRADE_reset_quarterly_tax_totals = yes
+			}
+			every_federation = {
+				set_variable = {
+					name = internal_income_pool
+					value = 0
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_tradegood_total_internal_stockpile
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_setup_governorship_for_export_internal_vars
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_internal_trade_stockpiles
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+				}
+				TRADE_reset_quarterly_tax_totals = yes
+			}
+			TRADE_reset_all_internal_trade_revenue_totals = yes
+			TRADE_save_connection_time_values = yes
+			TRADE_update_all_route_connection_times = yes
+			every_country = {
+				every_governorships = {
+					TRADE_update_governorship_TZs = yes
+					TRADE_setup_internal_trade_cuts = yes
+					TRADE_reset_quarterly_governorship_values = yes
+				}
+				TRADE_setup_tax_rates = yes
+				set_global_variable = first_time_generic_price_setup_done
+			}
+			TRADE_update_TZ_tradegood_trackers = yes
+			set_global_variable = {
+				name = trade_1_done
+				days = 2
+			}
+		}
+	}
+
+}
+
+trade.2 = { # Quarterly internal trade simulation
+	type = country_event
+	title = "TEST"
+	desc = "TEST"
+	picture = aqueducts
+	hidden = yes
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = { has_global_variable = trade_2_done } # Limit so this can be fired in on_action events block without triggering for every country
+			}
+			# trigger_event = { id = debug_trade.201 } # Global base prices - defunct
+			every_trade_center = {
+				set_variable = {
+					name = TZ_this_quarter_transport_pool
+					value = 0
+				}
+			}
+			PURCHASE_reset_shipping_variables = yes
+			every_country = {
+				every_governorships = {
+					TRADE_reset_quarterly_governorship_values = yes
+					TRADE_governorship_get_pops_this_quarter = yes
+				}
+				SELL_set_TZ_prices_by_country = yes
+				set_variable = {
+					name = internal_income_pool
+					value = 0
+				}
+				set_variable = {
+					name = national_trade_income_pool
+					value = 0
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_tradegood_total_internal_stockpile
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_internal_trade_stockpiles
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_internal_trade_revenue_total
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+				}
+			}
+			PRICE_update_TZ_prices = yes
+			every_federation = {
+				set_variable = {
+					name = internal_income_pool
+					value = 0
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_tradegood_total_internal_stockpile
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_internal_trade_stockpiles
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_internal_trade_revenue_total
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+				}
+			}
+			every_internal_trade_viable_country = {
+				every_governorships = {
+					SELL_declare_all_internal_available = yes
+				}
+			}
+			every_internal_trade_viable_country = {
+				ordered_governorships = {
+					order_by = {
+						value = var:governorship_trade_capacity
+						add = TRADE_factories_trade_priority_bonus
+						#multiply = -1
+					}
+					max = 999
+					check_range_bounds = no
+					PURCHASE_make_internal_shopping_list = yes
+				}
+				every_governorships = {
+					SELL_calculate_all_internal_revenue_cut_percentages = yes
+					SELL_get_all_internal_cuts_of_revenue = yes
+					TRADE_set_spender_shares = yes
+					TRADE_set_income_shares = yes
+					PURCHASE_split_all_costs = yes
+					SELL_split_all_income = yes 
+				}
+			}
+			every_country = {
+				every_governorships = {
+					TRADE_clear_local_revenue_cut_flags = yes
+					TRADE_reset_all_tradegoods_TZ_internal_rankings = yes # Clear the rankings so that they can be recalculated next trade phase
+					CONSUME_all_stockpiles = yes
+				}
+			}
+			TRADE_update_TZ_tradegood_trackers = yes
+			#every_trade_center = {
+			#	trigger_event = { id = debug_trade.224 }
+			#}
+			if = {
+				limit = {
+					NOT = {
+						has_global_variable = first_time_price_setup_done
+					}
+				}
+				set_global_variable = {
+					name = first_time_price_setup_done
+				}
+			}
+			set_global_variable = {
+				name = trade_2_done
+				days = 2
+			}
+		}
+	}
+
+}

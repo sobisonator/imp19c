@@ -1,4 +1,4 @@
-GT_do_global_trade = {
+﻿GT_do_global_trade = {
 	set_global_variable = global_trade_triggered
 	GT_reset_global_TZ_variables = yes
 	SHIPPING_update_TZ_overview_piecharts = yes
@@ -11,15 +11,17 @@ GT_do_global_trade = {
 			GT_declare_sell_to_TZ_aggregate_stockpile = yes
 		}
 	}
-	every_country = {
-		every_governorships = {
-			GT_get_governorship_percentage_of_TZ_sell_stockpile_all = yes
-		}
-	}
+	#every_country = {
+	#	every_governorships = {
+	#		GT_get_governorship_percentage_of_TZ_sell_stockpile_all = yes
+	#	}
+	#}
 	GT_sum_all_TZ_stockpiles = yes
 	GT_get_global_import_unit_price_all = yes
 	every_country = {
+		# TODO: Move global market pen to after create_order_all and have it trigger only if any governorships order size > 0
 		GT_get_country_global_market_penetration_all = yes
+		# TODO: Move get order size modifier to create_order_all and then apply that modifier below in GT_scale_wealth_owed_and_order_size_all
 		GT_get_order_size_modifier_all = yes
 		GT_get_country_import_unit_price_all = yes
 		every_governorships = {
@@ -43,6 +45,9 @@ GT_do_global_trade = {
 	every_country = {
 		every_governorships = {
 			GT_scale_wealth_owed_and_order_size_all = yes
+			GT_get_governorship_income_due_all = yes
+			GT_subtract_amount_exported_all = yes
+			GT_add_amount_imported_all = yes
 		}
 	}
 }
@@ -332,95 +337,6 @@ GT_reset_global_TZ_variables_tradegood = {
 
 	set_global_variable = {
 		name = global_payment_pool_$tradegood$
-		value = 0
-	}
-
-	set_global_variable = {
-		name = india_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = east_north_america_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = west_north_america_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = caribbean_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = west_south_america_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = east_south_america_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = south_east_asia_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = indo_china_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = yellow_sea_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = southern_africa_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = west_africa_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = east_africa_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = middle_east_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = western_steppe_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = eastern_steppe_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = upper_yangtzi_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = atlantic_seaboard_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = central_europe_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = west_mediterranean_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = baltic_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = east_europe_income_pool_$tradegood$
-		value = 0
-	}
-	set_global_variable = {
-		name = east_mediterranean_income_pool_$tradegood$
 		value = 0
 	}
 }
@@ -770,6 +686,7 @@ GT_get_governorship_percentage_of_TZ_sell_stockpile_all = {
 }
 
 GT_get_governorship_percentage_of_TZ_sell_stockpile = {
+	# OBSOLETE
 	# Scope: Governorship
 	# Function: Calculate what percentage of the TZ's $tradegood$ stockpile this governorship's sell declare for $tradegood$ was
 	if = {
@@ -1445,6 +1362,7 @@ GT_create_global_stockpile = {
 	}
 }
 
+
 GT_get_country_global_market_penetration_all = {
 	every_tradegood_complex = {
 		APPLY = GT_get_country_global_market_penetration_tradegood
@@ -1819,6 +1737,29 @@ GT_create_order_tradegood = {
 		change_variable = {
 			name = order_size_$tradegood$
 			multiply = owner.var:order_size_modifier_$tradegood$
+		}
+		# Cap at governorship infra capacity
+		set_local_variable = {
+			name = l_governorship_infrastructure_capacity_compare
+			value = var:governorship_infrastructure_capacity
+		}
+		change_local_variable = {
+			name = l_governorship_infrastructure_capacity_compare
+			subtract = var:order_size_$tradegood$
+		}
+		if = {
+			limit = {
+				trigger_if = {
+					limit = {
+						has_local_variable = l_governorship_infrastructure_capacity_compare
+					}
+					local_var:l_governorship_infrastructure_capacity_compare < 0
+				}
+			}
+			set_variable = {
+				name = order_size_$tradegood$
+				value = var:governorship_infrastructure_capacity
+			}
 		}
 		switch = {
 			trigger = has_variable
@@ -2675,6 +2616,11 @@ GT_modify_fulfillable_order_sizes = {
 	
 }
 
+set_variable = {
+	name
+	add = 1
+}
+
 GT_scale_payment_pool = {
 	# Function: Modify down the amount due to be paid by multiplying base price by the fulfilment percent, so that tradezones are not overpaying for their orders if they're only partially fulfilling them
 	# TODO: Also make sure the displayed unit prices reflect this
@@ -2947,20 +2893,80 @@ GT_scale_wealth_owed_and_order_size_tradegood = {
 	}
 }
 
-#### vvv NOT YET IMPLEMENTED vvv ####
-
-GT_get_TZ_income_due_tradegood = {
-	# Scope: Random country
-	# Function: Get the amount of income due in each tradezone according by:
-	# Getting the global payment pool for $tradegood$
-	# Getting this TZ's % contribution to the global stockpile
-	# Multiplying the global payment pool by that %
+GT_get_governorship_income_due_all = {
+	# Scope: Governorship
+	# Function: Get the income due for every tradegood in this governorship
+	every_tradegood_complex = {
+		APPLY = GT_get_governorship_income_due_tradegood
+	}
 }
 
 GT_get_governorship_income_due_tradegood = {
 	# Scope: Governorship
-	# Function: Get the amount of wealth income due according to this governorship's contribution to $tradezone$'s stockpile of $tradegood$ for sale.
+	# Function: Get the amount of wealth income due according to this governorship's contribution to the global stockpile of $tradegood$ for sale.
+	set_variable = {
+		name = income_due_$tradegood$
+		value = var:for_sale_$tradegood$
+	}
+
+	change_variable = {
+		name = income_due_$tradegood$
+		divide = global_var:global_stockpile_$tradegood$
+	}
+
+	change_variable = {
+		name = income_due_$tradegood$
+		multiply = global_var:global_payment_pool_$tradegood$
+	}
+
 }
+
+GT_subtract_amount_exported_all = {
+	every_tradegood_complex = {
+		APPLY = GT_subtract_amount_exported_tradegood
+	}
+}
+
+GT_add_amount_imported_all = {
+	every_tradegood_complex = {
+		APPLY = GT_add_amount_imported_tradegood
+	}
+}
+
+GT_subtract_amount_exported_tradegood = {
+	# Scope: Governorship
+	# Function: Subtract from the stockpile the amount of $tradegood$ exported by this governorship
+	set_variable = {
+		name = amount_exported_$tradegood$
+		value = var:for_sale_$tradegood$
+	}
+	if = { # If there is more supply than demand, do not sell all goods
+		limit = {
+			global_var:global_supply_as_percentage_of_order_$tradegood$ > 1
+		}
+		change_variable = {
+			name = amount_exported_$tradegood$
+			divide = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+	}
+
+	change_variable = {
+		name = $tradegood$_stockpile
+		subtract = var:amount_exported_$tradegood$
+	}
+}
+
+GT_add_amount_imported_tradegood = {
+	# Scope: Governorship
+	# Function: Add to the stockpile the amount of $tradegood$ imported by this governorship
+	change_variable = {
+		name = $tradegood$_stockpile
+		add = var:order_size_$tradegood$
+	}
+}
+
+#### vvv NOT YET IMPLEMENTED vvv ####
+
 
 # Sum of all payments from each tradezone will be charged to governorships according to their percentage contribution to the order total of each TZ
 # Each tradezone will scale down its total order size based on the global_supply_as_percentage_of_order_$tradegood$, before doling out the imported orders to governorships (see next note)

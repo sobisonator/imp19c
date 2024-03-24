@@ -9,6 +9,7 @@
 		every_governorships = {
 			GT_cache_governorship_infrastructure_capacity = yes
 			GT_declare_sell_to_TZ_aggregate_stockpile = yes
+			GT_cache_trade_shares_all = yes
 		}
 	}
 	#every_country = {
@@ -19,9 +20,7 @@
 	GT_sum_all_TZ_stockpiles = yes
 	GT_get_global_import_unit_price_all = yes
 	every_country = {
-		# TODO: Move global market pen to after create_order_all and have it trigger only if any governorships order size > 0
 		GT_get_country_global_market_penetration_all = yes
-		# TODO: Move get order size modifier to create_order_all and then apply that modifier below in GT_scale_wealth_owed_and_order_size_all
 		GT_get_order_size_modifier_all = yes
 		GT_get_country_import_unit_price_all = yes
 		every_governorships = {
@@ -48,6 +47,8 @@
 			GT_get_governorship_income_due_all = yes
 			GT_subtract_amount_exported_all = yes
 			GT_add_amount_imported_all = yes
+			GT_distribute_income_all = yes
+			GT_distribute_expenses_all = yes
 		}
 	}
 }
@@ -392,6 +393,10 @@ GT_declare_sell_to_TZ_aggregate_stockpile = {
 
 GT_declare_sell_amount = {
 	# Scope: Governorship
+	set_variable = {
+		name = for_sale_$tradegood$
+		value = 0
+	}
 	if = {
 		limit = {
 			var:$tradegood$_stockpile > DEMAND_$tradegood$
@@ -1722,6 +1727,10 @@ GT_create_order_all = {
 GT_create_order_tradegood = {
 	# Scope: Governorship
 	# Function: Get the order for $tradegood$ from the governorship and submit it to the country total
+	set_variable = {
+		name = order_size_$tradegood$
+		value = 0
+	}
 	if = {
 		limit = {
 			var:$tradegood$_stockpile < DEMAND_$tradegood$
@@ -2726,9 +2735,19 @@ GT_scale_payment_pool = {
 
 GT_scale_wealth_owed_and_order_size_all = {
 	# Scope: Governorship
-	# Function: 
+	# Function: Get the amount a governorship owes to pay for imports of $tradegood$
+	# Given $tradezone$ argument by a switch in the parent effect
+	set_variable = {
+		name = trade_expenses_due_resource_extraction
+		value = 0
+	}
+	set_variable = {
+		name = trade_expenses_due_manufacturing
+		value = 0
+	}
+
 	every_tradegood_complex = {
-		APPLY = GT_scale_wealth_owed_and_order_size_tradezone
+		APPLY = GT_scale_wealth_owed_and_order_size_tradegood
 	}
 }
 
@@ -2738,7 +2757,6 @@ GT_scale_wealth_owed_and_order_size_tradezone = {
 	if = {
 		limit = {
 			has_variable = order_size_$tradegood$
-			global_var:global_supply_as_percentage_of_order_$tradegood$ < 1
 		}
 		switch = {
 			trigger = has_variable
@@ -2883,19 +2901,91 @@ GT_scale_wealth_owed_and_order_size_tradegood = {
 	# Scope: Governorship (every governorship limited by governorships that have a nonzero order size)
 	# Function: Get the amount a governorship owes to pay for imports of $tradegood$
 	# Given $tradezone$ argument by a switch in the parent effect
-	change_variable = {
-		name = wealth_owed_for_$tradegood$
-		multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
-	}
-	change_variable = {
-		name = order_size_$tradegood$
-		multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+	if = {
+		limit = {
+			has_variable = order_size_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:global_supply_as_percentage_of_order_$tradegood$ < 1
+			}
+			change_variable = {
+				name = wealth_owed_for_$tradegood$
+				multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+			}
+			change_variable = {
+				name = order_size_$tradegood$
+				multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+			}
+		}
+		if = {
+			limit = {
+				OR = {
+					flag:$tradegood$ = flag:chocolate
+					flag:$tradegood$ = flag:fur
+					flag:$tradegood$ = flag:grain
+					flag:$tradegood$ = flag:vegetables
+					flag:$tradegood$ = flag:industrial_fibres
+					flag:$tradegood$ = flag:textile_fibres
+					flag:$tradegood$ = flag:wool
+					flag:$tradegood$ = flag:silk
+					flag:$tradegood$ = flag:wood
+					flag:$tradegood$ = flag:stone
+					flag:$tradegood$ = flag:sulphur
+					flag:$tradegood$ = flag:whales
+					flag:$tradegood$ = flag:spices
+					flag:$tradegood$ = flag:coal
+					flag:$tradegood$ = flag:lead
+					flag:$tradegood$ = flag:dye
+					flag:$tradegood$ = flag:silver
+					flag:$tradegood$ = flag:gold
+					flag:$tradegood$ = flag:iron
+					flag:$tradegood$ = flag:copper
+					flag:$tradegood$ = flag:inorganic_compounds
+					flag:$tradegood$ = flag:tin
+					flag:$tradegood$ = flag:peat
+					flag:$tradegood$ = flag:gems
+					flag:$tradegood$ = flag:cattle
+					flag:$tradegood$ = flag:oil
+					flag:$tradegood$ = flag:tea
+					flag:$tradegood$ = flag:coffee
+					flag:$tradegood$ = flag:opium
+					flag:$tradegood$ = flag:tobacco
+					flag:$tradegood$ = flag:sugar
+					flag:$tradegood$ = flag:hardwood
+					flag:$tradegood$ = flag:rubber
+					flag:$tradegood$ = flag:tropical_fruit
+					flag:$tradegood$ = flag:mediterranean_fruit
+					flag:$tradegood$ = flag:temperate_fruit
+					flag:$tradegood$ = flag:salt
+				}
+			}
+			change_variable = {
+				name = trade_expenses_due_resource_extraction
+				add = var:wealth_owed_for_$tradegood$
+			}
+		}
+		else = {
+			change_variable = {
+				name = trade_expenses_due_manufacturing
+				add = var:wealth_owed_for_$tradegood$
+			}
+		}
 	}
 }
 
 GT_get_governorship_income_due_all = {
 	# Scope: Governorship
 	# Function: Get the income due for every tradegood in this governorship
+	set_variable = {
+		name = trade_income_due_resource_extraction
+		value = 0
+	}
+	set_variable = {
+		name = trade_income_due_manufacturing
+		value = 0
+	}
+
 	every_tradegood_complex = {
 		APPLY = GT_get_governorship_income_due_tradegood
 	}
@@ -2904,19 +2994,87 @@ GT_get_governorship_income_due_all = {
 GT_get_governorship_income_due_tradegood = {
 	# Scope: Governorship
 	# Function: Get the amount of wealth income due according to this governorship's contribution to the global stockpile of $tradegood$ for sale.
-	set_variable = {
-		name = income_due_$tradegood$
-		value = var:for_sale_$tradegood$
+	if = {
+		limit = {
+			has_variable = for_sale_$tradegood$
+		}
+		set_variable = {
+			name = income_due_$tradegood$
+			value = var:for_sale_$tradegood$
+		}
+
+		if = {
+			limit = {
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_variable = {
+				name = income_due_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+
+		change_variable = {
+			name = income_due_$tradegood$
+			multiply = global_var:global_payment_pool_$tradegood$
+		}
 	}
 
-	change_variable = {
-		name = income_due_$tradegood$
-		divide = global_var:global_stockpile_$tradegood$
+	if = {
+		limit = {
+			has_variable = income_due_$tradegood$
+			OR = {
+				flag:$tradegood$ = flag:chocolate
+				flag:$tradegood$ = flag:fur
+				flag:$tradegood$ = flag:grain
+				flag:$tradegood$ = flag:vegetables
+				flag:$tradegood$ = flag:industrial_fibres
+				flag:$tradegood$ = flag:textile_fibres
+				flag:$tradegood$ = flag:wool
+				flag:$tradegood$ = flag:silk
+				flag:$tradegood$ = flag:wood
+				flag:$tradegood$ = flag:stone
+				flag:$tradegood$ = flag:sulphur
+				flag:$tradegood$ = flag:whales
+				flag:$tradegood$ = flag:spices
+				flag:$tradegood$ = flag:coal
+				flag:$tradegood$ = flag:lead
+				flag:$tradegood$ = flag:dye
+				flag:$tradegood$ = flag:silver
+				flag:$tradegood$ = flag:gold
+				flag:$tradegood$ = flag:iron
+				flag:$tradegood$ = flag:copper
+				flag:$tradegood$ = flag:inorganic_compounds
+				flag:$tradegood$ = flag:tin
+				flag:$tradegood$ = flag:peat
+				flag:$tradegood$ = flag:gems
+				flag:$tradegood$ = flag:cattle
+				flag:$tradegood$ = flag:oil
+				flag:$tradegood$ = flag:tea
+				flag:$tradegood$ = flag:coffee
+				flag:$tradegood$ = flag:opium
+				flag:$tradegood$ = flag:tobacco
+				flag:$tradegood$ = flag:sugar
+				flag:$tradegood$ = flag:hardwood
+				flag:$tradegood$ = flag:rubber
+				flag:$tradegood$ = flag:tropical_fruit
+				flag:$tradegood$ = flag:mediterranean_fruit
+				flag:$tradegood$ = flag:temperate_fruit
+				flag:$tradegood$ = flag:salt
+			}
+		}
+		change_variable = {
+			name = trade_income_due_resource_extraction
+			add = var:income_due_$tradegood$
+		}
 	}
-
-	change_variable = {
-		name = income_due_$tradegood$
-		multiply = global_var:global_payment_pool_$tradegood$
+	else_if = {
+		limit = {
+			has_variable = income_due_$tradegood$
+		}
+		change_variable = {
+			name = trade_income_due_manufacturing
+			add = var:income_due_$tradegood$
+		}
 	}
 
 }
@@ -2936,40 +3094,294 @@ GT_add_amount_imported_all = {
 GT_subtract_amount_exported_tradegood = {
 	# Scope: Governorship
 	# Function: Subtract from the stockpile the amount of $tradegood$ exported by this governorship
-	set_variable = {
-		name = amount_exported_$tradegood$
-		value = var:for_sale_$tradegood$
-	}
-	if = { # If there is more supply than demand, do not sell all goods
+	if = {
 		limit = {
-			global_var:global_supply_as_percentage_of_order_$tradegood$ > 1
+			has_variable = for_sale_$tradegood$
 		}
-		change_variable = {
+		set_variable = {
 			name = amount_exported_$tradegood$
-			divide = global_var:global_supply_as_percentage_of_order_$tradegood$
+			value = var:for_sale_$tradegood$
 		}
-	}
+		if = { # If there is more supply than demand, do not sell all goods
+			limit = {
+				global_var:global_supply_as_percentage_of_order_$tradegood$ > 1
+			}
+			change_variable = {
+				name = amount_exported_$tradegood$
+				divide = global_var:global_supply_as_percentage_of_order_$tradegood$
+			}
+		}
 
-	change_variable = {
-		name = $tradegood$_stockpile
-		subtract = var:amount_exported_$tradegood$
+		change_variable = {
+			name = $tradegood$_stockpile
+			subtract = var:amount_exported_$tradegood$
+		}
 	}
 }
 
 GT_add_amount_imported_tradegood = {
 	# Scope: Governorship
 	# Function: Add to the stockpile the amount of $tradegood$ imported by this governorship
+	if = {
+		limit = {
+			has_variable = order_size_$tradegood$
+		}
+		change_variable = {
+			name = $tradegood$_stockpile
+			add = var:order_size_$tradegood$
+		}
+	}
+}
+
+GT_cache_trade_shares_all = {
+	# Scope: governorship
+	# Function: Get all the split of costs between pop groups and the state into variables so they don't have to be re-calculated every time they're called.
+	# These come already as percentages
+	GT_cache_trade_shares_category = {
+		category = resource_extraction
+	}
+	GT_cache_trade_shares_category = {
+		category = manufacturing
+	}
+	
+}
+
+GT_cache_trade_shares_category = {
+	# Scope: governorship
+	# Function: Cache the shares of trade income shares from GT_svalues
+	set_variable = {
+		name = trade_share_$category$_upper_strata
+		value = GT_trade_share_percentage_$category$_upper_strata
+	}
+	set_variable = {
+		name = trade_share_$category$_middle_strata
+		value = GT_trade_share_percentage_$category$_middle_strata
+	}
+	set_variable = {
+		name = trade_share_$category$_lower_strata
+		value = GT_trade_share_percentage_$category$_lower_strata
+	}
+	set_variable = {
+		name = trade_share_$category$_proletariat
+		value = GT_trade_share_percentage_$category$_proletariat
+	}
+	set_variable = {
+		name = trade_share_$category$_indentured
+		value = GT_trade_share_percentage_$category$_indentured
+	}
+	set_variable = {
+		name = trade_share_$category$_tribesmen
+		value = GT_trade_share_percentage_$category$_tribesmen
+	}
+	set_variable = {
+		name = trade_share_$category$_slaves
+		value = GT_trade_share_percentage_$category$_slaves
+	}
+	set_variable = {
+		name = trade_share_$category$_the_state
+		value = GT_trade_share_percentage_$category$_the_state
+	}
+}
+
+GT_distribute_income_all = {
+	# Scope: Governorship
+	GT_distribute_income_category = {
+		category = resource_extraction
+	}
+	GT_distribute_income_category = {
+		category = manufacturing
+	}
+}
+
+GT_calculate_actual_share_of_income_category = {
+	set_variable = {
+		name = this_income_from_$category$_$seller$
+		value = var:trade_income_due_$category$
+	}
 	change_variable = {
-		name = $tradegood$_stockpile
-		add = var:order_size_$tradegood$
+		name = this_income_from_$category$_$seller$
+		multiply = var:trade_share_$category$_$seller$
+	}
+}
+
+GT_distribute_income_category = {
+	# Scope: governorship
+	# Split the income for a single category of imported goods
+	# The state
+	GT_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = the_state
+	}
+	#owner = {
+	#	add_treasury = var:this_income_from_$category$_the_state
+	#}
+	# Upper strata
+	GT_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = upper_strata
+	}
+	change_variable = {
+		name = upper_strata_wealth
+		add = var:this_income_from_$category$_upper_strata
+	}
+	# Middle strata
+	GT_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = middle_strata
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = var:this_income_from_$category$_middle_strata
+	}
+	# Lower strata
+	GT_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = lower_strata
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = var:this_income_from_$category$_lower_strata
+	}
+	# Proletariat
+	GT_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = proletariat
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = var:this_income_from_$category$_proletariat
+	}
+	# Tribesmen
+	GT_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = tribesmen
+	}
+	change_variable = {
+		name = tribesmen_wealth
+		add = var:this_income_from_$category$_tribesmen
+	}
+	# Indentured
+	GT_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = indentured
+	}
+	change_variable = {
+		name = indentured_wealth
+		add = var:this_income_from_$category$_indentured
+	}
+	# Slaves
+	GT_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = slaves
+	}
+	change_variable = {
+		name = slaves_wealth
+		add = var:this_income_from_$category$_slaves
 	}
 }
 
 #### vvv NOT YET IMPLEMENTED vvv ####
 
+GT_distribute_expenses_all = {
+	# Scope: Governorship
+	GT_distribute_expenses_category = {
+		category = resource_extraction
+	}
+	GT_distribute_expenses_category = {
+		category = manufacturing
+	}
+}
 
-# Sum of all payments from each tradezone will be charged to governorships according to their percentage contribution to the order total of each TZ
-# Each tradezone will scale down its total order size based on the global_supply_as_percentage_of_order_$tradegood$, before doling out the imported orders to governorships (see next note)
-# Sum of all imports from the global supply pool will be added to governorships ^^ditto
-# Sum of all income in each tradezone will be paid to governorships according to their percentage contribution to the stockpile of each TZ
-# Sum of all exports from each tradezone will be deducted from governorships ^^ditto
+GT_calculate_actual_share_of_expenses_category = {
+	set_variable = {
+		name = this_expenses_from_$category$_$seller$
+		value = var:trade_expenses_due_$category$
+	}
+	change_variable = {
+		name = this_expenses_from_$category$_$seller$
+		multiply = var:trade_share_$category$_$seller$
+	}
+}
+
+GT_distribute_expenses_category = {
+	# Scope: governorship
+	# Split the expenses for a single category of imported goods
+
+
+	change_variable = {
+		name = trade_expenses_due_$category$
+		multiply = -1
+	}
+
+	# The state
+	GT_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = the_state
+	}
+	#owner = {
+	#	add_treasury = var:this_expenses_from_$category$_the_state
+	#}
+	# Upper strata
+	GT_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = upper_strata
+	}
+	change_variable = {
+		name = upper_strata_wealth
+		add = var:this_expenses_from_$category$_upper_strata
+	}
+	# Middle strata
+	GT_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = middle_strata
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = var:this_expenses_from_$category$_middle_strata
+	}
+	# Lower strata
+	GT_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = lower_strata
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = var:this_expenses_from_$category$_lower_strata
+	}
+	# Proletariat
+	GT_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = proletariat
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = var:this_expenses_from_$category$_proletariat
+	}
+	# Tribesmen
+	GT_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = tribesmen
+	}
+	change_variable = {
+		name = tribesmen_wealth
+		add = var:this_expenses_from_$category$_tribesmen
+	}
+	# Indentured
+	GT_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = indentured
+	}
+	change_variable = {
+		name = indentured_wealth
+		add = var:this_expenses_from_$category$_indentured
+	}
+	# Slaves
+	GT_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = slaves
+	}
+	change_variable = {
+		name = slaves_wealth
+		add = var:this_expenses_from_$category$_slaves
+	}
+}

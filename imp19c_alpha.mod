@@ -1,5 +1,5 @@
 name="Imperatrix: Victoria"
-supported_version="2.0.3"
+supported_version="2.0.4"
 description=""
 tags={
 	"Overhaul"

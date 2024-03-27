@@ -1,0 +1,74 @@
+﻿revoke_holding_button = {
+    scope = province
+	
+	confirm_title = "holding_confirm_title"	
+	confirm_text = "holding_confirm_desc"
+	
+	saved_scopes = {
+		player
+	}
+    is_shown = { # Can be omitted as always true
+      #exists = holding_owner
+    } 
+	ai_is_valid = {
+		always = no
+	}
+    is_valid = {
+		exists = holding_owner
+		trigger_if = {
+			limit = {
+				scope:player = {
+					tyranny > 99
+				}
+			}
+			scope:player = {
+				tyranny <= 99
+			}
+		}
+
+    }
+    effect = {
+       if = {
+			limit = {
+				exists = holding_owner
+			}
+			holding_owner = {
+				if = {
+					limit = {
+						is_ruler = no
+					}
+					add_loyalty = revoked_holding_l
+				}
+				remove_holding = root 
+				if = {
+					limit = {
+						is_head_of_family = yes
+					}
+					scope:player = {
+						approval_with_custom_tooltip_effect = {
+							CUSTOM_TOOLTIP = land_from_aristocracy_tt
+							PARTY = oligarchic_party
+							VALUE = party_disapproval_small_svalue
+						}
+						approval_with_custom_tooltip_effect = {
+							CUSTOM_TOOLTIP = land_from_aristocracy_tt
+							PARTY = optimates_party
+							VALUE = party_disapproval_small_svalue
+						}
+						approval_effect = {
+							PARTY = populares_party
+							VALUE = party_approval_small_svalue
+						}
+						approval_effect = {
+							PARTY = democratic_party
+							VALUE = party_approval_small_svalue
+						}
+					}
+				}
+			}
+		}
+		else = {
+			custom_tooltip = "no_current_holding_owner"
+		}
+	}
+}

@@ -1,0 +1,231 @@
+﻿anoint_heir = {
+
+	confirm_title = "confirm_anoint_heir_t"	
+	confirm_text = "confirm_anoint_heir_desc"
+
+    scope = character
+	saved_scopes = {
+		player
+	}
+    is_shown = { # Can be omitted as always true
+		
+    } 
+	ai_is_valid = {
+		always = no
+	}
+    is_valid = {
+		trigger_if = {
+			limit = {
+				employer.current_ruler = {
+					is_minor_character = yes
+					NOT = { employer = { has_law = elective_succession_law } }
+				}
+			}
+			employer.current_ruler = {
+				is_minor_character = no #Ok in elective monarchies
+			}
+		}
+		trigger_if = { #We should not give this modifier if you already have it.
+			limit = {
+				has_triggered_character_modifier = nominated_heir_modifier
+			}
+			NOT = { has_triggered_character_modifier = nominated_heir_modifier }
+		}
+		trigger_if = { #Should not give to primary heir.
+			limit = {
+				is_primary_heir = yes
+				NOT = { employer = { has_law = elective_succession_law } }
+			}
+			is_primary_heir = no #Strengthening the primary heir is perfectly valid in an elective monarchy
+		}
+		
+		trigger_if = { #Only your own family - You can always adopt.
+			limit = {
+				THIS = { from_ruler_family = no }
+				NOT = { employer = { has_law = elective_succession_law } }
+			}
+			THIS = { from_ruler_family = yes }
+			#Strengthening other families is perfectly valid in an elective monarchy
+		}
+		
+		trigger_if = { #Show if you cannot afford.
+			limit = { employer = { political_influence < 15 } }
+			employer = { political_influence >= 15 }
+		}
+		
+		trigger_if = { #Legitimacy Requirement. This depends on laws.
+			limit = {
+				employer = {
+					NOR = { 
+						has_law = elevate_monarch_monarchy
+						has_law = elevate_prophet_monarch_monarchy
+					}
+				}
+			}
+			trigger_if = {
+				limit = {
+					employer = { legitimacy < 90 }
+				}
+				employer = { 
+					OR = {
+						legitimacy >= 90
+						has_law = elevate_monarch_monarchy
+						has_law = elevate_prophet_monarch_monarchy
+					}
+				}
+			}
+		}
+		
+		trigger_else_if = { #Even if you have Divine Monarchs, then we do show that this is why you can nominate.
+			limit = {
+				employer = {
+					OR = {
+						has_law = elevate_monarch_monarchy
+						has_law = elevate_prophet_monarch_monarchy
+					}
+				}
+			}
+			employer = {
+				OR = {
+					has_law = elevate_monarch_monarchy
+					has_law = elevate_prophet_monarch_monarchy
+				}
+			}
+		}
+		
+    }
+    effect = {
+		employer = { add_political_influence = -15 } #PI Cost
+		employer = { add_legitimacy = -25 } #Legitimacy Loss
+		if = { #Only one heir apparent.
+			limit = {
+				employer = {
+					any_character = {
+						has_triggered_character_modifier = nominated_heir_modifier
+					}
+				}
+			}
+			employer = {
+				every_character = {
+					limit = {
+						has_triggered_character_modifier = nominated_heir_modifier
+					}
+					remove_triggered_character_modifier = nominated_heir_modifier
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOT = { employer = { has_law = elective_succession_law } }
+			}
+			add_triggered_character_modifier = {
+				name = nominated_heir_modifier
+				duration = -1
+			}
+		}
+		else = {
+			add_triggered_character_modifier = {
+				name = nominated_candidate_modifier
+				duration = -1
+			}
+		}
+		if = { #Sorry they swore an oath to the old heir, not this one...
+			limit = {
+				employer = {
+					has_country_modifier = oaths_of_allegiance
+				}
+			}
+			employer = {
+				remove_country_modifier = oaths_of_allegiance
+			}
+		}
+		custom_tooltip = heir_offense_warning
+		hidden_effect = {
+			save_scope_as = nominee
+			employer = {
+				current_heir = { save_scope_as = lost_heir }
+			}
+			if = {
+				limit = { employer = { NOT = { has_law = elective_succession_law } } }
+				employer = {  #Coronation!
+					current_ruler = { save_scope_as = nominator }
+					if = {
+						limit = { prev = { age < 12 } }
+						trigger_event = { id = heir_events.11 }
+					}
+					else = {
+						random_list = {
+							50 = {
+								modifier = {
+									factor = 2
+									legitimacy < 50
+								}
+								modifier = {
+									factor = 2
+									tyranny > 25
+								}
+								trigger_event = { id = heir_events.5 }
+							}
+							50 = {
+								modifier = {
+									factor = 2
+									stability > 60
+								}
+								if = {
+									limit = {
+										tag = EGY
+										exists = fam:Lagid
+										scope:nominee = {
+											is_minor_character = no
+											family = employer.fam:Lagid
+										}
+									}
+									trigger_event = { id = heir_events.6 }
+								}
+								else_if = {
+									limit = {
+										tag = SEL
+										exists = fam:Seleukid
+										scope:nominee = {
+											is_minor_character = no
+											family = employer.fam:Seleukid
+										}
+									}
+									trigger_event = { id = heir_events.7 }
+								}
+								else_if = {
+									limit = {
+										exists = fam:Antigonid
+										scope:nominee = {
+											is_minor_character = no
+											family = employer.fam:Antigonid
+										}
+									}
+									trigger_event = { id = heir_events.8 }
+								}
+								else_if = {
+									limit = {
+										OR = {
+											tag = MAC
+											tag = EPI
+										}
+									}
+									trigger_event = { id = heir_events.9 }
+								}
+								else = {
+									trigger_event = { id = heir_events.10 }
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			update_character = yes
+			scope:player = {
+				recalc_succession = yes
+			}
+		}
+    }
+}

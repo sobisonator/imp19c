@@ -1,11 +1,7 @@
 def print_TZ_statement(TZ):
-	loc = """	set_global_variable = {{
-		name = {tradezone}_income_pool
-		value = global_payment_pool_$tradegood$
-	}}
-	change_global_variable = {{
-		name = {tradezone}_income_pool
-		multiply = {tradezone}_percentage_of_global_stockpile_$tradegood$
+	loc = """	GT_update_shipping_route_traffic_tradezone = {{
+		tradezone = {tradezone}
+		tradegood = $tradegood$
 	}}""".format(tradezone=TZ)
 	print(loc)
 

@@ -1,0 +1,544 @@
+@sidemargins = 42
+@topmargins = 12
+@windowwidth = 512
+@windowheight = 632
+@windowwidthminusmargin = 482
+
+####################
+### MAIN WINDOW
+####################
+
+base_window = {
+	gfxtype = windowgfx
+	name = "macro_builder_view"
+	parentanchor = top|left
+	widgetanchor = top|left
+	size = { @windowwidth @windowheight }
+	position = { 60 138 }
+	movable = no
+	
+	### Audio ###
+	state = {
+		name = _show
+		start_sound = {
+			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
+		}
+	}
+	state = {
+		name = _hide
+		start_sound = {
+			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
+		}
+	}
+
+	####################
+	### MAIN HEADER
+	####################
+
+	vbox = {
+		using = MainWindowHeaderBox
+		name = "box for all things"
+
+		blockoverride "FlagOrIcon"
+		{
+			icon = {
+				texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
+				framesize = { 100 100 }
+				frame = 6
+				position = { -2 -2 }
+				size = { 34 34 }
+				modify_texture = {
+					texture = "gfx/interface/icons/menu_buttons/macrobuilder.dds"
+					blend_mode = alphamultiply
+				}
+			}
+		}
+
+		blockoverride "Title_text"
+		{
+			text = "MACRO_BUILDER_TITLE" 
+		}
+
+		blockoverride "White_buttons" 
+		{
+			button_back = { 
+				shortcut = "previous_window"
+				onclick = "[MacroBuilderView.OnPrevious]"
+				tooltip = "PREVIOUS_MACRO_BUILDER_VIEW"
+			}
+			
+			button_close = {
+				onclick = "[MacroBuilderView.OnClose]"
+				tooltip = "CLOSE"
+				shortcut = "close_window"
+			}
+		}
+
+		vbox = {
+			layoutpolicy_vertical = expanding
+			layoutpolicy_horizontal = expanding
+
+			margin_widget = {
+				size = { 0 60 }
+				layoutpolicy_horizontal = expanding
+				#margin = { 0 0 }
+
+				icon = {
+					position = { 2 46 }
+					using = beige_medium_background
+					spriteType = Corneredtiled
+					size = { 94 2 }
+				}
+
+				icon = {
+					position = { 500 46 }
+					using = beige_medium_background
+					spriteType = Corneredtiled
+					size = { 9 2 }
+				}
+
+				sub_header_v = {
+					size = { 86 0 }
+					position = { 8 12 }
+					blockoverride "Title_text"
+					{
+						text = ""
+					}
+				}
+
+				#################
+				### TABS 
+				#################
+
+				hbox = {
+					layoutpolicy_vertical = preferred
+					layoutpolicy_horizontal = expanding
+					spacing = 2
+					position = { -4 0 }
+					margin = { 6 0 }
+					@mincategorybuttonwidth = 100
+					@maxcategorybuttonwidth = 100
+					@mincategorybuttonheight = 28 
+					@maxcategorybuttonheight = 34
+
+					datamodel = "[MacroBuilderView.GetPages]"
+					item = {
+						category_tab = {
+							blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+							blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+							blockoverride "ButtonMinSizeOverride" { size = { 60 22 } }
+							blockoverride "MinVisible" { visible = "[Not( MacroBuilderPage.IsActive )]" }
+							blockoverride "MaxVisible" { visible = "[MacroBuilderPage.IsActive]" }
+							######## Shared Overrides
+							blockoverride "Center_text" { visible = no }
+							blockoverride "Center_text_and_icon" { visible = yes }
+							blockoverride "Button_text" { visible = no }
+							blockoverride "Icon"
+							{
+								texture = "[MacroBuilderPage.GetIconTexture]" 
+								visible = yes
+							}
+							######## Small Button Overrides
+							blockoverride "ClickFunction"
+							{
+								onclick = "[MacroBuilderPage.OnActivate]"
+							}
+						}
+						
+					}
+					hbox = {
+						layoutpolicy_horizontal = expanding
+					}
+				}	
+			}
+
+			#################
+			### SUB HEADER 
+			#################
+
+			margin_widget = {
+				size = { 0 32 }
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = fixed
+				margin = { 14 0 }
+
+				sub_header_v = {
+					size = { 480 0 }
+
+					blockoverride "Title_text"
+					{
+						text = [MacroBuilderView.GetActivePage.GetName]
+					}
+				}
+			}
+
+
+			####################################			
+			### LIST - WHAT TO BUILD (STEP 1)
+			####################################
+
+			margin_widget = {
+				size = { 0 474 }
+				name = "build_in_province"
+				layoutpolicy_vertical = fixed
+				layoutpolicy_horizontal = expanding
+				margin = { 18 0 }
+				margin_top = 8
+				scrollarea = {
+					size = { @windowwidthminusmargin 100% }
+					scrollbarpolicy_horizontal = always_off
+					using = VerticalScrollAreaCutOff
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+
+					visible = "[Or(MacroBuilderView.IsLayoutActive('build_in_province'), And(MacroBuilderView.IsLayoutActive('build_in_province_with_list'), Not(MacroBuilderView.GetBuildInProvince.IsInProvinceMode)))]"
+					
+					scrollwidget = {
+						fixedgridbox = {
+							datamodel = "[MacroBuilderView.GetBuildInProvinceModel]"
+							size = { 490 500 }
+							addcolumn = 480
+							addrow = 50
+							
+							item = {
+								widget = {
+									size = { 470 40 }
+									icon = {
+										size = { 120 6 }
+										parentanchor = right
+										position = { 0 1 }
+										texture = "gfx/interface/base_parts/brown_underline_x60bd.dds"
+										spriteType = Corneredtiled
+										spriteborder = { 30 0 }
+									}
+									icon = {
+										size = { 120 6 }
+										parentanchor = bottom|right
+										position = { 0 -1 }
+										texture = "gfx/interface/base_parts/brown_underline_x60bd.dds"
+										spriteType = Corneredtiled
+										spriteborder = { 30 0 }
+									}
+									hbox = {
+										spacing = 6
+										
+										icon_card_macro = {
+											size = { 40 40 }
+											blockoverride "Icon" { 
+												texture = "[MacroBuilderProvinceBuildable.GetIconTexture]" 
+												size = { 32 32 }
+											}
+											tooltip = "[MacroBuilderProvinceBuildable.GetTooltip]"
+										}
+										
+										widget = {
+											size = { 332 34 }
+											list_button = {
+												size = { 100% 100% }
+												tooltip = "[MacroBuilderProvinceBuildable.GetTooltip]"
+												enabled = "[MacroBuilderProvinceBuildable.IsEnabled]"
+												onclick = "[MacroBuilderProvinceBuildable.OnClick]"
+												down = "[MacroBuilderProvinceBuildable.IsSelected]"
+											}
+											textbox = {
+												text = "[MacroBuilderProvinceBuildable.GetName]"
+												using = BaseFontM
+												using = Black_FontColor
+												parentanchor = vcenter
+												align = left|nobaseline
+												position = { 12 1 }
+												autoresize = yes
+											}
+										}
+										
+										text_and_icon_price = {
+											name = "cost"
+											size = { 90 28 }
+											tooltip = "MACRO_BUILDER_COST"
+											blockoverride "LineVisibility"
+											{
+												visible = no
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				margin_widget = {
+					name = "province_mode"
+					size = { 100% 100% }
+					visible = "[And(MacroBuilderView.IsLayoutActive('build_in_province_with_list'), MacroBuilderView.GetBuildInProvince.IsInProvinceMode)]"
+					datacontext = "[MacroBuilderView.GetBuildInProvince]"
+					#margin_left = 8
+					vbox = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+						margin_widget = {
+							name = "sort_by"
+							size = { 0 38 }
+							layoutpolicy_horizontal = expanding
+							margin = { 4 0 }
+
+							flowcontainer = {
+								spacing = 4
+								
+								text_button_sort = {
+									size = { 212 0 }
+									tooltip = "MACRO_BUILDER_SORT_PROVINCE_NAME_TT"
+									
+									blockoverride "Button_text" { text = "A_Z" }
+									blockoverride "Icon" { 
+										visible = no
+									}
+									blockoverride "On_click" { onclick = "[MacroBuilderBuildInProvince.SortProvinces('name')]" }
+									blockoverride "DownState" { down = "[MacroBuilderBuildInProvince.IsProvincesSorted('name')]" }
+								}
+								
+								text_button_sort = {
+									size = { 54 0 }
+									tooltip = "MACRO_BUILDER_SORT_BUILD_AMOUNT_TT"
+									
+									blockoverride "Button_text" { visible = no }
+									blockoverride "Icon" { 
+										visible = yes
+										texture = "gfx/interface/icons/shared_icons/quantity.dds" 
+									}
+									blockoverride "On_click" { onclick = "[MacroBuilderBuildInProvince.SortProvinces('free_slots')]" }
+									blockoverride "DownState" { down = "[MacroBuilderBuildInProvince.IsProvincesSorted('free_slots')]" }
+								}
+								
+								fixedgridbox = {
+									addcolumn = 62
+									addrow = 32
+									maxverticalslots = 1
+									flipdirection = yes
+									datamodel = "[MacroBuilderBuildInProvince.GetModificationHeaders]"
+									
+									item = {
+										widget = {
+											size = { 58 24 }
+											text_button_sort = {
+												size = { 58 0 }
+												tooltip = "[ModificationItem.GetName]"
+												visible = "[Not( ModificationItem.ShouldShowValue )]"
+												blockoverride "Button_text" { visible = no }
+												blockoverride "Icon" { 
+													visible = yes
+													texture = "[ModificationItem.GetIcon]"
+												}
+												blockoverride "On_click" { onclick = "[MacroBuilderBuildInProvince.SortProvinces(ModificationItem.GetKey)]" }
+												blockoverride "DownState" { down = "[MacroBuilderBuildInProvince.IsProvincesSorted(ModificationItem.GetKey)]" }
+											}
+											text_button_sort = {
+												size = { 58 0 }
+												tooltip = "[ModificationItem.GetName]"
+												visible = "[ModificationItem.ShouldShowValue]"
+												blockoverride "Button_text" { visible = no }
+												blockoverride "Icon" { 
+													visible = yes
+													texture = "[ModificationItem.GetIcon]"
+												}
+												blockoverride "On_click" { onclick = "[MacroBuilderBuildInProvince.SortProvincesByNewValue(ModificationItem.GetKey)]" }
+												blockoverride "DownState" { down = "[MacroBuilderBuildInProvince.IsProvincesSortedByNewValue(ModificationItem.GetKey)]" }
+											}
+										}
+									}
+								}
+								
+							}
+						}
+						####################################
+						### LIST - WHERE TO BUILD (STEP 2)
+						####################################
+						margin_widget = {
+							size = { 0 474 }
+							layoutpolicy_horizontal = expanding
+
+							scrollarea = {
+								size = { 478 400 }
+
+								scrollbarpolicy_horizontal = always_off
+								using = VerticalScrollAreaCutOff
+								scrollbar_vertical = {
+									using = VerticalScrollBar
+								}
+								
+								scrollwidget = {
+									fixedgridbox = {
+										datamodel = "[MacroBuilderBuildInProvince.GetBuildableGlueItems]"
+										size = { 380 460 }
+										addcolumn = 466
+										addrow = 35
+										
+										item = {
+											widget = {
+												size = { 100% 35 }
+												text_button_square = {
+													size = { 212 28 }
+													position = { 4 0 }
+													parentanchor = vcenter
+													blockoverride "Center_text"
+													{
+														text = "[BuildableGlueItem.GetProvince.GetName]"
+														autoresize = no
+													}
+													
+													tooltip = "[BuildableGlueItem.GetProvinceTooltip]"
+													enabled = "[BuildableGlueItem.CanBuild]"
+													blockoverride "On_click"
+													{
+														onclick = "[BuildableGlueItem.OnClick]"
+													}
+													onmousehierarchyenter = "[SetHighlightProvince( BuildableGlueItem.GetProvince.GetId )]"
+													onmousehierarchyleave = "[ClearHighlightColors]"
+												}
+												
+												tag = {
+													text = "[BuildableGlueItem.GetCanBeBuiltAmount]"
+													parentanchor = vcenter
+													position = { 230 2 }
+													minimumsize = { 34 0 }
+												}
+													
+												fixedgridbox = {	
+													position = { 267 4 }
+													addcolumn = 64
+													addrow = 32
+													maxverticalslots = 1
+													flipdirection = yes
+													
+													datamodel = "[BuildableGlueItem.GetModifications]"
+													
+													item = {
+														widget = {
+															size = { 68 24 }
+															parentanchor = vcenter
+															position = { 230 2 }
+															tag = {
+																visible = "[Not( ModificationItem.ShouldShowValue )]"
+																text = "[ModificationItem.GetDifferenceFormatted]"
+																minimumsize = { 68 0 }
+																maximumsize = { 68 999 }
+																tooltip = "MACRO_BUILDER_MOD_ITEM_TT"
+															}
+															tag = {
+																visible = "[ModificationItem.ShouldShowValue]"
+																text = "[ModificationItem.GetNewValueFormatted|0]"
+																minimumsize = { 68 0 }
+																maximumsize = { 68 999 }
+																tooltip = "MACRO_BUILDER_MOD_ITEM_TT"
+																using = BaseFontS
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}	
+						}
+					}	
+					allow_outside = yes
+					margin_widget = {
+						name = "back_button"
+						size = { 100% 32 }
+						parentanchor = bottom|left
+						position = { 0 12 }
+						margin = { 4 0 }
+
+						text_button_square = {
+							size = { 220 28 }
+							parentanchor = hcenter|top
+							blockoverride "Center_text"
+							{
+								text = "BACK"
+							}
+							blockoverride "On_click" 
+							{ 
+								onclick = "[MacroBuilderBuildInProvince.OnBack]"
+							}
+						}
+					}
+				}
+				allow_outside = yes
+				###########################
+				### TRADE GOODS
+				###########################	
+						
+				margin_widget = {
+					name = "trade_goods"
+					size = { 100% 100% }
+					
+					scrollarea = {
+						size = { 478 466 }
+
+						scrollbarpolicy_horizontal = always_off
+						using = VerticalScrollAreaCutOff
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+
+						visible = "[MacroBuilderView.IsLayoutActive('trade_goods')]"
+
+						scrollwidget = {
+							dynamicgridbox = {
+								datamodel = "[MacroBuilderView.GetTradeGoodsModel]"
+								
+								item = {
+									container = {
+										#### TODO CATEGORIES FOR POPS, FEELS ODD MAYBE
+										tag = {
+											text = "[MacroBuilderTradeGoodsGroup.GetName]"
+											parentanchor = left
+											position = { 1 3 }
+										}
+										
+										dynamicgridbox = {
+											position = { 2 38 }
+											datamodel = "[MacroBuilderTradeGoodsGroup.GetTradeGoodsModel]"
+											
+											item = {
+												margin_widget = {
+													size = { 458 36 }
+													list_button = {
+														size = { 100% 100% }
+														onclick = "[MacroBuilderTradeGood.OnClick]"
+														down = "[MacroBuilderTradeGood.IsSelected]"
+														enabled = "[MacroBuilderTradeGood.IsEnabled]"
+														tooltip = "[MacroBuilderTradeGood.GetTooltip]"
+													}
+													icon_card = {
+														size = { 32 32 }
+														parentanchor = vcenter
+														position = { 0 1 }
+														blockoverride "Icon" {
+															texture = "[MacroBuilderTradeGood.GetIconTexture]"
+															size = { 29 29 }
+														}
+													}
+													textbox = {
+														autoresize = yes
+														using = BaseFontM
+														using = Black_FontColor
+														text = "[MacroBuilderTradeGood.GetName]"
+														position = { 40 6 }
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			vbox = { layoutpolicy_vertical = expanding }
+		}
+	}	
+}

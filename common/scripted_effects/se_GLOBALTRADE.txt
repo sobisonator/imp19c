@@ -4593,15 +4593,224 @@ GT_update_shipping_route_traffic_tradezone = {
 
 # TODO:
 
-GT_get_governorship_shipping_payments_owed = {
-	# Scope: Governorship
-	# Function: Get the total number of goods imported in the governorship and turn that into a shipping fee based on the cost of naval supplies here. Also add this to the global shipping payment pool
+GT_do_shipping_costs = {
+	GT_setup_global_shipping_costs_pool = yes
+	every_country = {
+		every_governorships = {
+			GT_get_governorship_shipping_payments_owed = yes
+		}
+	}
+	GT_get_TZ_shipping_income_pool_all = yes
 }
 
-GT_get_TZ_shipping_income_pool = {
+GT_setup_global_shipping_costs_pool = {
+	# Scope: Random country
+	# Function: Set global variable for global shipping costs that can be added to by governorships while summing up local shipping costs
+	set_global_variable = {
+		name = global_shipping_costs_pool
+		value = 0
+	}
+}
+
+GT_get_governorship_shipping_payments_owed = {
+	# Scope: Governorship
+	# Function: Get the total number of goods imported and exported (transported) in the governorship and turn that into a shipping fee based on the cost of naval supplies here. Also add this to the global shipping payment pool
+	set_variable = {
+		name = governorship_shipping_costs
+		value = 0
+	}
+	every_tradegood_complex = {
+		APPLY = GT_get_governorship_amount_transported_tradegood
+	}
+}
+
+GT_get_governorship_amount_transported_tradegood = {
+	# Scope: Governorship
+
+	# NOTE: ATM the exporter bears the cost of shipping. This can be changed by uncommenting the below
+	#if = {
+	#	limit = {
+	#		has_variable = order_size_$tradegood$
+	#	}
+	#	change_variable = {
+	#		name = governorship_shipping_costs
+	#		add = var:order_size_$tradegood$
+	#	}
+	#}
+
+
+	if = {
+		limit = {
+			has_variable = amount_exported_$tradegood$
+		}
+		change_variable = {
+			name = governorship_shipping_costs
+			add = var:amount_exported_$tradegood$
+		}
+	}
+
+	change_variable = {
+		name = governorship_shipping_costs
+		multiply = 0.1
+	}
+
+	if = {
+		limit = {
+			var:governorship_shipping_costs > 0
+		}
+		change_global_variable = {
+			name = global_shipping_costs_pool
+			add = var:governorship_shipping_costs
+		}
+	}
+}
+
+GT_get_global_capped_shipping_traffic_all = {
+	# Scope: Random country
+	# Function: Get the shipping traffic, capped by shipping capacity, from every TZ and add it to a global total variable
+	set_global_variable = {
+		name = global_chargeable_shipping_traffic
+		value = 0
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = india
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = east_north_america
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = west_north_america
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = caribbean
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = west_south_america
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = east_south_america
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = south_east_asia
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = indo_china
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = yellow_sea
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = southern_africa
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = west_africa
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = east_africa
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = middle_east
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = western_steppe
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = eastern_steppe
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = upper_yangtzi
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = atlantic_seaboard
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = central_europe
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = west_mediterranean
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = baltic
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = east_europe
+	}
+	GT_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = east_mediterranean
+	}
+
+}
+
+GT_contribute_capped_shipping_traffic_tradezone = {
+	# Scope: Random country
+	# Function: Add the capped shipping traffic for one TZ to the global total
+	if = { # If value is over cap, add the cap
+		limit = {
+			global_var:global_$tradezone$_tradezone.var:TZ_shipping > global_var:global_$tradezone$_tradezone.SHIPPING_total_in_TZ
+		}
+
+		global_var:global_$tradezone$_tradezone = {
+			set_variable = {
+				name = TZ_shipping_capped
+				value = SHIPPING_total_in_TZ
+			}
+			change_global_variable = {
+				name = global_chargeable_shipping_traffic
+				add = var:TZ_shipping_capped
+			}
+		}
+	}
+	else = {
+		change_global_variable = {
+			name = global_chargeable_shipping_traffic
+			add = global_var:global_$tradezone$_tradezone.var:TZ_shipping
+		}
+	}
+}
+
+GT_get_TZ_shipping_income_pool_all = {
 	# Scope: Random country
 	# Function: Firstly get the total global shipping traffic (contributions from every TZ capped at its shipping capacity). Then divide each TZ's shipping traffic (capped at shipping capacity) by the total global traffic, giving its percentage share of global shipping.
 	# Then multiply the total global shipping payment pool by the TZ percentage share of global shipping in every TZ, to get the shipping income due to every TZ.
+	GT_get_global_capped_shipping_traffic_all = yes
+	every_trade_center = {
+		GT_get_TZ_shipping_income_pool_tradezone = yes
+	}
+
+}
+
+GT_get_TZ_shipping_income_pool_tradezone = {
+	# Scope: Trade center province
+	# Function: Get the percentage of global capped shipping from this tradezone
+	if = {
+		limit = {
+			has_variable = TZ_shipping_capped
+		}
+		set_local_variable = {
+			name = share_of_global_shipping_income
+			value = var:TZ_shipping_capped
+		}
+	}
+	else = {
+		set_local_variable = {
+			name = share_of_global_shipping_income
+			value = var:TZ_shipping
+		}
+	}
+
+	change_local_variable = {
+		name = share_of_global_shipping_income
+		divide = global_var:global_chargeable_shipping_traffic
+	}
+
+	set_variable = {
+		name = TZ_this_quarter_transport_pool
+		value = local_var:share_of_global_shipping_income
+	}
+	change_variable = {
+		name = TZ_this_quarter_transport_pool
+		multiply = global_var:global_shipping_costs_pool
+	}
 }
 
 GT_get_governorship_shipping_income = {

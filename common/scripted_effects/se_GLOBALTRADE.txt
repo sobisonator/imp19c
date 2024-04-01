@@ -51,6 +51,8 @@
 			GT_distribute_expenses_all = yes
 		}
 	}
+	GT_set_total_order_size_and_total_global_stockpile_percent_all = yes
+	GT_update_shipping_route_traffic_all = yes
 }
 
 GT_create_tradegroups = {
@@ -3708,16 +3710,6 @@ GT_distribute_expenses_category = {
 	}
 }
 
-
-#### vvv NOT YET IMPLEMENTED vvv ####
-
-
-
-GT_get_TZ_percentage_of_global_exports_tradegood = {
-	# Scope: Random country
-	# Function: Get every TZ's percentage of the global export total
-}
-
 GT_set_total_order_size_and_total_global_stockpile_percent_all = {
 	# Scope: Random country
 	# Function: Set the total order size and the percentage of the global export stockpile in every tradezone for all tradegoods combined, so that shipping calculations only run once per tradezone rather than for every tradegood - this massively improves performance
@@ -4596,20 +4588,29 @@ GT_update_shipping_route_traffic_tradezone = {
 	}
 }
 
-GT_calculate_export_cap_all_TZs = {
-	if = {
-		limit = {
-			any_governorships = {
-				var:trade_center = global_var:global_india_tradezone
-			}
-			GT_calculate_export_cap = {
-				tradezone = india
-			}
-		}
-	}
+
+#### vvv NOT YET IMPLEMENTED vvv ####
+
+# TODO:
+
+GT_get_governorship_shipping_payments_owed = {
+	# Scope: Governorship
+	# Function: Get the total number of goods imported in the governorship and turn that into a shipping fee based on the cost of naval supplies here. Also add this to the global shipping payment pool
 }
 
-GT_calculate_export_cap = {
-	# Scope: Country
-	# Function: Calculate the total that any of the country's governorships in this TZ can export
+GT_get_TZ_shipping_income_pool = {
+	# Scope: Random country
+	# Function: Firstly get the total global shipping traffic (contributions from every TZ capped at its shipping capacity). Then divide each TZ's shipping traffic (capped at shipping capacity) by the total global traffic, giving its percentage share of global shipping.
+	# Then multiply the total global shipping payment pool by the TZ percentage share of global shipping in every TZ, to get the shipping income due to every TZ.
+}
+
+GT_get_governorship_shipping_income = {
+	# Scope: Governorship
+	# Function: Get the shipping power of the governorship, then divide that by the total shipping capacity of the TZ, giving a percentage contribution to total shipping capacity in the TZ.
+	# Then multiply that by the TZ shipping income and grant this governorship the shipping income that is due based on ownership of the shipping industry
+}
+
+GT_shipping_governorship_apply_balance = {
+	# Scope: Governorship
+	# Function: Apply the balance of shipping income and expenses to the governorship
 }

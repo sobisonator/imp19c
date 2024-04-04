@@ -53,6 +53,7 @@
 	}
 	GT_set_total_order_size_and_total_global_stockpile_percent_all = yes
 	GT_update_shipping_route_traffic_all = yes
+	GT_do_shipping_costs = yes
 }
 
 GT_create_tradegroups = {
@@ -3456,7 +3457,7 @@ GT_cache_trade_shares_all = {
 
 GT_cache_trade_shares_category = {
 	# Scope: governorship
-	# Function: Cache the shares of trade income shares from GT_svalues
+	# Function: Cache the shares of trade income shares from GT_trade_share_[...]
 	set_variable = {
 		name = trade_share_$category$_upper_strata
 		value = GT_trade_share_percentage_$category$_upper_strata
@@ -3514,7 +3515,9 @@ GT_calculate_actual_share_of_income_category = {
 
 GT_distribute_income_category = {
 	# Scope: governorship
-	# Split the income for a single category of imported goods
+	# Split the income for a single category of imported goods. This uses the GT_trade_share_[...] svalues
+
+
 	# The state
 	GT_calculate_actual_share_of_income_category = {
 		category = $category$
@@ -4570,11 +4573,6 @@ GT_update_shipping_route_traffic_tradezone = {
 	}
 }
 
-
-#### vvv NOT YET IMPLEMENTED vvv ####
-
-# TODO:
-
 GT_do_shipping_costs = {
 	GT_setup_global_shipping_costs_pool = yes
 	every_country = {
@@ -4583,6 +4581,11 @@ GT_do_shipping_costs = {
 		}
 	}
 	GT_get_TZ_shipping_income_pool_all = yes
+	every_country = {
+		every_governorships = {
+			GT_get_governorship_shipping_income = yes
+		}
+	}
 }
 
 GT_setup_global_shipping_costs_pool = {
@@ -4800,13 +4803,148 @@ GT_get_TZ_shipping_income_pool_tradezone = {
 	}
 }
 
+
+#### vvv NOT YET IMPLEMENTED vvv ####
+
+# TODO:
+
 GT_get_governorship_shipping_income = {
 	# Scope: Governorship
 	# Function: Get the shipping power of the governorship, then divide that by the total shipping capacity of the TZ, giving a percentage contribution to total shipping capacity in the TZ.
 	# Then multiply that by the TZ shipping income and grant this governorship the shipping income that is due based on ownership of the shipping industry
+	save_scope_as = this_governorship
+	set_variable = {
+		name = income_owed_for_shipping_TZ
+		value = 0
+	}
+	every_governorship_state = {
+		every_state_province = {
+			save_scope_as = this_province
+
+			scope:this_governorship = {
+				change_variable = {
+					name = income_owed_for_shipping_TZ
+					add = scope:this_province.SHIPPING_province_power
+				}
+			}
+		}
+	}
+	change_variable = {
+		name = income_owed_for_shipping_TZ
+		divide = var:trade_center.SHIPPING_total_in_TZ
+	}
+	change_variable = {
+		name = income_owed_for_shipping_TZ
+		multiply = var:trade_center.var:TZ_this_quarter_transport_pool
+	}
+
+	#GT_distribute_income_category = {
+	#	category = shipping
+	#}
+
 }
 
-GT_shipping_governorship_apply_balance = {
+GT_calculate_trade_shares = {
 	# Scope: Governorship
-	# Function: Apply the balance of shipping income and expenses to the governorship
+	# Function: New and improved way of calculating weights for trade shares for a given category, without relying on multiple svalues which are hard to maintain
+	# Values should be 0-1
+	set_local_variable = {
+		name = GT_trade_share_$category$_the_state
+		value = $the_state$
+	}
+	set_local_variable = {
+		name = GT_trade_share_$category$_upper_strata
+		value = $upper_strata$
+	}
+	set_local_variable = {
+		name = GT_trade_share_$category$_middle_strata
+		value = $middle_strata$
+	}
+	set_local_variable = {
+		name = GT_trade_share_$category$_lower_strata
+		value = $lower_strata$
+	}
+	set_local_variable = {
+		name = GT_trade_share_$category$_proletariat
+		value = $proletariat$
+	}
+	set_local_variable = {
+		name = GT_trade_share_$category$_indentured
+		value = $indentured$
+	}
+	set_local_variable = {
+		name = GT_trade_share_$category$_tribesmen
+		value = $tribesmen$
+	}
+	set_local_variable = {
+		name = GT_trade_share_$category$_slaves
+		value = $slaves$
+	}
+
+	set_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		value = local_var:GT_trade_share_$category$_the_state
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = local_var:GT_trade_share_$category$_upper_strata
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = local_var:GT_trade_share_$category$_middle_strata
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = local_var:GT_trade_share_$category$_lower_strata
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = local_var:GT_trade_share_$category$_proletariat
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = local_var:GT_trade_share_$category$_indentured
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = local_var:GT_trade_share_$category$_tribesmen
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = local_var:GT_trade_share_$category$_slaves
+	}
+
+	# Get percentages - the outputs
+	set_variable = {
+		name = trade_share_$category$_the_state
+		value = GT_trade_share_$category$_the_state
+	}
+	change_variable = {
+		name = trade_share_$category$_upper_strata
+		divide = local_var:GT_sum_of_$category$_income_weights
+	}
+	change_variable = {
+		name = trade_share_$category$_middle_strata
+		divide = local_var:GT_sum_of_$category$_income_weights
+	}
+	change_variable = {
+		name = trade_share_$category$_lower_strata
+		divide = local_var:GT_sum_of_$category$_income_weights
+	}
+	change_variable = {
+		name = trade_share_$category$_proletariat
+		divide = local_var:GT_sum_of_$category$_income_weights
+	}
+	change_variable = {
+		name = trade_share_$category$_indentured
+		divide = local_var:GT_sum_of_$category$_income_weights
+	}
+	change_variable = {
+		name = trade_share_$category$_tribesmen
+		divide = local_var:GT_sum_of_$category$_income_weights
+	}
+	change_variable = {
+		name = trade_share_$category$_slaves
+		divide = local_var:GT_sum_of_$category$_income_weights
+	}
 }

@@ -10,6 +10,7 @@
 			GT_cache_governorship_infrastructure_capacity = yes
 			GT_declare_sell_to_TZ_aggregate_stockpile = yes
 			GT_cache_trade_shares_all = yes
+			GT_reset_governorship_shipping_costs = yes
 		}
 	}
 	#every_country = {
@@ -3442,6 +3443,15 @@ GT_add_amount_imported_tradegood = {
 	}
 }
 
+GT_reset_governorship_shipping_costs = {
+	# Scope: Governorship
+	# Function: Reset the governorship shipping costs value to 0 for this iteration
+	set_variable = {
+		name = governorship_shipping_costs
+		value = 0
+	}
+}
+
 GT_cache_trade_shares_all = {
 	# Scope: governorship
 	# Function: Get all the split of costs between pop groups and the state into variables so they don't have to be re-calculated every time they're called.
@@ -4581,6 +4591,13 @@ GT_do_shipping_costs = {
 		}
 	}
 	GT_get_TZ_shipping_income_pool_all = yes
+	# Scale back up - this has been scaled down to avoid overflow in the global pool size
+	every_trade_center = {
+		change_variable = {
+			name = TZ_this_quarter_transport_pool
+			multiply = 1
+		}
+	}
 	every_country = {
 		every_governorships = {
 			GT_get_governorship_shipping_income = yes
@@ -4607,52 +4624,46 @@ GT_get_governorship_shipping_payments_owed = {
 	every_tradegood_complex = {
 		APPLY = GT_get_governorship_amount_transported_tradegood
 	}
-}
-
-GT_get_governorship_amount_transported_tradegood = {
-	# Scope: Governorship
-
-	# NOTE: ATM the exporter bears the cost of shipping. This can be changed by uncommenting the below
-	#if = {
-	#	limit = {
-	#		has_variable = order_size_$tradegood$
-	#	}
-	#	change_variable = {
-	#		name = governorship_shipping_costs
-	#		add = var:order_size_$tradegood$
-	#	}
-	#}
-
-
-	if = {
-		limit = {
-			has_variable = amount_exported_$tradegood$
-		}
-		change_variable = {
-			name = governorship_shipping_costs
-			add = var:amount_exported_$tradegood$
-		}
-	}
-
-	change_variable = {
-		name = governorship_shipping_costs
-		multiply = 0.3
-	}
-
-	change_variable = {
-		name = governorship_shipping_costs
-		multiply = var:trade_center.var:local_price_naval_supplies
-	}
-
 	if = {
 		limit = {
 			var:governorship_shipping_costs > 0
+		}
+		change_variable = {
+			name = governorship_shipping_costs
+			multiply = var:trade_center.var:local_price_naval_supplies
 		}
 		change_global_variable = {
 			name = global_shipping_costs_pool
 			add = var:governorship_shipping_costs
 		}
 	}
+}
+
+GT_get_governorship_amount_transported_tradegood = {
+	# Scope: Governorship
+
+	# NOTE: ATM the importer bears the cost of shipping. This can be changed by uncommenting the below
+	if = {
+		limit = {
+			has_variable = order_size_$tradegood$
+		}
+		change_variable = {
+			name = governorship_shipping_costs
+			add = var:order_size_$tradegood$
+		}
+	}
+
+
+	#if = {
+	#	limit = {
+	#		has_variable = amount_exported_$tradegood$
+	#	}
+	#	change_variable = {
+	#		name = governorship_shipping_costs
+	#		add = var:amount_exported_$tradegood$
+	#	}
+	#}
+
 }
 
 GT_get_global_capped_shipping_traffic_all = {
@@ -4804,10 +4815,6 @@ GT_get_TZ_shipping_income_pool_tradezone = {
 }
 
 
-#### vvv NOT YET IMPLEMENTED vvv ####
-
-# TODO:
-
 GT_get_governorship_shipping_income = {
 	# Scope: Governorship
 	# Function: Get the shipping power of the governorship, then divide that by the total shipping capacity of the TZ, giving a percentage contribution to total shipping capacity in the TZ.
@@ -4843,6 +4850,10 @@ GT_get_governorship_shipping_income = {
 	#}
 
 }
+
+#### vvv NOT YET IMPLEMENTED vvv ####
+
+# TODO:
 
 GT_calculate_trade_shares = {
 	# Scope: Governorship

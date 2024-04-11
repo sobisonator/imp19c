@@ -7,9 +7,10 @@
 	GT_reset_all_TZ_stockpiles = yes
 	every_country = {
 		every_governorships = {
+			TRADE_governorship_get_pops_this_quarter = yes
 			GT_cache_governorship_infrastructure_capacity = yes
 			GT_declare_sell_to_TZ_aggregate_stockpile = yes
-			GT_cache_trade_shares_all = yes
+			GT_calculate_all_trade_shares = yes
 			GT_reset_governorship_shipping_costs = yes
 		}
 	}
@@ -3452,53 +3453,44 @@ GT_reset_governorship_shipping_costs = {
 	}
 }
 
-GT_cache_trade_shares_all = {
-	# Scope: governorship
-	# Function: Get all the split of costs between pop groups and the state into variables so they don't have to be re-calculated every time they're called.
-	# These come already as percentages
-	GT_cache_trade_shares_category = {
-		category = resource_extraction
-	}
-	GT_cache_trade_shares_category = {
-		category = manufacturing
-	}
-	
-}
+GT_calculate_all_trade_shares = {
+	# Scope: Country
+	#
 
-GT_cache_trade_shares_category = {
-	# Scope: governorship
-	# Function: Cache the shares of trade income shares from GT_trade_share_[...]
-	set_variable = {
-		name = trade_share_$category$_upper_strata
-		value = GT_trade_share_percentage_$category$_upper_strata
+	GT_calculate_trade_shares = {
+		category = resource_extraction
+		the_state = 0
+		upper_strata = 1
+		middle_strata = 0.05
+		lower_strata = 0.05
+		proletariat = 0
+		indentured = 0
+		tribesmen = 0.1
+		slaves = 0
 	}
-	set_variable = {
-		name = trade_share_$category$_middle_strata
-		value = GT_trade_share_percentage_$category$_middle_strata
+
+	GT_calculate_trade_shares = {
+		category = manufacturing
+		the_state = 0
+		upper_strata = 1
+		middle_strata = 0.2
+		lower_strata = 0
+		proletariat = 0
+		indentured = 0
+		tribesmen = 0
+		slaves = 0
 	}
-	set_variable = {
-		name = trade_share_$category$_lower_strata
-		value = GT_trade_share_percentage_$category$_lower_strata
-	}
-	set_variable = {
-		name = trade_share_$category$_proletariat
-		value = GT_trade_share_percentage_$category$_proletariat
-	}
-	set_variable = {
-		name = trade_share_$category$_indentured
-		value = GT_trade_share_percentage_$category$_indentured
-	}
-	set_variable = {
-		name = trade_share_$category$_tribesmen
-		value = GT_trade_share_percentage_$category$_tribesmen
-	}
-	set_variable = {
-		name = trade_share_$category$_slaves
-		value = GT_trade_share_percentage_$category$_slaves
-	}
-	set_variable = {
-		name = trade_share_$category$_the_state
-		value = GT_trade_share_percentage_$category$_the_state
+
+	GT_calculate_trade_shares = {
+		category = shipping
+		the_state = 0
+		upper_strata = 1
+		middle_strata = 0.3
+		lower_strata = 0
+		proletariat = 0
+		indentured = 0
+		tribesmen = 0
+		slaves = 0
 	}
 }
 
@@ -4853,109 +4845,181 @@ GT_get_governorship_shipping_income = {
 
 #### vvv NOT YET IMPLEMENTED vvv ####
 
-# TODO:
-
 GT_calculate_trade_shares = {
-	# Scope: Governorship
-	# Function: New and improved way of calculating weights for trade shares for a given category, without relying on multiple svalues which are hard to maintain
-	# Values should be 0-1
-	set_local_variable = {
-		name = GT_trade_share_$category$_the_state
+	set_variable = {
+		name = trade_share_$category$_the_state
 		value = $the_state$
 	}
-	set_local_variable = {
-		name = GT_trade_share_$category$_upper_strata
+	set_variable = {
+		name = trade_share_$category$_upper_strata
 		value = $upper_strata$
 	}
-	set_local_variable = {
-		name = GT_trade_share_$category$_middle_strata
+	set_variable = {
+		name = trade_share_$category$_middle_strata
 		value = $middle_strata$
 	}
-	set_local_variable = {
-		name = GT_trade_share_$category$_lower_strata
+	set_variable = {
+		name = trade_share_$category$_lower_strata
 		value = $lower_strata$
 	}
-	set_local_variable = {
-		name = GT_trade_share_$category$_proletariat
+	set_variable = {
+		name = trade_share_$category$_proletariat
 		value = $proletariat$
 	}
-	set_local_variable = {
-		name = GT_trade_share_$category$_indentured
+	set_variable = {
+		name = trade_share_$category$_indentured
 		value = $indentured$
 	}
-	set_local_variable = {
-		name = GT_trade_share_$category$_tribesmen
+	set_variable = {
+		name = trade_share_$category$_tribesmen
 		value = $tribesmen$
 	}
-	set_local_variable = {
-		name = GT_trade_share_$category$_slaves
+	set_variable = {
+		name = trade_share_$category$_slaves
 		value = $slaves$
 	}
 
-	set_local_variable = {
-		name = GT_sum_of_$category$_income_weights
-		value = local_var:GT_trade_share_$category$_the_state
-	}
-	change_local_variable = {
-		name = GT_sum_of_$category$_income_weights
-		add = local_var:GT_trade_share_$category$_upper_strata
-	}
-	change_local_variable = {
-		name = GT_sum_of_$category$_income_weights
-		add = local_var:GT_trade_share_$category$_middle_strata
-	}
-	change_local_variable = {
-		name = GT_sum_of_$category$_income_weights
-		add = local_var:GT_trade_share_$category$_lower_strata
-	}
-	change_local_variable = {
-		name = GT_sum_of_$category$_income_weights
-		add = local_var:GT_trade_share_$category$_proletariat
-	}
-	change_local_variable = {
-		name = GT_sum_of_$category$_income_weights
-		add = local_var:GT_trade_share_$category$_indentured
-	}
-	change_local_variable = {
-		name = GT_sum_of_$category$_income_weights
-		add = local_var:GT_trade_share_$category$_tribesmen
-	}
-	change_local_variable = {
-		name = GT_sum_of_$category$_income_weights
-		add = local_var:GT_trade_share_$category$_slaves
-	}
-
-	# Get percentages - the outputs
-	set_variable = {
+	change_variable = {
 		name = trade_share_$category$_the_state
-		value = GT_trade_share_$category$_the_state
+		multiply = var:governorship_population
 	}
 	change_variable = {
 		name = trade_share_$category$_upper_strata
-		divide = local_var:GT_sum_of_$category$_income_weights
+		multiply = var:governorship_upper_strata
 	}
 	change_variable = {
 		name = trade_share_$category$_middle_strata
-		divide = local_var:GT_sum_of_$category$_income_weights
+		multiply = var:governorship_middle_strata
 	}
 	change_variable = {
 		name = trade_share_$category$_lower_strata
-		divide = local_var:GT_sum_of_$category$_income_weights
+		multiply = var:governorship_lower_strata
 	}
 	change_variable = {
 		name = trade_share_$category$_proletariat
-		divide = local_var:GT_sum_of_$category$_income_weights
+		multiply = var:governorship_proletariat
 	}
 	change_variable = {
 		name = trade_share_$category$_indentured
-		divide = local_var:GT_sum_of_$category$_income_weights
+		multiply = var:governorship_indentured
 	}
 	change_variable = {
 		name = trade_share_$category$_tribesmen
-		divide = local_var:GT_sum_of_$category$_income_weights
+		multiply = var:governorship_tribesmen
 	}
 	change_variable = {
 		name = trade_share_$category$_slaves
-		divide = local_var:GT_sum_of_$category$_income_weights
+		multiply = var:governorship_slaves
+	}
+
+	set_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		value = var:trade_share_$category$_the_state
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_upper_strata
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_middle_strata
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_lower_strata
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_proletariat
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_indentured
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_tribesmen
+	}
+	change_local_variable = {
+		name = GT_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_slaves
+	}
+
+	if = {
+		limit = {
+			local_var:GT_sum_of_$category$_income_weights > 0
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_the_state > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_the_state
+				divide = local_var:GT_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_upper_strata > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_upper_strata
+				divide = local_var:GT_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_middle_strata > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_middle_strata
+				divide = local_var:GT_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_lower_strata > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_lower_strata
+				divide = local_var:GT_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_proletariat > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_proletariat
+				divide = local_var:GT_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_indentured > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_indentured
+				divide = local_var:GT_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_tribesmen > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_tribesmen
+				divide = local_var:GT_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_slaves > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_slaves
+				divide = local_var:GT_sum_of_$category$_income_weights
+			}
+		}
 	}
 }

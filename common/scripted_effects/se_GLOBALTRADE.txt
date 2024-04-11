@@ -11,7 +11,7 @@
 			GT_cache_governorship_infrastructure_capacity = yes
 			GT_declare_sell_to_TZ_aggregate_stockpile = yes
 			GT_calculate_all_trade_shares = yes
-			GT_reset_governorship_shipping_costs = yes
+			GT_reset_trade_expenses_due_shipping = yes
 		}
 	}
 	#every_country = {
@@ -3444,11 +3444,11 @@ GT_add_amount_imported_tradegood = {
 	}
 }
 
-GT_reset_governorship_shipping_costs = {
+GT_reset_trade_expenses_due_shipping = {
 	# Scope: Governorship
 	# Function: Reset the governorship shipping costs value to 0 for this iteration
 	set_variable = {
-		name = governorship_shipping_costs
+		name = trade_expenses_due_shipping
 		value = 0
 	}
 }
@@ -4593,6 +4593,12 @@ GT_do_shipping_costs = {
 	every_country = {
 		every_governorships = {
 			GT_get_governorship_shipping_income = yes
+			GT_distribute_income_category = {
+				category = shipping
+			}
+			GT_distribute_expenses_category = {
+				category = shipping
+			}
 		}
 	}
 }
@@ -4610,7 +4616,7 @@ GT_get_governorship_shipping_payments_owed = {
 	# Scope: Governorship
 	# Function: Get the total number of goods imported and exported (transported) in the governorship and turn that into a shipping fee based on the cost of naval supplies here. Also add this to the global shipping payment pool
 	set_variable = {
-		name = governorship_shipping_costs
+		name = trade_expenses_due_shipping
 		value = 0
 	}
 	every_tradegood_complex = {
@@ -4618,15 +4624,15 @@ GT_get_governorship_shipping_payments_owed = {
 	}
 	if = {
 		limit = {
-			var:governorship_shipping_costs > 0
+			var:trade_expenses_due_shipping > 0
 		}
 		change_variable = {
-			name = governorship_shipping_costs
+			name = trade_expenses_due_shipping
 			multiply = var:trade_center.var:local_price_naval_supplies
 		}
 		change_global_variable = {
 			name = global_shipping_costs_pool
-			add = var:governorship_shipping_costs
+			add = var:trade_expenses_due_shipping
 		}
 	}
 }
@@ -4640,7 +4646,7 @@ GT_get_governorship_amount_transported_tradegood = {
 			has_variable = order_size_$tradegood$
 		}
 		change_variable = {
-			name = governorship_shipping_costs
+			name = trade_expenses_due_shipping
 			add = var:order_size_$tradegood$
 		}
 	}
@@ -4651,7 +4657,7 @@ GT_get_governorship_amount_transported_tradegood = {
 	#		has_variable = amount_exported_$tradegood$
 	#	}
 	#	change_variable = {
-	#		name = governorship_shipping_costs
+	#		name = trade_expenses_due_shipping
 	#		add = var:amount_exported_$tradegood$
 	#	}
 	#}
@@ -4813,7 +4819,7 @@ GT_get_governorship_shipping_income = {
 	# Then multiply that by the TZ shipping income and grant this governorship the shipping income that is due based on ownership of the shipping industry
 	save_scope_as = this_governorship
 	set_variable = {
-		name = income_owed_for_shipping_TZ
+		name = trade_income_due_shipping
 		value = 0
 	}
 	every_governorship_state = {
@@ -4822,24 +4828,20 @@ GT_get_governorship_shipping_income = {
 
 			scope:this_governorship = {
 				change_variable = {
-					name = income_owed_for_shipping_TZ
+					name = trade_income_due_shipping
 					add = scope:this_province.SHIPPING_province_power
 				}
 			}
 		}
 	}
 	change_variable = {
-		name = income_owed_for_shipping_TZ
+		name = trade_income_due_shipping
 		divide = var:trade_center.SHIPPING_total_in_TZ
 	}
 	change_variable = {
-		name = income_owed_for_shipping_TZ
+		name = trade_income_due_shipping
 		multiply = var:trade_center.var:TZ_this_quarter_transport_pool
 	}
-
-	#GT_distribute_income_category = {
-	#	category = shipping
-	#}
 
 }
 

@@ -1,0 +1,145 @@
+﻿decentralize_realm_button = {
+    scope = country
+	saved_scopes = {
+		
+	}
+    is_shown = { # Can be omitted as always true
+       is_tribal = yes
+    }
+	ai_is_valid = {
+		always = no
+	}
+    is_valid = {
+		trigger_if = {
+			limit = {
+				has_country_modifier = migration_encouraged
+			}
+			NOT = {
+				has_country_modifier = migration_encouraged
+			}
+		}
+		trigger_if = {
+			limit = {
+				NOT = {
+					any_owned_province = {
+						total_population >= 5
+						any_pops_in_province = {
+							count >= 5
+							pop_culture = root.culture
+							pop_religion = root.religion
+							pop_type = tribesmen
+						}
+					}
+				}
+			}
+			custom_tooltip = {
+				text = "pops_in_province_decentralize_tt"
+				any_owned_province = {
+					total_population >= 5
+					any_pops_in_province = {
+						count >= 5
+						pop_culture = root.culture
+						pop_religion = root.religion
+						pop_type = tribesmen
+					}
+				}
+			}
+		}
+		trigger_if = {
+			limit = {
+				NOT = {
+					any_region = {
+						OR = {
+							any_neighbor_region = {
+								this = root.capital_scope.region
+							}
+							this = root.capital_scope.region
+						}
+						any_region_province = {
+							has_owner = no
+						}
+					}
+				}
+			}
+			any_region = {
+				OR = {
+					any_neighbor_region = {
+						this = root.capital_scope.region
+					}
+					this = root.capital_scope.region
+				}
+				any_region_province = {
+					has_owner = no
+				}
+			}
+		}
+    }
+    effect = {
+		if = {
+			limit = {
+				any_owned_province = {
+					total_population >= 5
+					any_pops_in_province = {
+						count >= 5
+						pop_culture = root.culture
+						pop_religion = root.religion
+						pop_type = tribesmen
+					}
+				}
+			}
+			random_region = {
+				limit = {
+					OR = {
+						any_neighbor_region = {
+							this = root.capital_scope.region
+						}
+						this = root.capital_scope.region
+					}
+					any_region_province = {
+						has_owner = no
+					}
+				}
+				random_region_province = {
+					limit = {
+						has_owner = no
+					}
+					save_scope_as = target_scope
+				}
+			}
+			random_owned_province = {
+				limit = {
+					total_population >= 5
+					any_pops_in_province = {
+						count >= 5
+						pop_culture = root.culture
+						pop_religion = root.religion
+						pop_type = tribesmen
+					}
+				}
+				hidden_effect = {
+					show_animated_text = "5_pops_moving_decentralization_button"
+					while = {
+						count = 5
+						random_pops_in_province = {
+							limit = {
+								pop_culture = root.culture
+								pop_religion = root.religion
+								pop_type = tribesmen
+							}
+							move_pop = scope:target_scope
+						}
+					}
+				}
+				custom_tooltip = decentralize_realm_tooltip_effect
+			}
+			add_country_modifier = {
+				name = migration_encouraged
+				duration = 1825
+			}
+		}
+		else = {
+			custom_tooltip = "decentralize_realm_tooltip_effect"
+		}
+		custom_tooltip = "decentralize_realm_button_desc_tt"
+    }
+}

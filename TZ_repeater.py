@@ -1,16 +1,6 @@
 def print_TZ_statement(TZ):
-	loc = """	textbox = {{
-		parentanchor = top
-		position = {{ 85 73 }}
-		using = BaseFontM
-		using = Black_FontColor
-		fontsize = 16
-
-		visible = "[SimpleProvinceIcon.GetProvince.MakeScope.Var('is_{tradezone}_tradezone').IsSet]"
-
-		block = "title_text" {{
-			text = "#T [Player.MakeScope.Var('TZ_penetration_{tradezone}').GetValue|0%]"
-		}}
+	loc = """	GT_contribute_capped_shipping_traffic_tradezone = {{
+		tradezone = {tradezone}
 	}}""".format(tradezone=TZ)
 	print(loc)
 

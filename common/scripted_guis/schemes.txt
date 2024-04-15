@@ -1,0 +1,277 @@
+﻿scheme_assist = {
+	scope = character
+	saved_scopes = {
+		player
+	}
+	ai_is_valid = {
+		always = no
+	}
+    is_shown = {
+		employer = scope:player
+		OR = {
+			has_ambition = scheme_assassinate
+			has_ambition = scheme_steal
+			has_ambition = scheme_steal_holding
+			has_ambition = scheme_pitfighting
+			has_ambition = scheme_gamble
+		}
+		is_ruler = no
+    }
+    is_valid = {
+		trigger_if = {
+			limit = {
+				has_variable = scheme_adjustment
+				var:scheme_adjustment >= 30
+			}
+			custom_tooltip = {
+				text = "max_plot_chance"
+				var:scheme_adjustment < 30
+			}
+		}
+		trigger_if = {
+			limit = {
+				employer.current_ruler = {
+					popularity < 5
+				}
+			}
+			employer.current_ruler = {
+				popularity >= 5
+			}
+		}
+    }
+    effect = {
+		custom_tooltip = "scheme_improvement_effect"
+		if = {
+			limit = {
+				NOT = {
+					has_variable = scheme_adjustment
+				}
+			}
+			set_variable = {
+				name = scheme_adjustment
+				value = 10
+			}
+		}
+		else = {
+			change_variable = {
+				name = scheme_adjustment
+				add = 10
+			}
+		}
+		employer.current_ruler = {
+			add_popularity = -5
+		}
+		custom_tooltip = newline_tt
+		custom_tooltip = "current_ambition_success_chance"
+    }
+}
+
+scheme_interfere = {
+	scope = character
+	saved_scopes = {
+		player
+	}
+    ai_is_valid = {
+		always = no
+	}
+    is_shown = {	
+		employer = scope:player
+		OR = {
+			has_ambition = scheme_assassinate
+			has_ambition = scheme_steal
+			has_ambition = scheme_steal_holding
+			has_ambition = scheme_pitfighting
+			has_ambition = scheme_gamble
+		}
+		is_ruler = no
+    }
+    is_valid = {
+		trigger_if = {
+			limit = {
+				has_variable = scheme_adjustment
+				var:scheme_adjustment <= -30
+			}
+			custom_tooltip = {
+				text = "min_plot_chance"
+				var:scheme_adjustment > -30
+			}
+		}
+		trigger_if = {
+			limit = {
+				loyalty < 10
+			}
+			loyalty >= 10
+		}
+		trigger_if = {
+			limit = {
+				is_alive = no
+			}
+			is_alive = yes
+		}
+    }
+    effect = {
+		custom_tooltip = "scheme_interference_effect"
+		if = {
+			limit = {
+				NOT = {
+					has_variable = scheme_adjustment
+				}
+			}
+			set_variable = {
+				name = scheme_adjustment
+				value = -10
+			}
+		}
+		else = {
+			change_variable = {
+				name = scheme_adjustment
+				add = -10
+			}
+		}
+		if = {
+			limit = {
+				is_alive = yes
+			}
+			add_loyalty = scheme_dismissed_l
+		}
+		custom_tooltip = newline_tt
+		custom_tooltip = "current_ambition_success_chance"
+    }
+}
+
+scheme_abort = {
+	scope = character
+	saved_scopes = {
+		player
+	}
+    is_shown = {
+		employer = scope:player
+		OR = {
+			has_ambition = scheme_provoke_rival
+			has_ambition = scheme_make_friends
+			has_ambition = scheme_hold_games
+			has_ambition = scheme_invest
+			has_ambition = scheme_seek_treatment
+			has_ambition = scheme_pitfighting
+			has_ambition = scheme_buy_holding
+			has_ambition = scheme_influence
+			has_ambition = scheme_disloyalty_self
+			has_ambition = scheme_disloyalty_other
+			has_ambition = scheme_purchase_power_base
+			has_ambition = scheme_seek_patron
+			has_ambition = scheme_ruler_invest
+			has_ambition = scheme_governor_extort
+			has_ambition = scheme_ruler_legitimacy
+			has_ambition = scheme_escape_prison
+			has_ambition = scheme_demand_office
+			has_ambition = scheme_expand_family_estates
+			has_ambition = scheme_invest_in_agriculture
+			has_ambition = scheme_invest_in_mining
+			has_ambition = scheme_hold_religious_festival
+			AND = { #In a Republic we cannot stop anyone from marrying
+				employer = {
+					OR = {
+						is_monarchy = yes
+						is_tribal = yes
+					}
+				}
+				has_ambition = scheme_seek_a_spouse
+			}
+			AND = {
+				is_ruler = yes
+				has_ambition = scheme_assassinate
+			}
+		}
+    }
+	ai_is_valid = {
+		always = no
+	}
+    is_valid = {
+		trigger_if = {
+    		limit = {
+    			NOT = { employer = scope:player }
+    		}
+    		employer = scope:player
+    	}
+		trigger_if = {
+			limit = {
+				loyalty < 10
+			}
+			loyalty >= 10
+		}
+		trigger_if = {
+			limit = {
+				has_ambition = scheme_disloyalty_self
+			}
+			custom_tooltip = {
+				text = "scheme_disloyalty_self_always_no_tt"
+				NOT = {
+					has_ambition = scheme_disloyalty_self
+				}
+			}
+		}
+		trigger_if = {
+			limit = {
+				has_ambition = scheme_escape_prison
+			}
+			custom_tooltip = {
+				text = "scheme_disloyalty_self_always_no_tt"
+				NOT = {
+					has_ambition = scheme_escape_prison
+				}
+			}
+		}
+		trigger_if = {
+			limit = {
+				OR = {
+					has_ambition = scheme_disloyalty_other
+					has_ambition = scheme_purchase_power_base
+				}
+				employer = {
+					treasury < 200
+				}
+			}
+			employer = {
+				treasury >= 200
+			}
+		}
+		hidden:employer = {
+			trigger_if = {
+				limit = {
+					root = {
+						is_ruler = no
+					}
+					NOT = {
+						can_pay_price = price_scheme_abort
+					}
+				}
+				can_pay_price = price_scheme_abort
+			}
+		}
+    }
+    effect = {
+		if = {
+			limit = {
+				is_ruler = no
+			}
+			employer = {
+				pay_price = price_scheme_abort
+			}
+			custom_tooltip = "newline_tt"
+			add_loyalty = scheme_dismissed_l
+		}
+		if = {
+			limit = {
+				OR = {
+					has_ambition = scheme_disloyalty_other
+					has_ambition = scheme_purchase_power_base
+				}
+			}
+			employer = {
+				add_treasury = -200
+			}
+			add_gold = 200
+		}
+		clear_ambition_effect = yes
+    }
+}

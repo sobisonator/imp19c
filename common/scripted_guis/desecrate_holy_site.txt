@@ -1,0 +1,78 @@
+﻿desecrate_holy_site_button = {
+    scope = province
+	
+	confirm_title = "desecrate_holy_site_confirm_title"	
+	confirm_text = "desecrate_holy_site_confirm_desc"
+	
+	saved_scopes = {
+		player
+	}
+    is_shown = { # Can be omitted as always true
+      always = yes
+    } 
+	ai_is_valid = {
+		always = no #TODO PWN
+	}
+	is_valid = {
+		trigger_if = {
+			limit = {
+				is_holy_site = no
+			}
+			is_holy_site = yes
+		}
+	}
+	effect = {
+		owner = { save_scope_as = sacker }
+		owner = {
+			if = {
+				limit = {
+					invention = god_is_dead
+				}
+				add_stability = 10
+			}
+		}
+		save_scope_as = shrine_location
+		if = { #Notification events, for if you used the religion view button.
+			limit = { is_holy_site = yes } #If we are actually doing this
+			province_deity = { save_scope_as = provincial_deity }
+			every_province_treasure = { transfer_treasure_to_country = root.owner }
+		}
+		scope:shrine_location = {
+			remove_province_deity = yes
+			add_city_fire_effect = yes
+			add_province_modifier = {
+				name = "upset_local_priests"
+				duration = 365
+			}
+		}
+		if = {
+			limit = {
+				exists = scope:provincial_deity
+				exists = scope:shrine_location
+			}
+			custom_tooltip = holy_site_deity_bonus_lost_tt
+		}
+		if = { # In case button checked on non-holysite
+			limit = { exists = scope:provincial_deity }
+			every_country = { # Ping event for same religion countries
+				limit = {
+					scope:provincial_deity = { deity_religion = PREV.religion }
+					NOR = { 
+						THIS = scope:shrine_location.owner
+						AND = {
+							exists = ROOT.unit_owner
+							THIS = ROOT.unit_owner
+						}
+					}
+				}
+				trigger_event = { id = desecration.3 } #Holy Site of our Faith Sacked
+			}
+			custom_tooltip = desecration_opinion
+		}
+		else = { custom_tooltip = desecration_opinion_general }
+		if = {
+			limit = { is_iron_man = yes }
+			ach_holy_fire_effect = yes
+		}
+	} 
+}

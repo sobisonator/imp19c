@@ -42,6 +42,24 @@ PixelShader =
 		SampleModeU = "Wrap"
 		SampleModeV = "Wrap"
 	}
+	TextureSampler NormalMap2
+	{
+		Index = 3
+		MagFilter = "Linear"
+		MinFilter = "Linear"
+		MipFilter = "Linear"
+		SampleModeU = "Wrap"
+		SampleModeV = "Wrap"
+	}
+	TextureSampler AdditionalColorMap
+	{
+		Index = 4
+		MagFilter = "Linear"
+		MinFilter = "Linear"
+		MipFilter = "Linear"
+		SampleModeU = "Wrap"
+		SampleModeV = "Wrap"
+	}
 	#TextureSampler LightIndexMap
 	#{
 	#	Index = 3
@@ -343,6 +361,14 @@ PixelShader =
 					#define NORMAL_UV_SET Input.UV1 + GetUserData(Input.InstanceIndex, USER_DATA_ATLAS_UV_OFFSET).rg
 				#endif
 
+				#ifndef NORMAL_UV_SET2
+					#define NORMAL_UV_SET2 Input.UV0
+				#endif
+
+				#ifndef ADDITIONALCOLOR_UV_SET
+					#define ADDITIONALCOLOR_UV_SET Input.UV0
+				#endif
+
 				#ifndef PROPERTIES_UV_SET
 					#define PROPERTIES_UV_SET Input.UV1 + GetUserData(Input.InstanceIndex, USER_DATA_ATLAS_UV_OFFSET).rg
 				#endif
@@ -389,13 +415,34 @@ PixelShader =
 
 				float4 Properties = PdxTex2D( PropertiesMap, PROPERTIES_UV_SET + UvAnimationAdd );
 
-				float4 NormalPacked = PdxTex2D( NormalMap, NORMAL_UV_SET + UvAnimationAdd );
-				float3 NormalSample = UnpackRRxGNormal( NormalPacked );
+				float3 UserColor = float3( 1.0f, 1.0f, 1.0f );
+
+				#if defined( ATLAS )
+					float4 NormalPacked = PdxTex2D( NormalMap2, NORMAL_UV_SET2 + UvAnimationAdd );
+					float3 NormalSample = UnpackRRxGNormal( NormalPacked );
+
+					float4 Unique = PdxTex2D( UniqueMap, UNIQUE_UV_SET );
+					float4 AdditionalColor = PdxTex2D( AdditionalColorMap, ADDITIONALCOLOR_UV_SET );
+
+					UserColor = lerp( UserColor, AdditionalColor.rgb, NormalPacked.b );
+
+					float4 NormalPacked2 = PdxTex2D( NormalMap, NORMAL_UV_SET + UvAnimationAdd );
+					float3 NormalSample2 = UnpackRRxGNormal( NormalPacked2 );
+
+					// blend normals
+					float3 UniqueNormalSample = UnpackRRxGNormal( Unique );
+					NormalSample = ReorientNormal( NormalSample, NormalSample2 );
+
+					// multiply AO
+					Diffuse.rgb *= Unique.bbb;
+				#else
+					float4 NormalPacked = PdxTex2D( NormalMap, NORMAL_UV_SET + UvAnimationAdd );
+					float3 NormalSample = UnpackRRxGNormal( NormalPacked );
+				#endif
 
 				float3x3 TBN = Create3x3( normalize( Input.Tangent ), normalize( Input.Bitangent ), normalize( Input.Normal ) );
 				float3 Normal = mul( NormalSample, TBN );
 
-				float3 UserColor = float3( 1.0f, 1.0f, 1.0f );
 				#if defined( USER_COLOR )
 					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_PRIMARY_COLOR ).rgb, Properties.r );
 					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_SECONDARY_COLOR ).rgb, NormalPacked.b );
@@ -408,7 +455,7 @@ PixelShader =
 
 				Diffuse.rgb *= UserColor;
 
-				#if defined( ATLAS )
+/*				#if defined( ATLAS )
 					float4 Unique = PdxTex2D( UniqueMap, UNIQUE_UV_SET );
 
 					// blend normals
@@ -417,8 +464,7 @@ PixelShader =
 
 					// multiply AO
 					Diffuse.rgb *= Unique.bbb;
-				#endif
-
+				#endif*/
 
 				#if defined( ENABLE_SNOW )
 					ApplySnowMesh( Diffuse.rgb, Normal, Properties, Input.WorldSpacePos, TerrainColorMapTexture, WinterMap, TerrainDiffuseArray, TerrainNormalsArray, TerrainMaterialArray );

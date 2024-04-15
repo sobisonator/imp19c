@@ -1,0 +1,854 @@
+﻿local_template great_work_view {
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+	size = { 100% 100% }
+
+	entity_instance = [GreatWorkWindow.GetEntity]
+
+	gfx_environment_file = "gfx/map/environment/environment_gw.txt"
+
+	camera_fov_y_degrees = 25
+	camera_zoom_limits = { 15 40 }
+	camera_translation_limits = { 0 0 0 }
+	camera_rotation_pitch_limits = { -32 -2 }
+	camera_position = { 1 8 -30 }
+}
+
+@windowwidth = 1180
+@windowheight = 870
+
+
+base_sub_window = {
+	gfxtype = windowgfx
+	name = "greatwork_window"	
+	size = { @windowwidth @windowheight }
+	#position = { 60 138 }
+	#parentanchor = top|left
+	#movable = yes
+	parentanchor = center
+
+	blockoverride "Title_text" 
+	{ 
+		text = "GW_BUILD_WINDOW_DEFAULT_TITLE"  
+	}
+	blockoverride "White_buttons" 
+	{
+		spacing = 0
+		button_close = {
+			shortcut = "close_window"
+			onclick = "[GreatWorkWindow.OnClose]"
+			tooltip = "CLOSE"
+		}
+	}
+	
+	sub_header_v = { #Construction Overview Label
+		size = { 780 32 }
+		position = { 16 650 }
+		blockoverride "Title_text"
+		{
+			text = "GW_CONSTRUCTION_TITLE"
+		}
+	}
+	
+	margin_widget = {
+		name = "3Dmodel"
+		size = { 460 810 }
+		position = { 20 0 }
+		### Great Wonder Name
+		margin_widget = { 
+			size = { 420 38 }
+			position = { 0 42 }
+			using = inputfield
+			parentanchor = hcenter
+			
+			editbox = {
+				position = { 0 0 }
+				size = { 100% 100% }
+				name = "great_work_name"
+				text = "[GreatWorkWindow.GetName]"
+				using = BaseFontM
+				using = Black_FontColor
+				fontsize = 20
+				align = center
+				maxcharacters = 46
+				focuspolicy = all
+				alwaystransparent = no
+				multiline = no
+				onreturnpressed = "[GreatWorkWindow.RenameGreatWork]"
+				oneditingfinished = "[GreatWorkWindow.RenameGreatWork]"
+			}
+			icon_button_square = {
+				size = { 34 34 }					
+				parentanchor = right|vcenter
+				blockoverride "Icon" 
+				{
+					using = button_tiled_texture
+					frame = 1
+					framesize = { 200 200 }
+					size = { 26 26 }
+					modify_texture = {
+						texture = "gfx/interface/icons/shared_icons/dice.dds"
+						blend_mode = alphamultiply
+					}
+				}
+				blockoverride "On_click"
+				{
+					onclick = "[GreatWorkWindow.GenerateName]"
+				}
+				tooltip = "GW_RANDOM_NAME_BUTTON_TT"
+			}
+			#button = {
+			#	size = { 28 28 }                    
+			#	parentanchor = vcenter|right
+			#	texture = "gfx/interface/base_parts/button_color_400fs.dds"
+			#	framesize = { 200 200 }
+			#	frame = 1
+			#	modify_texture = {
+			#		texture = "gfx/interface/icons/shared_icons/dice.dds"
+			#		blend_mode = alphamultiply
+			#	}
+			#	tooltip = "GW_RANDOM_NAME_BUTTON_TT"
+			#}
+		}
+		widget = {
+			size = { 450 540 }
+			alpha = 10
+			#using = NoninteractableBG
+			icon = {
+				size = { 100% 100% }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = flat_background
+				color = { 0 0 0 0.2 }
+				modify_texture = {
+					texture = "gfx/interface/base_parts/portrait_x32y32bd_alpha.dds"
+					blend_mode = alphamultiply
+					spriteType = Corneredtiled
+					spriteborder = { 4 4 }
+				}
+			}
+			position = { 0 100 }
+			parentanchor = hcenter
+			great_work_view_widget = { # Tower	
+				using = great_work_view
+				visible = "[GreatWorkWindow.IsSelectedCategory('column')]"
+				camera_look_at = { 0 3.4 0 }	
+				camera_fov_y_degrees = 18
+				camera_zoom_limits = { 10 35 }
+				modify_texture = {
+					texture = "gfx/interface/base_parts/portrait_x32y32bd_alpha.dds"
+					blend_mode = alphamultiply
+					spriteType = Corneredtiled
+					spriteborder = { 4 4 }
+				}				
+			}
+		}	
+	}
+	## Prestige Tier Progress
+	margin_widget = {
+		size = { 462 220 }
+		position = { 0 770 }
+		
+		icon_and_text = {
+			size = { 104 36 }
+			position = { 40 42 }
+			tooltip = "[GetGreatWorkPrestigeTooltip(GreatWorkWindow.GetPrestige)]"
+			blockoverride "Icon" 
+			{
+				size = { 36 36 }
+				texture = "gfx/interface/icons/modifiers/prestige_workpower.dds"
+			}
+
+			blockoverride "Text" 
+			{ 
+				text = "[GreatWorkWindow.GetPrestige|1]" 
+				fontsize = 22
+			}
+		}
+
+		flowcontainer = { #Tier Progress
+			position = { 50 0 }
+
+			tooltip = "[GetGreatWorkPrestigeTooltip(GreatWorkWindow.GetPrestige)]"
+			great_work_tier = {
+				size = { 1 36 }
+				blockoverride "progressbar_size"
+				{
+					size = { 0 0 }
+				}
+			}
+			great_work_tier = {
+				size = { 128 36 }
+				blockoverride "tier_text"
+				{
+					text = "[GetGreatWorkEffectTierName('gw_effect_tier_2')]"
+				}
+				blockoverride "tier_tooltip"
+				{
+					tooltip = "[GetGreatWorkEffectTierTooltip('gw_effect_tier_2')]"
+				}
+				blockoverride "progressbar_size"
+				{
+					size = { 128 8 }
+				}
+				blockoverride "progressbar_value"
+				{
+					value = "[GetGreatWorkEffectPrestigeTierProgess('gw_effect_tier_2', GreatWorkWindow.GetPrestige)]"
+				}
+			}
+			great_work_tier = {
+				size = { 128 36 }
+				blockoverride "tier_text"
+				{
+					text = "[GetGreatWorkEffectTierName('gw_effect_tier_3')]"
+				}
+				blockoverride "tier_tooltip"
+				{
+					tooltip = "[GetGreatWorkEffectTierTooltip('gw_effect_tier_3')]"
+				}
+				blockoverride "progressbar_size"
+				{
+					size = { 128 8 }
+				}
+				blockoverride "progressbar_value"
+				{
+					value = "[GetGreatWorkEffectPrestigeTierProgess('gw_effect_tier_3', GreatWorkWindow.GetPrestige)]"
+				}
+			}
+			great_work_tier = {
+				size = { 128 36 }
+				blockoverride "tier_text"
+				{
+					text = "[GetGreatWorkEffectTierName('gw_effect_tier_4')]"
+				}
+				blockoverride "tier_tooltip"
+				{
+					tooltip = "[GetGreatWorkEffectTierTooltip('gw_effect_tier_4')]"
+				}
+				blockoverride "progressbar_size"
+				{
+					size = { 128 8 }
+				}
+				blockoverride "progressbar_value"
+				{
+					value = "[GetGreatWorkEffectPrestigeTierProgess('gw_effect_tier_4', GreatWorkWindow.GetPrestige)]"
+				}
+			}
+		}
+	}
+
+	margin_widget = {
+		parentanchor = right
+		name = "right side details"
+		size = { 690 860 }
+
+		@mincategorybuttonwidth = 152
+		@maxcategorybuttonwidth = 178
+		@mincategorybuttonheight = 28 
+		@maxcategorybuttonheight = 34
+		
+		flowcontainer = {
+			position = { 0 46 }
+			parentanchor = hcenter
+			ignoreinvisible = yes
+			name = "category_tabs"
+			spacing = 2
+			flowcontainer = {
+				spacing = 2
+				datamodel =  "[GreatWorkWindow.GetCategories]"
+				item = {
+					category_tab = {
+						parentanchor = vcenter
+						enabled = "[Not(GreatWorkWindow.IsInEditMode)]"
+						blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+						blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+						visible = "[GreatWorkCategoryItem.IsValid]"
+						blockoverride "MinVisible" { visible = "[Not(And(Not(GreatWorkWindow.IsTemplateSelected),GreatWorkWindow.IsSelectedCategory(GreatWorkCategoryItem.GetCategoryKey)))]" }
+						blockoverride "MaxVisible" { visible = "[And(Not(GreatWorkWindow.IsTemplateSelected),GreatWorkWindow.IsSelectedCategory(GreatWorkCategoryItem.GetCategoryKey))]" }
+						######## Shared Overrides
+						blockoverride "Center_text" { text = "[GreatWorkCategoryItem.GetName]" }
+
+						blockoverride "Icon"
+						{
+							visible = no
+						}
+						######## Small Button Overrides
+						blockoverride "ClickFunction"
+						{
+							onclick = "[GreatWorkCategoryItem.OnClick]"
+						}
+					}
+				}						
+			}									
+
+			category_tab = {
+				parentanchor = vcenter
+				enabled = "[Not(GreatWorkWindow.IsInEditMode)]"
+				blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+				blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+				#visible = "[GreatWorkCategoryItem.IsValid]"
+				blockoverride "MinVisible" { visible = "[Not(GreatWorkWindow.IsTemplateSelected)]" }
+				blockoverride "MaxVisible" { visible = "[GreatWorkWindow.IsTemplateSelected]" }
+				######## Shared Overrides
+				blockoverride "Center_text" { text = "GW_CATEGORY_TEMPLATE" }
+				blockoverride "Icon"
+				{
+					visible = no
+				}
+				######## Small Button Overrides
+				blockoverride "ClickFunction"
+				{
+					onclick = "[GreatWorkWindow.SelectTemplates]"
+				}
+			}			
+		}
+
+		margin_widget = {	
+			name = "picker"
+			size = { 300 526 }
+			position = { 6 98 }
+			icon = { #тут
+				size = { 128 256 }
+				texture = "gfx/interface/great_work/top.dds"
+			}
+			fixedgridbox = { #Customize
+				#flipdirection = yes
+				datamodel_wrap = 3
+				addcolumn = 300
+				addrow = 174
+				datamodel = "[GreatWorkWindow.GetComponents]"
+
+				item = {
+
+					flowcontainer = {
+						spacing = 5
+						ignoreinvisible = yes
+						direction = vertical
+						visible = "[GreatWorkComponentItem.IsValid]"
+						margin_widget = {
+							size = { 310 32 }
+							sub_header_v = {
+								size = { 100% 0 }	
+								position = { -2 0 }								
+								blockoverride "Title_text"
+								{
+									text = "[GreatWorkComponentItem.GetName]"
+								}
+							}
+						}
+						flowcontainer = {
+							spacing = 4
+							visible = "[Not(GreatWorkComponentItem.IsTemplate)]"
+							icon_button_square = { #Module
+								size = { 31 31 }
+								visible = "[GreatWorkComponentItem.IsValid]"
+								enabled = "[Not(GreatWorkWindow.IsInEditMode)]"
+								tooltip = "[GreatWorkComponentItem.GetChangeTooltip]"
+								tooltip_widgetanchor = top|right
+								tooltip_parentanchor = top|left
+								onenter_signal = "[GreatWorkComponentItem.GetModuleWidgetId]"
+								onleave_signal = "[GreatWorkComponentItem.GetModuleWidgetId]"
+								blockoverride "On_click"
+								{
+									onclick = "[GreatWorkComponentItem.CycleModuleLeft]"
+								}
+								
+								#clicksound = "event:/SFX/UI/GreatWork/sfx_ui_great_work_swap_material"			
+								#texture = "gfx/interface/base_parts/sliders_export_slider_selection.dds"								
+
+								blockoverride "Icon" 
+								{
+									texture = "gfx/interface/buttons/arrow_left.dds"
+									size = { 30 30 }
+								}
+							}
+							category_drop = {
+								size = { 224 40 }
+								parentanchor = hcenter
+								widgetid = "[GreatWorkComponentItem.GetModuleWidgetId]"
+								tooltip = "[GreatWorkComponentItem.GetChangeTooltip]"
+								enabled = "[Not(GreatWorkWindow.IsInEditMode)]"
+								datacontext = "[GreatWorkComponentItem.AccessModuleItem]"
+								icon = {
+									texture = "[GreatWorkItem.GetIcon]"
+									size = { 31 31 }
+									parentanchor = vcenter
+									position = { 8 0 }
+								}
+								blockoverride "Text" { text = "[GreatWorkItem.GetName]" }
+								blockoverride "On_click" { onclick = "[GreatWorkItem.OpenSelection]" }
+								blockoverride "ClickSound" { clicksound = "event:/SFX/UI/GreatWork/sfx_ui_great_work_swap_material" }
+							}
+							widget = { size = { 6 0 } }
+							icon_button_square = { #Module
+								size = { 31 31 }
+								visible = "[GreatWorkComponentItem.IsValid]"
+								enabled = "[Not(GreatWorkWindow.IsInEditMode)]"
+								tooltip = "[GreatWorkComponentItem.GetChangeTooltip]"
+								onenter_signal = "[GreatWorkComponentItem.GetModuleWidgetId]"
+								onleave_signal = "[GreatWorkComponentItem.GetModuleWidgetId]"
+								blockoverride "On_click"
+								{
+									onclick = "[GreatWorkComponentItem.CycleModuleRight]"
+								}
+								
+								#clicksound = "event:/SFX/UI/GreatWork/sfx_ui_great_work_swap_material"			
+								#texture = "gfx/interface/base_parts/sliders_export_slider_selection.dds"								
+
+								blockoverride "Icon" 
+								{
+									texture = "gfx/interface/buttons/arrow_right.dds"
+									size = { 30 30 }
+								}
+							}
+						}
+						flowcontainer = {
+							spacing = 4
+							visible = "[Not(GreatWorkComponentItem.IsTemplate)]"
+							icon_button_square = { #Material
+								size = { 31 31 }
+								visible = "[GreatWorkComponentItem.IsValid]"
+								enabled = "[Not(GreatWorkWindow.IsInEditMode)]"
+								tooltip = "[GreatWorkComponentItem.GetChangeMaterialTooltip]"
+								tooltip_widgetanchor = top|right
+								tooltip_parentanchor = top|left
+								onenter_signal = "[GreatWorkComponentItem.GetMaterialWidgetId]"
+								onleave_signal = "[GreatWorkComponentItem.GetMaterialWidgetId]"
+								blockoverride "On_click"
+								{
+									onclick = "[GreatWorkComponentItem.CycleMaterialLeft]"
+								}
+								
+								#clicksound = "event:/SFX/UI/GreatWork/sfx_ui_great_work_swap_material"			
+								#texture = "gfx/interface/base_parts/sliders_export_slider_selection.dds"
+
+								blockoverride "Icon" 
+								{
+									texture = "gfx/interface/buttons/arrow_left.dds"
+									size = { 30 30 }
+								}
+							}
+							category_drop = {
+								size = { 224 40 }
+								parentanchor = hcenter
+								widgetid = "[GreatWorkComponentItem.GetMaterialWidgetId]"
+								tooltip = "[GreatWorkComponentItem.GetChangeMaterialTooltip]"
+								enabled = "[Not(GreatWorkWindow.IsInEditMode)]"
+								datacontext = "[GreatWorkComponentItem.AccessMaterialItem]"
+								icon = {
+									texture = "[GreatWorkItem.GetIcon]"
+									size = { 31 31 }
+									parentanchor = vcenter
+									position = { 8 0 }
+								}
+								blockoverride "Text" { text = "[GreatWorkItem.GetName]" }
+								blockoverride "On_click" { onclick = "[GreatWorkItem.OpenSelection]" }
+								blockoverride "ClickSound" { clicksound = "event:/SFX/UI/GreatWork/sfx_ui_great_work_swap_material" }
+							}
+							widget = { size = { 6 0 } }
+							icon_button_square = { #Material
+								size = { 31 31 }
+								visible = "[GreatWorkComponentItem.IsValid]"
+								enabled = "[Not(GreatWorkWindow.IsInEditMode)]"
+								tooltip = "[GreatWorkComponentItem.GetChangeMaterialTooltip]"
+								onenter_signal = "[GreatWorkComponentItem.GetMaterialWidgetId]"
+								onleave_signal = "[GreatWorkComponentItem.GetMaterialWidgetId]"
+								blockoverride "On_click"
+								{
+									onclick = "[GreatWorkComponentItem.CycleMaterialRight]"
+								}
+								
+								#clicksound = "event:/SFX/UI/GreatWork/sfx_ui_great_work_swap_material"			
+								#texture = "gfx/interface/base_parts/sliders_export_slider_selection.dds"
+
+								blockoverride "Icon" 
+								{
+									texture = "gfx/interface/buttons/arrow_right.dds"
+									size = { 30 30 }
+								}
+							}
+						}
+						flowcontainer = {
+							spacing = 4
+							visible = "[GreatWorkComponentItem.IsTemplate]"
+							icon_button_square = { #Template
+								size = { 31 31 }
+								visible = "[GreatWorkComponentItem.IsValid]"
+								enabled = "[Not(GreatWorkWindow.IsInEditMode)]"
+								tooltip = "[GreatWorkComponentItem.GetChangeTooltip]"
+								tooltip_widgetanchor = top|right
+								tooltip_parentanchor = top|left
+								onenter_signal = "[GreatWorkComponentItem.GetTemplateWidgetId]"
+								onleave_signal = "[GreatWorkComponentItem.GetTemplateWidgetId]"
+								blockoverride "On_click"
+								{
+									onclick = "[GreatWorkComponentItem.CycleTemplateLeft]"
+								}
+								
+								#clicksound = "event:/SFX/UI/GreatWork/sfx_ui_great_work_swap_material"			
+								#texture = "gfx/interface/base_parts/sliders_export_slider_selection.dds"
+
+								blockoverride "Icon" 
+								{
+									texture = "gfx/interface/buttons/arrow_left.dds"
+									size = { 30 30 }
+								}
+							}
+							category_drop = {
+								size = { 224 40 }
+								parentanchor = hcenter
+								widgetid = "[GreatWorkComponentItem.GetTemplateWidgetId]"
+								tooltip = "[GreatWorkComponentItem.GetChangeTooltip]"
+								enabled = "[Not(GreatWorkWindow.IsInEditMode)]"
+								datacontext = "[GreatWorkComponentItem.AccessTemplateItem]"
+								icon = {
+									texture = "[GreatWorkItem.GetIcon]"
+									size = { 31 31 }
+									parentanchor = vcenter
+									position = { 8 0 }
+								}
+								blockoverride "Text" { text = "[GreatWorkItem.GetName]" }
+								blockoverride "On_click" { onclick = "[GreatWorkItem.OpenSelection]" }
+								blockoverride "ClickSound" { clicksound = "event:/SFX/UI/GreatWork/sfx_ui_great_work_swap_material" }
+							}
+							widget = { size = { 6 0 } }
+							icon_button_square = { #Template
+								size = { 31 31 }
+								visible = "[GreatWorkComponentItem.IsValid]"
+								enabled = "[Not(GreatWorkWindow.IsInEditMode)]"
+								tooltip = "[GreatWorkComponentItem.GetChangeTooltip]"
+								onenter_signal = "[GreatWorkComponentItem.GetTemplateWidgetId]"
+								onleave_signal = "[GreatWorkComponentItem.GetTemplateWidgetId]"
+								blockoverride "On_click"
+								{
+									onclick = "[GreatWorkComponentItem.CycleTemplateRight]"
+								}
+								
+								#clicksound = "event:/SFX/UI/GreatWork/sfx_ui_great_work_swap_material"			
+								#texture = "gfx/interface/base_parts/sliders_export_slider_selection.dds"
+
+								blockoverride "Icon" 
+								{
+									texture = "gfx/interface/buttons/arrow_right.dds"
+									size = { 30 30 }
+								}
+							}
+						}
+					}
+				}
+			}
+
+			vbox = { #Right buttons
+				position = { 120 -16 }
+				layoutpolicy_vertical = expanding
+				bottomtotop = yes
+				#spacing = 0
+				datamodel = "[GreatWorkWindow.GetComponents]"
+				item = {
+					vbox = {
+						spacing = 7
+						ignoreinvisible = yes
+					}
+				}
+			}
+		}
+
+		margin_widget = { #Effects
+			size = { 356 650 }
+			position = { 320 98 }
+
+			sub_header_v = { #Effect Label
+				size = { 100% 0 }
+
+				blockoverride "Title_text"
+				{
+					text = "GW_EFFECTS_TITLE"
+				}
+			}
+
+			flowcontainer = {	
+				position = { 6 36 }				
+				direction = vertical
+				spacing = 10
+
+				datamodel = "[GreatWorkWindow.GetEffects]"
+				item = {
+					list_entry = {
+						size = { 344 164 }
+						
+						# TODO UX: display shading if Not(GreatWorkEffectItem.IsActive)
+						# Then let coders know which tooltip exactly should display the infomration that this is disabled because a stronger bonus is active somewhere else
+						
+						button = {
+							using = DropShadow
+							position = { -8 6 }
+							visible = "[Not(GreatWorkEffectItem.IsValid)]"
+							parentanchor = top|right
+							size = { 50 50 }
+							onclick = "[GreatWorkEffectItem.OpenSelection]"
+							tooltip = "GW_SELECT_EFFECT_TT"
+							texture = "gfx/interface/base_parts/button_color_400fs.dds"
+							framesize = { 200 200 }
+							frame = 2
+							modify_texture = {
+								name = "Alpha"
+								texture = "gfx/interface/base_parts/button2_inner_x8y8bd_alpha.dds"
+								blend_mode = alphamultiply
+								spriteType = Corneredtiled
+								spriteborder = { 6 6 }
+							}
+							
+							icon = {
+								name = "Pattern"
+								texture = "gfx/interface/base_parts/square_button_corner_pattern_x22y22bd.dds"
+								spriteType = Corneredtiled
+								spriteborder = { 11 11 }
+								size = { 100% 100% }
+							}
+							
+							icon = {
+								name = "question mark"
+								parentanchor = center	
+								texture = "gfx/interface/base_parts/idea_mark.dds"
+								size = { 36 36 }
+							}
+						}
+
+						
+						icon_button_square = {
+							parentanchor = top|right
+							position = { -6 6 }
+							size = { 50 50 }
+							visible = "[GreatWorkEffectItem.IsValid]"	
+							
+							blockoverride "On_click"
+							{
+								onclick = "[GreatWorkEffectItem.OpenSelection]"
+							}
+							
+							#tooltip = "[GreatWorkEffectItem.GetTooltip]"
+							
+							blockoverride "Icon" 
+							{ #effect icon
+								parentanchor = vcenter|hcenter
+								texture = "[GreatWorkEffectItem.GetIcon]"
+								size = { 78% 78% }	
+								icon = {
+									parentanchor = bottom|right
+									texture = "[GreatWorkEffectItem.GetTierIcon]"
+									size = {45% 45%}
+									position = { 0 0 }
+								}					
+							}
+						}
+
+						widget = { #Effect Description
+							size = { 334 182 }
+							position = { 12 14 }
+							tooltip = "[GreatWorkEffectItem.GetDescription]"
+
+							tag = { #Title
+								position = { 0 -8 }
+								using = BaseFontM
+								using = Black_FontColor
+								text = "[GreatWorkEffectItem.GetName]"
+							}
+
+							textbox = { #Descript
+								widgetanchor = vcenter
+								parentanchor = vcenter
+								size = { 100% 128 }
+								position = { 4 0 }
+								using = BaseFontS
+								using = Black_FontColor	
+								max_width = 332
+								fontsize_min = 11
+								autoresize = yes
+								#multiline = yes
+								elide = left
+								#text = "[GreatWorkEffectItem.GetDescription]"
+								text = "[GreatWorkEffectItem.GetTooltip]"
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		margin_widget = {
+			size = { 300 180 }
+			position = { 0 668 }
+
+			flowcontainer = {
+				parentanchor = bottom|hcenter
+				spacing = 22
+					
+				flowcontainer = {
+					direction = vertical
+					spacing = 4
+					parentanchor = bottom
+					icon_and_text = {
+						size = { 168 0 }
+						blockoverride "Text" 
+						{ 
+						text = "[GreatWorkWindow.GetGoldCost]" 
+						}
+						blockoverride "Icon" 
+						{ 
+						texture = "gfx/interface/icons/shared_icons/cost.dds"
+						}
+					}
+					icon_and_text = {
+						size = { 168 0 }
+						blockoverride "Text" 
+						{ 
+						text = "[GreatWorkWindow.GetInfluenceCost]"
+						}
+						blockoverride "Icon" 
+						{ 
+						texture = "gfx/interface/icons/shared_icons/political_influence.dds"
+						}
+					}
+					icon_and_text = {
+						size = { 168 0 }
+						tooltip = "[GetGreatWorkConstructionTimeTooltip(GreatWorkWindow.GetGreatWork, GreatWorkWindow.GetProvince, GreatWorkWindow.GetLeader, GreatWorkWindow.GetEstimatedDays)]"
+						blockoverride "Text" 
+						{ 
+						text = "[GreatWorkWindow.GetEstimatedDaysText]"
+						}
+						blockoverride "Icon" 
+						{ 
+						texture = "gfx/interface/icons/shared_icons/time.dds"
+						}
+
+					}
+				}
+
+				cpt_button = { #Leader
+					#blockoverride "Size" { size = { 70 106 } }
+					visible = "[GreatWorkWindow.CanHaveLeader]"
+					name = "portrait"								
+					datacontext = "[GreatWorkWindow.GetLeader]"
+
+					icon_button_square = {
+						size = { 38 38 }
+						parentanchor = bottom|right
+						visible = "[GreatWorkWindow.CanHaveLeader]"
+						blockoverride "On_click"
+						{
+							tooltip = "GREAT_WORK_SELECT_LEADER_HEADER"
+							onclick = "[GreatWorkWindow.OnLeaderClick]"	
+						}
+
+						blockoverride "Icon"
+						{
+							texture = "gfx/interface/icons/shared_icons/change.dds"
+							size = { 32 32 }
+						}
+					}
+				}
+			}
+
+			margin_widget = { #Required tradegoods box
+				size = { 310 42 }
+				position = { -100 28 }
+				#parentanchor = bottom|right
+
+				icon = { 
+					parentanchor = top|hcenter
+					size = { 100% 100% }
+					using = NoninteractableBG
+					blockoverride "Margins"
+					{
+						margin = { 10 10 }
+						margin_top = 6
+						margin_bottom = 6
+					}
+					spriteType = Corneredtiled
+					spriteborder = { 10 10 }
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					tooltip = "GW_GOODS_REQ_TT"
+					flowcontainer = { #Trade Goods
+						margin = { 6 2 }
+						resizeparent = yes
+						datamodel = "[GreatWorkWindow.GetRequiredTradeGoods]"
+
+						item = {
+							icon = {
+								parentanchor = vcenter
+								size = { 36 36 }
+								texture = "[GetTradeGoodsIcon(TradeGoodsGlue.GetTradeGood)]"
+								tooltip = "[Localize(TradeGoodsGlue.GetTradeGood.GetKey)]"
+								#tooltip = "[TradeGoodsGlue.GetTradeGood.GetDescription]"
+								icon = {
+									parentanchor = bottom|right
+									size = {50% 50%}
+									visible = "[GreatWorkWindow.IsMissingTradeGood(TradeGoodsGlue.GetTradeGood)]"
+									#tooltip = "GW_MISSING_TRADEGOODS_TT"
+									texture = "gfx/interface/icons/shared_icons/tick_cross.dds"
+									framesize = { 25 25 }
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	
+		text_button_square = { # Build
+			parentanchor = bottom|right
+			size = { 338 28 }
+			position = { -22 -24 }
+			blockoverride "On_click" 
+			{ 
+				onclick = "[GreatWorkWindow.BuildGreatWork]"
+				enabled = "[GreatWorkWindow.CanBuildGreatWork]"
+			}
+			blockoverride "Center_text" 
+			{
+				text = "GW_BUILD_BUTTON"
+			}
+			visible = "[Not(GreatWorkWindow.IsInEditMode)]"
+			tooltip = "[GreatWorkWindow.GetBuildTooltip]"
+			
+			#clicksound = "event:/SFX/UI/GreatWork/sfx_ui_great_work_start_construction"
+		}
+
+		text_button_square = { # Edit
+			parentanchor = bottom|right
+			position = { -22 -60 }
+			size = { 260 28 }
+			blockoverride "On_click" 
+			{ 
+				onclick = "[GreatWorkWindow.EditGreatWork]"
+				enabled = "[GreatWorkWindow.CanEditGreatWork]"
+			}
+			blockoverride "Center_text" 
+			{
+				text = "GW_EDIT_BUTTON"
+			}
+			visible = "[GreatWorkWindow.IsInEditMode]"
+			tooltip = "[GreatWorkWindow.GetEditTooltip]"
+		}
+
+		text_button_square = { # Cancel / Destroy
+			parentanchor = bottom|right
+			size = { 260 28 }
+			position = { -22 -24 }
+			datacontext = "[GreatWorkWindow.GetGreatWork]"
+			blockoverride "On_click" 
+			{ 
+				onclick = "[GreatWorkWindow.DestroyOrCancel]"
+				#enabled = "[GreatWorkWindow.CanBuildGreatWork]"
+			}
+			blockoverride "Center_text" 
+			{
+				text = "[SelectLocalization(GreatWork.IsUnderConstruction, 'CANCEL_OR_DESTROY_GW_BUTTON_CANCEL_LABEL', 'CANCEL_OR_DESTROY_GW_ADJECTIVE_DESTROY')]"
+				#text = "CANCEL_OR_DESTROY_GW_ADJECTIVE_DESTROY"
+			}
+			visible = "[GreatWorkWindow.IsInEditMode]"		
+			tooltip = "[SelectLocalization(GreatWork.IsUnderConstruction, 'CANCEL_OR_DESTROY_GW_BUTTON_CANCEL_TOOLTIP', 'CANCEL_OR_DESTROY_GW_ADJECTIVE_DESTROY')]"
+			#tooltip = "CANCEL_OR_DESTROY_GW_ADJECTIVE_DESTROY"
+			
+		}
+	}
+}

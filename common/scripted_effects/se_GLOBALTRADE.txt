@@ -56,11 +56,55 @@
 	GT_set_total_order_size_and_total_global_stockpile_percent_all = yes
 	GT_update_shipping_route_traffic_all = yes
 	GT_do_shipping_costs = yes
+
+	# GT_log_trade_balance = yes
 }
 
 GT_create_tradegroups = {
 	# Scope: Random country, to every trade center province
 	# Function: Create temporary objects that are used as proxies for groups of governorships within countries 
+}
+
+GT_log_trade_balance = {
+	# Scope: Random country
+	# Function: Save the trade balance in a random player country (the player, in singleplayer), and store up to the previous 7 trade balance values
+	random_country = {
+		limit = {
+			is_ai = no
+		}
+		set_variable = {
+			name = trade_national_balance_8
+			value = var:trade_national_balance_7
+		}
+		set_variable = {
+			name = trade_national_balance_7
+			value = var:trade_national_balance_6
+		}
+		set_variable = {
+			name = trade_national_balance_6
+			value = var:trade_national_balance_5
+		}
+		set_variable = {
+			name = trade_national_balance_5
+			value = var:trade_national_balance_4
+		}
+		set_variable = {
+			name = trade_national_balance_4
+			value = var:trade_national_balance_3
+		}
+		set_variable = {
+			name = trade_national_balance_3
+			value = var:trade_national_balance_2
+		}
+		set_variable = {
+			name = trade_national_balance_2
+			value = var:trade_national_balance_1
+		}
+		set_variable = {
+			name = trade_national_balance_1
+			value = TRADE_national_balance
+		}
+	}
 }
 
 GT_reset_global_TZ_variables = {
@@ -4845,8 +4889,6 @@ GT_get_governorship_shipping_income = {
 
 }
 
-#### vvv NOT YET IMPLEMENTED vvv ####
-
 GT_calculate_trade_shares = {
 	set_variable = {
 		name = trade_share_$category$_the_state
@@ -5021,6 +5063,42 @@ GT_calculate_trade_shares = {
 			change_variable = {
 				name = trade_share_$category$_slaves
 				divide = local_var:GT_sum_of_$category$_income_weights
+			}
+		}
+	}
+}
+
+#### vvv NOT YET IMPLEMENTED vvv ####
+
+GT_update_shipping_income = {
+	# Scope: Country
+	# Function: Save the income from shipping into a variable
+	set_variable = {
+		name = shipping_earned_all_TZs
+		value = SHIPPING_earned_all_TZs
+	}
+}
+
+GT_get_shipping_income_from_colonies = {
+	# Scope: Country
+	# Function: Get the shipping value from every colony
+	set_variable = {
+		name = shipping_income_all_colonies
+		value = 0
+	}
+	save_scope_as = overlord_scope
+	every_subject = {
+		limit = {
+			OR = {
+				is_subject_type = autonomous_colony
+				is_subject_type = client_colony
+			}
+		}
+		save_scope_as = subject_scope
+		scope:overlord_scope = {
+			change_variable = {
+				name = shipping_income_all_colonies
+				add = scope:subject_scope.var:shipping_earned_all_TZs
 			}
 		}
 	}

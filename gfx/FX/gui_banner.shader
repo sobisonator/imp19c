@@ -115,10 +115,10 @@ VertexShader =
 		[[
 			PDX_MAIN
 			{
-				#ifndef FLAG_WAVES_DISABLED
+/*				#ifndef FLAG_WAVES_DISABLED
 					float2 AnimUV = saturate( Input.Position.xy / float2( 9.0f, 6.0f ) + vec2( 0.5f ) );
 					CalculateSineAnimation( AnimUV, Input.Position, Input.Normal, Input.Tangent );
-				#endif
+				#endif*/
 				VS_OUTPUT Out = ConvertOutput( PdxMeshVertexShaderStandard( Input ) );
 				Out.InstanceIndex = Input.InstanceIndices.y;
 				return Out;

@@ -417,6 +417,8 @@ PixelShader =
 
 				float3 UserColor = float3( 1.0f, 1.0f, 1.0f );
 
+				//float3 UserColor = GetUserData( Input.InstanceIndex, USER_DATA_PRIMARY_COLOR ).rgb;
+
 				#if defined( ATLAS )
 					float4 NormalPacked = PdxTex2D( NormalMap2, NORMAL_UV_SET2 + UvAnimationAdd );
 					float3 NormalSample = UnpackRRxGNormal( NormalPacked );

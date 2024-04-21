@@ -24,254 +24,267 @@ base_window = {
     }
 }
 
-base_window = {
-	name = "supranational" #name used in console command to open widget
-    gfxtype = windowgfx
-    parentanchor = center
-    datacontext = "[Player.MakeScope.GetVariable('member_of_federation').GetProvince]"
-    size = { 900 700 }
-    vbox = {
-        using = MainWindowHeaderBoxCentered
+types SupranationalWindows
+{
+	type supranational = base_window {
+		name = "supranational" #name used in console command to open widget
+		gfxtype = windowgfx
+		parentanchor = center
+		movable = no
+		datacontext = "[Player.MakeScope.GetVariable('member_of_federation').GetProvince]"
+		size = { 1100 700 }
+		vbox = {
+		    using = MainWindowHeaderBoxCenteredNew
 
-        blockoverride "Title_text" { text = "[Player.MakeScope.GetVariable('member_of_federation').GetProvince.MakeScope.GetVariable('federation_name').GetFlagName]" } # Get name from the entity's data
-
-        vbox = {
-            layoutpolicy_vertical = expanding
-        }
-
-    }
-
-    container = {
-    	name = "federation_members"
-    	parentanchor = top|center
-		size = { 850 80 }
-		position = { 0 55 }
-		layoutpolicy_horizontal = expanding
-
-		sub_header = {
-			size = { 400 32 }
-			blockoverride "Title_text" 
-			{ 
-				text = "Member states"
+		    blockoverride "Title_text" {
+		    	text = "[Player.MakeScope.GetVariable('member_of_federation').GetProvince.MakeScope.GetVariable('federation_name').GetFlagName]"
+		    } # Get name from the entity's data
+			blockoverride "White_buttons" 
+			{
+				button_close = {
+					onclick = "[PdxGuiTriggerAllAnimations('on_supranational_hidden')]"
+					tooltip = "CLOSE"
+					shortcut = "close_window"
+				}
 			}
+		    vbox = {
+		        layoutpolicy_vertical = expanding
+		    }
+
 		}
 
-        overlappingitembox = {
-            size = { 850 78 }
-            position = { 0 30 }
-            datamodel = "[Province.MakeScope.GetList('list_of_members')]"
-            
-			item = {
-			    country_flag = {
-			        tooltip = "[Scope.GetCountry.GetName]"
-			        datacontext = "[Scope.GetCountry]"
-
-			        blockoverride "flag"
-					{
-					texture = "[Scope.GetCountry.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
-					frame = "[Scope.GetCountry.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
-						framesize = { 56 56 }
-					}
-			        
-			        blockoverride "size"
-			        {
-			            size = { 30 30 }
-			        }
-			    }
-			}
-        }
-		# Use an overlappingitembox
-		# Create a data_model to get the list of countries in the federation?
-	}
-
-    container = {
-    	name = "federation_leader"
-		size = { 200 200 }
-		position = { 0 120 }
-		layoutpolicy_horizontal = expanding
-
-		sub_header = {
-			size = { 200 32 }
-			blockoverride "Title_text" 
-			{ 
-				text = "President" # Should be "host" if ceremonial, "leader" if holding authority - add conditions
-			}
-		}
 		container = {
-			name = "federation_leader_flag"
-			size = { 66 112 }
-			position = { 0 30}
+			name = "federation_members"
+			#parentanchor = top|hcenter
+			#size = { 850 80 } #удалить
+			position = { 0 55 }
+			layoutpolicy_horizontal = expanding
 
-			banner_great_power = {
-				datacontext = "[Province.MakeScope.GetVariable('host_tag').GetCountry]"
+			sub_header = {
+				size = { 400 32 }
+				blockoverride "Title_text" 
+				{ 
+					text = "Member states"
+				}
+			}
+
+		    overlappingitembox = {
+		        size = { 850 78 }
+		        position = { 0 30 }
+		        datamodel = "[Province.MakeScope.GetList('list_of_members')]"
+		        
+				item = {
+				    country_flag = {
+				        tooltip = "[Scope.GetCountry.GetName]"
+				        datacontext = "[Scope.GetCountry]"
+
+				        blockoverride "flag"
+						{
+						texture = "[Scope.GetCountry.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+						frame = "[Scope.GetCountry.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+							framesize = { 56 56 }
+						}
+				        
+				        blockoverride "size"
+				        {
+				            size = { 30 30 }
+				        }
+				    }
+				}
+		    }
+			# Use an overlappingitembox
+			# Create a data_model to get the list of countries in the federation?
+		}
+
+		container = {
+			name = "federation_leader"
+			#size = { 200 200 } #удалить
+			position = { 0 120 }
+			layoutpolicy_horizontal = expanding
+
+			sub_header = {
+				size = { 200 32 }
+				blockoverride "Title_text" 
+				{ 
+					text = "President" # Should be "host" if ceremonial, "leader" if holding authority - add conditions
+				}
+			}
+			container = {
+				name = "federation_leader_flag"
+				#size = { 66 112 } #удалить
+				position = { 0 30}
+
+				banner_great_power = {
+					datacontext = "[Province.MakeScope.GetVariable('host_tag').GetCountry]"
+				}
+			}
+			widget = {
+				size = { 100 100 }
+				parentanchor = right|vcenter
+				position = { 0 0 }
+				piechart = {
+					size = { 90 90 }
+					position = { 0 0 }
+					parentanchor = vcenter
+					datamodel = "[Province.MakeScope.GetList('list_of_members')]"
+					#alwaystransparent = no
+					icon = {
+						size = { 100% 100% }
+						texture = "gfx/interface/pie_charts/pie_chart_alpha_80_shadow.dds"
+						alpha = 0.85
+					}
+					item = {
+						pieslice = {
+							#texture = "gfx/interface/piechart.dds"
+							texture = "gfx/interface/pie_charts/pie_chart_alpha_80.dds"
+							tooltip = "[Scope.GetCountry.GetName]"
+							value = "[IntToFloat( Scope.GetCountry.GetOwnedProvinceCount )]"
+							color = "[Scope.GetCountry.GetMapColor]"
+							alpha = 0.9
+						}
+					}
+				}			
 			}
 		}
-		widget = {
-			size = { 100 100 }
-			parentanchor = right|vcenter
-			position = { 0 0 }
-			piechart = {
-				size = { 90 90 }
-				position = { 0 0 }
-				parentanchor = vcenter
-				datamodel = "[Province.MakeScope.GetList('list_of_members')]"
-				#alwaystransparent = no
-				icon = {
-					size = { 100% 100% }
-					texture = "gfx/interface/pie_charts/pie_chart_alpha_80_shadow.dds"
-					alpha = 0.85
+
+		container = {
+			name = "membership_laws"
+			#size = { 200 200 } #удалить
+			position = { 0 260 }
+			layoutpolicy_horizontal = expanding
+
+			sub_header = {
+				size = { 250 32 }
+				blockoverride "Title_text" 
+				{ 
+					text = "Cultural Membership"
 				}
-				item = {
-					pieslice = {
-						#texture = "gfx/interface/piechart.dds"
-						texture = "gfx/interface/pie_charts/pie_chart_alpha_80.dds"
-						tooltip = "[Scope.GetCountry.GetName]"
-						value = "[IntToFloat( Scope.GetCountry.GetOwnedProvinceCount )]"
-						color = "[Scope.GetCountry.GetMapColor]"
-						alpha = 0.9
+			}
+			button_radial = {
+				position = { 5 33 }
+				#enabled = "[]"
+				scale = 0.9
+				
+				blockoverride "On_click" 
+				{
+					#onclick = "[]"
+					inherit_visual_state = no
+					enabled = yes
+				}
+				blockoverride "ShowDot"
+				{
+					#trigger_when = "[]"
+				} 
+				
+				blockoverride "HideDot" 
+				{
+					#trigger_when = "[]"
+				}
+				#tooltip = "[]"
+				tooltipwidget = federation_law_tooltip
+				widget = {
+					position = { 30 0 }
+					size = { 150 24 }
+					using = NoninteractableBG
+					blockoverride "Margins" { margin = { 4 6 } }
+					textbox = {
+						position = { 8 3 }
+						autoresize = yes
+						align = nobaseline|left
+						using = BaseFontS
+						using = Black_FontColor
+						text = "Any culture"
+						max_width = 280
+						elide = right
 					}
 				}
-			}			
+			}
+			button_radial = {
+				position = { 5 66 }
+				#enabled = "[]"
+				scale = 0.9
+				
+				blockoverride "On_click" 
+				{
+					#onclick = "[]"
+					inherit_visual_state = no
+					enabled = yes
+				}
+				blockoverride "ShowDot"
+				{
+					#trigger_when = "[]"
+				} 
+				
+				blockoverride "HideDot" 
+				{
+					#trigger_when = "[]"
+				}
+				#tooltip = "[]"
+				tooltipwidget = federation_law_tooltip
+				widget = {
+					position = { 30 0 }
+					size = { 150 24 }
+					using = NoninteractableBG
+					blockoverride "Margins" { margin = { 4 6 } }
+					textbox = {
+						position = { 8 3 }
+						autoresize = yes
+						align = nobaseline|left
+						using = BaseFontS
+						using = Black_FontColor
+						text = "Same culture group"
+						max_width = 280
+						elide = right
+					}
+				}
+			}
+			button_radial = {
+				position = { 5 99 }
+				#enabled = "[]"
+				scale = 0.9
+				
+				blockoverride "On_click" 
+				{
+					#onclick = "[]"
+					inherit_visual_state = no
+					enabled = yes
+				}
+				blockoverride "ShowDot"
+				{
+					#trigger_when = "[]"
+				} 
+				
+				blockoverride "HideDot" 
+				{
+					#trigger_when = "[]"
+				}
+				#tooltip = "[]"
+				tooltipwidget = federation_law_tooltip
+				widget = {
+					position = { 30 0 }
+					size = { 150 24 }
+					using = NoninteractableBG
+					blockoverride "Margins" { margin = { 4 6 } }
+					textbox = {
+						position = { 8 3 }
+						autoresize = yes
+						align = nobaseline|left
+						using = BaseFontS
+						using = Black_FontColor
+						text = "Same culture"
+						max_width = 280
+						elide = right
+					}
+				}
+			}
+			
 		}
+
+		#button_close = {
+		#    onclick = "[ExecuteConsoleCommand('GUI.ClearWidgets supranational')]"
+		#    tooltip = "CLOSE"
+		#    parentanchor = top|right
+		#    position = { -7 10}
+		#}
 	}
-
-	container = {
-    	name = "membership_laws"
-		size = { 200 200 }
-		position = { 0 260 }
-		layoutpolicy_horizontal = expanding
-
-		sub_header = {
-			size = { 250 32 }
-			blockoverride "Title_text" 
-			{ 
-				text = "Cultural Membership"
-			}
-		}
-		button_radial = {
-			position = { 5 33 }
-			enabled = "[]"
-			scale = 0.9
-			
-			blockoverride "On_click" 
-			{
-				onclick = "[]"
-				inherit_visual_state = no
-				enabled = yes
-			}
-			blockoverride "ShowDot"
-			{
-				trigger_when = "[]"
-			} 
-			
-			blockoverride "HideDot" 
-			{
-				trigger_when = "[]"
-			}
-			tooltip = "[]"
-			tooltipwidget = federation_law_tooltip
-			widget = {
-				position = { 30 0 }
-				size = { 150 24 }
-				using = NoninteractableBG
-				blockoverride "Margins" { margin = { 4 6 } }
-				textbox = {
-					position = { 8 3 }
-					autoresize = yes
-					align = nobaseline|left
-					using = BaseFontS
-					using = Black_FontColor
-					text = "Any culture"
-					max_width = 280
-					elide = right
-				}
-			}
-		}
-		button_radial = {
-			position = { 5 66 }
-			enabled = "[]"
-			scale = 0.9
-			
-			blockoverride "On_click" 
-			{
-				onclick = "[]"
-				inherit_visual_state = no
-				enabled = yes
-			}
-			blockoverride "ShowDot"
-			{
-				trigger_when = "[]"
-			} 
-			
-			blockoverride "HideDot" 
-			{
-				trigger_when = "[]"
-			}
-			tooltip = "[]"
-			tooltipwidget = federation_law_tooltip
-			widget = {
-				position = { 30 0 }
-				size = { 150 24 }
-				using = NoninteractableBG
-				blockoverride "Margins" { margin = { 4 6 } }
-				textbox = {
-					position = { 8 3 }
-					autoresize = yes
-					align = nobaseline|left
-					using = BaseFontS
-					using = Black_FontColor
-					text = "Same culture group"
-					max_width = 280
-					elide = right
-				}
-			}
-		}
-		button_radial = {
-			position = { 5 99 }
-			enabled = "[]"
-			scale = 0.9
-			
-			blockoverride "On_click" 
-			{
-				onclick = "[]"
-				inherit_visual_state = no
-				enabled = yes
-			}
-			blockoverride "ShowDot"
-			{
-				trigger_when = "[]"
-			} 
-			
-			blockoverride "HideDot" 
-			{
-				trigger_when = "[]"
-			}
-			tooltip = "[]"
-			tooltipwidget = federation_law_tooltip
-			widget = {
-				position = { 30 0 }
-				size = { 150 24 }
-				using = NoninteractableBG
-				blockoverride "Margins" { margin = { 4 6 } }
-				textbox = {
-					position = { 8 3 }
-					autoresize = yes
-					align = nobaseline|left
-					using = BaseFontS
-					using = Black_FontColor
-					text = "Same culture"
-					max_width = 280
-					elide = right
-				}
-			}
-		}
-		
-	}
-
-    button_close = {
-        onclick = "[ExecuteConsoleCommand('GUI.ClearWidgets supranational')]"
-        tooltip = "CLOSE"
-        parentanchor = top|right
-        position = { -7 10}
-    }
 }

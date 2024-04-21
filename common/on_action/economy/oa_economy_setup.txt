@@ -12,6 +12,157 @@
 			TRADE_setup_routes = yes
 			set_global_variable = tradezone_setup_done
 		}
+
+		if = {
+			limit = {
+				NOT = {
+					has_global_variable = defunct_tradegoods_replaced
+				}
+			}
+			every_province = {
+				limit = {
+					OR = {
+						trade_goods = tropical_fruit
+						trade_goods = mediterranean_fruit
+					}
+				}
+				set_trade_goods = temperate_fruit # TODO: Change this to generic_fruit
+			}
+			every_province = {
+				limit = {
+						trade_goods = inorganic_compounds
+				}
+				set_trade_goods = stone
+			}
+			every_province = {
+				limit = {
+						trade_goods = chocolate
+				}
+				set_trade_goods = coffee
+			}
+			every_province = {
+				limit = {
+						trade_goods = peat
+				}
+				set_trade_goods = sulphur
+			}
+			every_province = {
+				limit = {
+						trade_goods = wool
+				}
+				set_trade_goods = textile_fibres
+			}
+			every_province = {
+				limit = {
+						trade_goods = whales
+				}
+				set_trade_goods = fish
+			}
+			every_province = {
+				limit = {
+						trade_goods = camel
+				}
+				set_trade_goods = livestock
+			}
+			every_province = {
+				limit = {
+						trade_goods = horses
+				}
+				set_trade_goods = livestock
+			}
+
+			set_global_variable = defunct_tradegoods_replaced
+		}
+
+		# Factory initialisation
+		if = {
+			limit = {
+				NOT = {
+					has_global_variable = initial_factory_setup_done
+				}
+			}
+			every_country = {
+				every_governorships = {
+		      		INDUSTRY_setup_all_factory_assignments = yes # Set up fundamental variables for industries
+				}
+			}
+			p:3934 = {
+				state.governorship = {
+					INDUSTRY_assign_factory = {
+						tradegood = bronze
+						amount = 1
+					}
+				}
+			}
+			p:5014 = {
+				state.governorship = {
+					INDUSTRY_assign_factory = {
+						tradegood = clothing
+						amount = 3
+					}
+					INDUSTRY_assign_factory = {
+						tradegood = luxury_clothing
+						amount = 1
+					}
+				}
+			}
+			p:4966 = {
+				state.governorship = {
+					INDUSTRY_assign_factory = {
+						tradegood = machine_parts
+						amount = 1
+					}
+				}
+			}
+			# USA
+			p:8007 = {
+				state.governorship = {
+					INDUSTRY_assign_factory = {
+						tradegood = clothing
+						amount = 3
+					}
+				}
+			}
+			# PRU
+			p:1929 = {
+				state.governorship = {
+					INDUSTRY_assign_factory = {
+						tradegood = clothing
+						amount = 1
+					}
+				}
+			}
+			# AUS
+			p:8558 = {
+				state.governorship = {
+					INDUSTRY_assign_factory = {
+						tradegood = clothing
+						amount = 2
+					}
+				}
+			}
+			set_global_variable = initial_factory_setup_done
+		}
+
+		if = {
+			limit = {
+				NOT = {
+					has_global_variable = country_economy_setup_done
+				}
+			}
+			every_country = {
+				every_governorships = {
+					TRADE_set_internal_trade_scope = yes
+					WEALTH_setup_governorship = yes
+					GOODS_update_governorship_local_goods = yes
+		      		GOODS_setup_governorship_stockpiles = yes
+		      		TRADE_update_governorship_TZs = yes
+		      		CONSUME_setup_all_variables = yes
+				}
+			}
+			set_global_variable = country_economy_setup_done
+		}
+
 		if = {
 			limit = {
 				NOT = { has_global_variable = customs_union_setup_done }
@@ -1061,15 +1212,6 @@
 
 			set_global_variable = trade_deals_setup_done
 		}
-		every_governorships = {
-			TRADE_set_internal_trade_scope = yes
-			WEALTH_setup_governorship = yes
-			GOODS_update_governorship_local_goods = yes
-      		GOODS_setup_governorship_stockpiles = yes
-      		INDUSTRY_setup_all_factory_assignments = yes # Set up fundamental variables for industries
-      		TRADE_update_governorship_TZs = yes
-      		CONSUME_setup_all_variables = yes
-		}
 		TRADE_count_country_TZs = yes
 		if = {
 			limit = {
@@ -1086,14 +1228,6 @@
 				num_of_IND_industrial_estate > 0
 			}
 			show_model = "factory"
-		}
-		if = {
-			limit = {
-				NOT = { has_global_variable = initial_industry_assignment_done }
-			}
-			# GBR
-
-			set_global_variable = initial_industry_assignment_done
 		}
 		if = {
 			limit = {
@@ -1114,12 +1248,92 @@
 				set_variable = { name = regnal_year_var value = 19 }
 			}
 		}
+
+		# Do global trade setup
+		if = {
+			limit = {
+				NOT = {
+					has_global_variable = done_trade_startup
+				}
+			}
+			every_country = {
+				every_governorships = {
+					TRADE_governorship_get_pops_this_quarter = yes
+					TRADE_set_internal_trade_scope = yes
+					TRADE_update_governorship_TZs = yes
+				}
+				SELL_set_TZ_prices = yes
+			}
+			PRICE_update_TZ_prices = yes
+			every_country = {
+				every_governorships = {
+					TRADE_reset_all_tradegoods_TZ_internal_rankings = yes
+					TRADE_governorship_get_pops_this_quarter = yes
+				}
+				set_variable = {
+					name = internal_income_pool
+					value = 0
+				}
+				set_variable = {
+					name = national_trade_income_pool
+					value = 0
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_tradegood_total_internal_stockpile
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_setup_governorship_for_export_internal_vars
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_internal_trade_stockpiles
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+				}
+				TRADE_reset_quarterly_tax_totals = yes
+			}
+			every_federation = {
+				set_variable = {
+					name = internal_income_pool
+					value = 0
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_tradegood_total_internal_stockpile
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_setup_governorship_for_export_internal_vars
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_internal_trade_stockpiles
+				}
+				every_tradegood_complex = {
+					APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+				}
+				TRADE_reset_quarterly_tax_totals = yes
+			}
+			TRADE_reset_all_internal_trade_revenue_totals = yes
+			TRADE_save_connection_time_values = yes
+			TRADE_update_all_route_connection_times = yes
+			every_country = {
+				every_governorships = {
+					TRADE_update_governorship_TZs = yes
+					TRADE_setup_internal_trade_cuts = yes
+					TRADE_reset_quarterly_governorship_values = yes
+				}
+				TRADE_setup_tax_rates = yes
+				set_global_variable = first_time_generic_price_setup_done
+			}
+			TRADE_update_TZ_tradegood_trackers = yes
+
+			GT_do_global_trade = yes
+			set_global_variable = done_trade_startup
+		}
 	}
 	events = {
-		trade.1 # Setup trade values
+		#imp19c_startup.1 # Setup factories
 		debug_shipping.1 # Setup shipping values
-		imp19c_startup.1 # Setup factories
-		debug_demand.4 # Force 1 industrial production cycle
+		#trade.1
+		#debug_demand.4 # Force 1 industrial production cycle
 		#debug_demand.5 # Force 1 cottage industry production
 		noble_titles.1 # Personal titles
 		noble_titles.2 # Country ranks

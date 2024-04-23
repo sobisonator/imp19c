@@ -10,6 +10,12 @@
 	}
 }
 
+monthly_country_pulse = {
+	on_actions = {
+		monthly_do_trade # Check which trades have been done this quarter, and do the next one and set that var. If not, set "done" var and wait for quarterly_trade_pulse to remove the "done" var
+	}
+}
+
 quarterly_trade_pulse = {
 	effect = {
 
@@ -31,11 +37,10 @@ quarterly_trade_pulse = {
 					TRADE_governorship_get_pops_this_quarter = yes
 					GOODS_governorship_produce_all = yes
 					COTTAGEIND_produce_all = yes
-					MANUFACTURE_reset_all_tradegood_demand = yes
-					MANUFACTURE_all = yes
+					#MANUFACTURE_reset_all_tradegood_demand = yes
+					#MANUFACTURE_all = yes
 				}
 			}
-			GT_do_global_trade = yes
 			set_global_variable = {
 				name = done_quarterly_trade
 				days = 1
@@ -49,5 +54,80 @@ quarterly_trade_pulse = {
 		debug_demand.2
 		# trade.2 # Defunct
 		# debug_demand.3 # Produce manufactured goods
+	}
+
+	on_actions = {
+		quarterly_global_trade_food
+		delay = { days = 20 }
+		quarterly_global_trade_luxury
+		delay = { days = 40 }
+		quarterly_global_trade_3
+		delay = { days = 60 }
+		quarterly_global_trade_4
+	}
+}
+
+quarterly_global_trade_food = {
+	effect = {
+
+		if = {
+			limit = {
+				NOT = { has_global_variable = done_quarterly_global_trade_food }
+			}
+			GT_split_do_global_trade_split = { type = food }
+			set_global_variable = {
+				name = done_quarterly_global_trade_food
+				days = 1
+			}
+		}
+
+	}
+}
+quarterly_global_trade_luxury = {
+	effect = {
+
+		if = {
+			limit = {
+				NOT = { has_global_variable = done_quarterly_global_trade_luxury }
+			}
+			GT_split_do_global_trade_split = { type = luxury }
+			set_global_variable = {
+				name = done_quarterly_global_trade_luxury
+				days = 1
+			}
+		}
+
+	}
+}
+quarterly_global_trade_3 = {
+	effect = {
+
+		if = {
+			limit = {
+				NOT = { has_global_variable = done_quarterly_global_trade_3 }
+			}
+			GT_split_do_global_trade_split = { type = 3 }
+			set_global_variable = {
+				name = done_quarterly_global_trade_3
+				days = 1
+			}
+		}
+
+	}
+}
+quarterly_global_trade_4 = {
+	effect = {
+
+		if = {
+			limit = {
+				NOT = { has_global_variable = done_quarterly_global_trade_4 }
+			}
+			GT_split_do_global_trade_split = { type = 4 }
+			set_global_variable = {
+				name = done_quarterly_global_trade_4
+				days = 1
+			}
+		}
+
 	}
 }

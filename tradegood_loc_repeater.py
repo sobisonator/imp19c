@@ -1,24 +1,18 @@
 def print_out_good(tradegood_name):
   tradegood = tradegood_name
   tradegood_caps = tradegood.upper()
-  loc = '''TRADE_cash_balance_{tradegood} = {{ # Should be displayed with the spend and earnings in tooltip
-  every_governorships = {{
-    subtract = var:governorship_this_quarter_spend_on_{tradegood}
-    add = var:local_internal_revenue_cut_{tradegood}
-  }}
-}}
+  loc = '''									icon_card_goods = {{
+										
+										tooltip = "PROVWINDOW_GOV_{tradegood}_PRODUCED_TT"
+										blockoverride "Icon" {{texture = "gfx/interface/icons/tradegoods/{tradegood}.dds" 
+										}}
 
-TRADE_total_expenditure_{tradegood} = {{
-	every_governorships = {{
-		subtract = var:governorship_this_quarter_spend_on_{tradegood}
-	}}
-}}
+										blockoverride "Stockpile" {{text = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('{tradegood}_stockpile').GetValue|0] [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_difference_{tradegood}')|0+=]"
+										}}
 
-TRADE_total_revenue_{tradegood} = {{
-	every_governorships = {{
-		add = var:local_internal_revenue_cut_{tradegood}
-	}}
-}}'''.format(tradegood=tradegood)
+										blockoverride "Balance" {{text = "£[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('TRADE_governorship_cash_balance_{tradegood}')|3+=]"
+										}}
+									}}'''.format(tradegood=tradegood)
   print(loc)
 
 

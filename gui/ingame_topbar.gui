@@ -856,6 +856,7 @@ vbox = {
 				direction = vertical
 				spacing = 11
 				resizeparent = yes
+				ignoreinvisible = yes
 				#parentanchor = top|hcenter
 				
 				widget = {
@@ -871,6 +872,7 @@ vbox = {
 						{
 							visible = "[Not(IsGameViewOpen('overview'))]"
 							onclick = "[ToggleGameView('overview')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "NATION_OVERVIEW_MENU"
 							shortcut = "top_bar_1"
 							
@@ -900,6 +902,7 @@ vbox = {
 						{
 							visible = "[Not(IsGameViewOpen('government'))]"
 							onclick = "[ToggleGameView('government')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "GOVERNMENT_MENU"
 							shortcut = "top_bar_2"
 						
@@ -929,6 +932,7 @@ vbox = {
 						{
 							visible = "[Not(IsGameViewOpen('economy'))]"
 							onclick = "[ToggleGameView('economy')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "ECONOMY_MENU"
 							shortcut = "top_bar_3"
 						
@@ -965,6 +969,7 @@ vbox = {
 						{
 							visible = "[Not(IsGameViewOpen('religion'))]"
 							onclick = "[ToggleGameView('religion')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "RELIGION_MENU"
 							shortcut = "top_bar_4"
 							
@@ -994,6 +999,7 @@ vbox = {
 						{
 							visible = "[Not(IsGameViewOpen('culture'))]"
 							onclick = "[ToggleGameView('culture')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "CULTURE_MENU"
 							shortcut = "top_bar_5"
 							
@@ -1023,6 +1029,7 @@ vbox = {
 						{
 							visible = "[Not(IsGameViewOpen('trade'))]"
 							onclick = "[ToggleGameView('trade')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "TRADE_MENU"
 							shortcut = "top_bar_6"
 							
@@ -1052,6 +1059,7 @@ vbox = {
 						{
 							visible = "[Not(IsGameViewOpen('military'))]"
 							onclick = "[ToggleGameView('military')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "MILITARY_MENU"
 							shortcut = "top_bar_7"
 						
@@ -1081,6 +1089,7 @@ vbox = {
 						{
 							visible = "[Not(IsGameViewOpen('mercenary'))]"
 							onclick = "[ToggleGameView('mercenary')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "MERCENARY_MENU"
 							shortcut = "top_bar_8"
 							
@@ -1116,6 +1125,7 @@ vbox = {
 						{
 							visible = "[Not(IsGameViewOpen('diplomacy'))]"
 							onclick = "[ToggleGameView('diplomacy')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "DIPLOMACY_MENU"
 							shortcut = "top_bar_9"
 							
@@ -1145,6 +1155,7 @@ vbox = {
 						{
 							visible = "[Not(IsGameViewOpen('technology'))]"
 							onclick = "[ToggleGameView('technology')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "TECHNOLOGY_MENU"
 							shortcut = "top_bar_10"
 						
@@ -1174,6 +1185,7 @@ vbox = {
 						{
 							visible = "[Not(IsGameViewOpen('characters'))]"
 							onclick = "[ToggleGameView('characters')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "CHARACTERS_MENU"
 							shortcut = "top_bar_11"
 							
@@ -1199,13 +1211,11 @@ vbox = {
 					
 					TopBarWindowButton = {
 						position = { 4 2 }
-						
-						
-						
 						blockoverride "Details"
 						{
 							visible = "[Not(IsGameViewOpen('mission'))]"
 							onclick = "[ToggleGameView('mission')]"
+							onclick = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
 							tooltip = "[SelectLocalization( InGameTopbar.IsTutorialActive, 'TUTORIAL_MISSION_MENU', 'MISSION_MENU' )]"
 							shortcut = "top_bar_12"
 							enabled = "[Not( InGameTopbar.IsTutorialActive )]"
@@ -1222,6 +1232,66 @@ vbox = {
 						blockoverride "Icon"
 						{
 							texture = "gfx/interface/icons/menu_buttons/menu_mission.dds"
+						}
+					}
+				}
+
+				icon = {
+					size = { 43 2 }
+					visible = "[InGameTopbar.GetPlayer.MakeScope.Var('member_of_federation').IsSet]"
+					texture = "gfx/interface/base_parts/macro_divider.dds"
+					parentanchor = hcenter
+				}
+
+				widget = {
+					size = { 70 @SideBarButtonSize }
+					visible = "[InGameTopbar.GetPlayer.MakeScope.Var('member_of_federation').IsSet]"
+					TopBarWindowButton = {
+						position = { 4 2 }
+
+						blockoverride "Details"
+						{
+							onclick = "[PdxGuiTriggerAllAnimations('on_supranational_shown')]"
+							tooltip = "Supranational"
+							shortcut = "top_bar_13"
+							# ToDo: Add Sound.
+							clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_click"
+							oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+							state = {
+								name = instantiate_then_hide_subwindow
+								on_finish = "[PdxGuiWidget.Show]"
+							}
+							state = {
+								name = "on_supranational_shown"
+								on_start = "[PdxGuiWidget.Hide]"
+							}
+							state = {
+								name = "on_supranational_hidden"
+								on_start = "[PdxGuiWidget.Show]"
+							}
+						} 
+						
+						blockoverride "Details_toggled"
+						{
+							visible = no
+							onclick = "[PdxGuiTriggerAllAnimations('on_supranational_hidden')]"
+							state = {
+								name = instantiate_then_hide_subwindow
+								on_finish = "[PdxGuiWidget.Hide]"
+							}
+							state = {
+								name = "on_supranational_shown"
+								on_start = "[PdxGuiWidget.Show]"
+							}
+							state = {
+								name = "on_supranational_hidden"
+								on_start = "[PdxGuiWidget.Hide]"
+							}
+						}
+						
+						blockoverride "Icon"
+						{
+							texture = "gfx/interface/icons/icon_alpha/star.dds"
 						}
 					}
 				}
@@ -2283,6 +2353,29 @@ vbox = {
 				text = "[GetLaggingPlayerString]"
 				align = center|nobaseline
 				parentanchor = center
+			}
+		}
+		supranational = {
+			visible = no
+			#visible = yes
+			state = {
+				name = instantiate_then_hide_subwindow
+			
+				on_finish = "[PdxGuiWidget.Hide]"
+			}
+		
+			state = {
+				name = "on_supranational_shown"
+			
+				on_start = "[PdxGuiWidget.Show]"
+			
+			}
+		
+			state = {
+				name = "on_supranational_hidden"
+			
+				on_start = "[PdxGuiWidget.Hide]"
+			
 			}
 		}
 	}

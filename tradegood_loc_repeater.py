@@ -1,18 +1,24 @@
 def print_out_good(tradegood_name):
   tradegood = tradegood_name
   tradegood_caps = tradegood.upper()
-  loc = '''									icon_card_goods = {{
-										
-										tooltip = "PROVWINDOW_GOV_{tradegood}_PRODUCED_TT"
-										blockoverride "Icon" {{texture = "gfx/interface/icons/tradegoods/{tradegood}.dds" 
-										}}
+  loc = '''											icon_card_goods = {{
+												
+												tooltip = "#T {tradegood} #!"
+												blockoverride "Icon" {{texture = "gfx/interface/icons/tradegoods/{tradegood}.dds" 
+												}}
 
-										blockoverride "Stockpile" {{text = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('{tradegood}_stockpile').GetValue|0] [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_difference_{tradegood}')|0+=]"
-										}}
+												blockoverride "Stockpile" {{text = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('{tradegood}_stockpile').GetValue|0] [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_difference_{tradegood}')|0+=]"
+												}}
 
-										blockoverride "Balance" {{text = "£[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('TRADE_governorship_cash_balance_{tradegood}')|3+=]"
-										}}
-									}}'''.format(tradegood=tradegood)
+												blockoverride "StockpileTooltip" {{tooltip = "Stockpile: #H [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('{tradegood}_stockpile').GetValue|0] #! Demand: #R [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_{tradegood}')|0] #!/ Production: #G [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('GOODS_governorship_{tradegood}_produced')|0]"
+												}}
+
+												blockoverride "Balance" {{text = "£[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('TRADE_governorship_cash_balance_{tradegood}')|3+=]"
+												}}
+
+												blockoverride "BalanceTooltip" {{tooltip = "Imports: #R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('order_size_{tradegood}').GetValue|0] #!Exports: #G [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('amount_exported_{tradegood}').GetValue|0]"
+												}}
+											}}'''.format(tradegood=tradegood)
   print(loc)
 
 

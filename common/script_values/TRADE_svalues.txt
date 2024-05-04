@@ -78,6 +78,18 @@ TRADE_governorship_infrastructure_capacity_svalue = {
 	add = TRADE_river_port_bonus
 	add = TRADE_commerce_district_bonus
 	add = TRADE_depot_bonus
+	add = TRADE_governorship_infrastructure_from_shipping
+
+}
+
+TRADE_governorship_infrastructure_from_shipping = {
+	value = 0
+	every_governorship_state = {
+		every_state_province = {
+			add = SHIPPING_province_power
+		}
+	}
+	multiply = 0.5
 }
 
 # Bonuses from individual infrastructure buildings
@@ -6040,14 +6052,11 @@ TRADE_all_colony_export_income = {
 
 TRADE_all_colony_shipping_income = {
 	value = 0
-	every_subject = {
+	if = {
 		limit = {
-			OR = {
-				is_subject_type = autonomous_colony
-				is_subject_type = client_colony
-			}
+			has_variable = shipping_income_all_colonies
 		}
-		add = SHIPPING_earned_all_TZs
+		value = var:shipping_income_all_colonies
 	}
 }
 
@@ -6055,87 +6064,930 @@ TRADE_all_colony_shipping_income = {
 
 # FOR TESTING: Values from globaltrade
 
-TRADE_india_stockpile_grain = {
+TEST_is_coastal = {
+	value = 0
 	if = {
 		limit = {
-			has_global_variable = india_stockpile_grain
+			is_coastal = yes
 		}
-		value = global_var:india_stockpile_grain
+		value = 1
 	}
 }
 
-TRADE_global_stockpile_grain = {
-	if = {
-		limit = {
-			has_global_variable = global_stockpile_grain
-		}
-		value = global_var:global_stockpile_grain
-	}
-	
-}
+# TRADEGOOD BALANCE PER GOVERNORSHIP
 
-TRADE_india_percentage_of_global_stockpile_grain = {
+TRADE_governorship_cash_balance_grain = {
+	value = 0
 	if = {
 		limit = {
-			has_global_variable = india_percentage_of_global_stockpile_grain
+			has_variable = wealth_owed_for_grain
 		}
-		value = global_var:india_percentage_of_global_stockpile_grain
+		subtract = var:wealth_owed_for_grain
 	}
-	
-}
-
-TRADE_india_total_order_size_grain = {
 	if = {
 		limit = {
-			has_global_variable = india_total_order_size_grain
+			has_variable = income_due_grain
 		}
-		value = global_var:india_total_order_size_grain
+		add = var:income_due_grain
 	}
 }
-
-TRADE_global_base_import_price_grain = {
+TRADE_governorship_cash_balance_fish = {
+	value = 0
 	if = {
 		limit = {
-			has_global_variable = global_base_import_price_grain
+			has_variable = wealth_owed_for_fish
 		}
-		value = global_var:global_base_import_price_grain
-	}	
-}
-
-TRADE_global_order_total_grain = {
+		subtract = var:wealth_owed_for_fish
+	}
 	if = {
 		limit = {
-			has_global_variable = global_order_total_grain
+			has_variable = income_due_fish
 		}
-		value = global_var:global_order_total_grain
+		add = var:income_due_fish
 	}
 }
-
-TRADE_india_payment_pool_grain = {
+TRADE_governorship_cash_balance_livestock = {
+	value = 0
 	if = {
 		limit = {
-			has_global_variable = india_payment_pool_grain
+			has_variable = wealth_owed_for_livestock
 		}
-		value = global_var:india_payment_pool_grain
+		subtract = var:wealth_owed_for_livestock
 	}
-}
-
-TRADE_global_payment_pool_grain = {
 	if = {
 		limit = {
-			has_global_variable = global_payment_pool_grain
+			has_variable = income_due_livestock
 		}
-		value = global_var:global_payment_pool_grain
+		add = var:income_due_livestock
 	}
 }
-
-TRADE_india_total_imports_grain = {
-	value = global_var:global_shipping_costs_pool
+TRADE_governorship_cash_balance_vegetables = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_vegetables
+		}
+		subtract = var:wealth_owed_for_vegetables
+	}
+	if = {
+		limit = {
+			has_variable = income_due_vegetables
+		}
+		add = var:income_due_vegetables
+	}
 }
-
-#############
-
-TRADE_balance_summary = {
-	# For the GUI, used in the province window governorship view
-	# 
+TRADE_governorship_cash_balance_tropical_fruit = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_tropical_fruit
+		}
+		subtract = var:wealth_owed_for_tropical_fruit
+	}
+	if = {
+		limit = {
+			has_variable = income_due_tropical_fruit
+		}
+		add = var:income_due_tropical_fruit
+	}
+}
+TRADE_governorship_cash_balance_mediterranean_fruit = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_mediterranean_fruit
+		}
+		subtract = var:wealth_owed_for_mediterranean_fruit
+	}
+	if = {
+		limit = {
+			has_variable = income_due_mediterranean_fruit
+		}
+		add = var:income_due_mediterranean_fruit
+	}
+}
+TRADE_governorship_cash_balance_temperate_fruit = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_temperate_fruit
+		}
+		subtract = var:wealth_owed_for_temperate_fruit
+	}
+	if = {
+		limit = {
+			has_variable = income_due_temperate_fruit
+		}
+		add = var:income_due_temperate_fruit
+	}
+}
+TRADE_governorship_cash_balance_processed_foods = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_processed_foods
+		}
+		subtract = var:wealth_owed_for_processed_foods
+	}
+	if = {
+		limit = {
+			has_variable = income_due_processed_foods
+		}
+		add = var:income_due_processed_foods
+	}
+}
+TRADE_governorship_cash_balance_clothing = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_clothing
+		}
+		subtract = var:wealth_owed_for_clothing
+	}
+	if = {
+		limit = {
+			has_variable = income_due_clothing
+		}
+		add = var:income_due_clothing
+	}
+}
+TRADE_governorship_cash_balance_furniture = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_furniture
+		}
+		subtract = var:wealth_owed_for_furniture
+	}
+	if = {
+		limit = {
+			has_variable = income_due_furniture
+		}
+		add = var:income_due_furniture
+	}
+}
+TRADE_governorship_cash_balance_pharmaceuticals = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_pharmaceuticals
+		}
+		subtract = var:wealth_owed_for_pharmaceuticals
+	}
+	if = {
+		limit = {
+			has_variable = income_due_pharmaceuticals
+		}
+		add = var:income_due_pharmaceuticals
+	}
+}
+TRADE_governorship_cash_balance_coal = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_coal
+		}
+		subtract = var:wealth_owed_for_coal
+	}
+	if = {
+		limit = {
+			has_variable = income_due_coal
+		}
+		add = var:income_due_coal
+	}
+}
+TRADE_governorship_cash_balance_whales = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_whales
+		}
+		subtract = var:wealth_owed_for_whales
+	}
+	if = {
+		limit = {
+			has_variable = income_due_whales
+		}
+		add = var:income_due_whales
+	}
+}
+TRADE_governorship_cash_balance_alcohol = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_alcohol
+		}
+		subtract = var:wealth_owed_for_alcohol
+	}
+	if = {
+		limit = {
+			has_variable = income_due_alcohol
+		}
+		add = var:income_due_alcohol
+	}
+}
+TRADE_governorship_cash_balance_gems = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_gems
+		}
+		subtract = var:wealth_owed_for_gems
+	}
+	if = {
+		limit = {
+			has_variable = income_due_gems
+		}
+		add = var:income_due_gems
+	}
+}
+TRADE_governorship_cash_balance_opium = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_opium
+		}
+		subtract = var:wealth_owed_for_opium
+	}
+	if = {
+		limit = {
+			has_variable = income_due_opium
+		}
+		add = var:income_due_opium
+	}
+}
+TRADE_governorship_cash_balance_tobacco = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_tobacco
+		}
+		subtract = var:wealth_owed_for_tobacco
+	}
+	if = {
+		limit = {
+			has_variable = income_due_tobacco
+		}
+		add = var:income_due_tobacco
+	}
+}
+TRADE_governorship_cash_balance_chocolate = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_chocolate
+		}
+		subtract = var:wealth_owed_for_chocolate
+	}
+	if = {
+		limit = {
+			has_variable = income_due_chocolate
+		}
+		add = var:income_due_chocolate
+	}
+}
+TRADE_governorship_cash_balance_coffee = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_coffee
+		}
+		subtract = var:wealth_owed_for_coffee
+	}
+	if = {
+		limit = {
+			has_variable = income_due_coffee
+		}
+		add = var:income_due_coffee
+	}
+}
+TRADE_governorship_cash_balance_tea = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_tea
+		}
+		subtract = var:wealth_owed_for_tea
+	}
+	if = {
+		limit = {
+			has_variable = income_due_tea
+		}
+		add = var:income_due_tea
+	}
+}
+TRADE_governorship_cash_balance_spices = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_spices
+		}
+		subtract = var:wealth_owed_for_spices
+	}
+	if = {
+		limit = {
+			has_variable = income_due_spices
+		}
+		add = var:income_due_spices
+	}
+}
+TRADE_governorship_cash_balance_sugar = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_sugar
+		}
+		subtract = var:wealth_owed_for_sugar
+	}
+	if = {
+		limit = {
+			has_variable = income_due_sugar
+		}
+		add = var:income_due_sugar
+	}
+}
+TRADE_governorship_cash_balance_luxury_clothing = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_luxury_clothing
+		}
+		subtract = var:wealth_owed_for_luxury_clothing
+	}
+	if = {
+		limit = {
+			has_variable = income_due_luxury_clothing
+		}
+		add = var:income_due_luxury_clothing
+	}
+}
+TRADE_governorship_cash_balance_luxury_furniture = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_luxury_furniture
+		}
+		subtract = var:wealth_owed_for_luxury_furniture
+	}
+	if = {
+		limit = {
+			has_variable = income_due_luxury_furniture
+		}
+		add = var:income_due_luxury_furniture
+	}
+}
+TRADE_governorship_cash_balance_glass = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_glass
+		}
+		subtract = var:wealth_owed_for_glass
+	}
+	if = {
+		limit = {
+			has_variable = income_due_glass
+		}
+		add = var:income_due_glass
+	}
+}
+TRADE_governorship_cash_balance_motors = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_motors
+		}
+		subtract = var:wealth_owed_for_motors
+	}
+	if = {
+		limit = {
+			has_variable = income_due_motors
+		}
+		add = var:income_due_motors
+	}
+}
+TRADE_governorship_cash_balance_fur = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_fur
+		}
+		subtract = var:wealth_owed_for_fur
+	}
+	if = {
+		limit = {
+			has_variable = income_due_fur
+		}
+		add = var:income_due_fur
+	}
+}
+TRADE_governorship_cash_balance_industrial_fibres = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_industrial_fibres
+		}
+		subtract = var:wealth_owed_for_industrial_fibres
+	}
+	if = {
+		limit = {
+			has_variable = income_due_industrial_fibres
+		}
+		add = var:income_due_industrial_fibres
+	}
+}
+TRADE_governorship_cash_balance_textile_fibres = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_textile_fibres
+		}
+		subtract = var:wealth_owed_for_textile_fibres
+	}
+	if = {
+		limit = {
+			has_variable = income_due_textile_fibres
+		}
+		add = var:income_due_textile_fibres
+	}
+}
+TRADE_governorship_cash_balance_wool = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_wool
+		}
+		subtract = var:wealth_owed_for_wool
+	}
+	if = {
+		limit = {
+			has_variable = income_due_wool
+		}
+		add = var:income_due_wool
+	}
+}
+TRADE_governorship_cash_balance_silk = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_silk
+		}
+		subtract = var:wealth_owed_for_silk
+	}
+	if = {
+		limit = {
+			has_variable = income_due_silk
+		}
+		add = var:income_due_silk
+	}
+}
+TRADE_governorship_cash_balance_wood = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_wood
+		}
+		subtract = var:wealth_owed_for_wood
+	}
+	if = {
+		limit = {
+			has_variable = income_due_wood
+		}
+		add = var:income_due_wood
+	}
+}
+TRADE_governorship_cash_balance_stone = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_stone
+		}
+		subtract = var:wealth_owed_for_stone
+	}
+	if = {
+		limit = {
+			has_variable = income_due_stone
+		}
+		add = var:income_due_stone
+	}
+}
+TRADE_governorship_cash_balance_sulphur = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_sulphur
+		}
+		subtract = var:wealth_owed_for_sulphur
+	}
+	if = {
+		limit = {
+			has_variable = income_due_sulphur
+		}
+		add = var:income_due_sulphur
+	}
+}
+TRADE_governorship_cash_balance_peat = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_peat
+		}
+		subtract = var:wealth_owed_for_peat
+	}
+	if = {
+		limit = {
+			has_variable = income_due_peat
+		}
+		add = var:income_due_peat
+	}
+}
+TRADE_governorship_cash_balance_tin = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_tin
+		}
+		subtract = var:wealth_owed_for_tin
+	}
+	if = {
+		limit = {
+			has_variable = income_due_tin
+		}
+		add = var:income_due_tin
+	}
+}
+TRADE_governorship_cash_balance_inorganic_compounds = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_inorganic_compounds
+		}
+		subtract = var:wealth_owed_for_inorganic_compounds
+	}
+	if = {
+		limit = {
+			has_variable = income_due_inorganic_compounds
+		}
+		add = var:income_due_inorganic_compounds
+	}
+}
+TRADE_governorship_cash_balance_copper = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_copper
+		}
+		subtract = var:wealth_owed_for_copper
+	}
+	if = {
+		limit = {
+			has_variable = income_due_copper
+		}
+		add = var:income_due_copper
+	}
+}
+TRADE_governorship_cash_balance_iron = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_iron
+		}
+		subtract = var:wealth_owed_for_iron
+	}
+	if = {
+		limit = {
+			has_variable = income_due_iron
+		}
+		add = var:income_due_iron
+	}
+}
+TRADE_governorship_cash_balance_gold = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_gold
+		}
+		subtract = var:wealth_owed_for_gold
+	}
+	if = {
+		limit = {
+			has_variable = income_due_gold
+		}
+		add = var:income_due_gold
+	}
+}
+TRADE_governorship_cash_balance_silver = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_silver
+		}
+		subtract = var:wealth_owed_for_silver
+	}
+	if = {
+		limit = {
+			has_variable = income_due_silver
+		}
+		add = var:income_due_silver
+	}
+}
+TRADE_governorship_cash_balance_dye = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_dye
+		}
+		subtract = var:wealth_owed_for_dye
+	}
+	if = {
+		limit = {
+			has_variable = income_due_dye
+		}
+		add = var:income_due_dye
+	}
+}
+TRADE_governorship_cash_balance_lead = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_lead
+		}
+		subtract = var:wealth_owed_for_lead
+	}
+	if = {
+		limit = {
+			has_variable = income_due_lead
+		}
+		add = var:income_due_lead
+	}
+}
+TRADE_governorship_cash_balance_oil = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_oil
+		}
+		subtract = var:wealth_owed_for_oil
+	}
+	if = {
+		limit = {
+			has_variable = income_due_oil
+		}
+		add = var:income_due_oil
+	}
+}
+TRADE_governorship_cash_balance_hardwood = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_hardwood
+		}
+		subtract = var:wealth_owed_for_hardwood
+	}
+	if = {
+		limit = {
+			has_variable = income_due_hardwood
+		}
+		add = var:income_due_hardwood
+	}
+}
+TRADE_governorship_cash_balance_rubber = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_rubber
+		}
+		subtract = var:wealth_owed_for_rubber
+	}
+	if = {
+		limit = {
+			has_variable = income_due_rubber
+		}
+		add = var:income_due_rubber
+	}
+}
+TRADE_governorship_cash_balance_salt = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_salt
+		}
+		subtract = var:wealth_owed_for_salt
+	}
+	if = {
+		limit = {
+			has_variable = income_due_salt
+		}
+		add = var:income_due_salt
+	}
+}
+TRADE_governorship_cash_balance_electronics = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_electronics
+		}
+		subtract = var:wealth_owed_for_electronics
+	}
+	if = {
+		limit = {
+			has_variable = income_due_electronics
+		}
+		add = var:income_due_electronics
+	}
+}
+TRADE_governorship_cash_balance_construction_materials = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_construction_materials
+		}
+		subtract = var:wealth_owed_for_construction_materials
+	}
+	if = {
+		limit = {
+			has_variable = income_due_construction_materials
+		}
+		add = var:income_due_construction_materials
+	}
+}
+TRADE_governorship_cash_balance_steel = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_steel
+		}
+		subtract = var:wealth_owed_for_steel
+	}
+	if = {
+		limit = {
+			has_variable = income_due_steel
+		}
+		add = var:income_due_steel
+	}
+}
+TRADE_governorship_cash_balance_bronze = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_bronze
+		}
+		subtract = var:wealth_owed_for_bronze
+	}
+	if = {
+		limit = {
+			has_variable = income_due_bronze
+		}
+		add = var:income_due_bronze
+	}
+}
+TRADE_governorship_cash_balance_machine_parts = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_machine_parts
+		}
+		subtract = var:wealth_owed_for_machine_parts
+	}
+	if = {
+		limit = {
+			has_variable = income_due_machine_parts
+		}
+		add = var:income_due_machine_parts
+	}
+}
+TRADE_governorship_cash_balance_chemicals = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_chemicals
+		}
+		subtract = var:wealth_owed_for_chemicals
+	}
+	if = {
+		limit = {
+			has_variable = income_due_chemicals
+		}
+		add = var:income_due_chemicals
+	}
+}
+TRADE_governorship_cash_balance_naval_supplies = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_naval_supplies
+		}
+		subtract = var:wealth_owed_for_naval_supplies
+	}
+	if = {
+		limit = {
+			has_variable = income_due_naval_supplies
+		}
+		add = var:income_due_naval_supplies
+	}
+}
+TRADE_governorship_cash_balance_steel_ships = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_steel_ships
+		}
+		subtract = var:wealth_owed_for_steel_ships
+	}
+	if = {
+		limit = {
+			has_variable = income_due_steel_ships
+		}
+		add = var:income_due_steel_ships
+	}
+}
+TRADE_governorship_cash_balance_wooden_ships = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_wooden_ships
+		}
+		subtract = var:wealth_owed_for_wooden_ships
+	}
+	if = {
+		limit = {
+			has_variable = income_due_wooden_ships
+		}
+		add = var:income_due_wooden_ships
+	}
+}
+TRADE_governorship_cash_balance_petrochemicals = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_petrochemicals
+		}
+		subtract = var:wealth_owed_for_petrochemicals
+	}
+	if = {
+		limit = {
+			has_variable = income_due_petrochemicals
+		}
+		add = var:income_due_petrochemicals
+	}
+}
+TRADE_governorship_cash_balance_early_munitions = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_early_munitions
+		}
+		subtract = var:wealth_owed_for_early_munitions
+	}
+	if = {
+		limit = {
+			has_variable = income_due_early_munitions
+		}
+		add = var:income_due_early_munitions
+	}
+}
+TRADE_governorship_cash_balance_late_munitions = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_late_munitions
+		}
+		subtract = var:wealth_owed_for_late_munitions
+	}
+	if = {
+		limit = {
+			has_variable = income_due_late_munitions
+		}
+		add = var:income_due_late_munitions
+	}
+}
+TRADE_governorship_cash_balance_early_artillery = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_early_artillery
+		}
+		subtract = var:wealth_owed_for_early_artillery
+	}
+	if = {
+		limit = {
+			has_variable = income_due_early_artillery
+		}
+		add = var:income_due_early_artillery
+	}
+}
+TRADE_governorship_cash_balance_late_artillery = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = wealth_owed_for_late_artillery
+		}
+		subtract = var:wealth_owed_for_late_artillery
+	}
+	if = {
+		limit = {
+			has_variable = income_due_late_artillery
+		}
+		add = var:income_due_late_artillery
+	}
 }

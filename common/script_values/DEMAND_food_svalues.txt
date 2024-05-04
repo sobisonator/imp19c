@@ -10,7 +10,7 @@ DEMAND_need_life_goods = {
 }
 
 DEMAND_num_food_goods = {
-	value = 8
+	value = 6
 }
 
 DEMAND_total_food_need_div_num_food_goods = {
@@ -64,8 +64,6 @@ DEMAND_total_actual_demand_food = {
 	add = var:var_DEMAND_actual_livestock
 	add = var:var_DEMAND_actual_vegetables
 	add = var:var_DEMAND_actual_fish
-	add = var:var_DEMAND_actual_tropical_fruit
-	add = var:var_DEMAND_actual_mediterranean_fruit
 	add = var:var_DEMAND_actual_temperate_fruit
 	add = var:var_DEMAND_actual_processed_foods
 }
@@ -184,21 +182,9 @@ DEMAND_food_avg_price_normalised = {
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_mediterranean_fruit_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
-		}
-		add = var:price_mediterranean_fruit
-	}
-	if = {
-		limit = { 
 			var:DEMAND_price_temperate_fruit_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
 		}
 		add = var:price_temperate_fruit
-	}
-	if = {
-		limit = { 
-			var:DEMAND_price_tropical_fruit_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
-		}
-		add = var:price_tropical_fruit
 	}
 	if = {
 		limit = { 
@@ -715,100 +701,6 @@ DEMAND_vegetables_price_diff_to_food_avg = {
 	divide = var:var_DEMAND_food_avg_price_normalised
 }
 # End vegetables
-# tropical_fruit
-DEMAND_actual_tropical_fruit = {
-	value = DEMAND_tropical_fruit
-	if = {
-		limit = {
-			has_global_variable = first_time_price_setup_done
-			DEMAND_tropical_fruit > 0
-		}
-		if = {
-			limit = {
-				NOT = { DEMAND_tropical_fruit_price_diff_to_food_avg = 0 }
-			}
-			divide = DEMAND_tropical_fruit_price_diff_to_food_avg
-		}
-	}
-	if = {
-		limit = {
-			GOODS_governorship_tropical_fruit_produced < governorship_population_10th
-		}
-		#add = DEMAND_luxury_foods
-	}
-	max = var:var_DEMAND_unfulfilled_food_need_governorship # Should be plus luxury
-	min = DEMAND_consumer_minus_produced_tropical_fruit
-	if = {
-		limit = {
-			has_variable = previous_tick_demand_tropical_fruit
-		}
-		max = var:previous_tick_demand_tropical_fruit_110_percent
-		min = var:previous_tick_demand_tropical_fruit_90_percent
-	}
-	max = DEMAND_consumer_tropical_fruit
-}
-
-DEMAND_consumer_minus_produced_tropical_fruit = {
-	value = DEMAND_consumer_tropical_fruit
-	subtract = GOODS_governorship_tropical_fruit_produced
-	min = 0
-}
-
-DEMAND_tropical_fruit_price_diff_to_food_avg = {
-	# Scope: governorship
-	# Function: get the % difference of the price of the given tradegood to the average food goods price
-	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
-	value = var:price_tropical_fruit
-	divide = var:var_DEMAND_food_avg_price_normalised
-}
-# End tropical_fruit
-# mediterranean_fruit
-DEMAND_actual_mediterranean_fruit = {
-	value = DEMAND_mediterranean_fruit
-	if = {
-		limit = {
-			has_global_variable = first_time_price_setup_done
-			DEMAND_mediterranean_fruit > 0
-		}
-		if = {
-			limit = {
-				NOT = { DEMAND_mediterranean_fruit_price_diff_to_food_avg = 0 }
-			}
-			divide = DEMAND_mediterranean_fruit_price_diff_to_food_avg
-		}
-	}
-	if = {
-		limit = {
-			GOODS_governorship_mediterranean_fruit_produced < governorship_population_10th
-		}
-		#add = DEMAND_luxury_foods
-	}
-	max = var:var_DEMAND_unfulfilled_food_need_governorship # Should be plus luxury
-	min = DEMAND_consumer_minus_produced_mediterranean_fruit
-	if = {
-		limit = {
-			has_variable = previous_tick_demand_mediterranean_fruit
-		}
-		max = var:previous_tick_demand_mediterranean_fruit_110_percent
-		min = var:previous_tick_demand_mediterranean_fruit_90_percent
-	}
-	max = DEMAND_consumer_mediterranean_fruit
-}
-
-DEMAND_consumer_minus_produced_mediterranean_fruit = {
-	value = DEMAND_consumer_mediterranean_fruit
-	subtract = GOODS_governorship_mediterranean_fruit_produced
-	min = 0
-}
-
-DEMAND_mediterranean_fruit_price_diff_to_food_avg = {
-	# Scope: governorship
-	# Function: get the % difference of the price of the given tradegood to the average food goods price
-	# This is used to modify demand, more expensive foods will be shunned in favour of cheaper ones
-	value = var:price_mediterranean_fruit
-	divide = var:var_DEMAND_food_avg_price_normalised
-}
-# End mediterranean_fruit
 # temperate_fruit
 DEMAND_actual_temperate_fruit = {
 	value = DEMAND_temperate_fruit

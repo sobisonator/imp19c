@@ -3,22 +3,24 @@ template save_game_scroll_area
 	
 	scrollarea = {
 		name = "saved_games_scrollarea"
-		position = { -1 8 }
-		size = { 780 548 }
+		size = { 516 640 }
 		scrollbarpolicy_horizontal = always_off
-		using = VerticalScrollAreaCutOff
+		scrollbarpolicy_vertical = always_on
+		#using = VerticalScrollAreaCutOff
 		scrollbar_vertical = {
 			using = VerticalScrollBar
 		}
 		
 		scrollwidget = {
-			fixedgridbox = {
+			flowcontainer = {
 				name = "saved_games_grid"
-				position = { 0 6 }
-				addcolumn = 394
-				addrow = 76
-				flipdirection = yes
-				datamodel_wrap = 2
+				direction = vertical
+				spacing = 5
+				#position = { 10 6 }
+				#addcolumn = 386
+				#addrow = 77
+				#flipdirection = yes
+				#datamodel_wrap = 2
 				
 				block "save_game_datamodel"
 				{
@@ -26,19 +28,22 @@ template save_game_scroll_area
 				
 				item = {
 					widget = {
-						size = { 440 90 }
-						
-						list_button = {
-							position = { 0 0 }
-							size = { 388 70 }
-							onclick = "[SaveGameItem.Select]"
+						size = { 500 80 }
+						list_buttons = {
+							size = { 500 78 }
+							blockoverride "On_click"
+							{ 
+								onclick = "[SaveGameItem.Select]"
+								onclick = "[PdxGuiWidget.FindChild('selected_box').TriggerAnimation('anim1')]"
+								onclick = "[PdxGuiWidget.FindChild('background_black').TriggerAnimation('anim1')]"
+								onclick = "[PdxGuiWidget.TriggerAnimation('anim1')]"
+								onclick = "[PdxGuiTriggerAllAnimations('anim2')]"
+								onclick = "[PdxGuiTriggerAllAnimations('button_show')]"
+							}
 						}
-						
 						flowcontainer = {
-							widgetanchor = top|right
-							parentanchor = top|right
+							parentanchor = vcenter|right
 							direction = horizontal
-							position = { -68 32 }
 						
 							icon = {
 								size = { 32 32 }
@@ -72,24 +77,48 @@ template save_game_scroll_area
 							}
 						
 						}
-						
-						tag_dark = {
-							name = "name"
-							position = { 14 5 }
-							size = { 356 26 }
-							text = "[SaveGameItem.GetName]"
+						textbox = {
+							position = { 82 0 }
+							size = { 400 36 }
+							using = HeaderFont
+							using = Neutral_FontColor
+							text = "[SaveGameItem.GetPlayerName]"
+							alwaystransparent = yes
+							multiline = yes
 							enabled = "[Not(SaveGameItem.HasMissingDLC)]"
 						}
-						
 						textbox = {
 							name = "date"
-							position = { 14 28 }
-							size = { 200 36 }
+							position = { 82 24 }
+							size = { 400 36 }
+							using = BaseFontS
+							using = Black_FontColor
+							text = "[SaveGameItem.GetDate]"
+							alwaystransparent = yes
+							multiline = yes
+							enabled = "[Not(SaveGameItem.HasMissingDLC)]"
+						}
+						textbox = {
+							name = "real_date"
+							position = { 82 42 }
+							size = { 400 36 }
 							using = BaseFontS
 							using = Black_FontColor
 							text = "[SaveGameItem.GetRealDate]"
 							alwaystransparent = yes
 							multiline = yes
+							enabled = "[Not(SaveGameItem.HasMissingDLC)]"
+						}
+						textbox = {
+							name = "name"
+							parentanchor = right
+							position = { -8 0 }
+							size = { 200 28 }
+							using = TooltipConceptFont
+							text = "[SaveGameItem.GetName]"
+							alwaystransparent = yes
+							multiline = yes
+							align = right
 							enabled = "[Not(SaveGameItem.HasMissingDLC)]"
 						}
 					}
@@ -114,7 +143,7 @@ template save_game_scroll_area
 }
 
 types LoadSaveTypes {
-	type save_menu = base_sub_window
+	type save_menu = base_window
 	{
 		parentanchor = center
 		alwaystransparent = no
@@ -123,24 +152,32 @@ types LoadSaveTypes {
 		size = { 810 774 }
 		layer = top
 		enabled = "[SaveNameWindow.IsWindowEnabled]"
-		
-		blockoverride "Title_text" { 
-			block "save_game_title" { text = "SAVE_GAME" }
-		}
-		
-		blockoverride "White_buttons"
-		{
-			button_close = {
-				tooltip = "CLOSE"
-				onclick = "[SaveNameWindow.Cancel]"
+
+		vbox = {
+			using = MainWindowHeaderBoxCenteredNew
+			
+			blockoverride "Title_text" { 
+				block "save_game_title" { text = "SAVE_GAME" }
 			}
+			blockoverride "White_buttons"
+			{
+				button_close = {
+					tooltip = "CLOSE"
+					onclick = "[SaveNameWindow.Cancel]"
+				}
+			}
+
+			vbox = {
+				layoutpolicy_vertical = expanding
+			}
+			
 		}
 		
 		textbox = {
 			text = "FILE_NAME_INVALID"
 			using = BaseFontM
 			using = Black_FontColor
-			position = { 0 -34 }
+			position = { 0 -70 }
 			parentanchor = bottom|hcenter
 			align = center
 			alwaystransparent = yes
@@ -148,55 +185,121 @@ types LoadSaveTypes {
 		}
 		
 		container = {
-			position = { 14 54 }
+			position = { 14 64 }
 
 			using = save_game_scroll_area
 		}
-		
-		text_button_square = {
-			position = { -18 -18 }
-			size = { 180 28 }
-			parentanchor = bottom|right
-			name = "save_button"
-			blockoverride "On_click"
-			{
-				onclick = "[SaveNameWindow.Save]"
-			}
-			enabled = "[SaveNameWindow.IsSaveOk]"
-			tooltip = "[SaveNameWindow.GetSaveErrors]"
-			blockoverride "Center_text"
-			{
-				block "confirm_button"
-				{
-					text = "SAVE"
+		widget  = {
+			size = { 240 100% }
+			position = { 550 64 }
+			widget = {
+				size = { 240 32 }
+				sub_header_v = {
+					size = { 240 0 }
+					blockoverride "Title_text" { text = "Selected save" }	
 				}
 			}
-			blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_saved" }
-		}
-		
-		text_button_square = {
-			position = { 18 -18 }
-			size = { 180 28 }
-			parentanchor = bottom|left
-			name = "cancel_button"
-			blockoverride "On_click"
-			{
-				onclick = "[SaveNameWindow.Cancel]"
+			flowcontainer = {
+				name = "load_info"
+				position = { 0 34 }
+				direction = vertical
+				widget = {
+					size = { 240 32 }
+					textbox = {
+						name = "character"
+						size = { 240 32 }
+						using = HeaderFont
+						using = Black_FontColor
+						align = hcenter
+						text = "[SaveGameItem.GetPlayerName]"
+					}
+				}
+				widget ={
+					size = { 240 26 }
+					textbox = {
+						name = "date" 
+						size = { 240 32 }
+						using = BaseFontM
+						using = Black_FontColor
+						text = "[SaveGameItem.GetDate]"
+					}
+				}
+				widget ={
+					size = { 240 26 }
+					textbox = {
+						name = "date"
+						size = { 240 32 }
+						using = BaseFontM
+						using = Black_FontColor
+						text = "[SaveGameItem.GetRealDate]"
+					}
+				}
+				widget ={
+					size = { 240 26 }
+					textbox = {
+						name = "name"
+						size = { 240 32 }
+						using = BaseFontM
+						using = Black_FontColor
+						text = "Savename: [SaveGameItem.GetName]"
+					}
+				}
 			}
-			enabled = "[SaveNameWindow.IsSaveOk]"
-			tooltip = "[SaveNameWindow.GetSaveErrors]"
-			blockoverride "Center_text"
-			{
-				text = "CANCEL"
-			}
-			blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_saved" }
-			blockoverride "Shortcut" {
-				shortcut = "close_window"
+			flowcontainer = {
+				position = { 0 560 }
+				direction = vertical
+				widget = {
+					size = { 228 28 }
+					parentanchor = hcenter
+					text_button_square = {
+						name = "save_button"
+						size = { 228 28 }
+						blockoverride "On_click"
+						{
+							onclick = "[SaveNameWindow.Save]"
+						}
+						enabled = "[SaveNameWindow.IsSaveOk]"
+						tooltip = "[SaveNameWindow.GetSaveErrors]"
+						blockoverride "Center_text"
+						{
+							block "confirm_button"
+							{
+								text = "SAVE"
+							}
+						}
+						blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_saved" }
+					}
+				}
+				widget ={
+					size = { 240 10 }
+				}
+				widget = {
+					size = { 228 28 }
+					parentanchor = hcenter
+					text_button_square = {
+						name = "cancel_button"
+						size = { 228 28 }
+						blockoverride "On_click"
+						{
+							onclick = "[SaveNameWindow.Cancel]"
+						}
+						enabled = "[SaveNameWindow.IsSaveOk]"
+						tooltip = "[SaveNameWindow.GetSaveErrors]"
+						blockoverride "Center_text"
+						{
+							text = "CANCEL"
+						}
+						blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_saved" }
+						blockoverride "Shortcut" {
+							shortcut = "close_window"
+						}
+					}
+				}
 			}
 		}
 		
 		checkbox_entry = { 
-			position = { 12 -102 }
+			position = { 12 -65 }
 			parentanchor = bottom
 			size = { 34 34 }
 			enabled = "[SaveNameWindow.CanToggleCloudSaves]"
@@ -224,7 +327,7 @@ types LoadSaveTypes {
 		}
 		
 		flowcontainer = {
-			position = { -4 -62 }
+			position = { 0 -25 }
 			parentanchor = bottom|hcenter
 			widgetanchor = bottom|hcenter
 			
@@ -250,7 +353,7 @@ types LoadSaveTypes {
 		}
 	}
 
-    type load_menu = base_sub_window
+    type load_menu = base_window
 	{
 		parentanchor = center
 		alwaystransparent = no
@@ -259,109 +362,149 @@ types LoadSaveTypes {
         position = { 0 50 }
 		size = { 810 800 }
 		layer = top
-		blockoverride "Title_text" { text = "LOAD" }	
-		
+		vbox = {
+			using = MainWindowHeaderBoxCenteredNew
+			
+			blockoverride "Title_text" { text = "LOAD" }	
+
+			vbox = {
+				layoutpolicy_vertical = expanding
+			}
+			
+		}
 		container = {
-			position = { 14 118 }
+			position = { 14 64 }
 
 			using = save_game_scroll_area
 		}
 
-		
-		#widget = {
-		#	name = "frame"
-		#	position = { 16 38 }
-		#	size = { 780 80 }
-		#	list_entry = { size = { 100% 100% } }
-		#}
-
 		widget  = {
-			name = "load_info"
-			size = { 754 100% }
-			position = { 22 28 }
-			
-			textbox = {
-				name = "name"
-				position = { 4 8 }
-				size = { 754 34 }
-				using = BaseFontM
-				using = Black_FontColor
-				text = "[SaveGameItem.GetName]"
-				multiline = yes
+			size = { 240 100% }
+			position = { 550 64 }
+			widget = {
+				size = { 240 32 }
+				sub_header_v = {
+					size = { 240 0 }
+					blockoverride "Title_text" { text = "Selected save" }	
+				}
 			}
-			
 			flowcontainer = {
-				direction = horizontal
-				position = { 4 36 }
-			
-				textbox = {
-					name = "character"
-					using = BaseFontM
-					using = Black_FontColor
-					text = "[SaveGameItem.GetPlayerName]"
-					autoresize = yes
-				}
-				
-				widget = { 
-					size = { 14 0 }
-				}
-				
+				name = "load_info"
+				position = { 0 34 }
+				direction = vertical
 				widget = {
+					size = { 240 32 }
+					textbox = {
+						name = "character"
+						size = { 240 32 }
+						using = HeaderFont
+						using = Black_FontColor
+						align = hcenter
+						text = "[SaveGameItem.GetPlayerName]"
+					}
+				}
+				widget ={
+					size = { 240 26 }
 					textbox = {
 						name = "date" 
-						position = { 0 0 }
+						size = { 240 32 }
 						using = BaseFontM
 						using = Black_FontColor
 						text = "[SaveGameItem.GetDate]"
-						autoresize = yes
-						resizeparent = yes
+					}
+				}
+				widget ={
+					size = { 240 26 }
+					textbox = {
+						name = "date"
+						size = { 240 32 }
+						using = BaseFontM
+						using = Black_FontColor
+						text = "[SaveGameItem.GetRealDate]"
+					}
+				}
+				widget ={
+					size = { 240 26 }
+					textbox = {
+						name = "name"
+						size = { 240 32 }
+						using = BaseFontM
+						using = Black_FontColor
+						text = "Savename: [SaveGameItem.GetName]"
 					}
 				}
 			}
-			
-			textbox = {
-				name = "date"
-				position = { 4 58 }
-				using = BaseFontM
-				using = Black_FontColor
-				text = "[SaveGameItem.GetRealDate]"
-				autoresize = yes
-			}
-			
-			text_button_square = {
-				name = "delete_button"
-				size = { 228 28 }
-				parentanchor = bottom|left
-				position = { 20 -44 }
-				blockoverride "Shortcut" {
-					shortcut = "delete"
+			flowcontainer = {
+				position = { 0 560 }
+				direction = vertical
+				widget = {
+					size = { 228 28 }
+					parentanchor = hcenter
+					text_button_square = {
+						size = { 228 28 }
+						enabled = no
+						blockoverride "Center_text" { text = "DELETE" }
+						state = {
+							name = button_show
+							on_start = "[PdxGuiWidget.Hide]"
+						}
+					}
+					text_button_square = {
+						name = "delete_button"
+						size = { 228 28 }
+						visible = no
+						blockoverride "Shortcut" {
+							shortcut = "delete"
+						}
+						blockoverride "Center_text" { text = "DELETE" }
+						blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_new_game" }
+						blockoverride "On_click"
+						{
+							block "on_delete"
+							{
+							}
+						}
+						state = {
+							name = button_show
+							on_start = "[PdxGuiWidget.Show]"
+						}
+					}
 				}
-				blockoverride "Center_text" { text = "DELETE" }
-				
-				blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_new_game" }
-				blockoverride "On_click"
-				{
-					block "on_delete"
-					{
+				widget ={
+					size = { 240 10 }
+				}
+				widget = {
+					size = { 228 28 }
+					parentanchor = hcenter
+					text_button_square = {
+						size = { 228 28 }
+						enabled = no
+						blockoverride "Center_text" { text = "LOAD" }
+						state = {
+							name = button_show
+							on_start = "[PdxGuiWidget.Hide]"
+						}
+					}
+					text_button_square = {
+						name = "load_button"
+						size = { 228 28 }
+						visible = no
+						blockoverride "Center_text" { text = "LOAD" }
+						enabled = "[SaveGameItem.IsEnabled]"
+						blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_new_game"  }
+						blockoverride "On_click"
+						{ 
+							block "on_load"
+							{
+							}
+						}
+						state = {
+							name = button_show
+							on_start = "[PdxGuiWidget.Show]"
+						}
 					}
 				}
 			}
-			
-			text_button_square = {
-				name = "load_button"
-				size = { 228 28 }
-				parentanchor = bottom|right
-				position = { -8 -44 }
-				blockoverride "Center_text" { text = "LOAD" }
-				
-				enabled = "[SaveGameItem.IsEnabled]"
-				blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_new_game"  }
-				blockoverride "On_click" { 
-					block "on_load"
-					{
-					}
-				}
-			}			
 		}
     }
 }

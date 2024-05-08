@@ -1,0 +1,170 @@
+base_sub_window = {
+	name = "buildunitwindow"
+	parentanchor = bottom|left
+	size = { 780 434 }  
+	#widgetanchor = bottom|left  
+	movable = yes
+	position = { 823 0 }
+	
+	blockoverride "Title_text" { text = "BUILD_NAVIES" }
+	
+	blockoverride "White_buttons"
+	{
+		button_close = {
+			onclick = "[BuildUnitWindow.OnClose]"
+			tooltip = "CLOSE"
+		}
+	}
+	
+	scrollarea = {
+		position = { 14 42 }
+		size = { 544 374 }
+		scrollbarpolicy_horizontal = always_off
+		
+		using = VerticalScrollAreaCutOff
+		scrollbar_vertical = {
+			using = VerticalScrollBar
+		}
+		
+		scrollwidget = {
+			dynamicgridbox = {
+				name = "possible_unit_grid"
+				position = { 0 2 }
+
+				datamodel = "[BuildUnitWindow.GetPossibleUnits]"
+				item = {
+					margin_widget = {		
+						size = { 536 56 }
+						list_entry = { 
+							size = { 100% 100% }
+						}
+
+						icon_card = {
+							position = { 4 0 }
+							parentanchor = vcenter
+							blockoverride "Icon" { texture = "[GetSubUnitIcon(BuildUnitItem.GetType)]" }
+							tooltip = "[BuildUnitItem.GetUnitTooltip]"
+						}
+						
+						flowcontainer = {
+							spacing = 4
+							position = { 56 8 }
+							
+							tag = {
+								text = "[BuildUnitItem.GetName]"
+								tooltip = "[BuildUnitItem.GetUnitTooltip]"
+								minimumsize = { 96 24 }
+								maximumsize = { 96 24 }
+								parentanchor = bottom
+								align = left
+							}
+							
+							icon_and_text = {
+								size = { 82 30 }
+								parentanchor = vcenter
+								blockoverride "Icon" { using = icon_treasury }
+								blockoverride "Text" { text = "[BuildUnitItem.GetBuildCost]" }
+								tooltip = "RECRUITCOST"
+							}
+							icon_and_text = {
+								size = { 82 0 }
+								parentanchor = vcenter
+								blockoverride "Icon" { using = icon_time }
+								blockoverride "Text" { text = "[BuildUnitItem.GetBuildDays]" }
+								tooltip = "RECRUITTIME"
+							}
+							icon_and_text = {
+								size = { 82 0 }
+								parentanchor = vcenter
+								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/maintenance.dds" }
+								blockoverride "Text" { text = "[BuildUnitItem.GetMaintenanceCost|2]" }
+								tooltip = "RECRUITMAINTENANCE"
+							}
+							text_button_square = {
+								size = { 120 28 }
+								parentanchor = bottom
+								blockoverride "On_click"
+								{
+									onclick = "[BuildUnitItem.StartBuild]"
+									enabled = "[BuildUnitItem.CanBuild]"
+									tooltip = "[BuildUnitItem.GetBuildInfo]"
+								}
+								blockoverride "ClickSound"
+								{
+									clicksound = "event:/SFX/UI/Province/sfx_ui_province_build_unit"
+									oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+								}
+								blockoverride "Center_text" { text = "Build" }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	scrollarea = {
+		position = { 572 42 }
+		size = { 194 374 }
+		scrollbarpolicy_horizontal = always_off
+		
+		using = VerticalScrollAreaCutOff
+		
+		scrollbar_vertical = {
+			using = VerticalScrollBar
+		}
+		
+		scrollwidget = {
+			dynamicgridbox = {
+				name = "units_queue_grid"
+				
+				datamodel = "[BuildUnitWindow.GetConstructions]"
+				
+				item = {
+					margin_widget = {
+						size = { 184 70 }
+						list_entry = {
+							size = { 100% 100% }
+							tooltip = "[MilitaryConstruction.GetDurationInformation]"
+						}
+						
+						tag = {
+							position = { 8 0 }
+							size = { 120 28 }
+							text = "[MilitaryConstruction.GetName]"
+							elide = right
+							align = left
+						}
+						
+						textbox = {
+							position = { 8 26 }
+							size = { 125 24 }
+							maximumsize = { 160 28 }
+							using = BaseFontS
+							using = Black_FontColor
+							autoresize = yes
+							text = "[MilitaryConstruction.GetAdditionalInformation]"
+							align = left
+							elide = right
+						}
+
+						button_delete_item = {
+							blockoverride "On_click" { onclick = "[MilitaryConstruction.CancelConstruction]" }
+							tooltip = "CANCEL"
+							position = { -2 -6 }
+							parentanchor = right|vcenter
+							size = { 30 30 }
+						}
+						
+						fixed_size_progressbar = {
+							blockoverride "size" { size = { 166 8 } }
+							position = { 10 52 }
+							blockoverride "Value" { value = "[MilitaryConstruction.GetProgress]" }
+						}
+					}
+				}
+			}
+		}
+	}
+}
+

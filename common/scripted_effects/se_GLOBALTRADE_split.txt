@@ -49,7 +49,6 @@
 			GT_split_get_governorship_income_due_all = { type = $type$ }
 			GT_split_subtract_amount_exported_all = { type = $type$ }
 			GT_split_add_amount_imported_all = { type = $type$ }
-			GT_add_queued_trade_category_income_and_expenses = yes
 			# Distribution of income and expenses handled outside of this effect
 			# GT_split_distribute_income_all = yes
 			# GT_split_distribute_expenses_all = yes
@@ -58,6 +57,11 @@
 	GT_split_set_total_order_size_and_total_global_stockpile_percent_all = { type = $type$ }
 	GT_split_update_shipping_route_traffic_all = yes
 	GT_split_do_shipping_costs = { type = $type$ } # TODO: Needs to be split between the queued and total values
+	every_country = {
+		every_governorships = {
+			GT_add_queued_trade_category_income_and_expenses = yes
+		}
+	}
 
 	# GT_split_log_trade_balance = yes # TODO: Implement a way to save previous values so that it can be charted on a graph
 }
@@ -4409,12 +4413,6 @@ GT_split_get_total_stockpile_size_contribution = {
 GT_split_update_shipping_route_traffic_all = {
 	# Scope: Random country
 	# Function: Call GT_split_update_shipping_route_traffic_tradegood to update shipping along all trade routes
-    every_trade_center = {
-    	set_variable = {
-    		name = TZ_shipping
-    		value = 0
-    	}
-    }
 	GT_split_update_shipping_route_traffic_all_TZs =yes
 }
 
@@ -4802,7 +4800,7 @@ GT_split_update_shipping_route_traffic_tradezone = {
 }
 
 GT_split_do_shipping_costs = {
-	GT_split_setup_global_shipping_costs_pool = yes
+	#GT_split_setup_global_shipping_costs_pool = yes
 	every_country = {
 		every_governorships = {
 			GT_split_get_governorship_shipping_payments_owed = { type = $type$ }
@@ -4812,7 +4810,7 @@ GT_split_do_shipping_costs = {
 	# Scale back up - this has been scaled down to avoid overflow in the global pool size
 	every_trade_center = {
 		change_variable = {
-			name = TZ_this_quarter_transport_pool
+			name = queued_TZ_this_quarter_transport_pool
 			multiply = 1
 		}
 	}
@@ -4861,35 +4859,20 @@ GT_split_get_governorship_shipping_payments_owed = {
 				name = queued_trade_expenses_due_shipping
 				multiply = global_var:global_base_import_price_naval_supplies
 			}
+			change_variable = {
+				name = queued_trade_expenses_due_shipping
+				multiply = 10
+			}
 		}
 		else = {
 			change_variable = {
 				name = queued_trade_expenses_due_shipping
-				multiply = 0.01
+				multiply = 0.1
 			}
-		}
-		change_variable = {
-			name = queued_trade_expenses_due_shipping
-			multiply = 10
 		}
 		change_global_variable = {
 			name = global_shipping_costs_pool
 			add = var:queued_trade_expenses_due_shipping
-		}
-	}
-	if = {
-		limit = {
-			has_variable = trade_expenses_due_shipping
-		}
-		change_variable = {
-			name = trade_expenses_due_shipping
-			add = var:queued_trade_expenses_due_shipping
-		}
-	}
-	else = {
-		set_variable = {
-			name = trade_expenses_due_shipping
-			value = var:queued_trade_expenses_due_shipping
 		}
 	}
 }
@@ -5060,12 +5043,17 @@ GT_split_get_TZ_shipping_income_pool_tradezone = {
 	}
 
 	set_variable = {
-		name = TZ_this_quarter_transport_pool
+		name = queued_TZ_this_quarter_transport_pool
 		value = local_var:share_of_global_shipping_income
 	}
 	change_variable = {
-		name = TZ_this_quarter_transport_pool
+		name = queued_TZ_this_quarter_transport_pool
 		multiply = global_var:global_shipping_costs_pool
+	}
+
+	change_variable = {
+		name = TZ_this_quarter_transport_pool
+		add = var:queued_TZ_this_quarter_transport_pool
 	}
 }
 
@@ -5097,23 +5085,7 @@ GT_split_get_governorship_shipping_income = {
 	}
 	change_variable = {
 		name = queued_trade_income_due_shipping
-		multiply = var:trade_center.var:TZ_this_quarter_transport_pool
-	}
-
-	if = {
-		limit = {
-			has_variable = trade_income_due_shipping
-		}
-		change_variable = {
-			name = trade_income_due_shipping
-			add = var:queued_trade_income_due_shipping
-		}
-	}
-	else = {
-		set_variable = {
-			name = trade_income_due_shipping
-			value = var:queued_trade_income_due_shipping
-		}
+		multiply = var:trade_center.var:queued_TZ_this_quarter_transport_pool
 	}
 
 }

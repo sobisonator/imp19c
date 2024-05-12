@@ -49,6 +49,7 @@ quarterly_trade_pulse = {
 	}
 
 	on_actions = {
+		quarterly_reset_trade_transaction_totals
 		quarterly_global_trade_food
 		delay = { days = 20 }
 		quarterly_global_trade_luxury
@@ -61,12 +62,32 @@ quarterly_trade_pulse = {
 	}
 }
 
+quarterly_reset_trade_transaction_totals = {
+	effect = {
+		if = {
+			limit = {
+				NOT = { has_global_variable = trade_transaction_totals_reset }
+			}
+			every_country = {
+				every_governorships = {
+					GT_reset_trade_transaction_totals = yes
+				}
+			}
+		}
+		set_global_variable = {
+			name = trade_transaction_totals_reset
+			days = 1
+		}
+	}
+}
+
 quarterly_apply_trade_changes_and_consume = {
 	effect = {
 
 		every_governorships = {
 			# Actually apply the changes to stockpiles and get shortages
 			CONSUME_all_stockpiles = yes
+			GT_do_all_wealth_distribution = yes
 		}
 
 	}

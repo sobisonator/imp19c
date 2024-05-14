@@ -1,0 +1,685 @@
+template JominiSettingsEnumDropdown
+{
+	block "dropdown_item_size" {}
+	alwaystransparent = no
+
+	active_item = {
+		widget = {
+			block "dropdown_item_size" {}
+
+			category_drop = {
+				size = { 100% 30 }
+				button_trigger = none
+				blockoverride "Text" { block "dropdown_item_text" {} }
+				blockoverride "TextMaxWidth" { max_width = 240 }
+			}
+		}
+	}
+
+	item = {
+		margin_widget = {
+			size = { 280 24 }
+			margin = { 2 2 }
+			list_button = {
+				size = { 100% 100% }
+				button_trigger = none
+				block "dropdown_item" {}
+			}
+			textbox = {
+				using = BaseFontM
+				using = Black_FontColor
+				block "dropdown_item_text" {}
+				margin_top = 7
+				margin_left = 18
+				align = vcenter|nobaseline
+				autoresize = yes
+			}
+		}
+	}
+
+	list = {
+		scrollarea = {
+			block "dropdown_list_placement" { position = { 8 29 } }
+			block "dropdown_scrollarea_size" { size = { 280 170 } }
+			alwaystransparent = yes
+			scrollbarpolicy_horizontal = always_off
+			using = DropShadow
+			background = { 
+				margin_bottom = 4
+				margin_right = 4
+				#block "dropdown_texture" {}
+				using = flat_background_white
+				spriteType = CorneredStretched
+				spriteborder = { 6 6 }
+				spriteborder_right = 8
+				spriteborder_bottom = 8
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				block  "dropdown_list_background" {}
+				modify_texture = {
+					name = "Alpha"
+					texture = "gfx/interface/base_parts/portrait_x32y32bd_alpha.dds"
+					blend_mode = alphamultiply
+					spriteType = Corneredtiled
+					spriteborder = { 16 16 }
+				}
+			}
+
+			scrollwidget = {
+				fixedgridbox = {
+					alwaystransparent = no
+					setitemsizefromcell = yes
+					block "dropdown_gridbox_size" {}
+				}
+			}
+
+			scrollbar_vertical = {
+				using = VerticalScrollBar
+			}
+		}
+	}
+}
+
+template SettingsValueSlider
+{
+	block "settings_value_slider"
+	{
+		setting_scrollbar_button = {
+			upframe = 1
+			downframe = 2
+			overframe = 2
+			effectname = "NoHighlight"
+			gfxtype = framedbuttongfx
+			#disableframe = 20
+			size = { 14 14 }
+			framesize = { 14 14 }
+			texture = "gfx/interface/asterisk_big.dds"
+		}
+	}
+}
+
+template SettingsValueTrack
+{
+	block "settings_value_track"
+	{
+		setting_scrollbar_button = {
+			upframe = 1
+			downframe = 2
+			overframe = 2
+			size = { 217 5 }
+			texture = "gfx/interface/slider_track.dds"
+			framesize = { 217 5 }
+		}
+	}
+}
+
+template SettingsValueDecButton
+{
+	block "settings_value_dec_button"
+	{
+		setting_scrollbar_button = {
+			texture = "gfx/interface/right_slider_button.dds"
+			size = { 14 14 }
+			framesize = { 14 14 }
+		}
+	}
+}
+
+template SettingsValueIncButton
+{
+	block "settings_value_inc_button"
+	{
+		setting_scrollbar_button = {
+			upframe = 1
+			downframe = 2
+			overframe = 2
+			texture = "gfx/interface/left_slider_button.dds"
+			size = { 14 14 }
+			framesize = { 14 14 }
+		}
+	}
+}
+
+template SettingsButtonTextStyle
+{
+	block "settings_button_text_style"
+	{
+		parentanchor = vcenter|hcenter
+		using = BaseFontM
+		using = Black_FontColor
+		fontsize = 15
+		#fontcolor = { 0.86 0.86 0.73 1 }
+		autoresize = yes
+		#position = { 0 0 }
+		align = left
+	}
+}
+
+template SettingsButtonStyle
+{
+	block "settings_button_style"
+	{
+		texture = "gfx/editor_gui/editor_button.dds"
+		gfxtype = framedbuttongfx
+		spriteType = CorneredStretched
+		spriteborder = { 4 4 }
+		framesize = { 16 16 }
+		upframe = 1
+		downframe = 2
+		overframe = 3
+		disableframe = 4
+		intersectionmask = yes
+	}
+}
+
+template SettingsSegmentedControlButtonStyle
+{
+	block "settings_button_style"
+	{
+		texture = "gfx/interface/tiles/marble_button_s.dds"
+		spriteType = Corneredtiled
+		spriteborder = { 40 0 }
+		size = { 600 38 }
+		fontsize = 16
+		intersectionmask = yes
+		clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_close"
+		oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+	}
+}
+
+template SettingsSegmentedControlActiveButtonStyle
+{
+	block "settings_button_style"
+	{
+		texture = "gfx/interface/tiles/marble_button_hl_s.dds"
+		spriteType = Corneredtiled
+		spriteborder = { 40 0 }
+		size = { 600 38 }
+		fontsize = 16
+		intersectionmask = yes
+		clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_close"
+		oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+		using = GoldenFontS
+		default_format = "#glow_color:{0.0,0.0,0.0,0.3};glow_offset:{0.0,0.0}"
+	}
+}
+
+types Settings
+{
+	type setting_scrollbar_button = editor_button {
+		block "setting_scrollbar_button" {}
+	}
+
+	type setting_segmented_control_button = list_button {
+		textbox = {
+			text = "[EnumSettingEntry.GetGUIName]"
+			autoresize = yes
+			parentanchor = center
+			using = BaseFontM
+			using = Black_FontColor
+			alpha = 2 #Ew
+		}
+		minimumsize = { 210 38 }
+		using = SettingsSegmentedControlButtonStyle
+		align = center
+		onclick = "[SelectEnumWithString(EnumSettingEntry.GetEnumString, EnumSettingEntry.AccessSetting)]"
+		visible = "[Not(EnumSettingEntry.IsSelected)]"
+		down = no
+		tooltip = "[EnumSettingEntry.GetTooltip]"
+		margin_right = 38
+		margin_left = 38
+		margin_bottom = 6
+		block "setting_segmented_control_button" {}
+
+		buttonText = {
+			textbox = {
+				using = SettingsButtonTextStyle
+				parentanchor = vcenter|hcenter
+				resizeparent = yes
+				block "setting_segmented_control_button_text" {}
+			}
+		}
+	}
+
+	type setting_segmented_control_active_button = list_button {
+		textbox = {
+			text = "[EnumSettingEntry.GetGUIName]"
+			autoresize = yes
+			parentanchor = center
+			using = BaseFontM
+			using = Black_FontColor
+			alpha = 2 #Ew
+		}
+		minimumsize = { 300 38 }
+		#using = SettingsSegmentedControlActiveButtonStyle
+		align = left
+		onclick = "[SelectEnumWithString(EnumSettingEntry.GetEnumString, EnumSettingEntry.AccessSetting)]"
+		visible = "[EnumSettingEntry.IsSelected]"
+		down = yes
+		tooltip = "[EnumSettingEntry.GetTooltip]"
+		margin_right = 38
+		margin_left = 38
+		margin_bottom = 6
+
+		block "setting_segmented_control_active_button" {}
+
+		#buttonText = {
+		#	textbox = {
+		#		using = SettingsButtonTextStyle
+		#		parentanchor = vcenter|hcenter
+		#		resizeparent = yes
+		#		block "setting_segmented_control_active_button_text" {}
+		#	}
+		#}
+	}
+
+	type setting_page_button = button {
+		text = "[ScopedJominiSettingsPage.GetPage.GetName]"
+		size = { 150 30 }
+		using = SettingsButtonStyle
+		align = left
+		onclick = "[ScopedJominiSettingsPage.AccessPage.OnClick]"
+		upframe = "[Select_int32(ScopedJominiSettingsPage.GetPage.IsSelected,'(int32)2','(int32)1')]"
+		block "setting_page_button" {}
+
+		buttonText = {
+			textbox = {
+				using = SettingsButtonTextStyle
+				parentanchor = vcenter|left
+				#position = { 5 0 }
+				block "setting_page_button_text" {}
+			}
+		}
+	}
+
+	type jomini_settings_restart_required_indicator = icon {
+		texture = "gfx/interface/asterisk.dds"
+		tooltip = "REQUIRES_RESTART"
+		size = { 12 12 }
+	}
+
+	type jomini_setting_title = textbox {
+		name = "setting_title"
+		visible = "[JominiGUISetting.ShouldShow]"
+		fontsize = 16
+		size = { 312 44 }
+		using = BaseFontM
+		using = Black_FontColor
+		text = "[PdxSetting.GetTitle]"
+		tooltip = "[JominiGUISetting.GetTooltip]"
+		elide = right
+		align = vcenter|nobaseline
+		margin_right = 20
+		margin_left = 16
+		block "setting_title" {}
+		jomini_settings_restart_required_indicator = {
+			visible = "[And(And(JominiGUISetting.ShouldShow,PdxSetting.HasChanged),PdxSetting.GetSettingPromoted.RequireRestart)]"
+			parentanchor = vcenter|left
+		}
+	}
+
+	type jomini_setting_desc = textbox {
+		name = "setting_desc"
+		text = "[JominiGUISetting.GetDesc]"
+		using = BaseFontM
+		using = Black_FontColor
+		fontsize = 16
+		autoresize = yes
+		max_width = 300
+		margin = { 16 5 }
+	}
+
+	type jomini_setting_value_scrollbar = container {
+		name = "setting_value"
+		visible = "[JominiGUISetting.ShouldShow]"
+		horizontal_slider_plain = {
+			name = "setting_value_scrollbar"
+			direction = horizontal
+			parentanchor = left|vcenter
+			size = { 260 14 }
+			#minimumsize = { -1 14 }
+			value = "[PdxValueSetting.GetValue(PdxSetting.GetSetting)]"
+			block "setting_value_scrollbar" {}
+		}
+		textbox = {
+			position = { 260 0 }
+			size = { 40 30 }
+			using = BaseFontS
+			using = Black_FontColor
+			align = center|nobaseline
+			text = "[PdxValueSetting.GetFormatedValue(PdxSetting.GetSetting)]"
+			alwaystransparent = no
+			focuspolicy = all
+			maxcharacters = 4
+			block "setting_value_eb" {}
+		}
+
+
+	}
+
+	type jomini_setting_enum = container {
+		name = "setting_enum"
+		visible = "[JominiGUISetting.ShouldShow]"
+
+		dropDown = {
+			visible = "[Not(ShouldShowSegmentedControlForSetting(PdxSetting.GetSetting))]"
+			name = "setting_enum_dropdown"
+			size = { 300 44 }
+			using = JominiSettingsEnumDropdown
+			selectedindex = "[GetEnumIndex(PdxSetting.GetSetting)]"
+			block "enum_dropdown" {}
+
+			blockoverride "dropdown_item_size" { size = { 300 44 } }
+			blockoverride "dropdown_texture" { texture = "gfx/interface/buttons/dropdown_drop_six.dds" }
+			blockoverride "dropdown_list_position" { position = { 17 39 } }
+			blockoverride "dropdown_gridbox_size"
+			{
+				addcolumn = 250
+				addrow = 32
+			}
+			blockoverride "dropdown_item_text"
+			{
+				text = "[EnumSettingEntry.GetGUIName]"
+			}
+		}
+		dynamicgridbox = {
+			name = "segmented_control"
+			size = { 100 14 }
+			parentanchor = left|vcenter
+			flipdirection = yes
+			visible = "[ShouldShowSegmentedControlForSetting(PdxSetting.GetSetting)]"
+			block "segmented_control" {}
+			item = {
+				container = {
+					setting_segmented_control_button = {}
+					setting_segmented_control_active_button = {}
+				}
+			}
+		}
+	}
+
+	type jomini_setting_bool = widget {
+		name = "setting_bool"
+		size = { 220 36 }
+		block "setting_bool" {}
+
+		check_box_buttonA = {
+			name = "setting_bool_cb"
+			parentanchor = left|vcenter
+			blockoverride "Frame" { frame = "[BoolTo1And2( GetIsChecked(PdxSetting.GetSetting) )]" }
+			block "setting_bool_cb" {}
+		}
+	}
+
+	type jomini_setting_string = container {
+		name = "setting_string"
+		block "setting_string" {}
+
+		editbox = {
+			name = "setting_string_eb"
+			text = "[GetStringSettingText(PdxSetting.GetSetting)]"
+			size = { 254 30 }
+			parentanchor = left|vcenter
+			block "setting_string_eb" {}
+
+			using = BaseFontM
+			font = "BaseFont"
+			fontcolor = { 0 0 0 1 }
+			alwaystransparent = no
+			focuspolicy = all
+			multiline = no
+			ontextchanged = "[FindProvinceView.OnFindTextChanged]"
+			
+			background = {
+				margin_left = 8
+				margin_right = 8
+				margin_top = -2
+				texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
+				spriteType = CorneredStretched
+				spriteborder = { 12 12 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+			}
+		}
+	}
+
+	type jomini_settings_grouping = container {
+		name = "settings_grouping"
+		block "settings_grouping" {}
+
+		sub_header_v = {
+			size = { 100% 0 }
+		
+			blockoverride "Title_text"
+			{
+				text = "[SettingCategory.GetName]"
+			}
+		}
+
+		dynamicgridbox = {
+			position = { 10 42 }
+			name = "grouping_gridbox"
+			block "settings_grouping_gridbox" {}
+		}
+	}
+	type jomini_settings_window = base_window {
+		name = "jomini_settings_window"	
+		position = { 0 50 }
+		size = { 50% 80% }
+		minimumsize = { 400 100 }
+		resizable = no
+		movable = yes
+		parentanchor = hcenter
+		layer = top
+		vbox = {
+		    using = MainWindowHeaderBoxCenteredNew
+
+			blockoverride "Title_text"
+			{
+				text = "SETTINGS_HEADER"
+			}
+			blockoverride "White_buttons"
+			{
+				button_close = {
+					onclick = [JominiSettingsWindow.Hide]
+					tooltip = "CLOSE"
+				}
+			}
+		    vbox = {
+		        layoutpolicy_vertical = expanding
+		    }
+
+		}
+
+		vbox = {
+			alwaystransparent = yes
+			widget = {
+				size = { 0 58 }
+				layoutpolicy_horizontal = Fixed
+			}
+
+			hbox = {
+				layoutpolicy_horizontal = Preferred
+				layoutpolicy_vertical = Preferred
+
+				widget = {
+					size = { 10 0 }
+					layoutpolicy_horizontal = Fixed
+				}
+
+
+				scrollarea = {
+					alwaystransparent = yes
+					layoutpolicy_horizontal = fixed
+					layoutpolicy_vertical = expanding
+					focuspolicy = all
+					minimumsize = { 202 200 }
+					scrollbaralign_vertical = left
+					autoresizeviewport = yes
+					autoresizescrollarea = yes
+
+					viewportwidget = {
+						widget = {
+							scissor = no
+						}
+					}
+
+					scrollwidget = {
+						dynamicgridbox = {
+							flipdirection = no
+							alwaystransparent = no
+							parentanchor = top|left
+							position = { 8 0 }
+							datamodel = [JominiSettingsWindow.AccessPages]
+							# maxhorizontalslots = 1
+							item = {
+								#setting_page_button = {}
+								margin_widget = {
+									size = { 172 48 }
+									margin = { 2 2 }
+									list_button = {
+										size = { 100% 100% }
+										align = left
+										onclick = "[ScopedJominiSettingsPage.AccessPage.OnClick]"
+										down = "[ScopedJominiSettingsPage.GetPage.IsSelected]"
+									}
+									textbox = {
+										text = "[ScopedJominiSettingsPage.GetPage.GetName]"
+										autoresize = yes
+										parentanchor = center
+										align = center
+										using = BaseFontM
+										using = Black_FontColor
+									}
+								}
+							}
+						}
+					}
+
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+
+					scrollbar_horizontal = {
+						using = SocialHorizontalScrollbar
+					}
+				}
+
+				widget = {
+					size = { 10 0 }
+					layoutpolicy_horizontal = fixed
+				}
+
+				scrollarea = {
+					layoutpolicy_horizontal = expanding
+					
+					scrollbarpolicy_vertical = as_needed
+					scrollbarpolicy_horizontal = as_needed
+					scrollbaralign_vertical = right
+					scrollbaralign_horizontal = bottom
+					autoresizeviewport = yes
+
+					viewportwidget = {
+						widget = {
+							scissor = yes
+						}
+					}
+
+					scrollwidget = {
+						dynamicgridbox = {
+							name = "settings"
+							setitemsizefromcell = yes
+						}
+					}
+
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+
+					scrollbar_horizontal = {
+						using = MarbleScrollBarHorizontal
+					}
+				}
+
+				widget = {
+					size = { 10 0 }
+				}
+			}
+			widget = {
+				size = { 0 10 }
+			}
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				restrictparent_min = yes
+				spacing = 6
+
+				widget = {
+					size = { 10 0 }
+				}
+				widget = {
+					layoutpolicy_horizontal = expanding
+					visible = "[Not(JominiSettingsWindow.RequireRestart)]"
+				}
+
+				jomini_settings_restart_required_indicator = {
+					visible = "[JominiSettingsWindow.RequireRestart]"
+				}
+
+				editor_textbox  = {
+					layoutpolicy_horizontal = expanding
+					visible = "[JominiSettingsWindow.RequireRestart]"
+					fontsize = 16
+					text = "REQUIRE_RESTART_DESCRIPTION"
+					elide = right
+					align = vcenter|nobaseline
+					margin_left = 5
+					# autoresize = yes
+					block "require_restart_description" {}
+				}
+
+				widget = {
+					size = { 10 0 }
+				}
+
+				text_button_square = {
+					blockoverride "Center_text" { text = "RESTORE" }
+					blockoverride "On_click" { onclick = [JominiSettingsWindow.Restore] }
+					enabled = [JominiSettingsWindow.HasChanged]
+					size = { 180 28 }
+				}
+
+				widget = {
+					size = { 5 0 }
+				}
+				
+				text_button_square = {
+					blockoverride "Center_text" { text = "SAVE" }
+					blockoverride "On_click" { onclick = [JominiSettingsWindow.Save] }
+					size = { 180 28 }
+				}
+
+				widget = {
+					size = { 5 0 }
+				}
+				
+				text_button_square = {
+					blockoverride "Center_text" { text = "SAVE_AND_CLOSE" }
+					blockoverride "On_click" { onclick = [JominiSettingsWindow.SaveAndClose] }
+					size = { 180 28 }
+				}
+
+				widget = {
+					size = { 5 0 }
+				}
+
+				widget = {
+					size = { 10 0 }
+					layoutpolicy_horizontal = fixed
+				}
+			}
+
+			widget = {
+				size = { 0 10 }
+				layoutpolicy_vertical = fixed
+			}
+		}
+	}
+}

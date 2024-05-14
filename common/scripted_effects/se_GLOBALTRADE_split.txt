@@ -10,8 +10,8 @@
 			TRADE_governorship_get_pops_this_quarter = yes
 			GT_split_cache_governorship_infrastructure_capacity = yes
 			GT_split_declare_sell_to_TZ_aggregate_stockpile = { type = $type$ }
-			GT_split_calculate_all_trade_shares = yes
-			GT_split_reset_trade_expenses_due_shipping = yes
+			# GT_split_calculate_all_trade_shares = yes # Now handled within the distribution of income and expenses
+			GT_split_reset_queued_trade_expenses_due_shipping = yes
 		}
 	}
 	#every_country = {
@@ -49,15 +49,21 @@
 			GT_split_get_governorship_income_due_all = { type = $type$ }
 			GT_split_subtract_amount_exported_all = { type = $type$ }
 			GT_split_add_amount_imported_all = { type = $type$ }
-			GT_split_distribute_income_all = yes
-			GT_split_distribute_expenses_all = yes
+			# Distribution of income and expenses handled outside of this effect
+			# GT_split_distribute_income_all = yes
+			# GT_split_distribute_expenses_all = yes
 		}
 	}
 	GT_split_set_total_order_size_and_total_global_stockpile_percent_all = { type = $type$ }
 	GT_split_update_shipping_route_traffic_all = yes
-	GT_split_do_shipping_costs = { type = $type$ }
+	GT_split_do_shipping_costs = { type = $type$ } # TODO: Needs to be split between the queued and total values
+	every_country = {
+		every_governorships = {
+			GT_add_queued_trade_category_income_and_expenses = yes
+		}
+	}
 
-	# GT_split_log_trade_balance = yes
+	# GT_split_log_trade_balance = yes # TODO: Implement a way to save previous values so that it can be charted on a graph
 }
 
 GT_split_create_tradegroups = {
@@ -3116,11 +3122,11 @@ GT_split_scale_wealth_owed_and_order_size_all = {
 	# Function: Get the amount a governorship owes to pay for imports of $tradegood$
 	# Given $tradezone$ argument by a switch in the parent effect
 	set_variable = {
-		name = trade_expenses_due_resource_extraction
+		name = queued_trade_expenses_due_resource_extraction
 		value = 0
 	}
 	set_variable = {
-		name = trade_expenses_due_manufacturing
+		name = queued_trade_expenses_due_manufacturing
 		value = 0
 	}
 
@@ -3340,13 +3346,13 @@ GT_split_scale_wealth_owed_and_order_size_tradegood = {
 				}
 			}
 			change_variable = {
-				name = trade_expenses_due_resource_extraction
+				name = queued_trade_expenses_due_resource_extraction
 				add = var:wealth_owed_for_$tradegood$
 			}
 		}
 		else = {
 			change_variable = {
-				name = trade_expenses_due_manufacturing
+				name = queued_trade_expenses_due_manufacturing
 				add = var:wealth_owed_for_$tradegood$
 			}
 		}
@@ -3357,11 +3363,11 @@ GT_split_get_governorship_income_due_all = {
 	# Scope: Governorship
 	# Function: Get the income due for every tradegood in this governorship
 	set_variable = {
-		name = trade_income_due_resource_extraction
+		name = queued_trade_income_due_resource_extraction
 		value = 0
 	}
 	set_variable = {
-		name = trade_income_due_manufacturing
+		name = queued_trade_income_due_manufacturing
 		value = 0
 	}
 
@@ -3442,7 +3448,7 @@ GT_split_get_governorship_income_due_tradegood = {
 			}
 		}
 		change_variable = {
-			name = trade_income_due_resource_extraction
+			name = queued_trade_income_due_resource_extraction
 			add = var:income_due_$tradegood$
 		}
 	}
@@ -3451,7 +3457,7 @@ GT_split_get_governorship_income_due_tradegood = {
 			has_variable = income_due_$tradegood$
 		}
 		change_variable = {
-			name = trade_income_due_manufacturing
+			name = queued_trade_income_due_manufacturing
 			add = var:income_due_$tradegood$
 		}
 	}
@@ -3512,13 +3518,129 @@ GT_split_add_amount_imported_tradegood = {
 	}
 }
 
-GT_split_reset_trade_expenses_due_shipping = {
+GT_split_reset_queued_trade_expenses_due_shipping = {
 	# Scope: Governorship
 	# Function: Reset the governorship shipping costs value to 0 for this iteration
 	set_variable = {
-		name = trade_expenses_due_shipping
+		name = queued_trade_expenses_due_shipping
 		value = 0
 	}
+}
+
+GT_add_queued_trade_category_income_and_expenses = {
+	# Scope: Governorship
+	# Function: Add the queued income and expenses trade values to the quarterly totals
+
+	# INCOME: RESOURCE EXTRACTION
+	if = {
+		limit = {
+			has_variable = trade_income_due_resource_extraction
+		}
+		change_variable = {
+			name = trade_income_due_resource_extraction
+			add = var:queued_trade_income_due_resource_extraction
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_income_due_resource_extraction
+			value = var:queued_trade_income_due_resource_extraction
+		}
+	}
+
+	# INCOME: MANUFACTURING
+	if = {
+		limit = {
+			has_variable = trade_income_due_manufacturing
+		}
+		change_variable = {
+			name = trade_income_due_manufacturing
+			add = var:queued_trade_income_due_manufacturing
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_income_due_manufacturing
+			value = var:queued_trade_income_due_manufacturing
+		}
+	}
+
+	# EXPENSES: RESOURCE EXTRACTION
+	if = {
+		limit = {
+			has_variable = trade_expenses_due_resource_extraction
+		}
+		change_variable = {
+			name = trade_expenses_due_resource_extraction
+			add = var:queued_trade_expenses_due_resource_extraction
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_expenses_due_resource_extraction
+			value = var:queued_trade_expenses_due_resource_extraction
+		}
+	}
+	
+	# EXPENSES: MANUFACTURING
+	if = {
+		limit = {
+			has_variable = trade_expenses_due_manufacturing
+		}
+		change_variable = {
+			name = trade_expenses_due_manufacturing
+			add = var:queued_trade_expenses_due_manufacturing
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_expenses_due_manufacturing
+			value = var:queued_trade_expenses_due_manufacturing
+		}
+	}
+
+	# INCOME: SHIPPING
+	if = {
+		limit = {
+			has_variable = trade_income_due_shipping
+		}
+		change_variable = {
+			name = trade_income_due_shipping
+			add = var:queued_trade_income_due_shipping
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_income_due_shipping
+			value = var:queued_trade_income_due_shipping
+		}
+	}
+	
+	# EXPENSES: SHIPPING
+	if = {
+		limit = {
+			has_variable = trade_expenses_due_shipping
+		}
+		change_variable = {
+			name = trade_expenses_due_shipping
+			add = var:queued_trade_expenses_due_shipping
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_expenses_due_shipping
+			value = var:queued_trade_expenses_due_shipping
+		}
+	}
+}
+
+GT_do_all_wealth_distribution = {
+	# Scope: Governorship
+	# Called: Every quarter, after all GT_split trade effects
+	# Function: Distribute the income and expenses across pops and the state
+	GT_split_calculate_all_trade_shares = yes
+	GT_split_distribute_income_all = yes
+	GT_split_distribute_expenses_all = yes
 }
 
 GT_split_calculate_all_trade_shares = {
@@ -3570,6 +3692,43 @@ GT_split_distribute_income_all = {
 	GT_split_distribute_income_category = {
 		category = manufacturing
 	}
+	GT_split_distribute_income_category = {
+		category = shipping
+	}	
+}
+
+GT_reset_trade_transaction_totals = {
+	# Scope: Governorship
+	# Called: Every quarter before the first GT split effect is called
+	# Function: Set the total income and expense variables to 0, so that the queued values can be added to them throughout the quarter
+
+	set_variable = {
+		name = trade_income_due_shipping
+		value = 0
+	}
+	set_variable = {
+		name = trade_expenses_due_shipping
+		value = 0
+	}
+
+	set_variable = {
+		name = trade_income_due_resource_extraction
+		value = 0
+	}
+	set_variable = {
+		name = trade_expenses_due_resource_extraction
+		value = 0
+	}
+
+	set_variable = {
+		name = trade_income_due_manufacturing
+		value = 0
+	}
+	set_variable = {
+		name = trade_expenses_due_manufacturing
+		value = 0
+	}
+
 }
 
 GT_split_calculate_actual_share_of_income_category = {
@@ -3669,6 +3828,9 @@ GT_split_distribute_expenses_all = {
 	GT_split_distribute_expenses_category = {
 		category = manufacturing
 	}
+	GT_split_distribute_expenses_category = {
+		category = shipping
+	}	
 }
 
 GT_split_calculate_actual_share_of_expenses_category = {
@@ -4251,12 +4413,6 @@ GT_split_get_total_stockpile_size_contribution = {
 GT_split_update_shipping_route_traffic_all = {
 	# Scope: Random country
 	# Function: Call GT_split_update_shipping_route_traffic_tradegood to update shipping along all trade routes
-    every_trade_center = {
-    	set_variable = {
-    		name = TZ_shipping
-    		value = 0
-    	}
-    }
 	GT_split_update_shipping_route_traffic_all_TZs =yes
 }
 
@@ -4644,7 +4800,7 @@ GT_split_update_shipping_route_traffic_tradezone = {
 }
 
 GT_split_do_shipping_costs = {
-	GT_split_setup_global_shipping_costs_pool = yes
+	#GT_split_setup_global_shipping_costs_pool = yes
 	every_country = {
 		every_governorships = {
 			GT_split_get_governorship_shipping_payments_owed = { type = $type$ }
@@ -4654,19 +4810,20 @@ GT_split_do_shipping_costs = {
 	# Scale back up - this has been scaled down to avoid overflow in the global pool size
 	every_trade_center = {
 		change_variable = {
-			name = TZ_this_quarter_transport_pool
+			name = queued_TZ_this_quarter_transport_pool
 			multiply = 1
 		}
 	}
 	every_country = {
 		every_governorships = {
 			GT_split_get_governorship_shipping_income = yes
-			GT_split_distribute_income_category = {
-				category = shipping
-			}
-			GT_split_distribute_expenses_category = {
-				category = shipping
-			}
+			# The below has been moved to the quarterly income and expenses distribution effect
+			#GT_split_distribute_income_category = {
+			#	category = shipping
+			#}
+			#GT_split_distribute_expenses_category = {
+			#	category = shipping
+			#}
 		}
 	}
 }
@@ -4684,7 +4841,7 @@ GT_split_get_governorship_shipping_payments_owed = {
 	# Scope: Governorship
 	# Function: Get the total number of goods imported and exported (transported) in the governorship and turn that into a shipping fee based on the cost of naval supplies here. Also add this to the global shipping payment pool
 	set_variable = {
-		name = trade_expenses_due_shipping
+		name = queued_trade_expenses_due_shipping
 		value = 0
 	}
 	every_tradegood_$type$_complex = {
@@ -4692,19 +4849,30 @@ GT_split_get_governorship_shipping_payments_owed = {
 	}
 	if = {
 		limit = {
-			var:trade_expenses_due_shipping > 0
+			var:queued_trade_expenses_due_shipping > 0
 		}
-		change_variable = {
-			name = trade_expenses_due_shipping
-			multiply = global_var:global_base_import_price_naval_supplies
+		if = {
+			limit = {
+				has_global_variable = global_base_import_price_naval_supplies
+			}
+			change_variable = {
+				name = queued_trade_expenses_due_shipping
+				multiply = global_var:global_base_import_price_naval_supplies
+			}
+			change_variable = {
+				name = queued_trade_expenses_due_shipping
+				multiply = 10
+			}
 		}
-		change_variable = {
-			name = trade_expenses_due_shipping
-			multiply = 10
+		else = {
+			change_variable = {
+				name = queued_trade_expenses_due_shipping
+				multiply = 0.1
+			}
 		}
 		change_global_variable = {
 			name = global_shipping_costs_pool
-			add = var:trade_expenses_due_shipping
+			add = var:queued_trade_expenses_due_shipping
 		}
 	}
 }
@@ -4718,7 +4886,7 @@ GT_split_get_governorship_amount_transported_tradegood = {
 			has_variable = order_size_$tradegood$
 		}
 		change_variable = {
-			name = trade_expenses_due_shipping
+			name = queued_trade_expenses_due_shipping
 			add = var:order_size_$tradegood$
 		}
 	}
@@ -4729,7 +4897,7 @@ GT_split_get_governorship_amount_transported_tradegood = {
 	#		has_variable = amount_exported_$tradegood$
 	#	}
 	#	change_variable = {
-	#		name = trade_expenses_due_shipping
+	#		name = queued_trade_expenses_due_shipping
 	#		add = var:amount_exported_$tradegood$
 	#	}
 	#}
@@ -4875,12 +5043,17 @@ GT_split_get_TZ_shipping_income_pool_tradezone = {
 	}
 
 	set_variable = {
-		name = TZ_this_quarter_transport_pool
+		name = queued_TZ_this_quarter_transport_pool
 		value = local_var:share_of_global_shipping_income
 	}
 	change_variable = {
-		name = TZ_this_quarter_transport_pool
+		name = queued_TZ_this_quarter_transport_pool
 		multiply = global_var:global_shipping_costs_pool
+	}
+
+	change_variable = {
+		name = TZ_this_quarter_transport_pool
+		add = var:queued_TZ_this_quarter_transport_pool
 	}
 }
 
@@ -4891,7 +5064,7 @@ GT_split_get_governorship_shipping_income = {
 	# Then multiply that by the TZ shipping income and grant this governorship the shipping income that is due based on ownership of the shipping industry
 	save_scope_as = this_governorship
 	set_variable = {
-		name = trade_income_due_shipping
+		name = queued_trade_income_due_shipping
 		value = 0
 	}
 	every_governorship_state = {
@@ -4900,19 +5073,19 @@ GT_split_get_governorship_shipping_income = {
 
 			scope:this_governorship = {
 				change_variable = {
-					name = trade_income_due_shipping
+					name = queued_trade_income_due_shipping
 					add = scope:this_province.SHIPPING_province_power
 				}
 			}
 		}
 	}
 	change_variable = {
-		name = trade_income_due_shipping
+		name = queued_trade_income_due_shipping
 		divide = var:trade_center.SHIPPING_total_in_TZ
 	}
 	change_variable = {
-		name = trade_income_due_shipping
-		multiply = var:trade_center.var:TZ_this_quarter_transport_pool
+		name = queued_trade_income_due_shipping
+		multiply = var:trade_center.var:queued_TZ_this_quarter_transport_pool
 	}
 
 }

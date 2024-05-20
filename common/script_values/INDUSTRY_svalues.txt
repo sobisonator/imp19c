@@ -180,9 +180,14 @@ INDUSTRY_petrochemicals_factories = {
 # Scope: Governorship
 
 ## CLOTHING
-INDUSTRY_production_clothing = {
+INDUSTRY_production_clothing_base = {
 	value = INDUSTRY_clothing_factories
-	multiply = 20
+	multiply = 25
+}
+
+INDUSTRY_production_clothing = {
+	# Applies modifiers from supply
+	value = INDUSTRY_production_clothing_base
 	if = {
 		limit = {
 			owner = {
@@ -191,28 +196,18 @@ INDUSTRY_production_clothing = {
 		}
 		multiply = owner.var:production_bonus_clothing
 	}
-	if = {
-		limit = {
-			trigger_if = {
-				limit = {
-					has_variable = shortage_textile_fibres
-				}
-				var:shortage_textile_fibres > 0
-			}
-		}
-		multiply = INDUSTRY_malus_clothing_production_textile_fibres
-	}
-	if = {
-		limit = {
-			trigger_if = {
-				limit = {
-					has_variable = shortage_dye
-				}
-				var:shortage_dye > 0
-			}
-		}
-		multiply = INDUSTRY_malus_clothing_production_dye
-	}
+	multiply = INDUSTRY_production_clothing_multiplier
+}
+
+INDUSTRY_production_clothing_multiplier = {
+	value = 1
+	add = INDUSTRY_malus_clothing_production_textile_fibres
+	add = INDUSTRY_malus_clothing_production_dye
+}
+
+INDUSTRY_production_clothing_efficiency = {
+	value = INDUSTRY_production_clothing
+	divide = INDUSTRY_production_clothing_base
 }
 
 # Ingredients
@@ -220,36 +215,55 @@ INDUSTRY_production_clothing = {
 # Textile fibres
 
 INDUSTRY_malus_clothing_production_textile_fibres = {
-	value = 1
+	value = 0
 	if = {
 		limit = {
 			has_variable = shortage_textile_fibres
 		}
 		subtract = var:shortage_textile_fibres
+		multiply = INDUSTRY_demand_importance_clothing_textile_fibres
 	}
+}
+
+INDUSTRY_demand_importance_clothing_textile_fibres = {
+	# As a percentage of the crucial ingredients
+	value = 1
+}
+
+INDUSTRY_base_demand_clothing_textile_fibres = {
+	value = 20
 }
 
 INDUSTRY_demand_clothing_textile_fibres = {
 	value = INDUSTRY_clothing_factories
-	multiply = 20
+	multiply = INDUSTRY_base_demand_clothing_textile_fibres
 }
 
 # Dye
 
-INDUSTRY_malus_clothing_production_textile_fibres = {
-	value = 1
+INDUSTRY_malus_clothing_production_dye = {
+	value = 0
 	if = {
 		limit = {
 			has_variable = shortage_dye
 		}
 		subtract = var:shortage_dye
+		multiply = INDUSTRY_demand_importance_clothing_dye
 	}
-	min = 0.5
+}
+
+INDUSTRY_demand_importance_clothing_dye = {
+	# As a percentage of the crucial ingredients
+	value = 0.25
+}
+
+INDUSTRY_base_demand_clothing_dye = {
+	value = 10
 }
 
 INDUSTRY_demand_clothing_dye = {
 	value = INDUSTRY_clothing_factories
-	multiply = 10
+	multiply = INDUSTRY_base_demand_clothing_dye
 }
 
 ## LUXURY CLOTHING

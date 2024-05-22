@@ -1,0 +1,138 @@
+types WikiWindow {
+	type wiki_window = base_window {
+		name = "wiki"
+		gfxtype = windowgfx
+		parentanchor = left|vcenter
+		movable = no
+		size = { 715 800 }
+		position = { 60 0 }
+		#visible = no
+		#visible = "[Or( GetVariableSystem.Exists('open_wiki'), GetVariableSystem.Exists('open_wiki') )]"
+		visible = "[GetVariableSystem.Exists('open_wiki')]"
+		state = {
+			name = _show
+			start_sound = {
+				soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
+			}
+			#on_start = "[GetVariableSystem.Clear('screw_frigate_page')]"
+			#on_start = "[GetVariableSystem.Clear('medium_steamer_page')]"
+			#on_start = "[GetVariableSystem.Toggle('open_wiki')]"
+			on_start = "[GetVariableSystem.Toggle('wiki_main_page')]"
+			on_start = "[PdxGuiTriggerAllAnimations('open_wiki')]"
+		}
+		#### Audio ###
+		state = {
+			name = _hide
+			start_sound = {
+				soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
+			}
+			on_start = "[GetVariableSystem.Clear('wiki_main_page')]"
+		}
+
+		vbox = {
+		    using = MainWindowHeaderBoxCenteredNew
+
+			blockoverride "FlagOrIcon"
+			{
+				icon = {
+					texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
+					framesize = { 100 100 }
+					frame = 6
+					position = { -2 -2 }
+					size = { 32 32 }
+					modify_texture = {
+						texture = "gfx/interface/base_parts/find.dds"
+						blend_mode = alphamultiply
+					}
+				}
+			}
+		    blockoverride "Title_text" {
+		    	text = "Wiki?"
+		    }
+			blockoverride "White_buttons" 
+			{
+				button_close = {
+					onclick =  "[GetVariableSystem.Clear('open_wiki')]"
+					tooltip = "CLOSE"
+					shortcut = "close_window"
+				}
+			}
+		    vbox = {
+		        layoutpolicy_vertical = expanding
+		    }
+		}
+		flowcontainer = {
+			margin_top = 60
+			scrollarea = {
+				size = { 225 730 }
+				scrollbarpolicy_horizontal = always_off
+				scrollbarpolicy_vertical = always_on
+				#using = VerticalScrollAreaCutOff
+				scrollbar_vertical = {
+					using = VerticalScrollBar
+				}
+				
+				scrollwidget = {
+					flowcontainer = {
+						margin_left = 10
+						direction = vertical
+						spacing = 5
+						tag = {
+							text = "Units"
+							maximumsize = { 200 28 }
+							align = center
+							using = BaseFontS
+							using = Black_FontColor
+						}
+						wiki_button = {
+							blockoverride "Center_text" { text = "test1" }
+							blockoverride "On_click" { 	}
+						}
+						wiki_button = {
+							blockoverride "Center_text" { text = "test2" }
+							blockoverride "On_click" { 	}
+						}
+						tag = {
+							text = "Ships"
+							maximumsize = { 200 28 }
+							align = center
+							using = BaseFontS
+							using = Black_FontColor
+						}
+						wiki_button = {
+							blockoverride "Center_text" { text = "medium_steamer" }
+							blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('medium_steamer_page')]" }
+						}
+						wiki_button = {
+							blockoverride "Center_text" { text = "screw_frigate" }
+							blockoverride "On_click" {  onclick = "[PdxGuiTriggerAllAnimations('screw_frigate_page')]" }
+						}
+					}
+				}
+			}
+			scrollarea = {
+				size = { 500 730 }
+				scrollbarpolicy_horizontal = always_off
+				scrollbar_vertical = {
+					using = VerticalScrollBar
+				}
+				
+				scrollwidget = {
+					flowcontainer = {
+						ignoreinvisible = yes
+						direction = vertical
+						#alpha = 0
+						state = {
+							name = open_wiki
+							alpha = 1
+							delay = 0.001
+						}
+						main_page = { visible = "[GetVariableSystem.Exists('wiki_main_page')]" }
+						medium_steamer = { visible = "[GetVariableSystem.Exists('medium_steamer_page')]" }
+						screw_frigate = { visible = "[GetVariableSystem.Exists('screw_frigate_page')]" }
+					}
+				}
+			}
+		}
+	}
+}

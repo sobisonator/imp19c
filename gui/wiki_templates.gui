@@ -1,4 +1,4 @@
-@parametersheight = 28
+@parametersheight = 27
 
 types WikiTemplates {
 	type button_info = button {
@@ -77,6 +77,44 @@ types WikiTemplates {
 		size = { 255 @parametersheight }
 		hbox = {
 			spacing = 5
+			textbox = {
+				layoutpolicy_horizontal = fixed
+				align = top
+				block "String" { text = "none" }
+				multiline = yes
+				autoresize = yes
+				fontsize = 14
+				font = BaseFont
+				using = Black_FontColor
+			}
+			textbox = {
+				layoutpolicy_horizontal = fixed
+				align = top
+				block "Value" { text = "0" using = Black_FontColor }
+				multiline = yes
+				autoresize = yes
+				fontsize = 14
+				font = BaseFont
+			}
+			widget = {
+				layoutpolicy_horizontal = expanding
+			}
+		}
+	}
+	type parameters_damage = widget {
+		size = { 255 @parametersheight }
+		hbox = {
+			spacing = 5
+			textbox = {
+				layoutpolicy_horizontal = fixed
+				align = top
+				text = "WIKI_UNIT_TYPE_VERSUS"
+				multiline = yes
+				autoresize = yes
+				fontsize = 14
+				font = BaseFont
+				using = Black_FontColor
+			}
 			textbox = {
 				layoutpolicy_horizontal = fixed
 				align = top
@@ -481,16 +519,122 @@ types WikiTemplates {
 					block "Image" { texture = "gfx/interface/icons/plaseholder3.dds" }
 					size = { 190 253 }
 				}
+				icon = {
+					size = { 209 228 }
+					position = { 200 35 }
+					using = flat_background_white
+					#texture = "gfx/interface/base_parts/background_red.dds"
+					spriteType = corneredstretched
+					modify_texture = {
+						name = "Alpha"
+						blend_mode = alphamultiply
+						texture = "gfx/interface/base_parts/horizontal_gradient_stretch_black.dds"
+					}
+				}
 				tooltip = "[MacroBuilderProvinceBuildable.GetTooltip]"
 			}
-			sub_header_v = {
-				size = { 270 263 }
-				block "Title_text"  { text = "none" }	
-				blockoverride "Max_text_width" { max_width = 230 }
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
 				flowcontainer = {
+					sub_header_v = {
+						size = { 200 34 }
+						block "Title_text"  { text = "none" }	
+						blockoverride "Max_text_width" { max_width = 230 }
+					}
+					margin_widget = {
+						size = { 70 34 }
+						layoutpolicy_horizontal = expanding
+						@mincategorybuttonwidth = 34
+						@maxcategorybuttonwidth = 34
+						@mincategorybuttonheight = 28 
+						@maxcategorybuttonheight = 34
+						icon = {
+							position = { -205 33 }
+							using = beige_medium_background
+							spriteType = Corneredtiled
+							size = { 207 2 }
+						}
+						icon = {
+							position = { 70 33 }
+							using = beige_medium_background
+							spriteType = Corneredtiled
+							size = { 7 2 }
+						}
+						hbox = { 
+							layoutpolicy_vertical = preferred
+							layoutpolicy_horizontal = expanding
+							spacing = 2
+							margin_right = 10
+							#margin_top = 4
+							hbox = { layoutpolicy_horizontal = expanding }
+						
+							category_tab = {
+								blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+								blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+								blockoverride "ButtonMinSizeOverride" { size = { 60 22 } }
+								blockoverride "MinVisible" { visible = "[Not(GetVariableSystem.Exists('wiki_ship_info'))]" }
+								blockoverride "MaxVisible" { visible = "[GetVariableSystem.Exists('wiki_ship_info')]" }
+								######## Shared Overrides
+								blockoverride "Center_text" { visible = no }
+								blockoverride "Center_text_and_icon" { visible = yes }
+								blockoverride "Button_text" { visible = no }
+								blockoverride "IconSize" { size = { 25 25 } }
+								blockoverride "IconSize2" { size = { 25 25 } }
+								blockoverride "Icon"
+								{
+									icon = {
+										size = { 24 24 }
+										position = { 2 2 }
+										texture = "gfx/interface/icons/font_icons/font_icon_civic.dds"
+									}
+									visible = yes
+								}
+								######## Small Button Overrides
+								blockoverride "ClickFunction"
+								{
+									onclick = "[GetVariableSystem.Toggle('wiki_ship_info')]"
+									onclick = "[GetVariableSystem.Clear('wiki_ship_damage')]"
+								}
+								tooltip = "SHIP_INFO_TT"
+							}
+							category_tab = {
+								blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+								blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+								blockoverride "ButtonMinSizeOverride" { size = { 60 22 } }
+								blockoverride "MinVisible" { visible = "[Not(GetVariableSystem.Exists('wiki_ship_damage'))]" }
+								blockoverride "MaxVisible" { visible = "[GetVariableSystem.Exists('wiki_ship_damage')]" }
+								######## Shared Overrides
+								blockoverride "Center_text" { visible = no }
+								blockoverride "Center_text_and_icon" { visible = yes }
+								blockoverride "Button_text" { visible = no }
+								blockoverride "IconSize" { size = { 25 25 } }
+								blockoverride "IconSize2" { size = { 25 25 } }
+								blockoverride "Icon"
+								{
+									icon = {
+										size = { 24 24 }
+										position = { 2 2 }
+										texture = "gfx/interface/icons/font_icons/font_icon_chariots.dds"
+									}
+									visible = yes
+								}
+								######## Small Button Overrides
+								blockoverride "ClickFunction"
+								{
+									onclick = "[GetVariableSystem.Toggle('wiki_ship_damage')]"
+									onclick = "[GetVariableSystem.Clear('wiki_ship_info')]"
+								}
+								tooltip = "SHIP_DAMAGE_TT"
+							}
+						}
+					}
+				}
+				flowcontainer = {
+					visible = "[GetVariableSystem.Exists('wiki_ship_info')]"
 					direction = vertical
 					margin_left = 8
-					margin_top = 37
+					margin_top = 5
 					cost_type_port_time_maneuver_speed = {
 						block "Cost" { text = "0" }
 						block "ShipType" { text = "none" }
@@ -525,6 +669,27 @@ types WikiTemplates {
 						parameters = {
 							blockoverride "String" { text = "WIKI_ATTRITION_LOSS" }
 							blockoverride "Value" { block "Attrition_loss_value" { text = "0" using = Positive_FontColor } }
+						}
+					}
+				}
+				flowcontainer = {
+					visible = "[GetVariableSystem.Exists('wiki_ship_damage')]"
+					direction = vertical
+					margin_left = 8
+					margin_top = 5
+					flowcontainer = {
+						direction = vertical
+						parameters_damage = {
+							blockoverride "String" { text = "brig" }
+							blockoverride "Value" { block "damage_vs_brig" { text = "0" using = Neutral_FontColor } }
+						}
+						parameters_damage = {
+							blockoverride "String" { text = "medium_steamer" }
+							blockoverride "Value" { block "damage_vs_medium_steamer" { text = "0" using = Neutral_FontColor } }
+						}
+						parameters_damage = {
+							blockoverride "String" { text = "screw_frigate" }
+							blockoverride "Value" { block "damage_vs_screw_frigate" { text = "0" using = Neutral_FontColor } }
 						}
 					}
 				}

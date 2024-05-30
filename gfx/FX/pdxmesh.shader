@@ -449,6 +449,13 @@ PixelShader =
 					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_PRIMARY_COLOR ).rgb, Properties.r );
 					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_SECONDARY_COLOR ).rgb, NormalPacked.b );
 				#endif
+
+				#if defined( USER_COLOR_SHIP )
+					UserColor = float3( 0.75f, 0.75f, 0.75f );
+					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_PRIMARY_COLOR ).rgb, Properties.r );
+					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_SECONDARY_COLOR ).rgb, NormalPacked.b );
+				#endif
+
 				#ifdef FLAG
 					float4 CoAAtlasSlot = GetUserData( Input.InstanceIndex, USER_DATA_ATLAS_SLOT );
 					float2 FlagCoords = CoAAtlasSlot.xy + ( MirrorOutsideUV( Input.UV1 ) * CoAAtlasSlot.zw );
@@ -783,5 +790,22 @@ Effect SKYX_sky_selection_mapobject
 {
 	VertexShader = "VS_mapobject"
 	PixelShader = "SKYX_PS_sky"
+}
+
+Effect standard_usercolor_ship
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_standard"
+
+	Defines = { "USER_COLOR" "USER_COLOR_SHIP" }
+}
+
+Effect standard_usercolor_shipShadow
+{
+	VertexShader = "VertexPdxMeshStandardShadow"
+	PixelShader = "PixelPdxMeshStandardShadow"
+
+	RasterizerState = ShadowRasterizerState
+	Defines = { "USER_COLOR" "USER_COLOR_SHIP" }
 }
 # END MOD

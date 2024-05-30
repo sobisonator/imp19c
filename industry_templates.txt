@@ -1,0 +1,70 @@
+## TEMPLATE
+INDUSTRY_production_rate_[TEMPLATE_OUTPUT] = {
+	# Base maximum output of one factory for this tradegood, at maximum productivity
+	value = 0
+}
+
+INDUSTRY_production_[TEMPLATE_OUTPUT]_base = {
+	# Base output of all factories
+	value = INDUSTRY_production_rate_[TEMPLATE_OUTPUT]
+	multiply = INDUSTRY_[TEMPLATE_OUTPUT]_factories
+	if = {
+		limit = {
+			owner = {
+				has_variable = production_bonus_[TEMPLATE_OUTPUT]
+			}
+		}
+		multiply = owner.var:production_bonus_[TEMPLATE_OUTPUT]
+	}
+}
+
+INDUSTRY_production_[TEMPLATE_OUTPUT] = {
+	# Applies modifiers from supply
+	value = INDUSTRY_production_[TEMPLATE_OUTPUT]_base
+	multiply = INDUSTRY_production_[TEMPLATE_OUTPUT]_multiplier
+}
+
+INDUSTRY_production_[TEMPLATE_OUTPUT]_multiplier = {
+	# Base production, minus maluses from ingredient shortages. All ingredient maluses must be listed here
+	value = 1
+	add = INDUSTRY_malus_[TEMPLATE_OUTPUT]_production_[TEMPLATE_INGREDIENT]
+	min = 0
+}
+
+INDUSTRY_production_[TEMPLATE_OUTPUT]_efficiency = {
+	# For displaying the production efficiency as a percentage of possible maximum
+	value = INDUSTRY_production_[TEMPLATE_OUTPUT]
+	divide = INDUSTRY_production_[TEMPLATE_OUTPUT]_base
+}
+
+# Ingredients
+
+# TEMPLATE
+
+INDUSTRY_malus_[TEMPLATE_OUTPUT]_production_[TEMPLATE_INGREDIENT] = {
+	# The actual malus applied from shortages of the ingredient
+	value = 0
+	if = {
+		limit = {
+			has_variable = shortage_[TEMPLATE_INGREDIENT]
+		}
+		subtract = var:shortage_[TEMPLATE_INGREDIENT]
+		multiply = INDUSTRY_demand_importance_[TEMPLATE_OUTPUT]_[TEMPLATE_INGREDIENT]
+	}
+}
+
+INDUSTRY_demand_importance_[TEMPLATE_OUTPUT]_[TEMPLATE_INGREDIENT] = {
+	# As a percentage of the crucial ingredients, this is the maximum malus (0-1) that can be applied to the output
+	value = 0
+}
+
+INDUSTRY_base_demand_[TEMPLATE_OUTPUT]_[TEMPLATE_INGREDIENT] = {
+	# Units demanded per factory
+	value = 0
+}
+
+INDUSTRY_demand_[TEMPLATE_OUTPUT]_[TEMPLATE_INGREDIENT] = {
+	# Actual units demanded
+	value = INDUSTRY_[TEMPLATE_OUTPUT]_factories
+	multiply = INDUSTRY_base_demand_[TEMPLATE_OUTPUT]_[TEMPLATE_INGREDIENT]
+}

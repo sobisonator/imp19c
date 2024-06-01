@@ -5,6 +5,7 @@
 	GT_split_update_governorship_vars = yes
 	GT_split_cache_TZ_penetration_values = yes
 	GT_split_reset_all_TZ_stockpiles = { type = $type$ }
+	GT_reset_all_customs_union_for_sale_values = { type = $type$ }
 	every_country = {
 		every_governorships = {
 			TRADE_governorship_get_pops_this_quarter = yes
@@ -21,6 +22,7 @@
 	#}
 	GT_split_sum_all_TZ_stockpiles = { type = $type$ }
 	GT_split_get_global_import_unit_price_all = { type = $type$ }
+	GT_get_all_customs_union_for_sale_as_percentage_of_global = { type = $type$ }
 	every_country = {
 		GT_split_get_country_global_market_penetration_all = { type = $type$ }
 		GT_split_get_order_size_modifier_all = { type = $type$ }
@@ -754,6 +756,57 @@ GT_split_declare_sell_amount = {
 				value = var:governorship_infrastructure_capacity
 			}
 		}
+
+		save_scope_as = seller_governorship
+
+		# Update the total amount for sale in the customs union, be it federal, colonial or single-country
+
+		if = {
+			limit = {
+				NOR = {
+					has_variable = federation_customs_union
+					owner = {
+						has_variable = overlord_customs_union
+					}
+				}
+			}
+			owner = {
+				change_variable = {
+					name = customs_union_$tradegood$_for_sale
+					add = scope:seller_governorship.var:for_sale_$tradegood$
+				}
+			}
+		}
+
+		else_if = {
+			limit = {
+				owner = {
+					has_variable = overlord_customs_union
+				}
+				NOT = {
+					has_variable = federation_customs_union
+				}
+			}
+			owner.var:overlord_customs_union = {
+				change_variable = {
+					name = customs_union_$tradegood$_for_sale
+					add = scope:seller_governorship.var:for_sale_$tradegood$
+				}
+			}
+		}
+
+		else_if = {
+			limit = {
+				has_variable = federation_customs_union
+			}
+			var:federation_customs_union = {
+				change_variable = {
+					name = customs_union_$tradegood$_for_sale
+					add = scope:seller_governorship.var:for_sale_$tradegood$
+				}
+			}
+		}
+
 	}
 }
 
@@ -2000,6 +2053,56 @@ GT_split_get_country_global_market_penetration_tradegood = {
 			name = country_global_market_penetration_$tradegood$
 			multiply = 0.4545
 		}
+
+		# TODO: Get the correct customs union scope
+		if = {
+			limit = {
+				NOR = {
+					has_variable = overlord_customs_union
+					any_governorships = {
+						has_variable = federation_customs_union
+					}
+				}
+			}
+			change_variable = {
+				name = country_global_market_penetration_$tradegood$
+				add = var:customs_union_contribution_to_global_stockpile_$tradegood$
+			}
+		}
+
+		else_if = {
+			limit = {
+				has_variable = overlord_customs_union
+			}
+			change_variable = {
+				name = country_global_market_penetration_$tradegood$
+				add = var:overlord_customs_union.var:customs_union_contribution_to_global_stockpile_$tradegood$
+			}
+		}
+
+		else_if = {
+			limit = {
+				any_governorships = {
+					has_variable = federation_customs_union
+				}
+			}
+			change_variable = {
+				name = country_global_market_penetration_$tradegood$
+				add = var:member_of_federation.var:customs_union_contribution_to_global_stockpile_$tradegood$
+			}
+		}
+
+		### Cap at 100%
+
+		if = {
+			limit = {
+				var:country_global_market_penetration_$tradegood$ > 1
+			}
+			set_variable = {
+				name = country_global_market_penetration_$tradegood$
+				value = 1
+			}
+		}
 	}
 }
 
@@ -2032,6 +2135,9 @@ GT_split_get_order_size_modifier_tradegood = {
 						has_variable = order_size_modifier_$tradegood$
 					}
 					var:order_size_modifier_$tradegood$ < DEMAND_country_$tradegood$
+					NOT = { 
+						GOODS_national_production_$tradegood$ > DEMAND_country_$tradegood$
+					}
 				}
 			}
 			change_variable = {
@@ -5269,8 +5375,6 @@ GT_split_calculate_trade_shares = {
 	}
 }
 
-#### vvv NOT YET IMPLEMENTED vvv ####
-
 GT_split_update_shipping_income = {
 	# Scope: Country
 	# Function: Save the income from shipping into a variable
@@ -5301,6 +5405,70 @@ GT_split_get_shipping_income_from_colonies = {
 				name = shipping_income_all_colonies
 				add = scope:subject_scope.var:shipping_earned_all_TZs
 			}
+		}
+	}
+}
+
+#### vvv NOT YET IMPLEMENTED vvv ####
+
+
+GT_reset_all_customs_union_for_sale_values = {
+	# Scope: Random country
+	# Function: Set the customs_union_$tradegood$_for_sale values to 0, so that they can be summed up again during this trade iteration
+	every_country = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_reset_customs_union_for_sale_value_tradegood
+		}		
+	}
+	every_federation = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_reset_customs_union_for_sale_value_tradegood
+		}
+	}
+}
+
+GT_reset_customs_union_for_sale_value_tradegood = {
+	# Scope: Country or federation province
+	# Function: Set customs_union_$tradegood$_for_sale to 0. This value gets summed up during the trade loop and then used to calculate the percentage of the customs union's contribution to global stockpiles
+	set_variable = {
+		name = customs_union_$tradegood$_for_sale
+		value = 0
+	}
+	set_variable = {
+		name = customs_union_contribution_to_global_stockpile_$tradegood$
+		value = 0
+	}
+}
+
+GT_get_all_customs_union_for_sale_as_percentage_of_global = {
+	# Scope: Random country
+	# Function: Get the percentage of all customs unions' contributions to the global stockpile for all tradegoods
+	every_country = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_customs_union_for_sale_as_percentage_of_global_tradegood
+		}		
+	}
+	every_federation = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_customs_union_for_sale_as_percentage_of_global_tradegood
+		}
+	}
+}
+
+GT_customs_union_for_sale_as_percentage_of_global_tradegood = {
+	# Scope: Country or federation province
+	# Function: Get the percentage of the customs union's contribution to the global stockpile, which gives a boost to the global market penetration for this tradegood to every country inside the customs union
+	set_variable = {
+		name = customs_union_contribution_to_global_stockpile_$tradegood$
+		value = customs_union_$tradegood$_for_sale
+	}
+	if = {
+		limit = {
+			var:customs_union_contribution_to_global_stockpile_$tradegood$ > 0
+		}
+		change_variable = {
+			name = customs_union_contribution_to_global_stockpile_$tradegood$
+			divide = global_var:global_stockpile_$tradegood$
 		}
 	}
 }

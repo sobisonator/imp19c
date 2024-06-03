@@ -7,6 +7,7 @@
 	GT_split_reset_all_TZ_stockpiles = { type = $type$ }
 	GT_reset_all_customs_union_for_sale_values = { type = $type$ }
 	every_country = {
+		GT_split_set_customs_union_scope = yes
 		every_governorships = {
 			TRADE_governorship_get_pops_this_quarter = yes
 			GT_split_cache_governorship_infrastructure_capacity = yes
@@ -58,7 +59,7 @@
 	}
 	GT_split_set_total_order_size_and_total_global_stockpile_percent_all = { type = $type$ }
 	GT_split_update_shipping_route_traffic_all = yes
-	GT_split_do_shipping_costs = { type = $type$ } # TODO: Needs to be split between the queued and total values
+	GT_split_do_shipping_costs = { type = $type$ } 
 	every_country = {
 		every_governorships = {
 			GT_add_queued_trade_category_income_and_expenses = yes
@@ -761,53 +762,61 @@ GT_split_declare_sell_amount = {
 
 		# Update the total amount for sale in the customs union, be it federal, colonial or single-country
 
-		if = {
-			limit = {
-				NOR = {
-					has_variable = federation_customs_union
-					owner = {
-						has_variable = overlord_customs_union
-					}
-				}
-			}
-			owner = {
-				change_variable = {
-					name = customs_union_$tradegood$_for_sale
-					add = scope:seller_governorship.var:for_sale_$tradegood$
-				}
+		owner.var:customs_union_scope = {
+			change_variable = {
+				name = customs_union_$tradegood$_for_sale
+				add = scope:seller_governorship.var:for_sale_$tradegood$
 			}
 		}
-
-		else_if = {
-			limit = {
-				owner = {
-					has_variable = overlord_customs_union
-				}
-				NOT = {
-					has_variable = federation_customs_union
-				}
-			}
-			owner.var:overlord_customs_union = {
-				change_variable = {
-					name = customs_union_$tradegood$_for_sale
-					add = scope:seller_governorship.var:for_sale_$tradegood$
-				}
-			}
-		}
-
-		else_if = {
-			limit = {
-				has_variable = federation_customs_union
-			}
-			var:federation_customs_union = {
-				change_variable = {
-					name = customs_union_$tradegood$_for_sale
-					add = scope:seller_governorship.var:for_sale_$tradegood$
-				}
-			}
-		}
+		# TODO: Improve this so that governorships outside of a customs union do not interact with the federal CU
 
 	}
+}
+
+GT_split_set_customs_union_scope = {
+	# Scope: Country
+	# Function: Set the scope for the customs union of this country
+	if = {
+		limit = {
+			NOR = {
+				any_governorships = {
+					has_variable = federation_customs_union
+				}
+				has_variable = overlord_customs_union
+			}
+		}
+		set_variable = {
+			name = customs_union_scope
+			value = this
+		}
+	}
+
+	else_if = {
+		limit = {
+			has_variable = overlord_customs_union
+			NOT = {
+				any_governorships = {
+					has_variable = federation_customs_union
+				}
+			}
+		}
+		set_variable = {
+			name = customs_union_scope
+			value = var:overlord_customs_union
+		}
+	}
+
+	else_if = {
+		limit = {
+			any_governorships = {
+				has_variable = federation_customs_union
+			}
+		}
+		set_variable = {
+			name = customs_union_scope
+			value = var:member_of_federation.var:overlord_customs_union
+		}
+	}	
 }
 
 GT_split_update_TZ_sell_amount = {
@@ -2054,42 +2063,9 @@ GT_split_get_country_global_market_penetration_tradegood = {
 			multiply = 0.4545
 		}
 
-		# TODO: Get the correct customs union scope
-		if = {
-			limit = {
-				NOR = {
-					has_variable = overlord_customs_union
-					any_governorships = {
-						has_variable = federation_customs_union
-					}
-				}
-			}
-			change_variable = {
-				name = country_global_market_penetration_$tradegood$
-				add = var:customs_union_contribution_to_global_stockpile_$tradegood$
-			}
-		}
-
-		else_if = {
-			limit = {
-				has_variable = overlord_customs_union
-			}
-			change_variable = {
-				name = country_global_market_penetration_$tradegood$
-				add = var:overlord_customs_union.var:customs_union_contribution_to_global_stockpile_$tradegood$
-			}
-		}
-
-		else_if = {
-			limit = {
-				any_governorships = {
-					has_variable = federation_customs_union
-				}
-			}
-			change_variable = {
-				name = country_global_market_penetration_$tradegood$
-				add = var:member_of_federation.var:customs_union_contribution_to_global_stockpile_$tradegood$
-			}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = var:customs_union_scope.var:customs_union_contribution_to_global_stockpile_$tradegood$
 		}
 
 		### Cap at 100%
@@ -2123,6 +2099,7 @@ GT_split_get_order_size_modifier_tradegood = {
 			name = order_size_modifier_$tradegood$
 			value = var:country_global_market_penetration_$tradegood$
 		}
+
 		change_variable = {
 			name = order_size_modifier_$tradegood$
 			multiply = global_var:global_stockpile_$tradegood$
@@ -2135,22 +2112,46 @@ GT_split_get_order_size_modifier_tradegood = {
 						has_variable = order_size_modifier_$tradegood$
 					}
 					var:order_size_modifier_$tradegood$ < DEMAND_country_$tradegood$
-					NOT = { 
-						GOODS_national_production_$tradegood$ > DEMAND_country_$tradegood$
-					}
 				}
 			}
 			change_variable = {
 				name = order_size_modifier_$tradegood$
 				divide = DEMAND_country_$tradegood$
 			}
+
+			# Add a bonus to order size modifier equivalent to the % of demand satisfied  by the production of $tradegood$ in this country's customs union
+			set_local_variable = {
+				name = order_size_modifier_bonus_CU_prod_$tradegood$
+				value = var:customs_union_scope.var:customs_union_$tradegood$_for_sale
+			}
+			change_local_variable = {
+				name = order_size_modifier_bonus_CU_prod_$tradegood$
+				divide = DEMAND_country_$tradegood$
+			}
+			change_variable = {
+				name = order_size_modifier_$tradegood$
+				add = local_var:order_size_modifier_bonus_CU_prod_$tradegood$
+			}
+
+			if = {
+				limit = {
+					var:order_size_modifier_$tradegood$ > 1
+				}
+				set_variable = {
+					name = order_size_modifier_$tradegood$
+					value = 1
+				}
+			}
+
 		}
+
 		else = {
 			set_variable = {
 				name = order_size_modifier_$tradegood$
 				value = 1
 			}
 		}
+
 	}
 	else = {
 		set_variable = {

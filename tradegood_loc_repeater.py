@@ -1,54 +1,7 @@
 def print_out_good(tradegood_name):
   tradegood = tradegood_name
   tradegood_caps = tradegood.upper()
-  loc = '''#{tradegood}									
-									industrial_goods_widget = {{
-									    blockoverride "Icon"
-									    {{
-									        texture = "gfx/interface/icons/tradegoods/{tradegood}.dds"
-									    }}
-									    blockoverride "VisibleTrigger"
-									    {{
-									    	visible = "[GreaterThan_CFixedPoint( ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('INDUSTRY_factories_assigned_{tradegood}').GetValue, '(CFixedPoint)0' )]"
-									    }}
-									    blockoverride "AssignedText"
-									    {{
-									    	text = "#T [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('INDUSTRY_factories_assigned_{tradegood}').GetValue|0]"
-									    }}
-									    blockoverride "ButtonTooltip"
-									    {{
-									    	tooltip = "PROVWINDOW_GOV_{tradegood_caps}_PRODUCED_TT"
-									    }}
-									    blockoverride "StockpileText"
-									    {{
-									        text = "PROVWINDOW_GOV_{tradegood_caps}_STOCKPILE"
-									    }}
-									    blockoverride "BalanceTooltip"
-									    {{
-									    	tooltip = "Stockpile: #H [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('{tradegood}_stockpile').GetValue|0] #! Demand: #R [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_{tradegood}')|0] #!/ Production: #G [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('GOODS_governorship_{tradegood}_produced')|0]"
-									    }}
-									    blockoverride "CashBalanceText"
-									    {{
-									    	text = "£[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('TRADE_governorship_cash_balance_{tradegood}')|3+=]"
-									    }}
-									    blockoverride "CashBalanceTooltip"
-									    {{
-									    	tooltip = "Imports: #R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('order_size_{tradegood}').GetValue|0] #!Exports: #G [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('amount_exported_{tradegood}').GetValue|0]"
-									    }}
-									    blockoverride "BalanceText"
-									    {{
-									    	text = "[GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('DEMAND_difference_{tradegood}')|0+=]"
-									    }}
-									    blockoverride "On_click"
-									    {{
-									       enabled = "[EqualTo_CFixedPoint( GuiScope.SetRoot(ProvinceWindow.GetProvince.GetOwner.MakeScope).ScriptValue('INDUSTRY_unlocked_{tradegood}'), '(CFixedPoint)1' )]"
-									        onclick = "[GetScriptedGui('add_{tradegood}_button').Execute( GuiScope.SetRoot( ProvinceWindow.GetState.GetGovernorship.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-									    }}
-									    blockoverride "On_rightclick"
-									    {{
-									        onrightclick = "[GetScriptedGui('remove_{tradegood}_button').Execute( GuiScope.SetRoot( ProvinceWindow.GetState.GetGovernorship.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
-									    }}										
-									}}'''.format(tradegood=tradegood, tradegood_caps=tradegood.upper())
+  loc = '''PROVWINDOW_GOV_{tradegood_caps}_PRODUCED_TT:0 "#L #T {tradegood} #!#! \\n #X Imperatrix Alpha: This industry is not yet implemented"'''.format(tradegood=tradegood,tradegood_caps=tradegood.upper())
   print(loc)
 
 

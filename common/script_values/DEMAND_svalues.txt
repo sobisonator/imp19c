@@ -578,8 +578,53 @@ DEMAND_gold = { # Total
 		}
 		add = INDUSTRY_demand_luxury_clothing_gold
 	}
-	# Add minting info
+	# Usage in minting
+
+	# Reserve accumulation
+	if = {
+		limit = {
+			owner = {
+				trigger_if = {
+					limit = {
+						has_variable = gold_reserve_target
+					}
+					var:gold_reserve_target > DEMAND_gold_reserve_size_svalue
+				}
+			}
+		}
+		add = DEMAND_gold_reserve_accumulation_rate
+	}
 }
+
+DEMAND_gold_reserve_size_svalue = {
+	# Scope: Country
+	# For use as right-side comparator
+	value = var:gold_reserve_size
+}
+DEMAND_gold_reserve_accumulation_rate = {
+	# Scope: Governorship
+	# Function: Get the amount needed to fill the gold reserve target, divided by the number of governorships
+	if = {
+		limit = {
+			var:shortage_gold < 1
+		}
+		value = owner.var:gold_reserve_target
+		subtract = owner.var:gold_reserve_size
+		divide = owner.FUNC_num_governorships
+		multiply = DEMAND_shortage_gold_inverse
+	}
+	else = {
+		value = 0
+	}
+}
+DEMAND_shortage_gold_inverse = {
+	# Scope: Governorship
+	# Function: Get the inverse of the shortage of gold, so that the outcome is lower the higher the shortage
+	value = 1
+	subtract = var:shortage_gold
+}
+
+
 DEMAND_silver = { # Total
 	value = 0
 	if = {
@@ -601,8 +646,53 @@ DEMAND_silver = { # Total
 		}
 		add = INDUSTRY_demand_luxury_clothing_silver
 	}
-	# Add minting info
+	# Usage in minting
+
+	# Reserve accumulation
+	if = {
+		limit = {
+			owner = {
+				trigger_if = {
+					limit = {
+						has_variable = silver_reserve_target
+					}
+					var:silver_reserve_target > DEMAND_silver_reserve_size_svalue
+				}
+			}
+		}
+		add = DEMAND_silver_reserve_accumulation_rate
+	}
 }
+
+DEMAND_silver_reserve_size_svalue = {
+	# Scope: Country
+	# For use as right-side comparator
+	value = var:silver_reserve_size
+}
+DEMAND_silver_reserve_accumulation_rate = {
+	# Scope: Governorship
+	# Function: Get the amount needed to fill the silver reserve target, divided by the number of governorships
+	if = {
+		limit = {
+			var:shortage_silver < 1
+		}
+		value = owner.var:silver_reserve_target
+		subtract = owner.var:silver_reserve_size
+		divide = owner.FUNC_num_governorships
+		multiply = DEMAND_shortage_silver_inverse
+	}
+	else = {
+		value = 0
+	}
+}
+DEMAND_shortage_silver_inverse = {
+	# Scope: Governorship
+	# Function: Get the inverse of the shortage of silver, so that the outcome is lower the higher the shortage
+	value = 1
+	subtract = var:shortage_silver
+}
+
+
 DEMAND_dye = { # Total
 	value = 0
 	if = {

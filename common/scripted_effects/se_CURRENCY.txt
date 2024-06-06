@@ -2,6 +2,177 @@
 
 }
 
-CURRENCY_update_value = {
+CURRENCY_create_new_currency = {
+	# Scope: country
+	# Function: Create a new curreny object
+	# Takes arguments:
+	# $currency_name$, localisable flag
+	# $originator_tag$, country TAG
+	# $amt_circulated$, number - the number of units of this currency in circulation
+	# $backing_type$, string:
+	#	gold_standard (just gold)
+	#	bimetallic_standard (gold and silver)
+	random_province = {
+		limit = {
+			NOT = {
+				has_variable = is_currency
+			}
+		}
+		save_scope_as = currency_scope
 
+		set_variable = {
+			name = currency_name
+			value = flag:$currency_name$ # Can be localised
+		}
+
+		set_variable = {
+			name = originator_country
+			value = c:$originator_tag$
+		}
+
+		set_variable = {
+			name = amt_circulated
+			value = $amt_circulated$
+		}
+
+		set_variable = {
+			name = backing_type
+			value = $backing_type$
+		}
+
+		# Purchasing power - the number of wealth units per unit of this currency
+		# Automatic wealth purchasing power calculation takes the import price of all tradegoods
+		CURRENCY_update_purchasing_power = yes
+	}
+
+	set_global_variable = {
+		name = currency_name
+		value = scope:currency_scope
+	}
+}
+
+CURRENCY_update_purchasing_power = {
+	# Scope: Currency province
+	# Function: Update the purchasing power of one unit of this currency, in terms of 1 unit of wealth
+	# Purchasing power - the number of wealth units per unit of this currency
+	# Automatic wealth purchasing power calculation takes the import price of all tradegoods
+	set_variable = {
+		name = purchasing_power
+		value = 1
+	}
+	change_variable = {
+		name = purchasing_power
+		divide = var:originator_country.WEALTH_import_price_all_tradegoods
+	}	
+}
+
+CURRENCY_update_backing_value = {
+	# Scope: Currency province
+	# Function: Update the value intrinsic per unit of currency based on the precious metal or other system backing it
+
+	if = {
+		limit = {
+			var:backing_type = flag:gold_standard
+		}
+		set_variable = {
+			name = backing_value
+			value = var:originator_country.var:country_import_price_gold
+		}
+		change_variable = {
+			name = backing_value
+			multiply = var:originator_country.var:currency_reserves_gold
+		}
+	}
+	else_if = {
+		limit = {
+			var:backing_type = flag:silver_standard
+		}
+		set_variable = {
+			name = backing_value
+			value = var:originator_country.var:country_import_price_silver
+		}
+		change_variable = {
+			name = backing_value
+			multiply = var:originator_country.var:currency_reserves_silver
+		}
+	}
+	else_if = {
+		limit = {
+			var:backing_type = flag:bimetallic_standard
+		}
+		set_local_variable = {
+			name = backing_value_from_silver
+			value = var:originator_country.var:country_import_price_silver
+		}
+		change_local_variable = {
+			name = backing_value_from_silver
+			multiply = var:originator_country.var:currency_reserves_silver
+		}
+		set_local_variable = {
+			name = backing_value_from_gold
+			value = var:originator_country.var:country_import_price_silver
+		}
+		change_local_variable = {
+			name = backing_value_from_gold
+			multiply = var:originator_country.var:currency_reserves_silver
+		}
+		set_variable = {
+			name = backing_value
+			value = local_var:backing_value_from_silver
+		}
+		change_variable = {
+			name = backing_value
+			add = local_var:backing_value_from_gold
+		}
+	}
+
+	change_variable = {
+		name = backing_value
+		divide = var:amt_circulated
+	}
+}
+
+CURRENCY_country_setup_reserves = {
+	# Scope: Country
+	# Function: Setup up empty variables for precious metal reserves
+	set_variable = {
+		name = gold_reserve_size
+		value = $gold_reserve_size$
+	}
+	set_variable = {
+		name = silver_reserve_size
+		value = $silver_reserve_size$
+	}
+
+	set_variable = {
+		name = gold_reserve_target
+		value = $gold_reserve_target_size$
+	}
+	set_variable = {
+		name = silver_reserve_target
+		value = $silver_reserve_target_size$
+	}
+}
+
+CURRENCY_country_set_reserve_target = {
+	# Scope: Country
+	# Function: Set the target amount of a precious metal to hold in reserve
+	set_variable = {
+		name = $reserve_material$_reserve_target
+		value = $target_value$
+	}
+}
+
+CURRENCY_country_update_reserve_value = {
+	# Scope: Country
+	# Function: Update the amount in the reserve based on how much the governorships can acquire
+	every_governorships = {
+		save_scope_as = governorship_scope
+		owner = {
+			change_variable = {
+				name = $reserve_material$_reserve_size
+				add = scope:governorship_scope.DEMAND_$reserve_material$_reserve_accumulation_rate
+			}
+		}
+	}
 }

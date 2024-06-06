@@ -1,7 +1,7 @@
 def print_out_good(tradegood_name):
   tradegood = tradegood_name
   tradegood_caps = tradegood.upper()
-  loc = '''PROVWINDOW_GOV_{tradegood_caps}_PRODUCED_TT:0 "#L #T {tradegood} #!#! \\n #X Imperatrix Alpha: This industry is not yet implemented"'''.format(tradegood=tradegood,tradegood_caps=tradegood.upper())
+  loc = '''add = var:country_unit_price_{tradegood}'''.format(tradegood=tradegood)
   print(loc)
 
 
@@ -22,20 +22,16 @@ all_goods = {
   "fish":"food",
   "livestock":"food",
   "vegetables":"food",
-  "tropical_fruit":"food",
-  "mediterranean_fruit":"food",
   "temperate_fruit":"food",
   "processed_foods":"food",
   "clothing":"essential_goods",
   "furniture":"essential_goods",
   "pharmaceuticals":"essential_goods",
   "coal":"essential_goods",
-  "whales":"essential_goods",
   "alcohol":"luxury_goods",
   "gems":"luxury_goods",
   "opium":"luxury_goods",
   "tobacco":"luxury_goods",
-  "chocolate":"luxury_goods",
   "coffee":"luxury_goods",
   "tea":"luxury_goods",
   "spices":"luxury_goods",
@@ -52,9 +48,7 @@ all_goods = {
   "wood":"business_goods",
   "stone":"business_goods",
   "sulphur":"business_goods",
-  "peat":"business_goods",
   "tin":"business_goods",
-  "inorganic_compounds":"business_goods",
   "copper":"business_goods",
   "iron":"business_goods",
   "gold":"business_goods",
@@ -81,5 +75,5 @@ all_goods = {
   "late_artillery":"military"
         }
 
-for tradegood in industrial_goods:
+for tradegood in all_goods:
         print_out_good(tradegood)

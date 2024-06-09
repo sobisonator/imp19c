@@ -4,14 +4,16 @@
 	SHIPPING_update_TZ_overview_piecharts = yes
 	GT_split_update_governorship_vars = yes
 	GT_split_cache_TZ_penetration_values = yes
-	GT_split_reset_all_TZ_stockpiles = { type = $type$ }
+	# GT_split_reset_all_TZ_stockpiles = { type = $type$ } # OBSOLETE, global var $tradezone$_stockpile_$tradegood$ is used instead
+	GT_reset_all_customs_union_for_sale_values = { type = $type$ }
 	every_country = {
+		GT_split_set_customs_union_scope = yes
 		every_governorships = {
 			TRADE_governorship_get_pops_this_quarter = yes
 			GT_split_cache_governorship_infrastructure_capacity = yes
 			GT_split_declare_sell_to_TZ_aggregate_stockpile = { type = $type$ }
-			GT_split_calculate_all_trade_shares = yes
-			GT_split_reset_trade_expenses_due_shipping = yes
+			# GT_split_calculate_all_trade_shares = yes # Now handled within the distribution of income and expenses
+			GT_split_reset_queued_trade_expenses_due_shipping = yes
 		}
 	}
 	#every_country = {
@@ -20,13 +22,23 @@
 	#	}
 	#}
 	GT_split_sum_all_TZ_stockpiles = { type = $type$ }
+	every_country = {
+		every_governorships = {
+			GT_split_create_order_all = { type = $type$ }
+		}
+	}
+	# Put price calculations here
+	#####
+	#
+	GT_set_tradegood_price_all_TZs_all_tradegoods = { type = $type$ }
 	GT_split_get_global_import_unit_price_all = { type = $type$ }
+	GT_get_all_customs_union_for_sale_as_percentage_of_global = { type = $type$ }
 	every_country = {
 		GT_split_get_country_global_market_penetration_all = { type = $type$ }
 		GT_split_get_order_size_modifier_all = { type = $type$ }
 		GT_split_get_country_import_unit_price_all = { type = $type$ }
 		every_governorships = {
-			GT_split_create_order_all = { type = $type$ }
+			GT_split_update_wealth_owed_for_all_TZs_all_tradegoods = { type = $type$ }
 		}
 	}
 	GT_split_sum_all_TZ_orders_all = { type = $type$ } # Also gets as a order percentage of supply
@@ -49,15 +61,21 @@
 			GT_split_get_governorship_income_due_all = { type = $type$ }
 			GT_split_subtract_amount_exported_all = { type = $type$ }
 			GT_split_add_amount_imported_all = { type = $type$ }
-			GT_split_distribute_income_all = yes
-			GT_split_distribute_expenses_all = yes
+			# Distribution of income and expenses handled outside of this effect
+			# GT_split_distribute_income_all = yes
+			# GT_split_distribute_expenses_all = yes
 		}
 	}
 	GT_split_set_total_order_size_and_total_global_stockpile_percent_all = { type = $type$ }
 	GT_split_update_shipping_route_traffic_all = yes
-	GT_split_do_shipping_costs = { type = $type$ }
+	GT_split_do_shipping_costs = { type = $type$ } 
+	every_country = {
+		every_governorships = {
+			GT_add_queued_trade_category_income_and_expenses = yes
+		}
+	}
 
-	# GT_split_log_trade_balance = yes
+	# GT_split_log_trade_balance = yes # TODO: Implement a way to save previous values so that it can be charted on a graph
 }
 
 GT_split_create_tradegroups = {
@@ -709,6 +727,7 @@ GT_split_declare_sell_to_TZ_aggregate_stockpile = {
 
 GT_split_declare_sell_amount = {
 	# Scope: Governorship
+	# Function: 
 	set_variable = {
 		name = for_sale_$tradegood$
 		value = 0
@@ -748,7 +767,74 @@ GT_split_declare_sell_amount = {
 				value = var:governorship_infrastructure_capacity
 			}
 		}
+
+		save_scope_as = seller_governorship
+
+		# Update the total amount for sale in the customs union, be it federal, colonial or single-country
+
+		owner.var:customs_union_scope = {
+			change_variable = {
+				name = customs_union_$tradegood$_for_sale
+				add = scope:seller_governorship.var:for_sale_$tradegood$
+			}
+		}
+		# TODO: Improve this so that governorships outside of a customs union do not interact with the federal CU
+
 	}
+}
+
+GT_split_set_customs_union_scope = {
+	# Scope: Country
+	# Function: Set the scope for the customs union of this country
+	if = {
+		limit = {
+			NOR = {
+				any_governorships = {
+					has_variable = federation_customs_union
+				}
+				has_variable = overlord_customs_union
+			}
+		}
+		set_variable = {
+			name = customs_union_scope
+			value = this
+		}
+	}
+
+	else_if = {
+		limit = {
+			has_variable = overlord_customs_union
+			NOT = {
+				any_governorships = {
+					has_variable = federation_customs_union
+				}
+			}
+		}
+		set_variable = {
+			name = customs_union_scope
+			value = var:overlord_customs_union
+		}
+	}
+
+	else_if = {
+		limit = {
+			has_variable = member_of_federation
+			any_governorships = {
+				has_variable = federation_customs_union
+			}
+		}
+		set_variable = {
+			name = customs_union_scope
+			value = var:member_of_federation
+		}
+	}
+
+	else = {
+		set_variable = {
+			name = customs_union_scope
+			value = this
+		}
+	}	
 }
 
 GT_split_update_TZ_sell_amount = {
@@ -1994,6 +2080,23 @@ GT_split_get_country_global_market_penetration_tradegood = {
 			name = country_global_market_penetration_$tradegood$
 			multiply = 0.4545
 		}
+
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = var:customs_union_scope.var:customs_union_contribution_to_global_stockpile_$tradegood$
+		}
+
+		### Cap at 100%
+
+		if = {
+			limit = {
+				var:country_global_market_penetration_$tradegood$ > 1
+			}
+			set_variable = {
+				name = country_global_market_penetration_$tradegood$
+				value = 1
+			}
+		}
 	}
 }
 
@@ -2014,6 +2117,7 @@ GT_split_get_order_size_modifier_tradegood = {
 			name = order_size_modifier_$tradegood$
 			value = var:country_global_market_penetration_$tradegood$
 		}
+
 		change_variable = {
 			name = order_size_modifier_$tradegood$
 			multiply = global_var:global_stockpile_$tradegood$
@@ -2032,13 +2136,40 @@ GT_split_get_order_size_modifier_tradegood = {
 				name = order_size_modifier_$tradegood$
 				divide = DEMAND_country_$tradegood$
 			}
+
+			# Add a bonus to order size modifier equivalent to the % of demand satisfied  by the production of $tradegood$ in this country's customs union
+			set_local_variable = {
+				name = order_size_modifier_bonus_CU_prod_$tradegood$
+				value = var:customs_union_scope.var:customs_union_$tradegood$_for_sale
+			}
+			change_local_variable = {
+				name = order_size_modifier_bonus_CU_prod_$tradegood$
+				divide = DEMAND_country_$tradegood$
+			}
+			change_variable = {
+				name = order_size_modifier_$tradegood$
+				add = local_var:order_size_modifier_bonus_CU_prod_$tradegood$
+			}
+
+			if = {
+				limit = {
+					var:order_size_modifier_$tradegood$ > 1
+				}
+				set_variable = {
+					name = order_size_modifier_$tradegood$
+					value = 1
+				}
+			}
+
 		}
+
 		else = {
 			set_variable = {
 				name = order_size_modifier_$tradegood$
 				value = 1
 			}
 		}
+
 	}
 	else = {
 		set_variable = {
@@ -2075,10 +2206,15 @@ GT_split_create_order_tradegood = {
 			name = order_size_$tradegood$
 			subtract = var:$tradegood$_stockpile
 		}
-		change_variable = {
-			name = order_size_$tradegood$
-			multiply = owner.var:order_size_modifier_$tradegood$
-		}
+
+		# MOVED
+		# Now this multiplication is done under GT_split_update_wealth_owed_for_all_TZs_all_tradegoods to preserve the order of calculation, as order size modifier is calculated after create order
+		#change_variable = {
+		#	name = order_size_$tradegood$
+		#	multiply = owner.var:order_size_modifier_$tradegood$
+		#}
+
+
 		# Cap at governorship infra capacity
 		set_local_variable = {
 			name = l_governorship_infrastructure_capacity_compare
@@ -2242,11 +2378,164 @@ GT_split_create_order_tradegood = {
 
 GT_split_update_TZ_order_amount_apply_change = {
 	# Scope: Governorship
-	# Function: Add the local order for $tradegood$ to the TZ aggregate order, save the price paid for the tradegood, and also add that price paid to the TZ aggregate payment pool
+	# Function: Add the local order for $tradegood$ to the TZ aggregate order
 	change_global_variable = {
 		name = $tradezone$_total_order_size_$tradegood$
 		add = var:order_size_$tradegood$
 	}
+}
+
+GT_split_update_wealth_owed_for_all_TZs_all_tradegoods = {
+	# Scope: Governorship
+	# Function: Get the wealth owed for all tradegood orders and update the TZ aggregate payment pools for all tradegoods
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_update_wealth_owed_for_all_TZs_tradegood
+	}
+}
+
+GT_split_update_wealth_owed_for_all_TZs_tradegood = {
+	# Scope: Governorship
+	# Function: Save the price paid for the tradegood, and also add that price paid to the TZ aggregate payment pool
+	switch = {
+		trigger = has_variable
+		TZ_is_india_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = india
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_east_north_america_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = east_north_america
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_west_north_america_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = west_north_america
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_caribbean_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = caribbean
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_west_south_america_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = west_south_america
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_east_south_america_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = east_south_america
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_south_east_asia_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = south_east_asia
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_indo_china_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = indo_china
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_yellow_sea_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = yellow_sea
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_southern_africa_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = southern_africa
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_west_africa_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = west_africa
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_east_africa_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = east_africa
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_middle_east_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = middle_east
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_western_steppe_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = western_steppe
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_eastern_steppe_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = eastern_steppe
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_upper_yangtzi_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = upper_yangtzi
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_atlantic_seaboard_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = atlantic_seaboard
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_central_europe_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = central_europe
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_west_mediterranean_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = west_mediterranean
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_baltic_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = baltic
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_east_europe_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = east_europe
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_east_mediterranean_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = east_mediterranean
+				tradegood = $tradegood$
+			}
+		}
+	}
+}
+
+GT_split_update_wealth_owed_for_tradegoods = {
+	# Scope: Governorship
+	# Function: Update the amount of wealth owed for the $tradegood$ order here, and the $tradezone$ wealth pool for payments
 	set_variable = {
 		name = wealth_owed_for_$tradegood$
 		value = var:order_size_$tradegood$
@@ -2254,6 +2543,10 @@ GT_split_update_TZ_order_amount_apply_change = {
 	change_variable = {
 		name = wealth_owed_for_$tradegood$
 		multiply = owner.var:country_unit_price_$tradegood$
+	}
+	change_variable = {
+		name = wealth_owed_for_$tradegood$
+		multiply = owner.var:order_size_modifier_$tradegood$
 	}
 	change_global_variable = {
 		name = $tradezone$_payment_pool_$tradegood$
@@ -3116,11 +3409,11 @@ GT_split_scale_wealth_owed_and_order_size_all = {
 	# Function: Get the amount a governorship owes to pay for imports of $tradegood$
 	# Given $tradezone$ argument by a switch in the parent effect
 	set_variable = {
-		name = trade_expenses_due_resource_extraction
+		name = queued_trade_expenses_due_resource_extraction
 		value = 0
 	}
 	set_variable = {
-		name = trade_expenses_due_manufacturing
+		name = queued_trade_expenses_due_manufacturing
 		value = 0
 	}
 
@@ -3284,6 +3577,12 @@ GT_split_scale_wealth_owed_and_order_size_tradegood = {
 			has_variable = order_size_$tradegood$
 			has_variable = wealth_owed_for_$tradegood$
 		}
+
+		change_variable = {
+			name = order_size_$tradegood$
+			multiply = owner.var:order_size_modifier_$tradegood$
+		}
+
 		if = {
 			limit = {
 				global_var:global_supply_as_percentage_of_order_$tradegood$ < 1
@@ -3340,13 +3639,13 @@ GT_split_scale_wealth_owed_and_order_size_tradegood = {
 				}
 			}
 			change_variable = {
-				name = trade_expenses_due_resource_extraction
+				name = queued_trade_expenses_due_resource_extraction
 				add = var:wealth_owed_for_$tradegood$
 			}
 		}
 		else = {
 			change_variable = {
-				name = trade_expenses_due_manufacturing
+				name = queued_trade_expenses_due_manufacturing
 				add = var:wealth_owed_for_$tradegood$
 			}
 		}
@@ -3357,11 +3656,11 @@ GT_split_get_governorship_income_due_all = {
 	# Scope: Governorship
 	# Function: Get the income due for every tradegood in this governorship
 	set_variable = {
-		name = trade_income_due_resource_extraction
+		name = queued_trade_income_due_resource_extraction
 		value = 0
 	}
 	set_variable = {
-		name = trade_income_due_manufacturing
+		name = queued_trade_income_due_manufacturing
 		value = 0
 	}
 
@@ -3442,7 +3741,7 @@ GT_split_get_governorship_income_due_tradegood = {
 			}
 		}
 		change_variable = {
-			name = trade_income_due_resource_extraction
+			name = queued_trade_income_due_resource_extraction
 			add = var:income_due_$tradegood$
 		}
 	}
@@ -3451,7 +3750,7 @@ GT_split_get_governorship_income_due_tradegood = {
 			has_variable = income_due_$tradegood$
 		}
 		change_variable = {
-			name = trade_income_due_manufacturing
+			name = queued_trade_income_due_manufacturing
 			add = var:income_due_$tradegood$
 		}
 	}
@@ -3512,13 +3811,129 @@ GT_split_add_amount_imported_tradegood = {
 	}
 }
 
-GT_split_reset_trade_expenses_due_shipping = {
+GT_split_reset_queued_trade_expenses_due_shipping = {
 	# Scope: Governorship
 	# Function: Reset the governorship shipping costs value to 0 for this iteration
 	set_variable = {
-		name = trade_expenses_due_shipping
+		name = queued_trade_expenses_due_shipping
 		value = 0
 	}
+}
+
+GT_add_queued_trade_category_income_and_expenses = {
+	# Scope: Governorship
+	# Function: Add the queued income and expenses trade values to the quarterly totals
+
+	# INCOME: RESOURCE EXTRACTION
+	if = {
+		limit = {
+			has_variable = trade_income_due_resource_extraction
+		}
+		change_variable = {
+			name = trade_income_due_resource_extraction
+			add = var:queued_trade_income_due_resource_extraction
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_income_due_resource_extraction
+			value = var:queued_trade_income_due_resource_extraction
+		}
+	}
+
+	# INCOME: MANUFACTURING
+	if = {
+		limit = {
+			has_variable = trade_income_due_manufacturing
+		}
+		change_variable = {
+			name = trade_income_due_manufacturing
+			add = var:queued_trade_income_due_manufacturing
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_income_due_manufacturing
+			value = var:queued_trade_income_due_manufacturing
+		}
+	}
+
+	# EXPENSES: RESOURCE EXTRACTION
+	if = {
+		limit = {
+			has_variable = trade_expenses_due_resource_extraction
+		}
+		change_variable = {
+			name = trade_expenses_due_resource_extraction
+			add = var:queued_trade_expenses_due_resource_extraction
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_expenses_due_resource_extraction
+			value = var:queued_trade_expenses_due_resource_extraction
+		}
+	}
+	
+	# EXPENSES: MANUFACTURING
+	if = {
+		limit = {
+			has_variable = trade_expenses_due_manufacturing
+		}
+		change_variable = {
+			name = trade_expenses_due_manufacturing
+			add = var:queued_trade_expenses_due_manufacturing
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_expenses_due_manufacturing
+			value = var:queued_trade_expenses_due_manufacturing
+		}
+	}
+
+	# INCOME: SHIPPING
+	if = {
+		limit = {
+			has_variable = trade_income_due_shipping
+		}
+		change_variable = {
+			name = trade_income_due_shipping
+			add = var:queued_trade_income_due_shipping
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_income_due_shipping
+			value = var:queued_trade_income_due_shipping
+		}
+	}
+	
+	# EXPENSES: SHIPPING
+	if = {
+		limit = {
+			has_variable = trade_expenses_due_shipping
+		}
+		change_variable = {
+			name = trade_expenses_due_shipping
+			add = var:queued_trade_expenses_due_shipping
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_expenses_due_shipping
+			value = var:queued_trade_expenses_due_shipping
+		}
+	}
+}
+
+GT_do_all_wealth_distribution = {
+	# Scope: Governorship
+	# Called: Every quarter, after all GT_split trade effects
+	# Function: Distribute the income and expenses across pops and the state
+	GT_split_calculate_all_trade_shares = yes
+	GT_split_distribute_income_all = yes
+	GT_split_distribute_expenses_all = yes
 }
 
 GT_split_calculate_all_trade_shares = {
@@ -3570,6 +3985,43 @@ GT_split_distribute_income_all = {
 	GT_split_distribute_income_category = {
 		category = manufacturing
 	}
+	GT_split_distribute_income_category = {
+		category = shipping
+	}	
+}
+
+GT_reset_trade_transaction_totals = {
+	# Scope: Governorship
+	# Called: Every quarter before the first GT split effect is called
+	# Function: Set the total income and expense variables to 0, so that the queued values can be added to them throughout the quarter
+
+	set_variable = {
+		name = trade_income_due_shipping
+		value = 0
+	}
+	set_variable = {
+		name = trade_expenses_due_shipping
+		value = 0
+	}
+
+	set_variable = {
+		name = trade_income_due_resource_extraction
+		value = 0
+	}
+	set_variable = {
+		name = trade_expenses_due_resource_extraction
+		value = 0
+	}
+
+	set_variable = {
+		name = trade_income_due_manufacturing
+		value = 0
+	}
+	set_variable = {
+		name = trade_expenses_due_manufacturing
+		value = 0
+	}
+
 }
 
 GT_split_calculate_actual_share_of_income_category = {
@@ -3669,6 +4121,9 @@ GT_split_distribute_expenses_all = {
 	GT_split_distribute_expenses_category = {
 		category = manufacturing
 	}
+	GT_split_distribute_expenses_category = {
+		category = shipping
+	}	
 }
 
 GT_split_calculate_actual_share_of_expenses_category = {
@@ -4251,12 +4706,6 @@ GT_split_get_total_stockpile_size_contribution = {
 GT_split_update_shipping_route_traffic_all = {
 	# Scope: Random country
 	# Function: Call GT_split_update_shipping_route_traffic_tradegood to update shipping along all trade routes
-    every_trade_center = {
-    	set_variable = {
-    		name = TZ_shipping
-    		value = 0
-    	}
-    }
 	GT_split_update_shipping_route_traffic_all_TZs =yes
 }
 
@@ -4654,19 +5103,20 @@ GT_split_do_shipping_costs = {
 	# Scale back up - this has been scaled down to avoid overflow in the global pool size
 	every_trade_center = {
 		change_variable = {
-			name = TZ_this_quarter_transport_pool
+			name = queued_TZ_this_quarter_transport_pool
 			multiply = 1
 		}
 	}
 	every_country = {
 		every_governorships = {
 			GT_split_get_governorship_shipping_income = yes
-			GT_split_distribute_income_category = {
-				category = shipping
-			}
-			GT_split_distribute_expenses_category = {
-				category = shipping
-			}
+			# The below has been moved to the quarterly income and expenses distribution effect
+			#GT_split_distribute_income_category = {
+			#	category = shipping
+			#}
+			#GT_split_distribute_expenses_category = {
+			#	category = shipping
+			#}
 		}
 	}
 }
@@ -4684,7 +5134,7 @@ GT_split_get_governorship_shipping_payments_owed = {
 	# Scope: Governorship
 	# Function: Get the total number of goods imported and exported (transported) in the governorship and turn that into a shipping fee based on the cost of naval supplies here. Also add this to the global shipping payment pool
 	set_variable = {
-		name = trade_expenses_due_shipping
+		name = queued_trade_expenses_due_shipping
 		value = 0
 	}
 	every_tradegood_$type$_complex = {
@@ -4692,19 +5142,30 @@ GT_split_get_governorship_shipping_payments_owed = {
 	}
 	if = {
 		limit = {
-			var:trade_expenses_due_shipping > 0
+			var:queued_trade_expenses_due_shipping > 0
 		}
-		change_variable = {
-			name = trade_expenses_due_shipping
-			multiply = global_var:global_base_import_price_naval_supplies
+		if = {
+			limit = {
+				has_global_variable = global_base_import_price_naval_supplies
+			}
+			change_variable = {
+				name = queued_trade_expenses_due_shipping
+				multiply = global_var:global_base_import_price_naval_supplies
+			}
+			change_variable = {
+				name = queued_trade_expenses_due_shipping
+				multiply = 10
+			}
 		}
-		change_variable = {
-			name = trade_expenses_due_shipping
-			multiply = 10
+		else = {
+			change_variable = {
+				name = queued_trade_expenses_due_shipping
+				multiply = 0.1
+			}
 		}
 		change_global_variable = {
 			name = global_shipping_costs_pool
-			add = var:trade_expenses_due_shipping
+			add = var:queued_trade_expenses_due_shipping
 		}
 	}
 }
@@ -4718,7 +5179,7 @@ GT_split_get_governorship_amount_transported_tradegood = {
 			has_variable = order_size_$tradegood$
 		}
 		change_variable = {
-			name = trade_expenses_due_shipping
+			name = queued_trade_expenses_due_shipping
 			add = var:order_size_$tradegood$
 		}
 	}
@@ -4729,7 +5190,7 @@ GT_split_get_governorship_amount_transported_tradegood = {
 	#		has_variable = amount_exported_$tradegood$
 	#	}
 	#	change_variable = {
-	#		name = trade_expenses_due_shipping
+	#		name = queued_trade_expenses_due_shipping
 	#		add = var:amount_exported_$tradegood$
 	#	}
 	#}
@@ -4875,12 +5336,17 @@ GT_split_get_TZ_shipping_income_pool_tradezone = {
 	}
 
 	set_variable = {
-		name = TZ_this_quarter_transport_pool
+		name = queued_TZ_this_quarter_transport_pool
 		value = local_var:share_of_global_shipping_income
 	}
 	change_variable = {
-		name = TZ_this_quarter_transport_pool
+		name = queued_TZ_this_quarter_transport_pool
 		multiply = global_var:global_shipping_costs_pool
+	}
+
+	change_variable = {
+		name = TZ_this_quarter_transport_pool
+		add = var:queued_TZ_this_quarter_transport_pool
 	}
 }
 
@@ -4891,7 +5357,7 @@ GT_split_get_governorship_shipping_income = {
 	# Then multiply that by the TZ shipping income and grant this governorship the shipping income that is due based on ownership of the shipping industry
 	save_scope_as = this_governorship
 	set_variable = {
-		name = trade_income_due_shipping
+		name = queued_trade_income_due_shipping
 		value = 0
 	}
 	every_governorship_state = {
@@ -4900,19 +5366,19 @@ GT_split_get_governorship_shipping_income = {
 
 			scope:this_governorship = {
 				change_variable = {
-					name = trade_income_due_shipping
+					name = queued_trade_income_due_shipping
 					add = scope:this_province.SHIPPING_province_power
 				}
 			}
 		}
 	}
 	change_variable = {
-		name = trade_income_due_shipping
+		name = queued_trade_income_due_shipping
 		divide = var:trade_center.SHIPPING_total_in_TZ
 	}
 	change_variable = {
-		name = trade_income_due_shipping
-		multiply = var:trade_center.var:TZ_this_quarter_transport_pool
+		name = queued_trade_income_due_shipping
+		multiply = var:trade_center.var:queued_TZ_this_quarter_transport_pool
 	}
 
 }
@@ -5096,8 +5562,6 @@ GT_split_calculate_trade_shares = {
 	}
 }
 
-#### vvv NOT YET IMPLEMENTED vvv ####
-
 GT_split_update_shipping_income = {
 	# Scope: Country
 	# Function: Save the income from shipping into a variable
@@ -5129,5 +5593,258 @@ GT_split_get_shipping_income_from_colonies = {
 				add = scope:subject_scope.var:shipping_earned_all_TZs
 			}
 		}
+	}
+}
+
+GT_reset_all_customs_union_for_sale_values = {
+	# Scope: Random country
+	# Function: Set the customs_union_$tradegood$_for_sale values to 0, so that they can be summed up again during this trade iteration
+	every_country = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_reset_customs_union_for_sale_value_tradegood
+		}		
+	}
+	every_federation = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_reset_customs_union_for_sale_value_tradegood
+		}
+	}
+}
+
+GT_reset_customs_union_for_sale_value_tradegood = {
+	# Scope: Country or federation province
+	# Function: Set customs_union_$tradegood$_for_sale to 0. This value gets summed up during the trade loop and then used to calculate the percentage of the customs union's contribution to global stockpiles
+	set_variable = {
+		name = customs_union_$tradegood$_for_sale
+		value = 0
+	}
+	set_variable = {
+		name = customs_union_contribution_to_global_stockpile_$tradegood$
+		value = 0
+	}
+}
+
+GT_get_all_customs_union_for_sale_as_percentage_of_global = {
+	# Scope: Random country
+	# Function: Get the percentage of all customs unions' contributions to the global stockpile for all tradegoods
+	every_country = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_customs_union_for_sale_as_percentage_of_global_tradegood
+		}		
+	}
+	every_federation = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_customs_union_for_sale_as_percentage_of_global_tradegood
+		}
+	}
+}
+
+GT_customs_union_for_sale_as_percentage_of_global_tradegood = {
+	# Scope: Country or federation province
+	# Function: Get the percentage of the customs union's contribution to the global stockpile, which gives a boost to the global market penetration for this tradegood to every country inside the customs union
+	set_variable = {
+		name = customs_union_contribution_to_global_stockpile_$tradegood$
+		value = var:customs_union_$tradegood$_for_sale
+	}
+	if = {
+		limit = {
+			var:customs_union_contribution_to_global_stockpile_$tradegood$ > 0
+		}
+		change_variable = {
+			name = customs_union_contribution_to_global_stockpile_$tradegood$
+			divide = global_var:global_stockpile_$tradegood$
+		}
+	}
+}
+
+GT_set_tradegood_price_all_TZs_all_tradegoods = {
+	every_tradegood_$type$_complex = {
+		APPLY = GT_set_tradegood_price_all_TZs
+	}
+}
+
+GT_set_tradegood_price_all_TZs = {
+	# Scope: Random country
+	# Function: Calculate the base wholesale price of $tradegood$ based on supply and demand in every TZ
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = india
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = east_north_america
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = west_north_america
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = caribbean
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = west_south_america
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = east_south_america
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = south_east_asia
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = indo_china
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = yellow_sea
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = southern_africa
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = west_africa
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = east_africa
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = middle_east
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = western_steppe
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = eastern_steppe
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = upper_yangtzi
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = atlantic_seaboard
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = central_europe
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = west_mediterranean
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = baltic
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = east_europe
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = east_mediterranean
+	}
+
+}
+
+GT_set_tradegood_price = {
+	# Scope: Tradezone province
+	# Function: Calculate the base wholesale price of $tradegood$ based on supply and demand in $tradezone$
+	global_var:global_$tradezone$_tradezone = {
+
+		set_variable = {
+			name = local_price_$tradegood$
+			value = global_var:$tradezone$_total_order_size_$tradegood$
+		}		
+
+		if = {
+			limit = {
+				global_var:$tradezone$_stockpile_$tradegood$ > 0
+			}
+			change_variable = {
+				name = local_price_$tradegood$
+				divide = global_var:$tradezone$_stockpile_$tradegood$
+			}
+		}
+
+		change_variable = {
+			name = local_price_$tradegood$
+			multiply = 0.1
+		}
+
+		# Factor in elasticity
+
+		# If the tradegood is a food type, scale it down by the variety of food types available
+		if = {
+			limit = {
+				OR = {
+					flag:$tradegood$ = flag:grain
+					flag:$tradegood$ = flag:livestock
+					flag:$tradegood$ = flag:temperate_fruit
+					flag:$tradegood$ = flag:fish
+					flag:$tradegood$ = flag:vegetables
+					flag:$tradegood$ = flag:processed_foods
+				}
+			}
+			change_variable = {
+				name = local_price_$tradegood$
+				divide = DEMAND_num_food_tradegoods
+			}
+		}
+	}
+}
+
+#### vvv NOT YET IMPLEMENTED vvv ####
+
+GT_save_final_quarterly_wealth_values = {
+	# Scope: Governorship
+	# Function: Save the wealth owed and due for every tradegood and trade_income_due_resource_extraction, trade_income_due_manufacturing, trade_expenses_due_resource_extraction, trade_expenses_due_manufacturing into new values that stores the total for the quarter
+	# Called: After all 4 GT_split runs
+
+	GT_save_final_var = {
+		var_name = trade_income_due_resource_extraction
+	}
+	GT_save_final_var = {
+		var_name = trade_income_due_manufacturing
+	}
+	GT_save_final_var = {
+		var_name = trade_expenses_due_resource_extraction
+	}
+	GT_save_final_var = {
+		var_name = trade_expenses_due_manufacturing
+	}
+	GT_save_final_var = {
+		var_name = trade_income_due_resource_extraction
+	}				
+	every_tradegood_complex = {
+		APPLY = GT_save_final_tradegood_vars
+	}
+}
+
+GT_save_final_var = {
+	set_variable = {
+		name = final_quarterly_$var_name$
+		value = var:$var_name$
+	}
+}
+
+GT_save_final_tradegood_vars = {
+	set_variable = {
+		name = final_quarterly_income_due_$tradegood$
+		value = var:income_due_$tradegood$
+	}
+	set_variable = {
+		name = final_quarterly_wealth_owed_for_$tradegood$
+		value = var:wealth_owed_for_$tradegood$
 	}
 }

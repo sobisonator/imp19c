@@ -16,6 +16,9 @@ base_window = {
 		start_sound = {
 			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
 		}
+		on_start = "[GetVariableSystem.Clear('provinces_tab_open')]"
+		on_start = "[GetVariableSystem.Clear('governorships_tab_open')]"
+		on_start = "[GetVariableSystem.Toggle('decisions_tab_open')]"
 	}
 	### Audio ###
 	state = {
@@ -23,6 +26,7 @@ base_window = {
 		start_sound = {
 			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
 		}
+		on_start = "[GetVariableSystem.Clear('decisions_tab_open')]"
 	}
 	### Piechart update ###
 	#state = {
@@ -82,7 +86,6 @@ base_window = {
 			name = "box for the vertically stacked boxes"
 			layoutpolicy_vertical = expanding
 			layoutpolicy_horizontal = expanding
-			margin = { 14 6 }
 			
 			margin_widget = {
 				name = "decisions and provinces full width"
@@ -93,56 +96,97 @@ base_window = {
 				margin_widget = {
 					name = "tabs"
 					size = { 100% 48 }
-					@mincategorybuttonwidth = 292
-					@maxcategorybuttonwidth = 400
+					size = { 0 52 }
+					layoutpolicy_horizontal = expanding
+					@mincategorybuttonwidth = 181
+					@maxcategorybuttonwidth = 181
 					@mincategorybuttonheight = 28 
 					@maxcategorybuttonheight = 34
-					parentanchor = hcenter
+					sub_header_v = {
+						size = { 157 0 }
+						position = { 8 8 }
+						blockoverride "Title_text" { text = "" }	
+						blockoverride "Max_text_width" { max_width = 230 }
+					}
+					icon = {
+						position = { 2 42 }
+						using = beige_medium_background
+						spriteType = Corneredtiled
+						size = { 166 2 }
+					}
+					icon = {
+						position = { 712 42 }
+						using = beige_medium_background
+						spriteType = Corneredtiled
+						size = { 9 2 }
+					}
 					hbox = { 
-						margin_top = -2
-						layoutpolicy_vertical = shrinking
-						layoutpolicy_horizontal = shrinking
+						layoutpolicy_vertical = preferred
+						layoutpolicy_horizontal = expanding
+						spacing = 2
+						margin_right = 10
+						margin_top = 4
+						hbox = { layoutpolicy_horizontal = expanding }
 					
 						category_tab = {
 							name = "decisions_tab"
 							blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
 							blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
-							blockoverride "MinVisible" { visible = "[GetVariableSystem.HasValue( 'OverviewTabs', 'Details' )]" }
-							blockoverride "MaxVisible" { visible = "[Not( GetVariableSystem.HasValue( 'OverviewTabs', 'Details' ) )]" }
+							blockoverride "MinVisible" { visible = "[Not(GetVariableSystem.Exists('decisions_tab_open'))]" }
+							blockoverride "MaxVisible" { visible = "[GetVariableSystem.Exists('decisions_tab_open')]" }
 							######## Shared Overrides
 							blockoverride "Center_text" { text = "OVERVIEW" }
 							######## Small Button Overrides
 							blockoverride "ClickFunction"
 							{
-								onclick = "[GetVariableSystem.Set( 'OverviewTabs', 'Overview' )]"
+								onclick = "[GetVariableSystem.Toggle('decisions_tab_open')]"
+								onclick = "[GetVariableSystem.Clear('governorships_tab_open')]"
+								onclick = "[GetVariableSystem.Clear('provinces_tab_open')]"
 							}
 						}
-
+						category_tab = {
+							name = "governorships_tab"
+							blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+							blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+							blockoverride "MinVisible" { visible = "[Not(GetVariableSystem.Exists('governorships_tab_open'))]" }
+							blockoverride "MaxVisible" { visible = "[GetVariableSystem.Exists('governorships_tab_open')]" }
+							######## Shared Overrides
+							blockoverride "Center_text" { text = "GOVERNORSHIPS" }
+							######## Small Button Overrides
+							blockoverride "ClickFunction"
+							{
+								onclick = "[GetVariableSystem.Toggle('governorships_tab_open')]"
+								onclick = "[GetVariableSystem.Clear('decisions_tab_open')]"
+								onclick = "[GetVariableSystem.Clear('provinces_tab_open')]"
+							}
+						}
 						category_tab = {
 							name = "provinces_tab"
 							blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
 							blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
-							blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue( 'OverviewTabs', 'Details' ) )]" }
-							blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue( 'OverviewTabs', 'Details' )]" }
+							blockoverride "MinVisible" { visible = "[Not(GetVariableSystem.Exists('provinces_tab_open'))]" }
+							blockoverride "MaxVisible" { visible = "[GetVariableSystem.Exists('provinces_tab_open')]" }
 							######## Shared Overrides
-							blockoverride "Center_text" { text = "ADMINISTRATION_TITLE" }
+							blockoverride "Center_text" { text = "PROVINCES" }
 							######## Small Button Overrides
 							blockoverride "ClickFunction"
 							{
-								onclick = "[GetVariableSystem.Set( 'OverviewTabs', 'Details' )]"
+								onclick = "[GetVariableSystem.Toggle('provinces_tab_open')]"
+								onclick = "[GetVariableSystem.Clear('decisions_tab_open')]"
+								onclick = "[GetVariableSystem.Clear('governorships_tab_open')]"
 							}
-						} 		
+						} 
 					}
 				}
 				margin_widget = {
 					name = "Decisions Tab"
-					visible = "[Not( GetVariableSystem.HasValue( 'OverviewTabs', 'Details' ) )]"
+					visible = "[GetVariableSystem.Exists('decisions_tab_open')]"
 					size = { 100% 100% }
 					position = { 0 32 }
 					vbox = {
 						layoutpolicy_horizontal = expanding
-						#layoutpolicy_vertical = expanding
-						margin = { 4 0 }
+						layoutpolicy_vertical = expanding
+						margin = { 14 6 }
 						margin_top = 10
 						margin_widget = {
 							name = "widget 1 full width"
@@ -459,24 +503,21 @@ base_window = {
 														position = { 0 4 }
 														tooltip = "[IdeaItem.GetGroupMatchingTooltip]"
 													}
-													
-													button = {
+													icon_card_idea = {
 														name = "Idea Button"
-														position = { 0 16 }
-														tooltipwidget = idea_item_desc_tooltip
-
-														visible = "[IdeaItem.IsValid]"
-														alwaystransparent = no
 														size = { 56 56 }
-														gfxtype = framedbuttongfx
+														position = { 0 16 }
 														widgetanchor = center
-														parentanchor = center	
-														enabled = yes
-														texture = "[IdeaItem.GetIcon]"
-														onclick = "[IdeaItem.OpenSelection]"
+														parentanchor = center
+														visible = "[IdeaItem.IsValid]"
+														blockoverride "Icon" { 
+															texture = "[IdeaItem.GetIcon]"
+															size = { 48 48 }
+															onclick = "[IdeaItem.OpenSelection]"
+														}
+														tooltipwidget = idea_item_desc_tooltip
 														using = DropShadow
 													}
-													 
 													button = {
 														name = "No Picked Idea"
 														position = { 0 16 }
@@ -642,12 +683,13 @@ base_window = {
 								}
 							}
 
-							margin_widget = {
-								size = { 318 230 }
+							flowcontainer = {
+								#size = { 318 230 }
 								#using = NoninteractableBG
 								position = { 0 22 }
 								parentanchor = right|vcenter
-
+								direction = vertical
+								
 								flowcontainer = {
 									parentanchor = center
 									direction = horizontal
@@ -718,6 +760,12 @@ base_window = {
 											}
 										}
 									}
+								}
+								flowcontainer = {
+									parentanchor = center
+									direction = horizontal
+									spacing = 0
+
 									widget = {
 										size = { 106 88 }
 										flowcontainer = {
@@ -750,21 +798,35 @@ base_window = {
 											}
 										}
 									}
-									CustomPiechart = {
-										blockoverride "datamodel" {
-											datamodel = "[OverviewView.GetPlayer.MakeScope.GetList('list_of_wealth_distribution')]"
-										}
-										blockoverride "slice_tooltip" {
-											tooltip = "custom_piechart_loc"
-										}
-										blockoverride "slice_size" {
-											value = "[FixedPointToFloat( Scope.GetProvince.MakeScope.GetVariable('WEALTH_national_data_value').GetValue )]"
-										}
-										blockoverride "tag_text" {
-											text = "I'm a tag"
+									widget = {
+										size = { 106 88 }
+										CustomPiechart = {
+											blockoverride "widget_size_and_pos" {
+												size = { 106 88 }
+											}
+											blockoverride "datamodel" {
+												datamodel = "[OverviewView.GetPlayer.MakeScope.GetList('list_of_wealth_distribution')]"
+											}
+											blockoverride "slice_tooltip" {
+												tooltip = "custom_piechart_loc"
+											}
+											blockoverride "slice_size" {
+												value = "[FixedPointToFloat( Scope.GetProvince.MakeScope.GetVariable('WEALTH_national_data_value').GetValue )]"
+											}
+											blockoverride "piechart_size_and_pos" {
+												size = { 64 64 }
+												parentanchor = hcenter
+											}
+											blockoverride "tag_size_and_pos" {
+												size = { 106 20 }
+												position = { 0 64 }
+												parentanchor = hcenter
+											}
+											blockoverride "tag_text" {
+												text = "I'm a tag"
+											}
 										}
 									}
-									
 								}
 							}
 						}
@@ -996,392 +1058,343 @@ base_window = {
 						}
 					}
 				}
-				margin_widget = {
-					name = "Provinces Tab"
-					visible = "[GetVariableSystem.HasValue( 'OverviewTabs', 'Details' )]"
-					size = { 100% 740 } 
-					position = { 0 50 }
-					margin_widget = {
-						name = "tabs"
-						size = { 100% 34 }
-						@pmincategorybuttonwidth = 292
-						@pmaxcategorybuttonwidth = 400
-						@pmincategorybuttonheight = 28 
-						@pmaxcategorybuttonheight = 34
-						parentanchor = hcenter
-						hbox = { 
-							layoutpolicy_vertical = shrinking
-							layoutpolicy_horizontal = shrinking
+				margin_widget = { 
+					name = "Province list"
+					size = { 100% 726 }
+					position = { 0 48 } 
+					margin = { 14 6 }
+					visible = "[GetVariableSystem.Exists('governorships_tab_open')]"
+					scrollarea = {
+						size = { 100% 100% }
+						scrollbarpolicy_horizontal = always_off
 						
-							category_tab = {
-								name = "t_governorships_tab"
-								blockoverride "MinSize" { size = { @pmincategorybuttonwidth @pmincategorybuttonheight } }
-								blockoverride "MaxSize" { size = { @pmaxcategorybuttonwidth @pmaxcategorybuttonheight } }
-								blockoverride "MinVisible" { visible = "[GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' )]" }
-								blockoverride "MaxVisible" { visible = "[Not( GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' ) )]" }
-								######## Shared Overrides
-								blockoverride "Center_text" { text = "GOVERNORSHIPS" }
-								######## Small Button Overrides
-								blockoverride "ClickFunction"
-								{
-									onclick = "[GetVariableSystem.Set( 'ManagementTab', 'Govnernorships' )]"
-								}
-							}
-
-							category_tab = {
-								name = "t_provinces_tab"
-								blockoverride "MinSize" { size = { @pmincategorybuttonwidth @pmincategorybuttonheight } }
-								blockoverride "MaxSize" { size = { @pmaxcategorybuttonwidth @pmaxcategorybuttonheight } }
-								blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' ) )]" }
-								blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' )]" }
-								######## Shared Overrides
-								blockoverride "Center_text" { text = "PROVINCES" }
-								######## Small Button Overrides
-								blockoverride "ClickFunction"
-								{
-									onclick = "[GetVariableSystem.Set( 'ManagementTab', 'Provinces' )]"
-								}
-							} 		
+						using = VerticalScrollAreaCutOff
+						scrollbar_vertical = {
+							using = VerticalScrollBar
 						}
-					}
-					
-					margin_widget = { 
-						name = "Province list"
-						size = { 100% 726 }
-						position = { 0 48 } 
-						visible = "[Not( GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' ) )]"
-						scrollarea = {
-							size = { 100% 100% }
-							scrollbarpolicy_horizontal = always_off
-							
-							using = VerticalScrollAreaCutOff
-							scrollbar_vertical = {
-								using = VerticalScrollBar
-							}
-							
-							scrollwidget = {
-								dynamicgridbox = {
-									datamodel = "[OverviewView.GetGovernorships]"
-									
-									item = {
-										flowcontainer = {
-											direction = vertical
-											ignoreinvisible = yes
-											spacing = 6
-											widget = {
-												size = { 684 64 }
-												category_drop = {
-													size = { 684 60 }
-													onclick = "[GetVariableSystem.Set( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
-													visible = "[Or( Not( GetVariableSystem.Exists( OverviewGovernorshipItem.GetGovernorship.GetName ) ), GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'no' ) )]"
-													parentanchor = vcenter
-													cpt_button = {
-														size = { 40 60 }
-														datacontext = "[OverviewGovernorshipItem.GetGovernorship.GetGovernorOrRuler]"
-													}
-													tag = {
-														position = { 50 0 }
-														parentanchor = vcenter
-														text = "[OverviewGovernorshipItem.GetGovernorship.GetName]"
-													}
-													icon_and_text = {
-														size = { 120 0 }
-														parentanchor = vcenter|right
-														position = { -32 -5 }
-														blockoverride "Icon" { using = icon_poptype }
-														blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.GetTotalPopulation]" }
-														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetPopulationInfo]"
-													}
-													icon_and_text = {
-														size = { 120 0 }
-														parentanchor = vcenter|right
-														position = { -172 -5 }
-														blockoverride "Icon" { using = icon_treasury }
-														blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.MakeScope.GetVariable('governorship_this_quarter_spend_on_clothing').GetValue|+=]" }
-														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetIncomeBreakdown]" 
-													}
-													
+						
+						scrollwidget = {
+							dynamicgridbox = {
+								datamodel = "[OverviewView.GetGovernorships]"
+								
+								item = {
+									flowcontainer = {
+										direction = vertical
+										ignoreinvisible = yes
+										spacing = 6
+										widget = {
+											size = { 684 64 }
+											category_drop = {
+												size = { 684 60 }
+												onclick = "[GetVariableSystem.Set( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
+												visible = "[Or( Not( GetVariableSystem.Exists( OverviewGovernorshipItem.GetGovernorship.GetName ) ), GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'no' ) )]"
+												parentanchor = vcenter
+												cpt_button = {
+													size = { 40 60 }
+													datacontext = "[OverviewGovernorshipItem.GetGovernorship.GetGovernorOrRuler]"
 												}
-												category_drop = {
-													size = { 684 60 }
-													visible = "[GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
-													onclick = "[GetVariableSystem.Set( OverviewGovernorshipItem.GetGovernorship.GetName, 'no' )]"
+												tag = {
+													position = { 50 0 }
 													parentanchor = vcenter
-													cpt_button = {
-														size = { 40 60 }
-														datacontext = "[OverviewGovernorshipItem.GetGovernorship.GetGovernorOrRuler]"
-													}
-													tag = {
-														position = { 50 0 }
-														parentanchor = vcenter
-														text = "[OverviewGovernorshipItem.GetGovernorship.GetName]"
-													}
-													icon_and_text = {
-														size = { 120 0 }
-														parentanchor = vcenter|right
-														position = { -32 -5 }
-														blockoverride "Icon" { using = icon_poptype }
-														blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.GetTotalPopulation]" }
-														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetPopulationInfo]"
-													}
-													icon_and_text = {
-														size = { 120 0 }
-														parentanchor = vcenter|right
-														position = { -172 -5 }
-														blockoverride "Icon" { using = icon_treasury }
-														blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.MakeScope.ScriptValue('ECONOMY_total_tax_from_governorship').GetValue|+=]" }
-														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetIncomeBreakdown]" 
-													}
+													text = "[OverviewGovernorshipItem.GetGovernorship.GetName]"
+												}
+												icon_and_text = {
+													size = { 120 0 }
+													parentanchor = vcenter|right
+													position = { -32 -5 }
+													blockoverride "Icon" { using = icon_poptype }
+													blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.GetTotalPopulation]" }
+													tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetPopulationInfo]"
+												}
+												icon_and_text = {
+													size = { 120 0 }
+													parentanchor = vcenter|right
+													position = { -172 -5 }
+													blockoverride "Icon" { using = icon_treasury }
+													blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.MakeScope.GetVariable('governorship_this_quarter_spend_on_clothing').GetValue|+=]" }
+													tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetIncomeBreakdown]" 
+												}
+												
+											}
+											category_drop = {
+												size = { 684 60 }
+												visible = "[GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
+												onclick = "[GetVariableSystem.Set( OverviewGovernorshipItem.GetGovernorship.GetName, 'no' )]"
+												parentanchor = vcenter
+												cpt_button = {
+													size = { 40 60 }
+													datacontext = "[OverviewGovernorshipItem.GetGovernorship.GetGovernorOrRuler]"
+												}
+												tag = {
+													position = { 50 0 }
+													parentanchor = vcenter
+													text = "[OverviewGovernorshipItem.GetGovernorship.GetName]"
+												}
+												icon_and_text = {
+													size = { 120 0 }
+													parentanchor = vcenter|right
+													position = { -32 -5 }
+													blockoverride "Icon" { using = icon_poptype }
+													blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.GetTotalPopulation]" }
+													tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetPopulationInfo]"
+												}
+												icon_and_text = {
+													size = { 120 0 }
+													parentanchor = vcenter|right
+													position = { -172 -5 }
+													blockoverride "Icon" { using = icon_treasury }
+													blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.MakeScope.ScriptValue('ECONOMY_total_tax_from_governorship').GetValue|+=]" }
+													tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetIncomeBreakdown]" 
 												}
 											}
-											fixedgridbox = {
-												name = "states_grid"
-												size = { 684 394 }
-												addcolumn = 680
-												addrow = 52
-												visible = "[GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
-												datamodel = "[OverviewGovernorshipItem.GetStates]"
-												
-												item = {
-													container = {
-														onmousehierarchyenter = "[SetHighlightArea( StateItem.GetState.GetArea )]"
-														onmousehierarchyleave = "[ClearHighlightColors]"
+										}
+										fixedgridbox = {
+											name = "states_grid"
+											size = { 684 394 }
+											addcolumn = 680
+											addrow = 52
+											visible = "[GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
+											datamodel = "[OverviewGovernorshipItem.GetStates]"
+											
+											item = {
+												container = {
+													onmousehierarchyenter = "[SetHighlightArea( StateItem.GetState.GetArea )]"
+													onmousehierarchyleave = "[ClearHighlightColors]"
 
-														list_entry = { 
-															size = { 684 50 }
+													list_entry = { 
+														size = { 684 50 }
+													}
+
+													flowcontainer = {
+														spacing = 4
+														ignoreinvisible = yes
+
+														textbox = {
+															align = left
+															max_width = 174
+															fontsize_min = 14
+															elide = right
+															margin_left = 8
+															parentanchor = vcenter
+															minimumsize = { 174 28 }
+															text = "[StateItem.GetState.GetShortName]"
+															using = BaseFontS
+															using = Black_FontColor
+														}
+														
+														widget = {
+															size = { 20 2 }
+														}
+														
+														textbox = {
+															align = left
+															max_width = 32
+															fontsize_min = 12
+															margin_left = 8
+															parentanchor = vcenter 
+															minimumsize = { 32 14 }
+															text = "[StateItem.GetState.GetTotalPopulation]"
+															using = BaseFontS
+															using = Black_FontColor
+															datacontext = "[StateItem]"
+															tooltip = "ALL_POP_TT_STATE_ITEM"
+														}
+														
+														textbox = {
+															align = left
+															max_width = 56
+															fontsize_min = 12
+															margin_left = 8
+															parentanchor = vcenter 
+															minimumsize = { 56 12 }
+															text = "[StateItem.GetState.GetTradeRoutesShort]"
+															using = BaseFontS
+															using = Black_FontColor
+															datacontext = "[StateItem]"
+															tooltip = "[StateItem.GetState.GetTradeRoutesTooltip]"
+														}
+														
+														icon_and_text_progress_S = {
+															size = { 100 46 }
+															parentanchor = vcenter
+															tooltip = "[StateItem.GetState.GetLoyaltyTooltip]"
+
+															blockoverride "Text"
+															{
+																text = "[StateItem.GetState.GetStateLoyalty|0]/100"
+																minimumsize = { 60 24 }
+															}
+
+															blockoverride "Icon"
+															{
+																texture = "gfx/interface/icons/shared_icons/loyalty.dds"
+															}
+
+															blockoverride "Value"
+															{
+																### TODO Correct this value
+																value = "[FixedPointToFloat(StateItem.GetState.GetStateLoyalty)]"
+															}
+
+															#texture = "gfx/interface/icons/shared_icons/state_loyalty_increase.dds"
+															#visible = "[Not(StateItem.GetState.IsCapitalState)]"
+															#size = { 26 26 }
+															#framesize = { 50 50 }
+															#frame = "[StateItem.GetState.GetMonthlyLoyaltyFrame]"
+														
+															blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
+															blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
+														}
+														widget = {
+															size = { 1 2 }
+														}
+														
+														icon_and_text_progress_S = { 
+															parentanchor = vcenter
+															name = "food"
+															size = { 100 46 }
+															tooltip = "[StateItem.GetState.GetFoodTooltip]"
+
+															blockoverride "Icon" 
+															{
+																texture = "gfx/interface/icons/shared_icons/food.dds"
+																framesize = { 50 50 }
+																size = { 26 26 }
+																frame = "[StateItem.GetState.GetFoodFrame]"
+															}
+
+															blockoverride "Text"
+															{
+																text = "[StateItem.GetState.GetFood|0]/[StateItem.GetState.GetFoodCapacity|0]"
+																minimumsize = { 60 24 }
+															}
+
+															blockoverride "Value"
+															{
+																value = "[FixedPointToFloat(StateItem.GetState.GetFoodCapacityPercent)]"
+															}
+															
+															#progressbar = {
+															#	name = "foodbar_negative"
+															#	size = { 100% 8 }
+															#	position = { 0 0 }
+															#	parentanchor = bottom
+															#	visible = "[LessThan_CFixedPoint(StateItem.GetState.GetMonthlyFood, '(CFixedPoint)0')]"
+															#	using = progressbar_red_horizontal
+															#	value = "[FixedPointToFloat(StateItem.GetState.GetFoodCapacityPercent)]"
+															#}
+															
+															blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
+															blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
+															
 														}
 
-														flowcontainer = {
-															spacing = 4
-															ignoreinvisible = yes
+														widget = {
+															size { 4 28 }
+															parentanchor = vcenter
+														}
 
-															textbox = {
-																align = left
-																max_width = 174
-																fontsize_min = 14
-																elide = right
-																margin_left = 8
-																parentanchor = vcenter
-																minimumsize = { 174 28 }
-																text = "[StateItem.GetState.GetShortName]"
-																using = BaseFontS
-																using = Black_FontColor
+														icon_button_square = {
+															parentanchor = vcenter
+															size = { 34 34 }
+															datacontext = "[GetScriptedGui('release_subject_button')]"
+															visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+															enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+															tooltip = "RELEASE_SUBJECT_BUTTON_TOOLTIP"
+
+															blockoverride "Icon"
+															{ 
+																texture = "gfx/interface/icons/shared_icons/release_subject.dds"
+															}
+
+															blockoverride "On_click"
+															{ 
+																onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+															}
+														}
+
+														icon_button_square = {
+															parentanchor = vcenter
+															size = { 34 34 }
+															datacontext = "[StateItem.GetState]"
+															tooltip = "OVERVIEW_GOVPOL_TOOLTIP"
+															blockoverride "Icon"
+															{ 
+																texture = "[GetGovernorPolicyIcon(StateItem.GetState.GetGovernorPolicy)]"
+																size = { 31 31 }
+															}
+
+															
+															blockoverride "On_click"
+															{ 
+																onclick = "[ChangePolicy(StateItem.GetState)]"
+															}
+														}
+
+														icon_button_square = {
+															visible = "[Not(StateItem.GetState.IsAiAllowedToTrade)]"
+															
+															parentanchor = vcenter
+															size = { 34 34 }
+
+															tooltip = "TRADEROUTE_AUTOMATIC_FOR_STATE"
+															blockoverride "Icon"
+															{
+																texture = "gfx/interface/icons/shared_icons/trade.dds"
+																size = { 24 24 }
+																position = { -6 -3 }
+																
+																
+																icon = {
+																	using = negative_color_texture
+																	size = { 24 22 }
+																	position = { 10 5 }
+																	parentanchor = bottom|right
+																	modify_texture = {
+																		name = "Alpha"
+																		texture = "gfx/interface/base_parts/ex_mark.dds"
+																		framesize = { 50 50 }
+																		frame = 2
+																		blend_mode = alphamultiply
+																	}	
+																}
 															}
 															
-															widget = {
-																size = { 20 2 }
+
+															blockoverride "On_click"
+															{
+																onclick = "[StateItem.ToggleAiTradeAllowance]"
 															}
+														}
+
+														icon_button_square = {
+															visible = "[StateItem.GetState.IsAiAllowedToTrade]"
 															
-															textbox = {
-																align = left
-																max_width = 32
-																fontsize_min = 12
-																margin_left = 8
-																parentanchor = vcenter 
-																minimumsize = { 32 14 }
-																text = "[StateItem.GetState.GetTotalPopulation]"
-																using = BaseFontS
-																using = Black_FontColor
-																datacontext = "[StateItem]"
-																tooltip = "ALL_POP_TT_STATE_ITEM"
+															parentanchor = vcenter
+															size = { 34 34 }
+
+															tooltip = "TRADEROUTE_NOT_AUTOMATIC_FOR_STATE"
+															blockoverride "Icon"
+															{
+																texture = "gfx/interface/icons/shared_icons/trade.dds"
+																size = { 30 30 }
 															}
+
+															blockoverride "On_click"
+															{
+																onclick = "[StateItem.ToggleAiTradeAllowance]"
+															}
+														}
+
+														goto_button = {
+															parentanchor = vcenter
+															size = { 34 34 }
+															datacontext = "[StateItem.GetState]"
+															tooltip = "go_to"
 															
-															textbox = {
-																align = left
-																max_width = 56
-																fontsize_min = 12
-																margin_left = 8
-																parentanchor = vcenter 
-																minimumsize = { 56 12 }
-																text = "[StateItem.GetState.GetTradeRoutesShort]"
-																using = BaseFontS
-																using = Black_FontColor
-																datacontext = "[StateItem]"
-																tooltip = "[StateItem.GetState.GetTradeRoutesTooltip]"
-															}
-															
-															icon_and_text_progress_S = {
-																size = { 100 46 }
-																parentanchor = vcenter
-																tooltip = "[StateItem.GetState.GetLoyaltyTooltip]"
-
-																blockoverride "Text"
-																{
-																	text = "[StateItem.GetState.GetStateLoyalty|0]/100"
-																	minimumsize = { 60 24 }
-																}
-
-																blockoverride "Icon"
-																{
-																	texture = "gfx/interface/icons/shared_icons/loyalty.dds"
-																}
-
-																blockoverride "Value"
-																{
-																	### TODO Correct this value
-																	value = "[FixedPointToFloat(StateItem.GetState.GetStateLoyalty)]"
-																}
-
-																#texture = "gfx/interface/icons/shared_icons/state_loyalty_increase.dds"
-																#visible = "[Not(StateItem.GetState.IsCapitalState)]"
-																#size = { 26 26 }
-																#framesize = { 50 50 }
-																#frame = "[StateItem.GetState.GetMonthlyLoyaltyFrame]"
-															
-																blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
-																blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
-															}
-															widget = {
-																size = { 1 2 }
-															}
-															
-															icon_and_text_progress_S = { 
-																parentanchor = vcenter
-																name = "food"
-																size = { 100 46 }
-																tooltip = "[StateItem.GetState.GetFoodTooltip]"
-
-																blockoverride "Icon" 
-																{
-																	texture = "gfx/interface/icons/shared_icons/food.dds"
-																	framesize = { 50 50 }
-																	size = { 26 26 }
-																	frame = "[StateItem.GetState.GetFoodFrame]"
-																}
-
-																blockoverride "Text"
-																{
-																	text = "[StateItem.GetState.GetFood|0]/[StateItem.GetState.GetFoodCapacity|0]"
-																	minimumsize = { 60 24 }
-																}
-
-																blockoverride "Value"
-																{
-																	value = "[FixedPointToFloat(StateItem.GetState.GetFoodCapacityPercent)]"
-																}
-																
-																#progressbar = {
-																#	name = "foodbar_negative"
-																#	size = { 100% 8 }
-																#	position = { 0 0 }
-																#	parentanchor = bottom
-																#	visible = "[LessThan_CFixedPoint(StateItem.GetState.GetMonthlyFood, '(CFixedPoint)0')]"
-																#	using = progressbar_red_horizontal
-																#	value = "[FixedPointToFloat(StateItem.GetState.GetFoodCapacityPercent)]"
-																#}
-																
-																blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
-																blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
-																
-															}
-
-															widget = {
-																size { 4 28 }
-																parentanchor = vcenter
-															}
-
-															icon_button_square = {
-																parentanchor = vcenter
-																size = { 34 34 }
-																datacontext = "[GetScriptedGui('release_subject_button')]"
-																visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
-																enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
-																tooltip = "RELEASE_SUBJECT_BUTTON_TOOLTIP"
-
-																blockoverride "Icon"
-																{ 
-																	texture = "gfx/interface/icons/shared_icons/release_subject.dds"
-																}
-
-																blockoverride "On_click"
-																{ 
-																	onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
-																}
-															}
-
-															icon_button_square = {
-																parentanchor = vcenter
-																size = { 34 34 }
-																datacontext = "[StateItem.GetState]"
-																tooltip = "OVERVIEW_GOVPOL_TOOLTIP"
-																blockoverride "Icon"
-																{ 
-																	texture = "[GetGovernorPolicyIcon(StateItem.GetState.GetGovernorPolicy)]"
-																	size = { 31 31 }
-																}
-
-																
-																blockoverride "On_click"
-																{ 
-																	onclick = "[ChangePolicy(StateItem.GetState)]"
-																}
-															}
-
-															icon_button_square = {
-																visible = "[Not(StateItem.GetState.IsAiAllowedToTrade)]"
-																
-																parentanchor = vcenter
-																size = { 34 34 }
-
-																tooltip = "TRADEROUTE_AUTOMATIC_FOR_STATE"
-																blockoverride "Icon"
-																{
-																	texture = "gfx/interface/icons/shared_icons/trade.dds"
-																	size = { 24 24 }
-																	position = { -6 -3 }
-																	
-																	
-																	icon = {
-																		using = negative_color_texture
-																		size = { 24 22 }
-																		position = { 10 5 }
-																		parentanchor = bottom|right
-																		modify_texture = {
-																			name = "Alpha"
-																			texture = "gfx/interface/base_parts/ex_mark.dds"
-																			framesize = { 50 50 }
-																			frame = 2
-																			blend_mode = alphamultiply
-																		}	
-																	}
-																}
-																
-
-																blockoverride "On_click"
-																{
-																	onclick = "[StateItem.ToggleAiTradeAllowance]"
-																}
-															}
-
-															icon_button_square = {
-																visible = "[StateItem.GetState.IsAiAllowedToTrade]"
-																
-																parentanchor = vcenter
-																size = { 34 34 }
-
-																tooltip = "TRADEROUTE_NOT_AUTOMATIC_FOR_STATE"
-																blockoverride "Icon"
-																{
-																	texture = "gfx/interface/icons/shared_icons/trade.dds"
-																	size = { 30 30 }
-																}
-
-																blockoverride "On_click"
-																{
-																	onclick = "[StateItem.ToggleAiTradeAllowance]"
-																}
-															}
-
-															goto_button = {
-																parentanchor = vcenter
-																size = { 34 34 }
-																datacontext = "[StateItem.GetState]"
-																tooltip = "go_to"
-																
-																blockoverride "On_click"
-																{ 
-																	onclick = "[OnClickOnState(StateItem.GetState)]"
-																}
+															blockoverride "On_click"
+															{ 
+																onclick = "[OnClickOnState(StateItem.GetState)]"
 															}
 														}
 													}
@@ -1393,478 +1406,478 @@ base_window = {
 							}
 						}
 					}
+				}
+				margin_widget = { 
+					name = "States list"
+					size = { 100% 726 }
+					position = { 0 48 } 
+					visible = "[GetVariableSystem.Exists('provinces_tab_open')]"
+					margin = { 14 6 }
 					margin_widget = { 
-						name = "States list"
-						size = { 100% 726 }
-						position = { 0 48 } 
-						visible = "[GetVariableSystem.HasValue( 'ManagementTab', 'Provinces' )]"
-						
-						margin_widget = { 
-							size = { 100% 46 }
-							position = { 1 0 }
-							flowcontainer = {
-								name = "Sort Buttons"
-								spacing = 3
-						
-								text_button_sort = {
-									name = "sort_name"
-									size = { 121 0 }
-									tooltip = SORT_PROVINCE_TT
-						
-									blockoverride "On_click"
-									{
-										onclick = "[OverviewView.Sort('name')]"
-									}
-									
-									blockoverride "DownState" { down = "[OverviewView.IsSorted('name')]" }
-						
-									blockoverride "Icon"
-									{
-										visible = no
-										texture = "gfx/interface/icons/shared_icons/province.dds"
-										size = { 48 54 }
-									}
-									
-									blockoverride "Button_text"
-									{
-										text = "A_Z"
-									}
+						size = { 100% 46 }
+						position = { 1 0 }
+						flowcontainer = {
+							name = "Sort Buttons"
+							spacing = 3
+					
+							text_button_sort = {
+								name = "sort_name"
+								size = { 121 0 }
+								tooltip = SORT_PROVINCE_TT
+					
+								blockoverride "On_click"
+								{
+									onclick = "[OverviewView.Sort('name')]"
 								}
 								
-								
-								text_button_sort = {
-									name = "sort_gov"
-									size = { 32 0 }
-									tooltip = SORT_GOVERNOR_TT
-						
-									blockoverride "On_click"
-									{
-										onclick = "[OverviewView.Sort('governor')]"
-									}
-						
-									blockoverride "DownState" { down = "[OverviewView.IsSorted('governor')]" }
-									
-									blockoverride "Button_text"
-									{
-										text = ""
-									}
-								}
-						
-								text_button_sort = {
-									name = "sort_pops"
-									size = { 34 0 }
-									tooltip = "SORT_POPS_TT"
-									
-						
-									blockoverride "On_click"
-									{
-										onclick = "[OverviewView.Sort('total_population')]"
-									}
-						
-									blockoverride "DownState" { down = "[OverviewView.IsSorted('total_population')]" }
-						
-									blockoverride "Button_text"
-									{
-										text = ""
-									}
-						
-									blockoverride "Icon"
-									{
-										using = icon_pop_type
-										size = { 34 34 }
-									}	
+								blockoverride "DownState" { down = "[OverviewView.IsSorted('name')]" }
+					
+								blockoverride "Icon"
+								{
+									visible = no
+									texture = "gfx/interface/icons/shared_icons/province.dds"
+									size = { 48 54 }
 								}
 								
-								text_button_sort = {
-									name = "sort_trade_routes"
-									size = { 44 0 }
-									tooltip = SORT_TRADE_TT
-									
-						
-									blockoverride "On_click"
-									{
-										onclick = "[OverviewView.Sort('trade')]"
-									}
-									blockoverride "DownState" { down = "[OverviewView.IsSorted('trade')]" }
-						
-									blockoverride "Button_text"
-									{
-										text = ""
-									}
-						
-									blockoverride "Icon"
-									{
-										texture = "gfx/interface/icons/shared_icons/trade.dds"
-									}	
+								blockoverride "Button_text"
+								{
+									text = "A_Z"
 								}
+							}
+							
+							
+							text_button_sort = {
+								name = "sort_gov"
+								size = { 32 0 }
+								tooltip = SORT_GOVERNOR_TT
+					
+								blockoverride "On_click"
+								{
+									onclick = "[OverviewView.Sort('governor')]"
+								}
+					
+								blockoverride "DownState" { down = "[OverviewView.IsSorted('governor')]" }
 								
-								text_button_sort = {
-									name = "sort_loyalty"
-									size = { 100 0 }
-									tooltip = SORT_LOYALTY_TT
-									blockoverride "On_click"
-									{
-										onclick = "[OverviewView.Sort('loyalty')]"
-									}
-						
-									blockoverride "DownState" { down = "[OverviewView.IsSorted('loyalty')]" }
-						
-									blockoverride "Button_text"
-									{
-										text = ""
-									}
-						
-									blockoverride "Icon"
-									{
-										texture = "gfx/interface/icons/shared_icons/loyalty.dds"
-									}	
+								blockoverride "Button_text"
+								{
+									text = ""
 								}
-						
-								text_button_sort = {
-									name = "sort_food"
-									size = { 101 0 }
-									tooltip = SORT_FOOD_TT
-									blockoverride "On_click"
-									{
-										onclick = "[OverviewView.Sort('food')]"
-									}
-						
-									blockoverride "DownState" { down = "[OverviewView.IsSorted('food')]" }
-									blockoverride "Button_text"
-									{
-										text = ""
-									}
-						
-									blockoverride "Icon"
-									{
-										texture = "gfx/interface/icons/shared_icons/food.dds"
-										size = { 34 34 }
-									}	
+							}
+					
+							text_button_sort = {
+								name = "sort_pops"
+								size = { 34 0 }
+								tooltip = "SORT_POPS_TT"
+								
+					
+								blockoverride "On_click"
+								{
+									onclick = "[OverviewView.Sort('total_population')]"
 								}
-								text_button_sort = {
-									name = "sort_integrated_pops"
-									size = { 42 0 }
-									tooltip = SORT_INTEGRATED_POPS_TT
-									blockoverride "On_click"
-									{
-										onclick = "[OverviewView.Sort('integrated_pops')]"
-									}
-						
-									blockoverride "DownState" { down = "[OverviewView.IsSorted('integrated_pops')]" }
-									blockoverride "Button_text"
-									{
-										text = ""
-									}
-						
-									blockoverride "Icon"
-									{
-										using = icon_culture
-										size = { 32 32 }
-									}	
+					
+								blockoverride "DownState" { down = "[OverviewView.IsSorted('total_population')]" }
+					
+								blockoverride "Button_text"
+								{
+									text = ""
 								}
-								text_button_sort = {
-									name = "sort_religious_unity"
-									size = { 42 0 }
-									tooltip = SORT_RELIGIOUS_UNITY_TT
-									blockoverride "On_click"
-									{
-										onclick = "[OverviewView.Sort('religious_unity')]"
-									}
-						
-									blockoverride "DownState" { down = "[OverviewView.IsSorted('religious_unity')]" }
-									blockoverride "Button_text"
-									{
-										text = ""
-									}
-						
-									blockoverride "Icon"
-									{
-										using = icon_religious
-										size = { 32 32 }
-									}	
+					
+								blockoverride "Icon"
+								{
+									using = icon_pop_type
+									size = { 34 34 }
+								}	
+							}
+							
+							text_button_sort = {
+								name = "sort_trade_routes"
+								size = { 44 0 }
+								tooltip = SORT_TRADE_TT
+								
+					
+								blockoverride "On_click"
+								{
+									onclick = "[OverviewView.Sort('trade')]"
 								}
+								blockoverride "DownState" { down = "[OverviewView.IsSorted('trade')]" }
+					
+								blockoverride "Button_text"
+								{
+									text = ""
+								}
+					
+								blockoverride "Icon"
+								{
+									texture = "gfx/interface/icons/shared_icons/trade.dds"
+								}	
+							}
+							
+							text_button_sort = {
+								name = "sort_loyalty"
+								size = { 100 0 }
+								tooltip = SORT_LOYALTY_TT
+								blockoverride "On_click"
+								{
+									onclick = "[OverviewView.Sort('loyalty')]"
+								}
+					
+								blockoverride "DownState" { down = "[OverviewView.IsSorted('loyalty')]" }
+					
+								blockoverride "Button_text"
+								{
+									text = ""
+								}
+					
+								blockoverride "Icon"
+								{
+									texture = "gfx/interface/icons/shared_icons/loyalty.dds"
+								}	
+							}
+					
+							text_button_sort = {
+								name = "sort_food"
+								size = { 101 0 }
+								tooltip = SORT_FOOD_TT
+								blockoverride "On_click"
+								{
+									onclick = "[OverviewView.Sort('food')]"
+								}
+					
+								blockoverride "DownState" { down = "[OverviewView.IsSorted('food')]" }
+								blockoverride "Button_text"
+								{
+									text = ""
+								}
+					
+								blockoverride "Icon"
+								{
+									texture = "gfx/interface/icons/shared_icons/food.dds"
+									size = { 34 34 }
+								}	
+							}
+							text_button_sort = {
+								name = "sort_integrated_pops"
+								size = { 42 0 }
+								tooltip = SORT_INTEGRATED_POPS_TT
+								blockoverride "On_click"
+								{
+									onclick = "[OverviewView.Sort('integrated_pops')]"
+								}
+					
+								blockoverride "DownState" { down = "[OverviewView.IsSorted('integrated_pops')]" }
+								blockoverride "Button_text"
+								{
+									text = ""
+								}
+					
+								blockoverride "Icon"
+								{
+									using = icon_culture
+									size = { 32 32 }
+								}	
+							}
+							text_button_sort = {
+								name = "sort_religious_unity"
+								size = { 42 0 }
+								tooltip = SORT_RELIGIOUS_UNITY_TT
+								blockoverride "On_click"
+								{
+									onclick = "[OverviewView.Sort('religious_unity')]"
+								}
+					
+								blockoverride "DownState" { down = "[OverviewView.IsSorted('religious_unity')]" }
+								blockoverride "Button_text"
+								{
+									text = ""
+								}
+					
+								blockoverride "Icon"
+								{
+									using = icon_religious
+									size = { 32 32 }
+								}	
 							}
 						}
+					}
+					
+					scrollarea = {
+						size = { 100% 688 }
+						position = { 0 38 }
+						scrollbarpolicy_horizontal = always_off
 						
-						scrollarea = {
-							size = { 100% 688 }
-							position = { 0 38 }
-							scrollbarpolicy_horizontal = always_off
-							
-							using = VerticalScrollAreaCutOff
-							scrollbar_vertical = {
-								using = VerticalScrollBar
-							}
-							scrollwidget = {
-								fixedgridbox = {
-									name = "states_grid"
-									size = { 688 394 }
-									addcolumn = 688
-									addrow = 54
-									datamodel = "[OverviewView.GetStates]"
-									
-									item = {
-										container = {
-											onmousehierarchyenter = "[SetHighlightArea( StateItem.GetState.GetArea )]"
-											onmousehierarchyleave = "[ClearHighlightColors]"
+						using = VerticalScrollAreaCutOff
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+						scrollwidget = {
+							fixedgridbox = {
+								name = "states_grid"
+								size = { 688 394 }
+								addcolumn = 688
+								addrow = 54
+								datamodel = "[OverviewView.GetStates]"
+								
+								item = {
+									container = {
+										onmousehierarchyenter = "[SetHighlightArea( StateItem.GetState.GetArea )]"
+										onmousehierarchyleave = "[ClearHighlightColors]"
 
-											list_entry = { 
-												size = { 688 52 }
+										list_entry = { 
+											size = { 688 52 }
+										}
+
+										flowcontainer = {
+											spacing = 3
+											ignoreinvisible = yes
+
+											textbox = {
+												align = left
+												max_width = 120
+												fontsize_min = 11
+												elide = right
+												margin_left = 6
+												margin_bottom = 4
+												parentanchor = vcenter
+												minimumsize = { 120 28 }
+												text = "[StateItem.GetState.GetShortName]"
+												using = BaseFontS
+												using = Black_FontColor
+											}
+											
+											cpt_button = {
+												size = { 34 50 }
+												datacontext = "[StateItem.GetState.GetGovernorOrRuler]"
+											}
+											
+											textbox = {
+												align = left
+												max_width = 28
+												fontsize_min = 12
+												margin_left = 8
+												parentanchor = vcenter 
+												minimumsize = { 28 12 }
+												text = "[StateItem.GetState.GetTotalPopulation]"
+												using = BaseFontS
+												using = Black_FontColor
+												datacontext = "[StateItem]"
+												tooltip = "ALL_POP_TT_STATE_ITEM"
+											}
+											
+											textbox = {
+												align = left
+												max_width = 48
+												fontsize_min = 12
+												margin_left = 8
+												parentanchor = vcenter 
+												minimumsize = { 48 12 }
+												text = "[StateItem.GetState.GetTradeRoutesShort]"
+												using = BaseFontS
+												using = Black_FontColor
+												datacontext = "[StateItem]"
+												tooltip = "[StateItem.GetState.GetTradeRoutesTooltip]"
+											}
+											
+											icon_and_text_progress_S = {
+												size = { 100 46 }
+												parentanchor = vcenter
+												tooltip = "[StateItem.GetState.GetLoyaltyTooltip]"
+
+												blockoverride "Text"
+												{
+													text = "[StateItem.GetState.GetStateLoyalty|0]/100"
+													#minimumsize = { 60 24 }
+												}
+
+												blockoverride "Icon"
+												{
+													texture = "gfx/interface/icons/shared_icons/loyalty.dds"
+												}
+
+												blockoverride "Value"
+												{
+													### TODO Correct this value
+													value = "[FixedPointToFloat(StateItem.GetState.GetStateLoyalty)]"
+												}
+
+												#texture = "gfx/interface/icons/shared_icons/state_loyalty_increase.dds"
+												#visible = "[Not(StateItem.GetState.IsCapitalState)]"
+												#size = { 26 26 }
+												#framesize = { 50 50 }
+												#frame = "[StateItem.GetState.GetMonthlyLoyaltyFrame]"
+											
+												blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
+												blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
+											
+											}
+											widget = {
+												size = { 1 2 }
+											}
+											icon_and_text_progress_S = { 
+												parentanchor = vcenter
+												name = "food"
+												size = { 100 46 }
+												#blockoverride "size"
+												#{
+												#	size = { 110 7 }
+												#}
+												tooltip = "[StateItem.GetState.GetFoodTooltip]"
+
+												blockoverride "Icon" 
+												{
+													texture = "gfx/interface/icons/shared_icons/food.dds"
+													framesize = { 50 50 }
+													size = { 26 26 }
+													frame = "[StateItem.GetState.GetFoodFrame]"
+												}
+
+												blockoverride "Text"
+												{
+													text = "[StateItem.GetState.GetFood|0]/[StateItem.GetState.GetFoodCapacity|0]"
+													minimumsize = { 60 24 }
+												}
+
+												blockoverride "Value"
+												{
+													value = "[FixedPointToFloat(StateItem.GetState.GetFoodCapacityPercent)]"
+												}
+												blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
+												blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
+											}
+											widget = {
+												size = { 1 2 }
+											}
+											widget = {
+												size = { 36 24 }
+												datacontext = "[StateItem.GetState]"
+												tooltip = "STATE_INTEGRATED_CULTURE_TT"
+												textbox = { 
+													text = "[GuiScope.SetRoot( StateItem.GetState.MakeScope ).ScriptValue('state_culture_integrated_percent_svalue')|0%]"
+													autoresize = yes
+													using = BaseFontS
+													using = Black_FontColor
+													parentanchor = hcenter|vcenter
+													position = { 0 12 }
+												}
+											}
+											
+											widget = {
+												size = { 36 24 }
+												datacontext = "[StateItem.GetState]"
+												tooltip = "STATE_RELIGION_TT"
+												textbox = { 
+													text = "[GuiScope.SetRoot( StateItem.GetState.MakeScope ).ScriptValue('state_religion_integrated_percent_svalue')|0%]"
+													autoresize = yes
+													using = BaseFontS
+													using = Black_FontColor
+													parentanchor = hcenter|vcenter
+													position = { 0 12 }
+												}
+											}
+											widget = {
+												size = { 1 2 }
 											}
 
-											flowcontainer = {
-												spacing = 3
-												ignoreinvisible = yes
+											icon_button_square = {
+												parentanchor = vcenter
+												size = { 34 34 }
+												datacontext = "[GetScriptedGui('release_subject_button')]"
+												visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+												enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+												tooltip = "RELEASE_SUBJECT_BUTTON_TOOLTIP"
 
-												textbox = {
-													align = left
-													max_width = 120
-													fontsize_min = 11
-													elide = right
-													margin_left = 6
-													margin_bottom = 4
-													parentanchor = vcenter
-													minimumsize = { 120 28 }
-													text = "[StateItem.GetState.GetShortName]"
-													using = BaseFontS
-													using = Black_FontColor
+												blockoverride "Icon"
+												{ 
+													texture = "gfx/interface/icons/shared_icons/release_subject.dds"
 												}
+
+												blockoverride "On_click"
+												{ 
+													onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
+												}
+											}
+
+											icon_button_square = {
+												parentanchor = vcenter
+												size = { 34 34 }
+												datacontext = "[StateItem.GetState]"
+												tooltip = "OVERVIEW_GOVPOL_TOOLTIP"
+												blockoverride "Icon"
+												{ 
+													texture = "[GetGovernorPolicyIcon(StateItem.GetState.GetGovernorPolicy)]"
+												}
+
 												
-												cpt_button = {
-													size = { 34 50 }
-													datacontext = "[StateItem.GetState.GetGovernorOrRuler]"
+												blockoverride "On_click"
+												{ 
+													onclick = "[ChangePolicy(StateItem.GetState)]"
 												}
+											}
+											
+											icon_button_square = {
+												#visible = "[Not(StateItem.GetState.IsAiAllowedToTrade)]"
+												visible = "[StateItem.GetState.IsAiAllowedToTrade]"
 												
-												textbox = {
-													align = left
-													max_width = 28
-													fontsize_min = 12
-													margin_left = 8
-													parentanchor = vcenter 
-													minimumsize = { 28 12 }
-													text = "[StateItem.GetState.GetTotalPopulation]"
-													using = BaseFontS
-													using = Black_FontColor
-													datacontext = "[StateItem]"
-													tooltip = "ALL_POP_TT_STATE_ITEM"
+												parentanchor = vcenter
+												size = { 34 34 }
+
+												tooltip = "TRADEROUTE_NOT_AUTOMATIC_FOR_STATE"
+												blockoverride "Icon"
+												{
+													texture = "gfx/interface/icons/shared_icons/trade.dds"
+													size = { 30 30 }
 												}
+
+												blockoverride "On_click"
+												{
+													onclick = "[StateItem.ToggleAiTradeAllowance]"
+												}
+											}
+
+											icon_button_square = {
+												visible = "[Not(StateItem.GetState.IsAiAllowedToTrade)]"
+												#visible = "[StateItem.GetState.IsAiAllowedToTrade]"
 												
-												textbox = {
-													align = left
-													max_width = 48
-													fontsize_min = 12
-													margin_left = 8
-													parentanchor = vcenter 
-													minimumsize = { 48 12 }
-													text = "[StateItem.GetState.GetTradeRoutesShort]"
-													using = BaseFontS
-													using = Black_FontColor
-													datacontext = "[StateItem]"
-													tooltip = "[StateItem.GetState.GetTradeRoutesTooltip]"
-												}
-												
-												icon_and_text_progress_S = {
-													size = { 100 46 }
-													parentanchor = vcenter
-													tooltip = "[StateItem.GetState.GetLoyaltyTooltip]"
+												parentanchor = vcenter
+												size = { 34 34 }
 
-													blockoverride "Text"
-													{
-														text = "[StateItem.GetState.GetStateLoyalty|0]/100"
-														#minimumsize = { 60 24 }
-													}
-
-													blockoverride "Icon"
-													{
-														texture = "gfx/interface/icons/shared_icons/loyalty.dds"
-													}
-
-													blockoverride "Value"
-													{
-														### TODO Correct this value
-														value = "[FixedPointToFloat(StateItem.GetState.GetStateLoyalty)]"
-													}
-
-													#texture = "gfx/interface/icons/shared_icons/state_loyalty_increase.dds"
-													#visible = "[Not(StateItem.GetState.IsCapitalState)]"
-													#size = { 26 26 }
-													#framesize = { 50 50 }
-													#frame = "[StateItem.GetState.GetMonthlyLoyaltyFrame]"
-												
-													blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
-													blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetMonthlyLoyaltyFrame, '(int32)3' )]" }
-												
-												}
-												widget = {
-													size = { 1 2 }
-												}
-												icon_and_text_progress_S = { 
-													parentanchor = vcenter
-													name = "food"
-													size = { 100 46 }
-													#blockoverride "size"
-													#{
-													#	size = { 110 7 }
-													#}
-													tooltip = "[StateItem.GetState.GetFoodTooltip]"
-
-													blockoverride "Icon" 
-													{
-														texture = "gfx/interface/icons/shared_icons/food.dds"
-														framesize = { 50 50 }
-														size = { 26 26 }
-														frame = "[StateItem.GetState.GetFoodFrame]"
-													}
-
-													blockoverride "Text"
-													{
-														text = "[StateItem.GetState.GetFood|0]/[StateItem.GetState.GetFoodCapacity|0]"
-														minimumsize = { 60 24 }
-													}
-
-													blockoverride "Value"
-													{
-														value = "[FixedPointToFloat(StateItem.GetState.GetFoodCapacityPercent)]"
-													}
-													blockoverride "UpIndicator" { visible = "[GreaterThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
-													blockoverride "DownIndicator" { visible = "[LessThan_int32( StateItem.GetState.GetFoodFrame, '(int32)3' )]" }
-												}
-												widget = {
-													size = { 1 2 }
-												}
-												widget = {
-													size = { 36 24 }
-													datacontext = "[StateItem.GetState]"
-													tooltip = "STATE_INTEGRATED_CULTURE_TT"
-													textbox = { 
-														text = "[GuiScope.SetRoot( StateItem.GetState.MakeScope ).ScriptValue('state_culture_integrated_percent_svalue')|0%]"
-														autoresize = yes
-														using = BaseFontS
-														using = Black_FontColor
-														parentanchor = hcenter|vcenter
-														position = { 0 12 }
-													}
-												}
-												
-												widget = {
-													size = { 36 24 }
-													datacontext = "[StateItem.GetState]"
-													tooltip = "STATE_RELIGION_TT"
-													textbox = { 
-														text = "[GuiScope.SetRoot( StateItem.GetState.MakeScope ).ScriptValue('state_religion_integrated_percent_svalue')|0%]"
-														autoresize = yes
-														using = BaseFontS
-														using = Black_FontColor
-														parentanchor = hcenter|vcenter
-														position = { 0 12 }
-													}
-												}
-												widget = {
-													size = { 1 2 }
-												}
-
-												icon_button_square = {
-													parentanchor = vcenter
-													size = { 34 34 }
-													datacontext = "[GetScriptedGui('release_subject_button')]"
-													visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
-													enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
-													tooltip = "RELEASE_SUBJECT_BUTTON_TOOLTIP"
-
-													blockoverride "Icon"
-													{ 
-														texture = "gfx/interface/icons/shared_icons/release_subject.dds"
-													}
-
-													blockoverride "On_click"
-													{ 
-														onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('target_state',StateItem.GetState.MakeScope ).End )]"
-													}
-												}
-
-												icon_button_square = {
-													parentanchor = vcenter
-													size = { 34 34 }
-													datacontext = "[StateItem.GetState]"
-													tooltip = "OVERVIEW_GOVPOL_TOOLTIP"
-													blockoverride "Icon"
-													{ 
-														texture = "[GetGovernorPolicyIcon(StateItem.GetState.GetGovernorPolicy)]"
-													}
-
+												tooltip = "TRADEROUTE_AUTOMATIC_FOR_STATE"
+												blockoverride "Icon"
+												{
+													texture = "gfx/interface/icons/shared_icons/trade.dds"
+													size = { 24 24 }
+													position = { -6 -3 }
 													
-													blockoverride "On_click"
-													{ 
-														onclick = "[ChangePolicy(StateItem.GetState)]"
+													
+													icon = {
+														using = negative_color_texture
+														size = { 24 22 }
+														position = { 10 5 }
+														parentanchor = bottom|right
+														modify_texture = {
+															name = "Alpha"
+															texture = "gfx/interface/base_parts/ex_mark.dds"
+															framesize = { 50 50 }
+															frame = 2
+															blend_mode = alphamultiply
+														}	
 													}
 												}
+
+												blockoverride "On_click"
+												{
+													onclick = "[StateItem.ToggleAiTradeAllowance]"
+												}
+											}
+
+											goto_button = {
+												parentanchor = vcenter
+												size = { 34 34 }
+												datacontext = "[StateItem.GetState]"
+												tooltip = "go_to"
 												
-												icon_button_square = {
-													#visible = "[Not(StateItem.GetState.IsAiAllowedToTrade)]"
-													visible = "[StateItem.GetState.IsAiAllowedToTrade]"
-													
-													parentanchor = vcenter
-													size = { 34 34 }
-
-													tooltip = "TRADEROUTE_NOT_AUTOMATIC_FOR_STATE"
-													blockoverride "Icon"
-													{
-														texture = "gfx/interface/icons/shared_icons/trade.dds"
-														size = { 30 30 }
-													}
-
-													blockoverride "On_click"
-													{
-														onclick = "[StateItem.ToggleAiTradeAllowance]"
-													}
-												}
-
-												icon_button_square = {
-													visible = "[Not(StateItem.GetState.IsAiAllowedToTrade)]"
-													#visible = "[StateItem.GetState.IsAiAllowedToTrade]"
-													
-													parentanchor = vcenter
-													size = { 34 34 }
-
-													tooltip = "TRADEROUTE_AUTOMATIC_FOR_STATE"
-													blockoverride "Icon"
-													{
-														texture = "gfx/interface/icons/shared_icons/trade.dds"
-														size = { 24 24 }
-														position = { -6 -3 }
-														
-														
-														icon = {
-															using = negative_color_texture
-															size = { 24 22 }
-															position = { 10 5 }
-															parentanchor = bottom|right
-															modify_texture = {
-																name = "Alpha"
-																texture = "gfx/interface/base_parts/ex_mark.dds"
-																framesize = { 50 50 }
-																frame = 2
-																blend_mode = alphamultiply
-															}	
-														}
-													}
-
-													blockoverride "On_click"
-													{
-														onclick = "[StateItem.ToggleAiTradeAllowance]"
-													}
-												}
-
-												goto_button = {
-													parentanchor = vcenter
-													size = { 34 34 }
-													datacontext = "[StateItem.GetState]"
-													tooltip = "go_to"
-													
-													blockoverride "On_click"
-													{ 
-														onclick = "[OnClickOnState(StateItem.GetState)]"
-													}
+												blockoverride "On_click"
+												{ 
+													onclick = "[OnClickOnState(StateItem.GetState)]"
 												}
 											}
 										}

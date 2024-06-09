@@ -1,0 +1,195 @@
+types WikiWindow {
+	type wiki_window = base_window {
+		name = "wiki"
+		gfxtype = windowgfx
+		parentanchor = left|vcenter
+		movable = no
+		size = { 715 800 }
+		position = { 60 -2 }
+		visible = "[GetVariableSystem.Exists('open_wiki')]"
+		state = {
+			name = _show
+			start_sound = {
+				soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
+			}
+			#on_start = "[GetVariableSystem.Clear('screw_frigate_page')]"
+			#on_start = "[GetVariableSystem.Clear('medium_steamer_page')]"
+			#on_start = "[GetVariableSystem.Toggle('open_wiki')]"
+			on_start = "[GetVariableSystem.Toggle('wiki_main_page')]"
+			on_start = "[PdxGuiTriggerAllAnimations('open_wiki')]"
+			on_start = "[GetVariableSystem.Toggle('wiki_ship_info')]"
+		}
+		#### Audio ###
+		state = {
+			name = _hide
+			start_sound = {
+				soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
+			}
+			on_start = "[GetVariableSystem.Clear('wiki_main_page')]"
+			on_start = "[GetVariableSystem.Clear('wiki_ship_info')]"
+			on_start = "[GetVariableSystem.Clear('wiki_ship_damage')]"
+		}
+
+		vbox = {
+		    using = MainWindowHeaderBoxCenteredNew
+
+			blockoverride "FlagOrIcon"
+			{
+				icon = {
+					texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
+					framesize = { 100 100 }
+					frame = 6
+					position = { -2 -2 }
+					size = { 32 32 }
+					modify_texture = {
+						texture = "gfx/interface/base_parts/find.dds"
+						blend_mode = alphamultiply
+					}
+				}
+			}
+		    blockoverride "Title_text" {
+		    	text = "Wiki?"
+		    }
+			blockoverride "White_buttons" 
+			{
+				button_close = {
+					onclick =  "[GetVariableSystem.Clear('open_wiki')]"
+					tooltip = "CLOSE"
+					shortcut = "close_window"
+				}
+			}
+		    vbox = {
+		        layoutpolicy_vertical = expanding
+		    }
+		}
+		flowcontainer = {
+			margin_top = 60
+			scrollarea = {
+				size = { 225 730 }
+				scrollbarpolicy_horizontal = always_off
+				scrollbarpolicy_vertical = always_on
+				#using = VerticalScrollAreaCutOff
+				scrollbar_vertical = {
+					using = VerticalScrollBar
+				}
+				
+				scrollwidget = {
+					flowcontainer = {
+						margin_left = 10
+						direction = vertical
+						spacing = 5
+						#tag = {
+						#	text = "Test"
+						#	maximumsize = { 200 28 }
+						#	align = center
+						#	using = BaseFontS
+						#	using = Black_FontColor
+						#}
+						wiki_button = {
+							blockoverride "Center_text" { text = "WIKI_MAIN_PAGE" }
+							blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('wiki_main_page')]" }
+						}
+						wiki_category_drop = {
+							blockoverride "Center_text" { text = "WIKI_CATEGORY_UNITS" }
+							blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'wiki_category_units', 'no' )]" }
+							blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'wiki_category_units', 'yes' )]" }
+							blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'wiki_category_units', 'yes' )]" }
+							blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'wiki_category_units', 'yes' ) )]" }
+						}
+						wiki_category_list = {
+							visible = "[GetVariableSystem.HasValue( 'wiki_category_units', 'yes' )]"
+							wiki_category_button = {
+								blockoverride "Text" { text = "conscripts" }
+								blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('conscripts_page')]" }
+							}
+							wiki_category_button = {
+								blockoverride "Text" { text = "irregular_infantry" }
+								blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('irregular_infantry_page')]" }
+							}
+							wiki_category_button = {
+								blockoverride "Text" { text = "regular_infantry" }
+								blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('regular_infantry_page')]" }
+							}
+							wiki_category_button = {
+								blockoverride "Text" { text = "elite_infaintry" }
+								blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('elite_infaintry_page')]" }
+							}
+							wiki_category_button = {
+								blockoverride "Text" { text = "mounted_infantry" }
+								blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('mounted_infantry_page')]" }
+							}
+							wiki_category_button = {
+								blockoverride "Text" { text = "light_cavalry" }
+								blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('light_cavalry_page')]" }
+							}
+							wiki_category_button = {
+								blockoverride "Text" { text = "heavy_cavalry" }
+								blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('heavy_cavalry_page')]" }
+							}
+						}
+						wiki_category_drop = {
+							blockoverride "Center_text" { text = "WIKI_CATEGORY_SHIPS" }
+							blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'wiki_category_ships', 'no' )]" }
+							blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'wiki_category_ships', 'yes' )]" }
+							blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'wiki_category_ships', 'yes' )]" }
+							blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'wiki_category_ships', 'yes' ) )]" }
+						}
+						wiki_category_list = {
+							visible = "[GetVariableSystem.HasValue( 'wiki_category_ships', 'yes' )]"
+							wiki_category_button = {
+								blockoverride "Text" { text = "brig" }
+								blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('brig_page')]" }
+							}
+							wiki_category_button = {
+								blockoverride "Text" { text = "medium_steamer" }
+								blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('medium_steamer_page')]" }
+							}
+							wiki_category_button = {
+								blockoverride "Text" { text = "screw_frigate" }
+								blockoverride "On_click" {  onclick = "[PdxGuiTriggerAllAnimations('screw_frigate_page')]" }
+							}
+						}
+						wiki_button = {
+							blockoverride "Center_text" { text = "SHIPPING_PAGE" }
+							blockoverride "On_click" { onclick = "[PdxGuiTriggerAllAnimations('shipping_page')]" }
+						}
+					}
+				}
+			}
+			scrollarea = {
+				size = { 500 730 }
+				scrollbarpolicy_horizontal = always_off
+				scrollbar_vertical = {
+					using = VerticalScrollBar
+				}
+				
+				scrollwidget = {
+					flowcontainer = {
+						ignoreinvisible = yes
+						direction = vertical
+						#alpha = 0
+						state = {
+							name = open_wiki
+							alpha = 1
+							delay = 0.001
+						}
+						main_page = { visible = "[GetVariableSystem.Exists('wiki_main_page')]" }
+						### UNITS
+						conscripts_page = { visible = "[GetVariableSystem.Exists('conscripts_page')]" }
+						irregular_infantry_page = { visible = "[GetVariableSystem.Exists('irregular_infantry_page')]" }
+						regular_infantry_page = { visible = "[GetVariableSystem.Exists('regular_infantry_page')]" }
+						elite_infaintry_page = { visible = "[GetVariableSystem.Exists('elite_infaintry_page')]" }
+						mounted_infantry_page = { visible = "[GetVariableSystem.Exists('mounted_infantry_page')]" }
+						light_cavalry_page = { visible = "[GetVariableSystem.Exists('light_cavalry_page')]" }
+						heavy_cavalry_page = { visible = "[GetVariableSystem.Exists('heavy_cavalry_page')]" }
+						### SHIPS
+						brig_page = { visible = "[GetVariableSystem.Exists('brig_page')]" }
+						medium_steamer_page = { visible = "[GetVariableSystem.Exists('medium_steamer_page')]" }
+						screw_frigate_page = { visible = "[GetVariableSystem.Exists('screw_frigate_page')]" }
+						shipping_page = { visible = "[GetVariableSystem.Exists('shipping_page')]" }
+					}
+				}
+			}
+		}
+	}
+}

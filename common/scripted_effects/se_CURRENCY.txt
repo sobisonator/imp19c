@@ -1,11 +1,36 @@
 ﻿CURRENCY_set_country_currency = {
 	# Scope: Country
 	# Functon: Set the official currency of a country
+	save_scope_as = currency_set_country
+
+	if = {
+		limit = {
+			has_variable = official_currency
+		}
+		var:official_currency = {
+			remove_list_variable = {
+				name = currency_adopted_countries
+
+				target = scope:currency_set_country
+			}
+		}
+	}
 
 	set_variable = {
 		name = official_currency
 		value = global_var:$currency_name$
 	}
+
+	global_var:$currency_name$ = {
+		add_to_list = {
+			name = currency_adopted_countries
+		}
+	}
+}
+
+CURRENCY_peg_country_currency = {
+	# Scope: Country
+	# Function: Set this country's currency as the named currency, but do not contribute to its value
 }
 
 CURRENCY_create_new_currency = {
@@ -18,6 +43,11 @@ CURRENCY_create_new_currency = {
 	# $backing_type$, string:
 	#	gold_standard (just gold)
 	#	bimetallic_standard (gold and silver)
+	# Two lists
+	# Currency adopters list (min. 1 member)
+	# Currency peggers list (may be empty)
+	save_scope_as = currency_create_scope
+
 	random_province = {
 		limit = {
 			NOT = {
@@ -25,6 +55,35 @@ CURRENCY_create_new_currency = {
 			}
 		}
 		save_scope_as = currency_scope
+
+		set_global_variable = {
+			name = $currency_name$
+			value = scope:currency_scope
+		}
+
+		# Add the countries to adopt this currency and to peg to it. WARNING, this overrides existing currency settings for countries, so only set these if you really mean to.
+		scope:currency_create_scope = {
+			every_in_list = {
+				variable = $currency_adopters_list$
+
+				CURRENCY_set_country_currency = {
+					currency_name = $currency_name$
+				}
+			}
+			
+			if = {
+				limit = {
+					exists_variable_list = $currency_peggers_list$
+				}
+				every_in_list = {
+					variable = $currency_peggers_list$
+
+					CURRENCY_peg_country_currency = {
+						currency_name = $currency_name$
+					}
+				}
+			}
+		}
 
 		set_variable = {
 			name = currency_name
@@ -51,10 +110,6 @@ CURRENCY_create_new_currency = {
 		CURRENCY_update_purchasing_power = yes
 	}
 
-	set_global_variable = {
-		name = $currency_name$
-		value = scope:currency_scope
-	}
 }
 
 CURRENCY_update_purchasing_power = {

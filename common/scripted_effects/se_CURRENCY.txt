@@ -1,36 +1,81 @@
 ﻿CURRENCY_set_country_currency = {
 	# Scope: Country
 	# Functon: Set the official currency of a country
-	save_scope_as = currency_set_country
+	c:$target_country$ = {
 
-	if = {
-		limit = {
-			has_variable = official_currency
+		save_scope_as = currency_set_country
+
+		if = {
+			limit = {
+				has_variable = official_currency
+			}
+			var:official_currency = {
+				remove_list_variable = {
+					name = currency_adopted_countries
+
+					target = scope:currency_set_country
+				}
+				remove_list_variable = {
+					name = currency_pegged_countries
+
+					target = scope:currency_set_country
+				}
+			}
 		}
-		var:official_currency = {
-			remove_list_variable = {
-				name = currency_adopted_countries
 
+		set_variable = {
+			name = official_currency
+			value = global_var:$currency_name$
+		}
+
+		global_var:$currency_name$ = {
+			add_to_variable_list = {
+				name = currency_adopted_countries
 				target = scope:currency_set_country
 			}
 		}
-	}
 
-	set_variable = {
-		name = official_currency
-		value = global_var:$currency_name$
-	}
-
-	global_var:$currency_name$ = {
-		add_to_list = {
-			name = currency_adopted_countries
-		}
 	}
 }
 
 CURRENCY_peg_country_currency = {
 	# Scope: Country
 	# Function: Set this country's currency as the named currency, but do not contribute to its value
+	c:$target_country$ = {
+
+		save_scope_as = curreny_peg_country
+
+		if = {
+			limit = {
+				has_variable = official_currency
+			}
+			var:official_currency = {
+				remove_list_variable = {
+					name = currency_adopted_countries
+
+					target = scope:curreny_peg_country
+				}
+				remove_list_variable = {
+					name = currency_pegged_countries
+
+					target = scope:curreny_peg_country
+				}
+			}
+		}
+
+		set_variable = {
+			name = official_currency
+			value = global_var:$currency_name$
+		}
+
+		global_var:$currency_name$ = {
+			add_to_variable_list = {
+				name = currency_pegged_countries
+				target = scope:curreny_peg_country
+			}
+		}
+
+	}
 }
 
 CURRENCY_create_new_currency = {
@@ -66,20 +111,29 @@ CURRENCY_create_new_currency = {
 			every_in_list = {
 				variable = $currency_adopters_list$
 
+				save_scope_as = target_country
+
 				CURRENCY_set_country_currency = {
 					currency_name = $currency_name$
+					target_country = scope:target_country
 				}
 			}
 			
 			if = {
 				limit = {
-					exists_variable_list = $currency_peggers_list$
+					variable_list_size = {
+						name = $currency_peggers_list$
+						value > 0
+					}
 				}
 				every_in_list = {
 					variable = $currency_peggers_list$
 
+					save_scope_as = target_country
+
 					CURRENCY_peg_country_currency = {
 						currency_name = $currency_name$
+						target_country = scope:target_country
 					}
 				}
 			}
@@ -117,14 +171,55 @@ CURRENCY_update_purchasing_power = {
 	# Function: Update the purchasing power of one unit of this currency, in terms of 1 unit of wealth
 	# Purchasing power - the number of wealth units per unit of this currency
 	# Automatic wealth purchasing power calculation takes the import price of all tradegoods
+
+	save_scope_as = currency_scope
+
+	# Set purchasing power as 1, it will later be divided by the the demand times cost of all tradegoods in countries who have adopted this tradegood
 	set_variable = {
 		name = purchasing_power
 		value = 1
 	}
+
+	# Set a variable to contain the total wealth value of all demand in every country which has adopted this currency
+	set_variable = {
+		name = wealth_value_total_all_demand
+		value = 0
+	}
+
+	every_in_list = {
+		variable = currency_adopters_list
+
+		save_scope_as = this_country
+
+		scope:currency_scope = {
+			every_tradegood_complex = {
+				APPLY = CURRENCY_add_tradegood_total_demand_cost
+			}
+		}
+	}
+
 	change_variable = {
 		name = purchasing_power
 		divide = var:originator_country.WEALTH_import_price_all_tradegoods # This should probably be weighted by the country's demand for each tradegood, but that would be more performance intensive. Think of a way to scale this realistically without too many calculations?
 	}	
+}
+
+CURRENCY_add_tradegood_total_demand_cost = {
+	# Scope: Currency province
+	# Function: Get the total cost of fulfilling all demand for $tradegood$ in the current country (only when called as part of a currency_adopters_list in CURRENCY_update_purchasing_power)
+	set_local_variable = {
+		name = amount_to_add
+		value = scope:this_country.DEMAND_country_$tradegood$
+	}
+	change_local_variable = {
+		name = amount_to_add
+		multiply = scope:this_country.var:country_import_price_$tradegood$
+	}
+
+	change_variable = {
+		name = wealth_value_total_all_demand
+		add = local_var:amount_to_add
+	}
 }
 
 CURRENCY_update_backing_value = {

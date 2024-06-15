@@ -8,6 +8,7 @@
 	GT_reset_all_customs_union_for_sale_values = { type = $type$ }
 	every_country = {
 		GT_split_set_customs_union_scope = yes
+		GT_split_cache_DEMAND_reserve_accumulation_basis_svalues = yes
 		every_governorships = {
 			TRADE_governorship_get_pops_this_quarter = yes
 			GT_split_cache_governorship_infrastructure_capacity = yes
@@ -76,6 +77,19 @@
 	}
 
 	# GT_split_log_trade_balance = yes # TODO: Implement a way to save previous values so that it can be charted on a graph
+}
+
+GT_split_cache_DEMAND_reserve_accumulation_basis_svalues = {
+	# Scope: Country
+	# Function: Cache DEMAND_reserve_accumulation_basis for gold and silver
+	set_variable = {
+		name = DEMAND_gold_reserve_accumulation_basis
+		value = DEMAND_gold_reserve_accumulation_basis
+	}
+	set_variable = {
+		name = DEMAND_silver_reserve_accumulation_basis
+		value = DEMAND_silver_reserve_accumulation_basis
+	}
 }
 
 GT_split_create_tradegroups = {
@@ -5387,6 +5401,103 @@ GT_split_calculate_trade_shares = {
 	set_variable = {
 		name = trade_share_$category$_the_state
 		value = $the_state$
+	}
+	if = {
+		limit = {
+			flag:$category$ = flag:resource_extraction
+		}
+		if = {
+			limit = {
+				owner.var:official_currency = {
+					var:backing_type = flag:gold_standard
+				}
+			}
+
+			set_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				value = var:wealth_owed_for_gold
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				divide = var:trade_expenses_due_resource_extraction
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				multiply = DEMAND_gold_for_reserve_divided_by_base_demand
+			}
+
+			change_variable = {
+				name = trade_share_$category$_the_state
+				add = local_var:trade_share_$category$_the_state_gold_reserves
+			}
+		}
+		else_if = {
+			limit = {
+				owner.var:official_currency = {
+					var:backing_type = flag:bimetallic_standard
+				}
+			}
+
+			set_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				value = var:wealth_owed_for_gold
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				divide = var:trade_expenses_due_resource_extraction
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				multiply = DEMAND_gold_for_reserve_divided_by_base_demand
+			}
+
+			set_local_variable = {
+				name = trade_share_$category$_the_state_silver_reserves
+				value = var:wealth_owed_for_silver
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_silver_reserves
+				divide = var:trade_expenses_due_resource_extraction
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				multiply = DEMAND_silver_for_reserve_divided_by_base_demand
+			}
+
+			change_variable = {
+				name = trade_share_$category$_the_state
+				add = local_var:trade_share_$category$_the_state_gold_reserves
+			}
+			change_variable = {
+				name = trade_share_$category$_the_state
+				add = local_var:trade_share_$category$_the_state_silver_reserves
+			}
+		}
+		else_if = {
+			limit = {
+				owner.var:official_currency = {
+					var:backing_type = flag:silver_standard
+				}
+			}
+
+			set_local_variable = {
+				name = trade_share_$category$_the_state_silver_reserves
+				value = var:wealth_owed_for_silver
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_silver_reserves
+				divide = var:trade_expenses_due_resource_extraction
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				multiply = DEMAND_silver_for_reserve_divided_by_base_demand
+			}
+
+			change_variable = {
+				name = trade_share_$category$_the_state
+				add = local_var:trade_share_$category$_the_state_gold_reserves
+			}
+		}
 	}
 	set_variable = {
 		name = trade_share_$category$_upper_strata

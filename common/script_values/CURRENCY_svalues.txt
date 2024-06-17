@@ -1,1 +1,125 @@
-﻿
+﻿CURRENCY_wealth_value_1_unit = {
+	# Scope: Country
+	# Function: Get the amount of "wealth" units that 1 unit of this country's currency can buy according to its pegged reserve value
+	if = {
+		limit = {
+			var:official_currency = {
+				var:backing_type = flag:bimetallic_standard
+			}
+		}
+		value = CURRENCY_wealth_value_bimetallic_from_gold
+		add = CURRENCY_wealth_value_bimetallic_from_silver
+	}
+	else = {
+		value = 999 # TEST
+	}
+	divide = var:official_currency.var:units_to_the_lb
+}
+
+CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio = {
+	value = CURRENCY_wealth_value_1_unit
+	multiply = CURRENCY_wealth_value_reserve_ratio_minting_impact
+}
+
+CURRENCY_wealth_value_reserve_ratio_minting_impact = {
+	value = CURRENCY_reserve_ratio_total
+	multiply = 10
+	max = 1
+}
+
+CURRENCY_wealth_bimetallic_both_reserves_size = {
+	# Scope: Country
+	# Function: Add both metal reserves together
+	value = var:gold_reserve_size
+	add = var:silver_reserve_size
+}
+
+CURRENCY_wealth_value_bimetallic_from_gold = {
+	# Scope: Country
+	# Function: Get the amount of value that gold is contributing to the country's currency value
+	value = var:gold_reserve_size
+	divide = CURRENCY_wealth_bimetallic_both_reserves_size
+	multiply = var:country_unit_price_gold
+	multiply = 20 # Gold and silver price need to be balanced so they are much higher. For now, use this multiplier to give it some weight
+}
+
+CURRENCY_wealth_value_bimetallic_from_silver = {
+	# Scope: Country
+	# Function: Get the amount of value that gold is contributing to the country's currency value
+	value = var:silver_reserve_size
+	divide = CURRENCY_wealth_bimetallic_both_reserves_size
+	multiply = var:country_unit_price_silver
+	multiply = 20 # Gold and silver price need to be balanced so they are much higher. For now, use this multiplier to give it some weight
+}
+
+CURRENCY_national_debt_scaled = {
+	# Scope: Country
+	# Function: Take the national debt value and scale it down by a factor of 1-,000 to prevent overflows (as this goes into the billions)
+	value = CURRENCY_national_debt_thousands_scaled
+	add = CURRENCY_national_debt_millions_scaled
+	add = CURRENCY_national_debt_billions_scaled
+}
+
+CURRENCY_national_debt_thousands_scaled = {
+	value = var:CURRENCY_national_debt_thousands
+	divide = 1000
+}
+
+CURRENCY_national_debt_millions_scaled = {
+	value = var:CURRENCY_national_debt_millions
+}
+
+CURRENCY_national_debt_billions_scaled = {
+	value = var:CURRENCY_national_debt_billions
+	multiply = 1000
+}
+
+CURRENCY_amt_circulated_scaled = {
+	# Scope: Country
+	# Function: Take the amount circulated value and scale it down by a factor of 10,000 to prevent overflows (as this goes into the billions)
+	value = CURRENCY_amt_circulated_thousands_scaled
+	add = CURRENCY_amt_circulated_millions_scaled
+	add = CURRENCY_amt_circulated_billions_scaled
+}
+
+CURRENCY_amt_circulated_thousands_scaled = {
+	value = var:CURRENCY_amt_circulated_thousands
+	divide = 1000
+}
+
+CURRENCY_amt_circulated_millions_scaled = {
+	value = var:CURRENCY_amt_circulated_millions
+}
+
+CURRENCY_amt_circulated_billions_scaled = {
+	value = var:CURRENCY_amt_circulated_billions
+	multiply = 1000
+}
+
+CURRENCY_total_country_cash_scaled = {
+	# Scope: Country
+	# Function: Get the total amount of public and private cash in a country
+	value = CURRENCY_national_debt_scaled
+	add = CURRENCY_amt_circulated_scaled
+}
+
+CURRENCY_reserve_value_in_cash_scaled = {
+	# Scope: Country
+	# Function: Get the value of the country's percious metal reserves in currency units, divided by 10,000 (to scale wtih CURRENCY_total_country_cash_scaled)
+	if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:bimetallic_standard
+		}
+		value = CURRENCY_wealth_bimetallic_both_reserves_size
+	}
+	divide = 10000
+	multiply = var:official_currency.var:units_to_the_lb
+}
+
+CURRENCY_reserve_ratio_total = {
+	# Scope: Country
+	# Function: The ratio of currency in national debt and privately held cash, against the value of the precious metal reserves
+	#value = CURRENCY_reserve_value_in_cash_scaled
+	value = CURRENCY_reserve_value_in_cash_scaled
+	divide = CURRENCY_total_country_cash_scaled
+}

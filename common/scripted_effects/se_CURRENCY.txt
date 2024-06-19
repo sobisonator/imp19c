@@ -25,6 +25,7 @@
 		currency_adopters_list = currency_adopters_list
 		use_currency_peggers_list = false
 		currency_peggers_list = false
+		override_existing = yes
 	}
 
 	CURRENCY_set_amounts_country = {
@@ -35,6 +36,11 @@
 		amt_national_debt_thousands = 968
 		amt_national_debt_millions = 845
 		amt_national_debt_billions = 0
+	}
+
+	CURRENCY_set_country_currency = {
+		target_country = GBR
+		currency_name = pound_sterling
 	}
 }
 
@@ -83,6 +89,51 @@ CURRENCY_alter_own_debt = {
 	}
 }
 
+CURRENCY_alter_amt_circulated = {
+	# Scope: Country
+	# Function: Add to the national debt value, accounting for the thousands, millions and billions values that need to be displayed
+	change_variable = {
+		name = CURRENCY_amt_circulated_thousands
+		add = $thousands$
+	}
+	if = {
+		limit = {
+			var:CURRENCY_amt_circulated_thousands > 1000
+		}
+		change_variable = {
+			name = CURRENCY_amt_circulated_thousands
+			subtract = 1000
+		}
+		change_variable = {
+			name = CURRENCY_amt_circulated_millions
+			add = 1
+		}
+	}
+
+	change_variable = {
+		name = CURRENCY_amt_circulated_millions
+		add = $millions$
+	}
+	if = {
+		limit = {
+			var:CURRENCY_amt_circulated_millions > 1000
+		}
+		change_variable = {
+			name = CURRENCY_amt_circulated_millions
+			subtract = 1000
+		}
+		change_variable = {
+			name = CURRENCY_amt_circulated_billions
+			add = 1
+		}
+	}
+
+	change_variable = {
+		name = CURRENCY_amt_circulated_billions
+		add = $billions$
+	}
+}
+
 CURRENCY_set_amounts_country = {
 	# Scope: Country
 	# Function: Set the amount of currency in circulation in this country, both in public pockets and as national debt owned by the state
@@ -90,15 +141,15 @@ CURRENCY_set_amounts_country = {
 	# Units of this currency in public circulation, in the tens of thousands
 	c:$target_country$ = {
 		set_variable = {
-			name = CURRENCY_circulated_thousands
+			name = CURRENCY_amt_circulated_thousands
 			value = $amt_circulated_thousands$
 		}
 		set_variable = {
-			name = CURRENCY_circulated_millions
+			name = CURRENCY_amt_circulated_millions
 			value = $amt_circulated_millions$
 		}
 		set_variable = {
-			name = CURRENCY_circulated_billions
+			name = CURRENCY_amt_circulated_billions
 			value = $amt_circulated_billions$
 		}
 
@@ -222,79 +273,119 @@ CURRENCY_create_new_currency = {
 	# Currency adopters list (min. 1 member)
 	# $use_currency_peggers_list$ = flag, "true" or "false" to trigger whether the currency peggers list is counted
 	# Currency peggers list (may be empty)
-	save_scope_as = currency_create_scope
 
-	random_province = {
+	if = {
 		limit = {
 			NOT = {
-				has_variable = is_currency
+				has_global_variable = $currency_name$
 			}
 		}
-		save_scope_as = currency_scope
+		save_scope_as = currency_create_scope
 
-		set_global_variable = {
-			name = $currency_name$
-			value = scope:currency_scope
+		random_province = {
+			limit = {
+				NOT = {
+					has_variable = is_currency
+				}
+			}
+			CURRENCY_setup_currency_info = {
+				currency_name = $currency_name$
+				currency_adopters_list = $currency_adopters_list$
+				currency_peggers_list = $currency_peggers_list$
+				use_currency_peggers_list = $use_currency_peggers_list$
+				originator_tag = $originator_tag$
+				units_to_the_lb = $units_to_the_lb$
+				backing_type = $backing_type$
+			}
+
 		}
+	}
+	else_if = {
+		limit = {
+			has_global_variable = $currency_name$
+			flag:$override_existing$ = flag:yes # Whether to override an existing currency
+		}
+		global_var:$currency_name$ = {
+			CURRENCY_setup_currency_info = {
+				currency_name = $currency_name$
+				currency_adopters_list = $currency_adopters_list$
+				currency_peggers_list = $currency_peggers_list$
+				use_currency_peggers_list = $use_currency_peggers_list$
+				originator_tag = $originator_tag$
+				units_to_the_lb = $units_to_the_lb$
+				backing_type = $backing_type$
+			}
+		}
+	}
 
-		# Add the countries to adopt this currency and to peg to it. WARNING, this overrides existing currency settings for countries, so only set these if you really mean to.
-		scope:currency_create_scope = {
+}
+
+CURRENCY_setup_currency_info = {
+	# Scope: Currency province
+	# Function: Set the given currency info in a specified currency
+	save_scope_as = currency_scope
+
+	set_global_variable = {
+		name = $currency_name$
+		value = scope:currency_scope
+	}
+
+	# Add the countries to adopt this currency and to peg to it. WARNING, this overrides existing currency settings for countries, so only set these if you really mean to.
+	scope:currency_create_scope = {
+		every_in_list = {
+			name = $currency_adopters_list$
+
+			save_scope_as = target_country
+
+			CURRENCY_set_country_currency = {
+				currency_name = $currency_name$
+				target_country = scope:target_country
+			}
+		}
+		
+		if = {
+			limit = {
+				flag:$use_currency_peggers_list$ = flag:true
+			}
 			every_in_list = {
-				name = $currency_adopters_list$
+				name = $currency_peggers_list$
 
 				save_scope_as = target_country
 
-				CURRENCY_set_country_currency = {
+				CURRENCY_peg_country_currency = {
 					currency_name = $currency_name$
 					target_country = scope:target_country
 				}
 			}
-			
-			if = {
-				limit = {
-					flag:$use_currency_peggers_list$ = flag:true
-				}
-				every_in_list = {
-					name = $currency_peggers_list$
-
-					save_scope_as = target_country
-
-					CURRENCY_peg_country_currency = {
-						currency_name = $currency_name$
-						target_country = scope:target_country
-					}
-				}
-			}
 		}
-
-		set_variable = {
-			name = currency_name
-			value = flag:$currency_name$ # Can be localised
-		}
-
-		set_variable = {
-			name = originator_country
-			value = c:$originator_tag$
-		}
-
-		# Units of this currency to the pound of backing material
-		set_variable = {
-			name = units_to_the_lb
-			value = $units_to_the_lb$
-		}
-
-		set_variable = {
-			name = backing_type
-			value = flag:$backing_type$
-		}
-
-		# Backing value - the value of the currency based on the backing of precious metal reserves
-		CURRENCY_update_backing_value = yes
-		# Purchasing power - the number of wealth units per unit of this currency
-		# Automatic wealth purchasing power calculation takes the import price of all tradegoods
-		CURRENCY_update_purchasing_power = yes
 	}
 
+	set_variable = {
+		name = currency_name
+		value = flag:$currency_name$ # Can be localised
+	}
+
+	set_variable = {
+		name = originator_country
+		value = c:$originator_tag$
+	}
+
+	# Units of this currency to the pound of backing material
+	set_variable = {
+		name = units_to_the_lb
+		value = $units_to_the_lb$
+	}
+
+	set_variable = {
+		name = backing_type
+		value = flag:$backing_type$
+	}
+
+	# Backing value - the value of the currency based on the backing of precious metal reserves
+	CURRENCY_update_backing_value = yes
+	# Purchasing power - the number of wealth units per unit of this currency
+	# Automatic wealth purchasing power calculation takes the import price of all tradegoods
+	CURRENCY_update_purchasing_power = yes
 }
 
 CURRENCY_update_purchasing_power = {

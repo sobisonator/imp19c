@@ -100,8 +100,11 @@ base_window = {
 			vbox = {
 				layoutpolicy_vertical = expanding
 				layoutpolicy_horizontal = expanding
+				allow_outside = yes
 				container = {
+					allow_outside = yes
 					margin_widget = {
+					allow_outside = yes
 						name = "Debt and reserves"
 						minimumsize = { 0 198 }
 						margin_top = -20
@@ -140,10 +143,10 @@ base_window = {
 								margin_top = 20
 
 								icon_and_text = {
-									tooltip = "NATIONAL_DEBT_TOOLTIP"
+									tooltip = "AMT_CIRCULATED_TOOLTIP"
 									size = { 250 0 }
 									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
-									blockoverride "Text" { align = left text = "Sum of all private cash" }	
+									blockoverride "Text" { align = left text = "[EconomyView.GetPlayer.Custom('amt_circulated_text')]" }	
 								}
 							}
 							sub_header_v = {
@@ -155,20 +158,51 @@ base_window = {
 								spacing = 6
 								margin_top = 25
 								icon_and_text = {
-									tooltip = "NATIONAL_DEBT_TOOLTIP"
-									size = { 250 0 }
-									blockoverride "Text" { align = left text = "Gold: [EconomyView.GetPlayer.MakeScope.GetVariable('gold_reserve_size').GetValue|0]00 lb (£market value)" }	
+									tooltip = "#T Gold reserves #!Market value:  Currency value:  "
+									size = { 300 0 }
+									blockoverride "Icon" { texture = "gfx/interface/icons/tradegoods/gold.dds" }
+									blockoverride "Text" { align = left text = "[EconomyView.GetPlayer.MakeScope.GetVariable('gold_reserve_size').GetValue|0]00 / <target>00 lb" }
+									text_button_square = {
+										position = { 90 -3 }
+										name = "increase_gold_reserve_target"
+										datacontext = "[GetScriptedGui('alt_peace_button')]"
+										visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
+										blockoverride "Center_text" { text = "+" }
+										blockoverride "On_click" { 
+											onclick = "" 
+											onclick = ""
+										}
+										tooltip = "#L #G Increase #!#!target by 100 lb (Right-click 1,000lb)"
+										parentanchor = bottom|hcenter
+										size = { 24 24 }
+									}
+									text_button_square = {
+										position = { 120 -3 }
+										name = "decrease_gold_reserve_target"
+										datacontext = "[GetScriptedGui('alt_peace_button')]"
+										visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
+										blockoverride "Center_text" { text = "-" }
+										blockoverride "On_click" { 
+											onclick = "" 
+											onclick = ""
+										}
+										tooltip = "#L #R Decrease #!#!target by 100 lb (Right-click 1,000lb)"
+										parentanchor = bottom|hcenter
+										size = { 24 24 }
+									}
 								}
 								icon_and_text = {
-									tooltip = "NATIONAL_DEBT_TOOLTIP"
+									tooltip = "#T Silver reserves #!Market value:  Currency value:  "
 									size = { 250 0 }
-									blockoverride "Text" { align = left text = "Silver: [EconomyView.GetPlayer.MakeScope.GetVariable('silver_reserve_size').GetValue|0]00 lb (£market value)" }	
+									blockoverride "Icon" { texture = "gfx/interface/icons/tradegoods/silver.dds" }
+									blockoverride "Text" { align = left text = "[EconomyView.GetPlayer.MakeScope.GetVariable('silver_reserve_size').GetValue|0]00 / <target>00 lb" }	
 								}
 							}
 						}
 						
 					}
 					margin_widget = {
+						allow_outside = yes
 						name = "Currency"
 						minimumsize = { 0 198 }
 						margin_top = -20
@@ -178,10 +212,56 @@ base_window = {
 						flowcontainer = {
 						direction = vertical
 						spacing = 6
+						position = { 30 0 }
 
 							sub_header_v = {
-								size = { 100% 0 }
-								blockoverride "Title_text" { text = "Unga bunga go chunga" }
+								size = { 275 0 }
+								blockoverride "Title_text" { text = "Currency: [EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').GetProvince.MakeScope.GetVariable('currency_name').GetFlagName]" }
+							}
+
+							flowcontainer = {
+								direction = vertical 
+								spacing = 6
+								margin_top = 20
+								datacontext = "[EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').GetProvince]"
+
+								icon_and_text = {
+									tooltip = "CURRENCY_RESERVE_EXCHANGE_RATE_TT"
+									size = { 250 0 }
+									blockoverride "Icon" { texture = "gfx/interface/icons/tradegoods/gold.dds" }
+									blockoverride "Text" { align = left text = " [Province.MakeScope.GetVariable('units_to_the_lb').GetValue|0] / lb" }	
+								}
+
+								icon_and_text = {
+									tooltip = "CURRENCY_BASE_EXCHANGE_VALUE_TT"
+									size = { 250 0 }
+									blockoverride "Icon" { texture = "gfx/interface/icons/governor_policies/acquisition_of_wealth.dds" }
+									blockoverride "Text" { align = left text = "[GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_wealth_value_1_unit')|3] ([GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio')|3])" }	
+								}
+
+								icon_and_text = {
+									tooltip = "CURRENCY_RESERVE_RATIO_TT"
+									size = { 250 0 }
+									blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/local_tax_modifier.dds" }
+									blockoverride "Text" { align = left text = "[GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_reserve_ratio_total')|%]" }	
+								}
+
+								widget = {
+									size = { 0 30 }
+								}
+
+								icon_and_text = {
+									tooltip = "Test"
+									size = { 250 0 }
+									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
+									blockoverride "Text" { align = left text = "List countries using this currency" }	
+								}
+								icon_and_text = {
+									tooltip = "Test"
+									size = { 250 0 }
+									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
+									blockoverride "Text" { align = left text = "List countries pegged to this currency" }	
+								}
 							}
 
 						}

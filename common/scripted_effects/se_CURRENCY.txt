@@ -6,22 +6,13 @@
 	c:GBR = { add_to_list = currency_adopters_list }
 
 	# Make sure to set up reserves for this test case, although they should be set up for every country automatically in production
-	c:GBR = {
-		CURRENCY_country_setup_reserves = {
-			gold_reserve_size = 652 # hundreds lb
-			gold_reserve_target_size = 1950 # hundreds lb
-
-			silver_reserve_size = 10 # hundreds lb
-			silver_reserve_target_size = 13 # hundreds lb
-		}
-	}
 
 	# Define whichever parameters to test with
 	CURRENCY_create_new_currency = {
 		currency_name = pound_sterling
 		originator_tag = GBR
 		backing_type = bimetallic_standard
-		units_to_the_lb = 46
+		units_to_the_lb = 62
 		currency_adopters_list = currency_adopters_list
 		use_currency_peggers_list = false
 		currency_peggers_list = false
@@ -41,6 +32,36 @@
 	CURRENCY_set_country_currency = {
 		target_country = GBR
 		currency_name = pound_sterling
+	}
+}
+
+CURRENCY_setup_all_reserves = {
+	# Scope: Random country
+	# Function: Set up the precious metal reserves for all countries at the start of the game
+	# Called: By oa_economy_setup
+	c:GBR = {
+		CURRENCY_country_setup_reserves = {
+			gold_reserve_size = 444 # hundreds lb
+			gold_reserve_accumulation_rate = 50 # hundreds lb
+
+			silver_reserve_size = 7 # hundreds lb
+			silver_reserve_accumulation_rate = 3 # hundreds lb
+		}
+	}
+
+	every_country = {
+		limit = {
+			NOT = {
+				this = c:GBR
+			}
+		}
+		CURRENCY_country_setup_reserves = {
+			gold_reserve_size = CURRENCY_base_starting_reserve_gold # hundreds lb
+			gold_reserve_accumulation_rate = CURRENCY_base_starting_reserve_accumulation_rate_gold # hundreds lb
+
+			silver_reserve_size = CURRENCY_base_starting_reserve_silver # hundreds lb
+			silver_reserve_accumulation_rate = CURRENCY_base_starting_reserve_accumulation_rate_silver # hundreds lb
+		}
 	}
 }
 
@@ -531,20 +552,20 @@ CURRENCY_country_setup_reserves = {
 	}
 
 	set_variable = {
-		name = gold_reserve_target
-		value = $gold_reserve_target_size$
+		name = gold_accumulation_rate
+		value = $gold_reserve_accumulation_rate$
 	}
 	set_variable = {
-		name = silver_reserve_target
-		value = $silver_reserve_target_size$
+		name = silver_accumulation_rate
+		value = $silver_reserve_accumulation_rate$
 	}
 }
 
-CURRENCY_country_set_reserve_target = {
+CURRENCY_country_set_accumulation_rate = {
 	# Scope: Country
-	# Function: Set the target amount of a precious metal to hold in reserve
+	# Function: Set the target amount of a precious metal to buy every quarter in reserve
 	set_variable = {
-		name = $reserve_material$_reserve_target
+		name = $reserve_material$_accumulation_rate
 		value = $target_value$
 	}
 }
@@ -561,4 +582,11 @@ CURRENCY_country_update_reserve_size = {
 			}
 		}
 	}
+}
+
+## WIP ##
+
+CURRENCY_sell_reserve = {
+	# Scope: Country
+	# Function: Sell off reserves, which dumps into the stockpiles of governorships based on the proportion of the country's total commercial districts in those governorships
 }

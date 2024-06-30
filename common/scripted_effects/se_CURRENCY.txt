@@ -65,6 +65,59 @@ CURRENCY_setup_all_reserves = {
 	}
 }
 
+CURRENCY_all_governorships_send_to_reserves = {
+	# Scope: Country
+	# Function: Send the stock intended for reserves from all governorships to the national reserve
+	# Also record the actual change in each stockpile for the GUI display
+	set_variable = {
+		name = gold_reserve_actual_change
+		value = 0
+	}
+	set_variable = {
+		name = silver_reserve_actual_change
+		value = 0
+	}
+	every_governorships = {
+		CURRENCY_governorship_send_to_reserves = {
+			tradegood = gold
+		}
+		CURRENCY_governorship_send_to_reserves = {
+			tradegood = silver
+		}
+	}
+}
+
+CURRENCY_governorship_send_to_reserves = {
+	# Scope: Governorship
+	# Function: Send the specified amount of the specified precious metal ($tradegood$ to the national reserves
+	set_local_variable = {
+		name = $tradegood$_for_reserves
+		value = DEMAND_gold_reserve_accumulation_rate
+	}
+
+	if = {
+		limit = {
+			has_variable = shortage_$tradegood$
+		}
+		change_local_variable = {
+			name = $tradegood$_for_reserves
+			multiply = var:shortage_$tradegood$
+		}
+	}
+
+	owner = {
+		change_variable = {
+			name = $tradegood$_reserve_size
+			add = local_var:$tradegood$_for_reserves
+		}
+		change_variable = {
+			name = $tradegood$_reserve_actual_change
+			add = local_var:$tradegood$_for_reserves
+		}
+	}
+
+}
+
 CURRENCY_alter_own_debt = {
 	# Scope: Country
 	# Function: Add to the national debt value, accounting for the thousands, millions and billions values that need to be displayed

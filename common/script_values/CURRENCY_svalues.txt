@@ -57,6 +57,65 @@ CURRENCY_wealth_value_reserve_ratio_minting_impact = {
 	max = 1
 }
 
+CURRENCY_ideal_reserve_ratio_multiplier_gold = {
+	# Scope: Country
+	# Function: Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
+	# The ideal reserve ratio % (i.e. maximum reserve ratio size before the bonus caps out) is THIS divided by 100
+	value = var:gold_reserve_actual_change
+	divide = var:gold_reserve_size
+	if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:bimetallic_standard
+		}
+		multiply = CURRENCY_wealth_bimetallic_gold_as_percentage
+	}
+}
+
+CURRENCY_ideal_reserve_ratio_multiplier_silver = {
+	# Scope: Country
+	# Function: Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
+	# The ideal reserve ratio % (i.e. maximum reserve ratio size before the bonus caps out) is THIS divided by 100
+	value = var:silver_reserve_actual_change
+	divide = var:silver_reserve_size
+	if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:bimetallic_standard
+		}
+		multiply = CURRENCY_wealth_bimetallic_silver_as_percentage
+	}
+}
+
+CURRENCY_ideal_reserve_ratio_multiplier = {
+	# Scope: Country
+	# Function: Get the ideal reserve ratio multiplier based on the metallic standard in use
+	if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:bimetallic_standard
+		}
+		value = CURRENCY_ideal_reserve_ratio_multiplier_gold
+		add = CURRENCY_ideal_reserve_ratio_multiplier_silver
+	}
+}
+
+CURRENCY_ideal_reserve_ratio = {
+	value = CURRENCY_ideal_reserve_ratio_multiplier
+	divide = 100
+}
+
+CURRENCY_wealth_bimetallic_gold_as_percentage = {
+	# Scope: Country
+	# Function: Get the % of the reserve made up of gold
+	value = var:gold_reserve_size
+	divide = CURRENCY_wealth_bimetallic_both_reserves_size
+}
+
+CURRENCY_wealth_bimetallic_silver_as_percentage = {
+	# Scope: Country
+	# Function: Get the % of the reserve made up of gold
+	value = var:silver_reserve_size
+	divide = CURRENCY_wealth_bimetallic_both_reserves_size
+}
+
 CURRENCY_wealth_bimetallic_both_reserves_size = {
 	# Scope: Country
 	# Function: Add both metal reserves together

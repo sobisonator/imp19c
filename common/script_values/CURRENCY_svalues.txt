@@ -53,7 +53,7 @@ CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio = {
 
 CURRENCY_wealth_value_reserve_ratio_minting_impact = {
 	value = CURRENCY_reserve_ratio_total
-	multiply = 100
+	divide = CURRENCY_ideal_reserve_ratio
 	max = 1
 }
 
@@ -61,7 +61,7 @@ CURRENCY_ideal_reserve_ratio_multiplier_gold = {
 	# Scope: Country
 	# Function: Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
 	# The ideal reserve ratio % (i.e. maximum reserve ratio size before the bonus caps out) is THIS divided by 100
-	value = var:gold_reserve_actual_change
+	value = var:gold_reserve_actual_chan3
 	divide = var:gold_reserve_size
 	if = {
 		limit = {
@@ -85,21 +85,23 @@ CURRENCY_ideal_reserve_ratio_multiplier_silver = {
 	}
 }
 
-CURRENCY_ideal_reserve_ratio_multiplier = {
+CURRENCY_ideal_reserve_ratio = {
 	# Scope: Country
 	# Function: Get the ideal reserve ratio multiplier based on the metallic standard in use
+	# Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
+	value = 1
 	if = {
 		limit = {
 			var:official_currency.var:backing_type = flag:bimetallic_standard
 		}
-		value = CURRENCY_ideal_reserve_ratio_multiplier_gold
-		add = CURRENCY_ideal_reserve_ratio_multiplier_silver
+		subtract = CURRENCY_ideal_reserve_ratio_multiplier_gold
+		subtract = CURRENCY_ideal_reserve_ratio_multiplier_silver
 	}
-}
+	# The accumulation rate need only be 5% of the stockpile 
+	divide = 20
 
-CURRENCY_ideal_reserve_ratio = {
-	value = CURRENCY_ideal_reserve_ratio_multiplier
-	divide = 100
+	min = 0.001 # Minimum 0.1%
+	max = 0.1 # Maximum 10%
 }
 
 CURRENCY_wealth_bimetallic_gold_as_percentage = {

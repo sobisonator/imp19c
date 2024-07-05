@@ -1,4 +1,34 @@
-﻿CURRENCY_wealth_value_1_unit = {
+﻿CURRENCY_base_starting_reserve_gold = {
+	# Scope: Country
+	# Function: Get a value proportionate to the country's economy to start off the size of their gold reserves
+	value = country_population
+	multiply = 0.1
+	round = floor
+}
+
+CURRENCY_base_starting_reserve_accumulation_rate_gold = {
+	# Scope: Country
+	value = CURRENCY_base_starting_reserve_gold
+	multiply = 0.1
+	round = floor
+}
+
+CURRENCY_base_starting_reserve_silver = {
+	# Scope: Country
+	# Function: Get a value proportionate to the country's economy to start off the size of their silver reserves
+	value = country_population
+	multiply = 0.02
+	round = floor
+}
+
+CURRENCY_base_starting_reserve_accumulation_rate_silver = {
+	# Scope: Country
+	value = CURRENCY_base_starting_reserve_silver
+	multiply = 0.1
+	round = floor
+}
+
+CURRENCY_wealth_value_1_unit = {
 	# Scope: Country
 	# Function: Get the amount of "wealth" units that 1 unit of this country's currency can buy according to its pegged reserve value
 	if = {
@@ -9,6 +39,18 @@
 		}
 		value = CURRENCY_wealth_value_bimetallic_from_gold
 		add = CURRENCY_wealth_value_bimetallic_from_silver
+	}
+	else_if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:gold_standard
+		}
+		value = CURRENCY_wealth_value_bimetallic_from_gold
+	}
+	else_if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:silver_standard
+		}
+		value = CURRENCY_wealth_value_bimetallic_from_silver
 	}
 	else = {
 		value = 999 # TEST
@@ -23,8 +65,81 @@ CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio = {
 
 CURRENCY_wealth_value_reserve_ratio_minting_impact = {
 	value = CURRENCY_reserve_ratio_total
-	multiply = 10
+	divide = CURRENCY_ideal_reserve_ratio
 	max = 1
+}
+
+CURRENCY_ideal_reserve_ratio_multiplier_gold = {
+	# Scope: Country
+	# Function: Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
+	# The ideal reserve ratio % (i.e. maximum reserve ratio size before the bonus caps out) is THIS divided by 100
+	value = var:gold_reserve_actual_chan3
+	divide = var:gold_reserve_size
+	if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:bimetallic_standard
+		}
+		multiply = CURRENCY_wealth_bimetallic_gold_as_percentage
+	}
+}
+
+CURRENCY_ideal_reserve_ratio_multiplier_silver = {
+	# Scope: Country
+	# Function: Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
+	# The ideal reserve ratio % (i.e. maximum reserve ratio size before the bonus caps out) is THIS divided by 100
+	value = var:silver_reserve_actual_change
+	divide = var:silver_reserve_size
+	if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:bimetallic_standard
+		}
+		multiply = CURRENCY_wealth_bimetallic_silver_as_percentage
+	}
+}
+
+CURRENCY_ideal_reserve_ratio = {
+	# Scope: Country
+	# Function: Get the ideal reserve ratio multiplier based on the metallic standard in use
+	# Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
+	value = 1
+	if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:bimetallic_standard
+		}
+		subtract = CURRENCY_ideal_reserve_ratio_multiplier_gold
+		subtract = CURRENCY_ideal_reserve_ratio_multiplier_silver
+	}
+	else_if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:gold_standard
+		}
+		subtract = CURRENCY_ideal_reserve_ratio_multiplier_gold
+	}
+	else_if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:silver_standard
+		}
+		subtract = CURRENCY_ideal_reserve_ratio_multiplier_silver
+	}
+	# The accumulation rate need only be 5% of the stockpile 
+	divide = 20
+
+	min = 0.001 # Minimum 0.1%
+	max = 0.1 # Maximum 10%
+}
+
+CURRENCY_wealth_bimetallic_gold_as_percentage = {
+	# Scope: Country
+	# Function: Get the % of the reserve made up of gold
+	value = var:gold_reserve_size
+	divide = CURRENCY_wealth_bimetallic_both_reserves_size
+}
+
+CURRENCY_wealth_bimetallic_silver_as_percentage = {
+	# Scope: Country
+	# Function: Get the % of the reserve made up of gold
+	value = var:silver_reserve_size
+	divide = CURRENCY_wealth_bimetallic_both_reserves_size
 }
 
 CURRENCY_wealth_bimetallic_both_reserves_size = {
@@ -40,7 +155,7 @@ CURRENCY_wealth_value_bimetallic_from_gold = {
 	value = var:gold_reserve_size
 	divide = CURRENCY_wealth_bimetallic_both_reserves_size
 	multiply = var:country_unit_price_gold
-	multiply = 20 # Gold and silver price need to be balanced so they are much higher. For now, use this multiplier to give it some weight
+	multiply = 16 # 16 ounces to the pound, which is the base ratio
 }
 
 CURRENCY_wealth_value_bimetallic_from_silver = {
@@ -49,7 +164,7 @@ CURRENCY_wealth_value_bimetallic_from_silver = {
 	value = var:silver_reserve_size
 	divide = CURRENCY_wealth_bimetallic_both_reserves_size
 	multiply = var:country_unit_price_silver
-	multiply = 20 # Gold and silver price need to be balanced so they are much higher. For now, use this multiplier to give it some weight
+	multiply = 16 # 16 ounces to the pound, which is the base ratio
 }
 
 CURRENCY_national_debt_scaled = {
@@ -112,8 +227,52 @@ CURRENCY_reserve_value_in_cash_scaled = {
 		}
 		value = CURRENCY_wealth_bimetallic_both_reserves_size
 	}
+	else_if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:gold_standard
+		}
+		value = var:gold_reserve_size
+	}
+	else_if = {
+		limit = {
+			var:official_currency.var:backing_type = flag:silver_standard
+		}
+		value = var:silver_reserve_size
+	}
 	divide = 10000
 	multiply = var:official_currency.var:units_to_the_lb
+}
+
+CURRENCY_reserve_value_in_cash_scaled_silver = {
+	# Scope: Country
+	# Function: Get the value of the silver reserve in cash, in the millions
+	value = var:silver_reserve_size
+	divide = 100
+	multiply = var:official_currency.var:units_to_the_lb
+	divide = 100
+}
+
+CURRENCY_reserve_value_in_wealth_silver = {
+	# Scope: Country
+	# Function: Get the wealth value of the silver reserve
+	value = var:silver_reserve_size
+	multiply = global_var:global_base_import_price_silver
+}
+
+CURRENCY_reserve_value_in_cash_scaled_gold = {
+	# Scope: Country
+	# Function: Get the value of the gold reserve in cash, in the millions
+	value = var:gold_reserve_size
+	divide = 100
+	multiply = var:official_currency.var:units_to_the_lb
+	divide = 100
+}
+
+CURRENCY_reserve_value_in_wealth_gold = {
+	# Scope: Country
+	# Function: Get the wealth value of the gold reserve
+	value = var:gold_reserve_size
+	multiply = global_var:global_base_import_price_gold
 }
 
 CURRENCY_reserve_ratio_total = {
@@ -122,4 +281,21 @@ CURRENCY_reserve_ratio_total = {
 	#value = CURRENCY_reserve_value_in_cash_scaled
 	value = CURRENCY_reserve_value_in_cash_scaled
 	divide = CURRENCY_total_country_cash_scaled
+}
+
+CURRENCY_essentials_buying_power = {
+	# Scope: Country
+	# Function: Gets the effective buying power of the currency for ordinary people, based on how expensive to buy a quarter's worth of essential goods
+	value = var:country_unit_price_grain
+	add = var:country_unit_price_livestock
+	add = var:country_unit_price_fish
+	add = var:country_unit_price_vegetables
+	add = var:country_unit_price_temperate_fruit
+	add = var:country_unit_price_processed_foods
+	add = var:country_unit_price_clothing
+	add = var:country_unit_price_furniture
+	add = var:country_unit_price_pharmaceuticals
+	add = var:country_unit_price_alcohol
+
+	divide = CURRENCY_wealth_value_1_unit
 }

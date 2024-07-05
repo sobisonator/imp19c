@@ -586,9 +586,9 @@ DEMAND_gold = { # Total
 			owner = {
 				trigger_if = {
 					limit = {
-						has_variable = gold_reserve_target
+						has_variable = gold_accumulation_rate
 					}
-					var:gold_reserve_target > DEMAND_gold_reserve_size_svalue
+					var:gold_accumulation_rate > 0
 				}
 			}
 		}
@@ -596,6 +596,11 @@ DEMAND_gold = { # Total
 	}
 }
 
+DEMAND_gold_reserve_accumulation_rate_national = {
+	# Scope: Country
+	# Functon: For use as a right-side comparator
+	value = var:gold_accumulation_rate
+}
 DEMAND_gold_reserve_size_svalue = {
 	# Scope: Country
 	# For use as right-side comparator
@@ -604,30 +609,30 @@ DEMAND_gold_reserve_size_svalue = {
 DEMAND_gold_reserve_accumulation_rate = {
 	# Scope: Governorship
 	# Function: Get the amount needed to fill the gold reserve target, divided by the number of governorships
-	if = {
-		limit = {
-			var:shortage_gold < 1
-		}
-		value = owner.var:DEMAND_gold_reserve_accumulation_basis
-		multiply = DEMAND_shortage_gold_inverse
-		max = 15
-	}
-	else = {
-		value = 0
-	}
+	value = owner.var:DEMAND_gold_reserve_accumulation_basis
+	# Reduce the effective demand based on the shortage
+	# multiply = DEMAND_shortage_gold_inverse ## NOTE: Removed because this causes major instability in prices
+	# Scale the demand to the governorship's proportion of the country's population
+	add = GOODS_governorship_gold_produced
+	multiply = var:governorship_population
+	divide = owner.country_population
 }
 DEMAND_gold_reserve_accumulation_basis = {
 	# Scope: Country
 	# Function: Get the gold reserve target minus current size divided by the number of governorships, to avoid calculating this every iteration when getting DEMAND_gold_reserve_accumulation_rate. This value is cached.
-	value = owner.var:gold_reserve_target
-	subtract = owner.var:gold_reserve_size
-	divide = owner.FUNC_num_governorships
+	value = var:gold_accumulation_rate
+	divide = FUNC_num_governorships
 }
 DEMAND_shortage_gold_inverse = {
 	# Scope: Governorship
 	# Function: Get the inverse of the shortage of gold, so that the outcome is lower the higher the shortage
 	value = 1
-	subtract = var:shortage_gold
+	if = {
+		limit = {
+			has_variable = shortage_gold
+		}
+		subtract = var:shortage_gold
+	}
 }
 
 DEMAND_gold_base_minus_gold_reserve_demand = {
@@ -669,16 +674,21 @@ DEMAND_silver = { # Total
 			owner = {
 				trigger_if = {
 					limit = {
-						has_variable = silver_reserve_target
+						has_variable = silver_accumulation_rate
 					}
-					var:silver_reserve_target > DEMAND_silver_reserve_size_svalue
+					var:silver_accumulation_rate > 0
 				}
 			}
 		}
-		add = DEMAND_silver_reserve_accumulation_rate
+		add = DEMAND_gold_reserve_accumulation_rate
 	}
 }
 
+DEMAND_silver_reserve_accumulation_rate_national = {
+	# Scope: Country
+	# Functon: For use as a right-side comparator
+	value = var:silver_accumulation_rate
+}
 DEMAND_silver_reserve_size_svalue = {
 	# Scope: Country
 	# For use as right-side comparator
@@ -687,30 +697,30 @@ DEMAND_silver_reserve_size_svalue = {
 DEMAND_silver_reserve_accumulation_rate = {
 	# Scope: Governorship
 	# Function: Get the amount needed to fill the silver reserve target, divided by the number of governorships
-	if = {
-		limit = {
-			var:shortage_silver < 1
-		}
-		value = owner.var:DEMAND_silver_reserve_accumulation_basis
-		multiply = DEMAND_shortage_silver_inverse
-		max = 15
-	}
-	else = {
-		value = 0
-	}
+	value = GOODS_governorship_silver_produced
+	# Reduce the effective demand based on the shortage
+	# multiply = DEMAND_shortage_silver_inverse ## ## NOTE: Removed because this causes major instability in prices
+	# Scale the demand to the governorship's proportion of the country's population
+	add = GOODS_governorship_silver_produced
+	multiply = var:governorship_population
+	divide = owner.country_population
 }
 DEMAND_silver_reserve_accumulation_basis = {
 	# Scope: Country
 	# Function: Get the gold reserve target minus current size divided by the number of governorships, to avoid calculating this every iteration when getting DEMAND_gold_reserve_accumulation_rate. This value is cached.
-	value = owner.var:silver_reserve_target
-	subtract = owner.var:silver_reserve_size
-	divide = owner.FUNC_num_governorships
+	value = var:silver_accumulation_rate
+	divide = FUNC_num_governorships
 }
 DEMAND_shortage_silver_inverse = {
 	# Scope: Governorship
 	# Function: Get the inverse of the shortage of silver, so that the outcome is lower the higher the shortage
 	value = 1
-	subtract = var:shortage_silver
+	if = {
+		limit = {
+			has_variable = shortage_silver
+		}
+		subtract = var:shortage_silver
+	}
 }
 
 DEMAND_silver_base_minus_silver_reserve_demand = {

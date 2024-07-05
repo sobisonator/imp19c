@@ -77,10 +77,20 @@ CURRENCY_all_governorships_send_to_reserves = {
 		name = silver_reserve_actual_change
 		value = 0
 	}
-	every_governorships = {
+	ordered_governorships = {
+		order_by = {
+			order_by = GOODS_governorship_gold_produced
+		}
+		max = 999
 		CURRENCY_governorship_send_to_reserves = {
 			tradegood = gold
 		}
+	}
+	ordered_governorships = {
+		order_by = {
+			order_by = GOODS_governorship_silver_produced
+		}
+		max = 999
 		CURRENCY_governorship_send_to_reserves = {
 			tradegood = silver
 		}
@@ -92,7 +102,7 @@ CURRENCY_governorship_send_to_reserves = {
 	# Function: Send the specified amount of the specified precious metal ($tradegood$ to the national reserves
 	set_local_variable = {
 		name = $tradegood$_for_reserves
-		value = DEMAND_gold_reserve_accumulation_rate
+		value = DEMAND_$tradegood$_reserve_accumulation_rate
 	}
 
 	if = {
@@ -102,6 +112,36 @@ CURRENCY_governorship_send_to_reserves = {
 		change_local_variable = {
 			name = $tradegood$_for_reserves
 			multiply = var:shortage_$tradegood$
+		}
+	}
+
+	if = {
+		limit = {
+			owner.var:$tradegood$_reserve_actual_change > owner.DEMAND_$tradegood$_reserve_accumulation_rate_national
+		}
+		set_local_variable = {
+			name = $tradegood$_for_reserves
+			value = 0
+		}
+	}
+
+	if = {
+		limit = {
+			DEMAND_difference_$tradegood$ > 0
+		}
+		change_local_variable = {
+			name = $tradegood$_for_reserves
+			add = DEMAND_difference_$tradegood$
+		}
+	}
+
+	if = {
+		limit = {
+			local_var:$tradegood$_for_reserves > owner.DEMAND_$tradegood$_reserve_accumulation_rate_national
+		}
+		set_local_variable = {
+			name = $tradegood$_for_reserves
+			value = owner.DEMAND_$tradegood$_reserve_accumulation_rate_national
 		}
 	}
 

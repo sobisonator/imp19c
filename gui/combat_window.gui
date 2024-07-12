@@ -1,0 +1,358 @@
+@stats_icon_width = 96
+
+base_window = {
+	name = "combat_window"
+	movable = no
+	parentanchor = bottom|hcenter
+	size = { 755 400 }
+	position = { 0 2 }
+	widgetanchor = bottom|hcenter
+	
+	vbox = {
+		using = MainWindowHeaderBoxCenteredNew
+		
+		blockoverride "Title_text" { text = "[CombatView.GetCombat.GetName]" }
+		
+		
+		vbox = {
+			layoutpolicy_vertical = expanding
+		}
+		blockoverride "White_buttons" 
+		{
+			button_close = {
+				onclick = "[CombatView.OnClose]"
+				tooltip = "CLOSE"
+			}
+		}
+	}
+	
+	#icon = {
+	#	texture = "gfx/interface/ornamental/battle_top_white.dds"
+	#	parentanchor = hcenter
+	#	position = { 0 -128 }
+	#}
+	#icon = {
+	#	texture = "gfx/interface/ornamental/battle_top_red.dds"
+	#	parentanchor = hcenter
+	#	position = { -60 -128 }
+	#}
+	container = {
+		resizeparent = yes
+		ignoreinvisible = yes
+		
+		
+		widget = {
+			minimumsize = { 755 372 }
+			alwaystransparent = yes
+			
+			icon = {
+				visible = "[Not(CombatView.CanRetreat)]"
+				tooltip = "[CombatView.GetRetreatTooltip]"
+				
+				texture = "gfx/interface/icons/shared_icons/retreating.dds"
+				size = { 50 50 }
+				position = { 0 0 }
+			}
+			
+			icon = {
+				size = { 234 85 }
+				position = { 0 165 }
+				parentanchor = hcenter
+				texture = "[CombatView.GetTerrainTexture]"
+				#modify_texture = {
+				#	name = "Alpha" 
+				#	spriteType = corneredstretched
+				#	texture = "gfx/interface/base_parts/horizontal_gradient_stretch_sides_black_invert_terrain.dds" 
+				#	blend_mode = alphamultiply
+				#}
+			}
+			flowcontainer = {
+				minimumsize = { 755 372 }
+				resizeparent = yes
+				parentanchor = hcenter 
+				widget = {
+					size = { 40 372 }
+					dynamicgridbox = {
+						position = { 8 -6 }
+						parentanchor = vcenter
+						datacontext = "[CombatView.GetCombat.GetAttacker]"
+						using = combatant_modifiers
+						
+						blockoverride "Not_for_land"
+						{
+						}
+					}
+					
+					dynamicgridbox = {
+						position = { 8 38 }
+						parentanchor = vcenter
+						datacontext = "[CombatView.GetCombat.GetDefender]"
+						using = combatant_modifiers
+						
+						blockoverride "Not_for_land"
+						{
+						}
+					}
+				}
+				container = {
+					parentanchor = hcenter
+					minimumsize = { 735 0 }
+					dynamicgridbox = {
+						name = "attacker_front"
+						position = { 0 183 }
+						parentanchor = hcenter
+						flipdirection = yes
+						datamodel = "[CombatView.GetAttackerFrontRow]"
+						
+						item = {
+							using = combatant_unit_counter_new_attacker
+						}
+					}
+					dynamicgridbox = {
+						name = "defender_front"
+						position = { 0 212 }
+						parentanchor = hcenter
+						flipdirection = yes
+						datamodel = "[CombatView.GetDefenderFrontRow]"
+						
+						item = {
+							using = combatant_unit_counter_new_defender
+						}
+					}
+				}
+				widget = { 
+					size = { 40 80 }
+				}
+			}
+			# TODO - Combat Width
+			icon_and_text = {
+				name = "province_combat_width"
+				position = { -8 58 }
+				scale = 0.9
+				parentanchor = right
+				size = { @stats_icon_width 0 }
+				tooltip = "[CombatView.GetCombat.GetLocation.GetCombatWidthTooltip]"
+				blockoverride "Icon"
+				{
+					texture = "gfx/interface/icons/diplomatic_status/war.dds"
+				}
+				blockoverride "Text"
+				{
+					text = "[CombatView.GetCombat.GetLocation.GetCombatWidth]"
+				}
+			}
+			
+			margin_widget = {
+				margin = { 10 0 }
+				name = "attacker_widget"
+				size = { 100% 120 }
+				position = { 0 40 }
+				parentanchor = top
+				datacontext = "[CombatView.GetCombat.GetAttacker]"
+				container = {
+					position = { 60 12 }
+					icon_and_text = {
+						datacontext = "[CombatView.GetCombat.GetAttacker]"
+						size = { 92 0 }
+						blockoverride "Icon" { 
+							texture = "[GetCombatTacticIcon(Combatant.GetLeadingUnit.GetTactic.GetIcon)]" 
+						}
+						blockoverride "Text" { 
+							text = "[Combatant.GetLeadingUnit.GetTactic.GetPowerVersusDiffWithEfficiency(CombatView.GetCombat.GetDefender.GetLeadingUnit.GetTactic,Combatant.GetLeadingUnit)|+=0%]" 
+						}
+						tooltip = "[Combatant.GetLeadingUnit.GetTactic.GetFullDescription(Combatant.GetLeadingUnit)]"
+					}
+					icon = {
+						position = { 32 6 }
+						texture = "gfx/interface/combat/tactic_indicator.dds"
+						framesize = { 50 50 }
+						size = { 32 32 }
+						frame = "[Combatant.GetTacticImpactFrame]"
+					}
+				}
+				icon_and_text = {
+					position = { 60 -17 }
+					size = { 92 0 }
+					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/discipline.dds" }
+					blockoverride "Text" { text = "[Combatant.GetDiscipline]" }
+					tooltip = "[Combatant.GetDisciplineTooltip]"
+					parentanchor = bottom
+					visible = "[Not( CombatView.GetCombat.IsNavalCombat )]"
+				}
+				icon_and_text = {
+					position = { 60 -24 }
+					size = { 92 0 }
+					visible = "[CombatView.GetCombat.IsNavalCombat]"
+					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/attrition.dds" }
+					blockoverride "Text" { text = "[Combatant.GetSunkShips]" }
+					tooltip = "SHIPS_LOST_THIS_COMBAT"
+					parentanchor = bottom
+				}
+				cpt_button = {
+					position = { 0 -17 }
+					size = { 60 90 }
+					name = "portrait2"
+					parentanchor = bottom
+					datacontext = "[Combatant.GetCommander]"
+				}
+				fixed_size_progressbar = {
+					position = { 0 1 }
+					parentanchor = bottom
+					size = { 100% 14 }
+					blockoverride "Value" { value = "[Combatant.GetMoralePercent]" }
+					tooltip = "[Combatant.GetMoraleTooltip]"
+				}
+				
+				country_flag = {
+					parentanchor = right
+					position = { 3 50 }
+					tooltip = "[Combatant.GetCountry.GetName]"
+					datacontext = "[Combatant.GetCountry]"
+					
+					blockoverride "flag"
+					{
+						texture = "[Combatant.GetCountry.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+						frame = "[Combatant.GetCountry.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+						framesize = { 56 56 }
+					}
+					
+					blockoverride "size"
+					{
+						size = { 56 56 }
+					}
+				}
+				
+				#widget = {
+				#	size = { 490 60 }
+				#	list_entry = { size = { 100% 100% } }
+				#	parentanchor = center
+				#}
+				
+				overlappingitembox = {
+					name = "unit_types_grid"
+					position = { 0 14 }
+					maximumsize = { 500 60 }
+					autoresize = yes
+					parentanchor = hcenter
+					datamodel = "[Combatant.GetSubUnitCounts]"
+					
+					item = {
+						unit_combat_card = {
+							blockoverride "Size" { size = { 60 90 } }
+							visible = "[And( SubUnitCombatCounts.IsCorrectForCombat, GreaterThan_int32( SubUnitCombatCounts.GetCount, '(int32)0' ))]"
+							#visible = "[SubUnitCombatCounts.IsCorrectForCombat]"
+							tooltip = "[SubUnitCombatCounts.GetTooltip]"
+							filter_mouse = all
+							alwaystransparent = no
+						}
+					}
+				}
+			}
+
+			margin_widget = {
+				margin = { 10 0 }
+				name = "defender_widget"
+				size = { 100% 120 }
+				parentanchor = bottom
+				datacontext = "[CombatView.GetCombat.GetDefender]"
+				container = {
+					position = { 60 20 }
+					icon_and_text = {
+						datacontext = "[CombatView.GetCombat.GetDefender]"
+						size = { 92 0 }
+						blockoverride "Icon" { 
+							texture = "[GetCombatTacticIcon(Combatant.GetLeadingUnit.GetTactic.GetIcon)]" 
+						}
+						blockoverride "Text" { 
+							text = "[Combatant.GetLeadingUnit.GetTactic.GetPowerVersusDiffWithEfficiency(CombatView.GetCombat.GetAttacker.GetLeadingUnit.GetTactic,Combatant.GetLeadingUnit)|+=0%]" 
+						}
+						tooltip = "[Combatant.GetLeadingUnit.GetTactic.GetFullDescription(Combatant.GetLeadingUnit)]"
+					}
+					icon = {
+						position = { 32 6 }
+						texture = "gfx/interface/combat/tactic_indicator.dds"
+						framesize = { 50 50 }
+						size = { 32 32 }
+						frame = "[Combatant.GetTacticImpactFrame]"
+					}
+				}
+				icon_and_text = {
+					position = { 60 -14 }
+					size = { 92 0 }
+					visible = "[CombatView.GetCombat.IsNavalCombat]"
+					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/attrition.dds" }
+					blockoverride "Text" { text = "[Combatant.GetSunkShips]" }
+					tooltip = "SHIPS_LOST_THIS_COMBAT"
+					parentanchor = bottom
+				}
+				icon_and_text = {
+					position = { 60 -8 }
+					size = { 92 0 }
+					visible = "[Not( CombatView.GetCombat.IsNavalCombat )]"
+					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/discipline.dds" }
+					blockoverride "Text" { text = "[Combatant.GetDiscipline]" }
+					tooltip = "[Combatant.GetDisciplineTooltip]"
+					parentanchor = bottom
+				}
+				cpt_button = {
+					position = { 0 -12 }
+					size = { 60 90 }
+					name = "portrait2"
+					parentanchor = bottom
+					datacontext = "[Combatant.GetCommander]"
+				}
+				fixed_size_progressbar = {
+					position = { 0 1 }
+					size = { 100% 14 }
+					blockoverride "Value" { value = "[Combatant.GetMoralePercent]" }
+					tooltip = "[Combatant.GetMoraleTooltip]"
+				}
+				
+				country_flag = {
+					parentanchor = right
+					position = { 3 16 }
+					tooltip = "[Combatant.GetCountry.GetName]"
+					datacontext = "[Combatant.GetCountry]"
+					
+					blockoverride "flag"
+					{
+						texture = "[Combatant.GetCountry.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+						frame = "[Combatant.GetCountry.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+						framesize = { 56 56 }
+					}
+					
+					blockoverride "size"
+					{
+						size = { 56 56 }
+					}
+				}
+				
+				#widget = {
+				#	size = { 490 60 }
+				#	list_entry = { size = { 100% 100% } }
+				#	parentanchor = center
+				#}
+				
+				overlappingitembox = {
+					name = "unit_types_grid"
+					position = { 0 18 }
+					maximumsize = { 500 60 }
+					parentanchor = hcenter
+					autoresize = yes
+					datamodel = "[Combatant.GetSubUnitCounts]"
+					item = {
+						unit_combat_card = {
+							blockoverride "Size" { size = { 60 90 } }
+							visible = "[And( SubUnitCombatCounts.IsCorrectForCombat, GreaterThan_int32( SubUnitCombatCounts.GetCount, '(int32)0' ))]"
+							#visible = "[SubUnitCombatCounts.IsCorrectForCombat]"
+							tooltip = "[SubUnitCombatCounts.GetTooltip]"
+							filter_mouse = all
+							alwaystransparent = no
+						}
+					}
+				}
+			}
+		}
+	}
+}
+

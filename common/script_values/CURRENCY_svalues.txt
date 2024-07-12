@@ -299,3 +299,23 @@ CURRENCY_essentials_buying_power = {
 
 	divide = CURRENCY_wealth_value_1_unit
 }
+
+CURRENCY_private_cash_needed = {
+	# Scope: Country
+	# Function: Multiply the cost of living by the country population.
+	# This gives the minimum amount of cash that must be in circulation for pops to carry out day to day business. Anything less will cause serious deflation, i.e. demand for goods to drop and for a base level of shortages in every region
+	value = CURRENCY_essentials_buying_power
+	multiply = 4 # Multiply by 4, each pop is 4,000 people and this value will be scaled down to avoid overflows
+	multiply = country_population
+	divide = 1000 # Divide by 1,000 to scale down to CURRENCY_amt_circulated which is measured in the millions
+}
+
+CURRENCY_private_cash_ratio = {
+	# Scope: Country
+	# Function: Get the amount of private currency and divide it by the amount needed to support cost of living. If it's too low, the country will experience deflation as there is not enough money circulating
+	# This also sets the demand for private cash, and will cause pops to create new cash from commerce districts independently
+	# The government can set a rate at which private cash is created or recalled quarterly
+	value = CURRENCY_amt_circulated_scaled
+	divide = CURRENCY_private_cash_needed
+
+}

@@ -1,0 +1,65 @@
+﻿# Methods for finding solutions to common complex problems by lookup
+
+# Answers to problems are stored in provinces
+
+LOOKUP_global_market_penetration_tradegood = {
+	random_lookup_market_penetration = {
+		order_by 
+	}
+}
+
+LOOKUP_find_sub1_2_decimal_places = {
+	# Scope: Any
+	# Function: Find a lookup index where the index value is within 2 decimal places of the given value
+	# Used to pass sub-1 values as index values, within 2 decimal points of accuracy, otherwise our tables would grow far too big
+	random_LOOKUP_cell_$category$ = {
+		limit = {
+			$input_var_x$ > LOOKUP_LO_x_$category$
+			$input_var_x$ < LOOKUP_HI_x_$category$
+
+			$input_var_y$ > LOOKUP_LO_y_$category$
+			$input_var_y$ < LOOKUP_HI_y_$category$
+		}
+		save_scope_as = LOOKUP_SCOPE
+	}
+}
+
+LOOKUP_create_table = {
+	# Scope: Any
+	# Function: Create a lookup table
+	# $category$ = the category of problem you want to solve
+	# $increment$ = the amount by which to increase the numbers each step
+
+	set_local_variable = {
+		name = current_x
+		value = $start_x$
+	}
+	set_local_variable = {
+		name = current_y
+		value = $start_y$
+	}
+
+	set_local_variable = {
+		name = increment
+		value = $increment$
+	}
+
+	while = {
+		OR = {
+			local_var:current_x < $max_x$
+			local_var:current_y < $max_y$
+		}
+		every_province = {
+			set_variable = LOOKUP_is_cell_$category$
+
+			set_variable = {
+				name = LOOKUP_LO
+				value = local_var:current_y
+			}
+			set_variable = {
+				name = LOOKUP_HI
+				value = local_var:cu
+			}
+		}
+	}
+}

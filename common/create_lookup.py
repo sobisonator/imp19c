@@ -1,57 +1,73 @@
 from decimal import *
 
-def create_table(category, increment, start_y, start_x, max_y, max_x, solver):
+class LookupBuilder:
+    def __init__(self, category, increment, start_y, start_x, max_y, max_x, solver):
+        self.category = category
+        self.increment = increment
+        self.start_y = start_y
+        self.start_x = start_x
+        self.max_y = max_y
+        self.max_x = max_x
+        self.solver = solver
 
-    provid = 1
-    current_y = start_y
-    current_x = start_x
-    increment = increment
+    def create_table(self):
+        provid = 1
+        current_y = self.start_y
+        current_x = self.start_x
+        increment = increment
 
-    while current_x < max_x:
+        while provid < (self.max_x * self.max_y):
+            self.create_table_column
+             
+    def create_table_column(self):
+        while current_x < self.max_x:
 
-        print_table_output(provid,category,current_y,current_x,increment,solver)
-        current_x += increment
-    current_x = start_x
-    current_y += increment
+            self.print_table_output()
+            current_x += self.increment
 
+        current_x = self.start_x
+        current_y += self.increment     
 
-def print_table_output(provid,category,current_y,current_x,increment,solver):
-        output = """
-    p:{provid} = {{
-        set_variable = LOOKUP_IS_CELL
+    def print_table_output(self):
+            output = """
+        p:{provid} = {{
+            set_variable = LOOKUP_IS_CELL
 
-        set_variable = {{
-            name = LOOKUP_LO_x_{category}
-            value = {current_x}
+            set_variable = {{
+                name = LOOKUP_LO_x_{category}
+                value = {current_x}
+            }}
+            set_variable = {{
+                name = LOOKUP_HI_x_{category}
+                value = {current_x_incremented}
+            }}
+
+            set_variable = {{
+                name = LOOKUP_LO_y_{category}
+                value = {current_y}
+            }}
+            set_variable = {{
+                name = LOOKUP_HI_y_{category}
+                value = {current_y_incremented}
+            }}
+
+            set_variable = {{
+                name = LOOKUP_ANS_{category}
+                value = {ans}
+            }}
         }}
-        set_variable = {{
-            name = LOOKUP_HI_x_{category}
-            value = {current_x_incremented}
-        }}
+            """.format(provid=self.provid,
+                    category=self.category,
+                    current_y = round(self.current_y,2),
+                    current_y_incremented = round(self.current_y + self.increment,2),
+                    current_x = round(self.current_x,2),
+                    current_x_incremented = round(self.current_x + self.increment,2),
+                    ans = round(self.solver(self.current_y, self.current_x),2)
+            )
+            print(output)
 
-        set_variable = {{
-            name = LOOKUP_LO_y_{category}
-            value = {current_y}
-        }}
-        set_variable = {{
-            name = LOOKUP_HI_y_{category}
-            value = {current_y_incremented}
-        }}
 
-        set_variable = {{
-            name = LOOKUP_ANS_{category}
-            value = {ans}
-        }}
-    }}
-        """.format(provid=provid,
-                category=category,
-                current_y = current_y,
-                current_y_incremented = current_y + increment,
-                current_x = current_x,
-                current_x_incremented = current_x + increment,
-                ans = solver(current_y, current_x))
-        print(output)
-
+# TODO: Create an alternative method to use a binary search to find the answer in each coordinate
 
 def multiply_together(x,y):
     return x*y

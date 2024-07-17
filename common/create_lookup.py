@@ -14,10 +14,12 @@ class LookupBuilder:
         provid = 1
         current_y = self.start_y
         current_x = self.start_x
-        increment = increment
+        increment = self.increment
 
         while provid < (self.max_x * self.max_y):
             self.create_table_column
+            current_y += self.increment
+            provid += 1
              
     def create_table_column(self):
         while current_x < self.max_x:
@@ -25,8 +27,7 @@ class LookupBuilder:
             self.print_table_output()
             current_x += self.increment
 
-        current_x = self.start_x
-        current_y += self.increment     
+        current_x = self.start_x     
 
     def print_table_output(self):
             output = """
@@ -72,12 +73,13 @@ class LookupBuilder:
 def multiply_together(x,y):
     return x*y
 
-create_table(category = "global_trade_penetration",
+builder = LookupBuilder(category = "global_trade_penetration",
              increment = 0.01,
              start_y = 0,
              start_x = 0,
              max_x = 1,
              max_y = 1, 
-             solver = multiply_together
-             )
+             solver = multiply_together)
+
+builder.create_table()
 

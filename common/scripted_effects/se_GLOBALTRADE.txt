@@ -1,1 +1,5892 @@
-﻿
+﻿GT_split_do_global_trade_split_lookups = {
+	set_global_variable = global_trade_triggered
+	GT_split_reset_global_TZ_variables = { type = $type$ }
+	SHIPPING_update_TZ_overview_piecharts = yes
+	GT_split_update_governorship_vars = yes
+	GT_split_cache_TZ_penetration_values = yes
+	# GT_split_reset_all_TZ_stockpiles = { type = $type$ } # OBSOLETE, global var $tradezone$_stockpile_$tradegood$ is used instead
+	GT_reset_all_customs_union_for_sale_values = { type = $type$ }
+	every_country = {
+		GT_split_set_customs_union_scope = yes
+		GT_split_cache_DEMAND_reserve_accumulation_basis_svalues = yes
+		every_governorships = {
+			TRADE_governorship_get_pops_this_quarter = yes
+			GT_split_cache_governorship_infrastructure_capacity = yes
+			GT_split_declare_sell_to_TZ_aggregate_stockpile = { type = $type$ }
+			# GT_split_calculate_all_trade_shares = yes # Now handled within the distribution of income and expenses
+			GT_split_reset_queued_trade_expenses_due_shipping = yes
+		}
+	}
+	#every_country = {
+	#	every_governorships = {
+	#		GT_split_get_governorship_percentage_of_TZ_sell_stockpile_all = yes
+	#	}
+	#}
+	GT_split_sum_all_TZ_stockpiles = { type = $type$ }
+	every_country = {
+		every_governorships = {
+			GT_split_create_order_all = { type = $type$ }
+		}
+	}
+	# Put price calculations here
+	#####
+	#
+	GT_set_tradegood_price_all_TZs_all_tradegoods = { type = $type$ }
+	GT_split_get_global_import_unit_price_all = { type = $type$ }
+	GT_get_all_customs_union_for_sale_as_percentage_of_global = { type = $type$ }
+	every_country = {
+		GT_split_get_country_global_market_penetration_all = { type = $type$ }
+		GT_split_get_order_size_modifier_all = { type = $type$ }
+		GT_split_get_country_import_unit_price_all = { type = $type$ }
+		every_governorships = {
+			GT_split_update_wealth_owed_for_all_TZs_all_tradegoods = { type = $type$ }
+		}
+	}
+	GT_split_sum_all_TZ_orders_all = { type = $type$ } # Also gets as a order percentage of supply
+	# DISABLED - not currently needed for anything
+	#every_country = {
+	#	every_governorships = {
+	#		GT_split_get_order_as_percentage_of_TZ_total_all = yes
+	#	}
+	#}
+	GT_split_scale_order_size_and_payment_pools = { type = $type$ }
+	# DISABLED - not currently needed for anything
+	#every_country = {
+	#	every_governorships = {
+	#		GT_split_get_governorship_amount_owed_all = yes
+	#	}
+	#}
+	every_country = {
+		every_governorships = {
+			GT_split_scale_wealth_owed_and_order_size_all = { type = $type$ }
+			GT_split_get_governorship_income_due_all = { type = $type$ }
+			GT_split_subtract_amount_exported_all = { type = $type$ }
+			GT_split_add_amount_imported_all = { type = $type$ }
+			# Distribution of income and expenses handled outside of this effect
+			# GT_split_distribute_income_all = yes
+			# GT_split_distribute_expenses_all = yes
+		}
+	}
+	GT_split_set_total_order_size_and_total_global_stockpile_percent_all = { type = $type$ }
+	GT_split_update_shipping_route_traffic_all = yes
+	GT_split_do_shipping_costs = { type = $type$ } 
+	every_country = {
+		every_governorships = {
+			GT_add_queued_trade_category_income_and_expenses = yes
+		}
+	}
+
+	# GT_split_log_trade_balance = yes # TODO: Implement a way to save previous values so that it can be charted on a graph
+}
+
+GT_split_cache_DEMAND_reserve_accumulation_basis_svalues = {
+	# Scope: Country
+	# Function: Cache DEMAND_reserve_accumulation_basis for gold and silver
+	set_variable = {
+		name = DEMAND_gold_reserve_accumulation_basis
+		value = DEMAND_gold_reserve_accumulation_basis
+	}
+	set_variable = {
+		name = DEMAND_silver_reserve_accumulation_basis
+		value = DEMAND_silver_reserve_accumulation_basis
+	}
+}
+
+GT_split_create_tradegroups = {
+	# Scope: Random country, to every trade center province
+	# Function: Create temporary objects that are used as proxies for groups of governorships within countries 
+}
+
+GT_split_log_trade_balance = {
+	# Scope: Random country
+	# Function: Save the trade balance in a random player country (the player, in singleplayer), and store up to the previous 7 trade balance values
+	random_country = {
+		limit = {
+			is_ai = no
+		}
+		set_variable = {
+			name = trade_national_balance_8
+			value = var:trade_national_balance_7
+		}
+		set_variable = {
+			name = trade_national_balance_7
+			value = var:trade_national_balance_6
+		}
+		set_variable = {
+			name = trade_national_balance_6
+			value = var:trade_national_balance_5
+		}
+		set_variable = {
+			name = trade_national_balance_5
+			value = var:trade_national_balance_4
+		}
+		set_variable = {
+			name = trade_national_balance_4
+			value = var:trade_national_balance_3
+		}
+		set_variable = {
+			name = trade_national_balance_3
+			value = var:trade_national_balance_2
+		}
+		set_variable = {
+			name = trade_national_balance_2
+			value = var:trade_national_balance_1
+		}
+		set_variable = {
+			name = trade_national_balance_1
+			value = TRADE_national_balance
+		}
+	}
+}
+
+GT_split_reset_global_TZ_variables = {
+	# Scope: Random country
+	# Function: Specifies the list of global variables to reset for each tradezone
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_reset_global_TZ_variables_tradegood
+	}
+}
+
+GT_split_reset_global_TZ_variables_tradegood = {
+	# Scope: Random country
+	# Function: Set $tradegood$ stockpile to 0 for every tradezone
+	set_global_variable = {
+		name = india_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_north_america_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_north_america_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = caribbean_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_south_america_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_south_america_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = south_east_asia_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = indo_china_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = yellow_sea_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = southern_africa_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_africa_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_africa_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = middle_east_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = western_steppe_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = eastern_steppe_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = upper_yangtzi_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = atlantic_seaboard_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = central_europe_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_mediterranean_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = baltic_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_europe_stockpile_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_mediterranean_stockpile_$tradegood$
+		value = 0
+	}
+
+	set_global_variable = {
+		name = india_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_north_america_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_north_america_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = caribbean_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_south_america_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_south_america_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = south_east_asia_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = indo_china_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = yellow_sea_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = southern_africa_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_africa_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_africa_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = middle_east_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = western_steppe_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = eastern_steppe_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = upper_yangtzi_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = atlantic_seaboard_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = central_europe_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_mediterranean_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = baltic_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_europe_exported_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_mediterranean_exported_$tradegood$
+		value = 0
+	}
+
+	set_global_variable = {
+		name = india_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_north_america_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_north_america_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = caribbean_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_south_america_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_south_america_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = south_east_asia_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = indo_china_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = yellow_sea_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = southern_africa_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_africa_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_africa_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = middle_east_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = western_steppe_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = eastern_steppe_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = upper_yangtzi_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = atlantic_seaboard_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = central_europe_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_mediterranean_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = baltic_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_europe_total_imports_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_mediterranean_total_imports_$tradegood$
+		value = 0
+	}
+
+	set_global_variable = {
+		name = india_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_north_america_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_north_america_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = caribbean_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_south_america_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_south_america_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = south_east_asia_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = indo_china_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = yellow_sea_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = southern_africa_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_africa_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_africa_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = middle_east_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = western_steppe_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = eastern_steppe_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = upper_yangtzi_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = atlantic_seaboard_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = central_europe_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_mediterranean_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = baltic_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_europe_total_order_size_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_mediterranean_total_order_size_$tradegood$
+		value = 0
+	}
+
+	set_global_variable = {
+		name = india_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_north_america_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_north_america_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = caribbean_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_south_america_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_south_america_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = south_east_asia_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = indo_china_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = yellow_sea_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = southern_africa_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_africa_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_africa_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = middle_east_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = western_steppe_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = eastern_steppe_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = upper_yangtzi_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = atlantic_seaboard_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = central_europe_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = west_mediterranean_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = baltic_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_europe_payment_pool_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = east_mediterranean_payment_pool_$tradegood$
+		value = 0
+	}
+
+	set_global_variable = {
+		name = global_payment_pool_$tradegood$
+		value = 0
+	}
+
+	set_global_variable = {
+		name = india_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = east_north_america_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = west_north_america_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = caribbean_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = west_south_america_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = east_south_america_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = south_east_asia_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = indo_china_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = yellow_sea_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = southern_africa_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = west_africa_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = east_africa_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = middle_east_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = western_steppe_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = eastern_steppe_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = upper_yangtzi_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = atlantic_seaboard_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = central_europe_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = west_mediterranean_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = baltic_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = east_europe_shipping
+		value = 0
+	}
+	set_global_variable = {
+		name = east_mediterranean_shipping
+		value = 0
+	}
+}
+
+GT_split_update_governorship_vars = {
+	# Scope: Random country
+	# Function: Set the trade center variable in every governorship
+	every_country = {
+		every_governorships = {
+			TRADE_governorship_get_pops_this_quarter = yes
+			TRADE_set_internal_trade_scope = yes
+			TRADE_update_governorship_TZs = yes
+		}
+	}
+}
+
+GT_split_reset_all_TZ_stockpiles = {
+	every_trade_center = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_split_set_tradegood_TZ_stockpile_0
+		}
+	}
+}
+
+GT_split_set_tradegood_TZ_stockpile_0 = {
+	set_variable = {
+		name = TZ_stockpile_$tradegood$
+		value = 0
+	}
+}
+
+GT_split_cache_governorship_infrastructure_capacity = {
+	# Scope: Governorship
+	# Function: Cache the governorship infrastructure capacity as a var
+	set_variable = {
+		name = governorship_infrastructure_capacity
+		value = TRADE_governorship_infrastructure_capacity_svalue
+	}
+}
+
+GT_split_declare_sell_to_TZ_aggregate_stockpile = {
+	# Scope: Governorship
+	# Function: Every governorship declares its stockpile surplus of every tradegood as available to sell to its local tradezone, and some of it to the "global" tradezone
+	save_scope_as = seller_governorship
+
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_declare_sell_amount
+	}
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_update_TZ_sell_amount
+	}
+}
+
+GT_split_declare_sell_amount = {
+	# Scope: Governorship
+	# Function: 
+	set_variable = {
+		name = for_sale_$tradegood$
+		value = 0
+	}
+	if = {
+		limit = {
+			var:$tradegood$_stockpile > DEMAND_$tradegood$
+		}
+		set_variable = {
+			name = for_sale_$tradegood$
+			value = var:$tradegood$_stockpile
+		}
+		change_variable = {
+			name = for_sale_$tradegood$
+			subtract = DEMAND_$tradegood$
+		}
+		# Cap at governorship infra capacity
+		set_local_variable = {
+			name = l_governorship_infrastructure_capacity_compare
+			value = var:governorship_infrastructure_capacity
+		}
+		change_local_variable = {
+			name = l_governorship_infrastructure_capacity_compare
+			subtract = var:for_sale_$tradegood$
+		}
+		if = {
+			limit = {
+				trigger_if = {
+					limit = {
+						has_local_variable = l_governorship_infrastructure_capacity_compare
+					}
+					local_var:l_governorship_infrastructure_capacity_compare < 0
+				}
+			}
+			set_variable = {
+				name = for_sale_$tradegood$
+				value = var:governorship_infrastructure_capacity
+			}
+		}
+
+		save_scope_as = seller_governorship
+
+		# Update the total amount for sale in the customs union, be it federal, colonial or single-country
+
+		owner.var:customs_union_scope = {
+			change_variable = {
+				name = customs_union_$tradegood$_for_sale
+				add = scope:seller_governorship.var:for_sale_$tradegood$
+			}
+		}
+		# TODO: Improve this so that governorships outside of a customs union do not interact with the federal CU
+
+	}
+}
+
+GT_split_set_customs_union_scope = {
+	# Scope: Country
+	# Function: Set the scope for the customs union of this country
+	if = {
+		limit = {
+			NOR = {
+				any_governorships = {
+					has_variable = federation_customs_union
+				}
+				has_variable = overlord_customs_union
+			}
+		}
+		set_variable = {
+			name = customs_union_scope
+			value = this
+		}
+	}
+
+	else_if = {
+		limit = {
+			has_variable = overlord_customs_union
+			NOT = {
+				any_governorships = {
+					has_variable = federation_customs_union
+				}
+			}
+		}
+		set_variable = {
+			name = customs_union_scope
+			value = var:overlord_customs_union
+		}
+	}
+
+	else_if = {
+		limit = {
+			has_variable = member_of_federation
+			any_governorships = {
+				has_variable = federation_customs_union
+			}
+		}
+		set_variable = {
+			name = customs_union_scope
+			value = var:member_of_federation
+		}
+	}
+
+	else = {
+		set_variable = {
+			name = customs_union_scope
+			value = this
+		}
+	}	
+}
+
+GT_split_update_TZ_sell_amount = {
+	# Scope: Governorship
+	# Function: Update the amount of $tradegood$ offered in the TZ to which the governorship belongs
+	if = {
+		limit = {
+			has_variable = for_sale_$tradegood$
+		}
+		switch = {
+			trigger = has_variable
+			TZ_is_india_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = india
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_north_america_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = east_north_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_north_america_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = west_north_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_caribbean_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = caribbean
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_south_america_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = west_south_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_south_america_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = east_south_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_south_east_asia_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = south_east_asia
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_indo_china_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = indo_china
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_yellow_sea_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = yellow_sea
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_southern_africa_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = southern_africa
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_africa_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = west_africa
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_africa_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = east_africa
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_middle_east_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = middle_east
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_western_steppe_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = western_steppe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_eastern_steppe_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = eastern_steppe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_upper_yangtzi_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = upper_yangtzi
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_atlantic_seaboard_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = atlantic_seaboard
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_central_europe_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = central_europe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_mediterranean_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = west_mediterranean
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_baltic_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = baltic
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_europe_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = east_europe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_mediterranean_tradezone = {
+				GT_split_update_TZ_sell_amount_apply_change = {
+					tradezone = east_mediterranean
+					tradegood = $tradegood$
+				}
+			}
+		}
+	}
+}
+
+GT_split_update_TZ_sell_amount_apply_change = {
+	# Scope: Governorship
+	# Function: Apply the change to the appropriate global variable for the selling governorship's TZ
+	change_global_variable = {
+		name = $tradezone$_stockpile_$tradegood$
+		add = var:for_sale_$tradegood$
+	}
+}
+
+GT_split_cache_TZ_penetration_values = {
+	every_country = {
+		set_variable = {
+			name = TZ_penetration_india
+			value = TZ_penetration_india
+		}
+		set_variable = {
+			name = TZ_penetration_east_north_america
+			value = TZ_penetration_east_north_america
+		}
+		set_variable = {
+			name = TZ_penetration_west_north_america
+			value = TZ_penetration_west_north_america
+		}
+		set_variable = {
+			name = TZ_penetration_caribbean
+			value = TZ_penetration_caribbean
+		}
+		set_variable = {
+			name = TZ_penetration_west_south_america
+			value = TZ_penetration_west_south_america
+		}
+		set_variable = {
+			name = TZ_penetration_east_south_america
+			value = TZ_penetration_east_south_america
+		}
+		set_variable = {
+			name = TZ_penetration_south_east_asia
+			value = TZ_penetration_south_east_asia
+		}
+		set_variable = {
+			name = TZ_penetration_indo_china
+			value = TZ_penetration_indo_china
+		}
+		set_variable = {
+			name = TZ_penetration_yellow_sea
+			value = TZ_penetration_yellow_sea
+		}
+		set_variable = {
+			name = TZ_penetration_southern_africa
+			value = TZ_penetration_southern_africa
+		}
+		set_variable = {
+			name = TZ_penetration_west_africa
+			value = TZ_penetration_west_africa
+		}
+		set_variable = {
+			name = TZ_penetration_east_africa
+			value = TZ_penetration_east_africa
+		}
+		set_variable = {
+			name = TZ_penetration_middle_east
+			value = TZ_penetration_middle_east
+		}
+		set_variable = {
+			name = TZ_penetration_western_steppe
+			value = TZ_penetration_western_steppe
+		}
+		set_variable = {
+			name = TZ_penetration_eastern_steppe
+			value = TZ_penetration_eastern_steppe
+		}
+		set_variable = {
+			name = TZ_penetration_upper_yangtzi
+			value = TZ_penetration_upper_yangtzi
+		}
+		set_variable = {
+			name = TZ_penetration_atlantic_seaboard
+			value = TZ_penetration_atlantic_seaboard
+		}
+		set_variable = {
+			name = TZ_penetration_central_europe
+			value = TZ_penetration_central_europe
+		}
+		set_variable = {
+			name = TZ_penetration_west_mediterranean
+			value = TZ_penetration_west_mediterranean
+		}
+		set_variable = {
+			name = TZ_penetration_baltic
+			value = TZ_penetration_baltic
+		}
+		set_variable = {
+			name = TZ_penetration_east_europe
+			value = TZ_penetration_east_europe
+		}
+		set_variable = {
+			name = TZ_penetration_east_mediterranean
+			value = TZ_penetration_east_mediterranean
+		}
+	}
+}
+
+GT_split_get_governorship_percentage_of_TZ_sell_stockpile_all = {
+	# Scope: Governorship
+	# Function: Run GT_split_get_governorship_percentage_of_TZ_sell_stockpile for every tradegood
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_governorship_percentage_of_TZ_sell_stockpile
+	}
+}
+
+GT_split_get_governorship_percentage_of_TZ_sell_stockpile = {
+	# OBSOLETE
+	# Scope: Governorship
+	# Function: Calculate what percentage of the TZ's $tradegood$ stockpile this governorship's sell declare for $tradegood$ was
+	if = {
+		limit = {
+			has_variable = for_sale_$tradegood$
+		}
+		set_variable = {
+			name = percentage_of_TZ_sell_stockpile_$tradegood$
+			value = var:for_sale_$tradegood$
+		}
+		switch = {
+			trigger = has_variable
+			TZ_is_india_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:india_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_east_north_america_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:east_north_america_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_west_north_america_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:west_north_america_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_caribbean_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:caribbean_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_west_south_america_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:west_south_america_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_east_south_america_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:east_south_america_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_south_east_asia_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:south_east_asia_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_indo_china_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:indo_china_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_yellow_sea_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:yellow_sea_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_southern_africa_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:southern_africa_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_west_africa_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:west_africa_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_east_africa_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:east_africa_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_middle_east_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:middle_east_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_western_steppe_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:western_steppe_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_eastern_steppe_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:eastern_steppe_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_upper_yangtzi_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:upper_yangtzi_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_atlantic_seaboard_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:atlantic_seaboard_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_central_europe_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:central_europe_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_west_mediterranean_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:west_mediterranean_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_baltic_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:baltic_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_east_europe_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:east_europe_stockpile_$tradegood$
+					}
+				}
+			}
+			TZ_is_east_mediterranean_tradezone = {
+				if = {
+					limit = {
+						var:percentage_of_TZ_sell_stockpile_$tradegood$ > 0
+					}
+					change_variable = {
+						name = percentage_of_TZ_sell_stockpile_$tradegood$
+						divide = global_var:east_mediterranean_stockpile_$tradegood$
+					}
+				}
+			}
+		}
+	}
+	else = {
+		set_variable = {
+			name = percentage_of_TZ_sell_stockpile_$tradegood$
+			value = 0
+		}		
+	}
+}
+
+GT_split_sum_all_TZ_stockpiles = {
+	# Scope: Random country
+	# Function: Create one big pool of available tradegoods out of all the tradegood stockpiles
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_create_global_stockpile
+	}
+}
+
+GT_split_create_global_stockpile = {
+	# Scope: Random country
+	# Function: Create a global stockpile of $tradegood$ out of all the TZ stockpiles
+	if = {
+		limit = {
+			has_global_variable = india_stockpile_$tradegood$
+		}
+		set_global_variable = {
+			name = global_stockpile_$tradegood$
+			value = global_var:india_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:east_north_america_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:west_north_america_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:caribbean_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:west_south_america_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:east_south_america_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:south_east_asia_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:indo_china_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:yellow_sea_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:southern_africa_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:west_africa_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:east_africa_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:middle_east_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:western_steppe_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:eastern_steppe_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:upper_yangtzi_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:atlantic_seaboard_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:central_europe_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:west_mediterranean_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:baltic_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:east_europe_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_stockpile_$tradegood$
+			add = global_var:east_mediterranean_stockpile_$tradegood$
+		}
+
+		# And get percentages
+		set_global_variable = {
+			name = india_percentage_of_global_stockpile_$tradegood$
+			value = global_var:india_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:india_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = india_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = east_north_america_percentage_of_global_stockpile_$tradegood$
+			value = global_var:east_north_america_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:east_north_america_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = east_north_america_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = west_north_america_percentage_of_global_stockpile_$tradegood$
+			value = global_var:west_north_america_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:west_north_america_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = west_north_america_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = caribbean_percentage_of_global_stockpile_$tradegood$
+			value = global_var:caribbean_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:caribbean_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = caribbean_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = west_south_america_percentage_of_global_stockpile_$tradegood$
+			value = global_var:west_south_america_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:west_south_america_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = west_south_america_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = east_south_america_percentage_of_global_stockpile_$tradegood$
+			value = global_var:east_south_america_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:east_south_america_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = east_south_america_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = south_east_asia_percentage_of_global_stockpile_$tradegood$
+			value = global_var:south_east_asia_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:south_east_asia_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = south_east_asia_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = indo_china_percentage_of_global_stockpile_$tradegood$
+			value = global_var:indo_china_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:indo_china_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = indo_china_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = yellow_sea_percentage_of_global_stockpile_$tradegood$
+			value = global_var:yellow_sea_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:yellow_sea_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = yellow_sea_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = southern_africa_percentage_of_global_stockpile_$tradegood$
+			value = global_var:southern_africa_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:southern_africa_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = southern_africa_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = west_africa_percentage_of_global_stockpile_$tradegood$
+			value = global_var:west_africa_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:west_africa_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = west_africa_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = east_africa_percentage_of_global_stockpile_$tradegood$
+			value = global_var:east_africa_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:east_africa_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = east_africa_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = middle_east_percentage_of_global_stockpile_$tradegood$
+			value = global_var:middle_east_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:middle_east_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = middle_east_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = western_steppe_percentage_of_global_stockpile_$tradegood$
+			value = global_var:western_steppe_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:western_steppe_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = western_steppe_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = eastern_steppe_percentage_of_global_stockpile_$tradegood$
+			value = global_var:eastern_steppe_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:eastern_steppe_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = eastern_steppe_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = upper_yangtzi_percentage_of_global_stockpile_$tradegood$
+			value = global_var:upper_yangtzi_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:upper_yangtzi_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = upper_yangtzi_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = atlantic_seaboard_percentage_of_global_stockpile_$tradegood$
+			value = global_var:atlantic_seaboard_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:atlantic_seaboard_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = atlantic_seaboard_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = central_europe_percentage_of_global_stockpile_$tradegood$
+			value = global_var:central_europe_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:central_europe_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = central_europe_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = west_mediterranean_percentage_of_global_stockpile_$tradegood$
+			value = global_var:west_mediterranean_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:west_mediterranean_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = west_mediterranean_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = baltic_percentage_of_global_stockpile_$tradegood$
+			value = global_var:baltic_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:baltic_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = baltic_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = east_europe_percentage_of_global_stockpile_$tradegood$
+			value = global_var:east_europe_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:east_europe_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = east_europe_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+		set_global_variable = {
+			name = east_mediterranean_percentage_of_global_stockpile_$tradegood$
+			value = global_var:east_mediterranean_stockpile_$tradegood$
+		}
+		if = {
+			limit = {
+				global_var:east_mediterranean_stockpile_$tradegood$ > 0
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_global_variable = {
+				name = east_mediterranean_percentage_of_global_stockpile_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+	}
+}
+
+
+GT_split_get_country_global_market_penetration_all_lookups = {
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_country_global_market_penetration_tradegood_lookups
+	}
+}
+
+GT_split_get_country_global_market_penetration_tradegood_lookups = {
+	# Scope: Country
+	# Function: Get the penetration of the global market as a factor of the market penetration of all TZs contributing to the global stockpile for $tradegood$
+	if = {
+		limit = {
+			DEMAND_country_$tradegood$ = 0
+		}
+		set_variable = {
+			name = country_global_market_penetration_$tradegood$
+			value = 0
+		}
+	}
+	else_if = { # Performance saver - do not calculate global market penetration for minor AI nations
+		limit = {
+			is_ai = yes
+			OR = {
+				num_of_cities < 5
+				country_population < 100
+			}
+		}
+		set_variable = {
+			name = country_global_market_penetration_$tradegood$
+			value = 0.5
+		}
+	}
+	else = {
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:india_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_india
+		}
+		set_variable = {
+			name = country_global_market_penetration_$tradegood$
+			value = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:east_north_america_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_east_north_america
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:west_north_america_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_west_north_america
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:caribbean_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_caribbean
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:west_south_america_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_west_south_america
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:east_south_america_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_east_south_america
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:south_east_asia_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_south_east_asia
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:indo_china_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_indo_china
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:yellow_sea_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_yellow_sea
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:southern_africa_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_southern_africa
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:west_africa_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_west_africa
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:east_africa_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_east_africa
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:middle_east_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_middle_east
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:western_steppe_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_western_steppe
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:eastern_steppe_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_eastern_steppe
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:upper_yangtzi_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_upper_yangtzi
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:atlantic_seaboard_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_atlantic_seaboard
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:central_europe_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_central_europe
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:west_mediterranean_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_west_mediterranean
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:baltic_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_baltic
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:east_europe_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_east_europe
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		LOOKUP_get_answer_2_params = {
+			category = global_trade_penetration
+			x = global_var:east_mediterranean_percentage_of_global_stockpile_$tradegood$
+			y = var:TZ_penetration_east_mediterranean
+		}
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = global_var:LOOKUP_ANS
+		}
+		# Divide by 22, the number of tradezones
+
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			multiply = 0.4545
+		}
+
+		change_variable = {
+			name = country_global_market_penetration_$tradegood$
+			add = var:customs_union_scope.var:customs_union_contribution_to_global_stockpile_$tradegood$
+		}
+
+		### Cap at 100%
+
+		if = {
+			limit = {
+				var:country_global_market_penetration_$tradegood$ > 1
+			}
+			set_variable = {
+				name = country_global_market_penetration_$tradegood$
+				value = 1
+			}
+		}
+	}
+}
+
+GT_split_get_order_size_modifier_all = {
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_order_size_modifier_tradegood
+	}
+}
+
+GT_split_get_order_size_modifier_tradegood = {
+	# Scope: Country
+	# Function: Check if the nationwide demand for $tradegood$ is greater than can be fulfilled by the country's global market access, and if so set the modifier for all order sizes to the appropriate percentage of the market access. All orders for $tradegood$ will be reduced by this amount
+	if = {
+		limit = {
+			DEMAND_country_$tradegood$ > 0
+		}
+		set_variable = {
+			name = order_size_modifier_$tradegood$
+			value = var:country_global_market_penetration_$tradegood$
+		}
+
+		change_variable = {
+			name = order_size_modifier_$tradegood$
+			multiply = global_var:global_stockpile_$tradegood$
+		}
+
+		if = {
+			limit = {
+				trigger_if = {
+					limit = {
+						has_variable = order_size_modifier_$tradegood$
+					}
+					var:order_size_modifier_$tradegood$ < DEMAND_country_$tradegood$
+				}
+			}
+			change_variable = {
+				name = order_size_modifier_$tradegood$
+				divide = DEMAND_country_$tradegood$
+			}
+
+			# Add a bonus to order size modifier equivalent to the % of demand satisfied  by the production of $tradegood$ in this country's customs union
+			set_local_variable = {
+				name = order_size_modifier_bonus_CU_prod_$tradegood$
+				value = var:customs_union_scope.var:customs_union_$tradegood$_for_sale
+			}
+			change_local_variable = {
+				name = order_size_modifier_bonus_CU_prod_$tradegood$
+				divide = DEMAND_country_$tradegood$
+			}
+			change_variable = {
+				name = order_size_modifier_$tradegood$
+				add = local_var:order_size_modifier_bonus_CU_prod_$tradegood$
+			}
+
+			if = {
+				limit = {
+					var:order_size_modifier_$tradegood$ > 1
+				}
+				set_variable = {
+					name = order_size_modifier_$tradegood$
+					value = 1
+				}
+			}
+
+		}
+
+		else = {
+			set_variable = {
+				name = order_size_modifier_$tradegood$
+				value = 1
+			}
+		}
+
+	}
+	else = {
+		set_variable = {
+			name = order_size_modifier_$tradegood$
+			value = 1
+		}
+	}
+}
+
+GT_split_create_order_all = {
+	# Scope: Governorship
+	# Function: Create orders for all tradegoods which are then communicated to the TZ
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_create_order_tradegood
+	}
+}
+
+GT_split_create_order_tradegood = {
+	# Scope: Governorship
+	# Function: Get the order for $tradegood$ from the governorship and submit it to the country total
+	set_variable = {
+		name = order_size_$tradegood$
+		value = 0
+	}
+	if = {
+		limit = {
+			var:$tradegood$_stockpile < DEMAND_$tradegood$
+		}
+		set_variable = {
+			name = order_size_$tradegood$
+			value = DEMAND_$tradegood$
+		}
+		change_variable = {
+			name = order_size_$tradegood$
+			subtract = var:$tradegood$_stockpile
+		}
+
+		# MOVED
+		# Now this multiplication is done under GT_split_update_wealth_owed_for_all_TZs_all_tradegoods to preserve the order of calculation, as order size modifier is calculated after create order
+		#change_variable = {
+		#	name = order_size_$tradegood$
+		#	multiply = owner.var:order_size_modifier_$tradegood$
+		#}
+
+
+		# Cap at governorship infra capacity
+		set_local_variable = {
+			name = l_governorship_infrastructure_capacity_compare
+			value = var:governorship_infrastructure_capacity
+		}
+		change_local_variable = {
+			name = l_governorship_infrastructure_capacity_compare
+			subtract = var:order_size_$tradegood$
+		}
+		if = {
+			limit = {
+				trigger_if = {
+					limit = {
+						has_local_variable = l_governorship_infrastructure_capacity_compare
+					}
+					local_var:l_governorship_infrastructure_capacity_compare < 0
+				}
+			}
+			set_variable = {
+				name = order_size_$tradegood$
+				value = var:governorship_infrastructure_capacity
+			}
+		}
+		switch = {
+			trigger = has_variable
+			TZ_is_india_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = india
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_north_america_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = east_north_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_north_america_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = west_north_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_caribbean_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = caribbean
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_south_america_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = west_south_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_south_america_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = east_south_america
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_south_east_asia_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = south_east_asia
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_indo_china_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = indo_china
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_yellow_sea_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = yellow_sea
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_southern_africa_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = southern_africa
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_africa_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = west_africa
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_africa_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = east_africa
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_middle_east_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = middle_east
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_western_steppe_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = western_steppe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_eastern_steppe_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = eastern_steppe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_upper_yangtzi_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = upper_yangtzi
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_atlantic_seaboard_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = atlantic_seaboard
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_central_europe_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = central_europe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_west_mediterranean_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = west_mediterranean
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_baltic_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = baltic
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_europe_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = east_europe
+					tradegood = $tradegood$
+				}
+			}
+			TZ_is_east_mediterranean_tradezone = {
+				GT_split_update_TZ_order_amount_apply_change = {
+					tradezone = east_mediterranean
+					tradegood = $tradegood$
+				}
+			}
+		}
+	}
+}
+
+GT_split_update_TZ_order_amount_apply_change = {
+	# Scope: Governorship
+	# Function: Add the local order for $tradegood$ to the TZ aggregate order
+	change_global_variable = {
+		name = $tradezone$_total_order_size_$tradegood$
+		add = var:order_size_$tradegood$
+	}
+}
+
+GT_split_update_wealth_owed_for_all_TZs_all_tradegoods = {
+	# Scope: Governorship
+	# Function: Get the wealth owed for all tradegood orders and update the TZ aggregate payment pools for all tradegoods
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_update_wealth_owed_for_all_TZs_tradegood
+	}
+}
+
+GT_split_update_wealth_owed_for_all_TZs_tradegood = {
+	# Scope: Governorship
+	# Function: Save the price paid for the tradegood, and also add that price paid to the TZ aggregate payment pool
+	switch = {
+		trigger = has_variable
+		TZ_is_india_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = india
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_east_north_america_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = east_north_america
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_west_north_america_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = west_north_america
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_caribbean_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = caribbean
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_west_south_america_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = west_south_america
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_east_south_america_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = east_south_america
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_south_east_asia_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = south_east_asia
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_indo_china_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = indo_china
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_yellow_sea_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = yellow_sea
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_southern_africa_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = southern_africa
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_west_africa_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = west_africa
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_east_africa_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = east_africa
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_middle_east_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = middle_east
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_western_steppe_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = western_steppe
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_eastern_steppe_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = eastern_steppe
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_upper_yangtzi_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = upper_yangtzi
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_atlantic_seaboard_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = atlantic_seaboard
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_central_europe_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = central_europe
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_west_mediterranean_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = west_mediterranean
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_baltic_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = baltic
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_east_europe_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = east_europe
+				tradegood = $tradegood$
+			}
+		}
+		TZ_is_east_mediterranean_tradezone = {
+			GT_split_update_wealth_owed_for_tradegoods = {
+				tradezone = east_mediterranean
+				tradegood = $tradegood$
+			}
+		}
+	}
+}
+
+GT_split_update_wealth_owed_for_tradegoods = {
+	# Scope: Governorship
+	# Function: Update the amount of wealth owed for the $tradegood$ order here, and the $tradezone$ wealth pool for payments
+	set_variable = {
+		name = wealth_owed_for_$tradegood$
+		value = var:order_size_$tradegood$
+	}
+	change_variable = {
+		name = wealth_owed_for_$tradegood$
+		multiply = owner.var:country_unit_price_$tradegood$
+	}
+	change_variable = {
+		name = wealth_owed_for_$tradegood$
+		multiply = owner.var:order_size_modifier_$tradegood$
+	}
+	change_global_variable = {
+		name = $tradezone$_payment_pool_$tradegood$
+		add = var:wealth_owed_for_$tradegood$
+	}
+	change_global_variable = {
+		name = global_payment_pool_$tradegood$
+		add = var:wealth_owed_for_$tradegood$
+	}
+}
+
+GT_split_get_global_import_unit_price_all = {
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_global_import_unit_price_tradegood
+	}
+}
+
+GT_split_get_global_import_unit_price_tradegood = {
+	# Scope: Random country
+	# Function: Add up the unit price of $tradegood$ in every TZ, multiplied by the contribution percentage
+	set_local_variable = {
+		name = from_india_global_base_import_price_$tradegood$
+		value = global_var:global_india_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_india_global_base_import_price_$tradegood$
+		multiply = global_var:india_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_east_north_america_global_base_import_price_$tradegood$
+		value = global_var:global_east_north_america_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_east_north_america_global_base_import_price_$tradegood$
+		multiply = global_var:east_north_america_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_west_north_america_global_base_import_price_$tradegood$
+		value = global_var:global_west_north_america_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_west_north_america_global_base_import_price_$tradegood$
+		multiply = global_var:west_north_america_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_caribbean_global_base_import_price_$tradegood$
+		value = global_var:global_caribbean_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_caribbean_global_base_import_price_$tradegood$
+		multiply = global_var:caribbean_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_west_south_america_global_base_import_price_$tradegood$
+		value = global_var:global_west_south_america_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_west_south_america_global_base_import_price_$tradegood$
+		multiply = global_var:west_south_america_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_east_south_america_global_base_import_price_$tradegood$
+		value = global_var:global_east_south_america_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_east_south_america_global_base_import_price_$tradegood$
+		multiply = global_var:east_south_america_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_south_east_asia_global_base_import_price_$tradegood$
+		value = global_var:global_south_east_asia_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_south_east_asia_global_base_import_price_$tradegood$
+		multiply = global_var:south_east_asia_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_indo_china_global_base_import_price_$tradegood$
+		value = global_var:global_indo_china_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_indo_china_global_base_import_price_$tradegood$
+		multiply = global_var:indo_china_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_yellow_sea_global_base_import_price_$tradegood$
+		value = global_var:global_yellow_sea_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_yellow_sea_global_base_import_price_$tradegood$
+		multiply = global_var:yellow_sea_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_southern_africa_global_base_import_price_$tradegood$
+		value = global_var:global_southern_africa_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_southern_africa_global_base_import_price_$tradegood$
+		multiply = global_var:southern_africa_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_west_africa_global_base_import_price_$tradegood$
+		value = global_var:global_west_africa_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_west_africa_global_base_import_price_$tradegood$
+		multiply = global_var:west_africa_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_east_africa_global_base_import_price_$tradegood$
+		value = global_var:global_east_africa_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_east_africa_global_base_import_price_$tradegood$
+		multiply = global_var:east_africa_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_middle_east_global_base_import_price_$tradegood$
+		value = global_var:global_middle_east_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_middle_east_global_base_import_price_$tradegood$
+		multiply = global_var:middle_east_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_western_steppe_global_base_import_price_$tradegood$
+		value = global_var:global_western_steppe_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_western_steppe_global_base_import_price_$tradegood$
+		multiply = global_var:western_steppe_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_eastern_steppe_global_base_import_price_$tradegood$
+		value = global_var:global_eastern_steppe_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_eastern_steppe_global_base_import_price_$tradegood$
+		multiply = global_var:eastern_steppe_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_upper_yangtzi_global_base_import_price_$tradegood$
+		value = global_var:global_upper_yangtzi_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_upper_yangtzi_global_base_import_price_$tradegood$
+		multiply = global_var:upper_yangtzi_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_atlantic_seaboard_global_base_import_price_$tradegood$
+		value = global_var:global_atlantic_seaboard_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_atlantic_seaboard_global_base_import_price_$tradegood$
+		multiply = global_var:atlantic_seaboard_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_central_europe_global_base_import_price_$tradegood$
+		value = global_var:global_central_europe_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_central_europe_global_base_import_price_$tradegood$
+		multiply = global_var:central_europe_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_west_mediterranean_global_base_import_price_$tradegood$
+		value = global_var:global_west_mediterranean_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_west_mediterranean_global_base_import_price_$tradegood$
+		multiply = global_var:west_mediterranean_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_baltic_global_base_import_price_$tradegood$
+		value = global_var:global_baltic_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_baltic_global_base_import_price_$tradegood$
+		multiply = global_var:baltic_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_east_europe_global_base_import_price_$tradegood$
+		value = global_var:global_east_europe_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_east_europe_global_base_import_price_$tradegood$
+		multiply = global_var:east_europe_percentage_of_global_stockpile_$tradegood$
+	}
+	set_local_variable = {
+		name = from_east_mediterranean_global_base_import_price_$tradegood$
+		value = global_var:global_east_mediterranean_tradezone.var:local_price_$tradegood$
+	}
+	change_local_variable = {
+		name = from_east_mediterranean_global_base_import_price_$tradegood$
+		multiply = global_var:east_mediterranean_percentage_of_global_stockpile_$tradegood$
+	}
+
+	set_global_variable = {
+		name = global_base_import_price_$tradegood$
+		value = local_var:from_india_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_east_north_america_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_west_north_america_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_caribbean_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_west_south_america_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_east_south_america_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_south_east_asia_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_indo_china_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_yellow_sea_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_southern_africa_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_west_africa_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_east_africa_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_middle_east_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_western_steppe_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_eastern_steppe_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_upper_yangtzi_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_atlantic_seaboard_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_central_europe_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_west_mediterranean_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_baltic_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_east_europe_global_base_import_price_$tradegood$
+	}
+	change_global_variable = {
+		name = global_base_import_price_$tradegood$
+		add = local_var:from_east_mediterranean_global_base_import_price_$tradegood$
+	}
+}
+
+GT_split_get_country_import_unit_price_all = {
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_country_import_unit_price_tradegood
+	}
+}
+
+GT_split_get_country_import_unit_price_tradegood = {
+	# Scope: Country
+	# Function: Get the unit price for importing $tradegood$ based on the market penetration of the country
+	set_variable = {
+		name = country_unit_price_$tradegood$
+		value = global_var:global_base_import_price_$tradegood$
+	}
+	set_local_variable = {
+		name = country_import_price_div_$tradegood$
+		value = 0.5
+	}
+	change_local_variable = {
+		name = country_import_price_div_$tradegood$
+		add = var:country_global_market_penetration_$tradegood$
+	}
+	change_variable = {
+		name = country_unit_price_$tradegood$
+		divide = local_var:country_import_price_div_$tradegood$
+	}
+}
+
+GT_split_sum_all_TZ_orders_all = {
+	# Scope: Random country
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_sum_all_TZ_orders_tradegood
+	}
+}
+
+GT_split_sum_all_TZ_orders_tradegood = {
+	# Scope: Random country
+	# Function: Add together the orders for $tradegood$ from all tradezones.
+	# Also get the percentage of the global supply that has been ordered
+	# This percentage will modify down or up the global base import price
+	# If their sum is greater than the global stockpile, then the fulfilment will need to be reduced by a corresponding percentage
+
+	set_global_variable = {
+		name = global_order_total_$tradegood$
+		value = global_var:india_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:east_north_america_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:west_north_america_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:caribbean_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:west_south_america_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:east_south_america_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:south_east_asia_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:indo_china_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:yellow_sea_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:southern_africa_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:west_africa_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:east_africa_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:middle_east_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:western_steppe_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:eastern_steppe_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:upper_yangtzi_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:atlantic_seaboard_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:central_europe_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:west_mediterranean_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:baltic_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:east_europe_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = global_order_total_$tradegood$
+		add = global_var:east_mediterranean_total_order_size_$tradegood$
+	}
+
+	set_global_variable = {
+		name = global_supply_as_percentage_of_order_$tradegood$
+		value = global_var:global_stockpile_$tradegood$
+	}
+	if = {
+		limit = {
+			trigger_if = {
+				limit = {
+					has_global_variable = global_order_total_$tradegood$
+				}
+				global_var:global_order_total_$tradegood$ > 0
+			}
+		}
+		change_global_variable = {
+			name = global_supply_as_percentage_of_order_$tradegood$
+			divide = global_var:global_order_total_$tradegood$
+		}
+	}
+
+}
+
+GT_split_get_order_as_percentage_of_TZ_total_all = {
+	# Scope: Governorship
+	# Function: Get the percentage of the TZ total order that this governorship's order makes up
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_order_as_percentage_of_TZ_total_tradezone
+	}
+}
+
+GT_split_get_order_as_percentage_of_TZ_total_tradezone = {
+	# Scope: Governorship, limit has variable order_size_$tradegood$
+	if = {
+		limit = {
+			has_variable = order_size_$tradegood$
+		}
+		switch = {
+			trigger = has_variable
+
+			TZ_is_india_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = india
+				}
+			}
+			TZ_is_east_north_america_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_north_america
+				}
+			}
+			TZ_is_west_north_america_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_north_america
+				}
+			}
+			TZ_is_caribbean_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = caribbean
+				}
+			}
+			TZ_is_west_south_america_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_south_america
+				}
+			}
+			TZ_is_east_south_america_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_south_america
+				}
+			}
+			TZ_is_south_east_asia_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = south_east_asia
+				}
+			}
+			TZ_is_indo_china_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = indo_china
+				}
+			}
+			TZ_is_yellow_sea_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = yellow_sea
+				}
+			}
+			TZ_is_southern_africa_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = southern_africa
+				}
+			}
+			TZ_is_west_africa_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_africa
+				}
+			}
+			TZ_is_east_africa_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_africa
+				}
+			}
+			TZ_is_middle_east_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = middle_east
+				}
+			}
+			TZ_is_western_steppe_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = western_steppe
+				}
+			}
+			TZ_is_eastern_steppe_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = eastern_steppe
+				}
+			}
+			TZ_is_upper_yangtzi_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = upper_yangtzi
+				}
+			}
+			TZ_is_atlantic_seaboard_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = atlantic_seaboard
+				}
+			}
+			TZ_is_central_europe_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = central_europe
+				}
+			}
+			TZ_is_west_mediterranean_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_mediterranean
+				}
+			}
+			TZ_is_baltic_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = baltic
+				}
+			}
+			TZ_is_east_europe_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_europe
+				}
+			}
+			TZ_is_east_mediterranean_tradezone = {
+				GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_mediterranean
+				}
+			}
+		}
+	}
+}
+
+GT_split_get_order_as_percentage_of_TZ_total_tradegood = {
+	set_variable = {
+		name = order_as_percentage_of_TZ_total_$tradegood$
+		value = var:order_size_$tradegood$
+	}
+	change_variable = {
+		name = order_as_percentage_of_TZ_total_$tradegood$
+		divide = global_var:$tradezone$_total_order_size_$tradegood$
+	}
+}
+
+GT_split_scale_order_size_and_payment_pools = {
+	# Scope: Random country
+	# Function: Scale down the order sizes and payment pools so that unavailable amounts of tradegoods are not being purchased
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_modify_fulfillable_order_sizes
+	}
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_scale_payment_pool
+	}
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_scale_global_stockpile
+	}
+}
+
+GT_split_scale_global_stockpile = {
+	# Scope: Random country
+	# Function: Set a global exported var to reflect the actual amount exported, if the supply is greater than the total order size
+	if = {
+		limit = {
+			trigger_if = {
+				limit = {
+					has_global_variable = global_supply_as_percentage_of_order_$tradegood$
+				}
+				global_var:global_supply_as_percentage_of_order_$tradegood$ > 1
+			}
+		}
+		set_global_variable = {
+			name = global_exported_$tradegood$
+			value = global_var:global_stockpile_$tradegood$
+		}
+		change_global_variable = {
+			name = global_exported_$tradegood$
+			divide = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+	}
+	else = {
+		set_global_variable = {
+			name = global_exported_$tradegood$
+			value = global_var:global_stockpile_$tradegood$
+		}
+	}
+}
+
+GT_split_modify_fulfillable_order_sizes = {
+	# Scope: Random country
+	# Function: If the global order size exceeds the supply, modify down the order size from every TZ to an actually fulfillable amount
+	if = {
+		limit = {
+			trigger_if = {
+				limit = {
+					has_global_variable = global_supply_as_percentage_of_order_$tradegood$
+				}
+				global_var:global_supply_as_percentage_of_order_$tradegood$ < 1
+			}
+		}
+		change_global_variable = {
+			name = india_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_north_america_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_north_america_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = caribbean_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_south_america_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_south_america_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = south_east_asia_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = indo_china_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = yellow_sea_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = southern_africa_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_africa_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_africa_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = middle_east_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = western_steppe_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = eastern_steppe_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = upper_yangtzi_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = atlantic_seaboard_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = central_europe_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_mediterranean_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = baltic_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_europe_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_mediterranean_total_order_size_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+	}
+	
+}
+
+GT_split_scale_payment_pool = {
+	# Function: Modify down the amount due to be paid by multiplying base price by the fulfilment percent, so that tradezones are not overpaying for their orders if they're only partially fulfilling them
+	# TODO: Also make sure the displayed unit prices reflect this
+	if = {
+		limit = {
+			trigger_if = {
+				limit = {
+					has_global_variable = global_supply_as_percentage_of_order_$tradegood$
+				}
+				global_var:global_supply_as_percentage_of_order_$tradegood$ < 1
+			}
+		}
+		change_global_variable = {
+			name = india_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_north_america_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_north_america_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = caribbean_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_south_america_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_south_america_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = south_east_asia_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = indo_china_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = yellow_sea_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = southern_africa_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_africa_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_africa_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = middle_east_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = western_steppe_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = eastern_steppe_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = upper_yangtzi_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = atlantic_seaboard_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = central_europe_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = west_mediterranean_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = baltic_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_europe_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+		change_global_variable = {
+			name = east_mediterranean_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+
+		change_global_variable = {
+			name = global_payment_pool_$tradegood$
+			multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+		}
+	}
+}
+
+GT_split_scale_wealth_owed_and_order_size_all = {
+	# Scope: Governorship
+	# Function: Get the amount a governorship owes to pay for imports of $tradegood$
+	# Given $tradezone$ argument by a switch in the parent effect
+	set_variable = {
+		name = queued_trade_expenses_due_resource_extraction
+		value = 0
+	}
+	set_variable = {
+		name = queued_trade_expenses_due_manufacturing
+		value = 0
+	}
+
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_scale_wealth_owed_and_order_size_tradegood
+	}
+}
+
+GT_split_scale_wealth_owed_and_order_size_tradezone = {
+	# Scope: Governorship (every governorship limited by governorships that have a nonzero order size)
+	# Function: Pass tradezone to GT_split_get_governorship_amount_owed
+	if = {
+		limit = {
+			has_variable = order_size_$tradegood$
+		}
+		switch = {
+			trigger = has_variable
+
+			TZ_is_india_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = india
+				}
+			}
+			TZ_is_east_north_america_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_north_america
+				}
+			}
+			TZ_is_west_north_america_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_north_america
+				}
+			}
+			TZ_is_caribbean_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = caribbean
+				}
+			}
+			TZ_is_west_south_america_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_south_america
+				}
+			}
+			TZ_is_east_south_america_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_south_america
+				}
+			}
+			TZ_is_south_east_asia_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = south_east_asia
+				}
+			}
+			TZ_is_indo_china_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = indo_china
+				}
+			}
+			TZ_is_yellow_sea_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = yellow_sea
+				}
+			}
+			TZ_is_southern_africa_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = southern_africa
+				}
+			}
+			TZ_is_west_africa_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_africa
+				}
+			}
+			TZ_is_east_africa_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_africa
+				}
+			}
+			TZ_is_middle_east_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = middle_east
+				}
+			}
+			TZ_is_western_steppe_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = western_steppe
+				}
+			}
+			TZ_is_eastern_steppe_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = eastern_steppe
+				}
+			}
+			TZ_is_upper_yangtzi_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = upper_yangtzi
+				}
+			}
+			TZ_is_atlantic_seaboard_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = atlantic_seaboard
+				}
+			}
+			TZ_is_central_europe_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = central_europe
+				}
+			}
+			TZ_is_west_mediterranean_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = west_mediterranean
+				}
+			}
+			TZ_is_baltic_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = baltic
+				}
+			}
+			TZ_is_east_europe_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_europe
+				}
+			}
+			TZ_is_east_mediterranean_tradezone = {
+				GT_split_scale_wealth_owed_and_order_size_tradegood = {
+					tradegood = $tradegood$
+					tradezone = east_mediterranean
+				}
+			}
+		}
+	}
+}
+
+GT_split_scale_wealth_owed_and_order_size_tradegood = {
+	# Scope: Governorship (every governorship limited by governorships that have a nonzero order size)
+	# Function: Get the amount a governorship owes to pay for imports of $tradegood$
+	# Given $tradezone$ argument by a switch in the parent effect
+	if = {
+		limit = {
+			has_variable = order_size_$tradegood$
+			has_variable = wealth_owed_for_$tradegood$
+		}
+
+		change_variable = {
+			name = order_size_$tradegood$
+			multiply = owner.var:order_size_modifier_$tradegood$
+		}
+
+		if = {
+			limit = {
+				global_var:global_supply_as_percentage_of_order_$tradegood$ < 1
+			}
+			change_variable = {
+				name = wealth_owed_for_$tradegood$
+				multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+			}
+			change_variable = {
+				name = order_size_$tradegood$
+				multiply = global_var:global_supply_as_percentage_of_order_$tradegood$
+			}
+		}
+		if = {
+			limit = {
+				OR = {
+					flag:$tradegood$ = flag:chocolate
+					flag:$tradegood$ = flag:fur
+					flag:$tradegood$ = flag:grain
+					flag:$tradegood$ = flag:vegetables
+					flag:$tradegood$ = flag:industrial_fibres
+					flag:$tradegood$ = flag:textile_fibres
+					flag:$tradegood$ = flag:wool
+					flag:$tradegood$ = flag:silk
+					flag:$tradegood$ = flag:wood
+					flag:$tradegood$ = flag:stone
+					flag:$tradegood$ = flag:sulphur
+					flag:$tradegood$ = flag:whales
+					flag:$tradegood$ = flag:spices
+					flag:$tradegood$ = flag:coal
+					flag:$tradegood$ = flag:lead
+					flag:$tradegood$ = flag:dye
+					flag:$tradegood$ = flag:silver
+					flag:$tradegood$ = flag:gold
+					flag:$tradegood$ = flag:iron
+					flag:$tradegood$ = flag:copper
+					flag:$tradegood$ = flag:inorganic_compounds
+					flag:$tradegood$ = flag:tin
+					flag:$tradegood$ = flag:peat
+					flag:$tradegood$ = flag:gems
+					flag:$tradegood$ = flag:cattle
+					flag:$tradegood$ = flag:oil
+					flag:$tradegood$ = flag:tea
+					flag:$tradegood$ = flag:coffee
+					flag:$tradegood$ = flag:opium
+					flag:$tradegood$ = flag:tobacco
+					flag:$tradegood$ = flag:sugar
+					flag:$tradegood$ = flag:hardwood
+					flag:$tradegood$ = flag:rubber
+					flag:$tradegood$ = flag:tropical_fruit
+					flag:$tradegood$ = flag:mediterranean_fruit
+					flag:$tradegood$ = flag:temperate_fruit
+					flag:$tradegood$ = flag:salt
+				}
+			}
+			change_variable = {
+				name = queued_trade_expenses_due_resource_extraction
+				add = var:wealth_owed_for_$tradegood$
+			}
+		}
+		else = {
+			change_variable = {
+				name = queued_trade_expenses_due_manufacturing
+				add = var:wealth_owed_for_$tradegood$
+			}
+		}
+	}
+}
+
+GT_split_get_governorship_income_due_all = {
+	# Scope: Governorship
+	# Function: Get the income due for every tradegood in this governorship
+	set_variable = {
+		name = queued_trade_income_due_resource_extraction
+		value = 0
+	}
+	set_variable = {
+		name = queued_trade_income_due_manufacturing
+		value = 0
+	}
+
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_governorship_income_due_tradegood
+	}
+}
+
+GT_split_get_governorship_income_due_tradegood = {
+	# Scope: Governorship
+	# Function: Get the amount of wealth income due according to this governorship's contribution to the global stockpile of $tradegood$ for sale.
+	if = {
+		limit = {
+			has_variable = for_sale_$tradegood$
+		}
+		set_variable = {
+			name = income_due_$tradegood$
+			value = var:for_sale_$tradegood$
+		}
+
+		if = {
+			limit = {
+				global_var:global_stockpile_$tradegood$ > 0
+			}
+			change_variable = {
+				name = income_due_$tradegood$
+				divide = global_var:global_stockpile_$tradegood$
+			}
+		}
+
+		change_variable = {
+			name = income_due_$tradegood$
+			multiply = global_var:global_payment_pool_$tradegood$
+		}
+	}
+
+	if = {
+		limit = {
+			has_variable = income_due_$tradegood$
+			OR = {
+				flag:$tradegood$ = flag:chocolate
+				flag:$tradegood$ = flag:fur
+				flag:$tradegood$ = flag:grain
+				flag:$tradegood$ = flag:vegetables
+				flag:$tradegood$ = flag:industrial_fibres
+				flag:$tradegood$ = flag:textile_fibres
+				flag:$tradegood$ = flag:wool
+				flag:$tradegood$ = flag:silk
+				flag:$tradegood$ = flag:wood
+				flag:$tradegood$ = flag:stone
+				flag:$tradegood$ = flag:sulphur
+				flag:$tradegood$ = flag:whales
+				flag:$tradegood$ = flag:spices
+				flag:$tradegood$ = flag:coal
+				flag:$tradegood$ = flag:lead
+				flag:$tradegood$ = flag:dye
+				flag:$tradegood$ = flag:silver
+				flag:$tradegood$ = flag:gold
+				flag:$tradegood$ = flag:iron
+				flag:$tradegood$ = flag:copper
+				flag:$tradegood$ = flag:inorganic_compounds
+				flag:$tradegood$ = flag:tin
+				flag:$tradegood$ = flag:peat
+				flag:$tradegood$ = flag:gems
+				flag:$tradegood$ = flag:cattle
+				flag:$tradegood$ = flag:oil
+				flag:$tradegood$ = flag:tea
+				flag:$tradegood$ = flag:coffee
+				flag:$tradegood$ = flag:opium
+				flag:$tradegood$ = flag:tobacco
+				flag:$tradegood$ = flag:sugar
+				flag:$tradegood$ = flag:hardwood
+				flag:$tradegood$ = flag:rubber
+				flag:$tradegood$ = flag:tropical_fruit
+				flag:$tradegood$ = flag:mediterranean_fruit
+				flag:$tradegood$ = flag:temperate_fruit
+				flag:$tradegood$ = flag:salt
+			}
+		}
+		change_variable = {
+			name = queued_trade_income_due_resource_extraction
+			add = var:income_due_$tradegood$
+		}
+	}
+	else_if = {
+		limit = {
+			has_variable = income_due_$tradegood$
+		}
+		change_variable = {
+			name = queued_trade_income_due_manufacturing
+			add = var:income_due_$tradegood$
+		}
+	}
+
+}
+
+GT_split_subtract_amount_exported_all = {
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_subtract_amount_exported_tradegood
+	}
+}
+
+GT_split_add_amount_imported_all = {
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_add_amount_imported_tradegood
+	}
+}
+
+GT_split_subtract_amount_exported_tradegood = {
+	# Scope: Governorship
+	# Function: Subtract from the stockpile the amount of $tradegood$ exported by this governorship
+	if = {
+		limit = {
+			has_variable = for_sale_$tradegood$
+		}
+		set_variable = {
+			name = amount_exported_$tradegood$
+			value = var:for_sale_$tradegood$
+		}
+		if = { # If there is more supply than demand, do not sell all goods
+			limit = {
+				global_var:global_supply_as_percentage_of_order_$tradegood$ > 1
+			}
+			change_variable = {
+				name = amount_exported_$tradegood$
+				divide = global_var:global_supply_as_percentage_of_order_$tradegood$
+			}
+		}
+
+		change_variable = {
+			name = $tradegood$_stockpile
+			subtract = var:amount_exported_$tradegood$
+		}
+	}
+}
+
+GT_split_add_amount_imported_tradegood = {
+	# Scope: Governorship
+	# Function: Add to the stockpile the amount of $tradegood$ imported by this governorship
+	if = {
+		limit = {
+			has_variable = order_size_$tradegood$
+		}
+		change_variable = {
+			name = $tradegood$_stockpile
+			add = var:order_size_$tradegood$
+		}
+	}
+}
+
+GT_split_reset_queued_trade_expenses_due_shipping = {
+	# Scope: Governorship
+	# Function: Reset the governorship shipping costs value to 0 for this iteration
+	set_variable = {
+		name = queued_trade_expenses_due_shipping
+		value = 0
+	}
+}
+
+GT_add_queued_trade_category_income_and_expenses = {
+	# Scope: Governorship
+	# Function: Add the queued income and expenses trade values to the quarterly totals
+
+	# INCOME: RESOURCE EXTRACTION
+	if = {
+		limit = {
+			has_variable = trade_income_due_resource_extraction
+		}
+		change_variable = {
+			name = trade_income_due_resource_extraction
+			add = var:queued_trade_income_due_resource_extraction
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_income_due_resource_extraction
+			value = var:queued_trade_income_due_resource_extraction
+		}
+	}
+
+	# INCOME: MANUFACTURING
+	if = {
+		limit = {
+			has_variable = trade_income_due_manufacturing
+		}
+		change_variable = {
+			name = trade_income_due_manufacturing
+			add = var:queued_trade_income_due_manufacturing
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_income_due_manufacturing
+			value = var:queued_trade_income_due_manufacturing
+		}
+	}
+
+	# EXPENSES: RESOURCE EXTRACTION
+	if = {
+		limit = {
+			has_variable = trade_expenses_due_resource_extraction
+		}
+		change_variable = {
+			name = trade_expenses_due_resource_extraction
+			add = var:queued_trade_expenses_due_resource_extraction
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_expenses_due_resource_extraction
+			value = var:queued_trade_expenses_due_resource_extraction
+		}
+	}
+	
+	# EXPENSES: MANUFACTURING
+	if = {
+		limit = {
+			has_variable = trade_expenses_due_manufacturing
+		}
+		change_variable = {
+			name = trade_expenses_due_manufacturing
+			add = var:queued_trade_expenses_due_manufacturing
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_expenses_due_manufacturing
+			value = var:queued_trade_expenses_due_manufacturing
+		}
+	}
+
+	# INCOME: SHIPPING
+	if = {
+		limit = {
+			has_variable = trade_income_due_shipping
+		}
+		change_variable = {
+			name = trade_income_due_shipping
+			add = var:queued_trade_income_due_shipping
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_income_due_shipping
+			value = var:queued_trade_income_due_shipping
+		}
+	}
+	
+	# EXPENSES: SHIPPING
+	if = {
+		limit = {
+			has_variable = trade_expenses_due_shipping
+		}
+		change_variable = {
+			name = trade_expenses_due_shipping
+			add = var:queued_trade_expenses_due_shipping
+		}
+	}
+	else = {
+		set_variable = {
+			name = trade_expenses_due_shipping
+			value = var:queued_trade_expenses_due_shipping
+		}
+	}
+}
+
+GT_do_all_wealth_distribution = {
+	# Scope: Governorship
+	# Called: Every quarter, after all GT_split trade effects
+	# Function: Distribute the income and expenses across pops and the state
+	GT_split_calculate_all_trade_shares = yes
+	GT_split_distribute_income_all = yes
+	GT_split_distribute_expenses_all = yes
+}
+
+GT_split_calculate_all_trade_shares = {
+	# Scope: Country
+	#
+
+	GT_split_calculate_trade_shares = {
+		category = resource_extraction
+		the_state = 0
+		upper_strata = 1
+		middle_strata = 0.05
+		lower_strata = 0.05
+		proletariat = 0
+		indentured = 0
+		tribesmen = 0.1
+		slaves = 0
+	}
+
+	GT_split_calculate_trade_shares = {
+		category = manufacturing
+		the_state = 0
+		upper_strata = 1
+		middle_strata = 0.2
+		lower_strata = 0
+		proletariat = 0
+		indentured = 0
+		tribesmen = 0
+		slaves = 0
+	}
+
+	GT_split_calculate_trade_shares = {
+		category = shipping
+		the_state = 0
+		upper_strata = 1
+		middle_strata = 0.3
+		lower_strata = 0
+		proletariat = 0
+		indentured = 0
+		tribesmen = 0
+		slaves = 0
+	}
+}
+
+GT_split_distribute_income_all = {
+	# Scope: Governorship
+	GT_split_distribute_income_category = {
+		category = resource_extraction
+	}
+	GT_split_distribute_income_category = {
+		category = manufacturing
+	}
+	GT_split_distribute_income_category = {
+		category = shipping
+	}	
+}
+
+GT_reset_trade_transaction_totals = {
+	# Scope: Governorship
+	# Called: Every quarter before the first GT split effect is called
+	# Function: Set the total income and expense variables to 0, so that the queued values can be added to them throughout the quarter
+
+	set_variable = {
+		name = trade_income_due_shipping
+		value = 0
+	}
+	set_variable = {
+		name = trade_expenses_due_shipping
+		value = 0
+	}
+
+	set_variable = {
+		name = trade_income_due_resource_extraction
+		value = 0
+	}
+	set_variable = {
+		name = trade_expenses_due_resource_extraction
+		value = 0
+	}
+
+	set_variable = {
+		name = trade_income_due_manufacturing
+		value = 0
+	}
+	set_variable = {
+		name = trade_expenses_due_manufacturing
+		value = 0
+	}
+
+}
+
+GT_split_calculate_actual_share_of_income_category = {
+	set_variable = {
+		name = this_income_from_$category$_$seller$
+		value = var:trade_income_due_$category$
+	}
+	change_variable = {
+		name = this_income_from_$category$_$seller$
+		multiply = var:trade_share_$category$_$seller$
+	}
+}
+
+GT_split_distribute_income_category = {
+	# Scope: governorship
+	# Split the income for a single category of imported goods. This uses the GT_split_trade_share_[...] svalues
+
+
+	# The state
+	GT_split_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = the_state
+	}
+	#owner = {
+	#	add_treasury = var:this_income_from_$category$_the_state
+	#}
+	# Upper strata
+	GT_split_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = upper_strata
+	}
+	change_variable = {
+		name = upper_strata_wealth
+		add = var:this_income_from_$category$_upper_strata
+	}
+	# Middle strata
+	GT_split_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = middle_strata
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = var:this_income_from_$category$_middle_strata
+	}
+	# Lower strata
+	GT_split_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = lower_strata
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = var:this_income_from_$category$_lower_strata
+	}
+	# Proletariat
+	GT_split_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = proletariat
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = var:this_income_from_$category$_proletariat
+	}
+	# Tribesmen
+	GT_split_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = tribesmen
+	}
+	change_variable = {
+		name = tribesmen_wealth
+		add = var:this_income_from_$category$_tribesmen
+	}
+	# Indentured
+	GT_split_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = indentured
+	}
+	change_variable = {
+		name = indentured_wealth
+		add = var:this_income_from_$category$_indentured
+	}
+	# Slaves
+	GT_split_calculate_actual_share_of_income_category = {
+		category = $category$
+		seller = slaves
+	}
+	change_variable = {
+		name = slaves_wealth
+		add = var:this_income_from_$category$_slaves
+	}
+}
+
+GT_split_distribute_expenses_all = {
+	# Scope: Governorship
+	GT_split_distribute_expenses_category = {
+		category = resource_extraction
+	}
+	GT_split_distribute_expenses_category = {
+		category = manufacturing
+	}
+	GT_split_distribute_expenses_category = {
+		category = shipping
+	}	
+}
+
+GT_split_calculate_actual_share_of_expenses_category = {
+	set_variable = {
+		name = this_expenses_from_$category$_$seller$
+		value = var:trade_expenses_due_$category$
+	}
+	change_variable = {
+		name = this_expenses_from_$category$_$seller$
+		multiply = var:trade_share_$category$_$seller$
+	}
+}
+
+GT_split_distribute_expenses_category = {
+	# Scope: governorship
+	# Split the expenses for a single category of imported goods
+
+
+	change_variable = {
+		name = trade_expenses_due_$category$
+		multiply = -1
+	}
+
+	# The state
+	GT_split_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = the_state
+	}
+	#owner = {
+	#	add_treasury = var:this_expenses_from_$category$_the_state
+	#}
+	# Upper strata
+	GT_split_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = upper_strata
+	}
+	change_variable = {
+		name = upper_strata_wealth
+		add = var:this_expenses_from_$category$_upper_strata
+	}
+	# Middle strata
+	GT_split_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = middle_strata
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = var:this_expenses_from_$category$_middle_strata
+	}
+	# Lower strata
+	GT_split_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = lower_strata
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = var:this_expenses_from_$category$_lower_strata
+	}
+	# Proletariat
+	GT_split_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = proletariat
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = var:this_expenses_from_$category$_proletariat
+	}
+	# Tribesmen
+	GT_split_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = tribesmen
+	}
+	change_variable = {
+		name = tribesmen_wealth
+		add = var:this_expenses_from_$category$_tribesmen
+	}
+	# Indentured
+	GT_split_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = indentured
+	}
+	change_variable = {
+		name = indentured_wealth
+		add = var:this_expenses_from_$category$_indentured
+	}
+	# Slaves
+	GT_split_calculate_actual_share_of_expenses_category = {
+		category = $category$
+		seller = slaves
+	}
+	change_variable = {
+		name = slaves_wealth
+		add = var:this_expenses_from_$category$_slaves
+	}
+}
+
+GT_split_set_total_order_size_and_total_global_stockpile_percent_all = {
+	# Scope: Random country
+	# Function: Set the total order size and the percentage of the global export stockpile in every tradezone for all tradegoods combined, so that shipping calculations only run once per tradezone rather than for every tradegood - this massively improves performance
+	set_global_variable = {
+		name = global_stockpile_all_tradegoods
+		value = 0
+	}
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_total_stockpile_size_contribution
+	}
+
+
+	set_global_variable = {
+		name = india_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = east_north_america_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = west_north_america_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = caribbean_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = west_south_america_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = east_south_america_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = south_east_asia_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = indo_china_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = yellow_sea_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = southern_africa_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = west_africa_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = east_africa_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = middle_east_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = western_steppe_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = eastern_steppe_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = upper_yangtzi_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = atlantic_seaboard_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = central_europe_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = west_mediterranean_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = baltic_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = east_europe_total_order_size_all
+		value = 0
+	}
+	set_global_variable = {
+		name = east_mediterranean_total_order_size_all
+		value = 0
+	}
+
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_total_order_size_contribution
+	}
+
+
+	set_global_variable = {
+		name = india_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = east_north_america_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = west_north_america_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = caribbean_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = west_south_america_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = east_south_america_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = south_east_asia_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = indo_china_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = yellow_sea_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = southern_africa_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = west_africa_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = east_africa_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = middle_east_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = western_steppe_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = eastern_steppe_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = upper_yangtzi_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = atlantic_seaboard_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = central_europe_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = west_mediterranean_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = baltic_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = east_europe_percentage_of_global_stockpile_all
+		value = 0
+	}
+	set_global_variable = {
+		name = east_mediterranean_percentage_of_global_stockpile_all
+		value = 0
+	}
+
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_TZ_stockpile_all_contribution
+	}
+
+	change_global_variable = {
+		name = india_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = east_north_america_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = west_north_america_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = caribbean_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = west_south_america_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = east_south_america_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = south_east_asia_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = indo_china_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = yellow_sea_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = southern_africa_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = west_africa_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = east_africa_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = middle_east_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = western_steppe_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = eastern_steppe_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = upper_yangtzi_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = atlantic_seaboard_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = central_europe_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = west_mediterranean_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = baltic_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = east_europe_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+	change_global_variable = {
+		name = east_mediterranean_percentage_of_global_stockpile_all
+		divide = global_var:global_stockpile_all_tradegoods
+	}
+
+}
+
+GT_split_get_TZ_stockpile_all_contribution = {
+	change_global_variable = {
+		name = india_percentage_of_global_stockpile_all
+		add = global_var:india_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = east_north_america_percentage_of_global_stockpile_all
+		add = global_var:east_north_america_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = west_north_america_percentage_of_global_stockpile_all
+		add = global_var:west_north_america_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = caribbean_percentage_of_global_stockpile_all
+		add = global_var:caribbean_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = west_south_america_percentage_of_global_stockpile_all
+		add = global_var:west_south_america_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = east_south_america_percentage_of_global_stockpile_all
+		add = global_var:east_south_america_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = south_east_asia_percentage_of_global_stockpile_all
+		add = global_var:south_east_asia_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = indo_china_percentage_of_global_stockpile_all
+		add = global_var:indo_china_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = yellow_sea_percentage_of_global_stockpile_all
+		add = global_var:yellow_sea_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = southern_africa_percentage_of_global_stockpile_all
+		add = global_var:southern_africa_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = west_africa_percentage_of_global_stockpile_all
+		add = global_var:west_africa_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = east_africa_percentage_of_global_stockpile_all
+		add = global_var:east_africa_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = middle_east_percentage_of_global_stockpile_all
+		add = global_var:middle_east_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = western_steppe_percentage_of_global_stockpile_all
+		add = global_var:western_steppe_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = eastern_steppe_percentage_of_global_stockpile_all
+		add = global_var:eastern_steppe_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = upper_yangtzi_percentage_of_global_stockpile_all
+		add = global_var:upper_yangtzi_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = atlantic_seaboard_percentage_of_global_stockpile_all
+		add = global_var:atlantic_seaboard_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = central_europe_percentage_of_global_stockpile_all
+		add = global_var:central_europe_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = west_mediterranean_percentage_of_global_stockpile_all
+		add = global_var:west_mediterranean_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = baltic_percentage_of_global_stockpile_all
+		add = global_var:baltic_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = east_europe_percentage_of_global_stockpile_all
+		add = global_var:east_europe_stockpile_$tradegood$
+	}
+	change_global_variable = {
+		name = east_mediterranean_percentage_of_global_stockpile_all
+		add = global_var:east_mediterranean_stockpile_$tradegood$
+	}
+}
+
+GT_split_get_total_order_size_contribution = {
+	# Scope: Random country
+	# Function: Add to the order size count of all tradegoods in every tradezone the amount of this tradegood in the order size in tradezones
+	change_global_variable = {
+		name = india_total_order_size_all
+		add = global_var:india_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = east_north_america_total_order_size_all
+		add = global_var:east_north_america_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = west_north_america_total_order_size_all
+		add = global_var:west_north_america_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = caribbean_total_order_size_all
+		add = global_var:caribbean_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = west_south_america_total_order_size_all
+		add = global_var:west_south_america_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = east_south_america_total_order_size_all
+		add = global_var:east_south_america_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = south_east_asia_total_order_size_all
+		add = global_var:south_east_asia_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = indo_china_total_order_size_all
+		add = global_var:indo_china_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = yellow_sea_total_order_size_all
+		add = global_var:yellow_sea_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = southern_africa_total_order_size_all
+		add = global_var:southern_africa_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = west_africa_total_order_size_all
+		add = global_var:west_africa_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = east_africa_total_order_size_all
+		add = global_var:east_africa_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = middle_east_total_order_size_all
+		add = global_var:middle_east_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = western_steppe_total_order_size_all
+		add = global_var:western_steppe_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = eastern_steppe_total_order_size_all
+		add = global_var:eastern_steppe_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = upper_yangtzi_total_order_size_all
+		add = global_var:upper_yangtzi_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = atlantic_seaboard_total_order_size_all
+		add = global_var:atlantic_seaboard_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = central_europe_total_order_size_all
+		add = global_var:central_europe_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = west_mediterranean_total_order_size_all
+		add = global_var:west_mediterranean_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = baltic_total_order_size_all
+		add = global_var:baltic_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = east_europe_total_order_size_all
+		add = global_var:east_europe_total_order_size_$tradegood$
+	}
+	change_global_variable = {
+		name = east_mediterranean_total_order_size_all
+		add = global_var:east_mediterranean_total_order_size_$tradegood$
+	}
+}
+
+GT_split_get_total_stockpile_size_contribution = {
+	# Scope: Random country
+	# Function: Add to the global stockpile of all tradegoods the amount of this tradegood in the global stockpile
+	change_global_variable = {
+		name = global_stockpile_all_tradegoods
+		add = global_var:global_stockpile_$tradegood$
+	}
+}
+
+GT_split_update_shipping_route_traffic_all = {
+	# Scope: Random country
+	# Function: Call GT_split_update_shipping_route_traffic_tradegood to update shipping along all trade routes
+	GT_split_update_shipping_route_traffic_all_TZs =yes
+}
+
+GT_split_update_shipping_route_traffic_all_TZs = {
+	# Scope: Random country
+	# Function: Add the traffic between all tradezones and $tradezone$
+	# Each TZ generates shipping towards itself from other TZs based on the percentage of supply from every other TZ in the world, multiplied down by the percentage of global total imports within the given TZ.
+	# Each TZ also generates shipping out from itself based on the total exports in that TZ
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = india
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = east_north_america
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = west_north_america
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = caribbean
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = west_south_america
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = east_south_america
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = south_east_asia
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = indo_china
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = yellow_sea
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = southern_africa
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = west_africa
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = east_africa
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = middle_east
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = western_steppe
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = eastern_steppe
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = upper_yangtzi
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = atlantic_seaboard
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = central_europe
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = west_mediterranean
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = baltic
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = east_europe
+	}
+	GT_split_update_shipping_route_traffic_tradezone = {
+		tradezone = east_mediterranean
+	}
+}
+
+GT_split_update_shipping_route_traffic_tradezone = {
+	set_local_variable = {
+		name = $tradezone$_imports_from_india
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_india
+		multiply = global_var:india_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_india_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_india
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_east_north_america
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_east_north_america
+		multiply = global_var:east_north_america_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_east_north_america_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_east_north_america
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_west_north_america
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_west_north_america
+		multiply = global_var:west_north_america_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_west_north_america_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_west_north_america
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_caribbean
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_caribbean
+		multiply = global_var:caribbean_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_caribbean_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_caribbean
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_west_south_america
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_west_south_america
+		multiply = global_var:west_south_america_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_west_south_america_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_west_south_america
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_east_south_america
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_east_south_america
+		multiply = global_var:east_south_america_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_east_south_america_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_east_south_america
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_south_east_asia
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_south_east_asia
+		multiply = global_var:south_east_asia_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_south_east_asia_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_south_east_asia
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_indo_china
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_indo_china
+		multiply = global_var:indo_china_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_indo_china_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_indo_china
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_yellow_sea
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_yellow_sea
+		multiply = global_var:yellow_sea_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_yellow_sea_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_yellow_sea
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_southern_africa
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_southern_africa
+		multiply = global_var:southern_africa_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_southern_africa_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_southern_africa
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_west_africa
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_west_africa
+		multiply = global_var:west_africa_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_west_africa_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_west_africa
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_east_africa
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_east_africa
+		multiply = global_var:east_africa_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_east_africa_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_east_africa
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_middle_east
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_middle_east
+		multiply = global_var:middle_east_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_middle_east_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_middle_east
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_western_steppe
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_western_steppe
+		multiply = global_var:western_steppe_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_western_steppe_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_western_steppe
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_eastern_steppe
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_eastern_steppe
+		multiply = global_var:eastern_steppe_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_eastern_steppe_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_eastern_steppe
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_upper_yangtzi
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_upper_yangtzi
+		multiply = global_var:upper_yangtzi_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_upper_yangtzi_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_upper_yangtzi
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_atlantic_seaboard
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_atlantic_seaboard
+		multiply = global_var:atlantic_seaboard_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_atlantic_seaboard_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_atlantic_seaboard
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_central_europe
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_central_europe
+		multiply = global_var:central_europe_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_central_europe_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_central_europe
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_west_mediterranean
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_west_mediterranean
+		multiply = global_var:west_mediterranean_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_west_mediterranean_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_west_mediterranean
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_baltic
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_baltic
+		multiply = global_var:baltic_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_baltic_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_baltic
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_east_europe
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_east_europe
+		multiply = global_var:east_europe_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_east_europe_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_east_europe
+	}
+	
+	set_local_variable = {
+		name = $tradezone$_imports_from_east_mediterranean
+		value = global_var:$tradezone$_total_order_size_all
+	}
+	change_local_variable = {
+		name = $tradezone$_imports_from_east_mediterranean
+		multiply = global_var:east_mediterranean_percentage_of_global_stockpile_all
+	}
+	PURCHASE_update_shipping = {
+		origin_tradezone = global_var:global_east_mediterranean_tradezone
+		destination_tradezone = global_var:global_$tradezone$_tradezone
+		order_size = local_var:$tradezone$_imports_from_east_mediterranean
+	}
+}
+
+GT_split_do_shipping_costs = {
+	GT_split_setup_global_shipping_costs_pool = yes
+	every_country = {
+		every_governorships = {
+			GT_split_get_governorship_shipping_payments_owed = { type = $type$ }
+		}
+	}
+	GT_split_get_TZ_shipping_income_pool_all = yes
+	# Scale back up - this has been scaled down to avoid overflow in the global pool size
+	every_trade_center = {
+		change_variable = {
+			name = queued_TZ_this_quarter_transport_pool
+			multiply = 1
+		}
+	}
+	every_country = {
+		every_governorships = {
+			GT_split_get_governorship_shipping_income = yes
+			# The below has been moved to the quarterly income and expenses distribution effect
+			#GT_split_distribute_income_category = {
+			#	category = shipping
+			#}
+			#GT_split_distribute_expenses_category = {
+			#	category = shipping
+			#}
+		}
+	}
+}
+
+GT_split_setup_global_shipping_costs_pool = {
+	# Scope: Random country
+	# Function: Set global variable for global shipping costs that can be added to by governorships while summing up local shipping costs
+	set_global_variable = {
+		name = global_shipping_costs_pool
+		value = 0
+	}
+}
+
+GT_split_get_governorship_shipping_payments_owed = {
+	# Scope: Governorship
+	# Function: Get the total number of goods imported and exported (transported) in the governorship and turn that into a shipping fee based on the cost of naval supplies here. Also add this to the global shipping payment pool
+	set_variable = {
+		name = queued_trade_expenses_due_shipping
+		value = 0
+	}
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_governorship_amount_transported_tradegood
+	}
+	if = {
+		limit = {
+			var:queued_trade_expenses_due_shipping > 0
+		}
+		if = {
+			limit = {
+				has_global_variable = global_base_import_price_naval_supplies
+			}
+			change_variable = {
+				name = queued_trade_expenses_due_shipping
+				multiply = global_var:global_base_import_price_naval_supplies
+			}
+			change_variable = {
+				name = queued_trade_expenses_due_shipping
+				multiply = 10
+			}
+		}
+		else = {
+			change_variable = {
+				name = queued_trade_expenses_due_shipping
+				multiply = 0.1
+			}
+		}
+		change_global_variable = {
+			name = global_shipping_costs_pool
+			add = var:queued_trade_expenses_due_shipping
+		}
+	}
+}
+
+GT_split_get_governorship_amount_transported_tradegood = {
+	# Scope: Governorship
+
+	# NOTE: ATM the importer bears the cost of shipping. This can be changed by uncommenting the below
+	if = {
+		limit = {
+			has_variable = order_size_$tradegood$
+		}
+		change_variable = {
+			name = queued_trade_expenses_due_shipping
+			add = var:order_size_$tradegood$
+		}
+	}
+
+
+	#if = {
+	#	limit = {
+	#		has_variable = amount_exported_$tradegood$
+	#	}
+	#	change_variable = {
+	#		name = queued_trade_expenses_due_shipping
+	#		add = var:amount_exported_$tradegood$
+	#	}
+	#}
+
+}
+
+GT_split_get_global_capped_shipping_traffic_all = {
+	# Scope: Random country
+	# Function: Get the shipping traffic, capped by shipping capacity, from every TZ and add it to a global total variable
+	set_global_variable = {
+		name = global_chargeable_shipping_traffic
+		value = 0
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = india
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = east_north_america
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = west_north_america
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = caribbean
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = west_south_america
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = east_south_america
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = south_east_asia
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = indo_china
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = yellow_sea
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = southern_africa
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = west_africa
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = east_africa
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = middle_east
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = western_steppe
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = eastern_steppe
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = upper_yangtzi
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = atlantic_seaboard
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = central_europe
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = west_mediterranean
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = baltic
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = east_europe
+	}
+	GT_split_contribute_capped_shipping_traffic_tradezone = {
+		tradezone = east_mediterranean
+	}
+
+}
+
+GT_split_contribute_capped_shipping_traffic_tradezone = {
+	# Scope: Random country
+	# Function: Add the capped shipping traffic for one TZ to the global total
+	if = { # If value is over cap, add the cap
+		limit = {
+			global_var:global_$tradezone$_tradezone.var:TZ_shipping > global_var:global_$tradezone$_tradezone.SHIPPING_total_in_TZ
+		}
+
+		global_var:global_$tradezone$_tradezone = {
+			set_variable = {
+				name = TZ_shipping_capped
+				value = SHIPPING_total_in_TZ
+			}
+			change_global_variable = {
+				name = global_chargeable_shipping_traffic
+				add = var:TZ_shipping_capped
+			}
+		}
+	}
+	else = {
+		change_global_variable = {
+			name = global_chargeable_shipping_traffic
+			add = global_var:global_$tradezone$_tradezone.var:TZ_shipping
+		}
+	}
+}
+
+GT_split_get_TZ_shipping_income_pool_all = {
+	# Scope: Random country
+	# Function: Firstly get the total global shipping traffic (contributions from every TZ capped at its shipping capacity). Then divide each TZ's shipping traffic (capped at shipping capacity) by the total global traffic, giving its percentage share of global shipping.
+	# Then multiply the total global shipping payment pool by the TZ percentage share of global shipping in every TZ, to get the shipping income due to every TZ.
+	GT_split_get_global_capped_shipping_traffic_all = yes
+	every_trade_center = {
+		GT_split_get_TZ_shipping_income_pool_tradezone = yes
+	}
+
+}
+
+GT_split_get_TZ_shipping_income_pool_tradezone = {
+	# Scope: Trade center province
+	# Function: Get the percentage of global capped shipping from this tradezone
+	if = {
+		limit = {
+			has_variable = TZ_shipping_capped
+		}
+		set_local_variable = {
+			name = share_of_global_shipping_income
+			value = var:TZ_shipping_capped
+		}
+	}
+	else = {
+		set_local_variable = {
+			name = share_of_global_shipping_income
+			value = var:TZ_shipping
+		}
+	}
+
+	change_local_variable = {
+		name = share_of_global_shipping_income
+		divide = global_var:global_chargeable_shipping_traffic
+	}
+
+	set_variable = {
+		name = queued_TZ_this_quarter_transport_pool
+		value = local_var:share_of_global_shipping_income
+	}
+	change_variable = {
+		name = queued_TZ_this_quarter_transport_pool
+		multiply = global_var:global_shipping_costs_pool
+	}
+
+	change_variable = {
+		name = TZ_this_quarter_transport_pool
+		add = var:queued_TZ_this_quarter_transport_pool
+	}
+}
+
+
+GT_split_get_governorship_shipping_income = {
+	# Scope: Governorship
+	# Function: Get the shipping power of the governorship, then divide that by the total shipping capacity of the TZ, giving a percentage contribution to total shipping capacity in the TZ.
+	# Then multiply that by the TZ shipping income and grant this governorship the shipping income that is due based on ownership of the shipping industry
+	save_scope_as = this_governorship
+	set_variable = {
+		name = queued_trade_income_due_shipping
+		value = 0
+	}
+	every_governorship_state = {
+		every_state_province = {
+			save_scope_as = this_province
+
+			scope:this_governorship = {
+				change_variable = {
+					name = queued_trade_income_due_shipping
+					add = scope:this_province.SHIPPING_province_power
+				}
+			}
+		}
+	}
+	change_variable = {
+		name = queued_trade_income_due_shipping
+		divide = var:trade_center.SHIPPING_total_in_TZ
+	}
+	change_variable = {
+		name = queued_trade_income_due_shipping
+		multiply = var:trade_center.var:queued_TZ_this_quarter_transport_pool
+	}
+
+}
+
+GT_split_calculate_trade_shares = {
+	set_variable = {
+		name = trade_share_$category$_the_state
+		value = $the_state$
+	}
+	if = {
+		limit = {
+			flag:$category$ = flag:resource_extraction
+		}
+		if = {
+			limit = {
+				owner.var:official_currency = {
+					var:backing_type = flag:gold_standard
+				}
+			}
+
+			set_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				value = var:wealth_owed_for_gold
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				divide = var:trade_expenses_due_resource_extraction
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				multiply = DEMAND_gold_for_reserve_divided_by_base_demand
+			}
+
+			change_variable = {
+				name = trade_share_$category$_the_state
+				add = local_var:trade_share_$category$_the_state_gold_reserves
+			}
+		}
+		else_if = {
+			limit = {
+				owner.var:official_currency = {
+					var:backing_type = flag:bimetallic_standard
+				}
+			}
+
+			set_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				value = var:wealth_owed_for_gold
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				divide = var:trade_expenses_due_resource_extraction
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				multiply = DEMAND_gold_for_reserve_divided_by_base_demand
+			}
+
+			set_local_variable = {
+				name = trade_share_$category$_the_state_silver_reserves
+				value = var:wealth_owed_for_silver
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_silver_reserves
+				divide = var:trade_expenses_due_resource_extraction
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				multiply = DEMAND_silver_for_reserve_divided_by_base_demand
+			}
+
+			change_variable = {
+				name = trade_share_$category$_the_state
+				add = local_var:trade_share_$category$_the_state_gold_reserves
+			}
+			change_variable = {
+				name = trade_share_$category$_the_state
+				add = local_var:trade_share_$category$_the_state_silver_reserves
+			}
+		}
+		else_if = {
+			limit = {
+				owner.var:official_currency = {
+					var:backing_type = flag:silver_standard
+				}
+			}
+
+			set_local_variable = {
+				name = trade_share_$category$_the_state_silver_reserves
+				value = var:wealth_owed_for_silver
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_silver_reserves
+				divide = var:trade_expenses_due_resource_extraction
+			}
+			change_local_variable = {
+				name = trade_share_$category$_the_state_gold_reserves
+				multiply = DEMAND_silver_for_reserve_divided_by_base_demand
+			}
+
+			change_variable = {
+				name = trade_share_$category$_the_state
+				add = local_var:trade_share_$category$_the_state_gold_reserves
+			}
+		}
+	}
+	set_variable = {
+		name = trade_share_$category$_upper_strata
+		value = $upper_strata$
+	}
+	set_variable = {
+		name = trade_share_$category$_middle_strata
+		value = $middle_strata$
+	}
+	set_variable = {
+		name = trade_share_$category$_lower_strata
+		value = $lower_strata$
+	}
+	set_variable = {
+		name = trade_share_$category$_proletariat
+		value = $proletariat$
+	}
+	set_variable = {
+		name = trade_share_$category$_indentured
+		value = $indentured$
+	}
+	set_variable = {
+		name = trade_share_$category$_tribesmen
+		value = $tribesmen$
+	}
+	set_variable = {
+		name = trade_share_$category$_slaves
+		value = $slaves$
+	}
+
+	change_variable = {
+		name = trade_share_$category$_the_state
+		multiply = var:governorship_population
+	}
+	change_variable = {
+		name = trade_share_$category$_upper_strata
+		multiply = var:governorship_upper_strata
+	}
+	change_variable = {
+		name = trade_share_$category$_middle_strata
+		multiply = var:governorship_middle_strata
+	}
+	change_variable = {
+		name = trade_share_$category$_lower_strata
+		multiply = var:governorship_lower_strata
+	}
+	change_variable = {
+		name = trade_share_$category$_proletariat
+		multiply = var:governorship_proletariat
+	}
+	change_variable = {
+		name = trade_share_$category$_indentured
+		multiply = var:governorship_indentured
+	}
+	change_variable = {
+		name = trade_share_$category$_tribesmen
+		multiply = var:governorship_tribesmen
+	}
+	change_variable = {
+		name = trade_share_$category$_slaves
+		multiply = var:governorship_slaves
+	}
+
+	set_local_variable = {
+		name = GT_split_sum_of_$category$_income_weights
+		value = var:trade_share_$category$_the_state
+	}
+	change_local_variable = {
+		name = GT_split_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_upper_strata
+	}
+	change_local_variable = {
+		name = GT_split_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_middle_strata
+	}
+	change_local_variable = {
+		name = GT_split_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_lower_strata
+	}
+	change_local_variable = {
+		name = GT_split_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_proletariat
+	}
+	change_local_variable = {
+		name = GT_split_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_indentured
+	}
+	change_local_variable = {
+		name = GT_split_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_tribesmen
+	}
+	change_local_variable = {
+		name = GT_split_sum_of_$category$_income_weights
+		add = var:trade_share_$category$_slaves
+	}
+
+	if = {
+		limit = {
+			local_var:GT_split_sum_of_$category$_income_weights > 0
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_the_state > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_the_state
+				divide = local_var:GT_split_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_upper_strata > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_upper_strata
+				divide = local_var:GT_split_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_middle_strata > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_middle_strata
+				divide = local_var:GT_split_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_lower_strata > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_lower_strata
+				divide = local_var:GT_split_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_proletariat > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_proletariat
+				divide = local_var:GT_split_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_indentured > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_indentured
+				divide = local_var:GT_split_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_tribesmen > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_tribesmen
+				divide = local_var:GT_split_sum_of_$category$_income_weights
+			}
+		}
+		if = {
+			limit = {
+				var:trade_share_$category$_slaves > 0
+			}
+			change_variable = {
+				name = trade_share_$category$_slaves
+				divide = local_var:GT_split_sum_of_$category$_income_weights
+			}
+		}
+	}
+}
+
+GT_split_update_shipping_income = {
+	# Scope: Country
+	# Function: Save the income from shipping into a variable
+	set_variable = {
+		name = shipping_earned_all_TZs
+		value = SHIPPING_earned_all_TZs
+	}
+}
+
+GT_split_get_shipping_income_from_colonies = {
+	# Scope: Country
+	# Function: Get the shipping value from every colony
+	set_variable = {
+		name = shipping_income_all_colonies
+		value = 0
+	}
+	save_scope_as = overlord_scope
+	every_subject = {
+		limit = {
+			OR = {
+				is_subject_type = autonomous_colony
+				is_subject_type = client_colony
+			}
+		}
+		save_scope_as = subject_scope
+		scope:overlord_scope = {
+			change_variable = {
+				name = shipping_income_all_colonies
+				add = scope:subject_scope.var:shipping_earned_all_TZs
+			}
+		}
+	}
+}
+
+GT_reset_all_customs_union_for_sale_values = {
+	# Scope: Random country
+	# Function: Set the customs_union_$tradegood$_for_sale values to 0, so that they can be summed up again during this trade iteration
+	every_country = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_reset_customs_union_for_sale_value_tradegood
+		}		
+	}
+	every_federation = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_reset_customs_union_for_sale_value_tradegood
+		}
+	}
+}
+
+GT_reset_customs_union_for_sale_value_tradegood = {
+	# Scope: Country or federation province
+	# Function: Set customs_union_$tradegood$_for_sale to 0. This value gets summed up during the trade loop and then used to calculate the percentage of the customs union's contribution to global stockpiles
+	set_variable = {
+		name = customs_union_$tradegood$_for_sale
+		value = 0
+	}
+	set_variable = {
+		name = customs_union_contribution_to_global_stockpile_$tradegood$
+		value = 0
+	}
+}
+
+GT_get_all_customs_union_for_sale_as_percentage_of_global = {
+	# Scope: Random country
+	# Function: Get the percentage of all customs unions' contributions to the global stockpile for all tradegoods
+	every_country = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_customs_union_for_sale_as_percentage_of_global_tradegood
+		}		
+	}
+	every_federation = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_customs_union_for_sale_as_percentage_of_global_tradegood
+		}
+	}
+}
+
+GT_customs_union_for_sale_as_percentage_of_global_tradegood = {
+	# Scope: Country or federation province
+	# Function: Get the percentage of the customs union's contribution to the global stockpile, which gives a boost to the global market penetration for this tradegood to every country inside the customs union
+	set_variable = {
+		name = customs_union_contribution_to_global_stockpile_$tradegood$
+		value = var:customs_union_$tradegood$_for_sale
+	}
+	if = {
+		limit = {
+			var:customs_union_contribution_to_global_stockpile_$tradegood$ > 0
+		}
+		change_variable = {
+			name = customs_union_contribution_to_global_stockpile_$tradegood$
+			divide = global_var:global_stockpile_$tradegood$
+		}
+	}
+}
+
+GT_set_tradegood_price_all_TZs_all_tradegoods = {
+	every_tradegood_$type$_complex = {
+		APPLY = GT_set_tradegood_price_all_TZs
+	}
+}
+
+GT_set_tradegood_price_all_TZs = {
+	# Scope: Random country
+	# Function: Calculate the base wholesale price of $tradegood$ based on supply and demand in every TZ
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = india
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = east_north_america
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = west_north_america
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = caribbean
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = west_south_america
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = east_south_america
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = south_east_asia
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = indo_china
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = yellow_sea
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = southern_africa
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = west_africa
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = east_africa
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = middle_east
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = western_steppe
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = eastern_steppe
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = upper_yangtzi
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = atlantic_seaboard
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = central_europe
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = west_mediterranean
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = baltic
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = east_europe
+	}
+	GT_set_tradegood_price = {
+		tradegood = $tradegood$
+		tradezone = east_mediterranean
+	}
+
+}
+
+GT_set_tradegood_price = {
+	# Scope: Tradezone province
+	# Function: Calculate the base wholesale price of $tradegood$ based on supply and demand in $tradezone$
+	global_var:global_$tradezone$_tradezone = {
+
+		set_variable = {
+			name = local_price_$tradegood$
+			value = global_var:$tradezone$_total_order_size_$tradegood$
+		}		
+
+		if = {
+			limit = {
+				global_var:$tradezone$_stockpile_$tradegood$ > 0
+			}
+			change_variable = {
+				name = local_price_$tradegood$
+				divide = global_var:$tradezone$_stockpile_$tradegood$
+			}
+		}
+
+		change_variable = {
+			name = local_price_$tradegood$
+			multiply = 0.1
+		}
+
+		# Factor in elasticity
+
+		# If the tradegood is a food type, scale it down by the variety of food types available
+		if = {
+			limit = {
+				OR = {
+					flag:$tradegood$ = flag:grain
+					flag:$tradegood$ = flag:livestock
+					flag:$tradegood$ = flag:temperate_fruit
+					flag:$tradegood$ = flag:fish
+					flag:$tradegood$ = flag:vegetables
+					flag:$tradegood$ = flag:processed_foods
+				}
+			}
+			change_variable = {
+				name = local_price_$tradegood$
+				divide = DEMAND_num_food_tradegoods
+			}
+		}
+	}
+}
+
+#### vvv NOT YET IMPLEMENTED vvv ####
+
+GT_save_final_quarterly_wealth_values = {
+	# Scope: Governorship
+	# Function: Save the wealth owed and due for every tradegood and trade_income_due_resource_extraction, trade_income_due_manufacturing, trade_expenses_due_resource_extraction, trade_expenses_due_manufacturing into new values that stores the total for the quarter
+	# Called: After all 4 GT_split runs
+
+	GT_save_final_var = {
+		var_name = trade_income_due_resource_extraction
+	}
+	GT_save_final_var = {
+		var_name = trade_income_due_manufacturing
+	}
+	GT_save_final_var = {
+		var_name = trade_expenses_due_resource_extraction
+	}
+	GT_save_final_var = {
+		var_name = trade_expenses_due_manufacturing
+	}
+	GT_save_final_var = {
+		var_name = trade_income_due_resource_extraction
+	}				
+	every_tradegood_complex = {
+		APPLY = GT_save_final_tradegood_vars
+	}
+}
+
+GT_save_final_var = {
+	set_variable = {
+		name = final_quarterly_$var_name$
+		value = var:$var_name$
+	}
+}
+
+GT_save_final_tradegood_vars = {
+	set_variable = {
+		name = final_quarterly_income_due_$tradegood$
+		value = var:income_due_$tradegood$
+	}
+	set_variable = {
+		name = final_quarterly_wealth_owed_for_$tradegood$
+		value = var:wealth_owed_for_$tradegood$
+	}
+}

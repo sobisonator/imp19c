@@ -81,10 +81,13 @@ class LookupBuilder:
         self.pass_no = 0 # The pass
 
         num_rows_per_column = ( self.max_y - self.start_y ) / self.increment_y
-        max_columns_per_run = round(self.max_cells / num_rows_per_column, 0)
+        self.max_columns_per_run = round(self.max_cells / num_rows_per_column, 0)
+
+        # Get the X value at which to trigger a pass back round to provid 1
+        self.pass_1_x_index = (self.max_columns_per_run * self.increment_x) + self.start_x
 
         while self.current_x <= (self.max_x):
-            if self.column_number % max_columns_per_run == 0:
+            if self.column_number % self.max_columns_per_run == 0:
                 self.pass_no += 1
                 self.provid = 1
             self.create_table_column() # Create the entire column of all Y values at this X value
@@ -105,6 +108,7 @@ class LookupBuilder:
         self.current_y = self.start_y     
 
     def create_table_cell(self):
+        
         print("Pass "+ str(self.pass_no) +" Creating table cell x" + 
             str(round(self.current_x,2)) +
              " y" 
@@ -121,6 +125,8 @@ class LookupBuilder:
                 y_hi = {current_y_incremented}
                 ans = {ans}
                 pass_no = {pass_no}
+                pass_1_x_index = {pass_1_x_index}
+                pass_2_x_index = {pass_2_x_index}
             }}
         }}
         """.format(provid=self.provid,
@@ -130,7 +136,9 @@ class LookupBuilder:
                     current_x = round(self.current_x,2),
                     current_x_incremented = round(self.current_x + self.increment_x,2),
                     ans = round(self.solver(x=self.current_x, y=self.current_y),self.ans_precision),
-                    pass_no = self.pass_no
+                    pass_no = self.pass_no,
+                    pass_1_x_index = self.pass_1_x_index,
+                    pass_2_x_index = self.pass_1_x_index * 2
             )
         self.cell_number += 1
         return output

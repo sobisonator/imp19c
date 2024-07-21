@@ -5,7 +5,7 @@ class LookupBuilder:
     def __del__(self):
         print("Destroying LookupBuilder object")
 
-    def __init__(self, category, increment_y, increment_x, start_y, start_x, max_y, max_x, solver, **kwargs):
+    def __init__(self, category, increment_y, increment_x, start_y, start_x, max_y, max_x, solver, ans_precision, **kwargs):
         self.category = category
         self.increment_y = increment_y
         self.increment_x = increment_x
@@ -17,6 +17,7 @@ class LookupBuilder:
         self.max_x = max_x
         self.max_z = kwargs.get("max_z", None)
         self.max_cells = 13281
+        self.ans_precision = ans_precision
 
         z_args = {
             "increment_z": self.increment_z,
@@ -44,7 +45,7 @@ class LookupBuilder:
             self.dimensions = 3
 
         # Get the total number of cells needed in the table
-        self.num_cells = (self.max_x / self.increment_x ) * (self.max_y / self.increment_y)
+        self.num_cells = (self.max_x / self.increment_x + 1) * (self.max_y / self.increment_y)
         if self.dimensions == 3:
             self.num_cells *= (self.max_z / self.increment_z )
 
@@ -63,7 +64,7 @@ class LookupBuilder:
         # Ideally there's just one function to do this that depends on the num dimensions
         # ... or otherwise some way of minimising duplication
         print("Creating " + str(self.dimensions) + " dimensional lookup table...")
-        self.lookup_table_file = open("lookup_table_output.txt", "a")
+        self.lookup_table_file = open("lookup_table_output.txt", "w")
         if self.dimensions == 2:
             self.create_table_2d()
         elif self.dimensions == 3:
@@ -72,24 +73,23 @@ class LookupBuilder:
 
 
     def create_table_2d(self):
-        self.provid = 1 # Table cell ID
+        self.provid = 1
+        self.cell_number = 1
+        self.column_number = 1
         self.current_y = self.start_y
         self.current_x = self.start_x
+        self.pass_no = 0 # The pass
 
-        while self.provid < (self.num_cells):
-            if self.num_cells > self.max_cells:
-                # Each cell is 1 province
-                # There are only 13,281 provinces in the mod
-                # Therefore if the value goes over 13,281 it must be made to loop around somehow
-                # We need to set an extra set of variables with the appendix "_pass_i"
-                # Where i is the number of times we've looped beyond 13,281 cells in the table
-                # The LOOKUP_get_answer script then needs to know which pass to check based on the size of the input
-                # So we need a "pass_i_trigger" variable which if the column (x) is beyond, it checks the "_pass_i" variables
-                # The pass_i_trigger needs to be triggered just before the column where it would overflow 13,281
-                # So if the expected number of rows in this column would lead cell nubmer to exceed 13,281, enable pass_i
-                pass
+        num_rows_per_column = ( self.max_y - self.start_y ) / self.increment_y
+        max_columns_per_run = round(self.max_cells / num_rows_per_column, 0)
+
+        while self.current_x <= (self.max_x):
+            if self.column_number % max_columns_per_run == 0:
+                self.pass_no += 1
+                self.provid = 1
             self.create_table_column() # Create the entire column of all Y values at this X value
-            self.current_x += self.increment_x # Move on to the next X value, i.e. column
+            self.current_x += self.increment_x # Move on to the next x value, i.e. column
+            self.column_number += 1
              
     def create_table_3d(self):
         pass
@@ -105,11 +105,11 @@ class LookupBuilder:
         self.current_y = self.start_y     
 
     def create_table_cell(self):
-        print("Creating table cell x" + 
+        print("Pass "+ str(self.pass_no) +" Creating table cell x" + 
             str(round(self.current_x,2)) +
              " y" 
              + str(round(self.current_y,2)) +
-             "\n" + str(self.provid) + " of " + str(self.num_cells)
+             "\n" + str(self.cell_number) + " of " + str(self.num_cells)
              )
         output = """
         P:{provid} = {{
@@ -120,6 +120,7 @@ class LookupBuilder:
                 y_lo = {current_y}
                 y_hi = {current_y_incremented}
                 ans = {ans}
+                pass_no = {pass_no}
             }}
         }}
         """.format(provid=self.provid,
@@ -128,8 +129,10 @@ class LookupBuilder:
                     current_y_incremented = round(self.current_y + self.increment_y,2),
                     current_x = round(self.current_x,2),
                     current_x_incremented = round(self.current_x + self.increment_x,2),
-                    ans = round(self.solver(self.current_y, self.current_x),2)
+                    ans = round(self.solver(x=self.current_x, y=self.current_y),self.ans_precision),
+                    pass_no = self.pass_no
             )
+        self.cell_number += 1
         return output
 
 
@@ -142,7 +145,7 @@ def get_country_import_price(x,y):
     # x = global_base_import_price_$tradegood$
     # y = country_global_market_penetration_$tradegood$
     # return country_unit_price_$tradegood$
-    return (x / (y + 0.5))
+    return x / (y + 0.5)
 
 builder_global_trade_penetration = LookupBuilder(category = "global_trade_penetration",
              increment_x = 0.01,
@@ -151,15 +154,17 @@ builder_global_trade_penetration = LookupBuilder(category = "global_trade_penetr
              start_x = 0,
              max_x = 1,
              max_y = 1,
-             solver = multiply_together)
+             solver = multiply_together,
+             ans_precision = 2)
 
 builder_country_import_price = LookupBuilder(category = "country_import_price",
-             increment_x = 0.03,
+             increment_x = 0.01,
              increment_y = 0.01,
              start_y = 0,
              start_x = 0,
              max_x = 3,
              max_y = 1,
-             solver = get_country_import_price)
+             solver = get_country_import_price,
+             ans_precision = 3)
 
-builder.create_table()
+builder_country_import_price.create_table()

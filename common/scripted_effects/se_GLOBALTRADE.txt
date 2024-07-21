@@ -37,7 +37,7 @@
 	every_country = {
 		GT_split_get_country_global_market_penetration_all = { type = $type$ }
 		GT_split_get_order_size_modifier_all = { type = $type$ }
-		GT_split_get_country_import_unit_price_all = { type = $type$ }
+		GT_split_get_country_import_unit_price_all_lookup = { type = $type$ }
 		every_governorships = {
 			GT_split_update_wealth_owed_for_all_TZs_all_tradegoods = { type = $type$ }
 		}
@@ -2779,30 +2779,23 @@ GT_split_get_global_import_unit_price_tradegood = {
 	}
 }
 
-GT_split_get_country_import_unit_price_all = {
+GT_split_get_country_import_unit_price_all_lookup = {
 	every_tradegood_$type$_complex = {
-		APPLY = GT_split_get_country_import_unit_price_tradegood
+		APPLY = GT_split_get_country_import_unit_price_tradegood_lookup
 	}
 }
 
-GT_split_get_country_import_unit_price_tradegood = {
+GT_split_get_country_import_unit_price_tradegood_lookup = {
 	# Scope: Country
 	# Function: Get the unit price for importing $tradegood$ based on the market penetration of the country
+	LOOKUP_get_answer_2_params = {
+		category = country_unit_price
+		x = global_var:global_base_import_price_$tradegood$
+		y = var:country_global_market_penetration_$tradegood$
+	}
 	set_variable = {
 		name = country_unit_price_$tradegood$
-		value = global_var:global_base_import_price_$tradegood$
-	}
-	set_local_variable = {
-		name = country_import_price_div_$tradegood$
-		value = 0.5
-	}
-	change_local_variable = {
-		name = country_import_price_div_$tradegood$
-		add = var:country_global_market_penetration_$tradegood$
-	}
-	change_variable = {
-		name = country_unit_price_$tradegood$
-		divide = local_var:country_import_price_div_$tradegood$
+		value = global_var:LOOKUP_ANS
 	}
 }
 

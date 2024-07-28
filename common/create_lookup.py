@@ -64,7 +64,6 @@ class LookupBuilder:
         # Ideally there's just one function to do this that depends on the num dimensions
         # ... or otherwise some way of minimising duplication
         print("Creating " + str(self.dimensions) + " dimensional lookup table...")
-        self.lookup_table_file = open("lookup_table_output.txt", "w")
         if self.dimensions == 2:
             self.create_table_2d()
         elif self.dimensions == 3:
@@ -73,6 +72,7 @@ class LookupBuilder:
 
 
     def create_table_2d(self):
+        self.lookup_table_file = open("lookup_table_output.txt", "w")
         self.provid = 1
         self.cell_number = 1
         self.column_number = 1
@@ -90,6 +90,8 @@ class LookupBuilder:
             if self.column_number % self.max_columns_per_run == 0:
                 self.pass_no += 1
                 self.provid = 1
+                self.lookup_table_file.close()
+                self.lookup_table_file = open("lookup_table_output"+ str(self.pass_no) +".txt", "w")
             self.create_table_column() # Create the entire column of all Y values at this X value
             self.current_x += self.increment_x # Move on to the next x value, i.e. column
             self.column_number += 1

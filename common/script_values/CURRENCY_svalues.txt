@@ -28,30 +28,42 @@ CURRENCY_base_starting_reserve_accumulation_rate_silver = {
 	round = floor
 }
 
+CURRENCY_wealth_value_10_units = {
+	# Scope: Country
+	# Function: Get the amount of wealth from minting 1,000, used when adding money to the treasury
+	value = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
+	multiply = 10
+}
+
 CURRENCY_wealth_value_1k_units = {
 	# Scope: Country
 	# Function: Get the amount of wealth from minting 1,000, used when adding money to the treasury
 	value = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
-	multiply = 1000
-}
-
-CURRENCY_wealth_value_1k_units_negative = {
-	value = CURRENCY_wealth_value_1_unit
-	multiply = -1000	
+	multiply = 100
 }
 
 CURRENCY_wealth_value_10k_units = {
 	# Scope: Country
 	# Function: Get the amount of wealth from minting 1,000, used when adding money to the treasury
 	value = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
-	multiply = 10000
+	multiply = 1000
+}
+
+CURRENCY_wealth_value_10_units_negative = {
+	value = CURRENCY_wealth_value_1_unit
+	multiply = -10
+}
+
+CURRENCY_wealth_value_1k_units_negative = {
+	value = CURRENCY_wealth_value_1_unit
+	multiply = -100	
 }
 
 CURRENCY_wealth_value_10k_units_negative = {
 	# Scope: Country
 	# Function: Get the amount of wealth from minting 1,000, used when adding money to the treasury
 	value = CURRENCY_wealth_value_1_unit
-	multiply = -10000
+	multiply = -1000
 }
 
 CURRENCY_wealth_value_1_unit = {
@@ -105,7 +117,7 @@ CURRENCY_ideal_reserve_ratio_multiplier_gold = {
 	# Scope: Country
 	# Function: Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
 	# The ideal reserve ratio % (i.e. maximum reserve ratio size before the bonus caps out) is THIS divided by 100
-	value = var:gold_reserve_actual_chan3
+	value = var:gold_reserve_actual_change
 	divide = var:gold_reserve_size
 	if = {
 		limit = {
@@ -329,7 +341,8 @@ CURRENCY_essentials_buying_power = {
 	add = var:country_unit_price_pharmaceuticals
 	add = var:country_unit_price_alcohol
 
-	divide = CURRENCY_wealth_value_1_unit
+	divide = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
+	divide = 4
 }
 
 CURRENCY_private_cash_needed = {
@@ -350,4 +363,120 @@ CURRENCY_private_cash_ratio = {
 	value = CURRENCY_amt_circulated_scaled
 	divide = CURRENCY_private_cash_needed
 
+}
+
+# Minting rate
+
+CURRENCY_amt_circulated_scaled_1percent = {
+	# Scope: Country
+	# Function: Get 1 percent of the scaled amount of wealth circulated
+	value = CURRENCY_amt_circulated_scaled
+	divide = 100
+}
+
+CURRENCY_reserve_change_currency_value = {
+	# Scope: Country
+	# Function: Get the 1,000s value of currency in reserve change rates
+	value = var:gold_reserve_actual_change
+	add = var:silver_reserve_actual_change
+	divide = var:official_currency.var:units_to_the_lb
+	round = floor
+}
+
+CURRENCY_minting_rate_cap = {
+	# Scope: Country
+	# Function: Defines the maximum of new currency that can be minted every month
+	# The formula is:
+	# If paper money is NOT legal
+	# Cap = gold_reserve_actual_change + silver_reserve_actual_change
+	# + 1% of amount in circulation (for coin recycling)
+	if = {
+		limit = {
+			var:official_currency.var:paper_money_allowed = flag:false
+		}
+		value = CURRENCY_reserve_change_currency_value
+		add = CURRENCY_amt_circulated_scaled_1percent
+		add = CURRENCY_trade_wealth_income
+		round = floor
+	}
+
+	# If paper money is legal then there is no cap!
+	else = {
+		value = 99999
+	}
+}
+
+CURRENCY_minting_rate_wealth_value = {
+	# Scope: Country
+	# Function: Calculates the amount of wealth created by minting coins every month
+	value = var:CURRENCY_minting_rate
+	multiply = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
+	multiply = 100
+}
+
+# Private currency fluctuation due to trade
+
+CURRENCY_trade_wealth_income = {
+	# Scope: Country
+	# Function: Tracks the amount of mintable coming into the country from foreign currency
+	value = var:TRADE_national_income
+	# We divide by the value of wealth in 1 unit of currency, as that is what we are converting when melting down foreign currency to make our own
+	divide = CURRENCY_wealth_value_1_unit
+	# This is quarterly income, so we divide by 4 for every month
+	# Then we assume 10% of incoming foreign currency is available for melting down by minting authorities, so we divide by 10
+	divide = 400
+	round = floor
+}
+
+CURRENCY_trade_wealth_outgoing_currency_value = {
+	# Scope: Country
+	# Function: Get the amount of your currency being sent abroad in trade, which is subtracted from privately held cash every month
+	value = var:TRADE_national_expenditure
+	divide = CURRENCY_wealth_value_1_unit
+	divide = 4
+}
+
+CURRENCY_amt_circulated_balance = {
+	value = CURRENCY_trade_wealth_outgoing_currency_value
+	add = var:CURRENCY_minting_rate
+}
+
+# New wealth to governorships based on minting
+
+CURRENCY_governorship_wealth_from_minting = {
+	# Scope: Governorship
+	value = owner.CURRENCY_minting_rate_wealth_value
+	multiply = FUNC_governorship_country_pops_ratio
+}
+
+CURRENCY_governorship_wealth_due_to_upper_strata = {
+	value = CURRENCY_governorship_wealth_from_minting
+	multiply = FUNC_governorship_ratio_upper_strata
+	add = FUNC_governorship_ratio_slaves
+	add = FUNC_governorship_ratio_indentured
+}
+
+CURRENCY_governorship_wealth_due_to_middle_strata = {
+	value = CURRENCY_governorship_wealth_from_minting
+	multiply = FUNC_governorship_ratio_middle_strata
+}
+
+CURRENCY_governorship_wealth_due_to_lower_strata = {
+	value = CURRENCY_governorship_wealth_from_minting
+	multiply = FUNC_governorship_ratio_lower_strata
+}
+
+CURRENCY_governorship_wealth_due_to_proletariat = {
+	value = CURRENCY_governorship_wealth_from_minting
+	multiply = FUNC_governorship_ratio_proletariat
+}
+
+CURRENCY_governorship_wealth_due_to_indentured = {
+	value = CURRENCY_governorship_wealth_from_minting
+	multiply = FUNC_governorship_ratio_indentured
+}
+
+CURRENCY_governorship_wealth_due_to_tribesmen = {
+	value = CURRENCY_governorship_wealth_from_minting
+	multiply = FUNC_governorship_ratio_tribesmen
 }

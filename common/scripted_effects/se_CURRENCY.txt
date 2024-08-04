@@ -15,6 +15,7 @@
 		use_currency_peggers_list = false
 		currency_peggers_list = false
 		override_existing = yes
+		paper_money_allowed = false
 	}
 
 	CURRENCY_set_amounts_country = {
@@ -25,6 +26,7 @@
 		amt_national_debt_thousands = 968
 		amt_national_debt_millions = 845
 		amt_national_debt_billions = 0
+		minting_rate = 0
 	}
 
 	CURRENCY_set_country_currency = {
@@ -57,6 +59,7 @@
 		use_currency_peggers_list = false
 		currency_peggers_list = false
 		override_existing = yes
+		paper_money_allowed = false
 	}
 
 	CURRENCY_set_amounts_country = {
@@ -67,6 +70,7 @@
 		amt_national_debt_thousands = 0
 		amt_national_debt_millions = 700
 		amt_national_debt_billions = 2
+		minting_rate = 0
 	}
 
 	CURRENCY_set_country_currency = {
@@ -220,6 +224,20 @@ CURRENCY_alter_own_debt = {
 	}
 	if = {
 		limit = {
+			var:CURRENCY_national_debt_thousands < 0
+		}
+		set_variable = {
+			name = CURRENCY_national_debt_thousands
+			value = 999
+		}
+		change_variable = {
+			name = CURRENCY_national_debt_millions
+			subtract = 1
+		}
+	}
+	while = {
+		count = 9
+		limit = {
 			var:CURRENCY_national_debt_thousands > 1000
 		}
 		change_variable = {
@@ -270,6 +288,35 @@ CURRENCY_grant_country_wealth = {
 	add_treasury = local_var:wealth_to_grant
 }
 
+CURRENCY_mint_currency = {
+	# Scope: Country
+	# Function: Checks the maximum minting rate and mints the according amount of wealth
+	if = {
+		limit = {
+			var:CURRENCY_minting_rate > CURRENCY_minting_rate_cap
+		}
+		set_variable = {
+			name = CURRENCY_minting_rate
+			value = CURRENCY_minting_rate_cap
+		}
+	}
+	CURRENCY_alter_amt_circulated = {
+		thousands = CURRENCY_minting_rate
+	}
+	CURRENCY_distribute_currency_all_governorships = yes
+}
+
+CURRENCY_update_amt_circulated = {
+	# Scope: Country
+	# Called: Monthly
+	# Function: Update the amount circulated amount by adding the amount minted and the amount subtracted for trade expenses (money going abroad)
+	CURRENCY_alter_amt_circulated = {
+		thousands = CURRENCY_amt_circulated_balance
+		millions = 0
+		billions = 0
+	}
+}
+
 CURRENCY_alter_amt_circulated = {
 	# Scope: Country
 	# Function: Add to the national debt value, accounting for the thousands, millions and billions values that need to be displayed
@@ -278,6 +325,20 @@ CURRENCY_alter_amt_circulated = {
 		add = $thousands$
 	}
 	if = {
+		limit = {
+			var:CURRENCY_amt_circulated_thousands < 0
+		}
+		set_variable = {
+			name = CURRENCY_amt_circulated_thousands
+			value = 999
+		}
+		change_variable = {
+			name = CURRENCY_amt_circulated_million
+			subtract = 1
+		}
+	}
+	while = {
+		count = 9
 		limit = {
 			var:CURRENCY_amt_circulated_thousands > 1000
 		}
@@ -291,27 +352,37 @@ CURRENCY_alter_amt_circulated = {
 		}
 	}
 
-	change_variable = {
-		name = CURRENCY_amt_circulated_millions
-		add = $millions$
-	}
 	if = {
 		limit = {
-			var:CURRENCY_amt_circulated_millions > 1000
+			$millions$ > 0
 		}
 		change_variable = {
 			name = CURRENCY_amt_circulated_millions
-			subtract = 1000
+			add = $millions$
 		}
-		change_variable = {
-			name = CURRENCY_amt_circulated_billions
-			add = 1
+		if = {
+			limit = {
+				var:CURRENCY_amt_circulated_millions > 1000
+			}
+			change_variable = {
+				name = CURRENCY_amt_circulated_millions
+				subtract = 1000
+			}
+			change_variable = {
+				name = CURRENCY_amt_circulated_billions
+				add = 1
+			}
 		}
 	}
 
-	change_variable = {
-		name = CURRENCY_amt_circulated_billions
-		add = $billions$
+	if = {
+		limit = {
+			$billions$ > 0
+		}
+		change_variable = {
+			name = CURRENCY_amt_circulated_billions
+			add = $billions$
+		}
 	}
 }
 
@@ -346,6 +417,10 @@ CURRENCY_set_amounts_country = {
 		set_variable = {
 			name = CURRENCY_national_debt_billions
 			value = $amt_national_debt_billions$
+		}
+		set_variable = {
+			name = CURRENCY_minting_rate
+			value = $minting_rate$
 		}
 	}
 }
@@ -477,6 +552,7 @@ CURRENCY_create_new_currency = {
 				originator_tag = $originator_tag$
 				units_to_the_lb = $units_to_the_lb$
 				backing_type = $backing_type$
+				paper_money_allowed = $paper_money_allowed$
 			}
 
 		}
@@ -495,6 +571,7 @@ CURRENCY_create_new_currency = {
 				originator_tag = $originator_tag$
 				units_to_the_lb = $units_to_the_lb$
 				backing_type = $backing_type$
+				paper_money_allowed = $paper_money_allowed$
 			}
 		}
 	}
@@ -544,6 +621,11 @@ CURRENCY_setup_currency_info = {
 	set_variable = {
 		name = currency_name
 		value = flag:$currency_name$ # Can be localised
+	}
+
+	set_variable = {
+		name = paper_money_allowed
+		value = flag:$paper_money_allowed$
 	}
 
 	set_variable = {
@@ -741,6 +823,37 @@ CURRENCY_country_update_reserve_size = {
 				add = scope:governorship_scope.DEMAND_$reserve_material$_reserve_accumulation_rate
 			}
 		}
+	}
+}
+
+CURRENCY_distribute_currency_all_governorships = {
+	every_governorships = {
+		CURRENCY_distribute_governorship_minted_currency = yes
+	}
+}
+
+CURRENCY_distribute_governorship_minted_currency = {
+	# Scope: Governorship
+	# Function: Cache the ratio of each pop type in a province
+	change_variable = {
+		name = upper_strata_wealth
+		add = CURRENCY_governorship_wealth_due_to_upper_strata
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = CURRENCY_governorship_wealth_due_to_middle_strata
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = CURRENCY_governorship_wealth_due_to_lower_strata
+	}
+	change_variable = {
+		name = proletariat_wealth
+		add = CURRENCY_governorship_wealth_due_to_proletariat
+	}
+	change_variable = {
+		name = tribesmen_wealth
+		add = CURRENCY_governorship_wealth_due_to_tribesmen
 	}
 }
 

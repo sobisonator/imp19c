@@ -6990,3 +6990,57 @@ TRADE_governorship_cash_balance_late_artillery = {
 		add = var:final_quarterly_income_due_late_artillery
 	}
 }
+
+# Global market 
+
+TRADE_global_market_penetration_bonus = {
+	# Scope: Country
+	value = minimal_shipping_india
+	add = minimal_shipping_east_north_america
+	add = minimal_shipping_west_north_america
+	add = minimal_shipping_caribbean
+	add = minimal_shipping_west_south_america
+	add = minimal_shipping_east_south_america
+	add = minimal_shipping_south_east_asia
+	add = minimal_shipping_indo_china
+	add = minimal_shipping_yellow_sea
+	add = minimal_shipping_southern_africa
+	add = minimal_shipping_west_africa
+	add = minimal_shipping_east_africa
+	add = minimal_shipping_middle_east
+	add = minimal_shipping_western_steppe
+	add = minimal_shipping_eastern_steppe
+	add = minimal_shipping_upper_yangtzi
+	add = minimal_shipping_atlantic_seaboard
+	add = minimal_shipping_central_europe
+	add = minimal_shipping_west_mediterranean
+	add = minimal_shipping_baltic
+	add = minimal_shipping_east_europe
+	add = minimal_shipping_east_mediterranean
+}
+
+TRADE_global_chargeable_shipping_traffic = {
+	value = global_var:global_chargeable_shipping_traffic
+}
+
+TRADE_percentage_of_global_shipping = {
+	# Scope: Country
+	value = TRADE_global_market_penetration_bonus
+	divide = TRADE_global_chargeable_shipping_traffic
+}
+
+TRADE_activity_value = {
+	# Scope: Country
+	# Function: Gets the value of all imports and exports to help rate a country's trade value
+	value = var:TRADE_national_income
+	subtract = var:TRADE_national_expenditure # This is a double negative, therefore it adds.
+}
+
+TRADE_rating = {
+	# Scope: Country
+	# Function: Divide the percentage of global shipping by the number of provinces to get a rating of how good the target country's trade rating is
+	value = TRADE_percentage_of_global_shipping
+	multiply = 10
+	multiply = TRADE_activity_value
+	divide = num_of_provinces
+}

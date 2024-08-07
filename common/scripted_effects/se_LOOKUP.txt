@@ -1,0 +1,242 @@
+﻿# Methods for finding solutions to common complex problems by lookup
+
+# Answers to problems are stored in provinces
+
+LOOKUP_find_sub1_2_decimal_places = {
+	# Scope: Any
+	# Function: Find a lookup index where the index value is within 2 decimal places of the given value
+	# Used to pass sub-1 values as index values, within 2 decimal points of accuracy, otherwise our tables would grow far too big
+	random_LOOKUP_cell_$category$ = {
+		limit = {
+			$input_var_x$ > LOOKUP_LO_x_$category$
+			$input_var_x$ < LOOKUP_HI_x_$category$
+
+			$input_var_y$ > LOOKUP_LO_y_$category$
+			$input_var_y$ < LOOKUP_HI_y_$category$
+		}
+		save_scope_as = LOOKUP_SCOPE
+	}
+}
+
+LOOKUP_get_random_answer = {
+	random_province = {
+		add_treasury = 100
+	}
+}
+
+LOOKUP_get_answer_2_params = {
+	# Scope: Any
+	# Function: Get an answer from a lookup table given a category and 2 parameters
+	random_LOOKUP_cell_$category$ = {
+		limit = {
+			AND = {
+				$x$ >= LOOKUP_LO_x_$category$
+				$x$ < LOOKUP_HI_x_$category$
+				$y$ >= LOOKUP_LO_y_$category$
+				$y$ > LOOKUP_HI_y_$category$
+			}
+		}
+		set_global_variable = {
+			name = LOOKUP_ANS
+			value = var:LOOKUP_ANS_$category$
+		}
+	}
+}
+
+LOOKUP_big_get_answer_2_params = {
+	# Scope: Any
+	# Function: Get an answer from a lookup table given a category and 2 parameters
+	random_LOOKUP_cell_$category$ = {
+		limit = {
+			AND = {
+				$x$ >= LOOKUP_LO_x_$category$
+				$x$ < LOOKUP_HI_x_$category$
+				$y$ >= LOOKUP_LO_y_$category$
+				$y$ > LOOKUP_HI_y_$category$
+			}
+		}
+		set_global_variable = {
+			name = LOOKUP_ANS
+			value = var:LOOKUP_ANS_$category$
+		}
+	}
+}
+
+LOOKUP_create_cell = {
+	# Scope: Any
+	# Function: Set up the variables in a province needed to create a lookup cell
+	set_variable = LOOKUP_IS_CELL
+
+	set_variable = {
+		name = LOOKUP_LO_x_$category$
+		value = $x_lo$
+	}
+	set_variable = {
+		name = LOOKUP_HI_x_$category$
+		value = $x_hi$
+	}
+	set_variable = {
+		name = LOOKUP_LO_y_$category$
+		value = $y_lo$
+	}
+	set_variable = {
+		name = LOOKUP_HI_y_$category$
+		value = $y_hi$
+	}
+	set_variable = {
+		name = LOOKUP_ANS_$category$
+		value = $ans$
+	}
+}
+
+LOOKUP_create_cell_big = {
+	# Scope: Any
+	# Function: Set up the variables in a province needed to create a lookup cell
+	# But for BIG tables i.e. those with more than 13,281 cells
+	# Where it's necessary to store multiple lookup references per cell
+	# Supports up to 2 extra passes, i.e. up to 39,843 cells
+	set_variable = LOOKUP_IS_CELL
+
+	if = {
+		limit = {
+			NOT = {
+				has_variable = LOOKUP_x_pass_1_$category$
+			}
+		}
+		# Create the x indices at which the loop back round to province 1 and check the values from the next pass of the big table
+		set_variable = {
+			name = LOOKUP_x_pass_1_$category$
+			value = $pass_1_x_index$
+		}
+		set_variable = {
+			name = LOOKUP_x_pass_2_$category$
+			value = $pass_2_x_index$
+		}
+	}
+	set_variable = {
+		name = LOOKUP_LO_x_$pass_no$_$category$
+		value = $x_lo$
+	}
+	set_variable = {
+		name = LOOKUP_HI_x_$pass_no$_$category$
+		value = $x_hi$
+	}
+	set_variable = {
+		name = LOOKUP_LO_y_$pass_no$_$category$
+		value = $y_lo$
+	}
+	set_variable = {
+		name = LOOKUP_HI_y_$pass_no$_$category$
+		value = $y_hi$
+	}
+	set_variable = {
+		name = LOOKUP_ANS_$pass_no$_$category$
+		value = $ans$
+	}
+}
+
+LOOKUP_create_table = {
+	# Scope: Any
+	# Function: Create a lookup table
+	# $category$ = the category of problem you want to solve
+	# $increment$ = the amount by which to increase the numbers each step
+
+	set_local_variable = {
+		name = current_x
+		value = $start_x$
+	}
+	set_local_variable = {
+		name = current_y
+		value = $start_y$
+	}
+
+	set_local_variable = {
+		name = increment
+		value = $increment$
+	}
+
+	while = {
+		OR = {
+			local_var:current_x < $max_x$
+			local_var:current_y < $max_y$
+		}
+		every_province = {
+			set_variable = LOOKUP_is_cell_$category$
+
+			set_variable = {
+				name = LOOKUP_LO
+				value = local_var:current_y
+			}
+			set_variable = {
+				name = LOOKUP_HI
+				value = local_var:cu
+			}
+		}
+	}
+}
+
+LOOKUP_binary_search_answer_sub1 = {
+	# WiP
+	if = {
+		limit = {
+			var:y > 0.50
+		}
+		if = {
+			limit = {
+				var:y > 0.75
+			}
+			if = {
+				limit = {
+					var:y > 0.83
+				}
+				if = {
+					limit = {
+						var:y > 0.92
+					}
+					if = {
+						limit = {
+							var:y > 0.96
+						}
+						if = {
+							limit = {
+								var:y > 0.98
+							}
+							if = {
+								limit = {
+									var:y > 0.99
+								}
+								# var:y = 1
+							}
+							else = {
+								# var:y = 0.99
+							}
+						}
+						else = {
+							# var:y = 0.97
+						}
+					}
+					else_if = {
+						limit = {
+							var:y < 0.96
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						var:y < 0.92
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					var:y < 0.83
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				var:y < 0.75
+			}
+		}
+	}
+}

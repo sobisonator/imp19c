@@ -232,16 +232,6 @@ base_window = {
 						datacontext = "[DiplomaticView.GetHorde.GetLeader]"
 					}
 				}
-				#cpt_button = {
-				#	parentanchor = right|vcenter
-				#	size = { 50 77 }
-				#	position = { -165 20 }
-				#	block "Context" 
-				#	{
-				#		visible = "[DiplomaticView.GetTargetCountry.IsBarbarian]"
-				#		datacontext = "[DiplomaticView.GetTargetCountry.GetLeader]"
-				#	}
-				#}
 				cpt_button = {
 					parentanchor = right|vcenter
 					size = { 50 77 }
@@ -252,6 +242,72 @@ base_window = {
 						#visible = "[DiplomaticView.GetTargetCountry.MakeScope.Var('monarch_character').IsSet]"
 						visible = "[And(DiplomaticView.GetTargetCountry.MakeScope.Var('monarch_character').IsSet,Not(And(DiplomaticView.GetTargetCountry.MakeScope.Var('monarch_character').GetCharacter.IsRuler,EqualTo_string(DiplomaticView.GetTargetCountry.MakeScope.Var('monarch_character').GetCharacter.GetEmployer.GetTag,DiplomaticView.GetTargetCountry.GetTag))))]"
 					}
+				}
+				widget = {
+					name = "civil_war_pie"
+					size = { 42 42 }
+					parentanchor = left|vcenter
+					position = { 122 44 }
+					visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+					tooltip = "[DiplomaticView.GetTargetCountry.GetPossibleCivilWarTooltip]"
+					tooltip_offset = { 20 20 }
+					parentanchor = center
+
+					icon = {
+						texture = "gfx/interface/pie_charts/pie_chart_alpha_60_shadow.dds"
+						size = { 42 42 }
+						parentanchor = center
+						alpha = 0.5
+					}
+					icon = {
+						texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
+						size = { 42 42 }
+						framesize = { 100 100 }
+						frame = 3
+						parentanchor = center
+						modify_texture = {
+							texture = "gfx/interface/pie_charts/pie_chart_alpha_60.dds"
+							blend_mode = alphamultiply
+						}
+					}
+					icon = {
+						size = { 30 30 }
+						texture = "gfx/interface/base_parts/background_texture.dds"
+						parentanchor = center
+						alpha = 0.5
+						modify_texture = {
+							texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
+							blend_mode = alphamultiply
+						}
+					}
+					progresspie = {
+						name = "progress"
+						parentanchor = center
+						size = { 42 42 }
+						texture = "gfx/interface/pie_charts/pie_chart_alpha_60.dds"
+						framesize = { 68 68 }
+						frame = 2
+						value = "[FixedPointToFloat( Multiply_CFixedPoint( DiplomaticView.GetTargetCountry.GetProgressTowardsCivilWar, '(CFixedPoint)0.01' ) )]"
+						icon = {
+							size = { 32 32 }
+							texture = "gfx/interface/icons/shared_icons/civil_war_active_inactive.dds"
+							frame = "[DiplomaticView.GetTargetCountry.GetCivilWarFrame]"
+							framesize = { 50 50 }
+							parentanchor = center
+							modify_texture = {
+								texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
+								blend_mode = alphamultiply
+							}
+						}
+					}
+				}
+				button_round = {
+					size = { 40 40 }
+					parentanchor = right|vcenter
+					position = { -122 44 }
+					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/population.dds" }
+					blockoverride "On_click" { onclick = "[DiplomaticView.ViewCharacters]" }
+					tooltip = "SHOW_THEIR_CHARACTERS"
 				}
 			}
 		}
@@ -954,6 +1010,51 @@ base_window = {
 								
 									vbox = {
 										vbox = {
+											name = "trade_agreements"
+											layoutpolicy_horizontal = expanding 
+											layoutpolicy_vertical = shrinking
+											margin_right = 4
+												overlappingitembox = {
+													#using = NoninteractableBG
+													#blockoverride "Margins"
+													#{
+													#	margin_right = -8
+													#	margin_bottom = -4
+													#}
+													margin_right = 14
+													datamodel = "[DiplomaticView.GetTargetCountry.MakeScope.GetList('list_of_trade_partners_all_categories')]"
+													layoutpolicy_horizontal = expanding
+													layoutpolicy_vertical = fixed
+													size = { 0 36 }
+													spacing = 2
+													margin_left = 38
+													icon = {
+														texture = "gfx/interface/icons/modifiers/commerce_value.dds"
+														tooltip = "Test"
+														position = { 0 -1 }
+														size = { 34 34 }
+													}
+													item = {
+														country_flag = {
+															tooltip = "TRADE_AGREEMENT_TT"
+															datacontext = "[Scope.GetCountry]"
+														
+															blockoverride "flag"
+															{
+																texture = "[Scope.GetCountry.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+																frame = "[Scope.GetCountry.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+																framesize = { 56 56 }
+															}
+														
+															blockoverride "size"
+															{
+																size = { 30 30 }
+															}
+														}
+													}
+												}
+										}
+										vbox = {
 											layoutpolicy_horizontal = expanding 
 											layoutpolicy_vertical = shrinking
 											datamodel = "[DiplomaticView.GetDiplomaticRelations]"
@@ -1502,48 +1603,6 @@ base_window = {
 										}
 
 										widget = { size = { 0 4 } } # Adds spacing between diplo buttons
-
-										diplomacy_action_button = {
-											size = { 0 22 }
-											layoutpolicy_horizontal = expanding
-											margin = { 14 0 }
-											margin_right = 0
-
-											datacontext = "[GetScriptedGui('trade_agreement_food_goods_button')]"
-											parentanchor = hcenter
-
-											enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-
-											blockoverride "On_click"
-											{
-												enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												onclick = "[ScriptedGui.Execute(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											}
-
-											blockoverride "Left_text" 
-											{ 
-												margin_left = 24
-												text = "[Select_CString( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'Cancel Trade Agreement: #T Food', 'Trade Agreement: #T Food' )]"
-											}
-											
-											blockoverride "Right_text"
-											{
-												text = "Test"
-												using = Negative_FontColor 
-												tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											}	
-											
-											blockoverride "Icon" 
-											{
-												framesize = { 46 46 }
-												#visible = "[DiplomaticActionItem.RequireAcceptance]"
-												texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
-												frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
-												tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											}	
-
-											tooltip =  "[SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_title', 'offer_trade_agreement_all_tt_title' )]#T [DiplomaticView.GetTargetCountry.GetName] #! [SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_food_tt_body', 'offer_trade_agreement_food_tt_body' )]"
-										}
 
 										widget = { size = { 0 4 } } # Adds spacing between diplo buttons
 									}

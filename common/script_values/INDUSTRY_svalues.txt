@@ -187,17 +187,17 @@ INDUSTRY_production_rate_clothing = {
 	value = 70
 }
 
+production_bonus_clothing = {
+	# Scope: Country
+	# Function: Stores the multiplier to mechanised industrial production
+	value = 1
+}
+
 INDUSTRY_production_clothing_base = {
 	value = INDUSTRY_production_rate_clothing
 	multiply = INDUSTRY_clothing_factories
-	if = {
-		limit = {
-			owner = {
-				has_variable = production_bonus_clothing
-			}
-		}
-		multiply = owner.var:production_bonus_clothing
-	}
+	multiply = owner.production_bonus_clothing
+
 }
 
 INDUSTRY_production_clothing = {
@@ -311,18 +311,18 @@ INDUSTRY_production_rate_luxury_clothing = {
 	value = 45
 }
 
+production_bonus_luxury_clothing = {
+	# Scope: Country
+	# Function: Stores the multiplier to mechanised industrial production
+	value = 1
+}
+
 INDUSTRY_production_luxury_clothing_base = {
 	# Base output of all factories
 	value = INDUSTRY_production_rate_luxury_clothing
 	multiply = INDUSTRY_luxury_clothing_factories
-	if = {
-		limit = {
-			owner = {
-				has_variable = production_bonus_luxury_clothing
-			}
-		}
-		multiply = owner.var:production_bonus_luxury_clothing
-	}
+	multiply = owner.production_bonus_luxury_clothing
+
 }
 
 INDUSTRY_production_luxury_clothing = {
@@ -569,18 +569,18 @@ INDUSTRY_production_rate_bronze = {
 	value = 30
 }
 
+production_bonus_bronze = {
+	# Scope: Country
+	# Function: Stores the multiplier to mechanised industrial production
+	value = 1
+}
+
 INDUSTRY_production_bronze_base = {
 	# Base output of all factories
 	value = INDUSTRY_production_rate_bronze
 	multiply = INDUSTRY_bronze_factories
-	if = {
-		limit = {
-			owner = {
-				has_variable = production_bonus_bronze
-			}
-		}
-		multiply = owner.var:production_bonus_bronze
-	}
+	multiply = owner.production_bonus_bronze
+
 }
 
 INDUSTRY_production_bronze = {
@@ -702,18 +702,18 @@ INDUSTRY_production_rate_machine_parts = {
 	value = 45
 }
 
+production_bonus_machine_parts = {
+	# Scope: Country
+	# Function: Stores the multiplier to mechanised industrial production
+	value = 1
+}
+
 INDUSTRY_production_machine_parts_base = {
 	# Base output of all factories
 	value = INDUSTRY_production_rate_machine_parts
 	multiply = INDUSTRY_machine_parts_factories
-	if = {
-		limit = {
-			owner = {
-				has_variable = production_bonus_machine_parts
-			}
-		}
-		multiply = owner.var:production_bonus_machine_parts
-	}
+	multiply = owner.production_bonus_machine_parts
+
 }
 
 INDUSTRY_production_machine_parts = {
@@ -987,20 +987,20 @@ INDUSTRY_demand_machine_parts_rubber = {
 
 ## NAVAL SUPPLIES
 INDUSTRY_production_rate_naval_supplies = {
-	value = 35
+	value = 100
+}
+
+production_bonus_naval_supplies = {
+	# Scope: Country
+	# Function: Stores the multiplier to mechanised industrial production
+	value = 1
 }
 
 INDUSTRY_production_naval_supplies_base = {
 	value = INDUSTRY_production_rate_naval_supplies
 	multiply = INDUSTRY_naval_supplies_factories
-	if = {
-		limit = {
-			owner = {
-				has_variable = production_bonus_naval_supplies
-			}
-		}
-		multiply = owner.var:production_bonus_naval_supplies
-	}
+	multiply = owner.production_bonus_naval_supplies
+
 }
 
 INDUSTRY_production_naval_supplies = {
@@ -1025,7 +1025,7 @@ INDUSTRY_production_naval_supplies_efficiency = {
 
 # Ingredients
 
-# Textile fibres
+# Industrial fibres
 
 INDUSTRY_malus_naval_supplies_production_industrial_fibres = {
 	value = 0
@@ -1044,7 +1044,7 @@ INDUSTRY_demand_importance_naval_supplies_industrial_fibres = {
 }
 
 INDUSTRY_base_demand_naval_supplies_industrial_fibres = {
-	value = 20
+	value = 40
 }
 
 INDUSTRY_demand_naval_supplies_industrial_fibres = {
@@ -1071,7 +1071,7 @@ INDUSTRY_demand_importance_naval_supplies_copper = {
 }
 
 INDUSTRY_base_demand_naval_supplies_copper = {
-	value = 20
+	value = 35
 }
 
 INDUSTRY_demand_naval_supplies_copper = {
@@ -1098,7 +1098,7 @@ INDUSTRY_demand_importance_naval_supplies_bronze = {
 }
 
 INDUSTRY_base_demand_naval_supplies_bronze = {
-	value = 10
+	value = 20
 }
 
 INDUSTRY_demand_naval_supplies_bronze = {
@@ -1125,10 +1125,320 @@ INDUSTRY_demand_importance_naval_supplies_steel = {
 }
 
 INDUSTRY_base_demand_naval_supplies_steel = {
-	value = 5
+	value = 15
 }
 
 INDUSTRY_demand_naval_supplies_steel = {
 	value = INDUSTRY_naval_supplies_factories
 	multiply = INDUSTRY_base_demand_naval_supplies_steel
+}
+
+## ALCOHOL
+INDUSTRY_production_rate_alcohol = {
+	value = 70
+}
+
+production_bonus_alcohol = {
+	# Scope: Country
+	# Function: Stores the multiplier to mechanised industrial production
+	value = 1
+}
+
+INDUSTRY_production_alcohol_base = {
+	value = INDUSTRY_production_rate_alcohol
+	multiply = INDUSTRY_alcohol_factories
+	multiply = owner.production_bonus_alcohol
+}
+
+INDUSTRY_production_alcohol = {
+	# Applies modifiers from supply
+	value = INDUSTRY_production_alcohol_base
+	multiply = INDUSTRY_production_alcohol_multiplier
+}
+
+INDUSTRY_production_alcohol_multiplier = {
+	value = 1
+	add = INDUSTRY_malus_alcohol_production_glass # bottling
+	add = INDUSTRY_malus_alcohol_production_grain
+	add = INDUSTRY_malus_alcohol_production_temperate_fruit
+	add = INDUSTRY_malus_alcohol_production_sugar
+	add = INDUSTRY_malus_alcohol_production_vegetables
+	add = INDUSTRY_malus_alcohol_production_copper # brewing equipment
+	add = INDUSTRY_malus_alcohol_production_coal # heating
+	min = 0
+}
+
+INDUSTRY_production_alcohol_efficiency = {
+	value = INDUSTRY_production_alcohol
+	divide = INDUSTRY_production_alcohol_base
+}
+
+# Ingredients
+
+# Fruit
+
+INDUSTRY_malus_alcohol_production_temperate_fruit = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = shortage_temperate_fruit
+		}
+		subtract = var:shortage_temperate_fruit
+		multiply = INDUSTRY_demand_importance_alcohol_temperate_fruit
+	}
+}
+
+INDUSTRY_demand_importance_alcohol_temperate_fruit = {
+	# As a percentage of the crucial ingredients
+	value = 0.15
+}
+
+INDUSTRY_base_demand_alcohol_temperate_fruit = {
+	value = 10
+}
+
+INDUSTRY_demand_alcohol_temperate_fruit = {
+	value = INDUSTRY_alcohol_factories
+	multiply = INDUSTRY_base_demand_alcohol_temperate_fruit
+}
+
+# Grain
+
+INDUSTRY_malus_alcohol_production_grain = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = shortage_grain
+		}
+		subtract = var:shortage_grain
+		multiply = INDUSTRY_demand_importance_alcohol_grain
+	}
+}
+
+INDUSTRY_demand_importance_alcohol_grain = {
+	# As a percentage of the crucial ingredients
+	value = 0.5
+}
+
+INDUSTRY_base_demand_alcohol_grain = {
+	value = 20
+}
+
+INDUSTRY_demand_alcohol_grain = {
+	value = INDUSTRY_alcohol_factories
+	multiply = INDUSTRY_base_demand_alcohol_grain
+}
+
+# Glass
+
+INDUSTRY_malus_alcohol_production_glass = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = shortage_glass
+		}
+		subtract = var:shortage_glass
+		multiply = INDUSTRY_demand_importance_alcohol_glass
+	}
+}
+
+INDUSTRY_demand_importance_alcohol_glass = {
+	# As a percentage of the crucial ingredients
+	value = 0.5
+}
+
+INDUSTRY_base_demand_alcohol_glass = {
+	value = 10
+}
+
+INDUSTRY_demand_alcohol_glass = {
+	value = INDUSTRY_alcohol_factories
+	multiply = INDUSTRY_base_demand_alcohol_glass
+}
+
+# Copper
+
+INDUSTRY_malus_alcohol_production_copper = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = shortage_copper
+		}
+		subtract = var:shortage_copper
+		multiply = INDUSTRY_demand_importance_alcohol_copper
+	}
+}
+
+INDUSTRY_demand_importance_alcohol_copper = {
+	# As a percentage of the crucial ingredients
+	value = 0.75
+}
+
+INDUSTRY_base_demand_alcohol_copper = {
+	value = 4
+}
+
+INDUSTRY_demand_alcohol_copper = {
+	value = INDUSTRY_alcohol_factories
+	multiply = INDUSTRY_base_demand_alcohol_copper
+}
+
+# Sugar
+
+INDUSTRY_malus_alcohol_production_sugar = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = shortage_sugar
+		}
+		subtract = var:shortage_sugar
+		multiply = INDUSTRY_demand_importance_alcohol_sugar
+	}
+}
+
+INDUSTRY_demand_importance_alcohol_sugar = {
+	# As a percentage of the crucial ingredients
+	value = 0.5
+}
+
+INDUSTRY_base_demand_alcohol_sugar = {
+	value = 5
+}
+
+INDUSTRY_demand_alcohol_sugar = {
+	value = INDUSTRY_alcohol_factories
+	multiply = INDUSTRY_base_demand_alcohol_sugar
+}
+
+# Vegetables
+
+INDUSTRY_malus_alcohol_production_vegetables = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = shortage_vegetables
+		}
+		subtract = var:shortage_vegetables
+		multiply = INDUSTRY_demand_importance_alcohol_vegetables
+	}
+}
+
+INDUSTRY_demand_importance_alcohol_vegetables = {
+	# As a percentage of the crucial ingredients
+	value = 0.15
+}
+
+INDUSTRY_base_demand_alcohol_vegetables = {
+	value = 5
+}
+
+INDUSTRY_demand_alcohol_vegetables = {
+	value = INDUSTRY_alcohol_factories
+	multiply = INDUSTRY_base_demand_alcohol_vegetables
+}
+
+# coal
+
+INDUSTRY_malus_alcohol_production_coal = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = shortage_coal
+		}
+		subtract = var:shortage_coal
+		multiply = INDUSTRY_demand_importance_alcohol_coal
+	}
+}
+
+INDUSTRY_demand_importance_alcohol_coal = {
+	# As a percentage of the crucial ingredients
+	value = 0.75
+}
+
+INDUSTRY_base_demand_alcohol_coal = {
+	value = 4
+}
+
+INDUSTRY_demand_alcohol_coal = {
+	value = INDUSTRY_alcohol_factories
+	multiply = INDUSTRY_base_demand_alcohol_coal
+}
+
+## GLASS
+INDUSTRY_production_rate_glass = {
+	value = 35
+}
+
+production_bonus_glass = {
+	# Scope: Country
+	# Function: Stores the multiplier to mechanised industrial production
+	value = 1
+}
+
+INDUSTRY_production_glass_base = {
+	value = INDUSTRY_production_rate_glass
+	multiply = INDUSTRY_glass_factories
+	multiply = owner.production_bonus_glass
+
+}
+
+INDUSTRY_production_glass = {
+	# Applies modifiers from supply
+	value = INDUSTRY_production_glass_base
+	multiply = INDUSTRY_production_glass_multiplier
+}
+
+INDUSTRY_production_glass_multiplier = {
+	value = 1
+	add = INDUSTRY_malus_glass_production_coal
+	add = INDUSTRY_malus_glass_production_stone
+	add = INDUSTRY_malus_glass_production_lead
+	min = 0
+}
+
+INDUSTRY_production_glass_efficiency = {
+	value = INDUSTRY_production_glass
+	divide = INDUSTRY_production_glass_base
+}
+
+# Ingredients
+
+# Industrial fibres
+
+INDUSTRY_malus_glass_production_coal = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = shortage_coal
+		}
+		subtract = var:shortage_coal
+		multiply = INDUSTRY_demand_importance_glass_coal
+	}
+}
+
+INDUSTRY_demand_importance_glass_coal = {
+	# As a percentage of the crucial ingredients
+	value = 0.75
+}
+
+INDUSTRY_base_demand_glass_coal = {
+	value = 40
+}
+
+INDUSTRY_demand_glass_coal = {
+	value = INDUSTRY_glass_factories
+	multiply = INDUSTRY_base_demand_glass_coal
+}
+
+# Copper
+
+INDUSTRY_malus_glass_production_copper = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = shortage_copper
+		}
+		subtract = var:shortage_copper
+		multiply = INDUSTRY_demand_importance_glass_copper
+	}
 }

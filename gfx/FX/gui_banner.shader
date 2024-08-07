@@ -78,7 +78,7 @@ VertexShader =
 
 			// CONSTANT BUFFER VALUES
 			float SmallWaveScale = 1.5;
-			float WaveScale = 1.5;
+			float WaveScale = 0.5;
 			float AnimationSpeed = 1.4;
 
 			float AnimSeed = UV.x;

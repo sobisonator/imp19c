@@ -1,0 +1,234 @@
+@mmi_width = 38
+@mmi_height = 32
+
+base_window = {
+	gfxtype = windowgfx
+	name = "select_map_modes"
+	position = { -370 1 }
+	parentanchor = bottom|right
+	widgetanchor = bottom|right
+	size = { 400 287 }
+	layer = top
+	blockoverride "BackgroundGradient" { visible = no }
+
+	secondary_header = {
+		size = { 100% 32 }
+		position = { 0 3 }
+		
+		blockoverride "Title_text" { text = "SELECT_MAPMODES_HEADER" }
+		blockoverride "White_buttons" 
+		{
+			button_close = {
+				onclick = "[SelectMapModesView.OnClose]"
+				tooltip = "CLOSE"
+				shortcut = "close_window"
+				alwaystransparent = no
+			}
+		}
+	}
+
+	textbox = {
+		name = "Drag_Instructions"
+		position = { 12 15 }
+		size = { 388 60 }
+		multiline = yes								
+		align = left
+		text = "DRAG_DROP_TOOLTIP"
+		elide = right
+		using = BaseFontS
+		using = Black_FontColor
+	}
+	
+	scrollarea = {
+			position = { 10 70 }
+			size = { 378 204 }
+			scrollbarpolicy_horizontal = always_off
+			
+			using = VerticalScrollAreaCutOff
+
+			scrollbar_vertical = {
+				using = VerticalScrollBar
+			}
+			
+			scrollwidget = {
+				dynamicgridbox = {
+					position = { 8 2 }
+					size = { 340 323 }
+					datamodel = "[SelectMapModesView.GetMapModes]"
+					
+					item = {
+						widget = {
+							size = { 340 36 }
+							
+							list_button = {
+								size = { 314 34 }
+								position = { 40 0 }
+								parentanchor = vcenter
+								down = "[IsMapMode( SelectMapModesGlue.GetMapModeKey )]"
+								onclick = "[SelectMapModesGlue.OnClick]"
+								
+								#onmousehierarchyenter = "[PdxGuiWidget.FindChild('doot').Show]"
+								#onmousehierarchyleave = "[PdxGuiWidget.FindChild('doot').Hide]"
+								
+								#icon = {
+								#	name = "doot"
+								#	position = { 44 0 }
+								#	alpha = 0.3
+								#	texture = "gfx/interface/minimap/mapmode_highlight.dds"
+								#	visible = no
+								#	size = { 320 32 }
+								#}
+								
+							}
+							
+							icon = {
+								size = { @mmi_width @mmi_height }
+								using = button_tiled_texture
+								framesize = { 200 200 }
+								frame = 2
+								using = border_slightly_torn_alpha
+								parentanchor = vcenter
+							}
+							
+							dragdropicon = {
+								position = { 0 0 }
+								parentanchor = vcenter
+								size = { @mmi_width 29 }
+								texture = "[SelectMapModesGlue.GetMapModeIcon]"
+								framesize = { 86 64 }
+								dragdropid = "map_mode" 
+								dragdropargs = "[SelectMapModesGlue.GetMapModeKey]"
+								tooltip = "[SelectMapModesGlue.GetMapModeDesc]"
+								using = tooltip_es
+							}
+							
+							#icon = {
+							#	visible = "[IsMapMode( SelectMapModesGlue.GetMapModeKey )]"
+							#	position = { 44 0 }
+							#	alpha = 0.8
+							#	size = { 320 32 }
+							#	texture = "gfx/interface/minimap/mapmode_highlight.dds"
+							#}
+						
+							textbox = {
+								position = { 52 -2 }
+								autoresize = yes
+								size = { 200 30 }
+								parentanchor = vcenter
+								text = "[SelectMapModesGlue.GetMapModeName]"
+								using = BaseFontM
+								using = Black_FontColor
+							}
+						}
+					}
+				}
+			}
+		}
+	
+	#scrollarea = {
+	#	position = { 10 76 }
+	#	size = { 388 211 }
+	#	scrollbarpolicy_horizontal = always_off
+	#	
+	#	using = VerticalScrollAreaCutOff
+	#	
+	#	scrollbar_vertical = {
+	#		using = VerticalScrollBar
+	#		blockoverride "ScrollBar_offset"
+	#		{
+	#			size = { 0 4 }
+	#		}
+	#	}
+	#	
+	#	scrollwidget = {
+	#		dynamicgridbox = {
+	#			position = { 10 1 }
+	#			size = { 1080 694 }
+	#			datamodel = "[SelectMapModesView.GetMapModes]"
+	#			
+	#			item = {
+	#				widget = {
+	#					size = { 300 40 }
+	#					
+	#					button = {
+	#						size = { 300 40 }
+	#						position = { 0 0 }
+	#						onclick = "[SelectMapModesGlue.OnClick]"
+	#						
+	#						
+	#						onmousehierarchyenter = "[PdxGuiWidget.FindChild('doot').Show]"
+	#						onmousehierarchyleave = "[PdxGuiWidget.FindChild('doot').Hide]"
+	#						
+	#						icon = {
+	#							name = "doot"
+	#							position = { 44 2 }
+	#							alpha = 0.3
+	#							texture = "gfx/interface/minimap/mapmode_highlight.dds"
+	#							visible = no
+	#						}
+	#						
+	#					}
+	#					
+	#					dragdropicon = {
+	#						position = { 0 0 }
+	#						#size = { 78 78 }
+	#						size = { 45 37 }
+	#						texture = "[SelectMapModesGlue.GetMapModeIcon]"
+	#						dragdropid = "map_mode";
+	#						dragdropargs = "[SelectMapModesGlue.GetMapModeKey]"
+	#						framesize = { 45 37 }
+	#						tooltip = "[SelectMapModesGlue.GetMapModeDesc]"
+	#					}
+	#
+	#					#widget = {
+	#					#	visible = "[Not(SelectMapModesGlue.IsSelected)]"
+	#					#	position = { 78 0 }
+	#					#	size = { 794 84 }
+	#					#	using = BackgroundMapModeText
+	#					#}
+	#					
+	#					icon = {
+	#						visible = "[IsMapMode( SelectMapModesGlue.GetMapModeKey )]"
+	#						position = { 44 2 }
+	#						alpha = 0.8
+	#						#size = { 794 84 }
+	#						texture = "gfx/interface/minimap/mapmode_highlight.dds"
+	#					}
+	#
+	#					#textbox = {
+	#					#	position = { 88 10 }
+	#					#	size = { 320 48 }
+	#					#
+	#					#	multiline = yes								
+	#					#	parentanchor = top|left
+	#					#	align = left|top
+	#					#	text = "[SelectMapModesGlue.GetMapModeName]"
+	#					#	elide = right
+	#					#	tooltip = "[SelectMapModesGlue.GetMapModeDesc]"
+	#					#	
+	#					#	using = GoldenFontMB
+	#					#}
+	#				
+	#					textbox = {
+	#						position = { 52 16 }
+	#						#size = { 320 48 }
+	#
+	#						text = "[SelectMapModesGlue.GetMapModeName]"
+	#						
+	#						using = MarbleButtonFontM
+	#					}
+	#				}
+	#			}
+	#		}
+	#	}
+	#}
+	
+	state = {
+		name = close_mapmode_selector
+		
+		on_finish = "[SelectMapModesView.OnClose]"
+		
+	}
+	
+}
+

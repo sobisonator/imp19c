@@ -404,7 +404,7 @@ CURRENCY_private_cash_ratio = {
 	# Function: Get the amount of private currency and divide it by the amount needed to support cost of living. If it's too low, the country will experience deflation as there is not enough money circulating
 	# This also sets the demand for private cash, and will cause pops to create new cash from commerce districts independently
 	# The government can set a rate at which private cash is created or recalled quarterly
-	value = CURRENCY_amt_circulated_scaled
+	value = CURRENCY_amt_circulated_scaled_10x
 	divide = CURRENCY_private_cash_needed
 
 }
@@ -418,12 +418,27 @@ CURRENCY_amt_circulated_scaled_1percent = {
 	divide = 100
 }
 
+CURRENCY_amt_circulated_scaled_10percent = {
+	# Scope: Country
+	# Function: Get 1 percent of the scaled amount of wealth circulated
+	value = CURRENCY_amt_circulated_scaled
+	divide = 10
+}
+
+CURRENCY_amt_circulated_scaled_10x = {
+	# Scope: Country
+	# Function: Get 1 percent of the scaled amount of wealth circulated
+	value = CURRENCY_amt_circulated_scaled
+	multiply = 10
+}
+
 CURRENCY_reserve_change_currency_value = {
 	# Scope: Country
 	# Function: Get the 1,000s value of currency in reserve change rates
 	value = var:gold_reserve_actual_change
 	add = var:silver_reserve_actual_change
-	divide = var:official_currency.var:units_to_the_lb
+	divide = 100
+	multiply = var:official_currency.var:units_to_the_lb
 	round = floor
 }
 
@@ -439,7 +454,7 @@ CURRENCY_minting_rate_cap = {
 			var:official_currency.var:paper_money_allowed = flag:false
 		}
 		value = CURRENCY_reserve_change_currency_value
-		add = CURRENCY_amt_circulated_scaled_1percent
+		add = CURRENCY_amt_circulated_scaled_10percent
 		add = CURRENCY_trade_wealth_income
 		round = floor
 	}

@@ -1,4 +1,22 @@
-﻿CURRENCY_base_starting_reserve_gold = {
+﻿CURRENCY_base_starting_amt_circulated_thousands = {
+	# Scope: Country
+	# Function: Get a value proportionate to the country's economy to start off the size of their gold reserves
+	value = country_population
+	multiply = 1
+	round = floor
+}
+
+CURRENCY_gdp_10percent = {
+	value = WEALTH_total_private_moveable_wealth
+	divide = 10
+}
+
+CURRENCY_debt_to_GDP_ratio = {
+	value = CURRENCY_national_debt_scaled_wealth_value_millions
+	divide = WEALTH_total_private_moveable_wealth_scaled
+}
+
+CURRENCY_base_starting_reserve_gold = {
 	# Scope: Country
 	# Function: Get a value proportionate to the country's economy to start off the size of their gold reserves
 	value = country_population
@@ -39,14 +57,29 @@ CURRENCY_wealth_value_1k_units = {
 	# Scope: Country
 	# Function: Get the amount of wealth from minting 1,000, used when adding money to the treasury
 	value = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
-	multiply = 100
+	multiply = 1000
 }
 
 CURRENCY_wealth_value_10k_units = {
 	# Scope: Country
 	# Function: Get the amount of wealth from minting 1,000, used when adding money to the treasury
 	value = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
+	multiply = 10000
+}
+
+CURRENCY_wealth_value_1k_units_basic = {
+	value = CURRENCY_wealth_value_1_unit
 	multiply = 1000
+}
+
+CURRENCY_wealth_value_100_units_basic = {
+	value = CURRENCY_wealth_value_1_unit
+	multiply = 100
+}
+
+CURRENCY_wealth_value_10_units_basic = {
+	value = CURRENCY_wealth_value_1_unit
+	multiply = 10
 }
 
 CURRENCY_wealth_value_10_units_negative = {
@@ -56,14 +89,14 @@ CURRENCY_wealth_value_10_units_negative = {
 
 CURRENCY_wealth_value_1k_units_negative = {
 	value = CURRENCY_wealth_value_1_unit
-	multiply = -100	
+	multiply = -1000	
 }
 
 CURRENCY_wealth_value_10k_units_negative = {
 	# Scope: Country
 	# Function: Get the amount of wealth from minting 1,000, used when adding money to the treasury
 	value = CURRENCY_wealth_value_1_unit
-	multiply = -1000
+	multiply = -10000
 }
 
 CURRENCY_wealth_value_1_unit = {
@@ -94,6 +127,7 @@ CURRENCY_wealth_value_1_unit = {
 		value = 999 # TEST
 	}
 	divide = var:official_currency.var:units_to_the_lb
+	#multiply = 10
 }
 
 CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio = {
@@ -118,7 +152,9 @@ CURRENCY_ideal_reserve_ratio_multiplier_gold = {
 	# Function: Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
 	# The ideal reserve ratio % (i.e. maximum reserve ratio size before the bonus caps out) is THIS divided by 100
 	value = var:gold_reserve_actual_change
+	#multiply = 10
 	divide = var:gold_reserve_size
+	#multiply = 30
 	if = {
 		limit = {
 			var:official_currency.var:backing_type = flag:bimetallic_standard
@@ -168,8 +204,25 @@ CURRENCY_ideal_reserve_ratio = {
 	# The accumulation rate need only be 5% of the stockpile 
 	divide = 20
 
-	min = 0.001 # Minimum 0.1%
-	max = 0.1 # Maximum 10%
+	#subtract = CURRENCY_stability_impact_ideal_reserve_ratio
+
+	min = CURRENCY_stability_impact_ideal_reserve_ratio # Minimum 0.1%
+	max = 1 # Maximum 100%
+}
+
+CURRENCY_stability_impact_ideal_reserve_ratio = {
+	value = 50
+	if = {
+		limit = {
+			stability > 0
+		}
+		subtract = stability
+		divide = 100
+		min = 0.05
+	}
+	else = {
+		value = 1
+	}
 }
 
 CURRENCY_wealth_bimetallic_gold_as_percentage = {
@@ -219,9 +272,16 @@ CURRENCY_national_debt_scaled = {
 	add = CURRENCY_national_debt_billions_scaled
 }
 
+CURRENCY_national_debt_scaled_wealth_value_millions = {
+	# Scope: Country
+	# Function: Get the value of the national debt in millions of wealth units
+	value = CURRENCY_national_debt_scaled
+	multiply = CURRENCY_wealth_value_1_unit
+}
+
 CURRENCY_national_debt_thousands_scaled = {
 	value = var:CURRENCY_national_debt_thousands
-	divide = 1000
+	divide = 100
 }
 
 CURRENCY_national_debt_millions_scaled = {
@@ -243,7 +303,7 @@ CURRENCY_amt_circulated_scaled = {
 
 CURRENCY_amt_circulated_thousands_scaled = {
 	value = var:CURRENCY_amt_circulated_thousands
-	divide = 1000
+	divide = 100
 }
 
 CURRENCY_amt_circulated_millions_scaled = {
@@ -252,7 +312,7 @@ CURRENCY_amt_circulated_millions_scaled = {
 
 CURRENCY_amt_circulated_billions_scaled = {
 	value = var:CURRENCY_amt_circulated_billions
-	multiply = 1000
+	multiply = 100
 }
 
 CURRENCY_total_country_cash_scaled = {
@@ -360,7 +420,7 @@ CURRENCY_private_cash_ratio = {
 	# Function: Get the amount of private currency and divide it by the amount needed to support cost of living. If it's too low, the country will experience deflation as there is not enough money circulating
 	# This also sets the demand for private cash, and will cause pops to create new cash from commerce districts independently
 	# The government can set a rate at which private cash is created or recalled quarterly
-	value = CURRENCY_amt_circulated_scaled
+	value = CURRENCY_amt_circulated_scaled_10x
 	divide = CURRENCY_private_cash_needed
 
 }
@@ -374,12 +434,27 @@ CURRENCY_amt_circulated_scaled_1percent = {
 	divide = 100
 }
 
+CURRENCY_amt_circulated_scaled_10percent = {
+	# Scope: Country
+	# Function: Get 1 percent of the scaled amount of wealth circulated
+	value = CURRENCY_amt_circulated_scaled
+	divide = 10
+}
+
+CURRENCY_amt_circulated_scaled_10x = {
+	# Scope: Country
+	# Function: Get 1 percent of the scaled amount of wealth circulated
+	value = CURRENCY_amt_circulated_scaled
+	multiply = 10
+}
+
 CURRENCY_reserve_change_currency_value = {
 	# Scope: Country
 	# Function: Get the 1,000s value of currency in reserve change rates
 	value = var:gold_reserve_actual_change
 	add = var:silver_reserve_actual_change
-	divide = var:official_currency.var:units_to_the_lb
+	divide = 100
+	multiply = var:official_currency.var:units_to_the_lb
 	round = floor
 }
 
@@ -410,6 +485,8 @@ CURRENCY_minting_rate_wealth_value = {
 	# Scope: Country
 	# Function: Calculates the amount of wealth created by minting coins every month
 	value = var:CURRENCY_minting_rate
+	subtract = CURRENCY_amt_circulated_scaled_1percent
+	min = 0
 	multiply = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
 	multiply = 100
 }
@@ -421,10 +498,9 @@ CURRENCY_trade_wealth_income = {
 	# Function: Tracks the amount of mintable coming into the country from foreign currency
 	value = var:TRADE_national_income
 	# We divide by the value of wealth in 1 unit of currency, as that is what we are converting when melting down foreign currency to make our own
-	divide = CURRENCY_wealth_value_1_unit
+	multiply = CURRENCY_wealth_value_1_unit
 	# This is quarterly income, so we divide by 4 for every month
-	# Then we assume 10% of incoming foreign currency is available for melting down by minting authorities, so we divide by 10
-	divide = 400
+	divide = 4
 	round = floor
 }
 
@@ -479,4 +555,25 @@ CURRENCY_governorship_wealth_due_to_indentured = {
 CURRENCY_governorship_wealth_due_to_tribesmen = {
 	value = CURRENCY_governorship_wealth_from_minting
 	multiply = FUNC_governorship_ratio_tribesmen
+}
+
+# NATIONAL DEBT INTEREST RATES
+
+CURRENCY_national_debt_interest_base = {
+	# Scope: Country
+	# Function: The base rate of national interest if Debt = 100% of GDP
+	value = 0.03
+}
+
+CURRENCY_national_debt_interest_actual = {
+	# Scope: Country
+	# Function: The interest rate of the given country based on its debt/GDP ratio
+	value = CURRENCY_national_debt_interest_base
+	multiply = CURRENCY_debt_to_GDP_ratio
+}
+
+CURRENCY_national_debt_interest_actual_wealth_cost = {
+	value = CURRENCY_national_debt_interest_actual
+	multiply = CURRENCY_national_debt_scaled_wealth_value_millions
+	multiply = 10
 }

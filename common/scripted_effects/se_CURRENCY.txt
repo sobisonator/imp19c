@@ -35,7 +35,7 @@
 	}
 
 	every_in_list = {
-		name = currency_adopters_list
+		list = currency_adopters_list
 		remove_from_list = currency_adopters_list
 	}
 
@@ -68,6 +68,100 @@
 		amt_circulated_millions = 25
 		amt_circulated_billions = 3
 		amt_national_debt_thousands = 0
+		amt_national_debt_millions = 500
+		amt_national_debt_billions = 4
+		minting_rate = 0
+	}
+
+	CURRENCY_set_country_currency = {
+		target_country = FRA
+		currency_name = Franc
+	}
+
+	every_in_list = {
+		list = currency_adopters_list
+		remove_from_list = currency_adopters_list
+	}
+
+	# SPANISH DOLLAR
+	c:SPA = { add_to_list = currency_adopters_list }
+	c:NSP = { add_to_list = currency_adopters_list }
+	c:MEX = { add_to_list = currency_adopters_list }
+	c:NSP = { add_to_list = currency_adopters_list }
+	c:NSW = { add_to_list = currency_adopters_list }
+	c:PHI = { add_to_list = currency_adopters_list }
+	c:PR1 = { add_to_list = currency_adopters_list }
+
+	c:USA = { add_to_list = currency_peggers_list }
+
+	CURRENCY_create_new_currency = {
+		currency_name = spanish_dollar
+		originator_tag = SPA
+		backing_type = gold_standard
+		units_to_the_lb = 153
+		currency_adopters_list = currency_adopters_list
+		use_currency_peggers_list = true
+		currency_peggers_list = currency_peggers_list
+		override_existing = yes
+		paper_money_allowed = false
+	}
+
+	CURRENCY_set_amounts_country = {
+		target_country = SPA
+		amt_circulated_thousands = 986
+		amt_circulated_millions = 200
+		amt_circulated_billions = 0
+		amt_national_debt_thousands = 035
+		amt_national_debt_millions = 860
+		amt_national_debt_billions = 0
+		minting_rate = 0
+	}
+
+	CURRENCY_set_country_currency = {
+		target_country = SPA
+		currency_name = spanish_dollar
+	}
+
+	every_in_list = {
+		list = currency_adopters_list
+		save_scope_as = currency_adopter
+			CURRENCY_set_country_currency = {
+				target_country = scope:currency_adopter
+				currency_name = spanish_dollar
+			}
+	}
+
+	every_in_list = {
+		list = currency_adopters_list
+		remove_from_list = currency_adopters_list
+	}
+	every_in_list = {
+		list = currency_peggers_list
+		remove_from_list = currency_peggers_list
+	}
+
+	# CHINESE WÉN
+	c:QNG = { add_to_list = currency_adopters_list }
+
+
+	CURRENCY_create_new_currency = {
+		currency_name = Wen
+		originator_tag = QNG
+		backing_type = gold_standard
+		units_to_the_lb = 1720
+		currency_adopters_list = currency_adopters_list
+		use_currency_peggers_list = false
+		currency_peggers_list = false
+		override_existing = yes
+		paper_money_allowed = false
+	}
+
+	CURRENCY_set_amounts_country = {
+		target_country = QNG
+		amt_circulated_thousands = 134
+		amt_circulated_millions = 25
+		amt_circulated_billions = 3
+		amt_national_debt_thousands = 0
 		amt_national_debt_millions = 700
 		amt_national_debt_billions = 2
 		minting_rate = 0
@@ -77,6 +171,12 @@
 		target_country = FRA
 		currency_name = Franc
 	}
+
+	every_in_list = {
+		list = currency_adopters_list
+		remove_from_list = currency_adopters_list
+	}
+
 }
 
 CURRENCY_setup_all_reserves = {
@@ -96,6 +196,16 @@ CURRENCY_setup_all_reserves = {
 	c:FRA = {
 		CURRENCY_country_setup_reserves = {
 			gold_reserve_size = 1300 # hundreds lb
+			gold_reserve_accumulation_rate = 50 # hundreds lb
+
+			silver_reserve_size = 0 # hundreds lb
+			silver_reserve_accumulation_rate = 0 # hundreds lb
+		}
+	}
+
+	c:SPA = {
+		CURRENCY_country_setup_reserves = {
+			gold_reserve_size = 12180 # hundreds lb
 			gold_reserve_accumulation_rate = 50 # hundreds lb
 
 			silver_reserve_size = 0 # hundreds lb
@@ -136,7 +246,7 @@ CURRENCY_all_governorships_send_to_reserves = {
 	}
 	ordered_governorships = {
 		order_by = {
-			order_by = GOODS_governorship_gold_produced
+			value = GOODS_governorship_gold_produced
 		}
 		max = 999
 		CURRENCY_governorship_send_to_reserves = {
@@ -145,7 +255,7 @@ CURRENCY_all_governorships_send_to_reserves = {
 	}
 	ordered_governorships = {
 		order_by = {
-			order_by = GOODS_governorship_silver_produced
+			value = GOODS_governorship_silver_produced
 		}
 		max = 999
 		CURRENCY_governorship_send_to_reserves = {
@@ -591,7 +701,7 @@ CURRENCY_setup_currency_info = {
 	# Add the countries to adopt this currency and to peg to it. WARNING, this overrides existing currency settings for countries, so only set these if you really mean to.
 	scope:currency_create_scope = {
 		every_in_list = {
-			name = $currency_adopters_list$
+			list = $currency_adopters_list$
 
 			save_scope_as = target_country
 
@@ -606,7 +716,7 @@ CURRENCY_setup_currency_info = {
 				flag:$use_currency_peggers_list$ = flag:true
 			}
 			every_in_list = {
-				name = $currency_peggers_list$
+				list = $currency_peggers_list$
 
 				save_scope_as = target_country
 

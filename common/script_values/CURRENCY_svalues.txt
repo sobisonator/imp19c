@@ -115,13 +115,13 @@ CURRENCY_wealth_value_1_unit = {
 		limit = {
 			var:official_currency.var:backing_type = flag:gold_standard
 		}
-		value = CURRENCY_wealth_value_bimetallic_from_gold
+		value = CURRENCY_wealth_value_from_gold
 	}
 	else_if = {
 		limit = {
 			var:official_currency.var:backing_type = flag:silver_standard
 		}
-		value = CURRENCY_wealth_value_bimetallic_from_silver
+		value = CURRENCY_wealth_value_from_silver
 	}
 	else = {
 		value = 999 # TEST
@@ -263,6 +263,17 @@ CURRENCY_wealth_value_bimetallic_from_silver = {
 	multiply = var:country_unit_price_silver
 	multiply = 16 # 16 ounces to the pound, which is the base ratio
 }
+
+CURRENCY_wealth_value_from_silver = {
+	value = var:country_unit_price_silver
+	multiply = 16
+}
+
+CURRENCY_wealth_value_from_gold = {
+	value = var:country_unit_price_gold
+	multiply = 16
+}
+
 
 CURRENCY_national_debt_scaled = {
 	# Scope: Country
@@ -458,6 +469,13 @@ CURRENCY_reserve_change_currency_value = {
 	round = floor
 }
 
+CURRENCY_reserve_change_currency_value_for_minting = {
+	# Scope: Country
+	# Function: Get 10% of the reserve growth as mintable currency
+	value = CURRENCY_reserve_change_currency_value
+	divide = 10
+}
+
 CURRENCY_minting_rate_cap = {
 	# Scope: Country
 	# Function: Defines the maximum of new currency that can be minted every month
@@ -469,7 +487,7 @@ CURRENCY_minting_rate_cap = {
 		limit = {
 			var:official_currency.var:paper_money_allowed = flag:false
 		}
-		value = CURRENCY_reserve_change_currency_value
+		value = CURRENCY_reserve_change_currency_value_for_minting
 		add = CURRENCY_amt_circulated_scaled_1percent
 		add = CURRENCY_trade_wealth_income
 		round = floor
@@ -491,6 +509,11 @@ CURRENCY_minting_rate_wealth_value = {
 	multiply = 100
 }
 
+CURRENCY_minting_rate_wealth_value_per_capita = {
+	value = CURRENCY_minting_rate_wealth_value
+	divide = country_population
+}
+
 # Private currency fluctuation due to trade
 
 CURRENCY_trade_wealth_income = {
@@ -498,7 +521,7 @@ CURRENCY_trade_wealth_income = {
 	# Function: Tracks the amount of mintable coming into the country from foreign currency
 	value = var:TRADE_national_income
 	# We divide by the value of wealth in 1 unit of currency, as that is what we are converting when melting down foreign currency to make our own
-	multiply = CURRENCY_wealth_value_1_unit
+	divide = CURRENCY_wealth_value_1_unit
 	# This is quarterly income, so we divide by 4 for every month
 	divide = 4
 	round = floor
@@ -509,7 +532,9 @@ CURRENCY_trade_wealth_outgoing_currency_value = {
 	# Function: Get the amount of your currency being sent abroad in trade, which is subtracted from privately held cash every month
 	value = var:TRADE_national_expenditure
 	divide = CURRENCY_wealth_value_1_unit
+	# This is quarterly income, so we divide by 4 for every month
 	divide = 4
+	round = floor
 }
 
 CURRENCY_amt_circulated_balance = {

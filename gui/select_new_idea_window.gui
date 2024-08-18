@@ -1,0 +1,98 @@
+base_sub_window = {
+	name = "select_idea_view"
+	position = { 790 140 } 
+
+	size = { 638 476 }
+	
+	state = {
+		name = "close_ideas"
+		on_start = "[SelectNewIdeaWindow.Close]"
+	}
+	
+	blockoverride "Title_text" { text = "SELECT_NEW_IDEA" }
+		
+	blockoverride "White_buttons"
+	{
+		spacing = 4
+		button_close = {
+			tooltip = "CLOSE"
+			onclick = "[SelectNewIdeaWindow.Close]"
+		}
+	}	
+
+	dynamicgridbox = {
+		name = "group_grid"
+		datamodel = "[SelectNewIdeaWindow.GetIdeaGroups]"
+		position = { 12 36 }
+		
+		item = {
+			widget = {
+				margin_widget = {
+					size = { 100% 40 }
+					textbox = {
+						size = { 120 32 }
+						position = { 0 -4 }
+						parentanchor = right|vcenter
+						autoresize = yes
+						using = BaseFontM
+						using = Black_FontColor
+						text = "[SelectNewIdeaWindow.GetPlayer.GetPrice('buy_idea')]"
+						tooltip = "[SelectNewIdeaWindow.GetPlayer.GetPriceTooltip('buy_idea')]"
+						blockoverride "Margins"
+						{
+							margin_top = 6 
+							margin_bottom = 10
+							margin_left = 30
+							margin_right = 6
+						}
+					}
+
+					sub_header_v = { 
+						size = { 535 0 }
+						position = { 0 4 }
+						
+						icon = {
+							name = "ideas_icon"
+							position = { 8 2 }
+							size = { 28 28 }
+							texture = "[IdeaGroupsArray.GetIconTexture]"
+						}
+						
+						blockoverride "Title_text" { 
+							text = "        [IdeaGroupsArray.GetName]" #Oh god why
+						}
+					}
+				}
+				
+				fixedgridbox = {
+					name = "ideas_grid"
+					datamodel = "[IdeaGroupsArray.GetItems]"
+					flipdirection = yes
+					resizeparent = yes
+					position = { 4 40 }
+					addcolumn = 68
+					addrow = 106
+					
+					item = {
+						icon_button_square = {
+							size = { 64 64 }
+							#visible = "[IdeaItem.CanBePicked]"
+							blockoverride "On_click" 
+							{
+								enabled = "[IdeaItem.CanBePicked]"
+								onclick = "[IdeaItem.Pick]"
+							}
+							tooltipwidget = idea_item_tooltip
+							blockoverride "Icon" 
+							{
+								texture = "[IdeaItem.GetIcon]" 
+								size = { 60 60 }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+

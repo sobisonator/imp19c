@@ -153,7 +153,7 @@ CURRENCY_ideal_reserve_ratio_multiplier_gold = {
 	# The ideal reserve ratio % (i.e. maximum reserve ratio size before the bonus caps out) is THIS divided by 100
 	value = var:gold_reserve_actual_change
 	#multiply = 10
-	divide = var:gold_reserve_size
+	divide = CURRENCY_total_country_cash_scaled
 	#multiply = 30
 	if = {
 		limit = {
@@ -161,6 +161,7 @@ CURRENCY_ideal_reserve_ratio_multiplier_gold = {
 		}
 		multiply = CURRENCY_wealth_bimetallic_gold_as_percentage
 	}
+	multiply = 2
 }
 
 CURRENCY_ideal_reserve_ratio_multiplier_silver = {
@@ -168,13 +169,14 @@ CURRENCY_ideal_reserve_ratio_multiplier_silver = {
 	# Function: Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
 	# The ideal reserve ratio % (i.e. maximum reserve ratio size before the bonus caps out) is THIS divided by 100
 	value = var:silver_reserve_actual_change
-	divide = var:silver_reserve_size
+	divide = CURRENCY_total_country_cash_scaled
 	if = {
 		limit = {
 			var:official_currency.var:backing_type = flag:bimetallic_standard
 		}
 		multiply = CURRENCY_wealth_bimetallic_silver_as_percentage
 	}
+	multiply = 2
 }
 
 CURRENCY_ideal_reserve_ratio = {
@@ -211,6 +213,8 @@ CURRENCY_ideal_reserve_ratio = {
 		}
 		multiply = 3.5
 	}
+	#divide = CURRENCY_reserve_to_gdp_ratio
+	min = 0.05
 }
 
 CURRENCY_stability_impact_ideal_reserve_ratio = {
@@ -420,7 +424,15 @@ CURRENCY_essentials_buying_power = {
 	add = var:country_unit_price_pharmaceuticals
 	add = var:country_unit_price_alcohol
 
-	divide = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
+	if = {
+		limit = {
+			CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio > 0
+		}
+		divide = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
+	}
+	else = {
+		multiply = 32000
+	}
 	divide = 4
 }
 
@@ -652,12 +664,38 @@ CURRENCY_national_debt_interest_actual_wealth_cost = {
 
 # RESERVE TO GDP SCALES
 
-reserve_to_gdp_ratio = {
-	value = WEALTH_total_private_moveable_wealth_scaled
-	divide = CURRENCY_reserve_value_in_wealth_total
+CURRENCY_reserve_to_gdp_ratio = {
+	value = CURRENCY_reserve_value_in_wealth_total
+	if = {
+		limit = {
+			WEALTH_total_private_moveable_wealth_scaled > 0
+		}
+		divide = WEALTH_total_private_moveable_wealth_scaled
+	}
+	divide = 100
 }
 
 CURRENCY_reserve_value_in_wealth_total = {
 	value = CURRENCY_reserve_value_in_wealth_silver
 	add = CURRENCY_reserve_value_in_wealth_gold
+}
+
+# Reference to gold and silver global values
+
+CURRENCY_global_base_import_price_gold = {
+	value = global_var:global_base_import_price_gold
+}
+
+CURRENCY_global_base_import_price_silver = {
+	value = global_var:global_base_import_price_silver
+}
+
+CURRENCY_global_base_import_price_gold_10 = {
+	value = global_var:global_base_import_price_gold
+	multiply = 10
+}
+
+CURRENCY_global_base_import_price_silver_10 = {
+	value = global_var:global_base_import_price_silver
+	multiply = 10
 }

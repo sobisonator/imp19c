@@ -19,7 +19,7 @@
 	}
 
 	CURRENCY_set_amounts_country = {
-		target_country = GBR
+		target_country = c:GBR
 		amt_circulated_thousands = 920
 		amt_circulated_millions = 811
 		amt_circulated_billions = 0
@@ -63,7 +63,7 @@
 	}
 
 	CURRENCY_set_amounts_country = {
-		target_country = FRA
+		target_country = c:FRA
 		amt_circulated_thousands = 134
 		amt_circulated_millions = 25
 		amt_circulated_billions = 3
@@ -107,7 +107,7 @@
 	}
 
 	CURRENCY_set_amounts_country = {
-		target_country = SPA
+		target_country = c:SPA
 		amt_circulated_thousands = 986
 		amt_circulated_millions = 100
 		amt_circulated_billions = 0
@@ -157,7 +157,7 @@
 	}
 
 	CURRENCY_set_amounts_country = {
-		target_country = CHI
+		target_country = c:CHI
 		amt_circulated_thousands = 140
 		amt_circulated_millions = 46
 		amt_circulated_billions = 0
@@ -198,6 +198,7 @@
 	c:MKZ = { add_to_list = currency_adopters_list }
 	c:MKS = { add_to_list = currency_adopters_list }
 	c:OLD = { add_to_list = currency_adopters_list }
+	c:FRK = { add_to_list = currency_adopters_list }
 
 
 	CURRENCY_create_new_currency = {
@@ -213,7 +214,7 @@
 	}
 
 	CURRENCY_set_amounts_country = {
-		target_country = SAX
+		target_country = c:SAX
 		amt_circulated_thousands = 140
 		amt_circulated_millions = 4
 		amt_circulated_billions = 0
@@ -235,6 +236,27 @@
 	every_in_list = {
 		list = currency_adopters_list
 		remove_from_list = currency_adopters_list
+	}
+
+	# Starting amounts for all defined countries
+	every_country = {
+		limit = {
+			has_variable = official_currency
+			NOT = {
+			#	has_variable = amt_circulated_thousands
+			}
+		}
+		save_scope_as = target_country
+		CURRENCY_set_amounts_country = {
+			target_country = scope:target_country
+			amt_circulated_thousands = CURRENCY_base_starting_amt_circulated_scaled
+			amt_circulated_millions = 0
+			amt_circulated_billions = 0
+			amt_national_debt_thousands = 0
+			amt_national_debt_millions = 0
+			amt_national_debt_billions = 0
+			minting_rate = 0
+		}
 	}
 
 }
@@ -612,7 +634,7 @@ CURRENCY_set_amounts_country = {
 	# Function: Set the amount of currency in circulation in this country, both in public pockets and as national debt owned by the state
 
 	# Units of this currency in public circulation, in the tens of thousands
-	c:$target_country$ = {
+	$target_country$ = {
 		set_variable = {
 			name = CURRENCY_amt_circulated_thousands
 			value = $amt_circulated_thousands$
@@ -625,7 +647,20 @@ CURRENCY_set_amounts_country = {
 			name = CURRENCY_amt_circulated_billions
 			value = $amt_circulated_billions$
 		}
-
+		while = {
+			limit = {
+				var:CURRENCY_amt_circulated_thousands > 1000
+			}
+			change_variable = {
+				name = CURRENCY_amt_circulated_millions
+				add = 1
+			}
+			change_variable = {
+				name = CURRENCY_amt_circulated_thousands
+				subtract = 1
+			}
+			max = 999
+		}
 		# Units of this currency in the state's ledgers
 		set_variable = {
 			name = CURRENCY_national_debt_thousands

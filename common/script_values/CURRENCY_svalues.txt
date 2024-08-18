@@ -181,7 +181,7 @@ CURRENCY_ideal_reserve_ratio = {
 	# Scope: Country
 	# Function: Get the ideal reserve ratio multiplier based on the metallic standard in use
 	# Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
-	value = 1
+	value = 0.2
 	if = {
 		limit = {
 			var:official_currency.var:backing_type = flag:bimetallic_standard
@@ -202,26 +202,34 @@ CURRENCY_ideal_reserve_ratio = {
 		subtract = CURRENCY_ideal_reserve_ratio_multiplier_silver
 	}
 	# The accumulation rate need only be 5% of the stockpile 
-	divide = 20
-
-	#subtract = CURRENCY_stability_impact_ideal_reserve_ratio
-
-	min = CURRENCY_stability_impact_ideal_reserve_ratio # Minimum 0.1%
-	max = 1 # Maximum 100%
+	#divide = 20
+	if = {
+		limit = {
+			NOT = {
+				has_variable = public_debt_administration
+			}
+		}
+		multiply = 3.5
+	}
 }
 
 CURRENCY_stability_impact_ideal_reserve_ratio = {
-	value = 50
 	if = {
 		limit = {
 			stability > 0
+			stability < 50
 		}
+		value = 0.5
 		subtract = stability
-		divide = 100
-		min = 0.05
+	}
+	else_if = {
+		limit = {
+			stability = 0
+		}
+		value = 1
 	}
 	else = {
-		value = 1
+		value = 0.01
 	}
 }
 
@@ -416,11 +424,38 @@ CURRENCY_essentials_buying_power = {
 	divide = 4
 }
 
+CURRENCY_essentials_buying_power_unweighted = {
+	value = var:country_unit_price_grain
+	add = var:country_unit_price_livestock
+	add = var:country_unit_price_fish
+	add = var:country_unit_price_vegetables
+	add = var:country_unit_price_temperate_fruit
+	add = var:country_unit_price_processed_foods
+	add = var:country_unit_price_clothing
+	add = var:country_unit_price_furniture
+	add = var:country_unit_price_pharmaceuticals
+	add = var:country_unit_price_alcohol
+
+	divide = CURRENCY_wealth_value_1_unit
+	divide = 4
+}
+
 CURRENCY_private_cash_needed = {
 	# Scope: Country
 	# Function: Multiply the cost of living by the country population.
 	# This gives the minimum amount of cash that must be in circulation for pops to carry out day to day business. Anything less will cause serious deflation, i.e. demand for goods to drop and for a base level of shortages in every region
 	value = CURRENCY_essentials_buying_power
+	multiply = 4 # Multiply by 4, each pop is 4,000 people and this value will be scaled down to avoid overflows
+	multiply = country_population
+	divide = 1000 # Divide by 1,000 to scale down to CURRENCY_amt_circulated which is measured in the millions
+}
+
+CURRENCY_private_cash_needed_unweighted = {
+	# Scope: Country
+	# Function: Multiply the cost of living by the country population.
+	# SPECIAL - does not weight the need by the reserve ratio, so that this can be used in the ideal reserve ratio calculation
+	# This gives the minimum amount of cash that must be in circulation for pops to carry out day to day business. Anything less will cause serious deflation, i.e. demand for goods to drop and for a base level of shortages in every region
+	value = CURRENCY_essentials_buying_power_unweighted
 	multiply = 4 # Multiply by 4, each pop is 4,000 people and this value will be scaled down to avoid overflows
 	multiply = country_population
 	divide = 1000 # Divide by 1,000 to scale down to CURRENCY_amt_circulated which is measured in the millions
@@ -434,6 +469,18 @@ CURRENCY_private_cash_ratio = {
 	value = CURRENCY_amt_circulated_scaled_10x
 	divide = CURRENCY_private_cash_needed
 
+}
+
+CURRENCY_private_cash_ratio_unweighted = {
+	value = CURRENCY_amt_circulated_scaled_10x
+	divide = CURRENCY_private_cash_needed_unweighted
+	divide = CURRENCY_reserve_ratio_total
+	#multiply = 15
+}
+
+CURRENCY_units_to_the_lb_reciprocal = {
+	value = 1
+	divide = var:official_currency.var:units_to_the_lb
 }
 
 # Minting rate

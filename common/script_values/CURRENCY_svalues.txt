@@ -559,6 +559,7 @@ CURRENCY_minting_rate_cap = {
 		value = CURRENCY_reserve_change_currency_value_for_minting
 		add = CURRENCY_amt_circulated_scaled_1percent
 		add = CURRENCY_trade_wealth_income
+		add = CURRENCY_minting_from_sister_countries
 		round = floor
 	}
 
@@ -566,6 +567,20 @@ CURRENCY_minting_rate_cap = {
 	else = {
 		value = 99999
 	}
+}
+
+CURRENCY_minting_from_sister_countries = {
+	# Scope: Country
+	# Function: Factor in the extra coinage that can be recycled from other countries using the same currency
+	value = 0
+	var:official_currency = {
+		every_in_list = {
+			variable = currency_adopted_countries
+
+			add = var:TRADE_national_expenditure
+		}
+	}
+	divide = -2
 }
 
 CURRENCY_minting_rate_wealth_value = {
@@ -717,6 +732,9 @@ CURRENCY_base_starting_amt_circulated_scaled = {
 	# Function: Get the amount of currency to start with, if not defined elsewhere
 	value = var:official_currency.var:units_to_the_lb
 	multiply = WEALTH_total_private_moveable_wealth_scaled
-	multiply = 0.3
+	#multiply = 0.6
+	add = 20
+	multiply = 3
+	add = country_population
 	min = 1
 }

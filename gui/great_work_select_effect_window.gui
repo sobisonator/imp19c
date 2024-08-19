@@ -1,0 +1,522 @@
+@effect_name_width = 150
+
+types great_work {
+	type great_work_effect_filter_button = check_cross_filter {
+		blockoverride "TagText" { visible = no }
+		widget = {
+			size = { 36 24 }
+			#using = NoninteractableBG
+			blockoverride "Margins"
+			{
+				margin = { 0 6 }
+				margin_left = 12
+				margin_bottom = 10
+			}
+			icon = {
+				position = { -12 4 }
+				parentanchor = bottom
+				texture = "gfx/interface/base_parts/brown_underline_x60bd.dds"
+				spriteType = Corneredtiled
+				spriteborder = { 30 0 }
+				color = { 0.5 0.3 0.1 0.7 }
+				size = { 115% 7 }
+			}
+
+			icon = {
+				block "Icon" { texture = "gfx/interface/icons/modifiers/commerce_value.dds" }
+				size = { 30 30 }
+				position = { -4 -1 }
+			}
+		}
+	}
+
+	type great_work_tier = widget {
+		size = { 70 35 }
+		icon = {
+			name = "progress_frame"
+			texture = "gfx/interface/base_parts/progressbar_background_frame.dds"
+			minimumsize = { 0 8 }
+			size = { 100% 8 }
+			alpha = 0.5
+			color = { 0.7 0.7 0.7 1 }
+			parentanchor = bottom|hcenter
+		}
+
+		progressbar = {
+			using = progressbar_flat_green
+			block "progressbar_size"
+			{
+				size = { 100% 7 }
+			}
+			block "progressbar_value"
+			{
+				value = 0
+			}
+			parentanchor = bottom|left
+			widgetanchor = bottom|left
+		}
+
+		textbox = {
+			parentanchor = top|right
+			widgetanchor = top|right
+			align = right
+			using = BaseFontS
+			using = Black_FontColor
+			block "tier_text"
+			{
+				text = ""
+			}
+			#size = { 100% 15 }
+			position = { 26 0 }
+			autoresize = yes
+			block "tier_tooltip"
+			{
+				tooltip = ""
+			}
+		}
+
+		icon = { #Divider
+			parentanchor = bottom|right
+			widgetanchor = bottom|right
+			texture = "gfx/interface/tiles/tile_divider_01_vertical.dds"
+			size = { 6 33% }
+			position = { 3 0 }				
+		}
+	}
+
+	type great_work_effect = margin_widget { #Effect
+		size = { 100% 54 }
+		margin = { 10 0 }
+		margin_right = 22
+
+		textbox = {
+			parentanchor = vcenter
+			layoutpolicy_horizontal = expanding
+			using = BaseFontM
+			using = Black_FontColor
+			autoresize = no			
+			minimumsize = {@effect_name_width 54 }
+			multiline = yes
+			text = "[GreatWorkEffectGroupItem.GetName]"
+			tooltip = "[GreatWorkEffectGroupItem.GetDescription]"
+		}
+
+		flowcontainer = { # Tier Buttons
+			direction = horizontal
+			position = { 0 4 }
+			parentanchor = vcenter|right
+			spacing = 20
+
+			datamodel = "[GreatWorkEffectGroupItem.GetEffectTiers]"
+			item = {
+				icon_button_square = {
+					parentanchor = vcenter
+					size = { 50 50 }	
+					enabled = "[And( GreatWorkEffectItem.IsAllowed, GreatWorkEffectItem.CanSelect )]"
+					blockoverride "On_click"
+					{
+						onclick = "[GreatWorkEffectItem.Select]"
+					}
+					
+					tooltip = "GW_ALLOW_AND_EFFECT"
+
+					blockoverride "Icon" 
+					{ #effect icon
+						parentanchor = vcenter|hcenter
+						texture = "[GreatWorkEffectItem.GetIcon]"
+						size = { 75% 75% }	
+						icon = {
+							parentanchor = bottom|right
+							texture = "[GreatWorkEffectItem.GetTierIcon]"
+							size = {45% 45%}
+							position = { 0 0 }
+						}					
+					}
+				}
+			}
+		}
+	}
+}
+
+
+base_sub_window = {
+	name = "gw_select_effect_window"
+	size = { 560 900 }
+	parentanchor = center
+	blockoverride "GradientAlpha"
+	{
+		alpha = 0.25
+	}
+	blockoverride "Title_text" 
+	{ 
+	text = "GW_WINDOW_SELECT_EFFECT"
+	}
+	blockoverride "White_buttons" 
+	{
+		button_close = {
+			shortcut = "close_window"
+			onclick = "[GreatWorkSelectEffectWindow.OnClose]"
+			tooltip = "CLOSE"
+		}
+	}
+	
+	vbox = {
+    	margin = { 16 10 }
+    	margin_top = 40
+
+		hbox = { #Filters 
+			layoutpolicy_horizontal = expanding
+			spacing = 10
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Commerce
+					tooltip = "GW_FILTER_COMMERCE"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('commerce')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('commerce')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('commerce')]" }
+					#down = yes
+				}
+			}
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Civilization
+					tooltip = "GW_FILTER_CIVILIZATION"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('civilization')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('civilization')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('civilization')]" }
+					#down = yes
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/modifiers/country_civilization_value.dds"
+					}
+				}
+			}
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Population
+					tooltip = "GW_FILTER_POPULATION"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('population')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('population')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('population')]" }
+					#down = yes
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/shared_icons/population.dds"
+					}
+				}
+			}
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Slave Population
+					tooltip = "GW_FILTER_SLAVES"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('slave_population')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('slave_population')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('slave_population')]" }
+					#down = yes
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/pop_types/slaves.dds"
+					}
+				}
+			}
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Diplomacy
+					tooltip = "GW_FILTER_DIPLOMACY"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('diplomacy')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('diplomacy')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('diplomacy')]" }
+					#down = yes
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/shared_icons/diplomacy.dds"
+					}
+				}
+			}
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Government
+					tooltip = "GW_FILTER_GOVERNMENT"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('government')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('government')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('government')]" }
+					#down = yes
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/modifiers/government_bonus_cost_modifier.dds"
+					}
+
+				}
+			}
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Naval
+					tooltip = "GW_FILTER_NAVAL"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('naval')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('naval')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('naval')]" }
+					#down = yes
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/shared_icons/naval_combat.dds"
+					}
+
+				}
+			}
+			widget = { #Expander
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+			}
+		}
+		hbox = { #Filters 
+			layoutpolicy_horizontal = expanding
+			spacing = 10	
+
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Defense
+					tooltip = "GW_FILTER_DEFENSE"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('defense')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('defense')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('defense')]" }
+					#down = yes
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/shared_icons/defence.dds"
+					}
+
+				}
+			}
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Military
+					tooltip = "GW_FILTER_MILITARY"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('military')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('military')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('military')]" }
+					#down = yes
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/shared_icons/military.dds"
+					}
+				}
+			}
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Religious
+					tooltip = "GW_FILTER_RELIGIOUS"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('religious')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('religious')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('religious')]" }
+					#down = yes
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/shared_icons/religious.dds"
+					}
+				}
+			}
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Civic
+					tooltip = "GW_FILTER_CIVIC"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('civic')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('civic')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('civic')]" }
+					#down = yes
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/shared_icons/civic.dds"
+					}
+				}
+			}
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Oratory
+					tooltip = "GW_FILTER_ORATORY"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('oratory')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('oratory')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('oratory')]" }
+					#down = yes
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/powers/oratory.dds"
+					}
+				}
+			}
+			widget = {
+				size = { 66 32 }
+				great_work_effect_filter_button = { #Education
+					tooltip = "GW_FILTER_EDUCATION"
+					blockoverride "On_click" { onclick = "[GreatWorkSelectEffectWindow.Filter('education')]" }
+					blockoverride "FilterYes" { visible = "[GreatWorkSelectEffectWindow.HasFilterInclude('education')]" }
+					blockoverride "FilterNo" { visible = "[GreatWorkSelectEffectWindow.HasFilterExclude('education')]" }
+					blockoverride "Icon"
+					{				
+						texture = "gfx/interface/icons/shared_icons/research.dds"
+					}
+				}
+			}
+
+			widget = { #Expander
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+			}
+		}
+
+		margin_widget = { #Name and Tier progress
+			minimumsize = { 100% 40 }
+			layoutpolicy_horizontal = expanding
+			margin = { 10 0 }
+			icon = {
+				texture = "gfx/interface/icons/modifiers/prestige_workpower.dds"
+				size = { 34 34 }
+				position = { 142 12 }
+				tooltip = "[GetGreatWorkPrestigeTooltip(GreatWorkSelectEffectWindow.GetPrestige)]"
+			}
+			textbox = {
+				text = "[GreatWorkSelectEffectWindow.GetPrestige|1]"
+				size = { 60 28 }
+				autoresize = yes
+				align = right
+				using = BaseFontM
+				using = Black_FontColor
+				position = { 180 18 }
+			}
+
+			flowcontainer = { # Tier Progress
+				direction = horizontal
+				parentanchor = vcenter
+				position = { 154 0 }
+				tooltip = "[GetGreatWorkPrestigeTooltip(GreatWorkSelectEffectWindow.GetPrestige)]"
+				#spacing = 10
+				widget = {
+					size = { 4 33% }
+					parentanchor = bottom|hcenter
+					icon = { #Divider
+						texture = "gfx/interface/tiles/tile_divider_01_vertical.dds"
+						size = { 6 12 }			
+					}
+				}
+				great_work_tier = {
+					visible = no
+					blockoverride "progressbar_size"
+					{
+						size = { 0 0 }
+					}
+					blockoverride "progressbar_value"
+					{
+						value = "[GetGreatWorkEffectPrestigeTierProgess('gw_effect_tier_1', GreatWorkSelectEffectWindow.GetPrestige)]"
+					}
+				}
+				great_work_tier = {
+					blockoverride "tier_text"
+					{
+						text = "[GetGreatWorkEffectTierName('gw_effect_tier_2')]"
+					}
+					blockoverride "tier_tooltip"
+					{
+						tooltip = "[GetGreatWorkEffectTierTooltip('gw_effect_tier_2')]"
+					}
+					blockoverride "progressbar_value"
+					{
+						value = "[GetGreatWorkEffectPrestigeTierProgess('gw_effect_tier_2', GreatWorkSelectEffectWindow.GetPrestige)]"
+					}
+				}
+				great_work_tier = {
+					blockoverride "tier_text"
+					{
+						text = "[GetGreatWorkEffectTierName('gw_effect_tier_3')]"
+					}
+					blockoverride "tier_tooltip"
+					{
+						tooltip = "[GetGreatWorkEffectTierTooltip('gw_effect_tier_3')]"
+					}
+					blockoverride "progressbar_value"
+					{
+						value = "[GetGreatWorkEffectPrestigeTierProgess('gw_effect_tier_3', GreatWorkSelectEffectWindow.GetPrestige)]"					
+					}
+				}
+				great_work_tier = {
+					blockoverride "tier_text"
+					{
+						text = "[GetGreatWorkEffectTierName('gw_effect_tier_4')]"
+					}
+					blockoverride "tier_tooltip"
+					{
+						tooltip = "[GetGreatWorkEffectTierTooltip('gw_effect_tier_4')]"
+					}
+					blockoverride "progressbar_value"
+					{
+						value = "[GetGreatWorkEffectPrestigeTierProgess('gw_effect_tier_4', GreatWorkSelectEffectWindow.GetPrestige)]"
+					}
+				}
+
+				widget = {
+					size = { 70 35 }
+					visible = no
+					progressbar = {
+						position = { -40 0 }
+						using = progressbar_green_horizontal
+						size = { 100% 6 }
+						parentanchor = bottom|left
+					}
+
+					icon = { #Divider
+						position = { -40 0 }
+						parentanchor = bottom|right
+						texture = "gfx/interface/tiles/tile_divider_01_vertical.dds"
+						size = { 6 14 }						
+					}
+				}
+			}
+		}
+
+
+		margin_widget = { #Scroll area
+			size = { 540 660 }	
+
+			scrollarea = {
+				size = { 530 660 }
+				layoutpolicy_vertical = expanding
+				scrollbarpolicy_horizontal = always_off
+				using = VerticalScrollAreaCutOff
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+
+				scrollwidget = {
+					fixedgridbox = { #Effect List
+						addcolumn = 502
+						addrow = 62
+						maxhorizontalslots = 1
+
+						datamodel = "[GreatWorkSelectEffectWindow.GetEffects]"
+						item = {
+							list_entry = {
+								size = { 516 60 }
+								great_work_effect = {
+
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		text_button_square = {
+			size = { 190 28 }
+			#parentanchor = bottom|hcenter
+			blockoverride "On_click"
+			{
+				onclick = "[GreatWorkSelectEffectWindow.RemoveSelection]"
+			}
+			blockoverride "Center_text" 
+			{
+				text = "REMOVE"
+			}
+			tooltip = "[GreatWorkSelectEffectWindow.GetRemoveSelectedTooltip]"
+			enabled = "[GreatWorkSelectEffectWindow.CanRemoveEffect]"
+		}
+	}
+}

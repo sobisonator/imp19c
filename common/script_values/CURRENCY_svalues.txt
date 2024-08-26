@@ -205,8 +205,6 @@ CURRENCY_ideal_reserve_ratio = {
 		}
 		subtract = CURRENCY_ideal_reserve_ratio_multiplier_silver
 	}
-	# The accumulation rate need only be 5% of the stockpile 
-	#divide = 20
 	if = {
 		limit = {
 			NOT = {
@@ -737,4 +735,71 @@ CURRENCY_base_starting_amt_circulated_scaled = {
 	multiply = 3
 	add = country_population
 	min = 1
+}
+
+# Money supply effects - deflation and inflation
+
+CURRENCY_amt_circulated_deflation = {
+	# Scope: Country
+	# Function: Calculate the deflation impact from insufficient money supply, which is subtracted from base demand for tradegoods from pops, and added onto the shortage for all tradegoods
+	value = 0
+	if = {
+		limit = {
+			has_variable = CURRENCY_amt_circulated_thousands
+			CURRENCY_private_cash_ratio < 1
+		}
+		value = 1
+		subtract = CURRENCY_private_cash_ratio
+		divide = 10
+	}
+}
+
+CURRENCY_amt_circulated_deflation_demand_multiplier = {
+	# Scope: Country
+	# Function: Get the value by which to multiply pop demand based on inflation
+	value = 1
+	subtract = CURRENCY_amt_circulated_deflation
+}
+
+CURRENCY_amt_circulated_inflation = {
+	# Scope: Country
+	# Function: Calculate the inflation impact from excess money supply, which is added to base demand for tradegoods from pops
+	value = 0
+	if = {
+		limit = {
+			has_variable = CURRENCY_amt_circulated_thousands
+			CURRENCY_private_cash_ratio > 1
+		}
+		value = CURRENCY_private_cash_ratio
+		subtract = 1
+		divide = 10
+	}
+}
+
+CURRENCY_amt_circulated_inflation_demand_multiplier = {
+	value = CURRENCY_amt_circulated_inflation
+	add = 1
+}
+
+CURRENCY_amt_circulated_inflation_10th = {
+	value = 0
+	if = {
+		limit = {
+			CURRENCY_amt_circulated_inflation > 0
+		}
+		value = CURRENCY_amt_circulated_inflation
+		divide = 10
+	}
+}
+
+CURRENCY_amt_circulated_inflation_wealth_multiplier = {
+	# Scope: Country
+	# Function: Calculate % loss to pop wealth every quarter from excess money supply
+	value = 1
+	if = {
+		limit = {
+			CURRENCY_amt_circulated_inflation > 0
+		}
+		subtract = CURRENCY_amt_circulated_inflation_10th
+	}
 }

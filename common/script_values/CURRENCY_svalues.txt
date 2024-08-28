@@ -20,7 +20,7 @@ CURRENCY_base_starting_reserve_gold = {
 	# Scope: Country
 	# Function: Get a value proportionate to the country's economy to start off the size of their gold reserves
 	value = country_population
-	multiply = 0.1
+	multiply = 0.9
 	add = FUNC_cities_10x
 	round = floor
 }
@@ -36,7 +36,7 @@ CURRENCY_base_starting_reserve_silver = {
 	# Scope: Country
 	# Function: Get a value proportionate to the country's economy to start off the size of their silver reserves
 	value = country_population
-	multiply = 0.02
+	multiply = 0.35
 	add = FUNC_cities_10x
 	round = floor
 }
@@ -406,8 +406,29 @@ CURRENCY_reserve_ratio_total = {
 	# Scope: Country
 	# Function: The ratio of currency in national debt and privately held cash, against the value of the precious metal reserves
 	#value = CURRENCY_reserve_value_in_cash_scaled
-	value = CURRENCY_reserve_value_in_cash_scaled
-	divide = CURRENCY_total_country_cash_scaled
+	value = 0
+	var:official_currency = {
+		every_in_list = {
+			variable = currency_adopted_countries
+
+			add = CURRENCY_reserve_value_in_cash_scaled
+		}
+	}
+	#value = CURRENCY_reserve_value_in_cash_scaled
+	divide = CURRENCY_total_country_cash_scaled_for_reserve_ratio
+}
+
+CURRENCY_total_country_cash_scaled_for_reserve_ratio = {
+	# Scope: Country
+	# Function: Add the amount of cash in every country using this currency
+	value = 0.001
+	var:official_currency = {
+		every_in_list = {
+			variable = currency_adopted_countries
+
+			add = CURRENCY_total_country_cash_scaled
+		}
+	}
 }
 
 CURRENCY_essentials_buying_power = {
@@ -731,9 +752,8 @@ CURRENCY_base_starting_amt_circulated_scaled = {
 	value = var:official_currency.var:units_to_the_lb
 	multiply = WEALTH_total_private_moveable_wealth_scaled
 	#multiply = 0.6
-	add = 20
-	multiply = 3
 	add = country_population
+	multiply = 8
 	min = 1
 }
 

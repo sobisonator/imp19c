@@ -20,7 +20,7 @@ CURRENCY_base_starting_reserve_gold = {
 	# Scope: Country
 	# Function: Get a value proportionate to the country's economy to start off the size of their gold reserves
 	value = country_population
-	multiply = 0.9
+	multiply = 0.7
 	add = FUNC_cities_10x
 	round = floor
 }
@@ -36,7 +36,7 @@ CURRENCY_base_starting_reserve_silver = {
 	# Scope: Country
 	# Function: Get a value proportionate to the country's economy to start off the size of their silver reserves
 	value = country_population
-	multiply = 0.35
+	multiply = 0.28
 	add = FUNC_cities_10x
 	round = floor
 }
@@ -643,6 +643,15 @@ CURRENCY_trade_wealth_outgoing_currency_value = {
 CURRENCY_amt_circulated_balance = {
 	value = CURRENCY_trade_wealth_outgoing_currency_value
 	add = var:CURRENCY_minting_rate
+	if = {
+		limit = {
+			CURRENCY_amt_circulated_inflation > 0
+			NOT = {
+				has_variable = CURRENCY_reserves_frozen
+			}
+		}
+		subtract = CURRENCY_inflation_cash_selloff_amt
+	}
 }
 
 # New wealth to governorships based on minting
@@ -801,14 +810,14 @@ CURRENCY_amt_circulated_inflation_demand_multiplier = {
 	add = 1
 }
 
-CURRENCY_amt_circulated_inflation_10th = {
+CURRENCY_amt_circulated_inflation_100th = {
 	value = 0
 	if = {
 		limit = {
 			CURRENCY_amt_circulated_inflation > 0
 		}
 		value = CURRENCY_amt_circulated_inflation
-		divide = 10
+		divide = 100
 	}
 }
 
@@ -820,8 +829,60 @@ CURRENCY_amt_circulated_inflation_wealth_multiplier = {
 		limit = {
 			CURRENCY_amt_circulated_inflation > 0
 		}
-		subtract = CURRENCY_amt_circulated_inflation_10th
+		subtract = CURRENCY_amt_circulated_inflation_100th
 	}
+}
+
+CURRENCY_inflation_cash_selloff_amt = {
+	# Scope: Country
+	# Function: Determine how much reserve metal pops are trying to buy with their inflated cash
+	value = CURRENCY_amt_circulated_inflation
+	divide = 5
+	multiply = CURRENCY_amt_circulated_scaled
+}
+
+CURRENCY_inflation_precious_metal_reserve_bought = {
+	# Scope: Country
+	# Function: Get the value, in hundreds of lbs, of reserve currency being bought by pops due to inflation
+	value = CURRENCY_inflation_cash_selloff_amt
+	multiply = 10
+	divide = var:official_currency.var:units_to_the_lb
+}
+
+CURRENCY_deflation_money_demand_amt = {
+	# Scope: Country
+	# Function: Extra money that is created by pops creating new money with private banks
+	value = CURRENCY_amt_circulated_deflation
+	multiply = 3000
+}
+
+CURRENCY_deflation_money_bought_precious_metal_sold = {
+	# Scope Country
+	# Function: Get the value in precious metal of the reserve sold
+	value = CURRENCY_deflation_money_demand_amt
+	divide = var:official_currency.var:units_to_the_lb
+	multiply = 10
+}
+
+CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation = {
+	value = 0
+	if = {
+		limit = {
+			CURRENCY_amt_circulated_deflation > 0
+		}
+		value = CURRENCY_deflation_money_bought_precious_metal_sold
+	}
+	if = {
+		limit = {
+			CURRENCY_amt_circulated_inflation > 0
+		}
+		subtract = CURRENCY_inflation_precious_metal_reserve_bought		
+	}
+}
+
+CURRENCY_cash_inflation_wealth_malus_value = {
+	value = WEALTH_total_private_moveable_wealth
+	multiply = CURRENCY_amt_circulated_inflation_100th
 }
 
 ## FUNC

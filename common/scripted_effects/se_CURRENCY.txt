@@ -380,6 +380,41 @@ CURRENCY_all_governorships_send_to_reserves = {
 			tradegood = silver
 		}
 	}
+
+}
+
+CURRENCY_private_purchase_or_sell_reserves = {
+	# Scope: Country
+	# Function:
+	# Add from private purchase or sale of reserve metals
+	# Always buy or add to the biggest reserve
+	if = {
+		limit = {
+			var:gold_reserve_size > var:silver_reserve_size
+		}
+		change_variable = {
+			name = gold_reserve_size
+			add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
+		}
+		change_variable = {
+			name = gold_reserve_actual_change
+			add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
+		}
+	}
+	else_if = {
+		limit = {
+			var:silver_reserve_size > var:gold_reserve_size
+		}
+		change_variable = {
+			name = silver_reserve_size
+			add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
+		}
+		change_variable = {
+			name = silver_reserve_actual_change
+			add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
+		}
+	}
+
 }
 
 CURRENCY_governorship_send_to_reserves = {
@@ -547,6 +582,8 @@ CURRENCY_mint_currency = {
 	}
 	CURRENCY_alter_amt_circulated = {
 		thousands = CURRENCY_minting_rate
+		millions = 0
+		billions = 0
 	}
 	CURRENCY_distribute_currency_all_governorships = yes
 }
@@ -583,7 +620,7 @@ CURRENCY_alter_amt_circulated = {
 		}
 	}
 	while = {
-		count = 9
+		count = 999
 		limit = {
 			var:CURRENCY_amt_circulated_thousands > 1000
 		}
@@ -1165,6 +1202,7 @@ CURRENCY_country_set_accumulation_rate = {
 CURRENCY_country_update_reserve_size = {
 	# Scope: Country
 	# Function: Update the amount in the reserve based on how much the governorships can acquire
+	# DEFUNCT
 	every_governorships = {
 		save_scope_as = governorship_scope
 		owner = {
@@ -1174,6 +1212,7 @@ CURRENCY_country_update_reserve_size = {
 			}
 		}
 	}
+
 }
 
 CURRENCY_distribute_currency_all_governorships = {
@@ -1243,6 +1282,10 @@ CURRENCY_apply_inflation_wealth_malus_governorship = {
 	}
 	change_variable = {
 		name = tribesmen_wealth
+		multiply = CURRENCY_amt_circulated_inflation_wealth_multiplier
+	}
+	change_variable = {
+		name = indentured_wealth
 		multiply = CURRENCY_amt_circulated_inflation_wealth_multiplier
 	}
 }

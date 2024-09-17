@@ -153,7 +153,13 @@ CURRENCY_ideal_reserve_ratio_multiplier_gold = {
 	# Scope: Country
 	# Function: Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
 	# The ideal reserve ratio % (i.e. maximum reserve ratio size before the bonus caps out) is THIS divided by 100
-	value = var:gold_reserve_actual_change
+	value = 0
+	if = {
+		limit = {
+			has_variable = gold_reserve_actual_change
+		}
+		add = var:gold_reserve_actual_change
+	}
 	#multiply = 10
 	divide = CURRENCY_total_country_cash_scaled
 	#multiply = 30
@@ -170,7 +176,13 @@ CURRENCY_ideal_reserve_ratio_multiplier_silver = {
 	# Scope: Country
 	# Function: Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
 	# The ideal reserve ratio % (i.e. maximum reserve ratio size before the bonus caps out) is THIS divided by 100
-	value = var:silver_reserve_actual_change
+	value = 0
+	if = {
+		limit = {
+			has_variable = silver_reserve_actual_change
+		}
+		add = var:silver_reserve_actual_change
+	}
 	divide = CURRENCY_total_country_cash_scaled
 	if = {
 		limit = {
@@ -651,6 +663,14 @@ CURRENCY_amt_circulated_balance = {
 			}
 		}
 		subtract = CURRENCY_inflation_cash_selloff_amt
+	}
+	if = {
+		limit = {
+			CURRENCY_amt_circulated_deflation > 0
+			NOT = {
+				has_variable = CURRENCY_
+			}
+		}
 	}
 }
 

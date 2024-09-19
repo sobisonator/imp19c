@@ -1,4 +1,4 @@
-CURRENCY_base_starting_amt_circulated_thousands = {
+﻿CURRENCY_base_starting_amt_circulated_thousands = {
 	# Scope: Country
 	# Function: Get a value proportionate to the country's economy to start off the size of their gold reserves
 	value = country_population
@@ -719,7 +719,40 @@ CURRENCY_governorship_wealth_due_to_tribesmen = {
 CURRENCY_national_debt_interest_base = {
 	# Scope: Country
 	# Function: The base rate of national interest if Debt = 100% of GDP
-	value = 0.03
+	value = 0.015
+}
+
+CURRENCY_national_debt_interest_impact_from_stability = {
+	if = {
+		limit = {
+			stability > 0
+		}
+		value = {
+			value = 1
+			divide = {
+				value = stability
+				divide = 100
+			}
+		}
+	}
+	else = {
+		value = 100
+	}
+}
+
+CURRENCY_national_debt_interest_impact_from_war_exhaustion = {
+	if = {
+		limit = {
+			has_war_exhaustion > 0
+		}
+		value = {
+			value = has_war_exhaustion
+			divide = 300
+		}
+	}
+	else = {
+		value = 0
+	}
 }
 
 CURRENCY_national_debt_interest_actual = {
@@ -727,6 +760,8 @@ CURRENCY_national_debt_interest_actual = {
 	# Function: The interest rate of the given country based on its debt/GDP ratio
 	value = CURRENCY_national_debt_interest_base
 	multiply = CURRENCY_debt_to_GDP_ratio
+	multiply = CURRENCY_national_debt_interest_impact_from_stability
+	add = CURRENCY_national_debt_interest_impact_from_war_exhaustion
 }
 
 CURRENCY_national_debt_interest_actual_wealth_cost = {

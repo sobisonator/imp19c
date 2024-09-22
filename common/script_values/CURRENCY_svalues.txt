@@ -106,6 +106,11 @@ CURRENCY_repay_debt_1k_interest_cost = {
 	multiply = CURRENCY_national_debt_interest_actual
 }
 
+CURRENCY_repay_debt_10k_interest_cost = {
+	value = CURRENCY_wealth_value_10k_units_negative
+	multiply = CURRENCY_national_debt_interest_actual
+}
+
 CURRENCY_wealth_value_1_unit = {
 	# Scope: Country
 	# Function: Get the amount of "wealth" units that 1 unit of this country's currency can buy according to its pegged reserve value
@@ -149,9 +154,7 @@ CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio_x1k = {
 }
 
 CURRENCY_wealth_value_reserve_ratio_minting_impact = {
-	value = CURRENCY_reserve_ratio_total
-	divide = CURRENCY_ideal_reserve_ratio
-	max = 1
+	value = CURRENCY_reserve_ratio_impact
 }
 
 CURRENCY_ideal_reserve_ratio_multiplier_gold = {
@@ -174,7 +177,7 @@ CURRENCY_ideal_reserve_ratio_multiplier_gold = {
 		}
 		multiply = CURRENCY_wealth_bimetallic_gold_as_percentage
 	}
-	multiply = 2
+	multiply = 0.5
 }
 
 CURRENCY_ideal_reserve_ratio_multiplier_silver = {
@@ -195,14 +198,14 @@ CURRENCY_ideal_reserve_ratio_multiplier_silver = {
 		}
 		multiply = CURRENCY_wealth_bimetallic_silver_as_percentage
 	}
-	multiply = 2
+	multiply = 0.5
 }
 
 CURRENCY_ideal_reserve_ratio = {
 	# Scope: Country
 	# Function: Get the ideal reserve ratio multiplier based on the metallic standard in use
 	# Take the reserve ACTUAL accumulation rate (never mind the target) and divide it by the total reserve size. This gives the multiplier for minting value given by the reserve ratio.
-	value = 0.2
+	value = 0.5
 	if = {
 		limit = {
 			var:official_currency.var:backing_type = flag:bimetallic_standard
@@ -234,23 +237,43 @@ CURRENCY_ideal_reserve_ratio = {
 	min = 0.05
 }
 
+CURRENCY_reserve_ratio_impact = {
+	if = {
+		limit = {
+			has_variable = public_debt_administration
+			CURRENCY_reserve_ratio_total < 1
+		}
+		value = CURRENCY_reserve_ratio_total
+		multiply = {
+			value = 5
+			subtract = CURRENCY_reserve_ratio_total
+		}
+		max = 1
+	}
+	else_if = {
+		limit = {
+			CURRENCY_reserve_ratio_total < 1
+		}
+		value = CURRENCY_reserve_ratio_total
+	}
+	else = {
+		value = 1
+	}
+}
+
 CURRENCY_stability_impact_ideal_reserve_ratio = {
 	if = {
 		limit = {
 			stability > 0
-			stability < 50
 		}
-		value = 0.5
-		subtract = stability
+		value = stability
+		multiply = 0.01
 	}
 	else_if = {
 		limit = {
 			stability = 0
 		}
-		value = 1
-	}
-	else = {
-		value = 0.01
+		value = 0
 	}
 }
 
@@ -461,6 +484,8 @@ CURRENCY_essentials_buying_power = {
 	add = var:country_unit_price_furniture
 	add = var:country_unit_price_pharmaceuticals
 	add = var:country_unit_price_alcohol
+	add = var:country_unit_price_luxury_clothing
+	add = var:country_unit_price_luxury_furniture
 
 	if = {
 		limit = {
@@ -664,7 +689,7 @@ CURRENCY_amt_circulated_balance = {
 		limit = {
 			CURRENCY_amt_circulated_inflation > 0
 			NOT = {
-				has_variable = CURRENCY_reserves_frozen
+				has_variable = reserves_frozen
 			}
 		}
 		subtract = CURRENCY_inflation_cash_selloff_amt
@@ -673,7 +698,7 @@ CURRENCY_amt_circulated_balance = {
 		limit = {
 			CURRENCY_amt_circulated_deflation > 0
 			NOT = {
-				has_variable = CURRENCY_
+				has_variable = reserves_frozen
 			}
 		}
 	}
@@ -940,9 +965,50 @@ CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation = {
 	}
 }
 
-CURRENCY_cash_inflation_wealth_malus_value = {
-	value = WEALTH_total_private_moveable_wealth
-	multiply = CURRENCY_amt_circulated_inflation_100th
+CURRENCY_gold_reserve_actual_change_with_cashout = {
+	value = var:gold_reserve_actual_change
+	if = {
+		limit = {
+			NOT = { has_variable = reserves_frozen }
+			var:gold_reserve_size > var:silver_reserve_size
+		}
+		subtract = 	CURRENCY_inflation_precious_metal_reserve_bought
+	}
+}
+
+CURRENCY_silver_reserve_actual_change_with_cashout = {
+	value = var:silver_reserve_actual_change
+	if = {
+		limit = {
+			NOT = { has_variable = reserves_frozen }
+			var:silver_reserve_size > var:gold_reserve_size
+		}
+		subtract = 	CURRENCY_inflation_precious_metal_reserve_bought
+	}
+}
+
+
+CURRENCY_change_value_stability_impact = {
+	# Scope: Country
+	# Function: Scale the stability impact of changing currency value based on the current currency, so that a currency with a very high cash:reserve exchange rate impacts stability less
+	value = 100
+	divide = var:official_currency.var:units_to_the_lb
+	multiply = -1
+}
+
+CURRENCY_change_value_PI_cost = {
+	value = CURRENCY_change_value_stability_impact
+	multiply = 10
+}
+
+CURRENCY_change_value_PI_cost_neg = {
+	value = CURRENCY_change_value_PI_cost
+	multiply = -1
+}
+
+CURRENCY_change_value_stability_impact_neg = {
+	value = CURRENCY_change_value_stability_impact
+	multiply = -1
 }
 
 ## FUNC

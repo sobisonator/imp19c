@@ -223,6 +223,9 @@ CURRENCY_issue_national_debt = {
     ai_is_valid = {
         always = no
     }
+    is_valid = {
+        treasury < 99999
+    }
     effect = {
         CURRENCY_alter_own_debt = {
             thousands = 1
@@ -238,6 +241,9 @@ CURRENCY_issue_national_debt_10k = {
     ai_is_valid = {
         always = no
     }
+    is_valid = {
+        treasury < 99999
+    }
     effect = {
         CURRENCY_alter_own_debt = {
             thousands = 10
@@ -252,6 +258,9 @@ CURRENCY_issue_national_debt_100k = {
     scope = country
     ai_is_valid = {
         always = no
+    }
+    is_valid = {
+        treasury < 99999
     }
     effect = {
         CURRENCY_alter_own_debt = {
@@ -274,6 +283,9 @@ CURRENCY_issue_national_debt_1m = {
     ai_is_valid = {
         always = no
     }
+    is_valid = {
+        treasury < 99999
+    }
     effect = {
         CURRENCY_alter_own_debt = {
             thousands = 0
@@ -292,6 +304,9 @@ CURRENCY_issue_national_debt_1m = {
 
 CURRENCY_repay_national_debt = {
     scope = country
+    is_valid = {
+        treasury > 0
+    }
     effect = {
         CURRENCY_alter_own_debt = {
             thousands = -1
@@ -299,11 +314,15 @@ CURRENCY_repay_national_debt = {
             billions = 0
         }
         add_treasury = CURRENCY_wealth_value_1k_units_negative
+        add_treasury = CURRENCY_repay_debt_1k_interest_cost
     }
 }
 
 CURRENCY_repay_national_debt_10k = {
     scope = country
+    is_valid = {
+        treasury > 0
+    }
     effect = {
         CURRENCY_alter_own_debt = {
             thousands = -10
@@ -311,11 +330,15 @@ CURRENCY_repay_national_debt_10k = {
             billions = 0
         }
         add_treasury = CURRENCY_wealth_value_10k_units_negative
+        add_treasury = CURRENCY_repay_debt_10k_interest_cost
     }
 }
 
 CURRENCY_repay_national_debt_100k = {
     scope = country
+    is_valid = {
+        treasury > 0
+    }
     effect = {
         CURRENCY_alter_own_debt = {
             thousands = -100
@@ -334,6 +357,9 @@ CURRENCY_repay_national_debt_100k = {
 
 CURRENCY_repay_national_debt_1m = {
     scope = country
+    is_valid = {
+        treasury > 0
+    }
     effect = {
         CURRENCY_alter_own_debt = {
             thousands = 0
@@ -532,5 +558,58 @@ CURRENCY_sell_off_reserve_gold_10 = {
                 }
             }
         }
+    }
+}
+
+CURRENCY_toggle_freeze_reserves = {
+    scope = country
+    effect = {
+        if = {
+            limit = {
+                has_variable = reserves_frozen
+            }
+            remove_variable = reserves_frozen
+        }
+        else = {
+            set_variable = reserves_frozen
+        }
+    }
+}
+
+CURRENCY_decrease_reserve_exchange = {
+    scope = country
+    is_valid = {
+        var:official_currency.var:originator_country = ROOT
+        political_influence >= CURRENCY_change_value_PI_cost_neg
+        stability >= CURRENCY_change_value_stability_impact_neg
+    }
+    effect = {
+        var:official_currency = {
+            change_variable = {
+                name = units_to_the_lb
+                subtract = 1
+            }
+        }
+        add_political_influence = CURRENCY_change_value_PI_cost
+        add_stability = CURRENCY_change_value_stability_impact
+    }
+}
+
+CURRENCY_increase_reserve_exchange = {
+    scope = country
+    is_valid = {
+        var:official_currency.var:originator_country = ROOT
+        political_influence >= CURRENCY_change_value_PI_cost_neg
+        stability >= CURRENCY_change_value_stability_impact_neg
+    }
+    effect = {
+        var:official_currency = {
+            change_variable = {
+                name = units_to_the_lb
+                add = 1
+            }
+        }
+        add_political_influence = CURRENCY_change_value_PI_cost
+        add_stability = CURRENCY_change_value_stability_impact
     }
 }

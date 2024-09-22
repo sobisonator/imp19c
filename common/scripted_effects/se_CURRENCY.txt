@@ -5,6 +5,9 @@
 
 	# BRITISH POUND STERLING
 	c:GBR = { add_to_list = currency_adopters_list }
+	c:GBR = {
+		set_variable = reserves_frozen
+	}
 	
 	CURRENCY_create_new_currency = {
 		currency_name = pound_sterling
@@ -205,7 +208,7 @@
 
 	CURRENCY_create_new_currency = {
 		currency_name = Conventionsthaler
-		originator_tag = SAX
+		originator_tag = c:SAX
 		backing_type = silver_standard
 		units_to_the_lb = 194
 		currency_adopters_list = currency_adopters_list
@@ -390,28 +393,33 @@ CURRENCY_private_purchase_or_sell_reserves = {
 	# Always buy or add to the biggest reserve
 	if = {
 		limit = {
-			var:gold_reserve_size > var:silver_reserve_size
+			NOT = { has_variable = reserves_frozen }
 		}
-		change_variable = {
-			name = gold_reserve_size
-			add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
+		if = {
+			limit = {
+				var:gold_reserve_size > var:silver_reserve_size
+			}
+			change_variable = {
+				name = gold_reserve_size
+				add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
+			}
+			change_variable = {
+				name = gold_reserve_actual_change
+				add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
+			}
 		}
-		change_variable = {
-			name = gold_reserve_actual_change
-			add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
-		}
-	}
-	else_if = {
-		limit = {
-			var:silver_reserve_size > var:gold_reserve_size
-		}
-		change_variable = {
-			name = silver_reserve_size
-			add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
-		}
-		change_variable = {
-			name = silver_reserve_actual_change
-			add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
+		else_if = {
+			limit = {
+				var:silver_reserve_size > var:gold_reserve_size
+			}
+			change_variable = {
+				name = silver_reserve_size
+				add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
+			}
+			change_variable = {
+				name = silver_reserve_actual_change
+				add = CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation
+			}
 		}
 	}
 

@@ -375,3 +375,50 @@ ECON_distribute_starting_holdings = { #UK only for now
 		add_holding = p:9170 #Cambridgeshire, for Kimbolton
 	}
 }
+
+### WAGES FOR JBOS
+
+WAGE_set_all_wages_governorship = {
+
+}
+
+WAGE_set_wage_governorship = {
+	# Scope: Governorship
+	# Function: Set the wage in this governorship for a certain industry
+	# Available options are:
+	##
+	# manufacturing_consumer
+	# manufacturing_business
+	# agriculture
+	# mining
+	# unskilled_service
+	# skilled_service
+	##
+	set_variable = {
+		name = WAGE_$sector$
+		value = $wage$ # In currency
+	}
+}
+
+WAGE_pay_wages_governorship = {
+	# Scope: Governorship
+	# Function: Pay the wages to every pop type in a governorship based on the percentage of that pop type employed in $sector$
+	WAGE_pay_pop_wage = {
+		pop = middle_strata
+		sector = $sector$
+	}
+}
+
+WAGE_pay_pop_wage = {
+	# Scope: Governorship
+	# Function: Called by WAGE_pay_wages_governorship
+	change_variable = {
+		name = $pop$_wealth
+		add = {
+			value = WAGE_$sector$_wealth_value # svalue (translates currency value to wealth value)
+			multiply = 1000 # Base wage value is for 1 family, 1 pop =~ 1,000 families
+			multiply = JOBS_$pop$_employed_$sector$ # svalue
+			multiply = var:governorship_$pop$
+		}
+	}
+}

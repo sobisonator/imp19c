@@ -376,19 +376,18 @@ ECON_distribute_starting_holdings = { #UK only for now
 	}
 }
 
-### WAGES FOR JBOS
+### WAGES FOR JOBS - PORT INTO NEW FILE
 
 WAGE_set_all_wages_governorship = {
 
 }
 
 WAGE_set_wage_governorship = {
-	# Scope: Governorship
-	# Function: Set the wage in this governorship for a certain industry
+	# Scope: Country
+	# Function: Set the quarterly wage in this governorship for a certain industry
 	# Available options are:
 	##
-	# manufacturing_consumer
-	# manufacturing_business
+	# manufacturing
 	# agriculture
 	# mining
 	# unskilled_service
@@ -413,12 +412,44 @@ WAGE_pay_pop_wage = {
 	# Scope: Governorship
 	# Function: Called by WAGE_pay_wages_governorship
 	change_variable = {
-		name = $pop$_wealth
-		add = {
-			value = WAGE_$sector$_wealth_value # svalue (translates currency value to wealth value)
-			multiply = 1000 # Base wage value is for 1 family, 1 pop =~ 1,000 families
+		name = upper_strata_wealth
+		subtract = {
+			value = owner.WAGE_wealth_value_$sector$ # svalue (translates currency value to wealth value)
+			multiply = 500 # Base wage value is for 1 family, 1 pop =~ 500 working people
 			multiply = JOBS_$pop$_employed_$sector$ # svalue
 			multiply = var:governorship_$pop$
 		}
 	}
+	change_variable = {
+		name = $pop$_wealth
+		add = {
+			value = owner.WAGE_wealth_value_$sector$ # svalue (translates currency value to wealth value)
+			multiply = 500 # Base wage value is for 1 family, 1 pop =~ 500 working people
+			multiply = JOBS_$pop$_employed_$sector$ # svalue
+			multiply = var:governorship_$pop$
+		}
+	}
+}
+
+
+### NEW WEALTH GENERATION
+
+WEALTH_generate_new = {
+	# Scope: Governorship
+	# Function: Generate new wealth from resource production and services
+}
+
+WEALTH_generate_from_production_all = {
+	# Scope: Governorship
+	# Function: Create new wealth from the value of all goods produced in this governorship
+}
+
+WEALTH_generate_from_production = {
+	# Scope: Governorship
+	# Function: Generate new wealth from $tradegood$, taking into account its durability, i.e., once produced, how long one unit of this tradegood holds its value.
+
+}
+
+WEALTH_generate_from_services = {
+	# Scope: Governorship
 }

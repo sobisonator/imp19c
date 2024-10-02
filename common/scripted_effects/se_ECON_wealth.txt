@@ -446,10 +446,35 @@ WEALTH_generate_from_production_all = {
 
 WEALTH_generate_from_production = {
 	# Scope: Governorship
-	# Function: Generate new wealth from $tradegood$, taking into account its durability, i.e., once produced, how long one unit of this tradegood holds its value.
-
+	# Function: Create new wealth from $tradegood$ production taking into account its durability, i.e., once produced, how long one unit of this tradegood holds its value.
 }
 
 WEALTH_generate_from_services = {
 	# Scope: Governorship
+}
+
+WEALTH_assign_new_to_pops = {
+	# Scope: Governorship
+	# Function: Assign new wealth from $wealth_source$ (production or services) to $pop_type$
+	set_variable = {
+		name = WEALTH_new_generated_$wealth_source$_to_$pop_type$
+		value = {
+			value = var:WEALTH_new_generated_$wealth_source$_governorship
+
+			multiply = { # Percentage share owed to this pop type based on the population of the pop type and the pop type's share of new wealth earnings
+				value = WEALTH_new_ownership_$wealth_source$_share_$pop_type$
+				multiply = var:governorship_$pop_type$
+				if = {
+					limit = {
+						AND = {
+							WEALTH_new_ownership_$wealth_source$_share_$pop_type$ > 0
+							WEALTH_sum_of_new_ownership_$wealth_source$_shares > 0
+						}
+					}
+					divide = WEALTH_sum_of_new_ownership_$wealth_source$_shares
+				}
+			}
+		}
+	}
+
 }

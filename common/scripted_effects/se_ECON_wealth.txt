@@ -439,7 +439,15 @@ WEALTH_generate_new = {
 	# Function: Generate new wealth from resource production and services
 }
 
+WEALTH_generate_new_all_countries = {
+	# Scope: Random country
+	every_country = {
+		WEALTH_generate_new_all_governorships = yes
+	}
+}
+
 WEALTH_generate_new_all_governorships = {
+	# Scope: Country
 	every_governorships = {
 		WEALTH_generate_from_production_all = yes
 	}
@@ -459,6 +467,12 @@ WEALTH_generate_from_production_all = {
 		name = WEALTH_new_generated_production
 		multiply = 0.1
 	}
+}
+
+WEALTH_update_services_value = {
+	# Scope: Random country
+	WEALTH_set_services_demand = yes
+	WEALTH_set_services_supply = yes
 }
 
 WEALTH_generate_from_production = {
@@ -504,8 +518,13 @@ WEALTH_set_services_demand = {
 							value = governorship_middle_strata
 							multiply = 0.5
 						}
+						subtract = {
+							value = governorship_tribesmen # Tribal communities self-organising, reduce demand professional services
+							multiply = 0.12
+						}
 					}
 				}
+				min = 0
 			}
 		}
 	}
@@ -530,7 +549,9 @@ WEALTH_set_services_supply = {
 						limit = {
 							var:trade_center = scope:services_supply_scope
 						}
-						add = governorship_num_of_URB_commerce_district
+						add = {
+							value = SERVICES_output_governorship
+						}
 					}
 				}
 			}

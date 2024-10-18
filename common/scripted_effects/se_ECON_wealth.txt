@@ -471,8 +471,7 @@ WEALTH_generate_from_production_all = {
 
 WEALTH_update_services_value = {
 	# Scope: Random country
-	WEALTH_set_services_demand = yes
-	WEALTH_set_services_supply = yes
+	WEALTH_set_services_value = yes
 }
 
 WEALTH_generate_from_production = {
@@ -490,13 +489,13 @@ WEALTH_generate_from_production = {
 	}
 }
 
-WEALTH_set_services_demand = {
+WEALTH_set_services_value = {
 	# Scope: Random country, to every tradezone
 	# Function: Set the level of demand for services in every tradezone, based on economic activity in tradezones
 	every_trade_center = {
-		save_scope_as = services_demand_scope
+		save_scope_as = services_TZ_scope
 		set_variable = {
-			name = DEMAND_services
+			name = WEALTH_services_demand_TZ
 			value = {
 				value = var:TZ_shipping # Actual convoys
 				multiply = {
@@ -506,12 +505,12 @@ WEALTH_set_services_demand = {
 				every_country = {
 					limit = {
 						any_governorships = {
-							var:trade_center = scope:services_demand_scope
+							var:trade_center = scope:services_TZ_scope
 						}
 					}
 					every_governorships = {
 						limit = {
-							var:trade_center = scope:services_demand_scope
+							var:trade_center = scope:services_TZ_scope
 						}
 						add = governorship_upper_strata
 						add = {
@@ -527,32 +526,62 @@ WEALTH_set_services_demand = {
 				min = 0
 			}
 		}
-	}
-}
-
-WEALTH_set_services_supply = {
-	# UNTESTED
-	# Scope: Random country, to every tradezone
-	every_trade_center = {
-		save_scope_as = services_supply_scope
 		set_variable = {
-			name = SUPPLY_services
+			name = WEALTH_services_supply_TZ
 			value = {
 				value = 1
 				every_country = {
 					limit = {
 						any_governorships = {
-							var:trade_center = scope:services_supply_scope
+							var:trade_center = scope:services_TZ_scope
 						}
 					}
 					every_governorships = {
 						limit = {
-							var:trade_center = scope:services_supply_scope
+							var:trade_center = scope:services_TZ_scope
 						}
 						add = {
 							value = SERVICES_output_governorship
 						}
 					}
+				}
+			}
+		}
+	}
+
+	set_global_variable = {
+		name = WEALTH_services_demand_global
+		value = {
+			every_country = { 
+				every_owned_province = {
+					limit = { has_variable = TZ_name }
+					add = var:WEALTH_services_supply_TZ
+				}
+			}
+		}
+	}
+	set_global_variable = {
+		name = WEALTH_services_supply_global
+		value = {
+			every_country = { 
+				every_owned_province = {
+					limit = { has_variable = TZ_name }
+					add = var:WEALTH_services_demand_TZ
+				}
+			}
+		}
+	}
+
+	every_trade_center = {
+
+		set_variable = {
+			name = WEALTH_services_value_TZ
+			value = {
+				value = var:WEALTH_services_demand_TZ
+				add = global_var:WEALTH_services_demand_global
+				divide = {
+					value = var:WEALTH_services_supply_TZ
+					add = global_var:WEALTH_services_supply_global
 				}
 			}
 		}

@@ -1,7 +1,9 @@
 def print_out_good(tradegood_name):
   tradegood = tradegood_name
   tradegood_caps = tradegood.upper()
-  loc = '''add = var:country_unit_price_{tradegood}'''.format(tradegood=tradegood)
+  loc = '''WEALTH_{tradegood}_durability = {{
+	value = 1
+}}'''.format(tradegood=tradegood)
   print(loc)
 
 

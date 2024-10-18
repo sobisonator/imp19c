@@ -10,3 +10,46 @@ SERVICES_output_governorship = {
 	# LAWS -
 	# POLICIES - 
 }
+
+governorship_num_of_URB_residential_district = {
+	value = 0
+	every_governorship_state = {
+		every_state_province = {
+			add = num_of_URB_residential_district
+		}
+	}
+}
+
+SERVICES_demand = {
+	value = var:TZ_shipping # Actual convoys
+	multiply = {
+		value = SHIPPING_total_in_TZ # Capacity
+		divide = var:TZ_shipping # Actual convoys
+	}
+	every_country = {
+		limit = {
+			any_governorships = {
+				var:trade_center = scope:services_TZ_scope
+			}
+		}
+		every_governorships = {
+			limit = {
+				var:trade_center = scope:services_TZ_scope
+			}
+			add = governorship_upper_strata
+			add = {
+				value = governorship_middle_strata
+				multiply = 0.5
+			}
+			subtract = {
+				value = governorship_tribesmen # Tribal communities self-organising, reduce demand professional services
+				multiply = 0.12
+			}
+			add = {
+				value = governorship_num_of_URB_residential_district
+				multiply = 5
+			}
+		}
+	}
+	min = 0
+}

@@ -450,6 +450,7 @@ WEALTH_generate_new_all_governorships = {
 	# Scope: Country
 	every_governorships = {
 		WEALTH_generate_from_production_all = yes
+		WEALTH_generate_from_services = yes
 	}
 }
 
@@ -496,35 +497,7 @@ WEALTH_set_services_value = {
 		save_scope_as = services_TZ_scope
 		set_variable = {
 			name = WEALTH_services_demand_TZ
-			value = {
-				value = var:TZ_shipping # Actual convoys
-				multiply = {
-					value = SHIPPING_total_in_TZ # Capacity
-					divide = var:TZ_shipping # Actual convoys
-				}
-				every_country = {
-					limit = {
-						any_governorships = {
-							var:trade_center = scope:services_TZ_scope
-						}
-					}
-					every_governorships = {
-						limit = {
-							var:trade_center = scope:services_TZ_scope
-						}
-						add = governorship_upper_strata
-						add = {
-							value = governorship_middle_strata
-							multiply = 0.5
-						}
-						subtract = {
-							value = governorship_tribesmen # Tribal communities self-organising, reduce demand professional services
-							multiply = 0.12
-						}
-					}
-				}
-				min = 0
-			}
+			value = SERVICES_demand
 		}
 		set_variable = {
 			name = WEALTH_services_supply_TZ
@@ -577,12 +550,13 @@ WEALTH_set_services_value = {
 		set_variable = {
 			name = WEALTH_services_value_TZ
 			value = {
-				value = var:WEALTH_services_demand_TZ
-				add = global_var:WEALTH_services_demand_global
+				value = var:WEALTH_services_supply_TZ
+				add = global_var:WEALTH_services_supply_global
 				divide = {
-					value = var:WEALTH_services_supply_TZ
-					add = global_var:WEALTH_services_supply_global
+					value = var:WEALTH_services_demand_TZ
+					add = global_var:WEALTH_services_demand_global
 				}
+				divide = 20
 			}
 		}
 	}
@@ -591,6 +565,13 @@ WEALTH_set_services_value = {
 WEALTH_generate_from_services = {
 	# Scope: Governorship
 	# Function: Create new wealth from services
+	set_variable = {
+		name = WEALTH_generated_from_services_governorship
+		value = {
+			value = governorship_num_of_URB_commerce_district
+			multiply = var:trade_center.var:WEALTH_services_value_TZ
+		}
+	}
 }
 
 WEALTH_assign_new_to_pops = {

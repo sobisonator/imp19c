@@ -441,6 +441,7 @@ WEALTH_generate_new = {
 
 WEALTH_generate_new_all_countries = {
 	# Scope: Random country
+	WEALTH_update_services_value = yes
 	every_country = {
 		WEALTH_generate_new_all_governorships = yes
 	}
@@ -450,7 +451,18 @@ WEALTH_generate_new_all_governorships = {
 	# Scope: Country
 	every_governorships = {
 		WEALTH_generate_from_production_all = yes
-		WEALTH_generate_from_services = yes
+		WEALTH_generate_from_services_governorship = yes
+		WEALTH_calculate_new_wealth_shares = {
+			category = production
+			the_state = 0
+			upper_strata = 1
+			middle_strata = 0.1
+			lower_strata = 0.05
+			proletariat = 0
+			indentured = 0
+			tribesmen = 0.1
+			slaves = 0
+		}
 	}
 }
 
@@ -458,14 +470,14 @@ WEALTH_generate_from_production_all = {
 	# Scope: Governorship
 	# Function: Create new wealth from the value of all goods produced in this governorship
 	set_variable = {
-		name = WEALTH_new_generated_production
+		name = WEALTH_new_generated_production_governorship
 		value = 0
 	}
 	every_tradegood_complex = {
 		APPLY = WEALTH_generate_from_production
 	}
 	change_variable = {
-		name = WEALTH_new_generated_production
+		name = WEALTH_new_generated_production_governorship
 		multiply = 0.1
 	}
 }
@@ -479,7 +491,7 @@ WEALTH_generate_from_production = {
 	# Scope: Governorship
 	# Function: Create new wealth from $tradegood$ production taking into account its durability, i.e., once produced, how long one unit of this tradegood holds its value.
 	change_variable = {
-		name = WEALTH_new_generated_production
+		name = WEALTH_new_generated_production_governorship
 		add = {
 			value = WEALTH_$tradegood$_durability
 			multiply = {
@@ -562,11 +574,11 @@ WEALTH_set_services_value = {
 	}
 }
 
-WEALTH_generate_from_services = {
+WEALTH_generate_from_services_governorship = {
 	# Scope: Governorship
 	# Function: Create new wealth from services
 	set_variable = {
-		name = WEALTH_generated_from_services_governorship
+		name = WEALTH_new_generated_services_governorship
 		value = {
 			value = governorship_num_of_URB_commerce_district
 			multiply = var:trade_center.var:WEALTH_services_value_TZ
@@ -574,28 +586,162 @@ WEALTH_generate_from_services = {
 	}
 }
 
-WEALTH_assign_new_to_pops = {
-	# Scope: Governorship
-	# Function: Assign new wealth from $wealth_source$ (production or services) to $pop_type$
+WEALTH_set_new_generated_amount = {
 	set_variable = {
-		name = WEALTH_new_generated_$wealth_source$_to_$pop_type$
+		name = WEALTH_new_generated_$category$_$recipient$
 		value = {
-			value = var:WEALTH_new_generated_$wealth_source$_governorship
+			value = $recipient_ratio$
+			if = {
+				limit = {
+					NOT = { flag:$recipient$ = flag:the_state }
+				}
+				multiply = var:governorship_$recipient$
+			}
+			else = {
+				multiply = var:governorship_population
+			}
+		}
+	}
+}
 
-			multiply = { # Percentage share owed to this pop type based on the population of the pop type and the pop type's share of new wealth earnings
-				value = WEALTH_new_ownership_$wealth_source$_share_$pop_type$
-				multiply = var:governorship_$pop_type$
-				if = {
-					limit = {
-						AND = {
-							WEALTH_new_ownership_$wealth_source$_share_$pop_type$ > 0
-							WEALTH_sum_of_new_ownership_$wealth_source$_shares > 0
-						}
-					}
-					divide = WEALTH_sum_of_new_ownership_$wealth_source$_shares
+WEALTH_calculate_new_wealth_shares = {
+
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = the_state
+		recipient_ratio = $the_state$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = upper_strata
+		recipient_ratio = $upper_strata$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = middle_strata
+		recipient_ratio = $middle_strata$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = lower_strata
+		recipient_ratio = $lower_strata$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = proletariat
+		recipient_ratio = $proletariat$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = indentured
+		recipient_ratio = $indentured$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = tribesmen
+		recipient_ratio = $tribesmen$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = slaves
+		recipient_ratio = $slaves$
+	}
+
+	set_local_variable = {
+		name = WEALTH_new_generated_sum_of_$category$_income_weights
+		value = {
+			value = var:WEALTH_new_generated_$category$_the_state
+			add = var:WEALTH_new_generated_$category$_upper_strata
+			add = var:WEALTH_new_generated_$category$_middle_strata
+			add = var:WEALTH_new_generated_$category$_lower_strata
+			add = var:WEALTH_new_generated_$category$_proletariat
+			add = var:WEALTH_new_generated_$category$_indentured
+			add = var:WEALTH_new_generated_$category$_tribesmen
+			add = var:WEALTH_new_generated_$category$_slaves
+			divide = var:WEALTH_new_generated_production_governorship
+		}
+	}
+
+	if = {
+		limit = {
+			has_local_variable = WEALTH_new_generated_sum_of_$category$_income_weights
+		}
+		if = {
+			limit = {
+				local_var:WEALTH_new_generated_sum_of_$category$_income_weights > 0
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_the_state > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_the_state
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_upper_strata > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_upper_strata
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_middle_strata > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_middle_strata
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_lower_strata > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_lower_strata
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_proletariat > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_proletariat
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_indentured > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_indentured
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_tribesmen > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_tribesmen
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_slaves > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_slaves
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
 				}
 			}
 		}
 	}
-
 }

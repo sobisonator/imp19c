@@ -757,3 +757,115 @@ WEALTH_calculate_new_wealth_shares = {
 		}
 	}
 }
+
+WEALTH_create_empire_pool = {
+	# Scope: Country
+	# Function: Create a pool for the new wealth generated within an empire to be redirected to governorships with commerce districts
+	# The ratio of commerce districts to population sets the ratio of wealth from around the empire (core country, autonomous governorship and colonies) which is redirected to provinces with commerce districts
+
+	set_variable = {
+		name = WEALTH_empire_pool_total_commerce_districts
+		value = {
+			value = 0
+			every_governorships = {
+				add = governorship_num_of_URB_commerce_district
+			}
+			every_subject = {
+				limit = {
+					contributes_to_empire_wealth_pool = yes
+				}
+				every_governorships = {
+					add = governorship_num_of_URB_commerce_district 
+				}
+			}
+		}
+	}
+	if = {
+		limit = {
+			var:WEALTH_empire_pool_total_commerce_districts > 0
+		}
+		set_variable = {
+			name = WEALTH_empire_pool_ratio
+			value = {
+				value = var:WEALTH_empire_pool_total_commerce_districts
+				divide = {
+					value = num_of_cities
+					every_subject = {
+						limit = {
+							contributes_to_empire_wealth_pool = yes
+						}
+						add = num_of_cities
+					}
+				}
+			}
+		}
+	}
+	else = {
+		set_variable = {
+			name = WEALTH_empire_pool_ratio
+			value = 0
+		}
+	}
+	if = {
+		limit = {
+			var:WEALTH_empire_pool_ratio > 1
+		}
+		set_variable = {
+			name = WEALTH_empire_pool_ratio
+			value = 1
+		}
+	}
+
+	set_variable = {
+		name = WEALTH_empire_pool
+		value = {
+			value = 0
+			every_governorships = {
+				add = var:WEALTH_new_generated_production_governorship
+				add = var:WEALTH_new_generated_services_governorship
+			}
+			every_subject = {
+				limit = {
+					contributes_to_empire_wealth_pool = yes
+				}
+				every_governorships = {
+					add = var:WEALTH_new_generated_production_governorship
+					add = var:WEALTH_new_generated_services_governorship 
+				}
+			}
+			multiply = var:WEALTH_empire_pool_ratio
+		}
+	}
+}
+
+WEALTH_get_empire_pool_owed_governorship_all = {
+	# Scope: Country
+	every_governorships = {
+		WEALTH_get_empire_pool_owed_governorship = yes
+	}
+}
+
+WEALTH_get_empire_pool_owed_governorship = {
+	# Scope: Governorship
+	# Function: Get the amount owed to this governorship from the empire wealth pool
+	# This is always given either directly to the upper strata or the state
+	set_variable = {
+		name = WEALTH_empire_pool_owed_governorship
+		value = {
+			value = governorship_num_of_URB_commerce_district
+			if = {
+				limit = {
+					owner.var:WEALTH_empire_pool_total_commerce_districts > 0
+				}
+				divide = owner.var:WEALTH_empire_pool_total_commerce_districts
+			}
+			multiply = owner.var:WEALTH_empire_pool
+
+			subtract = {
+				value = var:WEALTH_new_generated_production_governorship
+				add = var:WEALTH_new_generated_services_governorship
+				multiply = owner.var:WEALTH_empire_pool_ratio
+			}
+		}
+	}
+}

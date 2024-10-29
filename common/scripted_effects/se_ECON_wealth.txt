@@ -937,3 +937,70 @@ WEALTH_distribute_new_wealth = {
 		}
 	}
 }
+
+############
+# Wages
+############
+
+# Wages are paid by upper strata pops to middle strata and proletariat pops
+# Only countries with a currency have wages. Countries without a currency cannot have jobs which pay a wage
+
+WEALTH_cache_national_cost_of_living = {
+	# Scope: Country
+	# Function: Cache the wealth cost of living at country level to limit repeat calculations
+	# Must be run at the start of every econ tick
+	set_variable = {
+		name = WEALTH_cost_of_living
+		value = {
+			value = CURRENCY_essentials_buying_power
+			multiply = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
+			multiply = 0.1
+		}
+	}
+}
+
+WEALTH_set_average_wage_at_cost_of_living = {
+	# Scope: Country
+	# Function: Set the average wage based on cost of living. This is based on a currency value, and does not automatically update to account for inflation.
+	# This amount can then be modified based on the specific sector for which wages are being paid.
+	set_variable = {
+		name = WEALTH_average_wage_wealth_value
+		value = var:WEALTH_cost_of_living
+	}
+}
+
+WEALTH_modify_average_wage = {
+	# Scope: Country
+	# Function: Multiply the average wage by the given multiplier
+	change_variable = {
+		name = WEALTH_average_wage_wealth_value
+		multiply = $multiplier$ 
+	}
+}
+
+WEALTH_set_expenses_shopping = {
+	# Scope: Governorship
+	# Function: Set the amount of wealth that non-owner pops must spend on shopping, which then goes to the owners
+	# Set for each $pop$
+	# Also adds the cost of some luxuries if the pop type is buying them
+	set_variable = {
+		name = WEALTH_shopping_spend_$pop$_governorship
+		value = {
+			value = owner.var:WEALTH_cost_of_living
+			multiply = var:governorship_$pop$
+		}
+	}
+}
+
+WEALTH_pay_wages = {
+	# Scope: Governorship
+	# Function: Set the wages due for the given category of jobs
+	# For the available categories, see JOBS_svalues
+	set_variable = {
+		name = WEALTH_wages_due_$category$
+		value = {
+			value = JOBS_$category$ # Number of occupied job slots in this category
+			multiply = owner.var:WEALTH_average_wage_wealth_value
+		}
+	}
+}

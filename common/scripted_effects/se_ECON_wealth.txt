@@ -945,6 +945,56 @@ WEALTH_distribute_new_wealth = {
 # Wages are paid by upper strata pops to middle strata and proletariat pops
 # Only countries with a currency have wages. Countries without a currency cannot have jobs which pay a wage
 
+# TODO: Reserve all the wages due for svalues
+
+WEALTH_setup_wages = {
+	# Scope: Country
+	# Function: Set up wages for a country
+	WEALTH_cache_national_cost_of_living = yes
+	WEALTH_set_average_wage_at_cost_of_living = yes
+}
+
+WEALTH_setup_and_pay_wages_all_countries = {
+	every_country = {
+		WEALTH_setup_wages = yes
+		WEALTH_pay_all_wages_country = yes
+	}
+}
+
+WEALTH_pay_all_wages_country = {
+	# Scope: Country
+	# Function: Calculate and pay wages for all job sectors in every governorship
+	every_governorships = {
+		WEALTH_calculate_all_wages = yes
+	}
+}
+
+WEALTH_calculate_all_wages = {
+	# Scope: Governorship
+	# Function: Determine the amount owed for all job sectors
+	WEALTH_pay_wages = {
+		category = administrators
+	}
+	WEALTH_pay_wages = {
+		category = educators
+	}
+	WEALTH_pay_wages = {
+		category = infrastructure_workers
+	}
+	WEALTH_pay_wages = {
+		category = military
+	}
+	WEALTH_pay_wages = {
+		category = resource_gatherer
+	}
+	WEALTH_pay_wages = {
+		category = industrial_workers
+	}
+	WEALTH_pay_wages = {
+		category = commercial
+	}
+}
+
 WEALTH_cache_national_cost_of_living = {
 	# Scope: Country
 	# Function: Cache the wealth cost of living at country level to limit repeat calculations
@@ -954,7 +1004,7 @@ WEALTH_cache_national_cost_of_living = {
 		value = {
 			value = CURRENCY_essentials_buying_power
 			multiply = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
-			multiply = 0.1
+			multiply = 0.01
 		}
 	}
 }
@@ -999,7 +1049,7 @@ WEALTH_pay_wages = {
 	set_variable = {
 		name = WEALTH_wages_due_$category$
 		value = {
-			value = JOBS_$category$ # Number of occupied job slots in this category
+			value = JOBS_$category$_governorship # Number of occupied job slots in this category
 			multiply = owner.var:WEALTH_average_wage_wealth_value
 		}
 	}

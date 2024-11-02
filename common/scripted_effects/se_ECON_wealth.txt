@@ -955,42 +955,67 @@ WEALTH_setup_wages = {
 }
 
 WEALTH_setup_and_pay_wages_all_countries = {
+	# Scope: Random country
+	# Called: At game start
 	every_country = {
+		limit = {
+			has_variable = official_currency
+		}
 		WEALTH_setup_wages = yes
-		WEALTH_pay_all_wages_country = yes
+		WEALTH_pay_all_wages_all_governorships = yes
 	}
 }
 
-WEALTH_pay_all_wages_country = {
+WEALTH_pay_wages_all_countries = {
+	# Scope: Random country
+	# Called: Quarterly economy tick
+	every_country = {
+		limit = {
+			has_variable = official_currency
+		}
+		WEALTH_pay_all_wages_all_governorships = yes
+	}
+}
+
+WEALTH_pay_all_wages_all_governorships = {
 	# Scope: Country
 	# Function: Calculate and pay wages for all job sectors in every governorship
 	every_governorships = {
 		WEALTH_calculate_all_wages = yes
+		WEALTH_pay_wages = yes
+	}
+}
+
+WEALTH_subtract_cost_of_living_all_governorships = {
+	# Scope: Country
+	# Function: Subtract wealth to cover cost of living in all governorships
+	every_governorships = {
+		WEALTH_subtract_cost_of_living = yes
 	}
 }
 
 WEALTH_calculate_all_wages = {
 	# Scope: Governorship
 	# Function: Determine the amount owed for all job sectors
-	WEALTH_pay_wages = {
+	WEALTH_calculate_wages = {
 		category = administrators
 	}
-	WEALTH_pay_wages = {
+	WEALTH_calculate_wages = {
 		category = educators
 	}
-	WEALTH_pay_wages = {
+	WEALTH_calculate_wages = {
 		category = infrastructure_workers
 	}
-	WEALTH_pay_wages = {
+	WEALTH_calculate_wages = {
 		category = military
 	}
-	WEALTH_pay_wages = {
+	WEALTH_calculate_wages = {
 		category = resource_gatherer
 	}
-	WEALTH_pay_wages = {
+	WEALTH_calculate_wages = {
 		category = industrial_workers
 	}
-	WEALTH_pay_wages = {
+	WEALTH_calculate_wages = {
 		category = commercial
 	}
 }
@@ -1032,7 +1057,30 @@ WEALTH_subtract_cost_of_living = {
 	# Scope: Governorship
 	# Function: Subtract the cost of living from every pop's wealth pool
 	change_variable = {
-		name = 
+		name = upper_strata_wealth
+		add = WEALTH_cost_of_living_upper_strata
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = WEALTH_cost_of_living_upper_strata
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = WEALTH_cost_of_living_upper_strata
+	}
+	change_variable = {
+		name = proletariat_wealth
+		add = WEALTH_cost_of_living_upper_strata
+	}
+}
+
+WEALTH_calculate_wages = {
+	set_variable = {
+		name = WEALTH_wages_due_$category$
+		value = {
+			value = JOBS_$category$_governorship # Number of occupied job slots in this category
+			multiply = owner.var:WEALTH_average_wage_wealth_value
+		}
 	}
 }
 
@@ -1040,11 +1088,16 @@ WEALTH_pay_wages = {
 	# Scope: Governorship
 	# Function: Set the wages due for the given category of jobs
 	# For the available categories, see JOBS_svalues
-	set_variable = {
-		name = WEALTH_wages_due_$category$
-		value = {
-			value = JOBS_$category$_governorship # Number of occupied job slots in this category
-			multiply = owner.var:WEALTH_average_wage_wealth_value
-		}
+	change_variable = {
+		name = upper_strata_wealth
+		add = JOBS_wages_expense_upper_strata
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = JOBS_wages_due_middle_strata
+	}
+	change_variable = {
+		name = proletariat_wealth
+		add = JOBS_wages_due_proletariat
 	}
 }

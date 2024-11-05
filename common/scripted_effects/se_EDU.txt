@@ -1,8 +1,47 @@
 ﻿## Education scripts
 
-EDU_set_education_numbers_governorship = {
+EDU_startup_effect = {
+	# Scope: Random country
+	# Function: Set up the education values needed at game start for all countries
+	every_country = {
+		EDU_setup_education_numbers_all_governorships = yes
+		EDU_set_t2_national_bonus_from_universities = yes
+	}
+}
+
+EDU_update_effect = {
+	# Scope: Random country
+	# Function: Update the education values during the yearly education tick
+	every_country = {
+		EDU_update_education_numbers_all_governorships = yes
+		EDU_set_t2_national_bonus_from_universities = yes
+	}
+}
+
+EDU_setup_education_numbers_all_countries = {
+	every_country = {
+		EDU_setup_education_numbers_all_governorships = yes
+	}
+}
+
+EDU_setup_education_numbers_all_governorships = {
+	# Scope: Country
+	every_governorships = {
+		EDU_setup_education_numbers_governorship = yes
+	}
+}
+
+EDU_setup_education_numbers_governorship = {
 	# Scope: Governorship
-	# Function: Set number of pops educated to the given $tier$ to whatever value is given
+	# Function: Create variables to store the number of pops educated to the given $tier$
+	set_variable = {
+		name = EDU_t1_educated_governorship
+		value = 0
+	}
+	set_variable = {
+		name = EDU_t2_educated_governorship
+		value = 0
+	}
 }
 
 EDU_update_education_numbers_governorship = {
@@ -10,5 +49,59 @@ EDU_update_education_numbers_governorship = {
 	# Function: Update the number of pops educated to the given $tier$
 	# The number of educated pops approaches the maximum at a rate inversely proportionate to how close the current number is to reaching the maximum, to a minimum of 5% of the maximum or 1 pop, whichever is higher.
 	# Called: Once a year
+	change_variable = {
+		name = EDU_$tier$_educated_governorship
+		add = EDU_change_rate_$tier$
+	}
+}
 
+EDU_update_education_numbers_all_governorships = {
+	every_governorships = {
+		EDU_update_education_numbers_governorship = {
+			tier = t1
+		}
+		EDU_update_education_numbers_governorship = {
+			tier = t2
+		}
+	}
+}
+
+EDU_update_education_numbers_all_countries = {
+	every_country = {
+		EDU_update_education_numbers_all_governorships = yes
+	}
+}
+
+# Education bonuses from national and global sources
+
+EDU_set_t2_national_bonus_from_universities = {
+	# Scope: Country
+	# Function: Add a bonus to available tier 2 education slots based on the number of universities across the nation
+	# Called: Yearly, when education values are updated
+	set_variable = {
+		name = EDU_national_t2_bonus_from_universities
+		value = {
+			value = 0
+			every_governorships = {
+				limit = {
+					any_governorship_state = {
+						any_state_province = {
+							has_building = EDU_university
+						}
+					}
+				}
+				every_governorship_state = {
+					every_state_province = {
+						add = num_of_EDU_university
+					}
+				}
+			}
+			multiply = 16 # 4 per university nationwide
+		}
+	}
+}
+
+EDU_update_education_available_from_trade = {
+	# Scope: Country
+	# Function: Add a bonus to education slots of both t1 and t2 in all governorships from trade agreements, simulating foreign professionals lending their services
 }

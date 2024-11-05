@@ -17,6 +17,20 @@
 		}
 		multiply = 10 # 10 pops per school
 	}
+	# Free bonus from capital with a certain tech
+	if = {
+		limit = {
+			owner = {
+				# has_invention = education # TBD
+			}
+			any_governorship_state = {
+				any_state_province = {
+					is_capital = yes
+				}
+			}
+		}
+		min = 2
+	}
 }
 
 EDU_available_slots_t2_governorship = {
@@ -36,35 +50,88 @@ EDU_available_slots_t2_governorship = {
 				add = num_of_EDU_university
 			}
 		}
-		multiply = 10 # 10 pops per university
-	}	
+		multiply = 2 # 2 pops per locally, 16 pops to national pool via EDU_set_t2_national_bonus_from_universities
+	}
+
+	if = {
+		limit = {
+			has_variable = EDU_t1_educated_governorship
+		}
+		max = var:EDU_t1_educated_governorship # Cannot be higher than the number of pops with tier 1 education	
+	}
+
+	add = EDU_t2_bonus_governorship_nationwide_universities
+
+	# Free bonus from capital with a certain tech
+	if = {
+		limit = {
+			owner = {
+				# has_invention = education # TBD
+			}
+			any_governorship_state = {
+				any_state_province = {
+					is_capital = yes
+				}
+			}
+		}
+		min = 2
+	}
+}
+
+EDU_t2_bonus_governorship_nationwide_universities = {
+	# Scope: Governorship
+	# 4 t2 slots available from every university nationally
+	# Relies on EDU_update_t2_national_bonus_from_universities
+	value = 0
+	add = {
+		value = 0
+		if = {
+			limit = {
+				owner = {
+					has_variable = EDU_national_t2_bonus_from_universities
+				}
+			}
+			value = owner.var:EDU_national_t2_bonus_from_universities
+		}
+		divide = {
+			value = 0
+			owner = {
+				every_governorships = {
+					add = 1
+				}
+			}
+		}
+	}
+	round = ceiling
 }
 
 # Education required by jobs
 # Scope: Province
 
-# Commerce districts - 1 of each tier
+# Commerce districts - 2 of t1, 1 of t2
 EDU_required_t1_URB_commercial_district = {
 	value = num_of_URB_commercial_district
+	multiply = 2
 }
 EDU_required_t2_URB_commercial_district = {
 	value = num_of_URB_commercial_district
+	multiply = 0.5
 }
 
-# Industrial estates - 0.5 of each tier
+# Industrial estates - 2 of t1, 0.5 of t2
 EDU_required_t1_IND_industrial_estate = {
 	value = num_of_IND_industrial_estate
-	multiply = 0.5
+	multiply = 2
 }
 EDU_required_t2_IND_industrial_estate = {
 	value = num_of_IND_industrial_estate
 	multiply = 0.5
 }
 
-# Schools - 2 of tier 2
+# Schools - 1 of tier 2
 EDU_required_t2_EDU_school = {
 	value = num_of_EDU_school
-	multiply = 2
+	multiply = 1
 }
 
 # Universities - 2.5 of tier 2
@@ -73,10 +140,14 @@ EDU_required_t2_EDU_university = {
 	multiply = 2.5
 }
 
-# Hospitals - 2 of tier 2
+# Hospitals - 2 of tier 2, 1 of tier 1
 EDU_required_t2_INF_hospital = {
 	value = num_of_INF_hospital
 	multiply = 2
+}
+EDU_required_t1_INF_hospital = {
+	value = num_of_INF_hospital
+	multiply = 1
 }
 
 # Sewer infrastructure workers - 1 of tier 1, 0.5 of tier 2
@@ -97,6 +168,15 @@ EDU_required_t2_INF_railway_upgrade = {
 	multiply = 0.5
 }
 
+# Administration district - 2 of tier 1, 1 of tier 2
+EDU_required_t1_URB_administration_district = {
+	value = num_of_URB_administration_district
+	multiply = 2
+}
+EDU_required_t2_URB_administration_district = {
+	value = num_of_URB_administration_district
+}
+
 # Required and used slots at governorship level
 
 EDU_required_t1_educated_governorship = {
@@ -109,13 +189,15 @@ EDU_required_t1_educated_governorship = {
 			add = EDU_required_t1_IND_industrial_estate
 			add = EDU_required_t1_INF_sewer_infrastructure
 			add = EDU_required_t1_INF_railway_upgrade
+			add = EDU_required_t1_INF_hospital
+			add = EDU_required_t1_URB_administration_district
 		}
 	}
 }
 
 EDU_required_t2_educated_governorship = {
 	# Scope: Governorship
-	# Function: Represents the number of t1 educated pops required by the job buildings in the province
+	# Function: Represents the number of t2 educated pops required by the job buildings in the province
 	value = 0
 	every_governorship_state = {
 		every_state_province = {
@@ -125,6 +207,7 @@ EDU_required_t2_educated_governorship = {
 			add = EDU_required_t2_INF_railway_upgrade
 			add = EDU_required_t2_EDU_university
 			add = EDU_required_t2_EDU_school
+			add = EDU_required_t2_URB_administration_district
 		}
 	}
 }
@@ -132,9 +215,49 @@ EDU_required_t2_educated_governorship = {
 EDU_available_t1_educated_governorship = {
 	# Scope: Governorship
 	# Function: Represents the number of pops available for jobs out of the t1 educated pops. A certain number of educated pops will be occupied by job buildings
+	value = var:EDU_t1_educated_governorship
+	subtract = EDU_required_t1_educated_governorship
+	min = 0
 }
 
 EDU_available_t2_educated_governorship = {
 	# Scope: Governorship
 	# Function: Represents the number of pops available for jobs out of the t1 educated pops. A certain number of educated pops will be occupied by job buildings
+	value = var:EDU_t2_educated_governorship
+	subtract = EDU_required_t2_educated_governorship
+	min = 0
+}
+
+## Change rate - added to the educated pops var. If negative, this signifies a decline.
+
+EDU_change_rate_t1 = {
+	value = EDU_available_slots_t1_governorship
+	subtract = var:EDU_t1_educated_governorship
+	divide = 10 # 10% of the difference
+	if = {
+		limit = {
+			EDU_available_slots_t2_governorship > var:EDU_t2_educated_governorship
+		}
+		min = {
+			value = EDU_available_slots_t2_governorship
+			divide = 20 # 5% of the total
+		}		
+		min = 1
+	}
+}
+
+EDU_change_rate_t2 = {
+	value = EDU_available_slots_t2_governorship
+	subtract = var:EDU_t2_educated_governorship
+	divide = 10 # 10% of the difference
+	if = {
+		limit = {
+			EDU_available_slots_t2_governorship > var:EDU_t1_educated_governorship
+		}
+		min = {
+			value = EDU_available_slots_t2_governorship
+			divide = 20 # 5% of the total
+		}
+		min = 1
+	}
 }

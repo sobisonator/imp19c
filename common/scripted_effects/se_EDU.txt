@@ -101,7 +101,37 @@ EDU_set_t2_national_bonus_from_universities = {
 	}
 }
 
-EDU_update_education_available_from_trade = {
+## Education bonus from trade
+
+EDU_set_available_for_trade = {
 	# Scope: Country
-	# Function: Add a bonus to education slots of both t1 and t2 in all governorships from trade agreements, simulating foreign professionals lending their services
+	# Function: Set how much this country will offer to its trade partners in terms of $tier$-educated pops
+	set_variable = {
+		name = EDU_available_for_trade_$tier$
+		value = {
+			value = 0
+			every_governorships = {
+				add = var:EDU_$tier$_educated_governorship
+			}	
+			multiply = 0.02 # TODO: This could be modified by emigration laws etc.
+		}
+	}
+}
+
+EDU_set_education_available_from_trade = {
+	# Scope: Country
+	# Function: Add a bonus to education numbers of both t1 and t2 in all governorships from trade agreements, simulating foreign professionals lending their services
+	# This adds a base value to the number of educated pops available to work, not to the cap.
+	# TODO: This also needs to add a way of distributing the wealth that these pops generate back to the trade partners. 
+	set_variable = {
+		name = EDU_available_from_trade_$tier$
+		value = {
+			value = 0
+				every_in_list = {
+					variable = list_of_trade_partners_all_categories
+
+					add = var:EDU_available_for_trade_$tier$
+			}
+		}
+	}
 }

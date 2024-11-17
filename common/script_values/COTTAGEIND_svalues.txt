@@ -25,6 +25,35 @@ COTTAGEIND_commerce_district_bonus = {
 		}
 		multiply = var:governorship_average_industrialisation
 	}
+	divide = 3825
+}
+
+COTTAGEIND_commerce_district_bonus_individual = {
+	# Gets the bonus from commerce districts in one province
+	# Scope: Governorship
+	value = COTTAGEIND_commerce_district_bonus
+	if = {
+		limit = {
+			any_governorship_state = {
+				any_state_province = {
+					has_building = URB_commerce_district
+				}
+			}
+		}
+		divide = {
+			value = 0
+			every_governorship_state = {
+				every_state_province = {
+					add = num_of_URB_commerce_district
+				}
+			}
+		}
+	}
+}
+COTTAGEIND_commerce_district_bonus_province_total = {
+	# Scope: Province
+	value = governorship.COTTAGEIND_commerce_district_bonus_individual
+	multiply = num_of_URB_commerce_district
 }
 
 COTTAGEIND_middle_strata_output = {
@@ -54,13 +83,14 @@ COTTAGEIND_lower_strata_output = {
 COTTAGEIND_pops_output = {
 	value = COTTAGEIND_middle_strata_output
 	add = COTTAGEIND_lower_strata_output
+	multiply = COTTAGEIND_scale
 	if = {
 		limit = {
 			has_variable = COTTAGEIND_commerce_district_bonus
 		}
 		add = var:COTTAGEIND_commerce_district_bonus
 	}
-	multiply = COTTAGEIND_scale
+	
 	multiply = 0.1
 }
 

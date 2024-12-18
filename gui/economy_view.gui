@@ -160,7 +160,7 @@ base_window = {
 		vbox = {
 			layoutpolicy_vertical = expanding
 			layoutpolicy_horizontal = expanding
-			visible = "[GetVariableSystem.Exists('national_economy_tab_open')]"
+			visible = "[Not(GetVariableSystem.Exists('global_economy_tab_open'))]"
 			vbox = {
 				layoutpolicy_vertical = expanding
 				layoutpolicy_horizontal = expanding
@@ -798,25 +798,69 @@ base_window = {
 			layoutpolicy_vertical = expanding
 			layoutpolicy_horizontal = expanding
 			visible = "[GetVariableSystem.Exists('global_economy_tab_open')]"
-			scrollwidget = {
+		    scrollarea = {
+				position = { 0 0 }
+				size = { 200 200 }
+				scrollbarpolicy_horizontal = always_off
+				using = VerticalScrollAreaCutOff
+				scrollbar_vertical = {
+					using = VerticalScrollBar
+				}
+				allow_outside = yes
+				scrollwidget = {
+					dynamicgridbox = {
+						name = "econ_view_currencies_list"
+						position = { 0 0 }
+						parentanchor = hcenter	
+						datamodel = "[EconomyView.GetPlayer.MakeScope.GetList('list_of_currencies')]"
+						allow_outside = yes
+						item = {
+							allow_outside = yes
+							flowcontainer = {
+								allow_outside = yes
+								spacing = 0
+								margin_bottom = 1
+								margin_top = 1
+								margin_left = -60
+								margin_bottom = 0
+								direction = vertical
+								flowcontainer = {
+									allow_outside = yes
+									direction = horizontal
+									spacing = 0
+									margin_bottom = 0
+									textbox = {
+										parentanchor = top
+										position = { 0 0 }
+										size = { 140 20 }
+										max_width = 140
+										using = BaseFontM
+										using = Black_FontColor
+										fontsize = 16
 
-				dynamicgridbox = {
-					datamodel = "[Player.MakeScope.GetList('list_of_currencies')]"
-					item = {
-						flowcontainer = {
-							spacing = 4
-							margin_bottom = 4
-							direction = vertical
-							textbox = {
-								position = { 1 5 }
-								size = { 0 5 }
-								autoresize = yes
-								text = "Test text"
-								font = BaseFont
-								fontsize = 20
-								fontcolor = { 0.9 0.9 0.9 1 }
-								alpha = 0.999
-								using = tooltip_below
+										text = "[Scope.GetProvince.MakeScope.GetVariable('currency_name').GetFlagName]"
+										tooltip = "Hi"
+									}
+								}
+								flowcontainer = {
+									allow_outside = yes
+									direction = horizontal
+									spacing = 0
+									margin_bottom = 0
+									textbox = {
+										parentanchor = top
+										position = { 0 0 }
+										size = { 140 20 }
+										max_width = 140
+										using = BaseFontM
+										using = Black_FontColor
+										fontsize = 16
+
+										text = "[GuiScope.SetRoot( Scope.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).ScriptValue.('CURRENCY_exchange_rate_to_player')|3 )]" # Use GUI script to do the maths for exchange rate
+										# Also, display the currency's score
+										tooltip = "Hi"
+									}
+								}
 							}
 						}
 					}

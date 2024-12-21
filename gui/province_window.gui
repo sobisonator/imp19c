@@ -215,6 +215,7 @@ window = {
 		on_start = "[GetVariableSystem.Set( 'show_governorship', 'yes' )]"
 		on_start = "[GetVariableSystem.Set( 'show_province_rank', 'no' )]"
 		on_start = "[PdxGuiTriggerAllAnimations('province_rank_full_hide')]"
+		on_start = "[GetScriptedGui('save_selected_province').Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
 		start_sound = {
 			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
 		}
@@ -687,6 +688,7 @@ window = {
 					}
 					
 					margin_widget = {
+					# Education statistics etc.
 						size = { 378 0 }
 						layoutpolicy_vertical = expanding
 						using = NoninteractableBG
@@ -697,165 +699,60 @@ window = {
 							margin_left = 0
 							margin_right = 13
 						}
-						
-						overlappingitembox = { 
-							parentanchor = right
-							margin = { 0 8 }
-							#size = { 254 54 }
-							size = { 364 54 }
-							name = "tradegoods_grid_row_1"
-							datamodel = "[ProvinceWindow.GetFirstSurplus]"
-							#list_entry = { size = { 100% 100% } }
-							item = {
-								trade_good_entry = {
-									tooltip = "[TradeGoodSurplusItem.GetItem.GetSurplus.GetInfo]"
-									using = tooltip_ne
-									alwaystransparent = no
-									filter_mouse = all
-									blockoverride "Icon" { texture = "[GetTradeGoodsIcon(TradeGoodSurplusItem.GetItem.GetSurplus.GetTradeGoods)]" }
-									blockoverride "Text" { text = "[TradeGoodSurplusItem.GetItem.GetSurplus.GetAmount]" }
-									blockoverride "On_click" 
-									{
-										onclick = "[SelectImportDestination(TradeGoodSurplusItem.GetItem.GetSurplus)]"
-										enabled = "[TradeGoodSurplusItem.GetItem.CanBeAvailableForTrade]"
-									}
-								}
-							}
-						}
-
-						overlappingitembox = {
-							parentanchor = right
-							name = "tradegoods_grid_row_2"
-							size = { 364 54 }
-							margin = { 0 8 }
-							position = { 0 54 }
-							datamodel = "[ProvinceWindow.GetSecondSurplus]"
-							item = {
-								trade_good_entry = {
-									tooltip = "[TradeGoodSurplusItem.GetItem.GetSurplus.GetInfo]"
-									using = tooltip_se
-									alwaystransparent = no
-									filter_mouse = all
-									
-									blockoverride "Icon" { texture = "[GetTradeGoodsIcon(TradeGoodSurplusItem.GetItem.GetSurplus.GetTradeGoods)]" }
-									blockoverride "Text" { text = "[TradeGoodSurplusItem.GetItem.GetSurplus.GetAmount]" }
-									blockoverride "On_click" 
-									{
-										onclick = "[SelectImportDestination(TradeGoodSurplusItem.GetItem.GetSurplus)]"
-										enabled = "[TradeGoodSurplusItem.GetItem.CanBeAvailableForTrade]"
-									}
-								}
-							}
-						}
-						
 						flowcontainer = {
-							parentanchor = bottom|left
-							position = { 6 -8 }
-							spacing = 3
-							ignoreinvisible = yes
-							icon_and_text = {
-								size = { 98 38 }
-								parentanchor = vcenter
-								blockoverride "Icon"
-								{
-									texture = "gfx/interface/icons/shared_icons/income.dds"
-									size = { 32 32 }
-								}
-								blockoverride "Text"
-								{
-									text = "[ProvinceWindow.GetState.GetTotalIncome|2=]"
-								}
-								tooltipwidget = { 
-									using = double_piece_tooltip 	
-									blockoverride "LeftText" { text = "[ProvinceWindow.GetState.GetCurrentTaxIncomeInfo]" }
-									blockoverride "RightText" { text = "[ProvinceWindow.GetState.GetCurrentCommerceIncomeInfo]" }
-								}
+							direction = vertical
+							margin_top = 5
+							margin_left = 10
+							textbox = {
+								position = { 1 5 }
+								size = { 0 5 }
+								autoresize = yes
+								text = "#T Education"
+								font = BaseFont
+								fontsize = 20
+								fontcolor = { 0.9 0.9 0.9 1 }
+								alpha = 0.999
+								using = tooltip_below
 							}
-							icon_and_text = {
-								size = { 108 38 }
-								blockoverride "Icon" 
-								{ 
-									texture = "gfx/interface/icons/modifiers/local_base_trade_routes.dds" 
-									size = { 30 30 }
-								}
-								
-								blockoverride "Text"
-								{
-									text = "[ProvinceWindow.GetState.GetTradeRoutesShort]"
-								}
-
-								tooltip = "[ProvinceWindow.GetState.GetTradeRoutesTooltip]"
+							textbox = {
+								position = { 1 5 }
+								size = { 0 5 }
+								autoresize = yes
+								text = "edu_t2_provwindow_text"
+								tooltip = "edu_t2_provwindow_tt"
+								font = BaseFont
+								fontsize = 20
+								fontcolor = { 0.9 0.9 0.9 1 }
+								alpha = 0.999
+								using = tooltip_below
 							}
-							text_button_square_highlighted = {
-								size = { 128 28 }
-								parentanchor = vcenter
-								blockoverride "Center_text"
-								{
-									text = "TRADE_GOODS_BUTTON"
-								}
-								enabled = "[ProvinceWindow.CanOpenTradeWindow]"
-								blockoverride "On_click"
-								{
-									onclick = "[ProvinceWindow.CreateTradeRoute]"
-								}
-								tooltip = "[ProvinceWindow.GetTradeRouteTooltip]"
+							textbox = {
+								position = { 1 5 }
+								size = { 0 5 }
+								autoresize = yes
+								text = "edu_t1_provwindow_text"
+								tooltip = "edu_t1_provwindow_tt"
+								font = BaseFont
+								fontsize = 20
+								fontcolor = { 0.9 0.9 0.9 1 }
+								alpha = 0.999
+								using = tooltip_below
 							}
-
-							icon_button_square = {
-								#visible = "[Not(ProvinceWindow.GetState.IsAiAllowedToTrade)]"
-								visible = "[And(ProvinceWindow.CanOpenTradeWindow, ProvinceWindow.GetState.IsAiAllowedToTrade)]"
-								enabled = "[ProvinceWindow.CanOpenTradeWindow]"
-								parentanchor = vcenter
-								size = { 28 28 }
-
-								tooltip = "TRADEROUTE_NOT_AUTOMATIC_FOR_STATE"
-								blockoverride "Icon"
-								{
-									texture = "gfx/interface/icons/shared_icons/trade.dds"
-									size = { 24 24 }
-								}
-
-								blockoverride "On_click"
-								{
-									onclick = "[ProvinceWindow.ToggleAiTradeAllowance]"
-								}
-							}
-							icon_button_square = {
-								visible = "[And(ProvinceWindow.CanOpenTradeWindow, Not(ProvinceWindow.GetState.IsAiAllowedToTrade))]"
-								#visible = "[ProvinceWindow.GetState.IsAiAllowedToTrade]"
-								enabled = "[ProvinceWindow.CanOpenTradeWindow]"
-								parentanchor = vcenter
-								size = { 28 28 }
-
-								tooltip = "TRADEROUTE_AUTOMATIC_FOR_STATE"
-								blockoverride "Icon"
-								{
-									texture = "gfx/interface/icons/shared_icons/trade.dds"
-									size = { 18 18 }
-									position = { -6 -3 }
-									
-									
-									icon = {
-										using = negative_color_texture
-										size = { 18 16 }
-										position = { 10 5 }
-										parentanchor = bottom|right
-										modify_texture = {
-											name = "Alpha"
-											texture = "gfx/interface/base_parts/ex_mark.dds"
-											framesize = { 50 50 }
-											frame = 2
-											blend_mode = alphamultiply
-										}	
-									}
-								}
-
-								blockoverride "On_click"
-								{
-									onclick = "[ProvinceWindow.ToggleAiTradeAllowance]"
-								}
+							textbox = {
+								position = { 1 5 }
+								size = { 0 5 }
+								margin_top = 10
+								autoresize = yes
+								text = "Uneducated: [GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('EDU_uneducated_governorship')|0] ([GuiScope.SetRoot(ProvinceWindow.GetState.GetGovernorship.MakeScope).ScriptValue('EDU_uneducated_governorship_percentage')|%0])"
+								tooltip = "Unused/Occupied/Max/Required"
+								font = BaseFont
+								fontsize = 20
+								fontcolor = { 0.9 0.9 0.9 1 }
+								alpha = 0.999
+								using = tooltip_below
 							}
 						}
+
 					}
 				}
 				hbox = {
@@ -974,7 +871,7 @@ window = {
 												}
 
 
-												blockoverride "Shortage" {visible = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_vegetables).IsSet)]"
+												blockoverride "Shortage" {visible = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_vegetables').IsSet)]"
 												text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_vegetables').GetValue|%0]"
 												}
 											}
@@ -997,7 +894,7 @@ window = {
 												}
 
 
-												blockoverride "Shortage" {visible = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_temperate_fruit).IsSet)]"
+												blockoverride "Shortage" {visible = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_temperate_fruit').IsSet)]"
 												text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_temperate_fruit').GetValue|%0]"
 												}
 											}
@@ -1204,7 +1101,7 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 												}
 
 
-												blockoverride "Shortage" {visible = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable(''shortage_tobacco')IsSet]"
+												blockoverride "Shortage" {visible = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_tobacco')IsSet]"
 												text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_tobacco').GetValue|%0]"
 												}
 											}
@@ -1341,7 +1238,7 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 												}
 
 
-												blockoverride "Shortage" {visible = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_industrial_fibres).IsSet]"
+												blockoverride "Shortage" {visible = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_industrial_fibres').IsSet]"
 												text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_industrial_fibres').GetValue|%0]"
 												}
 											}
@@ -1364,7 +1261,7 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 												}
 
 
-												blockoverride "Shortage" {visible = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_textile_fibres).IsSet]"
+												blockoverride "Shortage" {visible = "[ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_textile_fibres').IsSet]"
 												text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('shortage_textile_fibres').GetValue|%0]"
 												}
 											}
@@ -4122,7 +4019,7 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 										text = "[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_num_used_slots')|0]/[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_buildings_cap')|0]" 
 										
 									}
-									tooltip = "1 building can be built for every 2 non-tribal pops"
+									tooltip = "1 building can be built for every 2 non-tribal pops. #G +[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('province_industrialisation_percent')|%0]#! from industrialisation."
 									blockoverride "Icon"
 									{
 										texture = "gfx/interface/icons/shared_icons/building_slot.dds"

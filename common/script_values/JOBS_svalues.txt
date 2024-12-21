@@ -16,8 +16,13 @@ JOBS_administrators = {
 	value = num_of_URB_administration_district
 }
 
-JOBS_health_workers = {
-	value = num_of_INF_hospital
+JOBS_administrators_governorship = {
+	value = 0
+	every_governorship_state = {
+		every_state_province = {
+			add = JOBS_administrators
+		}
+	}
 }
 
 JOBS_educators = {
@@ -25,8 +30,13 @@ JOBS_educators = {
 	add = num_of_EDU_university
 }
 
-JOBS_arts_workers = {
-	value = num_of_URB_cultural_district
+JOBS_educators_governorship = {
+	value = 0
+	every_governorship_state = {
+		every_state_province = {
+			add = JOBS_educators
+		}
+	}
 }
 
 # Jobs capped by basic education
@@ -37,10 +47,30 @@ JOBS_infrastructure_workers = {
 	add = num_of_INF_sewer_infrastructure
 	add = num_of_river_port_building
 	add = num_of_port_building
+	add = num_of_INF_hospital
 }
 
-JOBS_clerks_artisans = {
+JOBS_infrastructure_workers_governorship = {
+	value = 0
+	every_governorship_state = {
+		every_state_province = {
+			add = JOBS_infrastructure_workers
+		}
+	}
+}
+
+JOBS_commercial = {
 	value = num_of_URB_commerce_district
+	add = num_of_URB_cultural_district
+}
+
+JOBS_commercial_governorship = {
+	value = 0
+	every_governorship_state = {
+		every_state_province = {
+			add = JOBS_commercial
+		}
+	}
 }
 
 # Jobs not capped by education
@@ -50,19 +80,167 @@ JOBS_military = {
 	add = num_of_fortress_building
 }
 
+JOBS_military_governorship = {
+	value = 0
+	every_governorship_state = {
+		every_state_province = {
+			add = JOBS_military
+		}
+	}
+}
+
 JOBS_resource_gatherer = {
 	value = num_of_IND_resource_gathering_operation
 }
 
-JOBS_industrial_worker = {
+JOBS_resource_gatherer_governorship = {
+	value = 0
+	every_governorship_state = {
+		every_state_province = {
+			add = JOBS_resource_gatherer
+		}
+	}
+}
+
+JOBS_industrial_workers = {
 	value = num_of_IND_industrial_estate
 }
+
+JOBS_industrial_workers_governorship = {
+	value = 0
+	every_governorship_state = {
+		every_state_province = {
+			add = JOBS_industrial_workers
+		}
+	}
+}
+
+JOBS_wages_due_all = {
+	# Scope: Governorship
+	value = var:WEALTH_wages_due_industrial_workers
+	add = var:WEALTH_wages_due_resource_gatherer
+	add = var:WEALTH_wages_due_military
+	add = var:WEALTH_wages_due_infrastructure_workers
+	add = var:WEALTH_wages_due_educators
+	add = var:WEALTH_wages_due_administrators
+	add = var:WEALTH_wages_due_commercial
+}
+
+JOBS_wages_due_middle_strata = {
+	# Scope: Governorship
+	value = JOBS_wages_due_all
+	multiply = {
+		value = var:governorship_middle_strata
+		divide = var:governorship_population
+	}
+}
+
+JOBS_wages_due_proletariat = {
+	# Scope: Governorship
+	value = JOBS_wages_due_all
+	multiply = {
+		value = var:governorship_proletariat
+		divide = var:governorship_population
+	}
+}
+
+JOBS_wages_expense_upper_strata = {
+	# Scope: Governorship
+	value = 0
+	if = {
+		limit = {
+			owner = {
+				NOT = { has_variable = state_pays_wages_business }
+			}
+		}
+		add = var:WEALTH_wages_due_industrial_workers
+		add = var:WEALTH_wages_due_resource_gatherer
+		add = var:WEALTH_wages_due_commercial
+	}
+	if = {
+		limit = {
+			owner = {
+				NOT = { has_variable = state_pays_wages_military }
+			}
+		}
+		add = var:WEALTH_wages_due_military # If not paid by state
+	}
+	if = {
+		limit = {
+			owner = {
+				NOT = { has_variable = state_pays_wages_infrastructure_workers }
+			}
+		}
+		add = var:WEALTH_wages_due_infrastructure_workers # If not paid by state
+	}
+	if = {
+		limit = {
+			owner = {
+				NOT = { has_variable = state_pays_wages_educators }
+			}
+		}
+		add = var:WEALTH_wages_due_educators # If not paid by state
+	}
+	if = {
+		limit = {
+			owner = {
+				NOT = { has_variable = state_pays_wages_adminisrtators }
+			}
+		}
+		add = var:WEALTH_wages_due_administrators # If not paid by state
+	}
+	multiply = {
+		value = var:governorship_middle_strata
+		add = var:governorship_proletariat
+		divide = var:governorship_population
+		multiply = -1
+	}
+}
+
+JOBS_wages_expense_the_state = {
+	# Scope: Governorship
+	value = 0
+	if = {
+		limit = {
+			owner = { has_variable = state_pays_wages_military }
+		}
+		add = var:WEALTH_wages_due_military
+	}
+	if = {
+		limit = {
+			owner = { has_variable = state_pays_wages_infrastructure_workers }
+		}
+		add = var:WEALTH_wages_due_infrastructure_workers
+	}
+	if = {
+		limit = {
+			owner = { has_variable = state_pays_wages_educators }
+		}
+		add = var:WEALTH_wages_due_educators
+	}
+	if = {
+		limit = {
+			owner = { has_variable = state_pays_wages_administrators }
+		}
+		add = var:WEALTH_wages_due_administrators
+	}
+	if = {
+		limit = {
+			owner = { has_variable = state_pays_wages_business }
+		}
+		add = var:WEALTH_wages_due_industrial_workers
+		add = var:WEALTH_wages_due_resource_gatherer
+		add = var:WEALTH_wages_due_commercial
+	}
+}
+
+# General
 
 JOBS_non_subsistence = {
 	value = JOBS_industrial_worker
 	add = JOBS_resource_gatherer
 	add = JOBS_military
-	add = JOBS_clerks_artisans
+	add = JOBS_commercial
 	add = JOBS_infrastructure_workers
 	add = JOBS_arts_workers
 	add = JOBS_educators
@@ -105,6 +283,11 @@ JOBS_buildings_cap = {
 	value = total_population
 	subtract = num_of_tribesmen
 	multiply = 0.5
+	multiply = {
+		value = civilization_value
+		divide = 100
+		add = 1
+	}
 }
 
 JOBS_available_slots = {

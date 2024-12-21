@@ -376,19 +376,18 @@ ECON_distribute_starting_holdings = { #UK only for now
 	}
 }
 
-### WAGES FOR JBOS
+### WAGES FOR JOBS - PORT INTO NEW FILE
 
 WAGE_set_all_wages_governorship = {
 
 }
 
 WAGE_set_wage_governorship = {
-	# Scope: Governorship
-	# Function: Set the wage in this governorship for a certain industry
+	# Scope: Country
+	# Function: Set the quarterly wage in this governorship for a certain industry
 	# Available options are:
 	##
-	# manufacturing_consumer
-	# manufacturing_business
+	# manufacturing
 	# agriculture
 	# mining
 	# unskilled_service
@@ -413,12 +412,692 @@ WAGE_pay_pop_wage = {
 	# Scope: Governorship
 	# Function: Called by WAGE_pay_wages_governorship
 	change_variable = {
-		name = $pop$_wealth
-		add = {
-			value = WAGE_$sector$_wealth_value # svalue (translates currency value to wealth value)
-			multiply = 1000 # Base wage value is for 1 family, 1 pop =~ 1,000 families
+		name = upper_strata_wealth
+		subtract = {
+			value = owner.WAGE_wealth_value_$sector$ # svalue (translates currency value to wealth value)
+			multiply = 500 # Base wage value is for 1 family, 1 pop =~ 500 working people
 			multiply = JOBS_$pop$_employed_$sector$ # svalue
 			multiply = var:governorship_$pop$
 		}
+	}
+	change_variable = {
+		name = $pop$_wealth
+		add = {
+			value = owner.WAGE_wealth_value_$sector$ # svalue (translates currency value to wealth value)
+			multiply = 500 # Base wage value is for 1 family, 1 pop =~ 500 working people
+			multiply = JOBS_$pop$_employed_$sector$ # svalue
+			multiply = var:governorship_$pop$
+		}
+	}
+}
+
+
+### NEW WEALTH GENERATION
+
+WEALTH_generate_new = {
+	# Scope: Governorship
+	# Function: Generate new wealth from resource production and services
+}
+
+WEALTH_generate_new_all_countries = {
+	# Scope: Random country
+	WEALTH_update_services_value = yes
+	every_country = {
+		WEALTH_generate_new_all_governorships = yes
+	}
+	every_country = {
+		WEALTH_create_empire_pool = yes
+		WEALTH_get_empire_pool_owed_governorship_all = yes
+		WEALTH_distribute_new_wealth_all_governorships = yes
+	}
+}
+
+WEALTH_generate_new_all_governorships = {
+	# Scope: Country
+	every_governorships = {
+		WEALTH_generate_from_production_all = yes
+		WEALTH_generate_from_services_governorship = yes
+		WEALTH_calculate_new_wealth_shares = {
+			category = production
+			the_state = 0
+			upper_strata = 1
+			middle_strata = 0.1
+			lower_strata = 0.05
+			proletariat = 0
+			indentured = 0
+			tribesmen = 0.1
+			slaves = 0
+		}
+		WEALTH_calculate_new_wealth_shares = {
+			category = services
+			the_state = 0
+			upper_strata = 1
+			middle_strata = 0.2
+			lower_strata = 0
+			proletariat = 0.01
+			indentured = 0
+			tribesmen = 0
+			slaves = 0
+		}
+	}
+}
+
+WEALTH_generate_from_production_all = {
+	# Scope: Governorship
+	# Function: Create new wealth from the value of all goods produced in this governorship
+	set_variable = {
+		name = WEALTH_new_generated_production_governorship
+		value = 0
+	}
+	every_tradegood_complex = {
+		APPLY = WEALTH_generate_from_production
+	}
+	change_variable = {
+		name = WEALTH_new_generated_production_governorship
+		multiply = 0.05
+	}
+}
+
+WEALTH_update_services_value = {
+	# Scope: Random country
+	WEALTH_set_services_value = yes
+}
+
+WEALTH_generate_from_production = {
+	# Scope: Governorship
+	# Function: Create new wealth from $tradegood$ production taking into account its durability, i.e., once produced, how long one unit of this tradegood holds its value.
+	change_variable = {
+		name = WEALTH_new_generated_production_governorship
+		add = {
+			value = WEALTH_$tradegood$_durability
+			multiply = {
+				value = GOODS_governorship_$tradegood$_produced
+				multiply = global_var:global_base_import_price_$tradegood$
+			}
+		}
+	}
+}
+
+WEALTH_set_services_value = {
+	# Scope: Random country, to every tradezone
+	# Function: Set the level of demand for services in every tradezone, based on economic activity in tradezones
+	every_trade_center = {
+		save_scope_as = services_TZ_scope
+		set_variable = {
+			name = WEALTH_services_demand_TZ
+			value = SERVICES_demand
+		}
+		set_variable = {
+			name = WEALTH_services_supply_TZ
+			value = {
+				value = 1
+				every_country = {
+					limit = {
+						any_governorships = {
+							var:trade_center = scope:services_TZ_scope
+						}
+					}
+					every_governorships = {
+						limit = {
+							var:trade_center = scope:services_TZ_scope
+						}
+						add = {
+							value = SERVICES_output_governorship
+						}
+					}
+				}
+			}
+		}
+	}
+
+	set_global_variable = {
+		name = WEALTH_services_demand_global
+		value = {
+			every_country = { 
+				every_owned_province = {
+					limit = { has_variable = TZ_name }
+					add = var:WEALTH_services_supply_TZ
+				}
+			}
+		}
+	}
+	set_global_variable = {
+		name = WEALTH_services_supply_global
+		value = {
+			every_country = { 
+				every_owned_province = {
+					limit = { has_variable = TZ_name }
+					add = var:WEALTH_services_demand_TZ
+				}
+			}
+		}
+	}
+
+	every_trade_center = {
+
+		set_variable = {
+			name = WEALTH_services_value_TZ
+			value = {
+				value = var:WEALTH_services_supply_TZ
+				add = global_var:WEALTH_services_supply_global
+				divide = {
+					value = var:WEALTH_services_demand_TZ
+					add = global_var:WEALTH_services_demand_global
+					add = global_var:WEALTH_services_demand_global
+				}
+				divide = 20
+			}
+		}
+	}
+}
+
+WEALTH_generate_from_services_governorship = {
+	# Scope: Governorship
+	# Function: Create new wealth from services
+	set_variable = {
+		name = WEALTH_new_generated_services_governorship
+		value = {
+			value = governorship_num_of_URB_commerce_district
+			multiply = var:trade_center.var:WEALTH_services_value_TZ
+		}
+	}
+}
+
+WEALTH_set_new_generated_amount = {
+	set_variable = {
+		name = WEALTH_new_generated_$category$_$recipient$
+		value = {
+			value = $recipient_ratio$
+			if = {
+				limit = {
+					NOT = { flag:$recipient$ = flag:the_state }
+				}
+				multiply = var:governorship_$recipient$
+			}
+			else = {
+				multiply = var:governorship_population
+			}
+		}
+	}
+}
+
+WEALTH_calculate_new_wealth_shares = {
+
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = the_state
+		recipient_ratio = $the_state$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = upper_strata
+		recipient_ratio = $upper_strata$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = middle_strata
+		recipient_ratio = $middle_strata$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = lower_strata
+		recipient_ratio = $lower_strata$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = proletariat
+		recipient_ratio = $proletariat$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = indentured
+		recipient_ratio = $indentured$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = tribesmen
+		recipient_ratio = $tribesmen$
+	}
+	WEALTH_set_new_generated_amount = {
+		category = $category$
+		recipient = slaves
+		recipient_ratio = $slaves$
+	}
+
+	set_local_variable = {
+		name = WEALTH_new_generated_sum_of_$category$_income_weights
+		value = {
+			value = var:WEALTH_new_generated_$category$_the_state
+			add = var:WEALTH_new_generated_$category$_upper_strata
+			add = var:WEALTH_new_generated_$category$_middle_strata
+			add = var:WEALTH_new_generated_$category$_lower_strata
+			add = var:WEALTH_new_generated_$category$_proletariat
+			add = var:WEALTH_new_generated_$category$_indentured
+			add = var:WEALTH_new_generated_$category$_tribesmen
+			add = var:WEALTH_new_generated_$category$_slaves
+			divide = var:WEALTH_new_generated_$category$_governorship
+		}
+	}
+
+	if = {
+		limit = {
+			has_local_variable = WEALTH_new_generated_sum_of_$category$_income_weights
+		}
+		if = {
+			limit = {
+				local_var:WEALTH_new_generated_sum_of_$category$_income_weights > 0
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_the_state > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_the_state
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_upper_strata > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_upper_strata
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_middle_strata > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_middle_strata
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_lower_strata > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_lower_strata
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_proletariat > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_proletariat
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_indentured > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_indentured
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_tribesmen > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_tribesmen
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+			if = {
+				limit = {
+					var:WEALTH_new_generated_$category$_slaves > 0
+				}
+				change_variable = {
+					name = WEALTH_new_generated_$category$_slaves
+					divide = local_var:WEALTH_new_generated_sum_of_$category$_income_weights
+				}
+			}
+		}
+	}
+}
+
+WEALTH_create_empire_pool = {
+	# Scope: Country
+	# Function: Create a pool for the new wealth generated within an empire to be redirected to governorships with commerce districts
+	# The ratio of commerce districts to population sets the ratio of wealth from around the empire (core country, autonomous governorship and colonies) which is redirected to provinces with commerce districts
+
+	set_variable = {
+		name = WEALTH_empire_pool_total_commerce_districts
+		value = {
+			value = 0
+			every_governorships = {
+				add = governorship_num_of_URB_commerce_district
+			}
+			every_subject = {
+				limit = {
+					contributes_to_empire_wealth_pool = yes
+				}
+				every_governorships = {
+					add = governorship_num_of_URB_commerce_district 
+				}
+			}
+		}
+	}
+	if = {
+		limit = {
+			var:WEALTH_empire_pool_total_commerce_districts > 0
+		}
+		set_variable = {
+			name = WEALTH_empire_pool_ratio
+			value = {
+				value = var:WEALTH_empire_pool_total_commerce_districts
+				divide = {
+					value = num_of_cities
+					every_subject = {
+						limit = {
+							contributes_to_empire_wealth_pool = yes
+						}
+						add = num_of_cities
+					}
+				}
+			}
+		}
+	}
+	else = {
+		set_variable = {
+			name = WEALTH_empire_pool_ratio
+			value = 0
+		}
+	}
+	if = {
+		limit = {
+			var:WEALTH_empire_pool_ratio > 1
+		}
+		set_variable = {
+			name = WEALTH_empire_pool_ratio
+			value = 1
+		}
+	}
+
+	set_variable = {
+		name = WEALTH_empire_pool
+		value = {
+			value = 0
+			every_governorships = {
+				add = var:WEALTH_new_generated_production_governorship
+				add = var:WEALTH_new_generated_services_governorship
+			}
+			every_subject = {
+				limit = {
+					contributes_to_empire_wealth_pool = yes
+				}
+				every_governorships = {
+					add = var:WEALTH_new_generated_production_governorship
+					add = var:WEALTH_new_generated_services_governorship 
+				}
+			}
+			multiply = var:WEALTH_empire_pool_ratio
+		}
+	}
+}
+
+WEALTH_get_empire_pool_owed_governorship_all = {
+	# Scope: Country
+	every_governorships = {
+		WEALTH_get_empire_pool_owed_governorship = yes
+	}
+}
+
+WEALTH_get_empire_pool_owed_governorship = {
+	# Scope: Governorship
+	# Function: Get the amount owed to this governorship from the empire wealth pool
+	# This is always given either directly to the upper strata or the state
+	set_variable = {
+		name = WEALTH_empire_pool_owed_governorship
+		value = {
+			value = governorship_num_of_URB_commerce_district
+			if = {
+				limit = {
+					owner.var:WEALTH_empire_pool_total_commerce_districts > 0
+				}
+				divide = owner.var:WEALTH_empire_pool_total_commerce_districts
+			}
+			multiply = owner.var:WEALTH_empire_pool
+
+			subtract = {
+				value = var:WEALTH_new_generated_production_governorship
+				add = var:WEALTH_new_generated_services_governorship
+				multiply = owner.var:WEALTH_empire_pool_ratio
+			}
+		}
+	}
+}
+
+WEALTH_distribute_new_wealth_all_governorships = {
+	# Scope: Country
+	# Function: Run WEALTH_distribute_new_wealth in every governorship
+	every_governorships = {
+		WEALTH_distribute_new_wealth = yes
+	}
+}
+
+WEALTH_distribute_new_wealth = {
+	# Scope: Governorship
+	# Function: Add the newly generated wealth and empire pool wealth to the pops and state treasury based on the ratios calculated
+	change_variable = {
+		name = upper_strata_wealth
+		add = {
+			value = var:WEALTH_new_generated_services_upper_strata
+			add = var:WEALTH_new_generated_production_upper_strata
+			add = var:WEALTH_empire_pool_owed_governorship # Unless controlled economy, in which case it goes to the state
+		}
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = {
+			value = var:WEALTH_new_generated_services_middle_strata
+			add = var:WEALTH_new_generated_production_middle_strata
+		}
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = {
+			value = var:WEALTH_new_generated_services_lower_strata
+			add = var:WEALTH_new_generated_production_lower_strata
+		}
+	}
+	change_variable = {
+		name = proletariat_wealth
+		add = {
+			value = var:WEALTH_new_generated_services_proletariat
+			add = var:WEALTH_new_generated_production_proletariat
+		}
+	}
+	change_variable = {
+		name = tribesmen_wealth
+		add = {
+			value = var:WEALTH_new_generated_services_tribesmen
+			add = var:WEALTH_new_generated_production_tribesmen
+		}
+	}
+	change_variable = {
+		name = slaves_wealth
+		add = {
+			value = var:WEALTH_new_generated_services_slaves
+			add = var:WEALTH_new_generated_production_slaves
+		}
+	}
+	change_variable = {
+		name = indentured_wealth
+		add = {
+			value = var:WEALTH_new_generated_services_indentured
+			add = var:WEALTH_new_generated_production_indentured
+		}
+	}
+}
+
+############
+# Wages
+############
+
+# Wages are paid by upper strata pops to middle strata and proletariat pops
+# Only countries with a currency have wages. Countries without a currency cannot have jobs which pay a wage
+
+# TODO: Reserve all the wages due for svalues
+
+WEALTH_setup_wages = {
+	# Scope: Country
+	# Function: Set up wages for a country
+	WEALTH_cache_national_cost_of_living = yes
+	WEALTH_set_average_wage_at_cost_of_living = yes
+}
+
+WEALTH_setup_and_pay_wages_all_countries = {
+	# Scope: Random country
+	# Called: At game start
+	every_country = {
+		limit = {
+			has_variable = official_currency
+		}
+		WEALTH_setup_wages = yes
+		WEALTH_pay_all_wages_all_governorships = yes
+	}
+}
+
+WEALTH_pay_wages_all_countries = {
+	# Scope: Random country
+	# Called: Quarterly economy tick
+	every_country = {
+		limit = {
+			has_variable = official_currency
+		}
+		WEALTH_pay_all_wages_all_governorships = yes
+	}
+}
+
+WEALTH_pay_all_wages_all_governorships = {
+	# Scope: Country
+	# Function: Calculate and pay wages for all job sectors in every governorship
+	every_governorships = {
+		WEALTH_calculate_all_wages = yes
+		WEALTH_pay_wages = yes
+	}
+}
+
+WEALTH_subtract_cost_of_living_all_governorships = {
+	# Scope: Country
+	# Function: Subtract wealth to cover cost of living in all governorships
+	every_governorships = {
+		WEALTH_subtract_cost_of_living = yes
+	}
+}
+
+WEALTH_calculate_all_wages = {
+	# Scope: Governorship
+	# Function: Determine the amount owed for all job sectors
+	WEALTH_calculate_wages = {
+		category = administrators
+	}
+	WEALTH_calculate_wages = {
+		category = educators
+	}
+	WEALTH_calculate_wages = {
+		category = infrastructure_workers
+	}
+	WEALTH_calculate_wages = {
+		category = military
+	}
+	WEALTH_calculate_wages = {
+		category = resource_gatherer
+	}
+	WEALTH_calculate_wages = {
+		category = industrial_workers
+	}
+	WEALTH_calculate_wages = {
+		category = commercial
+	}
+}
+
+WEALTH_cache_national_cost_of_living = {
+	# Scope: Country
+	# Function: Cache the wealth cost of living at country level to limit repeat calculations
+	# Must be run at the start of every econ tick
+	set_variable = {
+		name = WEALTH_cost_of_living
+		value = {
+			value = CURRENCY_essentials_buying_power
+			multiply = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
+			multiply = 0.01
+		}
+	}
+}
+
+WEALTH_set_average_wage_at_cost_of_living = {
+	# Scope: Country
+	# Function: Set the average wage based on cost of living. This is based on a currency value, and does not automatically update to account for inflation.
+	# This amount can then be modified based on the specific sector for which wages are being paid.
+	set_variable = {
+		name = WEALTH_average_wage_wealth_value
+		value = var:WEALTH_cost_of_living
+	}
+}
+
+WEALTH_modify_average_wage = {
+	# Scope: Country
+	# Function: Multiply the average wage by the given multiplier
+	change_variable = {
+		name = WEALTH_average_wage_wealth_value
+		multiply = $multiplier$ 
+	}
+}
+
+WEALTH_subtract_cost_of_living = {
+	# Scope: Governorship
+	# Function: Subtract the cost of living from every pop's wealth pool
+	change_variable = {
+		name = upper_strata_wealth
+		add = WEALTH_cost_of_living_upper_strata
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = WEALTH_cost_of_living_upper_strata
+	}
+	change_variable = {
+		name = lower_strata_wealth
+		add = WEALTH_cost_of_living_upper_strata
+	}
+	change_variable = {
+		name = proletariat_wealth
+		add = WEALTH_cost_of_living_upper_strata
+	}
+}
+
+WEALTH_calculate_wages = {
+	set_variable = {
+		name = WEALTH_wages_due_$category$
+		value = {
+			value = JOBS_$category$_governorship # Number of occupied job slots in this category
+			multiply = owner.var:WEALTH_average_wage_wealth_value
+		}
+	}
+}
+
+WEALTH_pay_wages = {
+	# Scope: Governorship
+	# Function: Set the wages due for the given category of jobs
+	# For the available categories, see JOBS_svalues
+	change_variable = {
+		name = upper_strata_wealth
+		add = JOBS_wages_expense_upper_strata
+	}
+	change_variable = {
+		name = middle_strata_wealth
+		add = JOBS_wages_due_middle_strata
+	}
+	change_variable = {
+		name = proletariat_wealth
+		add = JOBS_wages_due_proletariat
 	}
 }

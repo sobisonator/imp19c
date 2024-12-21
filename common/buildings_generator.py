@@ -1,4 +1,3 @@
-import unicodecsv as csv
 import pandas as pd
 
 # These columns may vary depending on what pops you have added to the game
@@ -85,7 +84,11 @@ def write_buildings():
                 cultural = str(int(round((int(row.middle_strata) + int(row.upper_strata)) / 13)))
                 if int(cultural) > 0:
                     f.write("       URB_cultural_district = " + cultural + "\n") 
-                school = str(int(round(int(row.middle_strata) / 10)))
+                school = str(int(round(int(row.middle_strata) / 4.25)*(int(row.INDUSTRIALISATION) / 60)))
+                if row.PROVINCE_RANK > 0:
+                    school = str(int(school)+1)
+                if row.upper_strata > 0:
+                    school = str(int(school)+1)
                 if int(school) > 0:
                     f.write("       EDU_school = " + school + "\n") 
                 sewer = str(int(round((total_population/30)*(int(row.INDUSTRIALISATION) / 100))))

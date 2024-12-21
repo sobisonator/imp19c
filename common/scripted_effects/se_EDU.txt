@@ -1,0 +1,193 @@
+﻿## Education scripts
+
+EDU_startup_effect = {
+	# Scope: Random country
+	# Function: Set up the education values needed at game start for all countries
+	every_country = {
+		EDU_setup_education_numbers_all_governorships = yes
+		EDU_set_t2_national_bonus_from_universities = yes
+		EDU_set_starting_education_numbers_all_governorships = yes
+		EDU_set_available_for_trade = { tier = t2 }
+	}
+	every_country = {
+		EDU_set_education_available_from_trade = { tier = t2 }
+		EDU_set_t2_research_bonus = yes
+	}
+}
+
+EDU_update_effect = {
+	# Scope: Country
+	# Function: Update the education values during the yearly education tick
+	EDU_update_education_numbers_all_governorships = yes
+	EDU_set_t2_national_bonus_from_universities = yes
+	EDU_set_available_for_trade = yes
+	EDU_set_t2_research_bonus = yes
+}
+
+EDU_setup_education_numbers_all_countries = {
+	every_country = {
+		EDU_setup_education_numbers_all_governorships = yes
+	}
+}
+
+EDU_setup_education_numbers_all_governorships = {
+	# Scope: Country
+	every_governorships = {
+		EDU_setup_education_numbers_governorship = yes
+	}
+}
+
+EDU_setup_education_numbers_governorship = {
+	# Scope: Governorship
+	# Function: Create variables to store the number of pops educated to the given $tier$
+	set_variable = {
+		name = EDU_t1_educated_governorship
+		value = 0
+	}
+	set_variable = {
+		name = EDU_t2_educated_governorship
+		value = 0
+	}
+}
+
+EDU_set_starting_education_numbers_all_governorships = {
+	every_governorships = {
+		EDU_set_education_cap_percent_filled_governorship = {
+			tier = t1
+			percentage = 0.9
+		}
+		EDU_set_education_cap_percent_filled_governorship = {
+			tier = t2
+			percentage = 0.9
+		}
+	}
+}
+
+EDU_set_education_cap_percent_filled_governorship = {
+	# Scope: Governorship
+	# Function: Set the education numbers for $tier$ to 90% of the cap at the start of the game
+	set_variable = {
+		name = EDU_$tier$_educated_governorship
+		value = {
+			value = EDU_available_slots_$tier$_governorship
+			multiply = $percentage$
+		}
+	}
+}
+
+EDU_update_education_numbers_governorship = {
+	# Scope: Governorship
+	# Function: Update the number of pops educated to the given $tier$
+	# The number of educated pops approaches the maximum at a rate inversely proportionate to how close the current number is to reaching the maximum, to a minimum of 5% of the maximum or 1 pop, whichever is higher.
+	# Called: Once a year
+	change_variable = {
+		name = EDU_$tier$_educated_governorship
+		add = EDU_change_rate_$tier$
+	}
+}
+
+EDU_update_education_numbers_all_governorships = {
+	every_governorships = {
+		EDU_update_education_numbers_governorship = {
+			tier = t1
+		}
+		EDU_update_education_numbers_governorship = {
+			tier = t2
+		}
+	}
+}
+
+EDU_update_education_numbers_all_countries = {
+	every_country = {
+		EDU_update_education_numbers_all_governorships = yes
+	}
+}
+
+# Education bonuses from national and global sources
+
+EDU_set_t2_national_bonus_from_universities = {
+	# Scope: Country
+	# Function: Add a bonus to available tier 2 education slots based on the number of universities across the nation
+	# Called: Yearly, when education values are updated
+	set_variable = {
+		name = EDU_national_t2_bonus_from_universities
+		value = {
+			value = 0
+			every_governorships = {
+				limit = {
+					any_governorship_state = {
+						any_state_province = {
+							has_building = EDU_university
+						}
+					}
+				}
+				every_governorship_state = {
+					every_state_province = {
+						add = num_of_EDU_university
+					}
+				}
+			}
+			multiply = EDU_university_national_bonus
+		}
+	}
+}
+
+## Education bonus from trade
+
+EDU_set_available_for_trade = {
+	# Scope: Country
+	# Function: Set how much this country will offer to its trade partners in terms of $tier$-educated pops
+	set_variable = {
+		name = EDU_available_for_trade_$tier$
+		value = {
+			value = 0
+			every_governorships = {
+				add = var:EDU_$tier$_educated_governorship
+			}	
+			multiply = 0.02 # TODO: This could be modified by emigration laws etc.
+		}
+	}
+}
+
+EDU_set_education_available_from_trade = {
+	# Scope: Country
+	# Function: Add a bonus to education numbers of both t1 and t2 in all governorships from trade agreements, simulating foreign professionals lending their services
+	# This adds a base value to the number of educated pops available to work, not to the cap.
+	# TODO: This also needs to add a way of distributing the wealth that these pops generate back to the trade partners. 
+	set_variable = {
+		name = EDU_available_from_trade_$tier$
+		value = {
+			value = 0
+				every_in_list = {
+					variable = list_of_trade_partners_all_categories
+
+					add = var:EDU_available_for_trade_$tier$
+			}
+		}
+	}
+}
+
+### Research point effects
+
+EDU_set_t2_research_bonus = {
+	# Scope: Country
+	every_owned_province = {
+		limit = {
+			has_province_modifier = EDU_t2_education_research_bonus
+		}
+		remove_province_modifier = EDU_t2_education_research_bonus
+	}
+	every_owned_province = {
+		limit = {
+			OR = {
+				has_building = EDU_university
+				is_capital = yes
+			}
+		}
+		FUNC_add_province_modifier_stack = {
+			MOD = EDU_t2_education_research_bonus
+			NUM = EDU_province_research_bonus_from_universities
+			DUR = -1
+		}
+	}
+}

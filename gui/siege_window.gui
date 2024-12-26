@@ -1,11 +1,12 @@
 base_sub_window = {
 	name = "siege_window"
 	size = { 580 422 }
-	position = { 68 0 }
+	position = { 68 4 }
 	#scale = 0.
 	parentanchor = bottom
 	movable = no
 	blockoverride "Title_text" { text = "[SiegeView.GetSiege.GetName]" }
+	blockoverride "AlphaTexture" { texture = "gfx/interface/base_parts/background_x60bd_alpha3.dds" }
 	blockoverride "White_buttons"
 	{
 		button_close = {
@@ -14,7 +15,7 @@ base_sub_window = {
 		}
 	}
 	icon = {
-		size = { 575 150 }
+		size = { 575 132 }
 		position = { 2 34 }
 		using = black_background
 		modify_texture = {
@@ -28,8 +29,10 @@ base_sub_window = {
 	}
 	flowcontainer = {
 		direction = vertical
+		ignoreinvisible = yes
 		margin = { 10 40 }
 		flowcontainer = {
+			margin_bottom = 5
 			spacing = 5
 			widget = {
 				size = { 352 122 }
@@ -52,7 +55,6 @@ base_sub_window = {
 						}
 						size = { 342 112 }
 					}
-					#tooltip = "[MacroBuilderProvinceBuildable.GetTooltip]"
 				}
 			}
 			flowcontainer = {
@@ -104,25 +106,309 @@ base_sub_window = {
 						blockoverride "Text" { text = "[SiegeView.GetSiege.GetLocation.GetLocalDefensive|%+=1]" }
 						tooltip = "[SiegeView.GetDefensivenessTooltip]"
 					}
-
-
 				}
-				#panelka_center = {
-				#	size = { 192 32 }
-				#	position = { 0 0 }
-				#	blockoverride "Icon" { using = icon_garrison }
-				#	blockoverride "TextBox" { text = "[SiegeView.GetSiege.GetLocation.GetGarrison]" }
-				#	blockoverride "Tooltip" { tooltip = "[SiegeView.GetSiege.GetLocation.GetGarrisonTooltip]" }
-				#}
-				#panelka_center = {
-				#	size = { 132 32 }
-				#	position = { 0 0 }
-				#	blockoverride "Icon" { using = icon_fortification }
-				#	blockoverride "TextBox" { text = "[SiegeView.GetSiege.GetLocation.GetFortLevel]" }
-				#	blockoverride "Tooltip" { tooltip = "[SiegeView.GetSiege.GetLocation.GetFortLevelTooltip]" }
-				#}
-				flowcontainer = {
+			}
+		}
+		widget = {
+			size = { 100% 2 }
+			icon = {
+				size = { 575 74 }
+				position = { -8 -2 }
+				using = black_background
+				modify_texture = {
+					blend_mode = alphamultiply
+					texture = "gfx/interface/base_parts/gradient_black.dds"
+				}
+			}
+			icon = {
+				position = { -8 -4 }
+				using = brighten_red_background
+				spriteType = Corneredtiled
+				size = { 575 2 }
+			}
+		}
+		flowcontainer = {
+			name = "Unfortified Defender"
+			visible = "[Not(SiegeView.GetSiege.IsSiege)]"
+			parentanchor = hcenter
+			direction = vertical
+			fixed_size_progressbar = {
+				size = { 500 14 }
+				blockoverride "Value" { value = "[SiegeView.GetSiege.GetOccupationProgress]" }
+				tooltip = "[SiegeView.GetSiege.GetOccupationProgressTooltip]"
+			}
+			widget = { size = { 200 56 } }
+		}
+		flowcontainer = {
+			visible = "[SiegeView.GetSiege.IsSiege]"
+			spacing = 20
+			flowcontainer = {
+				icon_button_square = {
+					size = { 50 50 }
+					blockoverride "On_click" { onclick = "[SiegeView.OnAssault]" }
+					enabled = "[SiegeView.CanAssault]"
+					blockoverride "ClickSound" { clicksound = "event:/SFX/Gameplay/Combat/sfx_gameplay_combat_screen_siege_order_assault" }
+					tooltip = "[SiegeView.GetAssaultTooltip]"
+					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/assault.dds" }
+				}
+			}
+			flowcontainer = {
+				spacing = 6
+				siege_card_small = {
+					name = "Commander"
+					blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/commander_impact.dds" }
+					blockoverride "Text" { text = "[SiegeView.GetSiege.GetLeaderImpact|=+]" }
+					tooltip = SIEGE_COMMANDER
+				}
+				siege_card_small = {
+					name = "Blockade"
+					blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/blockade_efficiency.dds" }
+					blockoverride "Text" { text = "[SiegeView.GetSiege.GetSiegeMemory|Y]" }
+					tooltip = SIEGE_BLOCKADE
+				}
+				siege_card_small = {
+					name = "Fort Impact"
+					blockoverride "Icon" { using = icon_fortification }
+					blockoverride "Text" { text = "[SiegeView.GetSiege.GetFortLevelImpact|=-+]" }
+					tooltip = SIEGE_FORT_IMPACT
+				}
+				siege_card_small = {
+					name = "Country"
+					blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/siege_engineers.dds" }
+					blockoverride "Text" { text = "[SiegeView.GetSiege.GetCountryImpact|=+]" }
+					tooltip = SIEGE_ENGINEER
+				}
+				siege_card_small = {
+					name = "Unit"
+					blockoverride "Icon" { texture = "gfx/interface/icons/subunits/engineer_cohort.dds" }
+					blockoverride "Text" { text = "[SiegeView.GetSiege.GetUnitImpact|=+]" }
+					tooltip = SIEGE_UNIT
+				}
+				siege_card_small = {
+					name = "Breach"
+					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/breaches.dds" }
+					blockoverride "Text" { text = "[SiegeView.GetSiege.GetNumOfBreach|=+]" }
+					tooltip = SIEGE_BREACH
+				}
+			}
+			flowcontainer = {
+				spacing = 6
+				siege_card_small = {
+					name = "Memory"
+					blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/siege_accumulation.dds" }
+					blockoverride "Text" { text = "[SiegeView.GetSiege.GetSiegeMemory|Y]" }
+					tooltip = SIEGE_MEMORY
+				}
+				siege_card_small = {
+					name = "Chance"
+					blockoverride "Icon" { using = icon_chance size = { 34 34 } }
+					blockoverride "Text" { text = "[SiegeView.GetSiege.GetLastSiegeDiceRoll]" }
+					tooltip = SIEGE_LAST_DICE_ROLL
+				}
+				icon = {
+					size = { 70 70 }
+					#parentanchor = center
+					#visible = "[SiegeView.GetSiege.IsSiege]"
+					widget = {
+						size = { 100% 100% }
+						textbox = {
+							position = { 0 1 }
+							parentanchor = center
+							size = { 100% 100% }
+							visible = "[Not(SiegeView.GetSiege.IsTooFewMen)]"
+							using = BaseFontS
+							using = Black_FontColor
+							fontsize = 14
+							align = center|nobaseline
+							text = "[SiegeView.GetSiege.GetFallChance|2%]"
+							autoresize = yes
+							tooltip = "[SiegeView.GetSiege.GetFallChanceTooltip]"
+						}
+						textbox = {
+							parentanchor = center
+							size = { 100% 100% }
+							position = { 0 2 }
+							visible = "[SiegeView.GetSiege.IsTooFewMen]"
+							using = BaseFontS
+							fontsize = 13
+							align = left|nobaseline
+							text = "SIEGE_TOO_FEW_MEN_TXT"
+							autoresize = yes
+							tooltip = "SIEGE_TOO_FEW_MEN_TOOLTIP"
+						}
 					
+					}
+					icon = {
+						texture = "gfx/interface/base_parts/buttons_ls.dds"
+						size = { 54 54 }
+						framesize = { 40 40 }
+						frame = 2
+						parentanchor = center
+						modify_texture = {
+							texture = "gfx/interface/pie_charts/pie_chart_alpha_60.dds"
+							blend_mode = alphamultiply
+						}
+					}
+					progresspie = {
+						name = "progresspiepie"
+						parentanchor = center
+						size = { 70 70 }
+						texture = "gfx/interface/map/on_map_siege_bar.dds"
+						framesize = { 70 70 }
+						frame = 2
+						value = "[SiegeView.GetSiege.GetSiegePhaseProgress]"
+						visible = "[SiegeView.GetSiege.IsTooFewMen]"
+						#tooltip = "SIEGE_TOO_FEW_MEN_TOOLTIP"
+					}
+					
+					progresspie = {
+						name = "progress"
+						parentanchor = center
+						size = { 54 54 }
+						texture = "gfx/interface/pie_charts/pie_chart_alpha_60.dds"
+						framesize = { 68 68 }
+						frame = 2
+						value = "[SiegeView.GetSiege.GetSiegePhaseProgress]"
+						visible = "[Not( SiegeView.GetSiege.IsTooFewMen )]"
+						tooltip = "[SiegeView.GetSiege.GetSiegePhaseProgressTooltip]"
+						icon = {
+							size = { 42 42 }
+							texture = "[GetSubUnitIcon(MilitaryConstructionIcon.GetType)]"
+							parentanchor = center
+							modify_texture = {
+								texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
+								blend_mode = alphamultiply
+							}
+						}
+					}
+				}
+			}
+
+		}
+		sub_header_v = {
+			size = { 560 0 }
+			blockoverride "Title_text" 
+			{
+				text = "Aggressor"
+			}
+		}
+		flowcontainer = {
+			flowcontainer = {
+				direction = vertical
+				spacing = 5
+				widget = { size = { 500 32 } }
+				flowcontainer = {
+					spacing = 5
+					cpt_button = {
+						size = { 90 135 }
+						parentanchor = bottom
+						datacontext = "[SiegeView.GetSiege.GetCommander]"
+					}
+					flowcontainer = {
+						direction = vertical
+						flowcontainer = {
+							margin_widget = {
+								name = "Attackers"
+								size = { 45 45 }
+								icon_button_square = {
+									blockoverride "On_click" { onclick = "[SiegeView.ToggleShowAll]" }
+									visible = "[Not(SiegeView.IsShowAll)]"
+									blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_click" }
+									tooltip = SHOW_ONLY_UNIT_TYPES_FOR_SIEGE
+									blockoverride "Icon" { texture = "gfx/interface/base_parts/down_arrow.dds" }
+								}
+								icon_button_square = {
+									blockoverride "On_click" { onclick = "[SiegeView.ToggleShowAll]" }
+									visible = "[SiegeView.IsShowAll]"
+									blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_click" }
+									tooltip = SHOW_ALL_UNIT_TYPES_SIEGE
+									blockoverride "Icon" { texture = "gfx/interface/base_parts/up_arrow.dds" }
+								}
+							}
+							flowcontainer = {
+								name = "Attacker Main Stats"
+								spacing = 10
+								margin_top = 5
+								visible = "[SiegeView.GetSiege.IsSiege]"
+								icon_and_text = {
+									size = { 90 0 }
+									blockoverride "Icon" { using = icon_attrition }
+									blockoverride "Text" { text = "[SiegeView.GetAttrition]" }
+									tooltip = "[SiegeView.GetAttritionTooltip]"
+								}
+								
+								icon_and_text = {
+									size = { 90 0 }
+									blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/enslavement_efficiency.dds" }
+									blockoverride "Text" { text = "[SiegeView.GetEnslavement|0%]" }
+									tooltip = "[SiegeView.GetEnslavementTooltip]"
+								}
+							}
+							widget = {
+								size = { 18 0 }
+							}
+							fixed_size_progressbar = {
+								size = { 150 9 }
+								visible = "[SiegeView.GetSiege.IsSiege]"
+								blockoverride "Value" { value = "[SiegeView.GetSiege.GetMoralePercent]" }
+								tooltip = "[SiegeView.GetSiege.GetMoraleTooltip]"
+							}
+						}
+						widget = {
+							size = { 400 85 }
+							overlappingitembox = {
+								name = "unit_types_grid"
+								datamodel = "[SiegeView.GetSubUnitCounts]"
+								size = { 100% 100% }
+								spacing = 5
+								item = {
+									unit_card = {
+										blockoverride "Size" { size = { 72 90 } }
+										blockoverride "LineVisible" { visible = "[And(SubUnitCounts.IsCohort, GreaterThan_int32(SubUnitCounts.GetTotalNumber,'(int32)0') )]" }
+										blockoverride "CountText" { visible = no }
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			flowcontainer = {
+				direction = vertical
+				spacing = 5
+				country_flag = {
+					tooltip = "[SiegeView.GetSiege.GetName]"
+					datacontext = "[SiegeView.GetSiege.GetBesieger]"
+					
+					blockoverride "flag"
+					{
+						texture = "[SiegeView.GetSiege.GetBesieger.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+						frame = "[SiegeView.GetSiege.GetBesieger.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+						framesize = { 120 120 }
+					}
+					
+					blockoverride "size" { size = { 60 60 } }
+				}
+				flowcontainer = {
+					direction = vertical
+					spacing = 5
+					margin_left = 10
+					visible = "[SiegeView.GetSiege.IsSiege]"
+					icon_button_square = {
+						size = { 50 50 }
+						blockoverride "On_click" { onclick = "[SiegeView.OnAssault]" }
+						enabled = "[SiegeView.CanAssault]"
+						blockoverride "ClickSound" { clicksound = "event:/SFX/Gameplay/Combat/sfx_gameplay_combat_screen_siege_order_assault" }
+						tooltip = "[SiegeView.GetAssaultTooltip]"
+						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/assault.dds" }
+					}
+					icon_button_square = {
+						size = { 50 50 }
+						blockoverride "On_click" { onclick = "[SiegeView.OnAssumeControl]" }
+						enabled = "[SiegeView.CanAssumeControl]"
+						tooltip = [SiegeView.GetAssumeControlTooltip]
+						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/siege.dds" }
+					}
 				}
 			}
 		}

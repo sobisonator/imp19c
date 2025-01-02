@@ -5928,43 +5928,41 @@ GT_set_tradegood_price = {
 
 		set_variable = {
 			name = local_price_$tradegood$
-			value = global_var:$tradezone$_total_order_size_$tradegood$
-		}		
-
-		if = {
-			limit = {
-				global_var:$tradezone$_stockpile_$tradegood$ > 0
+			value = {
+				value = global_var:$tradezone$_total_order_size_$tradegood$
+				if = {
+					limit = {
+						global_var:$tradezone$_stockpile_$tradegood$ > 0
+					}
+					divide = global_var:$tradezone$_stockpile_$tradegood$
+				}
+				multiply = 0.6 # The yearly total of all trade should be loosely in the range of 15-30% of a country's GDP, thus the quarterly total about 4% - 8%
+				if = {
+					limit = {
+						OR = {
+							flag:$tradegood$ = flag:grain
+							flag:$tradegood$ = flag:livestock
+							flag:$tradegood$ = flag:temperate_fruit
+							flag:$tradegood$ = flag:fish
+							flag:$tradegood$ = flag:vegetables
+							flag:$tradegood$ = flag:processed_foods
+						}
+					}
+					divide = DEMAND_num_food_tradegoods
+				}
+				if = {
+					limit = {
+						OR = {
+							flag:$tradegood$ = flag:silver
+							flag:$tradegood$ = flag:gold
+						}
+					}
+					divide = 3.5 # Scale value of precious metal backing goods to base wealth value
+				}
 			}
-			change_variable = {
-				name = local_price_$tradegood$
-				divide = global_var:$tradezone$_stockpile_$tradegood$
-			}
-		}
-
-		change_variable = {
-			name = local_price_$tradegood$
-			multiply = 0.6 # The yearly total of all trade should be loosely in the range of 15-30% of a country's GDP, thus the quarterly total about 4% - 8%
 		}
 
 		# Factor in elasticity
-
-		# If the tradegood is a food type, scale it down by the variety of food types available
-		if = {
-			limit = {
-				OR = {
-					flag:$tradegood$ = flag:grain
-					flag:$tradegood$ = flag:livestock
-					flag:$tradegood$ = flag:temperate_fruit
-					flag:$tradegood$ = flag:fish
-					flag:$tradegood$ = flag:vegetables
-					flag:$tradegood$ = flag:processed_foods
-				}
-			}
-			change_variable = {
-				name = local_price_$tradegood$
-				divide = DEMAND_num_food_tradegoods
-			}
-		}
 	}
 }
 

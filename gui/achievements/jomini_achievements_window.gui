@@ -1,0 +1,308 @@
+@windowwidth = 740
+@windowheight = 850
+
+base_window = {
+	name = "achievements_window"
+	gfxtype = windowgfx
+	parentanchor = hcenter|vcenter
+	position = { 0 0 }
+	movable = no
+	size = { @windowwidth @windowheight }
+	blockoverride "WindowAlpha" { alpha = 1 }
+
+	vbox = {
+	    using = MainWindowHeaderBoxCenteredNew
+		blockoverride "Title_text"
+		{
+			text = "ACHIEVEMENTS"	
+		}
+		blockoverride "White_buttons"
+		{
+			button_close = {
+				onclick = "[AchievementWindow.Hide]"
+				tooltip = "CLOSE"
+				shortcut = "close_window"
+			}
+		}
+	    vbox = {
+	        layoutpolicy_vertical = expanding
+	    }
+
+	}
+
+	vbox = {
+		widget = { size = { 0 30 } }
+		margin_widget = {
+			size = { 0 98 }
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = fixed
+			margin = { 18 0 }
+
+			flowcontainer = {
+				direction = vertical
+				spacing = 6
+
+				widget = {
+					name = "show all"
+					size = { 600 28 }
+					
+					button_radial = {
+						layoutpolicy_horizontal = expanding
+						
+						blockoverride "On_click"
+						{
+							onclick = "[AchievementWindow.ShowAll]"
+						}
+						
+						blockoverride "ShowDot"
+						{
+							trigger_when = "[AchievementWindow.ShouldShowAll]"
+						} 
+						
+						blockoverride "HideDot" 
+						{
+							trigger_when = "[Not(AchievementWindow.ShouldShowAll)]"
+						} 
+						
+					}
+
+					tag = {
+						parentanchor = vcenter
+						position = { 38 0 }			
+						size = { 100% 100% }
+						text = "SHOW_ALL_ACHIEVEMENTS"	
+					}
+				}
+
+				widget = {
+					name = "show remaining"
+					size = { 600 28 }
+					
+					button_radial = {
+						layoutpolicy_horizontal = expanding
+						
+						blockoverride "On_click"
+						{
+							onclick = "[AchievementWindow.ShowLocked]"
+						}
+						
+						blockoverride "ShowDot"
+						{
+							trigger_when = "[AchievementWindow.ShouldShowLocked]"
+						} 
+						
+						blockoverride "HideDot" 
+						{
+							trigger_when = "[Not(AchievementWindow.ShouldShowLocked)]"
+						} 
+						
+					}
+
+					tag = {
+						parentanchor = vcenter
+						position = { 38 0 }			
+						size = { 100% 100% }
+						text = "ACHIEVEMENT_FILTER_LOCKED"
+					}
+				}
+
+				widget = {
+					name = "show unlocked"
+					size = { 600 28 }
+
+					button_radial = {
+						layoutpolicy_horizontal = expanding
+						
+						blockoverride "On_click"
+						{
+							onclick = "[AchievementWindow.ShowUnlocked]"
+						}
+						
+						blockoverride "ShowDot"
+						{
+							trigger_when = "[AchievementWindow.ShouldShowUnlocked]"
+						} 
+						
+						blockoverride "HideDot" 
+						{
+							trigger_when = "[Not(AchievementWindow.ShouldShowUnlocked)]"
+						} 
+					}
+
+					tag = {
+						parentanchor = vcenter
+						position = { 38 0 }			
+						size = { 100% 100% }
+						text = "ACHIEVEMENT_FILTER_UNLOCKED"
+					}
+				}
+			}
+		}
+
+		margin_widget = {
+			size = { 0 660 }
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = fixed
+			margin = { 18 0 }
+			margin_bottom = 18
+			scrollarea = {
+				parentanchor = hcenter
+				position = { 0 0 }
+				size = { 710 100% }
+				scrollbarpolicy_horizontal = always_off
+				using = VerticalScrollAreaCutOff
+				scrollbar_vertical = {
+					using = VerticalScrollBar
+				}
+				
+				scrollwidget = {
+					dynamicgridbox = {
+						datamodel = "[AchievementWindow.AccessGroups]"
+						
+						item = {
+							flowcontainer = {
+								parentanchor = hcenter
+								direction = vertical
+								ignoreinvisible = yes
+								spacing = 4
+								
+								flowcontainer = {
+									parentanchor = hcenter
+									direction = vertical
+									ignoreinvisible = yes
+									spacing = 0
+									
+									category_drop = {
+										name = "collapsed_category"
+										size = { 676 36 }
+										blockoverride "Text" 
+										{
+											text = "ACHIEVEMENT_GROUP_TITLE"
+										}
+										blockoverride "On_click" 
+										{ 
+											onclick = "[Group.ToggleCollapsed]" 
+										}
+										blockoverride "Down" 
+										{ 
+											visible = no 
+										}
+										blockoverride "Right" 
+										{ 
+											visible = yes 
+										}
+										blockoverride "RightArrowVisible" 
+										{ 
+											visible = yes 
+										}
+										tooltip = "ACHIEVEMENT_GROUP_TOOLTIP"
+										visible = "[Group.IsCollapsed]"
+										
+									}
+									
+									category_drop = {
+										name = "expanded_category"
+										size = { 676 36 }
+										blockoverride "Text" 
+										{
+											text = "ACHIEVEMENT_GROUP_TITLE"
+										}
+										blockoverride "On_click" 
+										{ 
+											onclick = "[Group.ToggleCollapsed]" 
+										}
+
+										blockoverride "Down" 
+										{ 
+											visible = yes 
+										}
+										blockoverride "Right" 
+										{ 
+											visible = no 
+										}
+
+										blockoverride "RightArrowVisible" 
+										{ 
+											visible = no 
+										}
+
+										tooltip = "ACHIEVEMENT_GROUP_TOOLTIP"
+										visible = "[Not(Group.IsCollapsed)]"
+									}
+								}
+								
+								dynamicgridbox = {
+									datamodel = "[Group.AccessVisibleAchievements]"
+									visible = "[Not(Group.IsCollapsed)]"
+									
+									item = {
+										list_entry = {
+											parentanchor = hcenter
+											size = { 688 98 }
+											margin = { 6 0 }
+											
+											container = {
+												parentanchor = vcenter
+												
+												icon = {
+													#parentanchor = vcenter
+													texture = "[GUIAchievement.AccessTexture]"
+													position = { 5 4 }
+													size = { 64 64 }
+													tooltip = "ACHIEVEMENT_UNLOCKED"
+													visible = "[GUIAchievement.GetAchievement.IsUnlocked]"
+												}
+												
+												icon = {
+													#parentanchor = vcenter
+													texture = "[GUIAchievement.AccessLockedTexture]"
+													position = { 5 4 }
+													size = { 64 64 }
+													tooltip = "ACHIEVEMENT_LOCKED"
+													visible = "[Not(GUIAchievement.GetAchievement.IsUnlocked)]"
+													
+													modify_texture = {
+														name = "Locked"
+														texture = "gfx/interface/achievement/achievement_not_possible.dds"
+														blend_mode = alphamultiply
+														visible = "[Not(GUIAchievement.IsPossible)]"
+													}														
+												}
+											}
+											
+											widget = {
+												size = { 580 100% }
+												position = { 82 4 }
+												tag = {
+													name = "achievement_name"
+													size = { 100% 28 }
+													text = "[GUIAchievement.GetName]"
+													tooltip = "[GUIAchievement.GetHappenedDescription]"
+												}
+												
+												textbox = {
+													widgetanchor = vcenter
+													parentanchor = vcenter
+													position = { 0 0 }
+													size = { 100% 80 }
+													tooltip = "[GUIAchievement.GetHappenedDescription]"
+													text = "[GUIAchievement.GetDescription]"
+													multiline = yes
+													using = BaseFontS
+													using = Black_FontColor
+													elide = right
+													fontsize_min = 10
+													align = left
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

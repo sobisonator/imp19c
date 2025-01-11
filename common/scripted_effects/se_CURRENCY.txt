@@ -618,6 +618,17 @@
 		paper_money_allowed = true
 	}
 
+	CURRENCY_set_amounts_country = {
+		target_country = c:RUS
+		amt_circulated_thousands = 0
+		amt_circulated_millions = 400
+		amt_circulated_billions = 0
+		amt_national_debt_thousands = 800
+		amt_national_debt_millions = 579
+		amt_national_debt_billions = 0
+		minting_rate = 0
+	}
+
 	every_in_list = {
 		list = currency_adopters_list
 		save_scope_as = adopter_scope
@@ -708,6 +719,9 @@ CURRENCY_setup_public_debt_administrations = {
 	c:SPA = {
 		set_variable = public_debt_administration
 	}
+	c:RUS = {
+		set_variable = public_debt_administration
+	}
 }
 
 CURRENCY_setup_all_reserves = {
@@ -761,6 +775,36 @@ CURRENCY_setup_all_reserves = {
 
 			silver_reserve_size = 12 # hundreds lb
 			silver_reserve_accumulation_rate = 3 # hundreds lb
+		}
+	}
+
+	c:TUR = {
+		CURRENCY_country_setup_reserves = {
+			gold_reserve_size = 0 # hundreds lb
+			gold_reserve_accumulation_rate = 0 # hundreds lb
+
+			silver_reserve_size = 10600 # hundreds lb 
+			silver_reserve_accumulation_rate = 25 # hundreds lb
+		}
+	}
+
+	c:RUS = {
+		CURRENCY_country_setup_reserves = {
+			gold_reserve_size = 2000 # hundreds lb
+			gold_reserve_accumulation_rate = 10 # hundreds lb
+
+			silver_reserve_size = 5000 # hundreds lb
+			silver_reserve_accumulation_rate = 15 # hundreds lb
+		}
+	}
+
+	c:POL = {
+		CURRENCY_country_setup_reserves = {
+			gold_reserve_size = 0 # hundreds lb
+			gold_reserve_accumulation_rate = 0 # hundreds lb
+
+			silver_reserve_size = 500 # hundreds lb
+			silver_reserve_accumulation_rate = 2 # hundreds lb
 		}
 	}
 
@@ -1248,6 +1292,8 @@ CURRENCY_set_amounts_country = {
 			value = $minting_rate$
 		}
 	}
+
+	CURRENCY_cache_power = yes
 }
 
 CURRENCY_governorship_allocate_pops_currency = {
@@ -1298,6 +1344,7 @@ CURRENCY_set_country_currency = {
 		}
 
 	}
+	CURRENCY_cache_power = yes
 }
 
 CURRENCY_peg_country_currency = {
@@ -1726,4 +1773,37 @@ CURRENCY_apply_inflation_wealth_malus_governorship = {
 		name = indentured_wealth
 		multiply = CURRENCY_amt_circulated_inflation_wealth_multiplier
 	}
+}
+
+CURRENCY_cache_power = {
+	# Scope: Province (currency obj)
+	# Function: Save the currency power svalue as a var for quick reference
+	# Called: After currency initialisation and on quarterly trade pulse
+	set_variable = {
+		name = CURRENCY_num_adopters # Caches the number of country items in the adopters list
+		value = {
+			every_in_list = {
+				variable = currency_adopted_countries
+				add = 1
+			}
+		}
+	}
+	set_variable = {
+		name = CURRENCY_power_cached
+		value = CURRENCY_power
+	}
+}
+CURRENCY_cache_power_trade_bonus = {
+	# Scope: Province (currency obj)
+	set_variable = {
+		name = CURRENCY_power_trade_bonus_cached
+		value = CURRENCY_power_trade_bonus
+	}
+}
+
+CURRENCY_update_global_currency_status = {
+	# Scope: Random country
+	# Function: Update the score for every currency which determines whether it is in use as the global currency
+	
+	# TODO - https://github.com/sobisonator/imp19c/issues/453
 }

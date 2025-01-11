@@ -107,6 +107,7 @@ base_window = {
 		on_start = "[GetVariableSystem.Clear('industry_tab_open')]"
 		on_start = "[GetVariableSystem.Toggle('trade_tab_open')]"
 		on_start = "[ExecuteConsoleCommand('event piechart_update.2')]"
+		on_start = "[ExecuteConsoleCommand('event piechart_update.1')]"
 	}
 	state = {
 		name = _hide
@@ -2852,42 +2853,63 @@ base_window = {
 												size = { 5 55 }
 											}
 											textbox = {
-												margin_left = 10
+												margin_left = -150
 												size = { 115 0 }
 												using = BaseFontM
 												using = Black_FontColor
 												text = "[Province.Custom('state_trade_zone_loc')]" #TradeZone name
 											}
 											widget = {
-												size = { 70 0 }
+												size = { 0 0 }
 											}
-											icon_and_text = {
-												size = { 100 0 }
-												tooltip = "TRADE_ZONE_PRODUCTION_TT"
-												blockoverride "Icon"
-													{
-														texture = "gfx/interface/icons/modifiers/base_resources.dds"
+											flowcontainer = {
+												direction = horizontal
+												spacing = 4
+												margin_left = -50
+												icon_and_text = {
+													size = { 150 0 }
+													blockoverride "Icon" { texture = "gfx/interface/icons/menu_buttons/menu_trade.dds" }
+													blockoverride "Text" { 
+														text = "#T [Scope.GetProvince.MakeScope.Var('TZ_shipping').GetValue|0]#!/ #Y [GuiScope.SetRoot( Scope.GetProvince.MakeScope ).ScriptValue('SHIPPING_total_in_TZ')|0]" 
 													}
-												blockoverride "Text"
-												{
-													text = "[Province.Custom('state_trade_zone_value_loc')]" #TradeZone goods produced
+													tooltip = "#T Actual convoys passing through #! / #Y Capacity for convoys"
 												}
 											}
 											widget = {
-												size = { 25 0 }
+											 	size = { 25 0}
 											}
-											icon_and_text = {
-												size = { 100 0 }
-												tooltip = "TRADE_ZONE_POPULATION_TT"
-												blockoverride "Icon"
-													{
-														texture = "gfx/interface/icons/shared_icons/pop_type.dds"
+											widget = {
+												size = { 100 90 }
+													CustomPiechart = {
+													blockoverride "piechart_size_and_pos" {
+														size = { 80 80 }
+														parentanchor = vcenter
 													}
-												blockoverride "Text"
-												{
-													text = "[Province.Custom('trade_zone_population_loc')]" #TradeZone pops
+													blockoverride "datamodel" {
+														datamodel = "[Scope.GetProvince.MakeScope.GetList('shipping_power_list')]"
+													}
+													blockoverride "slice_tooltip" {
+														tooltip = "[Scope.GetProvince.MakeScope.GetVariable('tracking_TZ_shipping_for_tag').GetCountry.GetName] controls #G [GuiScope.SetRoot( Scope.GetProvince.MakeScope ).ScriptValue('SHIPPING_percentage_in_TZ')|%]#! of shipping here (capacity of #G [Scope.GetProvince.MakeScope.GetVariable('shipping_power_total').GetValue|0]#! convoys every quarter)."
+													}
+													blockoverride "slice_size" {
+														value = "[FixedPointToFloat( Scope.GetProvince.MakeScope.GetVariable('shipping_power_total').GetValue )]"
+													}
+													blockoverride "slice_color" {
+														color = "[Scope.GetProvince.MakeScope.GetVariable('tracking_TZ_shipping_for_tag').GetCountry.GetMapColor]"
+													}
+													blockoverride "alpha" {
+														alpha = 1
+													}
+													blockoverride "tag_text" {
+														text = ""
+													}
+												}
+												tradezone_penetration_info = { 
+													blockoverride "dataconext" { "[Scope.Province]"}
+													blockoverride "position" {}
 												}
 											}
+											
 											textbox = {
 												size = { 550 }
 											}

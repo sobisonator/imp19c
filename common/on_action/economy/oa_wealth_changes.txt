@@ -57,6 +57,7 @@ quarterly_trade_pulse = {
 			limit = {
 				NOT = { has_global_variable = done_quarterly_trade }
 			}
+			# Commence Production
 			every_country = {
 				every_governorships = {
 					limit = {
@@ -64,6 +65,7 @@ quarterly_trade_pulse = {
 							has_variable = internal_trade_scope
 						}
 					}
+					CURRENCY_governorship_send_to_reserves = yes
 					TRADE_set_internal_trade_scope = yes
 					TRADE_update_governorship_TZs = yes # In case new governorships are formed. TODO: slot this into the territory ownership changed effect once that is made
 				}
@@ -76,6 +78,19 @@ quarterly_trade_pulse = {
 			}
 			WEALTH_generate_new_all_countries = yes
 			WEALTH_pay_wages_all_countries = yes
+			# Cache currency power and currency power trade bonuses before trading
+			every_province = {
+				limit = {
+					has_variable = currency_name
+				}
+				CURRENCY_cache_power = yes
+			}
+			every_province = {
+				limit = {
+					has_variable = currency_name
+				}
+				CURRENCY_cache_power_trade_bonus = yes
+			}
 			set_global_variable = {
 				name = done_quarterly_trade
 				days = 1
@@ -92,6 +107,7 @@ quarterly_trade_pulse = {
 	}
 
 	on_actions = {
+		# Trigger the trade for each category one by one within this quarter
 		quarterly_reset_trade_transaction_totals
 		quarterly_global_trade_food
 		delay = { days = 20 }

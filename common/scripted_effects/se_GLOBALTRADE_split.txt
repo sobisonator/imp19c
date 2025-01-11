@@ -2562,6 +2562,25 @@ GT_split_update_wealth_owed_for_tradegoods = {
 		name = wealth_owed_for_$tradegood$
 		multiply = owner.var:order_size_modifier_$tradegood$
 	}
+	if = {
+		limit = {
+			owner = { has_variable = official_currency }
+		}
+		if = {
+			limit = {
+				owner.var:official_currency = {
+					has_variable = CURRENCY_power_trade_bonus_cached
+				}
+			}
+			change_variable = {
+				name = wealth_owed_for_$tradegood$
+				multiply = {
+					value = 1
+					subtract = owner.var:official_currency.var:CURRENCY_power_trade_bonus_cached
+				}
+			}
+		}
+	}
 	change_global_variable = {
 		name = $tradezone$_payment_pool_$tradegood$
 		add = var:wealth_owed_for_$tradegood$
@@ -3597,6 +3616,7 @@ GT_split_scale_wealth_owed_and_order_size_tradegood = {
 			multiply = owner.var:order_size_modifier_$tradegood$
 		}
 
+
 		if = {
 			limit = {
 				global_var:global_supply_as_percentage_of_order_$tradegood$ < 1
@@ -3959,7 +3979,7 @@ GT_split_calculate_all_trade_shares = {
 		the_state = 0
 		upper_strata = 1
 		middle_strata = 0.05
-		lower_strata = 0.05
+		lower_strata = 0.01
 		proletariat = 0
 		indentured = 0
 		tribesmen = 0.1
@@ -5176,6 +5196,25 @@ GT_split_get_governorship_shipping_payments_owed = {
 				multiply = 0.1
 			}
 		}
+		if = {
+			limit = {
+				owner = { has_variable = official_currency }
+			}
+			if = {
+				limit = {
+					owner.var:official_currency = {
+						has_variable = CURRENCY_power_trade_bonus_cached
+					}
+				}
+				change_variable = {
+					name = queued_trade_expenses_due_shipping
+					multiply = {
+						value = 1
+						subtract = owner.var:official_currency.var:CURRENCY_power_trade_bonus_cached
+					}
+				}
+			}
+		}
 		change_global_variable = {
 			name = global_shipping_costs_pool
 			add = var:queued_trade_expenses_due_shipping
@@ -5889,43 +5928,32 @@ GT_set_tradegood_price = {
 
 		set_variable = {
 			name = local_price_$tradegood$
-			value = global_var:$tradezone$_total_order_size_$tradegood$
-		}		
-
-		if = {
-			limit = {
-				global_var:$tradezone$_stockpile_$tradegood$ > 0
+			value = {
+				value = global_var:$tradezone$_total_order_size_$tradegood$
+				if = {
+					limit = {
+						global_var:$tradezone$_stockpile_$tradegood$ > 0
+					}
+					divide = global_var:$tradezone$_stockpile_$tradegood$
+				}
+				multiply = 0.6 # The yearly total of all trade should be loosely in the range of 15-30% of a country's GDP, thus the quarterly total about 4% - 8%
+				if = {
+					limit = {
+						OR = {
+							flag:$tradegood$ = flag:grain
+							flag:$tradegood$ = flag:livestock
+							flag:$tradegood$ = flag:temperate_fruit
+							flag:$tradegood$ = flag:fish
+							flag:$tradegood$ = flag:vegetables
+							flag:$tradegood$ = flag:processed_foods
+						}
+					}
+					divide = DEMAND_num_food_tradegoods
+				}
 			}
-			change_variable = {
-				name = local_price_$tradegood$
-				divide = global_var:$tradezone$_stockpile_$tradegood$
-			}
-		}
-
-		change_variable = {
-			name = local_price_$tradegood$
-			multiply = 0.1
 		}
 
 		# Factor in elasticity
-
-		# If the tradegood is a food type, scale it down by the variety of food types available
-		if = {
-			limit = {
-				OR = {
-					flag:$tradegood$ = flag:grain
-					flag:$tradegood$ = flag:livestock
-					flag:$tradegood$ = flag:temperate_fruit
-					flag:$tradegood$ = flag:fish
-					flag:$tradegood$ = flag:vegetables
-					flag:$tradegood$ = flag:processed_foods
-				}
-			}
-			change_variable = {
-				name = local_price_$tradegood$
-				divide = DEMAND_num_food_tradegoods
-			}
-		}
 	}
 }
 

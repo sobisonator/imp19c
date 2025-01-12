@@ -51,18 +51,29 @@ EDU_available_from_universities_local = {
 	# Scope: Any
 	# Determines how many education slots a university provides in its governorship
 	value = 1
-	# Value is 0 if traditional academia
 }
 
 EDU_university_national_bonus = {
 	# Scope: Any
 	value = 2
+	if = {
+		limit = {
+			has_law = law_university_religious_colleges
+		}
+		multiply = EDU_university_law_religious_colleges_country_impact
+	}
 }
 
 EDU_university_bonus_total_province = {
 	# Scope: Province
 	value = EDU_available_from_universities_local
 	multiply = num_of_EDU_university
+	if = {
+		limit = {
+			has_law = law_university_religious_colleges
+		}
+		multiply = EDU_university_law_religious_colleges_local_impact
+	}
 }
 
 EDU_university_local_bonus_total_governorship = {
@@ -165,7 +176,7 @@ EDU_required_t1_URB_commerce_district = {
 	multiply = EDU_required_t1_URB_commerce_district_per
 }
 EDU_required_t2_URB_commerce_district_per = {
-	value = 0.1
+	value = 0.05
 }
 EDU_required_t2_URB_commerce_district = {
 	value = num_of_URB_commerce_district
@@ -181,7 +192,7 @@ EDU_required_t1_IND_industrial_estate = {
 	multiply = EDU_required_t1_IND_industrial_estate_per
 }
 EDU_required_t2_IND_industrial_estate_per = {
-	value = 0.05
+	value = 0.02
 }
 EDU_required_t2_IND_industrial_estate = {
 	value = num_of_IND_industrial_estate
@@ -190,7 +201,7 @@ EDU_required_t2_IND_industrial_estate = {
 
 # Schools - 2 of tier 2
 EDU_required_t2_EDU_school_per = {
-	value = 0.5
+	value = 0.1
 }
 EDU_required_t2_EDU_school = {
 	value = num_of_EDU_school
@@ -215,7 +226,7 @@ EDU_required_t1_INF_hospital = {
 	multiply = EDU_required_t2_INF_hospital_per
 }
 EDU_required_t2_INF_hospital_per = {
-	value = 0.5
+	value = 0.2
 }
 EDU_required_t2_INF_hospital = {
 	value = num_of_INF_hospital
@@ -263,7 +274,7 @@ EDU_required_t1_URB_administration_district = {
 	multiply = EDU_required_t1_URB_administration_district_per
 }
 EDU_required_t2_URB_administration_district_per = {
-	value = 0.1
+	value = 0.05
 }
 EDU_required_t2_URB_administration_district = {
 	value = num_of_URB_administration_district
@@ -448,4 +459,32 @@ EDU_province_research_bonus_from_universities = {
 		value = governorship.EDU_t2_educated_governorship
 	}
 	multiply = 30
+}
+
+### Impact from laws
+
+EDU_university_law_religious_colleges_local_impact = {
+	# Scope: Province
+	# Function: Acts as a multiplier to modify down the number of available education slots in a province from universities if religious colleges law is in effect.
+
+	# Maximum t2 education bonus from universities is 90% of the base
+	value = 0.9
+	# Multiply down the t2 education bonus to the % of the province that has the primary country religion
+	multiply = FUNC_primary_religion_percentage_province
+}
+
+EDU_university_law_religious_colleges_country_impact = {
+	# Scope: Province
+	# Function: Acts as a multipler to modify down the number of available education slots from the national bonus if the religious colleges law is in effect.
+	value = {
+		value = owner.every_owned_province = {
+			if = {
+				limit = {
+					dominant_province_religion = owner.religion
+				}
+				add = 1
+			}
+		}
+	}
+	divide = owner.num_of_cities
 }

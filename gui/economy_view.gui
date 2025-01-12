@@ -48,8 +48,9 @@ base_window = {
 		start_sound = {
 			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
 		}
-		on_start = "[GetVariableSystem.Set('national_economy_tab_open')]"
 		on_start = "[GetVariableSystem.Clear('global_economy_tab_open')]"
+		on_start = "[GetVariableSystem.Clear('national_economy_tab_open')]"
+		on_start = "[GetVariableSystem.Toggle('national_economy_tab_open')]"
 		on_start = "[ExecuteConsoleCommand('event currencies_list.1')]"
 	}
 	state = {
@@ -96,64 +97,69 @@ base_window = {
 				shortcut = "close_window"
 			}
 		}
-
-		hbox = { 
-			layoutpolicy_vertical = fixed
+		margin_widget = {
+			name = "tabs"
+			size = { 100% 48 }
+			size = { 0 52 }
 			layoutpolicy_horizontal = expanding
-			spacing = 2
+			@mincategorybuttonwidth = 181
+			@maxcategorybuttonwidth = 181
+			@mincategorybuttonheight = 28 
+			@maxcategorybuttonheight = 34
+			sub_header_v = {
+				size = { 256 0 }
+				position = { 8 8 }
+				blockoverride "Title_text" { visible = no text = "" }	
+				blockoverride "Max_text_width" { max_width = 230 }
+			}
 			icon = {
-				size = { 147 32 }
-				sub_header_v = {
-					size = { 225 0 }
-					position = { 10 0 }
-					blockoverride "Title_text" { visible = no }	
-					blockoverride "Max_text_width" { max_width = 230 }
-				}
-				icon = {
-					icon = {
-						position = { 10 32 }
-						using = brighten_red_background
-						spriteType = Corneredtiled
-						size = { 622 2 }
-					}
-					icon = {
-						position = { 920 32 }
-						using = brighten_red_background
-						spriteType = Corneredtiled
-						size = { 7 2 }
-					}
-				}
+				position = { 2 42 }
+				using = brighten_red_background
+				spriteType = Corneredtiled
+				size = { 264 2 }
 			}
-			hbox = { layoutpolicy_horizontal = expanding }
-			category_tab = {
-				blockoverride "MinSize" { size = { 200 30 } }
-				blockoverride "MaxSize" { size = { 200 30 } }
-				blockoverride "MinVisible" { visible = "[Not(GetVariableSystem.Exists('national_economy_tab_open'))]" }
-				blockoverride "MaxVisible" { visible = "[GetVariableSystem.Exists('national_economy_tab_open')]" }
-				######## Shared Overrides
-				blockoverride "Center_text" { text = "National Economy" }
-				blockoverride "Icon" { visible = no }
-				######## Small Button Overrides
-				blockoverride "ClickFunction"
-				{
-					onclick = "[GetVariableSystem.Toggle('national_economy_tab_open')]"
-					onclick = "[GetVariableSystem.Clear('global_economy_tab_open')]"
-				}
+			icon = {
+				position = { 632 42 }
+				using = brighten_red_background
+				spriteType = Corneredtiled
+				size = { 5 2 }
 			}
-			category_tab = {
-				blockoverride "MinSize" { size = { 200 30 } }
-				blockoverride "MaxSize" { size = { 200 30 } }
-				blockoverride "MinVisible" { visible = "[Not(GetVariableSystem.Exists('global_economy_tab_open'))]" }
-				blockoverride "MaxVisible" { visible = "[GetVariableSystem.Exists('global_economy_tab_open')]" }
-				######## Shared Overrides
-				blockoverride "Center_text" { text = "Global Economy" }
-				blockoverride "Icon" { visible = no }
-				######## Small Button Overrides
-				blockoverride "ClickFunction"
-				{
-					onclick = "[GetVariableSystem.Toggle('global_economy_tab_open')]"
-					onclick = "[GetVariableSystem.Clear('national_economy_tab_open')]"
+			hbox = { 
+				layoutpolicy_vertical = preferred
+				layoutpolicy_horizontal = expanding
+				spacing = 2
+				margin_right = 10
+				margin_top = 4
+				hbox = { layoutpolicy_horizontal = expanding }
+			
+				category_tab = {
+					blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+					blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+					blockoverride "MinVisible" { visible = "[Not(GetVariableSystem.Exists('national_economy_tab_open'))]" }
+					blockoverride "MaxVisible" { visible = "[GetVariableSystem.Exists('national_economy_tab_open')]" }
+					######## Shared Overrides
+					blockoverride "Center_text" { text = "National Economy" }
+					######## Small Button Overrides
+					blockoverride "ClickFunction"
+					{
+						onclick = "[GetVariableSystem.Toggle('national_economy_tab_open')]"
+						onclick = "[GetVariableSystem.Clear('global_economy_tab_open')]"
+					}
 				}
+				category_tab = {
+					blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+					blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+					blockoverride "MinVisible" { visible = "[Not(GetVariableSystem.Exists('global_economy_tab_open'))]" }
+					blockoverride "MaxVisible" { visible = "[GetVariableSystem.Exists('global_economy_tab_open')]" }
+					######## Shared Overrides
+					blockoverride "Center_text" { text = "Global Economy" }
+					######## Small Button Overrides
+					blockoverride "ClickFunction"
+					{
+						onclick = "[GetVariableSystem.Toggle('global_economy_tab_open')]"
+						onclick = "[GetVariableSystem.Clear('national_economy_tab_open')]"
+					}
+				} 
 			}
 		}
 		
@@ -794,12 +800,12 @@ base_window = {
 			}
 		}
 
-		vbox = {
+		flowcontainer = {
 			layoutpolicy_vertical = expanding
 			layoutpolicy_horizontal = expanding
 			visible = "[GetVariableSystem.Exists('global_economy_tab_open')]"
+			margin = { 12 12 }
 		    scrollarea = {
-				position = { 0 0 }
 				size = { 200 200 }
 				scrollbarpolicy_horizontal = always_off
 				using = VerticalScrollAreaCutOff

@@ -405,6 +405,7 @@ base_window = {
 							vbox = {
 								layoutpolicy_vertical = expanding
 								spacing = 5
+								vbox = { }
 								panelka_trade = {
 									size = { 370 32 }
 									#blockoverride "Icon" { texture = "gfx/interface/icons/powers/religious.dds" }
@@ -665,6 +666,7 @@ base_window = {
 									direction = vertical
 									spacing = 5
 									margin_top = 10
+									margin_left = 20
 									margin_bottom = 10
 					                TradeGoodOverviewItem = {
 					                        blockoverride "image_and_tooltip"
@@ -2842,89 +2844,69 @@ base_window = {
 						scrollarea = {
 							size = { 100% 100% }
 							layoutpolicy_horizontal = expanding
+							scrollbarpolicy_horizontal = always_off
 							using = VerticalScrollAreaCutOff
-
 							scrollbar_vertical = {
 								using = VerticalScrollBar
 							}
-
-							scrollbarpolicy_horizontal = always_off
-									
 							scrollwidget = {
-								vbox = {
-									vbox = {
-										layoutpolicy_horizontal = expanding 
-										layoutpolicy_vertical = shrinking
-										datamodel = "[Player.MakeScope.GetList('trade_zones_list')]"
-										item = {
-											hbox = {
-												hbox = {
-													layoutpolicy_vertical = expanding
-													layoutpolicy_horizontal = shrinking
-													datacontext = "[Scope.Province]"
-													widget = {
-														size = { 5 55 }
+								flowcontainer = {
+									direction = vertical
+									spacing = 5
+									margin_top = 10
+									margin_left = 20
+									margin_bottom = 10
+									datamodel = "[Player.MakeScope.GetList('trade_zones_list')]"
+									item = {
+										button = {
+											size = { 880 90 }
+											using = list_item
+											flowcontainer = {
+												datacontext = "[Scope.Province]"
+												spacing = 50
+												textbox = {
+													size = { 330 90 }
+													align = hcenter
+													using = BaseFontM
+													using = Black_FontColor
+													text = "[Province.Custom('state_trade_zone_loc')]" #TradeZone name
+												}
+												icon_and_text = {
+													size = { 170 90 }
+													blockoverride "Icon" { texture = "gfx/interface/icons/menu_buttons/menu_trade.dds" }
+													blockoverride "Text" { 
+														text = "#T [Scope.GetProvince.MakeScope.Var('TZ_shipping').GetValue|0]#!/ #Y [GuiScope.SetRoot( Scope.GetProvince.MakeScope ).ScriptValue('SHIPPING_total_in_TZ')|0]" 
 													}
-													textbox = {
-														margin_left = -150
-														size = { 115 0 }
-														using = BaseFontM
-														using = Black_FontColor
-														text = "[Province.Custom('state_trade_zone_loc')]" #TradeZone name
-													}
-													widget = {
-														size = { 0 0 }
-													}
-													flowcontainer = {
-														direction = horizontal
-														spacing = 4
-														margin_left = -50
-														icon_and_text = {
-															size = { 150 0 }
-															blockoverride "Icon" { texture = "gfx/interface/icons/menu_buttons/menu_trade.dds" }
-															blockoverride "Text" { 
-																text = "#T [Scope.GetProvince.MakeScope.Var('TZ_shipping').GetValue|0]#!/ #Y [GuiScope.SetRoot( Scope.GetProvince.MakeScope ).ScriptValue('SHIPPING_total_in_TZ')|0]" 
-															}
-															tooltip = "#T Actual convoys passing through #! / #Y Capacity for convoys"
+													tooltip = "#T Actual convoys passing through #! / #Y Capacity for convoys"
+												}
+												widget = {
+													size = { 200 90 }
+													CustomPiechart = {
+														blockoverride "piechart_size_and_pos" {
+															size = { 80 80 }
+															parentanchor = vcenter
+														}
+														blockoverride "datamodel" {
+															datamodel = "[Scope.GetProvince.MakeScope.GetList('shipping_power_list')]"
+														}
+														blockoverride "slice_tooltip" {
+															tooltip = "[Scope.GetProvince.MakeScope.GetVariable('tracking_TZ_shipping_for_tag').GetCountry.GetName] controls #G [GuiScope.SetRoot( Scope.GetProvince.MakeScope ).ScriptValue('SHIPPING_percentage_in_TZ')|%]#! of shipping here (capacity of #G [Scope.GetProvince.MakeScope.GetVariable('shipping_power_total').GetValue|0]#! convoys every quarter)."
+														}
+														blockoverride "slice_size" {
+															value = "[FixedPointToFloat( Scope.GetProvince.MakeScope.GetVariable('shipping_power_total').GetValue )]"
+														}
+														blockoverride "slice_color" {
+															color = "[Scope.GetProvince.MakeScope.GetVariable('tracking_TZ_shipping_for_tag').GetCountry.GetMapColor]"
+														}
+														blockoverride "alpha" {
+															alpha = 1
+														}
+														blockoverride "tag_text" {
+															text = ""
 														}
 													}
-													widget = {
-													 	size = { 25 0}
-													}
-													widget = {
-														size = { 100 90 }
-															CustomPiechart = {
-															blockoverride "piechart_size_and_pos" {
-																size = { 80 80 }
-																parentanchor = vcenter
-															}
-															blockoverride "datamodel" {
-																datamodel = "[Scope.GetProvince.MakeScope.GetList('shipping_power_list')]"
-															}
-															blockoverride "slice_tooltip" {
-																tooltip = "[Scope.GetProvince.MakeScope.GetVariable('tracking_TZ_shipping_for_tag').GetCountry.GetName] controls #G [GuiScope.SetRoot( Scope.GetProvince.MakeScope ).ScriptValue('SHIPPING_percentage_in_TZ')|%]#! of shipping here (capacity of #G [Scope.GetProvince.MakeScope.GetVariable('shipping_power_total').GetValue|0]#! convoys every quarter)."
-															}
-															blockoverride "slice_size" {
-																value = "[FixedPointToFloat( Scope.GetProvince.MakeScope.GetVariable('shipping_power_total').GetValue )]"
-															}
-															blockoverride "slice_color" {
-																color = "[Scope.GetProvince.MakeScope.GetVariable('tracking_TZ_shipping_for_tag').GetCountry.GetMapColor]"
-															}
-															blockoverride "alpha" {
-																alpha = 1
-															}
-															blockoverride "tag_text" {
-																text = ""
-															}
-														}
-														tradezone_penetration_info = { 
-															blockoverride "dataconext" { "[Scope.Province]"}
-															blockoverride "position" {}
-														}
-													}
-													
-													textbox = {
-														size = { 550 }
+													tradezone_penetration_info = { 
+														blockoverride "dataconext" { "[Scope.Province]" }
 													}
 												}
 											}

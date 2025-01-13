@@ -191,3 +191,178 @@ EDU_set_t2_research_bonus = {
 		}
 	}
 }
+
+EDU_update_national_education_piechart = {
+	# Scope: Country
+	# TODO: Turn this into a generic FUNC_ scripted effect
+
+	set_variable = {
+		name = t2_educated_pops_country
+		value = {
+			value = 0
+			every_governorships = {
+				add = EDU_t2_educated_governorship
+			}
+		}
+	}
+
+	set_variable = {
+		name = t1_educated_pops_country
+		value = {
+			value = 0
+			every_governorships = {
+				add = var:EDU_t1_educated_governorship
+			}
+		}
+	}
+
+	set_variable = {
+		name = uneducated_pops_country
+		value = {
+			value = 0
+			every_governorships = {
+				add = EDU_uneducated_governorship
+			}
+		}
+	}
+
+	set_variable = {
+		name = t2_educated_pops_country_percentage
+		value = {
+			value = var:t2_educated_pops_country
+			divide = {
+				value = var:t2_educated_pops_country
+				add = var:t1_educated_pops_country
+				add = var:uneducated_pops_country
+			}
+		}
+	}
+	set_variable = {
+		name = t1_educated_pops_country_percentage
+		value = {
+			value = var:t1_educated_pops_country
+			divide = {
+				value = var:t2_educated_pops_country
+				add = var:t1_educated_pops_country
+				add = var:uneducated_pops_country
+			}
+		}
+	}
+	set_variable = {
+		name = uneducated_pops_country_percentage
+		value = {
+			value = var:uneducated_pops_country
+			divide = {
+				value = var:t2_educated_pops_country
+				add = var:t1_educated_pops_country
+				add = var:uneducated_pops_country
+			}
+		}
+	}
+
+	# TODO: Make this generic
+	if = {
+		limit = {
+			NOT = { has_variable = education_piechart_setup }
+		}
+		clear_variable_list = education_piechart_list
+		save_scope_as = country_scope
+		FUNC_add_to_piechart_list_province = {
+			piechart_name = education
+			slice_size_value = scope:country_scope.var:t2_educated_pops_country_percentage
+			derived_colour_culture_group = culture_group:irish_group
+			slice_tooltip = flag:t2_educated_country_tt
+		}
+		FUNC_add_to_piechart_list_province = {
+			piechart_name = education
+			slice_size_value = scope:country_scope.var:t1_educated_pops_country_percentage
+			derived_colour_culture_group = culture_group:italian
+			slice_tooltip = flag:t1_educated_country_tt
+		}
+		FUNC_add_to_piechart_list_province = {
+			piechart_name = education
+			slice_size_value = scope:country_scope.var:uneducated_pops_country_percentage
+			derived_colour_culture_group = culture_group:british_group
+			slice_tooltip = flag:uneducated_country_tt
+		}
+	}
+
+	else = {
+		FUNC_update_piechart_list_province = {
+			piechart_name = education
+			slice_size_value = var:t2_educated_pops_country_percentage
+			derived_colour_culture_group = culture_group:irish_group
+			slice_tooltip = flag:t2_educated_country_tt
+		}
+		FUNC_update_piechart_list_province = {
+			piechart_name = education
+			slice_size_value = var:t1_educated_pops_country_percentage
+			derived_colour_culture_group = culture_group:italian
+			slice_tooltip = flag:t1_educated_country_tt
+		}
+		FUNC_update_piechart_list_province = {
+			piechart_name = education
+			slice_size_value = var:uneducated_pops_country_percentage
+			derived_colour_culture_group = culture_group:british_group
+			slice_tooltip = flag:uneducated_country_tt
+		}
+	}
+	
+}
+
+FUNC_update_piechart_list_province = {
+	random_in_list = {
+		variable = $piechart_name$_piechart
+		limit = {
+			NOT = {
+				has_variable = piechart_details_updated
+			}
+		}
+		set_variable = {
+			name = $piechart_name$_piechart_slice_size
+			value = $slice_size_value$
+		}
+		set_variable = {
+			name = derived_colour
+			value = $derived_colour_culture_group$
+		}
+		set_variable = {
+			name = slice_tooltip
+			value = $slice_tooltip$
+		}
+
+		set_variable = {
+			name = piechart_details_updated
+			days = 1
+		}
+	}
+}
+
+FUNC_add_to_piechart_list_province = {
+	random_province = {
+		limit = {
+			NOT = {
+				has_variable = is_in_$piechart_name$_piechart
+			}
+		}
+		save_scope_as = piechart_item
+		set_variable = is_in_$piechart_name$_piechart
+
+		set_variable = {
+			name = $piechart_name$_piechart_slice_size
+			value = $slice_size_value$
+		}
+		set_variable = {
+			name = derived_colour
+			value = $derived_colour_culture_group$
+		}
+		set_variable = {
+			name = slice_tooltip
+			value = $slice_tooltip$
+		}
+	}
+	add_to_variable_list = {
+		name = $piechart_name$_piechart_list
+		target = scope:piechart_item
+	}
+}

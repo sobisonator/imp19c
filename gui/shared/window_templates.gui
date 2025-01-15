@@ -1,0 +1,352 @@
+types NEW_WINDOW {
+	type mp_country_button = button {
+		clicksound = "event:/SFX/UI/Generic/2.0/sfx_ui_button_accordion"
+		size = { 398 60 }
+		using = brighten_red_background
+		clicksound = "event:/SFX/UI/Province/sfx_ui_province_select"
+		oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+		#block "tooltip" { tooltip = "FRAINTRO" }
+		onclick = "[PdxGuiTriggerAllAnimations('unselect')]"
+		block "On_click" {
+		}
+		block "onmouse" {
+		}
+		widget = {
+			size = { 100% 100% }
+			block "visible" { }
+			background = {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = green_background
+			}
+		}
+		margin_widget = {
+			margin = { 2 2 }
+			size = { 100% 100% }
+			margin_widget = {
+				name = "background_black"
+				size = { 100% 100% }
+				parentanchor = right
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					using = black_background
+					using = portrait_x32y32bd_alpha
+				}
+				icon = {
+					size = { 100% 100% }
+					#parentanchor = right
+					using = portrait_x32y32bd_alpha
+					block "texture" { texture = "gfx/interface/images/background_load_save.dds" }
+					spriteType = Corneredtiled
+					modify_texture = {
+						texture = "gfx/interface/base_parts/gradient_black_invert.dds"
+						blend_mode = alphamultiply
+					}
+					modify_texture = {
+						texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
+						blend_mode = alphamultiply
+					}
+				}
+			}
+			country_flag = {
+				name = "France"
+				block "flag"
+				{
+					texture = "[GetCountry('FRA').AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+					frame = "[GetCountry('FRA').AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+					framesize = { 120 120 }
+				}
+				
+				blockoverride "size"
+				{
+					size = { 56 56 }
+				}
+			}
+			textbox = {
+				position = { 60 0 }
+				size = { 100% 34 }
+				fontsize = 28
+				font = HeaderFont
+				#using = Highlight_FontColor
+				using = Black_FontColor
+				block "name" { text = "France" }
+				alwaystransparent = yes
+				multiline = yes
+			}
+		}
+	}
+
+	type mp_country_on_map = icon {
+		size = { 100% 100% }
+		texture = "gfx/interface/base_parts/base_color.dds"
+		block "color" {  }
+		modify_texture = {
+			blend_mode = alphamultiply
+			block "texture" { }
+		}
+		icon = {
+			size = { 100% 100% }
+			using = green_background
+			block "visible" { }
+			modify_texture = {
+				blend_mode = alphamultiply
+				block "texture" { }
+			}
+			modify_texture = {
+				blend_mode = alphamultiply
+				spriteType = Corneredtiled
+				spriteborder = { 0 0 }
+				texture = "gfx/interface/base_parts/pattern_a_l.dds"
+			}
+		}
+		icon = {
+			size = { 100% 100% }
+			texture = "gfx/interface/base_parts/base_color.dds"
+			alpha = 0.2
+			visible = no
+			modify_texture = {
+				blend_mode = alphamultiply
+				block "texture" {  }
+			}
+			block "animation_2" { }
+		}
+	}
+
+	type mpwindow = widget {
+		size = { 100% 100% }
+		filter_mouse = left|wheel|right
+		alwaystransparent = no
+		movable = no
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = black_background
+		}
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = pattern_black_background
+			modify_texture = {
+				texture = "gfx/interface/base_parts/background_x60bd_alpha_two_corner.dds"
+				blend_mode = alphamultiply
+				spriteType = Corneredtiled
+				spriteborder = { 60 60 }
+			}
+		}
+		widget = {
+			size = { 2048 1024 }
+			parentanchor = center
+			icon = {
+				texture = "gfx/interface/images/flatmap.dds"
+				size = { 100% 100% }
+				icon = {
+					texture = "gfx/interface/base_parts/background_texture.dds"
+					size = { 100% 100% }
+					alpha = 0.8
+					modify_texture = {
+						blend_mode = alphamultiply
+						texture = "gfx/interface/base_parts/fade_bg_ingame_menu.dds"
+					}
+				}
+			}
+		}
+		widget = {
+			name = "country_images_on_map"
+			size = { 2048 1024 }
+			parentanchor = center
+			mp_country_on_map = {
+				name = "GBR"
+				blockoverride "color" { color = "[GetCountry('GBR').GetMapColor]" }
+				blockoverride "texture" { texture = "gfx/interface/images/GBR.dds" }
+				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'GBR')]" }
+				blockoverride "animation_2" {
+					state = {
+						name = gbr_anim_1
+						on_start = "[PdxGuiWidget.Show]"
+					}
+					state = {
+						name = gbr_anim_2
+						on_start = "[PdxGuiWidget.Hide]"
+					}
+				}
+			}
+			mp_country_on_map = {
+				name = "PRU"
+				blockoverride "color" { color = "[GetCountry('PRU').GetMapColor]" }
+				blockoverride "texture" { texture = "gfx/interface/images/PRU.dds" }
+				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'PRU')]" }
+				blockoverride "animation_2" {
+					state = {
+						name = pru_anim_1
+						on_start = "[PdxGuiWidget.Show]"
+					}
+					state = {
+						name = pru_anim_2
+						on_start = "[PdxGuiWidget.Hide]"
+					}
+				}
+			}
+			mp_country_on_map = {
+				name = "FRA"
+				blockoverride "color" { color = "[GetCountry('FRA').GetMapColor]" }
+				blockoverride "texture" { texture = "gfx/interface/images/FRA.dds" }
+				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'FRA')]" }
+				blockoverride "animation_2" {
+					state = {
+						name = fra_anim_1
+						on_start = "[PdxGuiWidget.Show]"
+					}
+					state = {
+						name = fra_anim_2
+						on_start = "[PdxGuiWidget.Hide]"
+					}
+				}
+			}
+		}
+		widget = {
+			size = { 398 886 }
+			position = { 120 100 }
+			flowcontainer = {
+				parentanchor = hcenter
+				position = { 0 30 }
+				direction = vertical 
+				spacing = 0
+
+				icon = {
+					name = "game_logo"
+					parentanchor = hcenter
+					texture = "gfx/frontend/game_logo.dds"
+					scale = 0.8
+					shaderfile = "gfx/FX/pdxgui_glow_game.shader"
+				}
+				flowcontainer = {
+					direction = vertical
+					spacing = 20
+					parentanchor = hcenter
+					margin_widget = {
+						size = { 100% 80 }
+						parentanchor = hcenter
+					}
+					flowcontainer = {
+						direction = vertical
+						spacing = 10
+						mp_country_button = {
+							blockoverride "name" { text = "Great Britain" }
+							blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'GBR')]" }
+							blockoverride "onmouse" {
+								onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('gbr_anim_1')]"
+								onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('gbr_anim_2')]"
+							}
+							blockoverride "On_click" {
+								onclick = "[SetLobbyCountryTag('GBR')]"
+								onclick = "[PdxGuiTriggerAllAnimations('gbr_select')]"
+							}
+							blockoverride "flag"
+							{
+								texture = "[GetCountry('GBR').AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+								frame = "[GetCountry('GBR').AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+								framesize = { 120 120 }
+							}
+							blockoverride "texture" { texture = "gfx/interface/missions/mission_image_russian_railway.dds" }
+						}
+						mp_country_button = {
+							blockoverride "name" { text = "Prussia" }
+							blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'PRU')]" }
+							blockoverride "onmouse" {
+								onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('pru_anim_1')]"
+								onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('pru_anim_2')]"
+							}
+							blockoverride "On_click" {
+								onclick = "[SetLobbyCountryTag('PRU')]"
+								onclick = "[PdxGuiTriggerAllAnimations('pru_select')]"
+							}
+							blockoverride "flag"
+							{
+								texture = "[GetCountry('PRU').AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+								frame = "[GetCountry('PRU').AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+								framesize = { 120 120 }
+							}
+							blockoverride "texture" { texture = "gfx/interface/missions/mission_image_test.dds" }
+						}
+						mp_country_button = {
+							blockoverride "name" { text = "France" }
+							blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'FRA')]" }
+							blockoverride "onmouse" {
+								onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('fra_anim_1')]"
+								onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('fra_anim_2')]"
+							}
+							blockoverride "On_click" {
+								onclick = "[SetLobbyCountryTag('FRA')]"
+								onclick = "[PdxGuiTriggerAllAnimations('fra_select')]"
+							}
+							blockoverride "flag"
+							{
+								texture = "[GetCountry('FRA').AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+								frame = "[GetCountry('FRA').AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+								framesize = { 120 120 }
+							}
+							blockoverride "texture" { texture = "gfx/interface/missions/mission_image_russian_railway.dds" }
+						}
+					}
+					margin_widget = {
+						size = { 100% 80 }
+						parentanchor = hcenter
+						text_button_square = {
+							size = { 210 28 }
+							parentanchor = vcenter|hcenter
+							
+							blockoverride "Center_text" 
+							{
+								text = "BACK"	
+							}
+							
+							enabled = "[LobbyView.CanGoBack]"
+							tooltip = "[LobbyView.GetGoBackToolTip]"
+							blockoverride "On_click"
+							{
+								onclick = "[SetPreparationLobby('(bool)no')]"
+								onclick = "[LobbyView.GoBack]"
+							}
+						}
+					}
+					margin_widget = {
+						size = { 100% 80 }
+						parentanchor = hcenter
+						text_button_square = {
+							size = { 210 28 }
+							parentanchor = vcenter|hcenter
+
+							blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_START" }
+							using = tooltip_ne
+							blockoverride "On_click" { 
+								onclick = "[LobbyView.Start]" 
+								clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_start"
+							}
+							enabled = "[LobbyView.CanStart]"
+							tooltip = "[LobbyView.StartToolTip]"
+							visible = "[And(PlayerIsHost, And(GameIsMultiplayer,IsPreparationLobby))]"
+							
+						}
+						text_button_square = {
+							size = { 210 28 }
+							parentanchor = vcenter|hcenter
+
+							blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_START" }
+							using = tooltip_ne
+							blockoverride "On_click" { 
+								onclick = "[GameLobby.StartGame]"
+								onclick = "[LobbyView.Ready]"
+								clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_start"
+							}
+							enabled = "[LobbyView.CanControlSelected]"
+							tooltip = "[LobbyView.GetControlToolTip]"
+							visible = "[And(PlayerIsHost,And(Or(Not(GameIsMultiplayer),Not(IsPreparationLobby)),Or(LobbyView.HasSelectedPlayable,LobbyView.IsObserver)))]"		
+						}
+					}
+				}
+			}
+		}
+		#button = {
+		#	size = { 50 50 }
+		#	parentanchor = center
+		#	using = red_background
+		#}
+	}
+}

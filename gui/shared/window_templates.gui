@@ -11,15 +11,17 @@ template portrait_x32y32bd_alpha_2
 types NEW_WINDOW {
 	type mp_country_button = button {
 		clicksound = "event:/SFX/UI/Generic/2.0/sfx_ui_button_accordion"
-		size = { 398 60 }
+		size = { 398 50 }
 		using = brighten_red_background
 		clicksound = "event:/SFX/UI/Province/sfx_ui_province_select"
 		oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
 		#block "tooltip" { tooltip = "FRAINTRO" }
 		onclick = "[PdxGuiTriggerAllAnimations('unselect')]"
-		block "On_click" {
-		}
-		block "onmouse" {
+		block "On_click" { }
+		block "onmouse" { }
+		modify_texture = {
+			blend_mode = alphamultiply
+			texture = "gfx/interface/base_parts/horizontal_gradient_stretch_black.dds"
 		}
 		widget = {
 			size = { 100% 100% }
@@ -27,6 +29,10 @@ types NEW_WINDOW {
 			background = {
 				shaderfile = "gfx/FX/pdxgui_default.shader"
 				using = green_background
+				modify_texture = {
+					blend_mode = alphamultiply
+					texture = "gfx/interface/base_parts/horizontal_gradient_stretch_black.dds"
+				}
 			}
 		}
 		margin_widget = {
@@ -35,6 +41,7 @@ types NEW_WINDOW {
 			margin_widget = {
 				name = "background_black"
 				size = { 100% 100% }
+				#margin = { 2 2 }
 				parentanchor = right
 				background = {
 					shaderfile = "gfx/FX/pdxgui_default.shader"
@@ -45,12 +52,10 @@ types NEW_WINDOW {
 					size = { 272 100% }
 					position = { 4 0 }
 					parentanchor = right
+					alpha = 0.75
+					using = portrait_x32y32bd_alpha
 					block "texture" { texture = "gfx/interface/images/background_load_save.dds" }
 					spriteType = Corneredtiled
-					#modify_texture = {
-					#	texture = "gfx/interface/base_parts/gradient_black_invert.dds"
-					#	blend_mode = alphamultiply
-					#}
 					modify_texture = {
 						texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
 						blend_mode = alphamultiply
@@ -68,12 +73,12 @@ types NEW_WINDOW {
 				
 				blockoverride "size"
 				{
-					size = { 56 56 }
+					size = { 46 46 }
 				}
 			}
 			textbox = {
-				position = { 60 0 }
-				size = { 100% 34 }
+				position = { 50 0 }
+				size = { 100% 40 }
 				fontsize = 28
 				font = HeaderFont
 				#using = Highlight_FontColor
@@ -107,6 +112,7 @@ types NEW_WINDOW {
 			size = { 100% 100% }
 			texture = "gfx/interface/base_parts/base_color.dds"
 			using = portrait_x32y32bd_alpha_2
+			shaderfile = "gfx/FX/pdxgui_glow_game.shader"
 			alpha = 0.5
 			block "visible" { }
 			modify_texture = {
@@ -129,7 +135,39 @@ types NEW_WINDOW {
 				blend_mode = alphamultiply
 				block "texture" {  }
 			}
-			block "animation_2" { }
+			block "animation" { }
+		}
+		#country_flag = {
+		#	clicksound = "event:/SFX/UI/Province/sfx_ui_province_select"
+		#	oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+		#	block "position" { }
+		#	block "click" { }
+		#	block "onmouse" { }
+		#	block "flag" {
+		#		texture = "[GetCountry('FRA').AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+		#		frame = "[GetCountry('FRA').AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+		#		framesize = { 120 120 }
+		#	}
+		#	blockoverride "size" {
+		#		size = { 52 52 }
+		#	}			
+		#}
+		button = {
+			size = { 128 128 }
+			alpha = 0.5
+			block "position" { }
+			block "click" { }
+			block "onmouse" { }
+			block "texture_coa" { }
+		}
+		icon = {
+			size = { 128 128 }
+			alpha = 1
+			block "visible" { }
+			block "position" { }
+			block "click" { }
+			block "onmouse" { }
+			block "texture_coa" { }
 		}
 	}
 
@@ -137,7 +175,11 @@ types NEW_WINDOW {
 		size = { 100% 100% }
 		filter_mouse = left|wheel|right
 		alwaystransparent = no
-		movable = no
+		#state = { 
+		#	name = _show
+		#	on_start = "[PdxGuiTriggerAllAnimations('europe_show')]"
+		#	on_start = "[SetLobbyCountryTag('GBR')]"
+		#}
 		state = {
 			name = show_mp_window
 			on_start = "[PdxGuiWidget.Show]"
@@ -163,8 +205,29 @@ types NEW_WINDOW {
 		icon = {
 			size = { 100% 100% }
 			parentanchor = center
-			texture = "gfx/interface/images/европа.png"
+			texture = "gfx/interface/images/maps/европа.png"
 			using = portrait_x32y32bd_alpha_2
+			visible = "[Or( Or( Or( EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'GBR'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'PRU') ), Or( EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'RUS'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'FRA') ) ), Or( Or( EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'NED'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'AUS') ), Or( EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'TUR'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'SAR') ) ) )]"
+			#visible = "[Not( EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'USA') )]"
+			state = {
+				name = europe_show
+				delay = 0.001
+				on_start = "[PdxGuiWidget.Show]"
+			}
+		}
+		icon = {
+			size = { 100% 100% }
+			parentanchor = center
+			texture = "gfx/interface/images/maps/северная_америка.png"
+			using = portrait_x32y32bd_alpha_2
+			visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'USA')]"
+		}
+		icon = {
+			size = { 100% 100% }
+			parentanchor = center
+			texture = "gfx/interface/images/maps/африка_индия.png"
+			using = portrait_x32y32bd_alpha_2
+			visible = "[Or(EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'EGY'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'EIC'))]"
 		}
 		icon = {
 			size = { 100% 100% }
@@ -177,16 +240,28 @@ types NEW_WINDOW {
 			}
 		}
 		widget = {
-			name = "country_images_on_map"
-			#size = { 2048 1024 }
+			name = "country_images_on_map_europe"
+			visible = "[Or( Or( Or( EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'GBR'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'PRU') ), Or( EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'RUS'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'FRA') ) ), Or( Or( EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'NED'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'AUS') ), Or( EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'TUR'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'SAR') ) ) )]"
 			size = { 1920 1080 }
 			parentanchor = center
+			state = {
+				name = europe_show
+				delay = 0.001
+				on_start = "[PdxGuiWidget.Show]"
+			}
 			mp_country_on_map = {
 				name = "GBR"
 				blockoverride "color" { color = "[GetCountry('GBR').GetMapColor]" }
 				blockoverride "texture" { texture = "gfx/interface/images/maps/GBR.png" }
 				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'GBR')]" }
-				blockoverride "animation_2" {
+				blockoverride "position" { position = { 740 320 } }
+				blockoverride "onmouse" {
+					onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('gbr_anim_1')]"
+					onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('gbr_anim_2')]"
+				}
+				blockoverride "click" { onclick = "[SetLobbyCountryTag('GBR')]" }
+				blockoverride "texture_coa" { texture = "gfx/interface/images/COA/GBR_COA.png" }
+				blockoverride "animation" {
 					state = {
 						name = gbr_anim_1
 						on_start = "[PdxGuiWidget.Show]"
@@ -202,7 +277,14 @@ types NEW_WINDOW {
 				blockoverride "color" { color = "[GetCountry('PRU').GetMapColor]" }
 				blockoverride "texture" { texture = "gfx/interface/images/maps/PRU.png" }
 				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'PRU')]" }
-				blockoverride "animation_2" {
+				blockoverride "position" { position = { 1130 330 } }
+				blockoverride "onmouse" {
+					onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('pru_anim_1')]"
+					onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('pru_anim_2')]"
+				}
+				blockoverride "click" { onclick = "[SetLobbyCountryTag('PRU')]" }
+				blockoverride "texture_coa" { texture = "gfx/interface/images/COA/PRU_COA.png" }
+				blockoverride "animation" {
 					state = {
 						name = pru_anim_1
 						on_start = "[PdxGuiWidget.Show]"
@@ -218,7 +300,14 @@ types NEW_WINDOW {
 				blockoverride "color" { color = "[GetCountry('RUS').GetMapColor]" }
 				blockoverride "texture" { texture = "gfx/interface/images/maps/RUS.png" }
 				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'RUS')]" }
-				blockoverride "animation_2" {
+				blockoverride "position" { position = { 1400 340 } }
+				blockoverride "onmouse" {
+					onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('rus_anim_1')]"
+					onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('rus_anim_2')]"
+				}
+				blockoverride "click" { onclick = "[SetLobbyCountryTag('RUS')]" }
+				blockoverride "texture_coa" { texture = "gfx/interface/images/COA/RUS_COA.png" }
+				blockoverride "animation" {
 					state = {
 						name = rus_anim_1
 						on_start = "[PdxGuiWidget.Show]"
@@ -234,7 +323,14 @@ types NEW_WINDOW {
 				blockoverride "color" { color = "[GetCountry('FRA').GetMapColor]" }
 				blockoverride "texture" { texture = "gfx/interface/images/maps/FRA.png" }
 				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'FRA')]" }
-				blockoverride "animation_2" {
+				blockoverride "position" { position = { 845 540 } }
+				blockoverride "onmouse" {
+					onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('fra_anim_1')]"
+					onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('fra_anim_2')]"
+				}
+				blockoverride "click" { onclick = "[SetLobbyCountryTag('FRA')]" }
+				blockoverride "texture_coa" { texture = "gfx/interface/images/COA/FRA_COA.png" }
+				blockoverride "animation" {
 					state = {
 						name = fra_anim_1
 						on_start = "[PdxGuiWidget.Show]"
@@ -250,13 +346,172 @@ types NEW_WINDOW {
 				blockoverride "color" { color = "[GetCountry('NED').GetMapColor]" }
 				blockoverride "texture" { texture = "gfx/interface/images/maps/NED.png" }
 				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'NED')]" }
-				blockoverride "animation_2" {
+				blockoverride "position" { position = { 900 370 } }
+				blockoverride "onmouse" {
+					onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('ned_anim_1')]"
+					onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('ned_anim_2')]"
+				}
+				blockoverride "click" { onclick = "[SetLobbyCountryTag('NED')]" }
+				blockoverride "texture_coa" { texture = "gfx/interface/images/COA/NED_COA.png" }
+				blockoverride "animation" {
 					state = {
 						name = ned_anim_1
 						on_start = "[PdxGuiWidget.Show]"
 					}
 					state = {
 						name = ned_anim_2
+						on_start = "[PdxGuiWidget.Hide]"
+					}
+				}
+			}
+			mp_country_on_map = {
+				name = "AUS"
+				blockoverride "color" { color = "[GetCountry('AUS').GetMapColor]" }
+				blockoverride "texture" { texture = "gfx/interface/images/maps/AUS.png" }
+				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'AUS')]" }
+				blockoverride "position" { position = { 1120 540 } }
+				blockoverride "onmouse" {
+					onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('aus_anim_1')]"
+					onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('aus_anim_2')]"
+				}
+				blockoverride "click" { onclick = "[SetLobbyCountryTag('AUS')]" }
+				blockoverride "texture_coa" { texture = "gfx/interface/images/COA/AUS_COA.png" }
+				blockoverride "animation" {
+					state = {
+						name = aus_anim_1
+						on_start = "[PdxGuiWidget.Show]"
+					}
+					state = {
+						name = aus_anim_2
+						on_start = "[PdxGuiWidget.Hide]"
+					}
+				}
+			}
+			mp_country_on_map = {
+				name = "TUR"
+				blockoverride "color" { color = "[GetCountry('TUR').GetMapColor]" }
+				blockoverride "texture" { texture = "gfx/interface/images/maps/TUR.png" }
+				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'TUR')]" }
+				blockoverride "position" { position = { 1370 755 } }
+				blockoverride "onmouse" {
+					onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('tur_anim_1')]"
+					onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('tur_anim_2')]"
+				}
+				blockoverride "click" { onclick = "[SetLobbyCountryTag('TUR')]" }
+				blockoverride "texture_coa" { texture = "gfx/interface/images/COA/TUR_COA.png" }
+				blockoverride "animation" {
+					state = {
+						name = tur_anim_1
+						on_start = "[PdxGuiWidget.Show]"
+					}
+					state = {
+						name = tur_anim_2
+						on_start = "[PdxGuiWidget.Hide]"
+					}
+				}
+			}
+			mp_country_on_map = {
+				name = "SAR"
+				blockoverride "color" { color = "[GetCountry('SAR').GetMapColor]" }
+				blockoverride "texture" { texture = "gfx/interface/images/maps/SAR.png" }
+				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'SAR')]" }
+				blockoverride "position" { position = { 970 640 } }
+				blockoverride "onmouse" {
+					onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('sar_anim_1')]"
+					onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('sar_anim_2')]"
+				}
+				blockoverride "click" { onclick = "[SetLobbyCountryTag('SAR')]" }
+				blockoverride "texture_coa" { texture = "gfx/interface/images/COA/SAR_COA.png" }
+				blockoverride "animation" {
+					state = {
+						name = sar_anim_1
+						on_start = "[PdxGuiWidget.Show]"
+					}
+					state = {
+						name = sar_anim_2
+						on_start = "[PdxGuiWidget.Hide]"
+					}
+				}
+			}
+		}
+		widget = {
+			name = "country_images_on_map_north_america"
+			visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'USA')]"
+			visible = no
+			size = { 1920 1080 }
+			parentanchor = center
+			mp_country_on_map = {
+				name = "USA"
+				blockoverride "color" { color = "[GetCountry('USA').GetMapColor]" }
+				blockoverride "texture" { texture = "gfx/interface/images/maps/USA.png" }
+				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'USA')]" }
+				blockoverride "position" { position = { 1150 400 } }
+				blockoverride "onmouse" {
+					onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('usa_anim_1')]"
+					onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('usa_anim_2')]"
+				}
+				blockoverride "click" { onclick = "[SetLobbyCountryTag('USA')]" }
+				blockoverride "texture_coa" { texture = "gfx/interface/images/COA/USA_COA.png" }
+				blockoverride "animation" {
+					state = {
+						name = usa_anim_1
+						on_start = "[PdxGuiWidget.Show]"
+					}
+					state = {
+						name = usa_anim_2
+						on_start = "[PdxGuiWidget.Hide]"
+					}
+				}
+			}
+		}
+		widget = {
+			name = "country_images_on_map_africa_india"
+			visible = "[Or(EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'EGY'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'EIC'))]"
+			visible = no
+			size = { 1920 1080 }
+			parentanchor = center
+			mp_country_on_map = {
+				name = "EGY"
+				blockoverride "color" { color = "[GetCountry('EGY').GetMapColor]" }
+				blockoverride "texture" { texture = "gfx/interface/images/maps/EGY.png" }
+				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'EGY')]" }
+				blockoverride "position" { position = { 480 130 } }
+				blockoverride "onmouse" {
+					onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('egy_anim_1')]"
+					onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('egy_anim_2')]"
+				}
+				blockoverride "click" { onclick = "[SetLobbyCountryTag('EGY')]" }
+				blockoverride "texture_coa" { texture = "gfx/interface/images/TUR_COA.png" }
+				blockoverride "animation" {
+					state = {
+						name = egy_anim_1
+						on_start = "[PdxGuiWidget.Show]"
+					}
+					state = {
+						name = egy_anim_2
+						on_start = "[PdxGuiWidget.Hide]"
+					}
+				}
+			}
+			mp_country_on_map = {
+				name = "EIC"
+				blockoverride "color" { color = "[GetCountry('EIC').GetMapColor]" }
+				blockoverride "texture" { texture = "gfx/interface/images/maps/EIC.png" }
+				blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'EIC')]" }
+				blockoverride "position" { position = { 1470 720 } }
+				blockoverride "onmouse" {
+					onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('eic_anim_1')]"
+					onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('eic_anim_2')]"
+				}
+				blockoverride "click" { onclick = "[SetLobbyCountryTag('EIC')]" }
+				blockoverride "texture_coa" { texture = "gfx/interface/images/EIC_COA.png" }
+				blockoverride "animation" {
+					state = {
+						name = eic_anim_1
+						on_start = "[PdxGuiWidget.Show]"
+					}
+					state = {
+						name = eic_anim_2
 						on_start = "[PdxGuiWidget.Hide]"
 					}
 				}
@@ -280,15 +535,15 @@ types NEW_WINDOW {
 				}
 				flowcontainer = {
 					direction = vertical
-					spacing = 20
+					spacing = 10
 					parentanchor = hcenter
-					margin_widget = {
-						size = { 100% 80 }
-						parentanchor = hcenter
-					}
+					#margin_widget = {
+					#	size = { 100% 80 }
+					#	parentanchor = hcenter
+					#}
 					flowcontainer = {
 						direction = vertical
-						spacing = 10
+						spacing = 5
 						mp_country_button = {
 							blockoverride "name" { text = "Great Britain" }
 							blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'GBR')]" }
@@ -379,26 +634,151 @@ types NEW_WINDOW {
 							}
 							blockoverride "texture" { texture = "gfx/interface/images/background/NED.png" }
 						}
+						mp_country_button = {
+							blockoverride "name" { text = "Austria" }
+							blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'AUS')]" }
+							blockoverride "onmouse" {
+								onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('aus_anim_1')]"
+								onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('aus_anim_2')]"
+							}
+							blockoverride "On_click" {
+								onclick = "[SetLobbyCountryTag('AUS')]"
+							}
+							blockoverride "flag"
+							{
+								texture = "[GetCountry('AUS').AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+								frame = "[GetCountry('AUS').AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+								framesize = { 120 120 }
+							}
+							blockoverride "texture" { texture = "gfx/interface/images/background/AUS.png" }
+						}
+						mp_country_button = {
+							blockoverride "name" { text = "Ottoman Empire" }
+							blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'TUR')]" }
+							blockoverride "onmouse" {
+								onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('tur_anim_1')]"
+								onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('tur_anim_2')]"
+							}
+							blockoverride "On_click" {
+								onclick = "[SetLobbyCountryTag('TUR')]"
+							}
+							blockoverride "flag"
+							{
+								texture = "[GetCountry('TUR').AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+								frame = "[GetCountry('TUR').AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+								framesize = { 120 120 }
+							}
+							blockoverride "texture" { texture = "gfx/interface/images/background/TUR.png" }
+						}
+						mp_country_button = {
+							blockoverride "name" { text = "Sardinia" }
+							blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'SAR')]" }
+							blockoverride "onmouse" {
+								onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('sar_anim_1')]"
+								onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('sar_anim_2')]"
+							}
+							blockoverride "On_click" {
+								onclick = "[SetLobbyCountryTag('SAR')]"
+							}
+							blockoverride "flag"
+							{
+								texture = "[GetCountry('SAR').AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+								frame = "[GetCountry('SAR').AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+								framesize = { 120 120 }
+							}
+							blockoverride "texture" { texture = "gfx/interface/images/background/SAR.png" }
+						}
+						mp_country_button = {
+							blockoverride "name" { text = "United States of America" }
+							blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'USA')]" }
+							blockoverride "onmouse" {
+								onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('usa_anim_1')]"
+								onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('usa_anim_2')]"
+							}
+							blockoverride "On_click" {
+								onclick = "[SetLobbyCountryTag('USA')]"
+							}
+							blockoverride "flag"
+							{
+								texture = "[GetCountry('USA').AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+								frame = "[GetCountry('USA').AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+								framesize = { 120 120 }
+							}
+							blockoverride "texture" { texture = "gfx/interface/images/background/USA.png" }
+						}
+						mp_country_button = {
+							blockoverride "name" { text = "Egypt" }
+							blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'EGY')]" }
+							blockoverride "onmouse" {
+								onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('egy_anim_1')]"
+								onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('egy_anim_2')]"
+							}
+							blockoverride "On_click" {
+								onclick = "[SetLobbyCountryTag('EGY')]"
+							}
+							blockoverride "flag"
+							{
+								texture = "[GetCountry('EGY').AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+								frame = "[GetCountry('EGY').AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+								framesize = { 120 120 }
+							}
+							blockoverride "texture" { texture = "gfx/interface/images/background/EGY.png" }
+						}
+						mp_country_button = {
+							blockoverride "name" { text = "East India Company" }
+							blockoverride "visible" { visible = "[EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'EIC')]" }
+							blockoverride "onmouse" {
+								onmousehierarchyenter = "[PdxGuiTriggerAllAnimations('eic_anim_1')]"
+								onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('eic_anim_2')]"
+							}
+							blockoverride "On_click" {
+								onclick = "[SetLobbyCountryTag('EIC')]"
+							}
+							blockoverride "flag"
+							{
+								texture = "[GetCountry('EIC').AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+								frame = "[GetCountry('EIC').AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+								framesize = { 120 120 }
+							}
+							blockoverride "texture" { texture = "gfx/interface/images/background/EIC.png" }
+						}
+					}
+					widget = {
+						size = { 180 6 }
+						parentanchor = hcenter
+						icon = {
+							texture = "gfx/interface/base_parts/brown_underline_x60bd.dds"
+							size = { 180 6 }
+							parentanchor = vcenter
+						}
 					}
 					margin_widget = {
-						size = { 100% 80 }
+						size = { 376 48 }
 						parentanchor = hcenter
-						text_button_square = {
-							size = { 210 28 }
-							parentanchor = vcenter|hcenter
-							
-							blockoverride "Center_text" 
-							{
-								text = "BACK"	
-							}
-							
-							enabled = "[LobbyView.CanGoBack]"
-							tooltip = "[LobbyView.GetGoBackToolTip]"
-							blockoverride "On_click"
-							{
+						enabled = "[LobbyView.CanGoBack]"
+						tooltip = "[LobbyView.GetGoBackToolTip]"
+						frontend_button = {
+							size = { 100% 100% }
+							blockoverride "Text" { text = "BACK" }
+							blockoverride "On_click" { 
 								onclick = "[SetPreparationLobby('(bool)no')]"
 								onclick = "[LobbyView.GoBack]"
+								shortcut = "close_window"
 							}
+							#position = { -200 0 }
+							#alpha = 0
+							#state = {
+							#	name = singleplayer_show
+							#	position = { 0 0 }
+							#	alpha = 1
+							#	duration = 0.35
+							#}
+							#state = {
+							#	name = singleplayer_hide
+							#	position = { -200 0 }
+							#	alpha = 0
+							#	duration = 0.35
+							#}
 						}
 					}
 					margin_widget = {
@@ -439,7 +819,7 @@ types NEW_WINDOW {
 			}
 		}
 		widget = {
-			size = { 50% 100% }
+			size = { 60% 100% }
 			parentanchor = right
 			icon = {
 				size = { 100% 100% }
@@ -452,83 +832,109 @@ types NEW_WINDOW {
 				}
 			}
 		}
-		part_sharp_base_window = {
+		widget = {
 			parentanchor = right|top
-			alwaystransparent = no
-			blockoverride "GradientAlpha" { 
-				alpha = 0.35
-				size = { 100% 100% }
-			}
 			size = { 432 860 }
-			movable = no
-			widget = {
-				size = { 100% 50 }
-				hbox = {
-					using = MainWindowHeaderBox
-					visible = "[LobbyView.HasSelectedPlayable]"
-					blockoverride "Title_text" 
-					{
-						text = "[LobbyView.GetSelectedPlayable.GetCountry.GetName]"
-					}
-					blockoverride "White_buttons" {}
+			flowcontainer = {
+				direction = vertical
+				margin = { 10 10 }
+				textbox = {
+					size = { 412 150 }
+					fontsize = 50
+					align = hcenter
+					#font = NewHeaderFont
+					font = HeaderFont
+					using = Highlight_FontColor
+					block "name" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetNameWithNoTooltip]" }
+					alwaystransparent = yes
+					multiline = yes
 				}
-				hbox = {
-					using = MainWindowHeaderBox
-					visible = "[Not(LobbyView.HasSelectedPlayable)]"
-					blockoverride "Title_text" 
-					{
-						text = "SELECT_TITLE_SULLA_V"
+				flowcontainer = {
+					margin_widget = {
+						size = { 275 211 }
+						margin_top = 55
+						banner_migrant_horde = {
+							datacontext = "[LobbyView.GetSelectedPlayable.GetCountry]"
+							visible = "[LobbyView.GetSelectedPlayable.GetCountry.HasRank('(int32)0')]"
+							tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRankInformation]"
+						}
+
+						banner_city_state = {
+							datacontext = "[LobbyView.GetSelectedPlayable.GetCountry]"
+							visible = "[LobbyView.GetSelectedPlayable.GetCountry.HasRank('(int32)1')]"
+							tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRankInformation]"
+						}
+						
+						banner_local_power = {
+							datacontext = "[LobbyView.GetSelectedPlayable.GetCountry]"
+							visible = "[LobbyView.GetSelectedPlayable.GetCountry.HasRank('(int32)2')]"
+							tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRankInformation]"
+						}
+						
+						banner_regional_power = {
+							datacontext = "[LobbyView.GetSelectedPlayable.GetCountry]"
+							visible = "[LobbyView.GetSelectedPlayable.GetCountry.HasRank('(int32)3')]"
+							tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRankInformation]"
+						}
+						banner_major_power = {
+							datacontext = "[LobbyView.GetSelectedPlayable.GetCountry]"
+							visible = "[LobbyView.GetSelectedPlayable.GetCountry.HasRank('(int32)4')]"
+							tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRankInformation]"
+						}
+						
+						banner_great_power = {
+							datacontext = "[LobbyView.GetSelectedPlayable.GetCountry]"
+							visible = "[LobbyView.GetSelectedPlayable.GetCountry.HasRank('(int32)5')]"
+							tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRankInformation]"
+						}
 					}
-					blockoverride "White_buttons" {}
-				}
-			}
-			widget = {
-				size = { 117 176 }
-				datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler]"
-				portrait_button = {
-					name = "monarchpic"
-					size = { 117 176 }
-					scale = 1.2
-					position = { 0 45 }
-					#parentanchor = bottom|left
-					using = pt_button_large
-					pop_out = yes
-					#visible="[GovernmentView.GetPlayer.MakeScope.Var('monarch_character').IsSet]"
-					
-					portrait_texture = "[Character.GetPortrait('default', 'looking_left')]"
-					panelka = { #capital
-						size = { 160 32 }
-						parentanchor = bottom
-						position = { -2 16 }
-						blockoverride "TextBox" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRulerTitle]" }
+					widget = {
+						size = { 140 211 }
+						datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler]"
+						portrait_button = {
+							name = "monarchpic"
+							size = { 140 211 }
+							#parentanchor = bottom|left
+							using = pt_button_large
+							pop_out = yes
+							#visible="[GovernmentView.GetPlayer.MakeScope.Var('monarch_character').IsSet]"
+							
+							portrait_texture = "[Character.GetPortrait('default', 'looking_left')]"
+							#panelka = { #capital
+							#	size = { 160 32 }
+							#	parentanchor = bottom
+							#	position = { -2 16 }
+							#	blockoverride "TextBox" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRulerTitle]" }
+							#}
+							#tag = {
+							#	position = { 0 160 }
+							#	size = { 160 0}
+							#	name = "MONARCH_NAME"
+							#	multiline = no
+							#	autoresize = no
+							#	parentanchor = hcenter
+							#	text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetNameWithNoTooltip]"
+							#	using = BaseFontL
+							#	using = Black_FontColor
+							#	fontsize = 18
+							#}
+						}
+						icon_card = {
+							#visible = "[GovernmentView.GetPlayer.GetGovernment.IsRepublic]"
+							size = { 40 40 }
+							position = { 94 -15 }
+							parentanchor = bottom
+							blockoverride "Icon"
+							{
+								texture = "[GetPartyIcon( Character.GetParty )]"
+							}
+							block "PartyIconVisibility" 
+							{
+								visible = "[Character.ShowParty]"
+							}
+							tooltip = "[Character.GetPartyTooltip]"
+						}
 					}
-					#tag = {
-					#	position = { 0 160 }
-					#	size = { 160 0}
-					#	name = "MONARCH_NAME"
-					#	multiline = no
-					#	autoresize = no
-					#	parentanchor = hcenter
-					#	text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetNameWithNoTooltip]"
-					#	using = BaseFontL
-					#	using = Black_FontColor
-					#	fontsize = 18
-					#}
-				}
-				icon_card = {
-					#visible = "[GovernmentView.GetPlayer.GetGovernment.IsRepublic]"
-					size = { 40 40 }
-					position = { 94 65 }
-					parentanchor = bottom
-					blockoverride "Icon"
-					{
-						texture = "[GetPartyIcon( Character.GetParty )]"
-					}
-					block "PartyIconVisibility" 
-					{
-						visible = "[Character.ShowParty]"
-					}
-					tooltip = "[Character.GetPartyTooltip]"
 				}
 			}
 		}

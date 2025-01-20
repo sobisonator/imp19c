@@ -4,13 +4,103 @@
 
 	### PRE-MODERN ###
 
-	#### EARLY ####
-
 	# Level 0
+	tech_permanent_army = {
+		modifier = {
+			discipline = 0.1
+			global_cohort_start_experience = 0.05
+		}
+	}
+
+	tech_commissioned_staff = {
+		modifier = {
+			discipline = 0.1
+			global_cohort_start_experience = 0.05
+		}
+		requires = { tech_permanent_army }
+	}
+
+	tech_mass_mobilisation = {
+		modifier = {
+			global_cohort_recruit_speed = -0.25
+		}
+		requires = { tech_permanent_army }
+	}
+
+	tech_field_ambulances = {
+		modifier = {
+			manpower_recovery_speed = 0.1
+			cohort_reinforcement_speed = 0.1
+			land_morale_recovery = 0.1
+		}
+		requires = { tech_permanent_army }
+	}
+
+	# Level 1
+
+	tech_skirmisher_corps = {
+		modifier = {
+			global_defensive = 0.05
+			regular_infantry_offensive = 0.1
+		}
+		requires = { tech_commissioned_staff }
+	}
+
 	tech_military_technical_journals_and_drawings = {  #Need a better name 
 		modifier = { 
 			price_state_investment_military_cost_modifier = -0.1
 		}
+		requires = { tech_commissioned_staff }
+	}
+
+	tech_mass_artillery = {
+		modifier = {
+			siege_ability = 0.2
+			# + Artillery offensive
+			# + Artillery discipline
+		}
+		requires = { tech_commissioned_staff }
+	}
+
+	### EARLY ###
+
+	tech_post_napoleonic_warfare = {
+		modifier = {
+			discipline = 0.1
+			land_unit_attrition = -0.05
+		}
+		requires = { tech_military_technical_journals_and_drawings }
+	}
+
+	### MID-TO-LATE-GAME FIELD TACTICS ###
+
+	tech_trench_warfare = {
+		modifier = {
+			global_defensive = 0.2
+		}
+		requires = { tech_post_napoleonic_warfare }
+	}
+
+	tech_dispersed_unit_tactics = {
+		modifier = {
+			global_defensive = 0.1
+			land_morale_modifier = 0.1
+		}
+		requires = { tech_trench_warfare }
+	}
+
+	tech_camouflage = {
+		modifier = {
+			global_defensive = 0.1
+		}
+		requires = { tech_dispersed_unit_tactics }
+	}
+
+	tech_storm_troopers = {
+		modifier = {
+			regular_infantry_offensive = 0.15
+		}
+		requires = { tech_trench_warfare }
 	}
 
 }
@@ -39,6 +129,9 @@ military_tech_firearms = {
 			naval_damage_done = 0.05
 		}
 		requires = { tech_weapon_manufacturing }
+		potential = {
+			invention = tech_chemistry
+		}
 	}
 
 	tech_replaceable_weapon_parts = {
@@ -61,15 +154,35 @@ military_tech_firearms = {
 		}
 	}
 
+	tech_cannons = {
+		modifier = {
+			# + Artillery attack
+		}
+		requires = {
+			tech_firearms
+			tech_weapon_manufacturing
+		}
+		on_activate = {
+			# Enables artillery unit type
+		}
+	}
+
 	### EARLY ###
 
 	# Level 1
+
+	tech_guncotton = {
+		modifier = {
+			siege_ability = 0.1
+		}
+		requires = { tech_firearms }
+	}
 
 	tech_nitroglycerin = { 
 		modifier = { 
 			siege_ability = 0.1 
 		}
-		requires = { tech_firearms }
+		requires = { tech_guncotton }
 	}
 
 	tech_rifling_standardisation = { 
@@ -142,6 +255,14 @@ military_tech_firearms = {
 		requires = { tech_bullet_innovation }
 	}
 
+	tech_minie_ball = {
+		modifier = {
+			conscripts_offensive = 0.05
+			regular_infantry_offensive = 0.05
+		}
+		requires = { tech_bullet_innovation }
+	}
+
 	### MID-GAME ###
 
 	tech_dynamite = {  # More complicated triggers 
@@ -154,8 +275,146 @@ military_tech_firearms = {
 			# Coal
 			# Copper
 			# Tin
+			# Lead
 			# TODO: Add this info into desc
 		}
-		requires = { tech_nitroglycerin }
+		requires = {
+			tech_nitroglycerin
+			tech_percussion_cap_ignition
+		}
+		on_activate = {
+			apply_tech_modifier_country = {
+				tech = tech_dynamite
+			}
+		}
 	}
+
+	tech_pinfire_primer = {
+		modifier = {
+			conscripts_offensive = 0.05
+			regular_infantry_offensive = 0.05
+		}
+		requires = { tech_breechloader }
+	}
+
+	tech_experimental_revolver = {
+		modifier = {
+			regular_infantry_offensive = 0.05
+		}
+		requires = { tech_pinfire_primer }
+	}
+
+	tech_hand_cranked_machine_guns = {
+		modifier = {
+			conscripts_offensive = 0.1
+			regular_infantry_offensive = 0.1
+			global_defensive = 0.05
+		}
+		requires = { tech_experimental_revolver }
+	}
+
+	tech_standard_issue_revolver = {
+		modifier = {
+			global_defensive = 0.05
+		}
+		requires = { tech_experimental_revolver }
+	}
+
+	### LATE GAME ###
+
+	tech_bolt_action_rifle = {
+		modifier = {
+			conscripts_offensive = 0.15
+			regular_infantry_offensive = 0.15
+		}
+		requires = { tech_pinfire_primer }
+	}
+
+	tech_recoil_powered_machine_guns = {
+		modifier = {
+			conscripts_offensive = 0.1
+			regular_infantry_offensive = 0.1
+			global_defensive = 0.3
+		}
+		requires = { tech_hand_cranked_machine_guns }
+	}
+
+	tech_sniper_rifles = {
+		modifier = {
+			regular_infantry_offensive = 0.2
+		}
+		requires = { tech_bolt_action_rifle }
+	}
+
+	tech_semi_automatic_pistols = {
+		modifier = {
+			conscripts_offensive = 0.1
+			regular_infantry_offensive = 0.1
+		}
+		requires = {
+			tech_bolt_action_rifle
+			tech_recoil_powered_machine_guns
+		}
+	}
+
+	tech_light_machine_guns = {
+		modifier = {
+			conscripts_offensive = 0.15
+			regular_infantry_offensive = 0.15
+			global_defensive = 0.4
+		}
+		requires = { tech_recoil_powered_machine_guns }
+	}
+
+	tech_machine_pistols = {
+		modifier = {
+			conscripts_offensive = 0.1
+			regular_infantry_offensive = 0.1
+		}
+		requires = { tech_semi_automatic_pistols }
+	}
+
+	tech_sub_machine_guns = {
+		modifier = {
+			conscripts_offensive = 0.3
+			regular_infantry_offensive = 0.3
+		}
+		requires = {
+			tech_machine_pistols
+			tech_light_machine_guns
+		}
+	}
+
+	### LATE-GAME COMBO TECHS ###
+
+	tech_railway_artillery = {
+		modifier = {
+			# + artillery offensive
+			# + artillery movement
+		}
+		requires = { tech_cannons } # TODO: Make this advanced artillery
+		potential = {
+			invention = stock_car
+		}
+	}
+}
+
+military_tech_vehicles = {
+	technology = military_tech
+	color = hsv { 0 0.5 0.7 }
+
+	### PRE-MODERN ###
+
+	tech_warships = {
+		naval_damage_done = 0.1
+	}
+
+	tech_naval_explosives = {
+		naval_damage_done = 0.5
+		requires = { tech_warships }
+		potential = {
+			invention = tech_firearms
+		}
+	}
+
 }

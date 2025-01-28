@@ -132,7 +132,8 @@ PixelShader =
 	[[
 		float4 GetFlatMapSurround( float2 UV )
 		{
-			float Mask = PdxTex2D( SurroundMask, UV ).b;
+			float Mask = PdxTex2D( SurroundMask, UV).b;
+			// float Mask = PdxTex2D( SurroundMask, UV * float2( 0.95, 0.90 )).b;
 			// float Mask = PdxTex2D( SurroundMask2, UV ).b;
 			float3 Tile = PdxTex2D( SurroundTile, UV * TileFactor ).rgb;
 			return float4( Tile, Mask );
@@ -290,7 +291,7 @@ PixelShader =
 			PDX_MAIN
 			{
 				float4 Ret = GetFlatMapSurround( Input.uv );
-				Ret.a *= FlatMapLerp;
+				Ret.a *= 0;
 				return Ret;
 			}
 		]]

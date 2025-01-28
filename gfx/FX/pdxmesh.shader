@@ -502,6 +502,9 @@ PixelShader =
 				#endif
 
 				DebugReturn( Color, MaterialProps, LightingProps, EnvironmentMap );
+				#ifdef TILE
+					Color = PdxTex2D( DiffuseMap, DIFFUSE_UV_SET * 10.0);
+				#endif
 				return float4( Color, Alpha );
 			}
 		]]
@@ -807,5 +810,21 @@ Effect standard_usercolor_shipShadow
 
 	RasterizerState = ShadowRasterizerState
 	Defines = { "USER_COLOR" "USER_COLOR_SHIP" }
+}
+
+Effect standard_tile
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_standard"
+
+	Defines = { "TILE" }
+}
+
+Effect standard_tile_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_standard"
+
+	Defines = { "TILE" }
 }
 # END MOD

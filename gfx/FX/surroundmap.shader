@@ -117,24 +117,12 @@ PixelShader =
 		SampleModeV = "Clamp"
 		Type = "Cube"
 	}
-	TextureSampler SurroundMask2
-	{
-		Ref = PdxTexture3
-		MagFilter = "Linear"
-		MinFilter = "Linear"
-		MipFilter = "Linear"
-		SampleModeU = "Border"
-		SampleModeV = "Border"
-		File = "gfx/map/surround_map/surround_clear_mask.dds"
-	}
 
 	Code
 	[[
 		float4 GetFlatMapSurround( float2 UV )
 		{
 			float Mask = PdxTex2D( SurroundMask, UV).b;
-			// float Mask = PdxTex2D( SurroundMask, UV * float2( 0.95, 0.90 )).b;
-			// float Mask = PdxTex2D( SurroundMask2, UV ).b;
 			float3 Tile = PdxTex2D( SurroundTile, UV * TileFactor ).rgb;
 			return float4( Tile, Mask );
 		}

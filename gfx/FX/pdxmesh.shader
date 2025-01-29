@@ -502,9 +502,69 @@ PixelShader =
 				#endif
 
 				DebugReturn( Color, MaterialProps, LightingProps, EnvironmentMap );
-				#ifdef TILE
-					Color = PdxTex2D( DiffuseMap, DIFFUSE_UV_SET * 10.0);
+				#ifdef TABLE
+					Color = PdxTex2D( NormalMap, NORMAL_UV_SET );
 				#endif
+				return float4( Color, Alpha );
+			}
+		]]
+	}
+
+	MainCode PS_map
+	{
+		Input = "VS_OUTPUT"
+		Output = "PDX_COLOR"
+		Code
+		[[
+			#ifndef DIFFUSE_UV_SET
+				#define DIFFUSE_UV_SET Input.UV0
+			#endif
+
+			#ifndef NORMAL_UV_SET
+				#define NORMAL_UV_SET Input.UV0
+			#endif
+
+			#ifndef PROPERTIES_UV_SET
+				#define PROPERTIES_UV_SET Input.UV0
+			#endif
+			#ifndef UNIQUE_UV_SET
+				#define UNIQUE_UV_SET Input.UV0
+			#endif
+
+			PDX_MAIN
+			{
+				float4 Diffuse = PdxTex2D( DiffuseMap, DIFFUSE_UV_SET );
+				Diffuse.a = PdxMeshApplyOpacity( Diffuse.a, Input.Position.xy, GetOpacity( Input.InstanceIndex ) );
+
+				float4 Properties = PdxTex2D( PropertiesMap, PROPERTIES_UV_SET );
+
+				float4 NormalPacked = PdxTex2D( NormalMap, NORMAL_UV_SET );
+				float3 NormalSample = UnpackRRxGNormal( NormalPacked );
+
+				float3x3 TBN = Create3x3( normalize( Input.Tangent ), normalize( Input.Bitangent ), normalize( Input.Normal ) );
+				float3 Normal = mul( NormalSample, TBN );
+
+				float4 Unique = PdxTex2D( UniqueMap, UNIQUE_UV_SET );
+				float3 UniqueNormalSample = UnpackRRxGNormal( Unique );
+				#ifdef TABLE
+					Diffuse.rgb *= Unique.bbb;
+				#endif
+
+				SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse.rgb, Normal, Properties.a, Properties.g, Properties.b );
+				SLightingProperties LightingProps = GetSunLightingProperties( Input.WorldSpacePos, ShadowTexture );
+
+				float3 Color = CalculateSunLighting( MaterialProps, LightingProps, EnvironmentMap );
+
+				float Alpha = Diffuse.a;
+
+				#ifdef TABLE
+					Color *= float3( 0.5, 0.5, 0.5 );
+				#endif
+				#ifdef MAPCOLOR
+					Color = PdxTex2D( DiffuseMap, DIFFUSE_UV_SET );
+				#endif
+
+				DebugReturn( Color, MaterialProps, LightingProps, EnvironmentMap );
 				return float4( Color, Alpha );
 			}
 		]]
@@ -823,8 +883,40 @@ Effect standard_tile
 Effect standard_tile_mapobject
 {
 	VertexShader = "VS_mapobject"
-	PixelShader = "PS_standard"
+	PixelShader = "PS_table"
 
 	Defines = { "TILE" }
+}
+
+Effect standard_mapcolor
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_map"
+
+	Defines = { "MAPCOLOR" }
+}
+
+Effect standard_mapcolor_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_map"
+
+	Defines = { "MAPCOLOR" }
+}
+
+Effect standard_table
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_map"
+
+	Defines = { "TABLE" }
+}
+
+Effect standard_table_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_map"
+
+	Defines = { "TABLE" }
 }
 # END MOD

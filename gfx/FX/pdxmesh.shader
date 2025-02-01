@@ -544,9 +544,16 @@ PixelShader =
 				float3x3 TBN = Create3x3( normalize( Input.Tangent ), normalize( Input.Bitangent ), normalize( Input.Normal ) );
 				float3 Normal = mul( NormalSample, TBN );
 
-				float4 Unique = PdxTex2D( UniqueMap, UNIQUE_UV_SET );
-				float3 UniqueNormalSample = UnpackRRxGNormal( Unique );
+				#ifdef NEWSPAPER_FLAG
+					float4 CoAAtlasSlot = GetUserData( Input.InstanceIndex, 2 );
+					float2 FlagCoords = CoAAtlasSlot.xy + ( MirrorOutsideUV( Input.UV1 ) * CoAAtlasSlot.zw );
+					// UserColor = PdxTex2D( FlagTexture, DIFFUSE_UV_SET );
+					Diffuse.rgb *= mul(PdxTex2D( FlagTexture, Input.UV0 ).rgb, PdxTex2D( UniqueMap, Input.UV0).r);
+				#endif
+
 				#ifdef TABLE
+					float4 Unique = PdxTex2D( UniqueMap, UNIQUE_UV_SET );
+					float3 UniqueNormalSample = UnpackRRxGNormal( Unique );
 					Diffuse.rgb *= Unique.bbb;
 				#endif
 
@@ -560,6 +567,11 @@ PixelShader =
 				#ifdef TABLE
 					Color *= float3( 0.5, 0.5, 0.5 );
 				#endif
+
+				#ifdef NEWSPAPER
+					Color *= float3( 0.7, 0.7, 0.7 );
+				#endif
+
 				#ifdef MAPCOLOR
 					Color = PdxTex2D( DiffuseMap, DIFFUSE_UV_SET );
 				#endif
@@ -918,5 +930,37 @@ Effect standard_table_mapobject
 	PixelShader = "PS_map"
 
 	Defines = { "TABLE" }
+}
+
+Effect standard_newspaper
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_map"
+
+	Defines = { "NEWSPAPER" }
+}
+
+Effect standard_newspaper_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_map"
+
+	Defines = { "NEWSPAPER" }
+}
+
+Effect standard_newspaper_flag
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_map"
+
+	Defines = { "NEWSPAPER_FLAG" "NEWSPAPER" }
+}
+
+Effect standard_newspaper_flag_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_map"
+
+	Defines = { "NEWSPAPER_FLAG" "NEWSPAPER" }
 }
 # END MOD

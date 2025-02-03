@@ -252,8 +252,6 @@ PixelShader =
 			MipFilter = "Linear"
 			SampleModeU = "Clamp"
 			SampleModeV = "Clamp"
-			File = "gfx/map/textures/flatmap.png"
-			srgb = yes
 		}
 	
 		Input = "VS_OUTPUT_PDX_TERRAIN"
@@ -290,8 +288,6 @@ PixelShader =
 			MipFilter = "Linear"
 			SampleModeU = "Clamp"
 			SampleModeV = "Clamp"
-			File = "gfx/map/textures/flatmap.png"
-			srgb = yes
 		}
 		
 		Input = "VS_OUTPUT_PDX_TERRAIN"

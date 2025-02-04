@@ -138,7 +138,7 @@ PixelShader =
 				float4 SnowDiffuse = PdxTex2D( DetailTextures, SnowUV );
 				float3 SnowNormal = UnpackRRxGNormal( PdxTex2D( NormalTextures, SnowUV ) );
 				float4 SnowMaterial = PdxTex2D( MaterialTextures, SnowUV );
-				
+				SnowDiffuse.rgb *= float3( 0.6, 0.6, 0.6 );
 				float SnowNoiseFactor = 0.1;
 				float SnowBlend = saturate( Snow * (1.0f+SnowNoiseFactor) - SnowNoiseFactor + ( SnowDiffuse.a * SnowNoiseFactor ) );
 				//return vec4(SnowBlend);

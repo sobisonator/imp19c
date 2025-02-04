@@ -134,6 +134,7 @@ PixelShader =
 				#ifndef PDX_OSX // [ED] Note: Definitely exceeds the limit of 16 samplers on mac
 					#ifdef ENABLE_SNOW
 						float4 Ice = CalcIce( Input.WorldSpacePos, Depth );
+						Ice.rgb *= float3( 0.6, 0.6, 1.0 );
 						Water.rgb = lerp( Water.rgb, Ice.rgb, Ice.a );
 					#endif
 				#endif

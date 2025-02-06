@@ -1,0 +1,368 @@
+## Script values used in the calculation of government income
+
+INCOME_governorship_total = {
+	# Scope: Governorship
+	# Function: Get the total amount of government income in a governorship
+}
+
+### TAXATION & TARIFFS
+# A currency is required in order to tax. Any levies or tithes made in kind are represented under the TITHES heading
+
+## EXCISE DUTY - ESSENTIALS
+# Consumption tax on cost of living, paid by pops according to their cost of living expenses
+# Calculated as a percentage of the cost of living for each pop
+
+INCOME_governorship_excise_duty_essentials_upper_strata = {
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_excise_duty_essentials
+			}
+		}
+		value = WEALTH_cost_of_living_upper_strata
+		multiply = owner.var:INCOME_taxrate_excise_duty_essentials
+	}
+	else = {
+		value = 0
+	}		
+}
+INCOME_governorship_excise_duty_essentials_middle_strata = {
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_excise_duty_essentials
+			}
+		}
+		value = WEALTH_cost_of_living_middle_strata
+		multiply = owner.var:INCOME_taxrate_excise_duty_essentials
+	}
+	else = {
+		value = 0
+	}		
+}
+INCOME_governorship_excise_duty_essentials_lower_strata = {
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_excise_duty_essentials
+			}
+		}
+		value = WEALTH_cost_of_living_lower_strata
+		multiply = owner.var:INCOME_taxrate_excise_duty_essentials
+	}	
+	else = {
+		value = 0
+	}		
+}
+INCOME_governorship_excise_duty_essentials_proletariat = {
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_excise_duty_essentials
+			}
+		}
+		value = WEALTH_cost_of_living_proletariat
+		multiply = owner.var:INCOME_taxrate_excise_duty_essentials
+	}
+	else = {
+		value = 0
+	}	
+}
+
+## EXCISE DUTY - LUXURIES
+
+INCOME_governorship_excise_duty_luxuries = {
+	# Consumption tax on luxuries, paid by pops according to trade share
+	# Calculated as a percentage of the total wealth paid for luxuries in the governorship
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_excise_duty_luxuries
+			}
+		}
+		value = var:final_quarterly_wealth_owed_for_tobacco
+		add = var:final_quarterly_wealth_owed_for_sugar
+		add = var:final_quarterly_wealth_owed_for_opium
+		add = var:final_quarterly_wealth_owed_for_alcohol
+		add = var:final_quarterly_wealth_owed_for_luxury_clothing
+		add = var:final_quarterly_wealth_owed_for_luxury_furniture
+		add = var:final_quarterly_wealth_owed_for_gems
+		add = var:final_quarterly_wealth_owed_for_coffee
+		add = var:final_quarterly_wealth_owed_for_spices
+		add = var:final_quarterly_wealth_owed_for_sugar
+		multiply = owner.var:INCOME_taxrate_excise_duty_luxuries
+	}
+	else = {
+		value = 0
+	}
+}
+
+## PROPERTY TAX
+
+INCOME_governorship_property_tax_total_positive = {
+	value = INCOME_governorship_property_tax
+	multiply = -1
+}
+
+INCOME_governorship_property_tax = {
+	# Tax paid by pops based on number of housing districts
+	# Pops pay tax based on the breakdown of land ownership in the governorship
+	# TODO: Create a land ownership breakdown
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_property_tax
+			}
+		}
+		value = governorship_num_of_URB_residential_district
+		multiply = -0.5 # TODO: Make this sensitive to property prices, perhaps a property demand value
+		multiply = owner.var:INCOME_taxrate_property_tax
+	}
+	else = {
+		value = 0
+	}
+}
+
+INCOME_governorship_property_tax_upper_strata = {
+	value = INCOME_governorship_property_tax
+	multiply = WEALTH_governorship_property_ownership_share_upper_strata
+}
+INCOME_governorship_property_tax_middle_strata = {
+	value = INCOME_governorship_property_tax
+	multiply = WEALTH_governorship_property_ownership_share_middle_strata
+}
+INCOME_governorship_property_tax_lower_strata = {
+	value = INCOME_governorship_property_tax
+	multiply = WEALTH_governorship_property_ownership_share_lower_strata
+}
+
+## INCOME TAX
+
+INCOME_governorship_income_tax_total_positive = {
+	value = INCOME_governorship_income_tax_proletariat
+	add = INCOME_governorship_income_tax_lower_strata
+	add = INCOME_governorship_income_tax_middle_strata
+	add = INCOME_governorship_income_tax_upper_strata
+	multiply = -1
+}
+
+INCOME_governorship_income_tax_proletariat = {
+	# Tax paid by pops as a percentage of wealth they earn NOT from trade in a quarter
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_income_tax
+			}
+		}
+		value = JOBS_wages_due_proletariat
+		add = var:this_income_from_shipping_proletariat
+		add = var:this_income_from_manufacturing_proletariat
+		add = var:this_income_from_resource_extraction_proletariat
+		add = var:WEALTH_new_generated_services_proletariat
+		multiply = owner.var:INCOME_taxrate_income_tax
+		multiply = -1
+	}
+	else = {
+		value = 0
+	}
+}
+
+INCOME_governorship_income_tax_lower_strata = {
+	# Tax paid by pops as a percentage of wealth they earn NOT from trade in a quarter
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_income_tax
+			}
+		}
+		value = var:this_income_from_shipping_lower_strata
+		add = var:this_income_from_manufacturing_lower_strata
+		add = var:this_income_from_resource_extraction_lower_strata
+		add = var:WEALTH_new_generated_services_lower_strata
+		multiply = owner.var:INCOME_taxrate_income_tax
+		multiply = -1
+	}
+	else = {
+		value = 0
+	}
+}
+
+INCOME_governorship_income_tax_middle_strata = {
+	# Tax paid by pops as a percentage of wealth they earn NOT from trade in a quarter
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_income_tax
+			}
+		}
+		value = JOBS_wages_due_middle_strata
+		add = var:this_income_from_shipping_middle_strata
+		add = var:this_income_from_manufacturing_middle_strata
+		add = var:this_income_from_resource_extraction_middle_strata
+		add = var:WEALTH_new_generated_services_middle_strata
+		multiply = owner.var:INCOME_taxrate_income_tax
+		multiply = -1
+
+		if = {
+			limit = {
+				owner = {
+					has_variable = INCOME_progressive_income_tax_enabled
+				}
+			}
+			multiply = 1.5
+		}
+	}
+	else = {
+		value = 0
+	}
+}
+
+INCOME_governorship_income_tax_upper_strata = {
+	# Tax paid by pops as a percentage of wealth they earn NOT from trade in a quarter
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_income_tax
+			}
+		}
+		value = JOBS_wages_due_upper_strata
+		add = var:this_income_from_shipping_upper_strata
+		add = var:this_income_from_manufacturing_upper_strata
+		add = var:this_income_from_resource_extraction_upper_strata
+		add = var:WEALTH_new_generated_services_upper_strata
+		multiply = owner.var:INCOME_taxrate_income_tax
+		multiply = -1
+
+		if = {
+			limit = {
+				owner = {
+					has_variable = INCOME_progressive_income_tax_enabled
+				}
+			}
+			multiply = 2.5
+		}
+	}
+	else = {
+		value = 0
+	}
+}
+
+
+## TARIFFS
+
+INCOME_governorship_tariffs_total_positive = {
+	value = INCOME_governorship_tariffs_upper_strata
+	add = INCOME_governorship_tariffs_middle_strata
+	add = INCOME_governorship_tariffs_lower_strata
+	add = INCOME_governorship_tariffs_proletariat
+	add = INCOME_governorship_tariffs_tribesmen
+	multiply = -1
+}
+
+INCOME_governorship_tariffs_upper_strata = {
+	# Tax by traders as a percentage of the total cost of importing goods
+	# TODO: Tariffs should provide special bonuses/maluses to the state:
+	## Higher tarrifs should:
+	## ---% trade penetration from trade agreements
+	## +++% trade penetration from own provinces and colonies
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_tariffs
+			}
+		}
+		value = var:this_expenses_from_resource_extraction_upper_strata
+		add = var:this_expenses_from_manufacturing_upper_strata
+		multiply = owner.var:INCOME_taxrate_tariffs
+	}
+	else = {
+		value = 0
+	}
+}
+
+INCOME_governorship_tariffs_middle_strata = {
+	# Tax by traders as a percentage of the total cost of importing goods
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_tariffs
+			}
+		}
+		value = var:this_expenses_from_resource_extraction_middle_strata
+		add = var:this_expenses_from_manufacturing_middle_strata
+		multiply = owner.var:INCOME_taxrate_tariffs
+	}
+	else = {
+		value = 0
+	}
+}
+
+INCOME_governorship_tariffs_lower_strata = {
+	# Tax by traders as a percentage of the total cost of importing goods
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_tariffs
+			}
+		}
+		value = var:this_expenses_from_resource_extraction_lower_strata
+		add = var:this_expenses_from_manufacturing_lower_strata
+		multiply = owner.var:INCOME_taxrate_tariffs
+	}
+	else = {
+		value = 0
+	}
+}
+
+INCOME_governorship_tariffs_proletariat = {
+	# Tax by traders as a percentage of the total cost of importing goods
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_tariffs
+			}
+		}
+		value = var:this_expenses_from_resource_extraction_proletariat
+		add = var:this_expenses_from_manufacturing_proletariat
+		multiply = owner.var:INCOME_taxrate_tariffs
+	}
+	else = {
+		value = 0
+	}
+}
+
+INCOME_governorship_tariffs_tribesmen = {
+	# Tax by traders as a percentage of the total cost of importing goods
+	if = {
+		limit = {
+			owner = {
+				has_variable = INCOME_taxrate_tariffs
+			}
+		}
+		value = var:this_expenses_from_resource_extraction_tribesmen
+		add = var:this_expenses_from_manufacturing_tribesmen
+		multiply = owner.var:INCOME_taxrate_tariffs
+	}
+	else = {
+		value = 0
+	}
+}
+
+### DIRECT INCOME FROM STATE OWNERSHIP OF BUSINESS
+## PORT CHARGES
+
+INCOME_governorship_state_port_charges = {
+	# This is calculated as the state's share in shipping income in a province, instead of as a tax out of the pops' governorship shipping income
+	value = var:this_income_from_shipping_the_state
+	subtract = var:this_expenses_from_shipping_the_state
+}
+INCOME_governorship_state_resource_extraction = {
+	# This is calculated as the state's share in shipping income in a province, instead of as a tax out of the pops' governorship shipping income
+	value = var:this_income_from_resource_extraction_the_state
+	subtract = var:this_expenses_from_resource_extraction_the_state
+}
+INCOME_governorship_state_manufacturing = {
+	# This is calculated as the state's share in shipping income in a province, instead of as a tax out of the pops' governorship shipping income
+	value = var:this_income_from_manufacturing_the_state
+	subtract = var:this_expenses_from_manufacturing_the_state
+}

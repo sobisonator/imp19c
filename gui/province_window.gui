@@ -9,6 +9,9 @@
 @province_rank_time_1 = 0.2
 @province_rank_time_2 = 0.4
 
+@province_building_time_1 = 0.1
+@province_building_time_2 = 0.2
+
 template cultural_province_ranks_guts
 {
 	size = { 146 170 }
@@ -2882,7 +2885,7 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 		@province_height_small = 141
 		blockoverride "BackgroundGradient" { visible = no }
 		size = { @window_width @province_height_large }
-		
+
 		parentanchor = bottom
 		visible = "[ProvinceWindow.HasProvince]"
 		alwaystransparent = no
@@ -2900,7 +2903,7 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 			name = "uncolonized_main_header"
 			#layoutpolicy_horizontal = expanding
 			widgetanchor = bottom
-			size = { 768 36 }
+			size = { 768 0 }
 			visible = "[Not(ProvinceWindow.HasState)]"
 
 			blockoverride "Title_text"
@@ -3493,23 +3496,12 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 								multiline = yes
 							}				
 						}
-						icon = {
-							size = { 46 54 }
-							parentanchor = right|top
-							using = flat_background_white
-							using = portrait_x32y32bd_alpha
-							spriteType = corneredstretched
-							modify_texture = {
-								name = "Alpha"
-								blend_mode = alphamultiply
-								texture = "gfx/interface/base_parts/top_right_corner_alpha.dds"
-							}
-						}
 						icon_button_square = {
 							size = { 40 40 }
-							position = { -3 3 }
+							position = { -3 2 }
 							parentanchor = right|top
-							enabled = no 
+							enabled = no
+							tooltip = "province_change"
 							blockoverride "Icon"
 							{
 								texture = "gfx/interface/icons/shared_icons/change.dds"
@@ -3518,9 +3510,10 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 						}
 						icon_button_square = {
 							size = { 40 40 }
-							position = { -3 3 }
+							position = { -3 2 }
 							parentanchor = right|top
-							enabled = "[ProvinceWindow.IsPlayerProvince]" 
+							enabled = "[ProvinceWindow.IsPlayerProvince]"
+							tooltip = "province_change"
 							blockoverride "On_click"
 							{
 								onclick = "[PdxGuiTriggerAllAnimations('province_rank')]"
@@ -3547,10 +3540,11 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 						}
 						icon_button_square = {
 							size = { 40 40 }
-							position = { -3 3 }
+							position = { -3 2 }
 							parentanchor = right|top
-							enabled = "[ProvinceWindow.IsPlayerProvince]" 
+							enabled = "[ProvinceWindow.IsPlayerProvince]"
 							visible = no
+							tooltip = "province_change"
 							blockoverride "On_click"
 							{
 								onclick = "[PdxGuiTriggerAllAnimations('province_rank_hide')]"
@@ -3572,6 +3566,72 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 							}
 							state = {
 								name = "province_rank_full_hide"
+								on_start = "[PdxGuiWidget.Hide]"
+							}
+						}
+
+						icon_button_square = {
+							size = { 40 40 }
+							position = { -3 46 }
+							parentanchor = right|top
+							enabled = no
+							tooltip = "province_building"
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/shared_icons/building_slot.dds"
+								size = { 34 34 }
+							}
+						}
+						icon_button_square = {
+							size = { 40 40 }
+							position = { -3 46 }
+							parentanchor = right|top
+							#enabled = "[ProvinceWindow.IsPlayerProvince]"
+							tooltip = "province_building"
+							blockoverride "On_click"
+							{
+								onclick = "[PdxGuiTriggerAllAnimations('province_building')]"
+							}
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/shared_icons/building_slot.dds"
+								size = { 34 34 }
+							}
+							blockoverride "Drop_shadow" { visible = no }
+							state = {
+								name = "province_building"
+								on_start = "[PdxGuiWidget.Hide]"
+							}
+							state = {
+								name = "province_building_hide"
+								delay = @province_building_time_2
+								on_start = "[PdxGuiWidget.Show]"
+							}
+						}
+						icon_button_square = {
+							size = { 40 40 }
+							position = { -3 46 }
+							parentanchor = right|top
+							#enabled = "[ProvinceWindow.IsPlayerProvince]"
+							visible = no
+							tooltip = "province_building"
+							blockoverride "On_click"
+							{
+								onclick = "[PdxGuiTriggerAllAnimations('province_building_hide')]"
+							}
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/shared_icons/building_slot.dds"
+								size = { 34 34 }
+							}
+							blockoverride "Drop_shadow" { visible = no }
+							state = {
+								name = "province_building"
+								delay = @province_building_time_2
+								on_start = "[PdxGuiWidget.Show]"
+							}
+							state = {
+								name = "province_building_hide"
 								on_start = "[PdxGuiWidget.Hide]"
 							}
 						}
@@ -3918,8 +3978,8 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 								margin_top = 0
 								spacing = 2
 								visible = "[Not( Or( ProvinceWindow.GetProvince.HasGreatWork, ProvinceWindow.GetProvince.HasSecondaryGreatWork ) )]"
-								@mincategorybuttonwidth = 138
-								@maxcategorybuttonwidth = 160
+								@mincategorybuttonwidth = 206
+								@maxcategorybuttonwidth = 232
 								@mincategorybuttonheight = 28 
 								@maxcategorybuttonheight = 34
 								#widget = {
@@ -3956,31 +4016,31 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 										onclick = "[GetVariableSystem.Set('province_tabs', 'pops')]"
 									}
 								}   
-								category_tab = { 
-									name = "buildings_tab"
-									blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
-									blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
-									blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue('province_tabs', 'buildings'))]" }
-									blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue('province_tabs', 'buildings')]" }
-									######## Shared Overrides
-									blockoverride "Center_text" { visible = no }
-									blockoverride "Center_text_and_icon" { visible = yes }
-									blockoverride "Button_text" { 
-										text = "[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_num_used_slots')|0]/[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_buildings_cap')|0]" 
+								#category_tab = { 
+								#	name = "buildings_tab"
+								#	blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+								#	blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+								#	blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue('province_tabs', 'buildings'))]" }
+								#	blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue('province_tabs', 'buildings')]" }
+								#	######## Shared Overrides
+								#	blockoverride "Center_text" { visible = no }
+								#	blockoverride "Center_text_and_icon" { visible = yes }
+								#	blockoverride "Button_text" { 
+								#		text = "[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_num_used_slots')|0]/[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_buildings_cap')|0]" 
 										
-									}
-									tooltip = "1 building can be built for every 2 non-tribal pops up to a cap from #Y Depot#! buildings present #G +[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('province_industrialisation_percent')|%0]#! from industrialisation."
-									blockoverride "Icon"
-									{
-										texture = "gfx/interface/icons/shared_icons/building_slot.dds"
-										visible = yes
-									}
-									######## Small Button Overrides
-									blockoverride "ClickFunction"
-									{
-										onclick = "[GetVariableSystem.Set('province_tabs', 'buildings')]"
-									}
-								} 
+								#	}
+								#	tooltip = "1 building can be built for every 2 non-tribal pops up to a cap from #Y Depot#! buildings present #G +[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('province_industrialisation_percent')|%0]#! from industrialisation."
+								#	blockoverride "Icon"
+								#	{
+								#		texture = "gfx/interface/icons/shared_icons/building_slot.dds"
+								#		visible = yes
+								#	}
+								#	######## Small Button Overrides
+								#	blockoverride "ClickFunction"
+								#	{
+								#		onclick = "[GetVariableSystem.Set('province_tabs', 'buildings')]"
+								#	}
+								#} 
 								category_tab = {
 									name = "tactical_tab"
 									blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
@@ -4021,13 +4081,13 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 							hbox = { 
 								layoutpolicy_vertical = preferred
 								layoutpolicy_horizontal = expanding
-								margin_right = 17
+								margin_right = 10
 								margin_left = 2
 								margin_top = 0
 								spacing = 2
 								visible = "[Or( ProvinceWindow.GetProvince.HasGreatWork, ProvinceWindow.GetProvince.HasSecondaryGreatWork )]"
-								@gwmincategorybuttonwidth = 106
-								@gwmaxcategorybuttonwidth = 114
+								@gwmincategorybuttonwidth = 138
+								@gwmaxcategorybuttonwidth = 160
 								@gwmincategorybuttonheight = 28 
 								@gwmaxcategorybuttonheight = 34
 								#widget = {
@@ -4059,32 +4119,32 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 										onclick = "[GetVariableSystem.Set('province_tabs', 'pops')]"
 									}
 								}   
-								category_tab = { 
-									name = "buildings_tab2"
-									blockoverride "MinSize" { size = { @gwmincategorybuttonwidth @gwmincategorybuttonheight } }
-									blockoverride "MaxSize" { size = { @gwmaxcategorybuttonwidth @gwmaxcategorybuttonheight } }
-									blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue('province_tabs', 'buildings'))]" }
-									blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue('province_tabs', 'buildings')]" }
-									######## Shared Overrides
-									blockoverride "Center_text" { visible = no }
-									blockoverride "Center_text_and_icon" { visible = yes }
-									blockoverride "Button_text" { 
-										text = "[ProvinceWindow.GetProvince.GetTotalAmountOfBuildingLevels]/[ProvinceWindow.GetProvince.GetAllowedAmountOfBuildingLevels]" 
-									}
-									blockoverride "Icon"
-									{
-										texture = "gfx/interface/icons/shared_icons/building_slot.dds"
-										size = { 24 24 }
-										#visible = no
+								#category_tab = { 
+								#	name = "buildings_tab2"
+								#	blockoverride "MinSize" { size = { @gwmincategorybuttonwidth @gwmincategorybuttonheight } }
+								#	blockoverride "MaxSize" { size = { @gwmaxcategorybuttonwidth @gwmaxcategorybuttonheight } }
+								#	blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue('province_tabs', 'buildings'))]" }
+								#	blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue('province_tabs', 'buildings')]" }
+								#	######## Shared Overrides
+								#	blockoverride "Center_text" { visible = no }
+								#	blockoverride "Center_text_and_icon" { visible = yes }
+								#	blockoverride "Button_text" { 
+								#		text = "[ProvinceWindow.GetProvince.GetTotalAmountOfBuildingLevels]/[ProvinceWindow.GetProvince.GetAllowedAmountOfBuildingLevels]" 
+								#	}
+								#	blockoverride "Icon"
+								#	{
+								#		texture = "gfx/interface/icons/shared_icons/building_slot.dds"
+								#		size = { 24 24 }
+								#		#visible = no
 										
-									}
-									tooltip = "[ProvinceWindow.GetProvince.GetBuildingLevelInformation]"
-									######## Small Button Overrides
-									blockoverride "ClickFunction"
-									{
-										onclick = "[GetVariableSystem.Set('province_tabs', 'buildings')]"
-									}
-								} 
+								#	}
+								#	tooltip = "[ProvinceWindow.GetProvince.GetBuildingLevelInformation]"
+								#	######## Small Button Overrides
+								#	blockoverride "ClickFunction"
+								#	{
+								#		onclick = "[GetVariableSystem.Set('province_tabs', 'buildings')]"
+								#	}
+								#} 
 								category_tab = {
 									name = "tactical_tab2"
 									blockoverride "MinSize" { size = { @gwmincategorybuttonwidth @gwmincategorybuttonheight } }
@@ -4389,110 +4449,104 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 							on_start = "[PdxGuiWidget.Show]"
 						}
 						using = hide_province_tab
-						margin_widget = {
-							layoutpolicy_vertical = expanding
-							layoutpolicy_horizontal = expanding
-							margin = { 6 6 }
-							margin_bottom = 0
-							
-							scrollarea = {
-								size = { 100% 100% }
-								scrollbarpolicy_horizontal = always_off
-								
-								scrollbar_vertical = {
-									using = VerticalScrollBar
-								}
-								
-								scrollwidget = {
-									dynamicgridbox = {
-										name = "possible_buildings_grid"
-										position = { 0 0 } 
-										datamodel_wrap = 2
+						#margin_widget = {
+						#	layoutpolicy_vertical = expanding
+						#	layoutpolicy_horizontal = expanding
+						#	margin = { 6 6 }
+						#	margin_bottom = 0
+						#	scrollarea = {
+						#		size = { 100% 100% }
+						#		scrollbarpolicy_horizontal = always_off
+						#		scrollbarpolicy_vertical = always_off
+						#		scrollwidget = {
+						#			dynamicgridbox = {
+						#				name = "possible_buildings_grid"
+						#				block "ItemPosition" { position = { 0 0 } }
+						#				datamodel_wrap = 2
 										
-										datamodel = "[ProvinceWindow.GetPossibleBuildings]"
+						#				datamodel = "[ProvinceWindow.GetPossibleBuildings]"
 										
-										item = {
-											widget = {
-												size = { 55	80 }
-												building_item_button = {
-													blockoverride "On_click" { 
-														onclick = "[BuildingItem.Build]" 
-														#enabled = "[Or( BuildingItem.CanBuild, BuildingItem.HasQueue )]"
-														onrightclick = "[BuildingItem.CancelOrDestroy]"
-													}
-													blockoverride "Text" { text = "[BuildingItem.GetLevel]" }
-													blockoverride "ExtraText" 
-													{
-														visible = "[BuildingItem.HasQueue]"
-														text = "+[BuildingItem.GetQueueSize]"
-													}
-													blockoverride "Tooltip" {
-														text = "Awooga!"
-													}
-												}
-											}
-										}
+						#				item = {
+						#					widget = {
+						#						size = { 55	80 }
+						#						building_item_button = {
+						#							blockoverride "On_click" { 
+						#								onclick = "[BuildingItem.Build]" 
+						#								#enabled = "[Or( BuildingItem.CanBuild, BuildingItem.HasQueue )]"
+						#								onrightclick = "[BuildingItem.CancelOrDestroy]"
+						#							}
+						#							blockoverride "Text" { text = "[BuildingItem.GetLevel]" }
+						#							blockoverride "ExtraText" 
+						#							{
+						#								visible = "[BuildingItem.HasQueue]"
+						#								text = "+[BuildingItem.GetQueueSize]"
+						#							}
+						#							blockoverride "Tooltip" {
+						#								text = "Awooga!"
+						#							}
+						#						}
+						#					}
+						#				}
 										
-									}
-								}
-							}
-							scrollarea = {
-								size = { 280 38 }
-								scrollbarpolicy_horizontal = always_off
-								parentanchor = bottom
-								scissor = yes
-								position = { 0 -13 }
-								scrollbar_vertical = {
-									using = VerticalScrollBar
-								}
-								using = VerticalScrollAreaCutOff
-								scrollwidget = {
-									overlappingitembox = {
-										name = "queued_buildings_grid"
-										size = { 100% 100% }
-										#datamodel_wrap = 1
+						#			}
+						#		}
+						#	}
+						#	scrollarea = {
+						#		size = { 280 38 }
+						#		scrollbarpolicy_horizontal = always_off
+						#		parentanchor = bottom
+						#		scissor = yes
+						#		position = { 0 -13 }
+						#		scrollbar_vertical = {
+						#			using = VerticalScrollBar
+						#		}
+						#		using = VerticalScrollAreaCutOff
+						#		scrollwidget = {
+						#			overlappingitembox = {
+						#				name = "queued_buildings_grid"
+						#				size = { 100% 100% }
+						#				#datamodel_wrap = 1
 										
-										datamodel = "[ProvinceWindow.GetQueuedBuildings]"
+						#				datamodel = "[ProvinceWindow.GetQueuedBuildings]"
 										
-										item = {
-											button = {
-												gfxtype = togglepushbuttongfx
-												size = { 38 38 }
-												onrightclick = "[BuildingItem.Cancel]"
-												onclick = "[BuildingItem.Cancel]"
-												background = {
-													shaderfile = "gfx/FX/pdxgui_default.shader"
-													using = flat_background_white
-													using = portrait_x32y32bd_alpha
-												}
-												icon = {
-													size = { 32 32 }
-													parentanchor = center|center
-													texture = "[GetBuildingIcon( BuildingItem.GetBuilding )]"
-													using = portrait_x32y32bd_alpha
-												}
-												tooltip = "CANCEL_BUILDING_HERE"
-											}
-										}
+						#				item = {
+						#					button = {
+						#						gfxtype = togglepushbuttongfx
+						#						size = { 38 38 }
+						#						onrightclick = "[BuildingItem.Cancel]"
+						#						onclick = "[BuildingItem.Cancel]"
+						#						background = {
+						#							shaderfile = "gfx/FX/pdxgui_default.shader"
+						#							using = flat_background_white
+						#							using = portrait_x32y32bd_alpha
+						#						}
+						#						icon = {
+						#							size = { 32 32 }
+						#							parentanchor = center|center
+						#							texture = "[GetBuildingIcon( BuildingItem.GetBuilding )]"
+						#							using = portrait_x32y32bd_alpha
+						#						}
+						#						tooltip = "CANCEL_BUILDING_HERE"
+						#					}
+						#				}
 										
-									}
-								}
-							}
-							text_button_square_highlighted = {
-								visible = "[HasDlc('Heirs of Alexander')]"
-								parentanchor = bottom|right
-								position = { -6 -16 }
-								size = { 148 0 }
-								blockoverride "Center_text" { text = "OPEN_GREAT_WORKS" }
-								blockoverride "On_click" 
-								{
-									onclick = "[ProvinceWindow.OpenGreatWorkWindowBuild]" 
-									enabled = "[ProvinceWindow.CanBuildGreatWork]"
-									tooltip = "[ProvinceWindow.CanBuildGreatWorkTooltip]"
-								}
-							}
-						}
-						
+						#			}
+						#		}
+						#	}
+						#	text_button_square_highlighted = {
+						#		visible = "[HasDlc('Heirs of Alexander')]"
+						#		parentanchor = bottom|right
+						#		position = { -6 -16 }
+						#		size = { 148 0 }
+						#		blockoverride "Center_text" { text = "OPEN_GREAT_WORKS" }
+						#		blockoverride "On_click" 
+						#		{
+						#			onclick = "[ProvinceWindow.OpenGreatWorkWindowBuild]" 
+						#			enabled = "[ProvinceWindow.CanBuildGreatWork]"
+						#			tooltip = "[ProvinceWindow.CanBuildGreatWorkTooltip]"
+						#		}
+						#	}
+						#}
 					}
 					vbox = {
 						name = "tactical_tab"
@@ -5274,5 +5328,228 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
         #        }
         #    }
         #}
+	}
+	base_sub_window = { #subjects
+		name = "building"
+		#visible = "[GetVariableSystem.HasValue('province_tabs', 'buildings')]"
+		state = {
+			name = "province_building"
+			duration = @province_building_time_2
+			size = { 365 @province_height_large }
+			position = { 766 0 }
+			on_start = "[PdxGuiWidget.Show]"
+		}
+		state = {
+			name = "province_building_hide"
+			duration = @province_building_time_2
+			size = { 60 @province_height_large }
+			position = { 759 0 }
+			next = province_building_full_hide
+		}
+		state = {
+			name = "province_building_full_hide"
+			on_start = "[PdxGuiWidget.Hide]"
+		}
+		visible = no
+		size = { 365 @province_height_large } 
+		position = { 766 0 }
+		parentanchor = bottom
+		movable = no
+		blockoverride "secondary_header_visible" { visible = no }
+		secondary_header = {  
+			name = "uncolonized_main_header"
+			size = { 100% 0 }
+			position = { 0 4 }
+			visible = no
+			blockoverride "Title_text"
+			{
+				text = "Building"
+				margin_left = @window_margin_left_title
+			}
+			blockoverride "White_buttons"
+			{
+				button_close = { 
+					visible = yes
+					onclick = "[PdxGuiTriggerAllAnimations('province_building_hide')]"
+					tooltip = "CLOSE"
+				}
+			}
+			state = {
+				name = "province_building"
+				delay = @province_building_time_1
+				on_start = "[PdxGuiWidget.Show]"
+			}
+			state = {
+				name = "province_building_hide"
+				delay = @province_building_time_1
+				on_start = "[PdxGuiWidget.Hide]"
+			}
+		}
+		flowcontainer = {
+			direction = vertical
+			ignoreinvisible = yes
+			margin = { 10 40 }
+			visible = no
+			state = {
+				name = "province_building"
+				delay = @province_building_time_1
+				duration = @province_building_time_1
+				on_start = "[PdxGuiWidget.Show]"
+			}
+			state = {
+				name = "province_building_hide"
+				duration = @province_building_time_2
+				on_start = "[PdxGuiWidget.Hide]"
+			}
+			building_box = { #ничего
+				visible = "[EqualTo_int32( GetDataModelSize( ProvinceWindow.GetPossibleBuildings ), '(int32)15' )]"
+				blockoverride "PortItems" {
+					ports_item = { }
+				}
+				blockoverride "EducationItems" {
+					education_item = { }
+				}
+				blockoverride "IndustrialItems" {
+					industrial_item = { }
+				}
+				blockoverride "InfrastructureItems" {
+					infrastructure_item = { }
+				}
+				blockoverride "MilitaryItems" {
+					military_item = { }
+				}
+				blockoverride "UrbanDistrictsItems" {
+					urban_districts_item = { }
+				}
+			}
+			building_box = { #море
+				visible = "[And(EqualTo_int32( GetDataModelSize( ProvinceWindow.GetPossibleBuildings ), '(int32)16' ), ProvinceCanHavePort(ProvinceWindow.GetProvince))]"
+				blockoverride "PortItems" {
+					ports_item_river_or_sea = { }
+				}
+				blockoverride "EducationItems" {
+					education_item_river_or_sea = { }
+				}
+				blockoverride "IndustrialItems" {
+					industrial_item_river_or_sea = { }
+				}
+				blockoverride "InfrastructureItems" {
+					infrastructure_item_river_or_sea = { }
+				}
+				blockoverride "MilitaryItems" {
+					military_item_river_or_sea = { }
+				}
+				blockoverride "UrbanDistrictsItems" {
+					urban_districts_item_river_or_sea = { }
+				}
+			}
+			building_box = { #река
+				visible = "[And(EqualTo_int32( GetDataModelSize( ProvinceWindow.GetPossibleBuildings ), '(int32)16' ), Not(ProvinceCanHavePort(ProvinceWindow.GetProvince)))]"
+				blockoverride "PortItems" {
+					ports_item_river_or_sea = { }
+				}
+				blockoverride "EducationItems" {
+					education_item_river_or_sea = { }
+				}
+				blockoverride "IndustrialItems" {
+					industrial_item_river_or_sea = { }
+				}
+				blockoverride "InfrastructureItems" {
+					infrastructure_item_river_or_sea = { }
+				}
+				blockoverride "MilitaryItems" {
+					military_item_river_or_sea = { }
+				}
+				blockoverride "UrbanDistrictsItems" {
+					urban_districts_item_river_or_sea = { }
+				}
+			}
+			building_box = { #море + река
+				visible = "[EqualTo_int32( GetDataModelSize( ProvinceWindow.GetPossibleBuildings ), '(int32)17' )]"
+				blockoverride "PortItems" {
+					ports_item_river_and_sea = { }
+				}
+				blockoverride "EducationItems" {
+					education_item_river_and_sea = { }
+				}
+				blockoverride "IndustrialItems" {
+					industrial_item_river_and_sea = { }
+				}
+				blockoverride "InfrastructureItems" {
+					infrastructure_item_river_and_sea = { }
+				}
+				blockoverride "MilitaryItems" {
+					military_item_river_and_sea = { }
+				}
+				blockoverride "UrbanDistrictsItems" {
+					urban_districts_item_river_and_sea = { }
+				}
+			}
+			margin_widget = {
+				size = { 365 80 }
+				margin_top = 12
+				margin_right = 22
+				scrollarea = {
+					size = { 100% 38 }
+					scrollbarpolicy_horizontal = always_off
+					parentanchor = top
+					scissor = yes
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+					using = VerticalScrollAreaCutOff
+					scrollwidget = {
+						overlappingitembox = {
+							name = "queued_buildings_grid"
+							size = { 100% 100% }
+							#datamodel_wrap = 1
+							
+							datamodel = "[ProvinceWindow.GetQueuedBuildings]"
+							
+							item = {
+								button = {
+									gfxtype = togglepushbuttongfx
+									size = { 38 38 }
+									onrightclick = "[BuildingItem.Cancel]"
+									onclick = "[BuildingItem.Cancel]"
+									background = {
+										shaderfile = "gfx/FX/pdxgui_default.shader"
+										using = flat_background_white
+										using = portrait_x32y32bd_alpha
+									}
+									icon = {
+										size = { 32 32 }
+										parentanchor = center|center
+										texture = "[GetBuildingIcon( BuildingItem.GetBuilding )]"
+										using = portrait_x32y32bd_alpha
+									}
+									tooltip = "CANCEL_BUILDING_HERE"
+								}
+							}
+							
+						}
+					}
+				}
+				tag = {
+					parentanchor = bottom
+					position = { 0 10 }
+					block "TagText" { text = "Buildings: [GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_num_used_slots')|0]/[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_buildings_cap')|0]" }
+					tooltip = "1 building can be built for every 2 non-tribal pops up to a cap from #Y Depot#! buildings present #G +[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('province_industrialisation_percent')|%0]#! from industrialisation."
+				}
+				text_button_square_highlighted = {
+					visible = "[HasDlc('Heirs of Alexander')]"
+					parentanchor = right|bottom
+					position = { 0 10 }
+					size = { 148 0 }
+					blockoverride "Center_text" { text = "OPEN_GREAT_WORKS" }
+					blockoverride "On_click" 
+					{
+						onclick = "[ProvinceWindow.OpenGreatWorkWindowBuild]" 
+						enabled = "[ProvinceWindow.CanBuildGreatWork]"
+						tooltip = "[ProvinceWindow.CanBuildGreatWorkTooltip]"
+					}
+				}
+			}
+		}
 	}
 }

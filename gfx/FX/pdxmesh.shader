@@ -445,12 +445,12 @@ PixelShader =
 				float3x3 TBN = Create3x3( normalize( Input.Tangent ), normalize( Input.Bitangent ), normalize( Input.Normal ) );
 				float3 Normal = mul( NormalSample, TBN );
 
-				#if defined( USER_COLOR )
+				#ifdef USER_COLOR
 					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_PRIMARY_COLOR ).rgb, Properties.r );
 					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_SECONDARY_COLOR ).rgb, NormalPacked.b );
 				#endif
 
-				#if defined( USER_COLOR_SHIP )
+				#ifdef USER_COLOR_SHIP
 					UserColor = float3( 0.75f, 0.75f, 0.75f );
 					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_PRIMARY_COLOR ).rgb, Properties.r );
 					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_SECONDARY_COLOR ).rgb, NormalPacked.b );
@@ -884,83 +884,82 @@ Effect standard_usercolor_shipShadow
 	Defines = { "USER_COLOR" "USER_COLOR_SHIP" }
 }
 
-Effect standard_tile
+Effect mapcolor
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_map"
+
+	Defines = { "MAPCOLOR" }
+}
+
+Effect mapcolor_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_map"
+
+	Defines = { "MAPCOLOR" }
+}
+
+Effect table
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_map"
+
+	Defines = { "TABLE" }
+}
+
+Effect table_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_map"
+
+	Defines = { "TABLE" }
+}
+
+Effect newspaper
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_map"
+
+	Defines = { "NEWSPAPER" }
+}
+
+Effect newspaper_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_map"
+
+	Defines = { "NEWSPAPER" }
+}
+
+Effect newspaper_flag
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_map"
+
+	Defines = { "NEWSPAPER_FLAG" "NEWSPAPER" }
+}
+
+Effect newspaper_flag_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_map"
+
+	Defines = { "NEWSPAPER_FLAG" "NEWSPAPER" }
+}
+
+Effect city_building_snow
 {
 	VertexShader = "VS_standard"
 	PixelShader = "PS_standard"
-
-	Defines = { "TILE" }
+	Defines = { "ENABLE_SNOW" }
 }
 
-Effect standard_tile_mapobject
+Effect city_building_snowShadow
 {
-	VertexShader = "VS_mapobject"
-	PixelShader = "PS_table"
+	VertexShader = "VertexPdxMeshStandardShadow"
+	PixelShader = "PixelPdxMeshStandardShadow"
 
-	Defines = { "TILE" }
-}
-
-Effect standard_mapcolor
-{
-	VertexShader = "VS_standard"
-	PixelShader = "PS_map"
-
-	Defines = { "MAPCOLOR" }
-}
-
-Effect standard_mapcolor_mapobject
-{
-	VertexShader = "VS_mapobject"
-	PixelShader = "PS_map"
-
-	Defines = { "MAPCOLOR" }
-}
-
-Effect standard_table
-{
-	VertexShader = "VS_standard"
-	PixelShader = "PS_map"
-
-	Defines = { "TABLE" }
-}
-
-Effect standard_table_mapobject
-{
-	VertexShader = "VS_mapobject"
-	PixelShader = "PS_map"
-
-	Defines = { "TABLE" }
-}
-
-Effect standard_newspaper
-{
-	VertexShader = "VS_standard"
-	PixelShader = "PS_map"
-
-	Defines = { "NEWSPAPER" }
-}
-
-Effect standard_newspaper_mapobject
-{
-	VertexShader = "VS_mapobject"
-	PixelShader = "PS_map"
-
-	Defines = { "NEWSPAPER" }
-}
-
-Effect standard_newspaper_flag
-{
-	VertexShader = "VS_standard"
-	PixelShader = "PS_map"
-
-	Defines = { "NEWSPAPER_FLAG" "NEWSPAPER" }
-}
-
-Effect standard_newspaper_flag_mapobject
-{
-	VertexShader = "VS_mapobject"
-	PixelShader = "PS_map"
-
-	Defines = { "NEWSPAPER_FLAG" "NEWSPAPER" }
+	RasterizerState = ShadowRasterizerState
 }
 # END MOD

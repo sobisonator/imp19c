@@ -459,21 +459,14 @@ base_window = {
 			margin_right = 0
 			margin_left = @window_margin_left
 			visible = "[GetVariableSystem.HasValue( 'diplomatic_tabs', 'subjects' )]"
-			vbox = {
-				margin_bottom = 4
-				margin_right = 24
+			flowcontainer = {
+				margin_top = 10
 				layoutpolicy_vertical = expanding
 				layoutpolicy_horizontal = expanding
-
-				widget = {
-					size = { 0 10 }
-				}
-
 				scrollarea = {
 					visible = "[Not(IsDataModelEmpty(Player.MakeScope.GetList('player_subjects')))]"
-					layoutpolicy_vertical = expanding
 					using = VerticalScrollAreaCutOff
-
+					size = { 200 600 }
 					scrollbar_vertical = {
 						using = VerticalScrollBar
 					}
@@ -481,179 +474,578 @@ base_window = {
 					scrollbarpolicy_horizontal = always_off
 				
 					scrollwidget = {
-						vbox = {
-							vbox = {
-								layoutpolicy_horizontal = expanding 
-								layoutpolicy_vertical = shrinking
-								datamodel = "[Player.MakeScope.GetList('player_subjects')]"
-								item = {
-									hbox = {
-										hbox = {
-											layoutpolicy_vertical = expanding
-											layoutpolicy_horizontal = shrinking
-											datacontext = "[Scope.GetCountry]"
-											widget = {
-												size = { 0 54 }
-											}											
-											country_flag = {
-												tooltip = "COUNTRY_SHORTHAND_INFO"
-												parentanchor = vcenter
-								
-												blockoverride "flag"
-												{
-													texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
-													frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
-													framesize = { 56 56 }
-												}
+						flowcontainer = {
+							datamodel = "[Player.MakeScope.GetList('player_subjects')]"
+							direction = vertical
+							item = {
+								flowcontainer = {
+									datacontext = "[Scope.GetCountry]"
+									spacing = 5
+									country_flag = {
+										tooltip = "COUNTRY_SHORTHAND_INFO"
+										parentanchor = vcenter
+						
+										blockoverride "flag"
+										{
+											texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+											frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+											framesize = { 56 56 }
+										}
 
-												blockoverride "size"
-												{
-													size = { 48 48 }
-												}
+										blockoverride "size"
+										{
+											size = { 48 48 }
+										}
 
-												blockoverride "click"
-												{
-													onclick = "[OpenDiplomacy(Country.GetCountry)]"
-												}
-									
-												blockoverride "hover_leave"
-												{
-													onmousehierarchyleave = "[DiplomaticView.ResetHighlight]"
-												}
+										blockoverride "click"
+										{
+											#onclick = "[OpenDiplomacy(Country.GetCountry)]" #change this
+										}
+							
+										blockoverride "hover_leave"
+										{
+											onmousehierarchyleave = "[DiplomaticView.ResetHighlight]"
+										}
 
-											}
-											widget = {
-												size = { 55 30 }
-												tag_dark = {
-													text = "[Country.Custom('subject_interaction_name')]"
-													tooltip = "[Country.GetDescriptiveName]"
-													max_width = 135
-													#fontsize_min = 17
-													elide = right
-												}
-											}
-											widget = {
-												size = { 95 0 }
-											}
-											icon_button_square = {
-												datacontext = "[GetScriptedGui('subject_interaction_individual_focus_change_button')]"
-												visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												blockoverride "On_click"
-												{
-													enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-													onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												}
-												tooltip = "CHANGE_INDIVIDUAL_SUBJECTS_FOCUS_TT"
-												blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
-												blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/roman_eagle.dds" size = { 35 35 } }
-											}
-											widget = {
-												size = { 30 0 }
-											}
-											icon_button_square = {
-												datacontext = "[GetScriptedGui('subject_interaction_add_to_customs_union_button')]"
-												visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												blockoverride "On_click"
-												{
-													enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-													onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												}
-												tooltip = "SUBJECT_ADD_TO_CUSTOMS_UNION_TT"
-												#tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( SelectTargetCountryView.Player.MakeScope ).AddScope('player', SelectTargetCountryView.GetCountry.MakeScope ).End )]"
-												blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
-												blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/war_on_subject_cost_modifier.dds" size = { 35 35 } }
-											}
-											widget = {
-												size = { 30 0 }
-											}
-											icon_button_square = {
-												datacontext = "[GetScriptedGui('subject_interaction_individual_quota_button')]"
-												visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												blockoverride "On_click"
-												{
-													enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-													onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												}
-												tooltip = "SUBJECT_EXPORT_QUOTA_TT"
-												#tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( SelectTargetCountryView.Player.MakeScope ).AddScope('player', SelectTargetCountryView.GetCountry.MakeScope ).End )]"
-												blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
-												blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/global_import_commerce_modifier.dds" size = { 35 35 } }
-											}
-											widget = {
-												datacontext = "[GetScriptedGui('subject_interaction_individual_quota_button')]"
-												size = { 40 40 }
-												visible = "[Not(ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End ))]"
-											}
-											widget = {
-												size = { 30 0 }
-											}
-											icon_button_square = {
-												datacontext = "[GetScriptedGui('subject_interaction_individual_war_button')]"
-												visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												blockoverride "On_click"
-												{
-													enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-													onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												}
-												tooltip = "SUBJECT_FORCE_CULTURE_TT"
-												#tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( SelectTargetCountryView.Player.MakeScope ).AddScope('player', SelectTargetCountryView.GetCountry.MakeScope ).End )]"
-												blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
-												blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/war_score_cost.dds" size = { 35 35 } }
-											}
-											widget = {
-												size = { 30 0 }
-											}
-											icon_button_square = {
-												datacontext = "[GetScriptedGui('subject_interaction_individual_take_pops_button')]"
-												visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												blockoverride "On_click"
-												{
-													enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-													onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												}
-												tooltip = "CONTRIBUTE_TO_CAPITAL_TT"
-												#tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( SelectTargetCountryView.Player.MakeScope ).AddScope('player', SelectTargetCountryView.GetCountry.MakeScope ).End )]"
-												blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
-												blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/pop_type.dds" size = { 35 35 } }
-											}
-											widget = {
-												size = { 30 0 }
-											}
-											icon_button_square = {
-												datacontext = "[GetScriptedGui('subject_interaction_individual_manpower_button')]"
-												visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												blockoverride "On_click"
-												{
-													enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-													onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-													onclick = "[PdxGuiTriggerAllAnimations('on_opinions_hidden')]"
-												}
-												tooltip = "TAKE_SUBJECTS_MANPOWER_TT"
-												#tooltip = "[ScriptedGui.BuildTooltip( GuiScope.SetRoot( SelectTargetCountryView.Player.MakeScope ).AddScope('player', SelectTargetCountryView.GetCountry.MakeScope ).End )]"
-												blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
-												blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/manpower.dds" size = { 35 35 } }
-
-											}
-											#expanding element to make the row pretty
-											textbox = {
-												size = { 200 }
-											}
-										}													
-									}
+									}	
+									tag_dark = {
+										text = "[Country.Custom('subject_interaction_name')]"
+										tooltip = "[Country.GetDescriptiveName]"
+										max_width = 135
+										elide = right
+									}											
 								}
-							}
-							vbox = {
-								name = "expander"
-								layoutpolicy_vertical = growing 
 							}
 						}
 					}
 				}
-			}
-			margin_widget = {
-				size = { 0 16 }
-				layoutpolicy_horizontal = expanding
-				margin = { -8 0 } 
+				flowcontainer = { 
+					direction = vertical 
+					spacing = 16
+					flowcontainer = {
+						flowcontainer = {
+							direction = vertical
+							icon = { #flag
+								parentanchor = center
+								size = { 140 70 }
+								cpt_button = {
+									parentanchor = left
+									size = { 50 77 }
+									position = { 10 -5 }
+									block "Context" 
+									{
+										datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
+										visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+									}
+								}
+								country_flag = {
+									tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
+									parentanchor = right
+
+									blockoverride "flag"
+									{
+										texture = "[DiplomaticView.GetTargetCountry.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+										frame = "[DiplomaticView.GetTargetCountry.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+										framesize = { 120 120 }
+									}
+
+									blockoverride "size"
+									{
+										size = { 70 70 }
+									}
+
+									blockoverride "click"
+									{
+										onclick = "[OpenDiplomacy(Country.GetCountry)]"
+									}
+
+									blockoverride "hover_leave"
+									{
+										onmousehierarchyleave = "[DiplomaticView.ResetHighlight]"
+									}
+								}
+							}
+							widget = { #country name
+								parentanchor = center
+								size = { 100 20 }
+								icon_and_text = {
+									size = { 100 20 }
+									tooltip = "[DiplomaticView.GetTargetCountry.GetName]"
+									blockoverride "LineSize"
+									{
+										size = { 100 4 }
+									} 
+									blockoverride "Icon"
+									{
+										visible = no
+									}
+									blockoverride "Text"
+									{
+										position = { 0 0 }
+										text = "[DiplomaticView.GetTargetCountry.GetNameWithNoTooltip]"
+										align = center|center
+										multiline = no
+										fontsize = 20
+									}
+								}
+							}
+						}
+						flowcontainer = {
+							direction = vertical
+							ignoreinvisible = yes
+							widget = {
+								size = { 3 3 }	
+							}
+							panelka_center = { #religion
+								size = { 120 32 }
+								blockoverride "Icon" { texture = "gfx/interface/icons/powers/religious.dds" }
+								blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetReligion.GetName]" }
+								blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetReligion.GetTooltip]" }
+							}
+							widget = { size = { 0 10 } }
+							panelka_center = { #culture
+								size = { 120 32 }
+								blockoverride "Icon" { texture = "gfx/interface/icons/governor_policies/cultural_assimilation.dds" }
+								blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetName]" }
+								blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetTooltip]" }
+							}
+							widget = { size = { 0 10 } }
+							panelka_center = { #manpower
+								size = { 120 32 }
+								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/manpower.dds" }
+								blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetManpower]" }
+								blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetManpowerTooltip]" }
+							}
+						}
+						flowcontainer = {
+							direction = vertical
+							ignoreinvisible = yes
+							widget = {
+								size = { 15 3 }	
+							}
+						}
+						flowcontainer = {
+							direction = vertical
+							ignoreinvisible = yes
+							widget = {
+								size = { 3 3 }	
+							}
+							panelka_center = { #treasury
+								size = { 120 32 }
+								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
+								blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetTreasury|0]" }
+								blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetTreasuryTooltip]" }
+							}
+							widget = { size = { 0 10 } }
+							panelka_center = { #pop
+								size = { 120 32 }
+								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/pop_type.dds" }
+								blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetTotalPopulation]" }
+								blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.BuildTotalPopulationToolTip]" }
+							}
+							widget = { size = { 0 10 } }
+							panelka_center = { #stability
+								size = { 120 32 }
+								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/stability.dds" }
+								blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetStability|2]" }
+								blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetStabilityTooltip]" }
+							}
+						} 
+					}
+					flowcontainer = {
+						flowcontainer = {
+							direction = vertical
+							icon = {
+								parentanchor = center
+								size = { 65 70 }
+								cpt_button = {
+									parentanchor = left
+									size = { 50 77 }
+									position = { 10 -5 }
+									block "Context" 
+									{
+										datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
+										visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+									}
+								}
+							}
+						}
+						flowcontainer = {
+							direction = vertical
+							layoutpolicy_horizontal = expanding
+							flowcontainer = {
+								icon_and_text = {
+									size = { 200 20 }
+									tooltip = "Overseer"
+									blockoverride "LineSize"
+									{
+										size = { 200 4 }
+									} 
+									blockoverride "Icon"
+									{
+										visible = no
+									}
+									blockoverride "Text"
+									{
+										position = { 0 0 }
+										text = "Overseer"
+										align = left
+										multiline = no
+										fontsize = 20
+									}
+								}
+								widget = {
+									name = "modifier_reward"
+									size = { 150 32 }
+									using = NoninteractableBG
+									blockoverride "Margins" {}
+									visible = "[OfficeHolderItem.HasHolder]"
+									modifier_desc_condensed = {
+										position = { 0 -4 } 
+										parentanchor = center
+										widgetanchor = center
+										datacontext = "[OfficeHolderItem.GetModifier]"
+										tooltip = "[OfficeHolderItem.GetTooltip]"
+										scale = 0.9
+									}
+								}
+							}
+							flowcontainer = { 
+								margin_top = 10
+								icon_button_square = {
+									size = { 40 40 }
+									blockoverride "On_click"
+									{
+										#onclick = ""
+										clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+										oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+										inherit_visual_state = no
+									}
+									blockoverride "Icon"
+									{
+										texture = "gfx/interface/icons/shared_icons/change.dds"
+										size = { 34 34 }
+									}
+									
+									tooltip = "Change Overseer"
+								} 
+								widget = {
+									size = { 120 40 }
+									icon = {
+										size = { 120 40 }
+										shaderfile = "gfx/FX/pdxgui_default.shader"
+										using = black_background
+										alpha = 0.4
+										modify_texture = {
+											name = "Alpha"
+											texture = "gfx/interface/base_parts/header_l_x20bd_alpha1.dds"
+											blend_mode = alphamultiply
+											spriteType = Corneredtiled
+											spriteborder = { 52 0 }
+										}
+									}
+									flowcontainer = {
+										layoutpolicy_horizontal = expanding
+										margin_top = 7
+										spacing = 6
+										widget = { size = { 10 0 } }
+										policy_button = {
+											enabled = no
+										}
+										policy_button = {
+											enabled = no
+										}
+										policy_button = {
+											enabled = yes
+										}
+									}
+								}
+								widget = {
+									size = { 180 50 }
+									icon = {
+										texture = "gfx/interface/icons/icon_skills.dds"
+										framesize = { 50 50 }
+										frame = 3
+										size = { 30 30 }
+										tooltip = "Dip"
+									}
+									textbox = {
+										parentanchor = right
+										position = { 0 15 }
+										using = BaseFontM
+										using = White_FontColor
+										align = right
+										block "progress_text" { text = "1 / 5" }
+									}
+									widget = {
+										position = { 0 30 }
+										size = { 180 8 }
+										icon = {
+											using = flat_background
+											size = { 4 100% }
+										}
+										margin_widget = {
+											size = { 100% 100% }
+											margin = { 6 0 }
+											icon = {
+												name = "progress_frame"
+												texture = "gfx/interface/base_parts/progressbar_background_frame.dds"
+												minimumsize = { 0 7 }
+												size = { 100% 100% }
+												color = { 0.7 0.7 0.7 1 }
+												block "ProgressAlpha" { alpha = 0.5 }
+											}
+											progressbar = {
+												using = progressbar_flat_green
+												parentanchor = center
+												position = { 0 0 }
+												size = { 168 8 }
+
+												block "progress_value"
+												{
+													value = "35"
+												}
+											}
+										}
+										icon = {
+											using = flat_background
+											parentanchor = right
+											size = { 4 100% }
+										}
+									}
+								}
+							}
+						}
+					}
+					flowcontainer = {
+						flowcontainer = {
+							direction = vertical
+							ignoreinvisible = yes
+							panelka = {
+								size = { 220 32 }
+								blockoverride "TextBox" { text = "Type: Governorate" }
+								blockoverride "Tooltip" { tooltip = "Type: Governorate" }
+							}
+							widget = { size = { 0 6 } }
+							panelka = {
+								size = { 220 32 }
+								blockoverride "TextBox" { text = "Autonomy: number" }
+								blockoverride "Tooltip" { tooltip = "Autonomy: number" }
+							}
+						} 
+						widget = {
+							size = { 60 35 }	
+						}
+						icon_button_square = {
+							size = { 40 40 }
+							blockoverride "On_click"
+							{
+								clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+								oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+								inherit_visual_state = no
+							}
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/shared_icons/change.dds"
+								size = { 34 34 }
+							}
+							tooltip = "Change?"
+						} 
+					}
+					flowcontainer = { 
+						spacing = 8 
+						widget = { size = { 5 0 } }
+						icon_button_square = {
+							size = { 40 40 }
+							blockoverride "On_click"
+							{
+								#onclick = ""
+								clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+								oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+								inherit_visual_state = no
+							}
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/_default.dds"
+								size = { 34 34 }
+							}
+							tooltip = "Change?"
+						} 
+						icon_button_square = {
+							size = { 40 40 }
+							blockoverride "On_click"
+							{
+								#onclick = ""
+								clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+								oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+								inherit_visual_state = no
+							}
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/_default.dds"
+								size = { 34 34 }
+							}
+							tooltip = "Change?"
+						} 
+						icon_button_square = {
+							size = { 40 40 }
+							blockoverride "On_click"
+							{
+								#onclick = ""
+								clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+								oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+								inherit_visual_state = no
+							}
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/_default.dds"
+								size = { 34 34 }
+							}
+							tooltip = "Change?"
+						} 
+						icon_button_square = {
+							size = { 40 40 }
+							blockoverride "On_click"
+							{
+								#onclick = ""
+								clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+								oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+								inherit_visual_state = no
+							}
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/_default.dds"
+								size = { 34 34 }
+							}
+							tooltip = "Change?"
+						} 
+					}
+					flowcontainer = {
+						flowcontainer = {
+							direction = vertical
+							ignoreinvisible = yes
+							widget = {
+								size = { 0 10 }	
+							}
+							widget = {
+								size = { 0 20 }
+								textbox = {
+									position = { 10 0 }
+									using = BaseFontM
+									using = White_FontColor
+									block "progress_text" { text = "Status: Desloyal" }
+								}
+							}
+							widget = {
+								size = { 180 25 }
+								widget = {
+									size = { 180 8 }
+									icon = {
+										using = flat_background
+										size = { 4 100% }
+									}
+									margin_widget = {
+										size = { 100% 100% }
+										margin = { 6 0 }
+										icon = {
+											name = "progress_frame"
+											texture = "gfx/interface/base_parts/progressbar_background_frame.dds"
+											minimumsize = { 0 7 }
+											size = { 100% 100% }
+											color = { 0.7 0.7 0.7 1 }
+											block "ProgressAlpha" { alpha = 0.5 }
+										}
+										progressbar = {
+											using = progressbar_flat_green
+											parentanchor = center
+											position = { 0 0 }
+											size = { 168 8 }
+
+											block "progress_value"
+											{
+												value = "35"
+											}
+										}
+									}
+									icon = {
+										using = flat_background
+										parentanchor = right
+										size = { 4 100% }
+									}
+								}
+							}
+							widget = {
+								size = { 0 20 }
+								textbox = {
+									position = { 10 0 }
+									using = BaseFontM
+									using = White_FontColor
+									block "progress_text" { text = "Relation: -55" }
+								}
+							}
+						} 
+						widget = {
+							size = { 20 0 }	
+						}
+						icon_button_square = {
+							size = { 50 50 }
+							blockoverride "On_click"
+							{
+								#onclick = ""
+								clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+								oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+								inherit_visual_state = no
+							}
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/_default.dds"
+								size = { 34 34 }
+							}
+							tooltip = "Change?"
+						} 
+					}
+					flowcontainer = {
+						widget = {
+							size = { 420 30 }
+							flowcontainer = {
+								parentanchor = hcenter
+								spacing = 10
+								icon_and_text = {
+									size = { 100 20 }
+									blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetTreasuryChange|2+=]" }
+									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
+									tooltip = "[DiplomaticView.GetPlayer.GetTreasuryChange|2+=]"
+								}
+								icon_and_text = {
+									size = { 100 20 }
+									blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetManpowerChange]" }
+									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/manpower.dds" }
+									tooltip = "[DiplomaticView.GetPlayer.GetManpowerChange]"
+								}
+								icon_and_text = {
+									size = { 100 20 }
+									blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetPoliticalInfluenceChange|2+=]" }
+									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/political_influence.dds" }
+									tooltip = "[DiplomaticView.GetPlayer.GetPoliticalInfluenceChange|2+=]"
+								}
+							}
+						}
+					}
+					widget = {
+						size = { 420 100 } 
+						text_button_square_highlighted = {
+							parentanchor = hcenter
+							size = { 230 28 }
+							blockoverride "On_click" {
+								#onclick = ""
+							}
+							blockoverride "Center_text"
+							{
+								text = "Decisions"
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -2232,548 +2624,548 @@ base_window = {
 			}
 		}
 	}
-	base_sub_window = { #subjects
-		name = "subject"
-		layer = top
-		visible = "[GetVariableSystem.HasValue( 'diplomatic_tabs', 'subjects' )]"
-		#visible = no
-		size = { 440 700 } 
-		position = { 640 200 }
-		movable = no
-		blockoverride "Title_text"
-		{
-			text = "Subject"
-			using = Sub_Header_FontColor
-		}
-		flowcontainer = { 
-			direction = vertical 
-			spacing = 16
-			margin = { 10 40 }
-			flowcontainer = {
-				flowcontainer = {
-					direction = vertical
-					icon = { #flag
-						parentanchor = center
-						size = { 140 70 }
-						cpt_button = {
-							parentanchor = left
-							size = { 50 77 }
-							position = { 10 -5 }
-							block "Context" 
-							{
-								datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
-								visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-							}
-						}
-						country_flag = {
-							tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
-							parentanchor = right
+	#base_sub_window = { #subjects
+	#	name = "subject"
+	#	layer = top
+	#	visible = "[GetVariableSystem.HasValue( 'diplomatic_tabs', 'subjects' )]"
+	#	#visible = no
+	#	size = { 440 700 } 
+	#	position = { 640 200 }
+	#	movable = no
+	#	blockoverride "Title_text"
+	#	{
+	#		text = "Subject"
+	#		using = Sub_Header_FontColor
+	#	}
+	#	flowcontainer = { 
+	#		direction = vertical 
+	#		spacing = 16
+	#		margin = { 10 40 }
+	#		flowcontainer = {
+	#			flowcontainer = {
+	#				direction = vertical
+	#				icon = { #flag
+	#					parentanchor = center
+	#					size = { 140 70 }
+	#					cpt_button = {
+	#						parentanchor = left
+	#						size = { 50 77 }
+	#						position = { 10 -5 }
+	#						block "Context" 
+	#						{
+	#							datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
+	#							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+	#						}
+	#					}
+	#					country_flag = {
+	#						tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
+	#						parentanchor = right
 
-							blockoverride "flag"
-							{
-								texture = "[DiplomaticView.GetTargetCountry.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
-								frame = "[DiplomaticView.GetTargetCountry.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
-								framesize = { 120 120 }
-							}
+	#						blockoverride "flag"
+	#						{
+	#							texture = "[DiplomaticView.GetTargetCountry.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+	#							frame = "[DiplomaticView.GetTargetCountry.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+	#							framesize = { 120 120 }
+	#						}
 
-							blockoverride "size"
-							{
-								size = { 70 70 }
-							}
+	#						blockoverride "size"
+	#						{
+	#							size = { 70 70 }
+	#						}
 
-							blockoverride "click"
-							{
-								onclick = "[OpenDiplomacy(Country.GetCountry)]"
-							}
+	#						blockoverride "click"
+	#						{
+	#							onclick = "[OpenDiplomacy(Country.GetCountry)]"
+	#						}
 
-							blockoverride "hover_leave"
-							{
-								onmousehierarchyleave = "[DiplomaticView.ResetHighlight]"
-							}
-						}
-					}
-					widget = { #country name
-						parentanchor = center
-						size = { 100 20 }
-						icon_and_text = {
-							size = { 100 20 }
-							tooltip = "[DiplomaticView.GetTargetCountry.GetName]"
-							blockoverride "LineSize"
-							{
-								size = { 100 4 }
-							} 
-							blockoverride "Icon"
-							{
-								visible = no
-							}
-							blockoverride "Text"
-							{
-								position = { 0 0 }
-								text = "[DiplomaticView.GetTargetCountry.GetNameWithNoTooltip]"
-								align = center|center
-								multiline = no
-								fontsize = 20
-							}
-						}
-					}
-				}
-				flowcontainer = {
-					direction = vertical
-					ignoreinvisible = yes
-					widget = {
-						size = { 3 3 }	
-					}
-					panelka_center = { #religion
-						size = { 120 32 }
-						blockoverride "Icon" { texture = "gfx/interface/icons/powers/religious.dds" }
-						blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetReligion.GetName]" }
-						blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetReligion.GetTooltip]" }
-					}
-					widget = { size = { 0 10 } }
-					panelka_center = { #culture
-						size = { 120 32 }
-						blockoverride "Icon" { texture = "gfx/interface/icons/governor_policies/cultural_assimilation.dds" }
-						blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetName]" }
-						blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetTooltip]" }
-					}
-					widget = { size = { 0 10 } }
-					panelka_center = { #manpower
-						size = { 120 32 }
-						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/manpower.dds" }
-						blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetManpower]" }
-						blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetManpowerTooltip]" }
-					}
-				}
-				flowcontainer = {
-					direction = vertical
-					ignoreinvisible = yes
-					widget = {
-						size = { 15 3 }	
-					}
-				}
-				flowcontainer = {
-					direction = vertical
-					ignoreinvisible = yes
-					widget = {
-						size = { 3 3 }	
-					}
-					panelka_center = { #treasury
-						size = { 120 32 }
-						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
-						blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetTreasury|0]" }
-						blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetTreasuryTooltip]" }
-					}
-					widget = { size = { 0 10 } }
-					panelka_center = { #pop
-						size = { 120 32 }
-						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/pop_type.dds" }
-						blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetTotalPopulation]" }
-						blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.BuildTotalPopulationToolTip]" }
-					}
-					widget = { size = { 0 10 } }
-					panelka_center = { #stability
-						size = { 120 32 }
-						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/stability.dds" }
-						blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetStability|2]" }
-						blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetStabilityTooltip]" }
-					}
-				} 
-			}
-			flowcontainer = {
-				flowcontainer = {
-					direction = vertical
-					icon = {
-						parentanchor = center
-						size = { 65 70 }
-						cpt_button = {
-							parentanchor = left
-							size = { 50 77 }
-							position = { 10 -5 }
-							block "Context" 
-							{
-								datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
-								visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-							}
-						}
-					}
-				}
-				flowcontainer = {
-					direction = vertical
-					layoutpolicy_horizontal = expanding
-					flowcontainer = {
-						icon_and_text = {
-							size = { 200 20 }
-							tooltip = "Overseer"
-							blockoverride "LineSize"
-							{
-								size = { 200 4 }
-							} 
-							blockoverride "Icon"
-							{
-								visible = no
-							}
-							blockoverride "Text"
-							{
-								position = { 0 0 }
-								text = "Overseer"
-								align = left
-								multiline = no
-								fontsize = 20
-							}
-						}
-						widget = {
-							name = "modifier_reward"
-							size = { 150 32 }
-							using = NoninteractableBG
-							blockoverride "Margins" {}
-							visible = "[OfficeHolderItem.HasHolder]"
-							modifier_desc_condensed = {
-								position = { 0 -4 } 
-								parentanchor = center
-								widgetanchor = center
-								datacontext = "[OfficeHolderItem.GetModifier]"
-								tooltip = "[OfficeHolderItem.GetTooltip]"
-								scale = 0.9
-							}
-						}
-					}
-					flowcontainer = { 
-						margin_top = 10
-						icon_button_square = {
-							size = { 40 40 }
-							blockoverride "On_click"
-							{
-								#onclick = ""
-								clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-								oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-								inherit_visual_state = no
-							}
-							blockoverride "Icon"
-							{
-								texture = "gfx/interface/icons/shared_icons/change.dds"
-								size = { 34 34 }
-							}
+	#						blockoverride "hover_leave"
+	#						{
+	#							onmousehierarchyleave = "[DiplomaticView.ResetHighlight]"
+	#						}
+	#					}
+	#				}
+	#				widget = { #country name
+	#					parentanchor = center
+	#					size = { 100 20 }
+	#					icon_and_text = {
+	#						size = { 100 20 }
+	#						tooltip = "[DiplomaticView.GetTargetCountry.GetName]"
+	#						blockoverride "LineSize"
+	#						{
+	#							size = { 100 4 }
+	#						} 
+	#						blockoverride "Icon"
+	#						{
+	#							visible = no
+	#						}
+	#						blockoverride "Text"
+	#						{
+	#							position = { 0 0 }
+	#							text = "[DiplomaticView.GetTargetCountry.GetNameWithNoTooltip]"
+	#							align = center|center
+	#							multiline = no
+	#							fontsize = 20
+	#						}
+	#					}
+	#				}
+	#			}
+	#			flowcontainer = {
+	#				direction = vertical
+	#				ignoreinvisible = yes
+	#				widget = {
+	#					size = { 3 3 }	
+	#				}
+	#				panelka_center = { #religion
+	#					size = { 120 32 }
+	#					blockoverride "Icon" { texture = "gfx/interface/icons/powers/religious.dds" }
+	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetReligion.GetName]" }
+	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetReligion.GetTooltip]" }
+	#				}
+	#				widget = { size = { 0 10 } }
+	#				panelka_center = { #culture
+	#					size = { 120 32 }
+	#					blockoverride "Icon" { texture = "gfx/interface/icons/governor_policies/cultural_assimilation.dds" }
+	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetName]" }
+	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetTooltip]" }
+	#				}
+	#				widget = { size = { 0 10 } }
+	#				panelka_center = { #manpower
+	#					size = { 120 32 }
+	#					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/manpower.dds" }
+	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetManpower]" }
+	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetManpowerTooltip]" }
+	#				}
+	#			}
+	#			flowcontainer = {
+	#				direction = vertical
+	#				ignoreinvisible = yes
+	#				widget = {
+	#					size = { 15 3 }	
+	#				}
+	#			}
+	#			flowcontainer = {
+	#				direction = vertical
+	#				ignoreinvisible = yes
+	#				widget = {
+	#					size = { 3 3 }	
+	#				}
+	#				panelka_center = { #treasury
+	#					size = { 120 32 }
+	#					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
+	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetTreasury|0]" }
+	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetTreasuryTooltip]" }
+	#				}
+	#				widget = { size = { 0 10 } }
+	#				panelka_center = { #pop
+	#					size = { 120 32 }
+	#					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/pop_type.dds" }
+	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetTotalPopulation]" }
+	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.BuildTotalPopulationToolTip]" }
+	#				}
+	#				widget = { size = { 0 10 } }
+	#				panelka_center = { #stability
+	#					size = { 120 32 }
+	#					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/stability.dds" }
+	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetStability|2]" }
+	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetStabilityTooltip]" }
+	#				}
+	#			} 
+	#		}
+	#		flowcontainer = {
+	#			flowcontainer = {
+	#				direction = vertical
+	#				icon = {
+	#					parentanchor = center
+	#					size = { 65 70 }
+	#					cpt_button = {
+	#						parentanchor = left
+	#						size = { 50 77 }
+	#						position = { 10 -5 }
+	#						block "Context" 
+	#						{
+	#							datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
+	#							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+	#						}
+	#					}
+	#				}
+	#			}
+	#			flowcontainer = {
+	#				direction = vertical
+	#				layoutpolicy_horizontal = expanding
+	#				flowcontainer = {
+	#					icon_and_text = {
+	#						size = { 200 20 }
+	#						tooltip = "Overseer"
+	#						blockoverride "LineSize"
+	#						{
+	#							size = { 200 4 }
+	#						} 
+	#						blockoverride "Icon"
+	#						{
+	#							visible = no
+	#						}
+	#						blockoverride "Text"
+	#						{
+	#							position = { 0 0 }
+	#							text = "Overseer"
+	#							align = left
+	#							multiline = no
+	#							fontsize = 20
+	#						}
+	#					}
+	#					widget = {
+	#						name = "modifier_reward"
+	#						size = { 150 32 }
+	#						using = NoninteractableBG
+	#						blockoverride "Margins" {}
+	#						visible = "[OfficeHolderItem.HasHolder]"
+	#						modifier_desc_condensed = {
+	#							position = { 0 -4 } 
+	#							parentanchor = center
+	#							widgetanchor = center
+	#							datacontext = "[OfficeHolderItem.GetModifier]"
+	#							tooltip = "[OfficeHolderItem.GetTooltip]"
+	#							scale = 0.9
+	#						}
+	#					}
+	#				}
+	#				flowcontainer = { 
+	#					margin_top = 10
+	#					icon_button_square = {
+	#						size = { 40 40 }
+	#						blockoverride "On_click"
+	#						{
+	#							#onclick = ""
+	#							clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+	#							oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+	#							inherit_visual_state = no
+	#						}
+	#						blockoverride "Icon"
+	#						{
+	#							texture = "gfx/interface/icons/shared_icons/change.dds"
+	#							size = { 34 34 }
+	#						}
 							
-							tooltip = "Change Overseer"
-						} 
-						widget = {
-							size = { 120 40 }
-							icon = {
-								size = { 120 40 }
-								shaderfile = "gfx/FX/pdxgui_default.shader"
-								using = black_background
-								alpha = 0.4
-								modify_texture = {
-									name = "Alpha"
-									texture = "gfx/interface/base_parts/header_l_x20bd_alpha1.dds"
-									blend_mode = alphamultiply
-									spriteType = Corneredtiled
-									spriteborder = { 52 0 }
-								}
-							}
-							flowcontainer = {
-								layoutpolicy_horizontal = expanding
-								margin_top = 7
-								spacing = 6
-								widget = { size = { 10 0 } }
-								policy_button = {
-									enabled = no
-								}
-								policy_button = {
-									enabled = no
-								}
-								policy_button = {
-									enabled = yes
-								}
-							}
-						}
-						widget = {
-							size = { 180 50 }
-							icon = {
-								texture = "gfx/interface/icons/icon_skills.dds"
-								framesize = { 50 50 }
-								frame = 3
-								size = { 30 30 }
-								tooltip = "Dip"
-							}
-							textbox = {
-								parentanchor = right
-								position = { 0 15 }
-								using = BaseFontM
-								using = White_FontColor
-								align = right
-								block "progress_text" { text = "1 / 5" }
-							}
-							widget = {
-								position = { 0 30 }
-								size = { 180 8 }
-								icon = {
-									using = flat_background
-									size = { 4 100% }
-								}
-								margin_widget = {
-									size = { 100% 100% }
-									margin = { 6 0 }
-									icon = {
-										name = "progress_frame"
-										texture = "gfx/interface/base_parts/progressbar_background_frame.dds"
-										minimumsize = { 0 7 }
-										size = { 100% 100% }
-										color = { 0.7 0.7 0.7 1 }
-										block "ProgressAlpha" { alpha = 0.5 }
-									}
-									progressbar = {
-										using = progressbar_flat_green
-										parentanchor = center
-										position = { 0 0 }
-										size = { 168 8 }
+	#						tooltip = "Change Overseer"
+	#					} 
+	#					widget = {
+	#						size = { 120 40 }
+	#						icon = {
+	#							size = { 120 40 }
+	#							shaderfile = "gfx/FX/pdxgui_default.shader"
+	#							using = black_background
+	#							alpha = 0.4
+	#							modify_texture = {
+	#								name = "Alpha"
+	#								texture = "gfx/interface/base_parts/header_l_x20bd_alpha1.dds"
+	#								blend_mode = alphamultiply
+	#								spriteType = Corneredtiled
+	#								spriteborder = { 52 0 }
+	#							}
+	#						}
+	#						flowcontainer = {
+	#							layoutpolicy_horizontal = expanding
+	#							margin_top = 7
+	#							spacing = 6
+	#							widget = { size = { 10 0 } }
+	#							policy_button = {
+	#								enabled = no
+	#							}
+	#							policy_button = {
+	#								enabled = no
+	#							}
+	#							policy_button = {
+	#								enabled = yes
+	#							}
+	#						}
+	#					}
+	#					widget = {
+	#						size = { 180 50 }
+	#						icon = {
+	#							texture = "gfx/interface/icons/icon_skills.dds"
+	#							framesize = { 50 50 }
+	#							frame = 3
+	#							size = { 30 30 }
+	#							tooltip = "Dip"
+	#						}
+	#						textbox = {
+	#							parentanchor = right
+	#							position = { 0 15 }
+	#							using = BaseFontM
+	#							using = White_FontColor
+	#							align = right
+	#							block "progress_text" { text = "1 / 5" }
+	#						}
+	#						widget = {
+	#							position = { 0 30 }
+	#							size = { 180 8 }
+	#							icon = {
+	#								using = flat_background
+	#								size = { 4 100% }
+	#							}
+	#							margin_widget = {
+	#								size = { 100% 100% }
+	#								margin = { 6 0 }
+	#								icon = {
+	#									name = "progress_frame"
+	#									texture = "gfx/interface/base_parts/progressbar_background_frame.dds"
+	#									minimumsize = { 0 7 }
+	#									size = { 100% 100% }
+	#									color = { 0.7 0.7 0.7 1 }
+	#									block "ProgressAlpha" { alpha = 0.5 }
+	#								}
+	#								progressbar = {
+	#									using = progressbar_flat_green
+	#									parentanchor = center
+	#									position = { 0 0 }
+	#									size = { 168 8 }
 
-										block "progress_value"
-										{
-											value = "35"
-										}
-									}
-								}
-								icon = {
-									using = flat_background
-									parentanchor = right
-									size = { 4 100% }
-								}
-							}
-						}
-					}
-				}
-			}
-			flowcontainer = {
-				flowcontainer = {
-					direction = vertical
-					ignoreinvisible = yes
-					panelka = {
-						size = { 220 32 }
-						blockoverride "TextBox" { text = "Type: Governorate" }
-						blockoverride "Tooltip" { tooltip = "Type: Governorate" }
-					}
-					widget = { size = { 0 6 } }
-					panelka = {
-						size = { 220 32 }
-						blockoverride "TextBox" { text = "Autonomy: number" }
-						blockoverride "Tooltip" { tooltip = "Autonomy: number" }
-					}
-				} 
-				widget = {
-					size = { 60 35 }	
-				}
-				icon_button_square = {
-					size = { 40 40 }
-					blockoverride "On_click"
-					{
-						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-						oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-						inherit_visual_state = no
-					}
-					blockoverride "Icon"
-					{
-						texture = "gfx/interface/icons/shared_icons/change.dds"
-						size = { 34 34 }
-					}
-					tooltip = "Change?"
-				} 
-			}
-			flowcontainer = { 
-				spacing = 8 
-				widget = { size = { 5 0 } }
-				icon_button_square = {
-					size = { 40 40 }
-					blockoverride "On_click"
-					{
-						#onclick = ""
-						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-						oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-						inherit_visual_state = no
-					}
-					blockoverride "Icon"
-					{
-						texture = "gfx/interface/icons/_default.dds"
-						size = { 34 34 }
-					}
-					tooltip = "Change?"
-				} 
-				icon_button_square = {
-					size = { 40 40 }
-					blockoverride "On_click"
-					{
-						#onclick = ""
-						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-						oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-						inherit_visual_state = no
-					}
-					blockoverride "Icon"
-					{
-						texture = "gfx/interface/icons/_default.dds"
-						size = { 34 34 }
-					}
-					tooltip = "Change?"
-				} 
-				icon_button_square = {
-					size = { 40 40 }
-					blockoverride "On_click"
-					{
-						#onclick = ""
-						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-						oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-						inherit_visual_state = no
-					}
-					blockoverride "Icon"
-					{
-						texture = "gfx/interface/icons/_default.dds"
-						size = { 34 34 }
-					}
-					tooltip = "Change?"
-				} 
-				icon_button_square = {
-					size = { 40 40 }
-					blockoverride "On_click"
-					{
-						#onclick = ""
-						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-						oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-						inherit_visual_state = no
-					}
-					blockoverride "Icon"
-					{
-						texture = "gfx/interface/icons/_default.dds"
-						size = { 34 34 }
-					}
-					tooltip = "Change?"
-				} 
-			}
-			flowcontainer = {
-				flowcontainer = {
-					direction = vertical
-					ignoreinvisible = yes
-					widget = {
-						size = { 0 10 }	
-					}
-					widget = {
-						size = { 0 20 }
-						textbox = {
-							position = { 10 0 }
-							using = BaseFontM
-							using = White_FontColor
-							block "progress_text" { text = "Status: Desloyal" }
-						}
-					}
-					widget = {
-						size = { 180 25 }
-						widget = {
-							size = { 180 8 }
-							icon = {
-								using = flat_background
-								size = { 4 100% }
-							}
-							margin_widget = {
-								size = { 100% 100% }
-								margin = { 6 0 }
-								icon = {
-									name = "progress_frame"
-									texture = "gfx/interface/base_parts/progressbar_background_frame.dds"
-									minimumsize = { 0 7 }
-									size = { 100% 100% }
-									color = { 0.7 0.7 0.7 1 }
-									block "ProgressAlpha" { alpha = 0.5 }
-								}
-								progressbar = {
-									using = progressbar_flat_green
-									parentanchor = center
-									position = { 0 0 }
-									size = { 168 8 }
+	#									block "progress_value"
+	#									{
+	#										value = "35"
+	#									}
+	#								}
+	#							}
+	#							icon = {
+	#								using = flat_background
+	#								parentanchor = right
+	#								size = { 4 100% }
+	#							}
+	#						}
+	#					}
+	#				}
+	#			}
+	#		}
+	#		flowcontainer = {
+	#			flowcontainer = {
+	#				direction = vertical
+	#				ignoreinvisible = yes
+	#				panelka = {
+	#					size = { 220 32 }
+	#					blockoverride "TextBox" { text = "Type: Governorate" }
+	#					blockoverride "Tooltip" { tooltip = "Type: Governorate" }
+	#				}
+	#				widget = { size = { 0 6 } }
+	#				panelka = {
+	#					size = { 220 32 }
+	#					blockoverride "TextBox" { text = "Autonomy: number" }
+	#					blockoverride "Tooltip" { tooltip = "Autonomy: number" }
+	#				}
+	#			} 
+	#			widget = {
+	#				size = { 60 35 }	
+	#			}
+	#			icon_button_square = {
+	#				size = { 40 40 }
+	#				blockoverride "On_click"
+	#				{
+	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+	#					inherit_visual_state = no
+	#				}
+	#				blockoverride "Icon"
+	#				{
+	#					texture = "gfx/interface/icons/shared_icons/change.dds"
+	#					size = { 34 34 }
+	#				}
+	#				tooltip = "Change?"
+	#			} 
+	#		}
+	#		flowcontainer = { 
+	#			spacing = 8 
+	#			widget = { size = { 5 0 } }
+	#			icon_button_square = {
+	#				size = { 40 40 }
+	#				blockoverride "On_click"
+	#				{
+	#					#onclick = ""
+	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+	#					inherit_visual_state = no
+	#				}
+	#				blockoverride "Icon"
+	#				{
+	#					texture = "gfx/interface/icons/_default.dds"
+	#					size = { 34 34 }
+	#				}
+	#				tooltip = "Change?"
+	#			} 
+	#			icon_button_square = {
+	#				size = { 40 40 }
+	#				blockoverride "On_click"
+	#				{
+	#					#onclick = ""
+	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+	#					inherit_visual_state = no
+	#				}
+	#				blockoverride "Icon"
+	#				{
+	#					texture = "gfx/interface/icons/_default.dds"
+	#					size = { 34 34 }
+	#				}
+	#				tooltip = "Change?"
+	#			} 
+	#			icon_button_square = {
+	#				size = { 40 40 }
+	#				blockoverride "On_click"
+	#				{
+	#					#onclick = ""
+	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+	#					inherit_visual_state = no
+	#				}
+	#				blockoverride "Icon"
+	#				{
+	#					texture = "gfx/interface/icons/_default.dds"
+	#					size = { 34 34 }
+	#				}
+	#				tooltip = "Change?"
+	#			} 
+	#			icon_button_square = {
+	#				size = { 40 40 }
+	#				blockoverride "On_click"
+	#				{
+	#					#onclick = ""
+	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+	#					inherit_visual_state = no
+	#				}
+	#				blockoverride "Icon"
+	#				{
+	#					texture = "gfx/interface/icons/_default.dds"
+	#					size = { 34 34 }
+	#				}
+	#				tooltip = "Change?"
+	#			} 
+	#		}
+	#		flowcontainer = {
+	#			flowcontainer = {
+	#				direction = vertical
+	#				ignoreinvisible = yes
+	#				widget = {
+	#					size = { 0 10 }	
+	#				}
+	#				widget = {
+	#					size = { 0 20 }
+	#					textbox = {
+	#						position = { 10 0 }
+	#						using = BaseFontM
+	#						using = White_FontColor
+	#						block "progress_text" { text = "Status: Desloyal" }
+	#					}
+	#				}
+	#				widget = {
+	#					size = { 180 25 }
+	#					widget = {
+	#						size = { 180 8 }
+	#						icon = {
+	#							using = flat_background
+	#							size = { 4 100% }
+	#						}
+	#						margin_widget = {
+	#							size = { 100% 100% }
+	#							margin = { 6 0 }
+	#							icon = {
+	#								name = "progress_frame"
+	#								texture = "gfx/interface/base_parts/progressbar_background_frame.dds"
+	#								minimumsize = { 0 7 }
+	#								size = { 100% 100% }
+	#								color = { 0.7 0.7 0.7 1 }
+	#								block "ProgressAlpha" { alpha = 0.5 }
+	#							}
+	#							progressbar = {
+	#								using = progressbar_flat_green
+	#								parentanchor = center
+	#								position = { 0 0 }
+	#								size = { 168 8 }
 
-									block "progress_value"
-									{
-										value = "35"
-									}
-								}
-							}
-							icon = {
-								using = flat_background
-								parentanchor = right
-								size = { 4 100% }
-							}
-						}
-					}
-					widget = {
-						size = { 0 20 }
-						textbox = {
-							position = { 10 0 }
-							using = BaseFontM
-							using = White_FontColor
-							block "progress_text" { text = "Relation: -55" }
-						}
-					}
-				} 
-				widget = {
-					size = { 20 0 }	
-				}
-				icon_button_square = {
-					size = { 50 50 }
-					blockoverride "On_click"
-					{
-						#onclick = ""
-						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-						oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-						inherit_visual_state = no
-					}
-					blockoverride "Icon"
-					{
-						texture = "gfx/interface/icons/_default.dds"
-						size = { 34 34 }
-					}
-					tooltip = "Change?"
-				} 
-			}
-			flowcontainer = {
-				widget = {
-					size = { 440 30 }
-					flowcontainer = {
-						parentanchor = hcenter
-						spacing = 10
-						icon_and_text = {
-							size = { 100 20 }
-							blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetTreasuryChange|2+=]" }
-							blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
-							tooltip = "[DiplomaticView.GetPlayer.GetTreasuryChange|2+=]"
-						}
-						icon_and_text = {
-							size = { 100 20 }
-							blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetManpowerChange]" }
-							blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/manpower.dds" }
-							tooltip = "[DiplomaticView.GetPlayer.GetManpowerChange]"
-						}
-						icon_and_text = {
-							size = { 100 20 }
-							blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetPoliticalInfluenceChange|2+=]" }
-							blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/political_influence.dds" }
-							tooltip = "[DiplomaticView.GetPlayer.GetPoliticalInfluenceChange|2+=]"
-						}
-					}
-				}
-			}
-			widget = {
-				size = { 440 100 } 
-				text_button_square_highlighted = {
-					parentanchor = hcenter
-					size = { 230 28 }
-					blockoverride "On_click" {
-						#onclick = ""
-					}
-					blockoverride "Center_text"
-					{
-						text = "Decisions"
-					}
-				}
-			}
-		}
-	}
+	#								block "progress_value"
+	#								{
+	#									value = "35"
+	#								}
+	#							}
+	#						}
+	#						icon = {
+	#							using = flat_background
+	#							parentanchor = right
+	#							size = { 4 100% }
+	#						}
+	#					}
+	#				}
+	#				widget = {
+	#					size = { 0 20 }
+	#					textbox = {
+	#						position = { 10 0 }
+	#						using = BaseFontM
+	#						using = White_FontColor
+	#						block "progress_text" { text = "Relation: -55" }
+	#					}
+	#				}
+	#			} 
+	#			widget = {
+	#				size = { 20 0 }	
+	#			}
+	#			icon_button_square = {
+	#				size = { 50 50 }
+	#				blockoverride "On_click"
+	#				{
+	#					#onclick = ""
+	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
+	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+	#					inherit_visual_state = no
+	#				}
+	#				blockoverride "Icon"
+	#				{
+	#					texture = "gfx/interface/icons/_default.dds"
+	#					size = { 34 34 }
+	#				}
+	#				tooltip = "Change?"
+	#			} 
+	#		}
+	#		flowcontainer = {
+	#			widget = {
+	#				size = { 440 30 }
+	#				flowcontainer = {
+	#					parentanchor = hcenter
+	#					spacing = 10
+	#					icon_and_text = {
+	#						size = { 100 20 }
+	#						blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetTreasuryChange|2+=]" }
+	#						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
+	#						tooltip = "[DiplomaticView.GetPlayer.GetTreasuryChange|2+=]"
+	#					}
+	#					icon_and_text = {
+	#						size = { 100 20 }
+	#						blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetManpowerChange]" }
+	#						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/manpower.dds" }
+	#						tooltip = "[DiplomaticView.GetPlayer.GetManpowerChange]"
+	#					}
+	#					icon_and_text = {
+	#						size = { 100 20 }
+	#						blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetPoliticalInfluenceChange|2+=]" }
+	#						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/political_influence.dds" }
+	#						tooltip = "[DiplomaticView.GetPlayer.GetPoliticalInfluenceChange|2+=]"
+	#					}
+	#				}
+	#			}
+	#		}
+	#		widget = {
+	#			size = { 440 100 } 
+	#			text_button_square_highlighted = {
+	#				parentanchor = hcenter
+	#				size = { 230 28 }
+	#				blockoverride "On_click" {
+	#					#onclick = ""
+	#				}
+	#				blockoverride "Center_text"
+	#				{
+	#					text = "Decisions"
+	#				}
+	#			}
+	#		}
+	#	}
+	#}
 }
 
 template diplomatic_actions_v2

@@ -103,7 +103,7 @@ types NEW_WINDOW {
 		icon = {
 			size = { 100% 100% }
 			using = portrait_x32y32bd_alpha_2
-			#alpha = 0.75
+			alpha = 0.4
 			block "texture" { }
 			block "color" {  }
 			modify_texture = {
@@ -120,9 +120,10 @@ types NEW_WINDOW {
 			size = { 100% 100% }
 			texture = "gfx/interface/base_parts/base_color.dds"
 			using = portrait_x32y32bd_alpha_2
-			shaderfile = "gfx/FX/pdxgui_glow_game.shader"
+			#shaderfile = "gfx/FX/pdxgui_glow_game.shader"
 			alpha = 0.5
 			block "visible" { }
+			block "color" {  }
 			modify_texture = {
 				blend_mode = alphamultiply
 				block "texture" { }
@@ -137,7 +138,7 @@ types NEW_WINDOW {
 			size = { 100% 100% }
 			texture = "gfx/interface/base_parts/base_color.dds"
 			using = portrait_x32y32bd_alpha_2
-			alpha = 0.1
+			alpha = 0.2
 			visible = no
 			modify_texture = {
 				blend_mode = alphamultiply
@@ -670,7 +671,8 @@ types NEW_WINDOW {
 					visible = "[And(PlayerIsHost, And(GameIsMultiplayer,IsPreparationLobby))]"
 					blockoverride "Text" { text = "JOMINI_MULTIPLAYER_GUI_START" }
 					blockoverride "On_click" { 
-						onclick = "[LobbyView.Start]" 
+						#onclick = "[LobbyView.Start]" 
+						onclick = "[GetVariableSystem.Set('mp_start_screen', 'start')]"
 						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_start"
 					}
 				}
@@ -682,8 +684,9 @@ types NEW_WINDOW {
 					visible = "[And(PlayerIsHost,And(Or(Not(GameIsMultiplayer),Not(IsPreparationLobby)),Or(LobbyView.HasSelectedPlayable,LobbyView.IsObserver)))]"	
 					blockoverride "Text" { text = "JOMINI_MULTIPLAYER_GUI_START" }
 					blockoverride "On_click" { 
-						onclick = "[GameLobby.StartGame]"
-						onclick = "[LobbyView.Ready]"
+						#onclick = "[GameLobby.StartGame]"
+						#onclick = "[LobbyView.Ready]"
+						onclick = "[GetVariableSystem.Set('mp_start_screen', 'start')]"
 						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_start"
 					}
 				}
@@ -1826,6 +1829,703 @@ types NEW_WINDOW {
 					card_easy = { }
 				}
 				blockoverride "description" { text = "TKG_DESK" }
+			}
+		}
+	}
+
+	type text_area_date = textbox {
+		size = { 100% 100% }
+		fontsize = 70
+		align = hcenter
+		font = HeaderFont
+		using = Highlight_FontColor
+		block "text" { text = "1800" }
+		state = {
+			name = "hide_animation"
+			alpha = 0
+		}
+	}
+	@initial_animation = 0.5
+	@numbers_animation = 0.4
+	type mp_start_screen = widget {
+		size = { 100% 100% }
+		filter_mouse = left|wheel|right
+		alwaystransparent = no
+		visible = "[GetVariableSystem.HasValue('mp_start_screen', 'start')]"
+		alpha = 0
+		state = { 
+			name = _show
+			on_start = "[PdxGuiTriggerAllAnimations('initial_animation')]"
+		}
+		state = {
+			name = _hide
+			on_start = "[PdxGuiTriggerAllAnimations('hide_animation')]"
+			duration = 0.5
+		}
+		state = {
+			name = "initial_animation"
+			duration = 0.5
+			alpha = 1
+			next = start_game
+		}
+		state = {
+			name = "hide_animation"
+			duration = 0.5
+			alpha = 0
+		}
+		state = {
+			name = "start_game"
+			delay = 2.0
+			on_start = "[GameLobby.StartGame]"
+			on_start = "[LobbyView.Ready]"
+		}
+		@initial_animation = 0.5
+		@numbers_animation = 0.4
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			texture = "[GetCurrentLoadingScreen]"
+		}
+		progressbar = {
+			size = { 44 44 }
+			gfxtype = framedprogressbargfx
+			texture = "gfx/interface/loading_progress.dds"
+			framesize = { 44 45 }
+			loopinterval = 1.0
+			max = 0
+			position = { 10 10 }
+		}
+		textbox = {
+			position = { 60 0 }
+			text = "Preparing the game..."
+			size = { 200 60 }
+			using = BaseFontS
+			using = Black_FontColor
+			fontsize = 16
+			align = left
+		}
+		icon = {
+			size = { 500 280 }
+			parentanchor = center
+			using = black_background
+			modify_texture = {
+				texture = "gfx/interface/base_parts/horizontal_gradient_black.dds"
+				blend_mode = alphamultiply
+			}
+			state = {
+				name = "initial_animation"
+				duration = @initial_animation
+				size = { 1500 280 }
+				bezier = { 0.1 0.25 0.4 1 }
+			}
+			state = {
+				name = "hide_animation"
+				duration = @initial_animation
+				size = { 500 280 }
+			}
+		}
+		vbox = {
+			widget = {
+				layoutpolicy_vertical = expanding
+			}
+			widget = {
+				layoutpolicy_vertical = fixed
+				size = { 564 75 }
+				icon = {
+					size = { 100% 100% }
+					alpha = 0
+					position = { 0 15 }
+					texture = "gfx/interface/base_parts/base_color.dds"
+					color = { 0.95 0.8 0.44 1 }
+					modify_texture = {
+						texture = "gfx/interface/images/elements/top_image.dds"
+						blend_mode = alphamultiply
+					}
+					state = {
+						name = "initial_animation"
+						duration = @initial_animation
+						position = { 0 -15 }
+						alpha = 1
+						bezier = { 0.1 0.25 0.4 1 }
+					}
+					state = {
+						name = "hide_animation"
+						duration = @initial_animation
+						position = { 0 15 }
+						alpha = 0
+					}
+				}
+			}
+			hbox = {
+				layoutpolicy_vertical = fixed
+				spacing = 15
+				widget = {
+					layoutpolicy_horizontal = expanding
+				}
+				widget = {
+					layoutpolicy_horizontal = fixed
+					size = { 75 75 }
+					icon = {
+						size = { 60 60 }
+						alpha = 0
+						parentanchor = right
+						texture = "gfx/interface/base_parts/base_color.dds"
+						color = { 0.95 0.8 0.44 1 }
+						modify_texture = {
+							texture = "gfx/interface/images/elements/left_image.dds"
+							blend_mode = alphamultiply
+						}
+						state = {
+							name = "initial_animation"
+							duration = @initial_animation
+							size = { 90 90 }
+							alpha = 1
+							bezier = { 0.1 0.25 0.4 1 }
+						}
+						state = {
+							name = "hide_animation"
+							duration = @initial_animation
+							size = { 60 60 }
+							alpha = 0
+						}
+					}
+				}
+				textbox = {
+					layoutpolicy_horizontal = fixed
+					fontsize = 70
+					align = hcenter
+					font = HeaderFont
+					using = Highlight_FontColor
+					text = "[LobbyView.GetSelectedPlayable.GetCountry.GetNameWithNoTooltip]"
+					autoresize = yes
+				}
+				widget = {
+					layoutpolicy_horizontal = fixed
+					size = { 75 75 }
+					icon = {
+						size = { 60 60 }
+						alpha = 0
+						parentanchor = left
+						texture = "gfx/interface/base_parts/base_color.dds"
+						color = { 0.95 0.8 0.44 1 }
+						modify_texture = {
+							texture = "gfx/interface/images/elements/right_image.dds"
+							blend_mode = alphamultiply
+						}
+						state = {
+							name = "initial_animation"
+							duration = @initial_animation
+							size = { 90 90 }
+							alpha = 1
+							bezier = { 0.1 0.25 0.4 1 }
+						}
+						state = {
+							name = "hide_animation"
+							duration = @initial_animation
+							size = { 60 60 }
+							alpha = 0
+						}
+					}
+				}
+				widget = {
+					layoutpolicy_horizontal = expanding
+				}
+			}
+			hbox = {
+				layoutpolicy_vertical = fixed
+				widget = {
+					layoutpolicy_horizontal = expanding
+					size = { 270 75 }
+					icon = {
+						size = { 100% 100% }
+						position = { -405 0 }
+						alpha = 0
+						texture = "gfx/interface/base_parts/base_color.dds"
+						color = { 0.95 0.8 0.44 1 }
+						modify_texture = {
+							texture = "gfx/interface/images/elements/left_bottom_image.dds"
+							blend_mode = alphamultiply
+						}
+						state = {
+							name = "initial_animation"
+							duration = @initial_animation
+							position = { -10 0 }
+							alpha = 1
+							bezier = { 0.1 0.25 0.4 1 }
+							next = finish_date
+						}
+						state = {
+							name = "finish_date"
+							delay = 1.2
+							duration = @numbers_animation
+							position = { -20 0 }
+							bezier = { 0.1 0.25 0.4 1 }
+							next = real_finish_date
+						}
+						state = {
+							name = "real_finish_date"
+							duration = 0.1
+							position = { -10 0 }
+							bezier = { 0.1 0.25 0.4 1 }
+						}
+						state = {
+							name = "hide_animation"
+							duration = @initial_animation
+							position = { -405 0 }
+							alpha = 0
+						}
+					}
+				}
+				widget = {
+					layoutpolicy_horizontal = fixed
+					size = { 150 75 }
+					alpha = 0
+					state = {
+						name = "initial_animation"
+						duration = @initial_animation
+						alpha = 1
+						bezier = { 1 1 0 1 }
+						on_start = "[PdxGuiTriggerAllAnimations('0000')]"
+					}
+					state = {
+						name = "hide_animation"
+						duration = @initial_animation
+						alpha = 0
+					}
+					widget = {
+						size = { 100% 100% }
+						position = { 0 400 }
+						state = {
+							name = "initial_animation"
+							duration = @initial_animation
+							delay = 0.1
+							alpha = 1
+							position = { 0 0 }
+						}
+						state = {
+							name = "hide_animation"
+							duration = @initial_animation
+							position = { 0 200 }
+							alpha = 0
+						}
+						text_area_date = {
+							alpha = 0
+							blockoverride "text" { text = "0000" }
+							state = {
+								name = "0000"
+								alpha = 1
+								delay = @initial_animation
+								start_sound = {
+									soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_button_radio"
+								}
+								next = show
+							}
+							state = {
+								name = "show"
+								delay = @numbers_animation
+								on_start = "[PdxGuiTriggerAllAnimations('0001')]"
+								next = hide_animation
+							}
+						}
+						text_area_date = {
+							alpha = 0
+							blockoverride "text" { text = "0001" }
+							state = {
+								name = "0001"
+								alpha = 1
+								start_sound = {
+									soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_button_radio"
+								}
+								next = show
+							}
+							state = {
+								name = "show"
+								delay = @numbers_animation
+								on_start = "[PdxGuiTriggerAllAnimations('0018')]"
+								next = hide_animation
+							}
+						}
+						text_area_date = {
+							alpha = 0
+							blockoverride "text" { text = "0018" }
+							state = {
+								name = "0018"
+								alpha = 1
+								start_sound = {
+									soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_button_radio"
+								}
+								next = show
+							}
+							state = {
+								name = "show"
+								delay = @numbers_animation
+								on_start = "[PdxGuiTriggerAllAnimations('0181')]"
+								next = hide_animation
+							}
+						}
+						text_area_date = {
+							alpha = 0
+							blockoverride "text" { text = "0181" }
+							state = {
+								name = "0181"
+								alpha = 1
+								start_sound = {
+									soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_button_radio"
+								}
+								next = show
+							}
+							state = {
+								name = "show"
+								delay = @numbers_animation
+								on_start = "[PdxGuiTriggerAllAnimations('1815')]"
+								next = hide_animation
+							}
+						}
+						text_area_date = {
+							alpha = 0
+							blockoverride "text" { text = "1815" }
+							state = {
+								name = "1815"
+								alpha = 1
+								start_sound = {
+									soundeffect = "event:/SFX/UI/Notifications/sfx_ui_notification_alert"
+								}
+								next = show
+							}
+							state = {
+								name = "show"
+							}
+						}
+					}
+				}
+				widget = {
+					layoutpolicy_horizontal = expanding
+					size = { 270 75 }
+					icon = {
+						size = { 100% 100% }
+						position = { 405 0 }
+						alpha = 0
+						texture = "gfx/interface/base_parts/base_color.dds"
+						color = { 0.95 0.8 0.44 1 }
+						modify_texture = {
+							texture = "gfx/interface/images/elements/right_bottom_image.dds"
+							blend_mode = alphamultiply
+						}
+						state = {
+							name = "initial_animation"
+							duration = @initial_animation
+							position = { 10 0 }
+							alpha = 1
+							bezier = { 0.1 0.25 0.4 1 }
+							next = finish_date
+						}
+						state = {
+							name = "finish_date"
+							delay = 1.2
+							duration = @numbers_animation
+							position = { 20 0 }
+							bezier = { 0.1 0.25 0.4 1 }
+							next = real_finish_date
+						}
+						state = {
+							name = "real_finish_date"
+							duration = 0.1
+							position = { 10 0 }
+							bezier = { 0.1 0.25 0.4 1 }
+						}
+						state = {
+							name = "hide_animation"
+							duration = @initial_animation
+							position = { 405 0 }
+							alpha = 0
+						}
+					}
+				}
+			}
+			widget = {
+				layoutpolicy_vertical = expanding
+			}
+		}
+	}
+	type mp_start_screen_ingame = widget {
+		size = { 100% 100% }
+		filter_mouse = left|wheel|right
+		alwaystransparent = no
+		alpha = 1
+		visible = "[GetVariableSystem.HasValue('mp_start_screen', 'start')]"
+		state = { 
+			name = start
+			duration = 1.0
+			trigger_when = "[GetVariableSystem.HasValue('mp_start_screen', 'start')]"
+			on_finish = "[PdxGuiTriggerAllAnimations('start_hide_animation')]"
+		}
+		state = {
+			name = "start_hide_animation"
+			delay = 0.5
+			duration = 1.0
+			alpha = 0
+			on_start = "[PdxGuiTriggerAllAnimations('hide_animation')]"
+			on_finish = "[GetVariableSystem.Set('mp_start_screen', 'select')]"
+		}
+		state = {
+			name = "hide_animation"
+			alpha = 1
+		}
+		#state = {
+		#	name = "show_all"
+		#	on_start = "[PdxGuiTriggerAllAnimations('base_animation')]"
+		#	on_start = "[GetVariableSystem.Set('mp_start_screen', 'select')]"
+		#	alpha = 1
+		#}
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			texture = "[GetCurrentLoadingScreen]"
+		}
+		progressbar = {
+			size = { 44 44 }
+			gfxtype = framedprogressbargfx
+			texture = "gfx/interface/loading_progress.dds"
+			framesize = { 44 45 }
+			loopinterval = 1.0
+			max = 0
+			position = { 10 10 }
+		}
+		textbox = {
+			position = { 60 0 }
+			text = "Preparing the game..."
+			size = { 200 60 }
+			using = BaseFontS
+			using = Black_FontColor
+			fontsize = 16
+			align = left
+		}
+		icon = {
+			size = { 1500 280 }
+			parentanchor = center
+			using = black_background
+			modify_texture = {
+				texture = "gfx/interface/base_parts/horizontal_gradient_black.dds"
+				blend_mode = alphamultiply
+			}
+			state = {
+				name = "base_animation"
+				size = { 1500 280 }
+			}
+			state = {
+				name = "hide_animation"
+				duration = @initial_animation
+				size = { 500 280 }
+			}
+		}
+		vbox = {
+			widget = {
+				layoutpolicy_vertical = expanding
+			}
+			widget = {
+				layoutpolicy_vertical = fixed
+				size = { 564 75 }
+				icon = {
+					size = { 100% 100% }
+					alpha = 1
+					position = { 0 -15 }
+					texture = "gfx/interface/base_parts/base_color.dds"
+					color = { 0.95 0.8 0.44 1 }
+					modify_texture = {
+						texture = "gfx/interface/images/elements/top_image.dds"
+						blend_mode = alphamultiply
+					}
+					state = {
+						name = "base_animation"
+						position = { 0 -15 }
+						alpha = 1
+					}
+					state = {
+						name = "hide_animation"
+						duration = @initial_animation
+						position = { 0 15 }
+						alpha = 0
+					}
+				}
+			}
+			hbox = {
+				layoutpolicy_vertical = fixed
+				spacing = 15
+				widget = {
+					layoutpolicy_horizontal = expanding
+				}
+				widget = {
+					layoutpolicy_horizontal = fixed
+					size = { 75 75 }
+					icon = {
+						size = { 90 90 }
+						parentanchor = right
+						texture = "gfx/interface/base_parts/base_color.dds"
+						color = { 0.95 0.8 0.44 1 }
+						modify_texture = {
+							texture = "gfx/interface/images/elements/left_image.dds"
+							blend_mode = alphamultiply
+						}
+						state = {
+							name = "base_animation"
+							size = { 90 90 }
+							alpha = 1
+						}
+						state = {
+							name = "hide_animation"
+							duration = @initial_animation
+							size = { 60 60 }
+							alpha = 0
+						}
+					}
+				}
+				textbox = {
+					layoutpolicy_horizontal = fixed
+					fontsize = 70
+					align = hcenter
+					font = HeaderFont
+					using = Highlight_FontColor
+					text = "[InGameTopbar.GetPlayer.GetNameWithNoTooltip]"
+					autoresize = yes
+					alpha = 0
+					state = {
+						name = "base_animation"
+						alpha = 1
+					}
+					state = {
+						name = "hide_animation"
+						duration = @initial_animation
+						alpha = 0
+					}
+				}
+				widget = {
+					layoutpolicy_horizontal = fixed
+					size = { 75 75 }
+					icon = {
+						size = { 90 90 }
+						parentanchor = left
+						texture = "gfx/interface/base_parts/base_color.dds"
+						color = { 0.95 0.8 0.44 1 }
+						modify_texture = {
+							texture = "gfx/interface/images/elements/right_image.dds"
+							blend_mode = alphamultiply
+						}
+						state = {
+							name = "base_animation"
+							size = { 90 90 }
+							alpha = 1
+						}
+						state = {
+							name = "hide_animation"
+							duration = @initial_animation
+							size = { 60 60 }
+							alpha = 0
+						}
+					}
+				}
+				widget = {
+					layoutpolicy_horizontal = expanding
+				}
+			}
+			hbox = {
+				layoutpolicy_vertical = fixed
+				widget = {
+					layoutpolicy_horizontal = expanding
+					size = { 270 75 }
+					icon = {
+						size = { 100% 100% }
+						position = { -10 0 }
+						texture = "gfx/interface/base_parts/base_color.dds"
+						color = { 0.95 0.8 0.44 1 }
+						modify_texture = {
+							texture = "gfx/interface/images/elements/left_bottom_image.dds"
+							blend_mode = alphamultiply
+						}
+						state = {
+							name = "base_animation"
+							position = { -10 0 }
+							alpha = 1
+						}
+						state = {
+							name = "hide_animation"
+							duration = @initial_animation
+							position = { -405 0 }
+							alpha = 0
+						}
+					}
+				}
+				widget = {
+					layoutpolicy_horizontal = fixed
+					size = { 150 75 }
+					alpha = 1
+					state = {
+						name = "base_animation"
+						alpha = 1
+					}
+					state = {
+						name = "hide_animation"
+						duration = @initial_animation
+						alpha = 0
+					}
+					widget = {
+						size = { 100% 100% }
+						state = {
+							name = "base_animation"
+							alpha = 1
+							position = { 0 0 }
+						}
+						state = {
+							name = "hide_animation"
+							duration = @initial_animation
+							position = { 0 200 }
+							alpha = 0
+						}
+						textbox = {
+							size = { 100% 100% }
+							fontsize = 70
+							align = hcenter
+							font = HeaderFont
+							using = Highlight_FontColor
+							text = "1815"
+							alpha = 1
+							state = {
+								name = "base_animation"
+								alpha = 1
+							}
+							state = {
+								name = "hide_animation"
+								alpha = 0
+							}
+						}
+					}
+				}
+				widget = {
+					layoutpolicy_horizontal = expanding
+					size = { 270 75 }
+					icon = {
+						size = { 100% 100% }
+						position = { 10 0 }
+						alpha = 1
+						texture = "gfx/interface/base_parts/base_color.dds"
+						color = { 0.95 0.8 0.44 1 }
+						modify_texture = {
+							texture = "gfx/interface/images/elements/right_bottom_image.dds"
+							blend_mode = alphamultiply
+						}
+						state = {
+							name = "base_animation"
+							position = { 10 0 }
+							alpha = 1
+						}
+						state = {
+							name = "hide_animation"
+							duration = @initial_animation
+							position = { 405 0 }
+							alpha = 0
+						}
+					}
+				}
+			}
+			widget = {
+				layoutpolicy_vertical = expanding
 			}
 		}
 	}

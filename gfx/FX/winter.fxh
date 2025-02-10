@@ -66,7 +66,7 @@ PixelShader =
 				float3 UV = float3( WorldSpacePos.xz * 0.1f, SnowTerrainTextureArrayIndex );
 				float4 SnowDiffuse = PdxTex2D( SnowDiffuseMap, UV );
 				float4 SnowProperties = PdxTex2D( SnowPropertiesMap, UV );
-				float4 SnowNormal = PdxTex2D( SnowNormalMap, UV );
+				//float4 SnowNormal = PdxTex2D( SnowNormalMap, UV );
 				SnowDiffuse.rgb *= float3( 0.6, 0.6, 0.6 );
 				//float Blend = Snow * SnowDiffuse.a;
 				float Blend = smoothstep( 0.0f, 0.5f, Snow );
@@ -79,7 +79,7 @@ PixelShader =
 				
 				Diffuse.rgb = lerp( Diffuse, SnowDiffuse.rgb, Blend );
 				Properties = lerp( Properties, SnowProperties, Blend );
-				Normal = lerp ( Normal, SnowNormal, Blend );
+				//Normal = lerp ( Normal, SnowNormal, Blend );
 				//TODO(maybe) normals
 			}
 		}

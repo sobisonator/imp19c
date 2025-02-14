@@ -1,5 +1,120 @@
 ## AI Behaviour scripts
 
+# DIPLOMACY
+
+### Testing commands (for use in explorer)
+
+### Behaviour script
+
+#### WAR
+
+AI_pick_war_target = {
+	# Scope: Country
+	# Function: Pick the country which the AI is most likely to declare war on
+
+	random_country = {
+		weight = {
+
+			modifier = {
+
+			}
+
+		}
+	}
+}
+
+#### DIPLOMATIC INTEREST
+# Mark areas as "interests" to control
+
+AI_add_control_interest = {
+	# Scope: Country
+	# Function: Pick an area to mark as an interest and add it to the list in country scope
+	# AI interests are areas that the AI will focus on accessing diplomatically
+	# Methods of control include controlling the land directly or through a subject
+	# TODO: Have a controller script that limits the number of interests based on the power rating of a country
+
+	save_scope_as = AI_root
+
+	random_area = {
+		limit = {
+			any_area_province = {
+				NOT = {
+					owner = scope:AI_root
+				}
+			}
+		}
+		weight = {
+
+			# Weight from religion
+			## TODO: Modify this weight based on the religious policies of the root
+			modifier = {
+				factor = {
+					every_area_province = {
+						every_pops_in_province = {
+							if = {
+								limit = {
+									pop_religion = scope:AI_root.religion
+								}
+								add = 1
+							}
+						}
+					}
+					multiply = 1000
+				}
+				always = yes
+			}
+
+			# Weight from culture
+			## TODO: Modify this weight based on the cultural policies of the root
+			modifier = {
+				factor = {
+					every_area_province = {
+						every_pops_in_province = {
+							if = {
+								limit = {
+									pop_culture = scope:AI_root.culture
+								}
+								add = 1
+							}
+							else_if = {
+								limit = {
+									pop_culture_group = scope:AI_root.culture_group
+								}
+								add = 0.5
+							}
+						}
+					}
+					multiply = 1000
+				}
+				always = yes
+			}
+
+			# Weight from trade goods
+			## Higher if the tradegoods in this area are in shortage in the root country
+			## Higher if the area has high value tradegoods
+
+		}
+
+		# Currently here for testing - this is so that the tooltip can grab province area by scoping to a state
+		random_area_province = {
+			save_scope_as = AI_interest_target
+		}
+	}
+
+	# TESTING PURPOSES ONLY - Saves just 1 interest var
+	set_variable = {
+		name = AI_interest
+		value = scope:AI_interest_target
+	}
+
+	# TODO
+	# Activate this once confirmed working
+	#add_to_variable_list = {
+	#	name = AI_interest_list
+	#	target = scope:AI_interest_target
+	#}
+}
+
 # CURRENCY
 ## Take out debt
 

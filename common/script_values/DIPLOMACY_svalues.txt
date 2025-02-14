@@ -1,0 +1,72 @@
+DIPLOMACY_power = {
+	# Scope: Country
+	# Function: Get the power rating of the country
+
+	value = DIPLOMACY_power_from_economy
+	add = DIPLOMACY_power_from_military
+	add = DIPLOMACY_power_from_tech
+	add = DIPLOMACY_power_from_subjects
+	# TODO: Add diplomacy power from prestige
+
+}
+
+DIPLOMACY_power_from_subjects = {
+	value = {
+		every_subject = {
+			add = DIPLOMACY_power
+		}
+	}
+}
+
+DIPLOMACY_power_from_economy = {
+	value = {
+		value = WEALTH_total_private_moveable_wealth
+		multiply = 0.5
+	}
+	add = TRADE_percentage_of_global_shipping
+	add = TRADE_activity_value
+	if = {
+		limit = {
+			has_variable = official_currency
+		}
+		if = {
+			limit = {
+				THIS = var:official_currency.var:originator_country
+			}
+			add = {
+				value = var:official_currency.var:CURRENCY_power_cached
+				multiply = 0.25
+			}
+		}
+	}
+	add = {
+		value = WEALTH_national_per_capita
+		multiply = 500
+	}
+}
+
+DIPLOMACY_power_from_military = {
+	value = {
+		add = {
+			value = manpower 
+			multiply = {
+				value = 0.2
+				add = {
+					value = military_tech
+					multiply = 0.02
+				}
+			}
+		}
+	}
+}
+
+DIPLOMACY_power_from_tech = {
+	value = 1
+	add = {
+		value = oratory_tech
+		add = military_tech
+		add = civic_tech
+		add = religious_tech
+		multiply = 50
+	}
+}

@@ -22,11 +22,70 @@ DIPLOMACY_get_power_in_play_TZ = {
 DIPLOMACY_get_top_players_tradezone = {
 	# Scope: Any (directed to trade center province scope)
 	# Function: Save the top X powers in a tradezone into respective variables
-	ordered_country = {
-		order_by = var:DIPLOMACY_power_$tradezone$
+	global_var:global_$tradezone$_tradezone = {
+		save_scope_as = TZ_scope
+		remove_variable = DIPLOMACY_power_n1
+		remove_variable = DIPLOMACY_power_n2
+		remove_variable = DIPLOMACY_power_n3
+		remove_variable = DIPLOMACY_power_n4
+		ordered_country = {
+			order_by = var:DIPLOMACY_power_$tradezone$
 
-		max = 3 # Adjust as needed based on how many ranked powers to have in a region
+			max = 4 # Adjust as needed based on how many ranked powers to have in a region
+
+			save_scope_as = power_scope
+
+			scope:TZ_scope = {
+				if = {
+					limit = {
+						scope:TZ_scope = {
+							NOT = { has_variable = DIPLOMACY_power_n1 }
+						}
+					}
+					set_variable = {
+						name = DIPLOMACY_power_n1
+						value = scope:power_scope
+					}
+				}
+				else_if = {
+					limit = {
+						scope:TZ_scope = {
+							NOT = {has_variable = DIPLOMACY_power_n2}
+						}
+					}
+					set_variable = {
+						name = DIPLOMACY_power_n2
+						value = scope:power_scope
+					}
+				}
+				else_if = {
+					limit = {
+						scope:TZ_scope = {
+							NOT = {has_variable = DIPLOMACY_power_n3}
+						}
+					}
+					set_variable = {
+						name = DIPLOMACY_power_n3
+						value = scope:power_scope
+					}
+				}
+				else_if = {
+					limit = {
+						scope:TZ_scope = {
+							NOT = {has_variable = DIPLOMACY_power_n4}
+						}
+					}
+					set_variable = {
+						name = DIPLOMACY_power_n4
+						value = scope:power_scope
+					}
+				}
+			}
+
+		}
 	}
+	
+	
 }
 
 DIPLOMACY_cache_country_power_tradezone = {

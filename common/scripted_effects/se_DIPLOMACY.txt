@@ -5,16 +5,113 @@ DIPLOMACY_cache_diplomatic_power_country_every_TZ = {
 }
 
 DIPLOMACY_get_power_in_play_TZ = {
-	# Scope: TZ (trade center province)
+	# Scope: Any (directed to trade center province scope)
 	# Function: Get the total amount of diplomatic power in play in the given TZ
 	global_var:global_$tradezone$_tradezone = {
 		set_variable = {
 			name = TZ_power_in_play
 			value = {
 				every_country = {
-					add = DIPLOMACY_power_$tradezone$
+					add = var:DIPLOMACY_power_$tradezone$
 				}
 			}
 		}
 	}
+}
+
+DIPLOMACY_get_top_players_tradezone = {
+	# Scope: Any (directed to trade center province scope)
+	# Function: Save the top X powers in a tradezone into respective variables
+	ordered_country = {
+		order_by = var:DIPLOMACY_power_$tradezone$
+
+		max = 3 # Adjust as needed based on how many ranked powers to have in a region
+	}
+}
+
+DIPLOMACY_cache_country_power_tradezone = {
+	# Scope: Country
+	# Function: Save the country's power in each tradezone, if above 100
+	save_scope_as = country_scope
+	set_variable = {
+		name = DIPLOMACY_power_$tradezone$
+		value = {
+			value = DIPLOMACY_power
+			multiply = TZ_penetration_$tradezone$
+			# Bonus multiplier for home-turf, % of this country's GDP in the TZ
+			# e.g. if this TZ contains 75% of the country's wealth, multiply the power rating by 1.75
+			multiply = {
+				value = 1
+				add = {
+					value = 0
+					every_governorships = {
+						#if = {
+							limit = {
+								capital_scope = {
+									$tradezone$_tradezone = { PROVINCE = yes }
+								}
+							}
+							add = {
+								value = WEALTH_governorship_total
+							}
+						#}
+					}
+					divide = {
+						value = var:WEALTH_total_private_moveable_wealth
+						divide = 4
+					}
+				}
+
+			}
+		}
+	}
+}
+
+DIPLOMACY_add_cached_subject_power_tradezone = {
+	# Scope: Country
+	# Function: Add all subjects' cached power to suzerains
+	set_variable = {
+		name = DIPLOMACY_power_from_subjects_$tradezone$
+		value = {
+			value = 0
+			every_subject = {
+				add = var:DIPLOMACY_power_$tradezone$
+			}
+		}
+	}
+}
+
+DIPLOMACY_finalise_cached_subject_power_tradezone = {
+	# Scope: Country
+	# Function: Combine subjects' cached power to suzerain's tradezone power value
+	change_variable = {
+		name = DIPLOMACY_power_$tradezone$
+		add = var:DIPLOMACY_power_from_subjects_$tradezone$
+	}
+	remove_variable = DIPLOMACY_power_from_subjects_$tradezone$
+}
+
+DIPLOMACY_update_global_power_status = {
+	every_country = {
+		every_tradezone_complex = {
+			APPLY = DIPLOMACY_cache_country_power_tradezone
+		}
+	}
+	every_country = {
+		every_tradezone_complex = {
+			APPLY = DIPLOMACY_add_cached_subject_power_tradezone
+		}
+	}
+	every_country = {
+		every_tradezone_complex = {
+			APPLY = DIPLOMACY_finalise_cached_subject_power_tradezone
+		}
+	}
+	every_tradezone_complex = {
+		APPLY = DIPLOMACY_get_power_in_play_TZ
+	}
+	every_tradezone_complex = {
+		APPLY = DIPLOMACY_get_top_players_tradezone
+	}
+
 }

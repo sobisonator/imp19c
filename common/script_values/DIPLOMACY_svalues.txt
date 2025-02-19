@@ -13,6 +13,12 @@ DIPLOMACY_power = {
 DIPLOMACY_power_from_subjects = {
 	value = {
 		every_subject = {
+			limit = {
+				NOR = {
+					is_subject_type = tributary
+					is_subject_type = nominal_vassal
+				}
+			}
 			add = DIPLOMACY_power
 		}
 	}
@@ -21,9 +27,15 @@ DIPLOMACY_power_from_subjects = {
 DIPLOMACY_power_from_economy = {
 	value = {
 		value = WEALTH_total_private_moveable_wealth
-		multiply = 0.5
+		multiply = {
+			value = WEALTH_national_per_capita
+			multiply = 0.01
+		}
 	}
-	add = TRADE_percentage_of_global_shipping
+	add = {
+		value = TRADE_percentage_of_global_shipping
+		multiply = 10000
+	}
 	add = TRADE_activity_value
 	if = {
 		limit = {
@@ -38,10 +50,6 @@ DIPLOMACY_power_from_economy = {
 				multiply = 0.25
 			}
 		}
-	}
-	add = {
-		value = WEALTH_national_per_capita
-		multiply = 500
 	}
 }
 
@@ -69,4 +77,30 @@ DIPLOMACY_power_from_tech = {
 		add = religious_tech
 		multiply = 50
 	}
+}
+
+DIPLOMACY_insignificant_threshold = {
+	# Scope: Country
+	# Function: The threshold under which countries should not be included in global power calculations
+	# CURRENTLY HAS NO USE
+	value = 100
+}
+
+## REGIONAL DIPLOMACY POWER
+
+# TODO: Probably make this a scripted effect so it's templated
+# TODO: Give some kind of bonus for home turf
+## ^ Idea for the above bonus: give a 1+.% bonus multiplier to DIPLOMACY_power based on the % of your GDP in that tradezone
+
+DIPLOMACY_power_india = {
+	# Scope: Country
+	# Function: Get the diplomatic power of this country in the India TZ
+	value = DIPLOMACY_power
+	multiply = TZ_penetration_india
+}
+DIPLOMACY_power_percentage_india = {
+	# Scope: Country
+	# Function: Get the percentage power influence in the India TZ held by this country
+	value = var:DIPLOMACY_power_india
+	divide = global_var:global_india_tradezone.var:TZ_power_in_play
 }

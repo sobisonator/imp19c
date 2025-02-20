@@ -1226,14 +1226,10 @@ vbox = {
 		}
 		# GUI REWORK
 		
-		icon = {
+		widget = {
 			name = "TopBar"
-			position = { 0 5 }
-			parentanchor = hcenter
+			position = { 100 5 }
 			size = { 800 46 }
-			using = black_background
-			spriteType = Corneredtiled
-			#alpha = 0.95
 			alwaystransparent = no
 			background = {
 				name = "Shadow"
@@ -1245,12 +1241,15 @@ vbox = {
 				margin_bottom = 2
 				alpha = 0.5
 			}
-			modify_texture = {
-				name = "Alpha"
-				texture = "gfx/interface/base_parts/top_bar_alpha_x120bd.dds"
-				blend_mode = alphamultiply
-				spriteType = Corneredtiled
-				spriteborder = { 60 0 }
+			background = {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = black_background
+				modify_texture = {
+					texture = "gfx/interface/base_parts/top_bar_alpha_x120bd.dds"
+					blend_mode = alphamultiply
+					spriteType = Corneredtiled
+					spriteborder = { 60 0 }
+				}
 			}
 
 			flowcontainer = {
@@ -1782,11 +1781,64 @@ vbox = {
 		flowcontainer = {
 			margin = { 5 5 }
 			spacing = 4
+			parentanchor = right
 			ignoreinvisible = yes
+			wiki_topbar_button = {
+				visible = "[Not(GetVariableSystem.HasValue( 'wiki_ui', 'open' ))]"
+				blockoverride "On_click" 
+				{ 
+					onclick = "[GetVariableSystem.Set( 'wiki_ui', 'open' )]"
+				}
+				tooltip = "open_wiki"
+				using = tooltip_se
+				shortcut = "top_bar_14"
+			}
+			wiki_topbar_button = {
+				visible = "[GetVariableSystem.HasValue( 'wiki_ui', 'open' )]"
+				blockoverride "On_click" 
+				{ 
+					onclick = "[GetVariableSystem.Set( 'wiki_ui', 'close' )]"
+				}
+				tooltip = "close_wiki"
+				using = tooltip_se
+				shortcut = "top_bar_14"
+			}
+			ledger_button = {
+				blockoverride "On_click" 
+				{ 
+					onclick = "[InGameTopbar.OpenView('ledger')]"
+				}
+				tooltip = "LEDGER"
+				using = tooltip_se
+			}
+			score_button = { 
+				blockoverride "On_click"
+				{
+					onclick = "[InGameTopbar.OpenView('view_score')]"
+				}
+				tooltip = "TOPBAR_SCORE_TOOLTIP"
+				using = tooltip_se
+			}
+			log_button = {
+				blockoverride "On_click"
+				{
+					onclick = "[ToggleMessageLog]"
+				}
+				tooltip = "MESSAGE_LOG_TT"
+				using = tooltip_se
+			}
+			graphic_settings_button = {
+				enabled = "[Not(GetVariableSystem.Exists('graphic_settings'))]"
+				blockoverride "On_click" 
+				{ 
+					onclick = "[ExecuteConsoleCommand('gui.createwidget gui/settings_window.gui settings')]"
+					onclick = "[GetVariableSystem.Toggle('graphic_settings')]"
+				}
+				tooltip = "#T Graphical Settings#!"
+				using = tooltip_se
+			}
 			ingame_menu_button = {
 				name = "ingame_menu_button"
-				#parentanchor = right
-				#position = { -5 5 }
 				blockoverride "On_click"
 				{
 					onclick = "[OnPauseMenu]"
@@ -1800,87 +1852,18 @@ vbox = {
 				tooltip = "SHOW_MENU" 
 				using = tooltip_se
 			}
-			wiki_topbar_button = {
-				position = { 88 8 }
-				visible = "[GetVariableSystem.HasValue( 'wiki_ui', 'close' )]"
-				blockoverride "On_click" 
-				{ 
-					onclick = "[GetVariableSystem.Set( 'wiki_ui', 'open' )]"
-				}
-				tooltip = "open_wiki"
-				using = tooltip_se
-				shortcut = "top_bar_14"
-			}
-			wiki_topbar_button = {
-				position = { 88 8 }
-				visible = "[GetVariableSystem.HasValue( 'wiki_ui', 'open' )]"
-				blockoverride "On_click" 
-				{ 
-					onclick = "[GetVariableSystem.Set( 'wiki_ui', 'close' )]"
-				}
-				tooltip = "close_wiki"
-				using = tooltip_se
-				shortcut = "top_bar_14"
-			}
-		}
-		flowcontainer = {
-			margin = { 5 5 }
-			spacing = 4
-			parentanchor = right
-			ledger_button = {
-				position = { 88 8 }
-				blockoverride "On_click" 
-				{ 
-					onclick = "[InGameTopbar.OpenView('ledger')]"
-				}
-				tooltip = "LEDGER"
-				using = tooltip_se
-			}
-			score_button = { 
-				position = { 54 8 }
-				blockoverride "On_click"
-				{
-					onclick = "[InGameTopbar.OpenView('view_score')]"
-				}
-				tooltip = "TOPBAR_SCORE_TOOLTIP"
-				using = tooltip_se
-			}
-			log_button = {
-				#position = { 122 8 }
-				blockoverride "On_click"
-				{
-					onclick = "[ToggleMessageLog]"
-				}
-				tooltip = "MESSAGE_LOG_TT"
-				using = tooltip_se
-			}
-			graphic_settings_button = {
-				#parentanchor = right
-				#position = { -48 5 }
-				enabled = "[Not(GetVariableSystem.Exists('graphic_settings'))]"
-				blockoverride "On_click" 
-				{ 
-					onclick = "[ExecuteConsoleCommand('gui.createwidget gui/settings_window.gui settings')]"
-					onclick = "[GetVariableSystem.Toggle('graphic_settings')]"
-				}
-				tooltip = "#T Graphical Settings#!"
-				using = tooltip_se
-			}
 		}
 		widget = {
 			size = { 300 244 }
-			parentanchor = hcenter
-			position = { -735 -122 }
 			icon = {
 				texture = "gfx/interface/topbar/flag_shadow.dds"
 				size = { 155 180 }
-				position = { 0 122 }
 				alpha = 0.5
 				#tooltip = "[InGameTopbar.GetFlagDesc]"
 			}
 			widget = {
 				size = { 143 103 }
-				position = { 145 122 }
+				position = { 145 0 }
 				background = {
 					name = "Shadow"
 					texture = "gfx/interface/base_parts/button_square_dropshadow_x16y16bd.dds"
@@ -1894,58 +1877,63 @@ vbox = {
 					shaderfile = "gfx/FX/pdxgui_default.shader"
 					using = black_background
 				}
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					using = pattern_black_background
+				}
 				flowcontainer = {
 					direction = vertical
 					spacing = 2
 					list_button = {
 						size = { 140 32 }
-						tooltip = "none"
-						textbox = {
-							text = "£[GuiScope.SetRoot(Player.MakeScope).ScriptValue('WEALTH_total_private_moveable_wealth')|3]"
-							using = BaseFontM
-							using = Black_FontColor
-							parentanchor = vcenter
-							align = left|nobaseline
-							position = { 10 2 }
-							autoresize = yes
+						tooltip = "£[GuiScope.SetRoot(Player.MakeScope).ScriptValue('WEALTH_total_private_moveable_wealth')|3]"
+						blockoverride "Content" {
+							textbox = {
+								text = "£[GuiScope.SetRoot(Player.MakeScope).ScriptValue('WEALTH_total_private_moveable_wealth')|3]"
+								using = BaseFontM
+								using = Black_FontColor
+								parentanchor = vcenter
+								align = left|nobaseline
+								position = { 10 2 }
+								autoresize = yes
+							}
 						}
 					}
 					list_button = {
 						size = { 140 32 }
-						tooltip = "none"
-						textbox = {
-							text = "[GuiScope.SetRoot(Player.MakeScope).ScriptValue('TRADE_percentage_of_global_shipping')|%]"
-							using = BaseFontM
-							using = Black_FontColor
-							parentanchor = vcenter
-							align = left|nobaseline
-							position = { 10 2 }
-							autoresize = yes
+						tooltip = "[GuiScope.SetRoot(Player.MakeScope).ScriptValue('TRADE_percentage_of_global_shipping')|%]"
+						blockoverride "Content" {
+							textbox = {
+								text = "[GuiScope.SetRoot(Player.MakeScope).ScriptValue('TRADE_percentage_of_global_shipping')|%]"
+								using = BaseFontM
+								using = Black_FontColor
+								parentanchor = vcenter
+								align = left|nobaseline
+								position = { 10 2 }
+								autoresize = yes
+							}
 						}
 					}
 					list_button = {
 						size = { 140 32 }
-						tooltip = "none"
-						textbox = {
-							text = "£[GuiScope.SetRoot(Player.MakeScope).ScriptValue('TRADE_activity_value')|3]"
-							using = BaseFontM
-							using = Black_FontColor
-							parentanchor = vcenter
-							align = left|nobaseline
-							position = { 10 2 }
-							autoresize = yes
+						tooltip = "£[GuiScope.SetRoot(Player.MakeScope).ScriptValue('TRADE_activity_value')|3]"
+						blockoverride "Content" {
+							textbox = {
+								text = "£[GuiScope.SetRoot(Player.MakeScope).ScriptValue('TRADE_activity_value')|3]"
+								using = BaseFontM
+								using = Black_FontColor
+								parentanchor = vcenter
+								align = left|nobaseline
+								position = { 10 2 }
+								autoresize = yes
+							}
 						}
 					}
 				}
 			}
 			button = {
 	            name = "Nation Flag"
-	            size = { 150 244 }
-	            entity_instance = "[InGameTopbar.GetFlagEntity]"
-	            #color = "[InGameTopbar.AccessCoatOfArms.GetColor('(int32)1')]"
-	            #texture = "[InGameTopbar.AccessCoatOfArms.GetTexture('(int32)155','(int32)355')]"
-	            frame = "[InGameTopbar.AccessCoatOfArms.GetFrame('(int32)155','(int32)355')]"
-	            framesize = { 155 355 }
+	            size = { 150 122 }
 	            onclick = "[ToggleGameView('overview')]"
 	            tooltip = "[InGameTopbar.GetFlagDesc]"
 	            
@@ -1955,6 +1943,7 @@ vbox = {
 
 	            banner_widget = {
 	                size = { 155 355 }
+	                position = { 0 -122 }
 	                entity_instance = "[InGameTopbar.GetFlagEntity]"
 	                color = "[InGameTopbar.AccessCoatOfArms.GetColor('(int32)1')]"
 	                texture = "[InGameTopbar.AccessCoatOfArms.GetTexture('(int32)155','(int32)355')]"
@@ -1971,7 +1960,7 @@ vbox = {
 			name = "minimap_and_buttons"
 			parentanchor = bottom|right
 			widgetanchor = bottom|right
-			size = { 374 288 }
+			size = { 374 292 }
 			movable = no
 			background = {
 				name = "Shadow"
@@ -1988,8 +1977,8 @@ vbox = {
 				using = border3
 			}
 			secondary_header = {
-				size = { 376 0 }
-				position = { 0 3 }
+				size = { 376 38 }
+				position = { 0 5 }
 				
 				blockoverride "Title_text" { text = "MAPMODES_HEADER" }
 				blockoverride "White_buttons" 
@@ -2089,7 +2078,7 @@ vbox = {
 				using = minimap_view
 			}
 			container = {
-				position = { 8 38 }
+				position = { 8 42 }
 				container = {
 					name = "toolbar"
 					position = { 0 0 }

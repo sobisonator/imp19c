@@ -1,7 +1,11 @@
+@mincategorybuttonwidth = 61
+@maxcategorybuttonwidth = 61
+@mincategorybuttonheight = 42
+@maxcategorybuttonheight = 42
 @sidemargins = 42
 @topmargins = 12
-@windowwidth = 512
-@windowheight = 632
+@window_width = 512
+@window_height = 632
 @windowwidthminusmargin = 482
 
 ####################
@@ -13,17 +17,13 @@ base_window = {
 	name = "macro_builder_view"
 	parentanchor = top|left
 	widgetanchor = top|left
-	size = { @windowwidth @windowheight }
+	size = { @window_width @window_height }
 	using = main_window_template
-	
-	### Audio ###
 	state = {
 		name = _show
 		start_sound = {
 			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
 		}
-		on_start = "[PdxGuiTriggerAllAnimations('anim2')]"
-		on_start = "[PdxGuiTriggerAllAnimations('anim3')]"
 	}
 	state = {
 		name = _hide
@@ -37,87 +37,34 @@ base_window = {
 	####################
 
 	vbox = {
-		using = MainWindowHeaderBox
-		name = "box for all things"
-
-		blockoverride "FlagOrIcon"
-		{
-			icon = {
-				texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
-				framesize = { 100 100 }
-				frame = 6
-				position = { -2 -2 }
-				size = { 34 34 }
-				modify_texture = {
-					texture = "gfx/interface/icons/menu_buttons/macrobuilder.dds"
-					blend_mode = alphamultiply
-				}
-			}
+		widget = {
+			size = { @window_width 12 }
+			using = MainWindowHeaderLine
 		}
-
-		blockoverride "Title_text"
-		{
-			text = "MACRO_BUILDER_TITLE" 
-		}
-
-		blockoverride "White_buttons" 
-		{
-			button_back = { 
-				shortcut = "previous_window"
-				onclick = "[MacroBuilderView.OnPrevious]"
-				tooltip = "PREVIOUS_MACRO_BUILDER_VIEW"
-			}
-			
-			button_close = {
-				onclick = "[MacroBuilderView.OnClose]"
-				tooltip = "CLOSE"
-				shortcut = "close_window"
-			}
-		}
-
-		vbox = {
-			layoutpolicy_vertical = expanding
+		margin_widget = {
+			size = { @window_width 58 }
 			layoutpolicy_horizontal = expanding
-
-			margin_widget = {
-				size = { 0 60 }
+			hbox = { 
+				layoutpolicy_vertical = preferred
 				layoutpolicy_horizontal = expanding
-				#margin = { 0 0 }
-
-				icon = {
-					position = { 2 46 }
-					using = brighten_red_background
-					spriteType = Corneredtiled
-					size = { 94 2 }
+				spacing = -2
+				margin_widget = {
+					using = MainWindowHeaderContentLeft
+					blockoverride "Title_text" { text = "MACRO_BUILDER_TITLE"  }
+					blockoverride "FlagOrIcon"
+					{
+						icon = {
+							using = gold_background
+							size = { 32 32 }
+							modify_texture = {
+								texture = "gfx/interface/icons/menu_buttons/macrobuilder.dds"
+								blend_mode = alphamultiply
+							}
+						}
+					}
 				}
-
-				icon = {
-					position = { 500 46 }
-					using = brighten_red_background
-					spriteType = Corneredtiled
-					size = { 9 2 }
-				}
-
-				sub_header_v = {
-					size = { 86 0 }
-					position = { 8 12 }
-					blockoverride "Title_text" { visible = no text = "" }
-				}
-
-				#################
-				### TABS 
-				#################
-				hbox = {
-					layoutpolicy_vertical = preferred
-					layoutpolicy_horizontal = expanding
+				flowcontainer = {
 					spacing = 2
-					position = { -4 0 }
-					margin = { 6 0 }
-					@mincategorybuttonwidth = 100
-					@maxcategorybuttonwidth = 100
-					@mincategorybuttonheight = 28 
-					@maxcategorybuttonheight = 34
-
 					datamodel = "[MacroBuilderView.GetPages]"
 					item = {
 						category_tab = {
@@ -143,11 +90,29 @@ base_window = {
 						}
 						
 					}
-					hbox = {
-						layoutpolicy_horizontal = expanding
+				}
+				margin_widget = {
+					using = MainWindowHeaderContentRight
+					blockoverride "White_buttons" 
+					{
+						button_back = { 
+							shortcut = "previous_window"
+							onclick = "[MacroBuilderView.OnPrevious]"
+							tooltip = "PREVIOUS_MACRO_BUILDER_VIEW"
+						}
+						
+						button_close = {
+							onclick = "[MacroBuilderView.OnClose]"
+							tooltip = "CLOSE"
+							shortcut = "close_window"
+						}
 					}
-				}	
+				}
 			}
+		}
+		vbox = {
+			layoutpolicy_vertical = expanding
+			layoutpolicy_horizontal = expanding
 
 			#################
 			### SUB HEADER 
@@ -194,7 +159,7 @@ base_window = {
 			####################################
 
 			margin_widget = {
-				size = { 0 474 }
+				size = { 0 510 }
 				name = "build_in_province"
 				layoutpolicy_vertical = fixed
 				layoutpolicy_horizontal = expanding
@@ -462,9 +427,6 @@ base_window = {
 							}
 							blockoverride "On_click" 
 							{ 
-								onclick = "[MacroBuilderBuildInProvince.OnBack]"
-								onclick = "[PdxGuiTriggerAllAnimations('anim2')]"
-								onclick = "[PdxGuiTriggerAllAnimations('anim3')]"
 							}
 						}
 					}
@@ -479,7 +441,7 @@ base_window = {
 					size = { 100% 100% }
 					
 					scrollarea = {
-						size = { 478 466 }
+						size = { 100% 100% }
 
 						scrollbarpolicy_horizontal = always_off
 						using = VerticalScrollAreaCutOff

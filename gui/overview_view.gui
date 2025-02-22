@@ -48,44 +48,40 @@ base_window = {
 	}
 	
 	vbox = {
-		using = MainWindowHeaderBox
-		name = "main window box with main header"
+		widget = {
+			size = { @windowwidth 48 }
+			using = MainWindowHeaderBox
+			name = "main window box with main header"
+			blockoverride "Title_text" { text = "NATION_OVERVIEW_MENU_HEADER" }
+			blockoverride "FlagOrIcon"
+			{
+				icon = {
+					texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
+					framesize = { 100 100 }
+					frame = 6
+					position = { -2 -2 }
+					size = { 32 32 }
+					modify_texture = {
+						texture = "gfx/interface/icons/menu_buttons/menu_overview.dds"
+						blend_mode = alphamultiply
+					}
+				}
+			}
+			blockoverride "White_buttons" 
+			{
+				button_back = { 
+					shortcut = "previous_window"
+					onclick = "[OverviewView.OnPrevious]"
+					tooltip = "PREVIOUS_OVERVIEW_VIEW"
+				}
 
-		blockoverride "FlagOrIcon"
-		{
-			icon = {
-				texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
-				framesize = { 100 100 }
-				frame = 6
-				position = { -2 -2 }
-				size = { 32 32 }
-				modify_texture = {
-					texture = "gfx/interface/icons/menu_buttons/menu_overview.dds"
-					blend_mode = alphamultiply
+				button_close = {
+					onclick = "[OverviewView.OnClose]"
+					tooltip = "CLOSE"
+					shortcut = "close_window"
 				}
 			}
 		}
-
-		blockoverride "Title_text"
-		{
-			text = "NATION_OVERVIEW_MENU_HEADER" 
-		}
-
-		blockoverride "White_buttons" 
-		{
-			button_back = { 
-				shortcut = "previous_window"
-				onclick = "[OverviewView.OnPrevious]"
-				tooltip = "PREVIOUS_OVERVIEW_VIEW"
-			}
-
-			button_close = {
-				onclick = "[OverviewView.OnClose]"
-				tooltip = "CLOSE"
-				shortcut = "close_window"
-			}
-		}
-
 		vbox = {
 			name = "box for the vertically stacked boxes"
 			layoutpolicy_vertical = expanding
@@ -101,12 +97,6 @@ base_window = {
 					name = "tabs"
 					size = { 100% 48 }
 					layoutpolicy_horizontal = expanding
-					sub_header_v = {
-						size = { 157 0 }
-						position = { 8 8 }
-						blockoverride "Title_text" { visible = no text = "" }	
-						blockoverride "Max_text_width" { max_width = 230 }
-					}
 					icon = {
 						position = { 2 42 }
 						using = brighten_red_background
@@ -123,10 +113,16 @@ base_window = {
 						layoutpolicy_vertical = preferred
 						layoutpolicy_horizontal = expanding
 						spacing = 2
-						margin_right = 10
+						margin = { 10 0 }
 						margin_top = 4
-						hbox = { layoutpolicy_horizontal = expanding }
-					
+						margin_widget = {
+							layoutpolicy_horizontal = expanding
+							sub_header = {
+								position = { 0 3 }
+								blockoverride "Title_text" { visible = no text = "" }	
+								blockoverride "Max_text_width" { max_width = 230 }
+							}
+						}
 						category_tab = {
 							name = "decisions_tab"
 							blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
@@ -854,7 +850,7 @@ base_window = {
 
 						}
 
-						sub_header_v = {
+						sub_header = {
 							size = { 688 32 }
 							blockoverride "Title_text"
 							{
@@ -1112,62 +1108,69 @@ base_window = {
 												onclick = "[GetVariableSystem.Set( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
 												visible = "[Or( Not( GetVariableSystem.Exists( OverviewGovernorshipItem.GetGovernorship.GetName ) ), GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'no' ) )]"
 												parentanchor = vcenter
-												cpt_button = {
-													size = { 40 60 }
-													datacontext = "[OverviewGovernorshipItem.GetGovernorship.GetGovernorOrRuler]"
+												widget ={
+													size = { 100% 100% }
+													alpha = 2.0
+													cpt_button = {
+														size = { 40 60 }
+														datacontext = "[OverviewGovernorshipItem.GetGovernorship.GetGovernorOrRuler]"
+													}
+													tag = {
+														position = { 50 0 }
+														parentanchor = vcenter
+														text = "[OverviewGovernorshipItem.GetGovernorship.GetName]"
+													}
+													icon_and_text = {
+														size = { 120 0 }
+														parentanchor = vcenter|right
+														position = { -32 -5 }
+														blockoverride "Icon" { using = icon_poptype }
+														blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.GetTotalPopulation]" }
+														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetPopulationInfo]"
+													}
+													icon_and_text = {
+														size = { 120 0 }
+														parentanchor = vcenter|right
+														position = { -172 -5 }
+														blockoverride "Icon" { using = icon_treasury }
+														blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.MakeScope.GetVariable('governorship_this_quarter_spend_on_clothing').GetValue|+=]" }
+														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetIncomeBreakdown]" 
+													}
 												}
-												tag = {
-													position = { 50 0 }
-													parentanchor = vcenter
-													text = "[OverviewGovernorshipItem.GetGovernorship.GetName]"
-												}
-												icon_and_text = {
-													size = { 120 0 }
-													parentanchor = vcenter|right
-													position = { -32 -5 }
-													blockoverride "Icon" { using = icon_poptype }
-													blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.GetTotalPopulation]" }
-													tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetPopulationInfo]"
-												}
-												icon_and_text = {
-													size = { 120 0 }
-													parentanchor = vcenter|right
-													position = { -172 -5 }
-													blockoverride "Icon" { using = icon_treasury }
-													blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.MakeScope.GetVariable('governorship_this_quarter_spend_on_clothing').GetValue|+=]" }
-													tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetIncomeBreakdown]" 
-												}
-												
 											}
 											category_drop = {
 												size = { 684 60 }
 												visible = "[GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
 												onclick = "[GetVariableSystem.Set( OverviewGovernorshipItem.GetGovernorship.GetName, 'no' )]"
 												parentanchor = vcenter
-												cpt_button = {
-													size = { 40 60 }
-													datacontext = "[OverviewGovernorshipItem.GetGovernorship.GetGovernorOrRuler]"
-												}
-												tag = {
-													position = { 50 0 }
-													parentanchor = vcenter
-													text = "[OverviewGovernorshipItem.GetGovernorship.GetName]"
-												}
-												icon_and_text = {
-													size = { 120 0 }
-													parentanchor = vcenter|right
-													position = { -32 -5 }
-													blockoverride "Icon" { using = icon_poptype }
-													blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.GetTotalPopulation]" }
-													tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetPopulationInfo]"
-												}
-												icon_and_text = {
-													size = { 120 0 }
-													parentanchor = vcenter|right
-													position = { -172 -5 }
-													blockoverride "Icon" { using = icon_treasury }
-													blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.MakeScope.ScriptValue('ECONOMY_total_tax_from_governorship').GetValue|+=]" }
-													tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetIncomeBreakdown]" 
+												widget ={
+													size = { 100% 100% }
+													alpha = 2.0
+													cpt_button = {
+														size = { 40 60 }
+														datacontext = "[OverviewGovernorshipItem.GetGovernorship.GetGovernorOrRuler]"
+													}
+													tag = {
+														position = { 50 0 }
+														parentanchor = vcenter
+														text = "[OverviewGovernorshipItem.GetGovernorship.GetName]"
+													}
+													icon_and_text = {
+														size = { 120 0 }
+														parentanchor = vcenter|right
+														position = { -32 -5 }
+														blockoverride "Icon" { using = icon_poptype }
+														blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.GetTotalPopulation]" }
+														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetPopulationInfo]"
+													}
+													icon_and_text = {
+														size = { 120 0 }
+														parentanchor = vcenter|right
+														position = { -172 -5 }
+														blockoverride "Icon" { using = icon_treasury }
+														blockoverride "Text" { text = "[OverviewGovernorshipItem.GetGovernorship.MakeScope.GetVariable('governorship_this_quarter_spend_on_clothing').GetValue|+=]" }
+														tooltip = "[OverviewGovernorshipItem.GetGovernorship.GetIncomeBreakdown]" 
+													}
 												}
 											}
 										}
@@ -1644,10 +1647,7 @@ base_window = {
 									container = {
 										onmousehierarchyenter = "[SetHighlightArea( StateItem.GetState.GetArea )]"
 										onmousehierarchyleave = "[ClearHighlightColors]"
-
-										list_entry = { 
-											size = { 688 52 }
-										}
+										using = list_item
 
 										flowcontainer = {
 											spacing = 3

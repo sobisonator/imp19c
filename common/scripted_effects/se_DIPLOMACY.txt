@@ -135,6 +135,9 @@ DIPLOMACY_add_cached_subject_power_tradezone = {
 			value = 0
 			every_subject = {
 				add = var:DIPLOMACY_power_$tradezone$
+				every_subject = {
+					add = var:DIPLOMACY_power_$tradezone$
+				}
 			}
 		}
 	}
@@ -148,6 +151,32 @@ DIPLOMACY_finalise_cached_subject_power_tradezone = {
 		add = var:DIPLOMACY_power_from_subjects_$tradezone$
 	}
 	remove_variable = DIPLOMACY_power_from_subjects_$tradezone$
+}
+
+DIPLOMACY_get_top_global_powers = {
+	# Scope: Any country, iterate through tradezones
+	# Function: Get the top powers in the world. Every country with more than 22
+	clear_global_variable_list = global_powers_list
+	ordered_country = {
+		order_by = DIPLOMACY_global_power_score
+
+		max = 10
+
+		limit = {
+			is_subject = no
+		}
+
+		if = {
+			limit = {
+				DIPLOMACY_global_power_score > DIPLOMACY_global_power_score_threshold
+			}
+			save_scope_as = global_power_scope
+			add_to_global_variable_list = {
+				name = global_powers_list
+				target = scope:global_power_scope
+			}
+		}
+	}
 }
 
 DIPLOMACY_update_global_power_status = {
@@ -172,5 +201,7 @@ DIPLOMACY_update_global_power_status = {
 	every_tradezone_complex = {
 		APPLY = DIPLOMACY_get_top_players_tradezone
 	}
+
+	DIPLOMACY_get_top_global_powers = yes
 
 }

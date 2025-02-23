@@ -1,12 +1,14 @@
-@mincategorybuttonwidth = 260
-@maxcategorybuttonwidth = 260
-@mincategorybuttonheight = 28 
-@maxcategorybuttonheight = 34
+@mincategorybuttonwidth = 261
+@maxcategorybuttonwidth = 261
+@mincategorybuttonheight = 42
+@maxcategorybuttonheight = 42
+@window_width = 1200
+@window_height = 900
 
 base_window = {
 	gfxtype = windowgfx
 	name = "characters_view"
-	size = { 1200 900 }
+	size = { @window_width @window_height }
 	using = main_window_template
 	### Audio ###
 	state = {
@@ -385,76 +387,34 @@ base_window = {
 	}
 	
 	vbox = {
-		using = MainWindowHeaderBox
-
-		blockoverride "FlagOrIcon"
-		{
-			icon = {
-				texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
-				framesize = { 100 100 }
-				frame = 6
-				position = { -2 -2 }
-				size = { 32 32 }
-				modify_texture = {
-					texture = "gfx/interface/icons/menu_buttons/menu_character.dds"
-					blend_mode = alphamultiply
-				}
-			}
+		widget = {
+			size = { @window_width 12 }
+			using = MainWindowHeaderLine
 		}
-		
-		blockoverride "Title_text" { text = "CHARACTERS_MENU_HEADER" }
-		
-		blockoverride "White_buttons"
-		{
-			button_back = {
-				shortcut = "previous_window"
-				onclick = "[CharactersView.OnClose]"
-				tooltip = "PREVIOUS_CHARACTER_VIEW"
-			}
-			button_close = {
-				onclick = "[CharactersView.OnClose]"
-				tooltip = "CLOSE"
-				shortcut = "close_window"
-			}
-		}
-		flowcontainer = {
-			layoutpolicy_vertical = expanding
+		margin_widget = {
+			size = { @window_width 58 }
 			layoutpolicy_horizontal = expanding
-			direction = vertical
-			ignoreinvisible = yes	
-			# Tabs
-			margin_widget = {
-				size = { 1200 48 }
-				sub_header_v = {
-					size = { 240 0 }
-					position = { 8 8 }
-					blockoverride "Title_text" { visible = no }	
-					blockoverride "Max_text_width" { max_width = 230 }
+			hbox = { 
+				layoutpolicy_vertical = preferred
+				layoutpolicy_horizontal = expanding
+				spacing = -2
+				margin_widget = {
+					using = MainWindowHeaderContentLeft
+					blockoverride "Title_text" { text = "CHARACTERS_MENU_HEADER" }
+					blockoverride "FlagOrIcon"
+					{
+						icon = {
+							using = gold_background
+							size = { 32 32 }
+							modify_texture = {
+								texture = "gfx/interface/icons/menu_buttons/menu_character.dds"
+								blend_mode = alphamultiply
+							}
+						}
+					}
 				}
-				sub_header_v = {
-					size = { 418 0 }
-					position = { 774 8 }
-					visible = "[CharactersView.IsShowFamily]"
-					blockoverride "Title_text" { visible = no }	
-					blockoverride "Max_text_width" { max_width = 230 }
-				}
-				icon = {
-					position = { 2 42 }
-					using = brighten_red_background
-					spriteType = Corneredtiled
-					size = { 248 2 }
-				}
-				icon = {
-					position = { 774 42 }
-					using = brighten_red_background
-					spriteType = Corneredtiled
-					size = { 423 2 }
-				}
-				hbox = {
+				flowcontainer = {
 					spacing = 2
-					margin_right = 18
-					margin_top = 4
-					widget = { size = { 248 0 } }
 					category_tab = {
 						name = "characters_tab"
 						blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
@@ -489,11 +449,35 @@ base_window = {
 							onclick = "[CharactersView.ShowFamily]"
 						}
 					}
-					hbox = { layoutpolicy_horizontal = expanding }
 				}
 				margin_widget = {
+					using = MainWindowHeaderContentRight
+					blockoverride "White_buttons" 
+					{
+						button_back = {
+							shortcut = "previous_window"
+							onclick = "[CharactersView.OnClose]"
+							tooltip = "PREVIOUS_CHARACTER_VIEW"
+						}
+						button_close = {
+							onclick = "[CharactersView.OnClose]"
+							tooltip = "CLOSE"
+							shortcut = "close_window"
+						}
+					}
+				}
+			}
+		}
+		flowcontainer = {
+			layoutpolicy_vertical = expanding
+			layoutpolicy_horizontal = expanding
+			direction = vertical
+			ignoreinvisible = yes	
+			margin_widget = {
+				size = { 1200 34 }
+				margin_widget = {
 					size = { 400 40 }
-					position = { 830 6 }
+					position = { 830 0 }
 					using = inputfield
 					margin_right = 80
 					margin_left = 22
@@ -521,7 +505,7 @@ base_window = {
 					}
 				}
 				country_flag = {
-					position = { 1155 10 }
+					position = { 1155 0 }
 					datacontext = "[CharactersView.GetSelectedCountry]"
 					visible = "[Not(CharactersView.IsShowFamily)]"		
 					blockoverride "flag"

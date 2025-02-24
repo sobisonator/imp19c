@@ -235,7 +235,7 @@ window = {
 		size = { @window_width @state_height_large } #TODO
 		
 		parentanchor = bottom
-		position = { 0 -484 }
+		position = { 0 -485 }
 		
 		state = {
 			name = enlargen_state_details
@@ -2898,25 +2898,26 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 				soundeffect = "event:/SFX/UI/Province/sfx_ui_province_select_window"
 			}
 		}
-		
-		secondary_header = {  
-			name = "uncolonized_main_header"
-			#layoutpolicy_horizontal = expanding
+		sharp_base_window = {
+			size = { 100% 46 }
 			widgetanchor = bottom
-			size = { 768 0 }
+			position = { 0 5 }
 			visible = "[Not(ProvinceWindow.HasState)]"
-
-			blockoverride "Title_text"
-			{
-				text = "[ProvinceWindow.GetProvince.GetAreaName]"  
-				margin_left = @window_margin_left_title
-			}
-			blockoverride "White_buttons"
-			{
-				button_close = { 
-					visible = yes
-					onclick = "[ProvinceWindow.OnClose]"
-					tooltip = "CLOSE"
+			secondary_header = {  
+				name = "uncolonized_main_header"
+				parentanchor = vcenter
+				blockoverride "Title_text"
+				{
+					text = "[ProvinceWindow.GetProvince.GetAreaName]"  
+					margin_left = @window_margin_left_title
+				}
+				blockoverride "White_buttons"
+				{
+					button_close = { 
+						visible = yes
+						onclick = "[ProvinceWindow.OnClose]"
+						tooltip = "CLOSE"
+					}
 				}
 			}
 		}
@@ -5330,13 +5331,13 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
         #    }
         #}
 	}
-	base_sub_window = { #subjects
+	base_sub_window = { #building
 		name = "building"
-		visible = "no"
+		visible = no
 		state = {
 			name = "province_building"
 			duration = @province_building_time_2
-			size = { 370 @province_height_large }
+			size = { 432 @province_height_large }
 			position = { 766 0 }
 			on_start = "[PdxGuiWidget.Show]"
 		}
@@ -5351,19 +5352,17 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 			name = "province_building_full_hide"
 			on_start = "[PdxGuiWidget.Hide]"
 		}
-		size = { 370 @province_height_large } 
+		size = { 432 @province_height_large } 
 		position = { 766 0 }
 		parentanchor = bottom
 		movable = no
 		blockoverride "secondary_header_visible" { visible = no }
 		secondary_header = {  
-			name = "uncolonized_main_header"
-			size = { 100% 0 }
 			position = { 0 4 }
-			visible = no
 			blockoverride "Title_text"
 			{
-				text = "Building"
+				text = "Buildings: [GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_num_used_slots')|0]/[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_buildings_cap')|0]"
+				tooltip = "1 building can be built for every 2 non-tribal pops up to a cap from #Y Depot#! buildings present #G +[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('province_industrialisation_percent')|%0]#! from industrialisation."
 				margin_left = @window_margin_left_title
 			}
 			blockoverride "White_buttons"
@@ -5374,6 +5373,7 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 					tooltip = "CLOSE"
 				}
 			}
+			visible = no
 			state = {
 				name = "province_building"
 				delay = @province_building_time_1
@@ -5403,252 +5403,41 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 			}
 			building_box = {
 				blockoverride "PortItems" {
-					test123_build_item_port = { }
-					test123_build_item_river_port = { }
+					build_item_port = { }
+					build_item_river_port = { }
 				}
 				blockoverride "EducationItems" {
-					test123_build_item_school = { }
-					test123_build_item_university = { }
+					build_item_school = { }
+					build_item_university = { }
 				}
 				blockoverride "IndustrialItems" {
-					test123_build_item_industrial_estate = { }
-					test123_build_item_resource_gathering_operation = { }
+					build_item_industrial_estate = { }
+					build_item_resource_gathering_operation = { }
 				}
 				blockoverride "InfrastructureItems" {
-					test123_build_item_sewer_infrastructure = { }
-					test123_build_item_hospital = { }
-					test123_build_item_canal = { }
-					test123_build_item_railway_upgrade = { }
-					test123_build_item_depot = { }
+					build_item_sewer_infrastructure = { }
+					build_item_hospital = { }
+					build_item_canal = { }
+					build_item_railway_upgrade = { }
+					build_item_depot = { }
 				}
 				blockoverride "MilitaryItems" {
-					test123_build_item_fortress_building = { }
-					test123_build_item_arsenal_building = { }
+					build_item_fortress_building = { }
+					build_item_arsenal_building = { }
 				}
 				blockoverride "UrbanDistrictsItems" {
-					test123_build_item_commerce_district = { }
-					test123_build_item_administration_district = { }
-					test123_build_item_residential_district = { }
-					test123_build_item_cultural_district = { }
+					build_item_commerce_district = { }
+					build_item_administration_district = { }
+					build_item_residential_district = { }
+					build_item_cultural_district = { }
 				}
 			}
-			#building_box = { #ничего
-			#	visible = "[EqualTo_int32( GetDataModelSize( ProvinceWindow.GetPossibleBuildings ), '(int32)15' )]"
-			#	blockoverride "PortItems" { }
-			#	blockoverride "EducationItems" {
-			#		test123_build_item_school = { }
-			#		test123_build_item_university = { }
-			#	}
-			#	blockoverride "IndustrialItems" {
-			#		test123_build_item_industrial_estate = { }
-			#		test123_build_item_resource_gathering_operation = { }
-			#	}
-			#	blockoverride "InfrastructureItems" {
-			#		test123_build_item_sewer_infrastructure = { }
-			#		test123_build_item_hospital = { }
-			#		test123_build_item_canal = { }
-			#		test123_build_item_railway_upgrade = { }
-			#		test123_build_item_depot = { }
-			#	}
-			#	blockoverride "MilitaryItems" {
-			#		test123_build_item_fortress_building = { }
-			#		test123_build_item_arsenal_building = { }
-			#	}
-			#	blockoverride "UrbanDistrictsItems" {
-			#		test123_build_item_commerce_district = { }
-			#		test123_build_item_administration_district = { }
-			#		test123_build_item_residential_district = { }
-			#		test123_build_item_cultural_district = { }
-			#	}
-			#}
-			#building_box = { #море
-			#	visible = "[And(EqualTo_int32( GetDataModelSize( ProvinceWindow.GetPossibleBuildings ), '(int32)16' ), ProvinceCanHavePort(ProvinceWindow.GetProvince))]"
-			#	blockoverride "PortItems" {
-			#		ports_item_river_or_sea = { }
-			#	}
-			#	blockoverride "EducationItems" {
-			#		education_item_river_or_sea = { }
-			#	}
-			#	blockoverride "IndustrialItems" {
-			#		industrial_item_river_or_sea = { }
-			#	}
-			#	blockoverride "InfrastructureItems" {
-			#		infrastructure_item_river_or_sea = { }
-			#	}
-			#	blockoverride "MilitaryItems" {
-			#		military_item_river_or_sea = { }
-			#	}
-			#	blockoverride "UrbanDistrictsItems" {
-			#		urban_districts_item_river_or_sea = { }
-			#	}
-			#}
-			#building_box = { #море
-			#	visible = "[And(EqualTo_int32( GetDataModelSize( ProvinceWindow.GetPossibleBuildings ), '(int32)16' ), ProvinceCanHavePort(ProvinceWindow.GetProvince))]"
-			#	blockoverride "PortItems" {
-			#		test123_build_item_port = { }
-			#	}
-			#	blockoverride "EducationItems" {
-			#		test123_build_item_school = { }
-			#		test123_build_item_university = { }
-			#	}
-			#	blockoverride "IndustrialItems" {
-			#		test123_build_item_industrial_estate = { }
-			#		test123_build_item_resource_gathering_operation = { }
-			#	}
-			#	blockoverride "InfrastructureItems" {
-			#		test123_build_item_sewer_infrastructure = { }
-			#		test123_build_item_hospital = { }
-			#		test123_build_item_canal = { }
-			#		test123_build_item_railway_upgrade = { }
-			#		test123_build_item_depot = { }
-			#	}
-			#	blockoverride "MilitaryItems" {
-			#		test123_build_item_fortress_building = { }
-			#		test123_build_item_arsenal_building = { }
-			#	}
-			#	blockoverride "UrbanDistrictsItems" {
-			#		test123_build_item_commerce_district = { }
-			#		test123_build_item_administration_district = { }
-			#		test123_build_item_residential_district = { }
-			#		test123_build_item_cultural_district = { }
-			#	}
-			#}
-			#building_box = { #река
-			#	visible = "[And(EqualTo_int32( GetDataModelSize( ProvinceWindow.GetPossibleBuildings ), '(int32)16' ), Not(ProvinceCanHavePort(ProvinceWindow.GetProvince)))]"
-			#	blockoverride "PortItems" {
-			#		ports_item_river_or_sea = { }
-			#	}
-			#	blockoverride "EducationItems" {
-			#		education_item_river_or_sea = { }
-			#	}
-			#	blockoverride "IndustrialItems" {
-			#		industrial_item_river_or_sea = { }
-			#	}
-			#	blockoverride "InfrastructureItems" {
-			#		infrastructure_item_river_or_sea = { }
-			#	}
-			#	blockoverride "MilitaryItems" {
-			#		military_item_river_or_sea = { }
-			#	}
-			#	blockoverride "UrbanDistrictsItems" {
-			#		urban_districts_item_river_or_sea = { }
-			#	}
-			#}
-			#building_box = { #река
-			#	visible = "[And(EqualTo_int32( GetDataModelSize( ProvinceWindow.GetPossibleBuildings ), '(int32)16' ), Not(ProvinceCanHavePort(ProvinceWindow.GetProvince)))]"
-			#	blockoverride "PortItems" {
-			#		test123_build_item_river_port = { }
-			#	}
-			#	blockoverride "EducationItems" {
-			#		test123_build_item_school = { }
-			#		test123_build_item_university = { }
-			#	}
-			#	blockoverride "IndustrialItems" {
-			#		test123_build_item_industrial_estate = { }
-			#		test123_build_item_resource_gathering_operation = { }
-			#	}
-			#	blockoverride "InfrastructureItems" {
-			#		test123_build_item_sewer_infrastructure = { }
-			#		test123_build_item_hospital = { }
-			#		test123_build_item_canal = { }
-			#		test123_build_item_railway_upgrade = { }
-			#		test123_build_item_depot = { }
-			#	}
-			#	blockoverride "MilitaryItems" {
-			#		test123_build_item_fortress_building = { }
-			#		test123_build_item_arsenal_building = { }
-			#	}
-			#	blockoverride "UrbanDistrictsItems" {
-			#		test123_build_item_commerce_district = { }
-			#		test123_build_item_administration_district = { }
-			#		test123_build_item_residential_district = { }
-			#		test123_build_item_cultural_district = { }
-			#	}
-			#}
-			#building_box = { #море + река
-			#	visible = "[EqualTo_int32( GetDataModelSize( ProvinceWindow.GetPossibleBuildings ), '(int32)17' )]"
-			#	blockoverride "PortItems" {
-			#		ports_item_river_and_sea = { }
-			#	}
-			#	blockoverride "EducationItems" {
-			#		education_item_river_and_sea = { }
-			#	}
-			#	blockoverride "IndustrialItems" {
-			#		industrial_item_river_and_sea = { }
-			#	}
-			#	blockoverride "InfrastructureItems" {
-			#		infrastructure_item_river_and_sea = { }
-			#	}
-			#	blockoverride "MilitaryItems" {
-			#		military_item_river_and_sea = { }
-			#	}
-			#	blockoverride "UrbanDistrictsItems" {
-			#		urban_districts_item_river_and_sea = { }
-			#	}
-			#}
-			#building_box = { #море + река
-			#	visible = "[EqualTo_int32( GetDataModelSize( ProvinceWindow.GetPossibleBuildings ), '(int32)17' )]"
-			#	blockoverride "PortItems" {
-			#		test123_build_item_port = { }
-			#		test123_build_item_river_port = { }
-			#	}
-			#	blockoverride "EducationItems" {
-			#		test123_build_item_school = { }
-			#		test123_build_item_university = { }
-			#	}
-			#	blockoverride "IndustrialItems" {
-			#		test123_build_item_industrial_estate = { }
-			#		test123_build_item_resource_gathering_operation = { }
-			#	}
-			#	blockoverride "InfrastructureItems" {
-			#		test123_build_item_sewer_infrastructure = { }
-			#		test123_build_item_hospital = { }
-			#		test123_build_item_canal = { }
-			#		test123_build_item_railway_upgrade = { }
-			#		test123_build_item_depot = { }
-			#	}
-			#	blockoverride "MilitaryItems" {
-			#		test123_build_item_fortress_building = { }
-			#		test123_build_item_arsenal_building = { }
-			#	}
-			#	blockoverride "UrbanDistrictsItems" {
-			#		test123_build_item_commerce_district = { }
-			#		test123_build_item_administration_district = { }
-			#		test123_build_item_residential_district = { }
-			#		test123_build_item_cultural_district = { }
-			#	}
-			#}
-			#flowcontainer = {
-			#	datamodel = "[ProvinceWindow.GetPossibleBuildings]"
-			#	#datamodel = "[ProvinceWindow.GetBuildInProvince]"
-			#	widget = {
-			#		size = { 55	80 }
-			#		building_item_button = {
-			#			datacontext = "[BuildingItem('EDU_school')]"
-			#			blockoverride "On_click" { 
-			#				onclick = "[BuildingItem.Build]" 
-			#				#enabled = "[Or( BuildingItem.CanBuild, BuildingItem.HasQueue )]"
-			#				onrightclick = "[BuildingItem.CancelOrDestroy]"
-			#			}
-			#			blockoverride "Text" { text = "[BuildingItem.GetLevel]" }
-			#			blockoverride "ExtraText" 
-			#			{
-			#				visible = "[BuildingItem.HasQueue]"
-			#				text = "+[BuildingItem.GetQueueSize]"
-			#			}
-
-			#			blockoverride "Tooltip" {
-			#				text = "Awooga!"
-			#			}
-			#		}
-			#	}
-			#}
 			margin_widget = {
-				size = { 370 80 }
+				size = { 100% 80 }
 				margin_top = 12
 				margin_right = 22
 				scrollarea = {
-					size = { 100% 38 }
+					size = { 250 38 }
 					scrollbarpolicy_horizontal = always_off
 					parentanchor = top
 					scissor = yes
@@ -5660,8 +5449,6 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 						overlappingitembox = {
 							name = "queued_buildings_grid"
 							size = { 100% 100% }
-							#datamodel_wrap = 1
-							
 							datamodel = "[ProvinceWindow.GetQueuedBuildings]"
 							
 							item = {
@@ -5688,16 +5475,10 @@ text = "#R [ProvinceWindow.GetState.GetGovernorship.MakeScope.GetVariable('short
 						}
 					}
 				}
-				tag = {
-					parentanchor = bottom
-					position = { 0 10 }
-					block "TagText" { text = "Buildings: [GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_num_used_slots')|0]/[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('JOBS_buildings_cap')|0]" }
-					tooltip = "1 building can be built for every 2 non-tribal pops up to a cap from #Y Depot#! buildings present #G +[GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).ScriptValue('province_industrialisation_percent')|%0]#! from industrialisation."
-				}
 				text_button_square_highlighted = {
 					visible = "[HasDlc('Heirs of Alexander')]"
 					parentanchor = right|bottom
-					position = { 0 10 }
+					position = { 0 -36 }
 					size = { 148 0 }
 					blockoverride "Center_text" { text = "OPEN_GREAT_WORKS" }
 					blockoverride "On_click" 

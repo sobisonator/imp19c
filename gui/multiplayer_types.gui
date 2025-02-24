@@ -1,0 +1,2139 @@
+types JominiServerBrowser {
+
+	type JominiMultiplayerPushButton = button {
+		block "jomini_multiplayer_push_button"
+		{
+			texture = "gfx/editor_gui/editor_button.dds"
+			gfxtype = framedbuttongfx
+			spriteType = CorneredStretched
+			spriteborder = { 4 4 }
+			effectname = "NoHighlight"
+			framesize = { 16 16 }
+			upframe = 1
+			downframe = 2
+			overframe = 3
+			disableframe = 4
+			intersectionmask = yes
+		}
+	}
+
+	type JominiServerBrowserWindow = window {
+		name = "JominiServerBrowser"
+		size = { 900 300 } 
+		visible = no
+		position = { 0 0 }
+		parentanchor = center
+		widgetanchor = center
+
+		block "serverbrowser_background" {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			texture = "gfx/editor_gui/editor_field.dds"
+			spriteType = CorneredStretched
+			spriteborder = { 6 6 }
+		}
+
+		vbox = {
+			block "serverbrowser_margin" {
+				margin = { 10 10 }
+			}
+
+			block "serverbrowser_header" {}
+
+			widget = {
+				size = { 100 50 }
+				layoutpolicy_horizontal = expanding
+
+				hbox = {
+					spacing = 10
+
+					JominiMultiplayerCheckbutton = {
+						blockoverride "checkbutton"
+						{
+							onclick = "[JominiServerBrowserGui.ToggleHasPasswordFilter]"
+							checked = "[Not( JominiServerBrowserGui.IsHasPasswordFilterSet )]"
+						}
+
+						blockoverride "label"
+						{
+							text = "JOMINI_MULTIPLAYER_GUI_SERVER_FILTER_LABEL_HAS_PASSWORD"
+						}
+					}
+
+					JominiMultiplayerCheckbutton = {
+						blockoverride "checkbutton"
+						{
+							onclick = "[JominiServerBrowserGui.ToggleSameVersionFilter]"
+							checked = "[JominiServerBrowserGui.IsSameVersionFilterSet]"
+						}
+
+						blockoverride "label"
+						{
+							text = "JOMINI_MULTIPLAYER_GUI_SERVER_FILTER_LABEL_SAME_VERSION"
+						}
+					}
+
+					JominiMultiplayerCheckbutton = {
+						visible = "[JominiMultiplayerIsCrossplayFilterAvailable]"
+
+						blockoverride "checkbutton"
+						{
+							onclick = "[JominiServerBrowserGui.ToggleCrossPlatformFilter]"
+							checked = "[JominiServerBrowserGui.IsCrossPlatformFilterSet]"
+							enabled = "[JominiMultiplayerIsCrossplayEnabled]"
+						}
+
+						blockoverride "label"
+						{
+							text = "JOMINI_MULTIPLAYER_GUI_SERVER_FILTER_LABEL_CROSSPLAY_ENABLED"
+						}
+					}
+
+					JominiMultiplayerTextbox = {
+						block "serverbrowser_emptyspace" {
+							text = "JOMINI_MULTIPLAYER_GUI_SERVER_SEARCH"
+							layoutpolicy_horizontal = fixed
+							autoresize = yes
+						}
+					}
+
+					JominiMultiplayerEditbox = {
+						ontextedited = "[JominiServerBrowserGui.OnFilterTextEdit]"
+						block "serverbrowser_searchbox" {}
+					}
+				}
+			}
+
+			widget = {
+				block "serverbrowser_top_spacer"
+				{
+					size = { 20 10 }
+					layoutpolicy_horizontal = expanding
+				}
+			}
+
+			widget = {
+				layoutpolicy_vertical = expanding
+				layoutpolicy_horizontal = expanding
+
+				hbox = {
+					widget = {
+						block "serverbrowser_haspassword_column_size" 
+						{
+							size = { 100 20 }
+						}
+					}
+
+					block "serverbrowser_divider" {}
+
+					widget = {
+						block "serverbrowser_servername_column_size" 
+						{
+							size = { 100 20 }
+						}
+					}
+
+					block "serverbrowser_divider" {}
+
+					widget = {
+						block "serverbrowser_version_column_size" 
+						{
+							size = { 100 20 }
+						}
+					}
+
+					block "serverbrowser_divider" {}
+
+					widget = {
+						block "serverbrowser_numplayers_column_size" 
+						{
+							size = { 100 20 }
+						}
+					}
+
+					block "serverbrowser_divider" {}
+
+					widget = {
+						block "serverbrowser_status_column_size" 
+						{
+							size = { 100 20 }
+						}
+					}
+
+					widget = {
+						layoutpolicy_horizontal = expanding
+					}
+				}
+
+				vbox = {
+					flowcontainer = {
+						layoutpolicy_horizontal = expanding
+						direction = horizontal
+
+						JominiMultiplayerPushButton = {
+							onclick = "[JominiServerBrowserGui.Sort( 'has_password' )]"
+							text = "JOMINI_MULTIPLAYER_GUI_SERVER_SORT_LABEL_PASSWORD"
+
+							block "serverbrowser_haspassword_column_size" 
+							{
+								size = { 100 20 }
+							}
+						}
+
+						block "serverbrowser_spacer_widget" {}
+
+						JominiMultiplayerPushButton = {
+							onclick = "[JominiServerBrowserGui.Sort( 'name' )]"
+							text = "JOMINI_MULTIPLAYER_GUI_SERVER_SORT_LABEL_SERVER_NAME"
+
+							block "serverbrowser_servername_column_size" 
+							{
+								size = { 100 20 }
+							}
+						}
+
+						block "serverbrowser_spacer_widget" {}
+
+						JominiMultiplayerPushButton = {
+							onclick = "[JominiServerBrowserGui.Sort( 'version' )]"
+							text = "JOMINI_MULTIPLAYER_GUI_SERVER_SORT_LABEL_VERSION"
+
+							block "serverbrowser_version_column_size"
+							{
+								size = { 200 20 }
+							}
+						}
+
+						block "serverbrowser_spacer_widget" {}
+
+						JominiMultiplayerPushButton = {
+							onclick = "[JominiServerBrowserGui.Sort( 'players_count' )]"
+							text = "JOMINI_MULTIPLAYER_GUI_SERVER_SORT_LABEL_PLAYERS"
+
+							block "serverbrowser_numplayers_column_size"
+							{
+								size = { 10 20 }
+							}
+						}
+
+						block "serverbrowser_spacer_widget" {}
+
+						JominiMultiplayerPushButton = {
+							onclick = "[JominiServerBrowserGui.Sort( 'status' )]"
+							text = "JOMINI_MULTIPLAYER_GUI_SERVER_SORT_LABEL_STATUS"
+
+							block "serverbrowser_status_column_size"
+							{
+								size = { 100 20 }
+							}
+						}
+					}
+
+					scrollarea = {
+						layoutpolicy_vertical = expanding
+						layoutpolicy_horizontal = preferred
+
+						scrollbarpolicy_vertical = as_needed
+						scrollbarpolicy_horizontal = always_off
+						scrollbaralign_vertical = right
+
+						scissor = yes
+						autoresizeviewport = yes
+						alwaystransparent = yes
+						
+						scrollbar_vertical = {
+							block "serverbrowser_scrollbar"
+							{
+								using = editor_vertical_scrollbar
+							}
+						}
+						
+						scrollwidget = {
+							vbox = {
+								fixedgridbox = {
+									addcolumn = 100%
+									block "serverbrowser_row_height"
+									{
+										addrow = 30
+									}
+
+									datamodel = "[JominiServerBrowserGui.AccessServers]"
+									item = {
+										flowcontainer = {
+											direction = horizontal
+												
+											widget = {
+												icon = {
+													texture = "gfx/interface/icons/has_password_icon.dds"
+													visible = "[JominiServer.GetHasPassword]"
+													tooltip = "JOMINI_MULTIPLAYER_GUI_SERVER_PASSWORD_PROTECTED_TOOLTIP"
+													parentanchor = hcenter
+													block "has_password_icon_properties" {
+													}
+												}
+
+												icon = {
+													texture = "gfx/interface/icons/no_password_icon.dds"
+													visible = "[Not(JominiServer.GetHasPassword)]"
+													tooltip = "JOMINI_MULTIPLAYER_GUI_SERVER_NOT_PASSWORD_PROTECTED_TOOLTIP"
+													parentanchor = hcenter
+													block "no_password_icon_properties" {
+													}
+												}
+
+												block "serverbrowser_haspassword_column_size" 
+												{
+													size = { 100 20 }
+												}
+											}
+
+											block "serverbrowser_spacer_widget" {}
+
+											JominiMultiplayerTextbox = {
+												text = "[JominiServer.GetName]"
+												align = vcenter|nobaseline
+												autoresize = no
+												elide = right
+
+												block "serverbrowser_servername_column_size" 
+												{
+													size = { 100 20 }
+												}
+											}
+
+											block "serverbrowser_spacer_widget" {}
+
+											JominiMultiplayerTextbox = {
+												text = "[JominiServer.GetVersion]"
+												align = vcenter|nobaseline
+												autoresize = no
+												elide = right
+
+												block "serverbrowser_version_column_size"
+												{
+													size = { 200 20 }
+												}
+											}
+
+											block "serverbrowser_spacer_widget" {}
+
+											JominiMultiplayerTextbox = {
+												text = "[JominiServer.GetNumPlayers] / [JominiServer.GetMaxPlayers]"
+												align = vcenter|nobaseline
+												autoresize = no
+												elide = right
+
+												block "serverbrowser_numplayers_column_size"
+												{
+													size = { 100 20 }
+												}
+											}
+
+											block "serverbrowser_spacer_widget" {}
+
+											JominiMultiplayerTextbox = {
+												text = "[JominiServer.GetStatus]"
+												autoresize = no
+												align = vcenter|nobaseline
+												elide = right
+
+												block "serverbrowser_status_column_size"
+												{
+													size = { 100 20 }
+												}
+											}
+
+											button = {
+												block "serverbrowser_join_button" {
+													texture = "gfx/editor_gui/editor_button.dds"
+													gfxtype = framedbuttongfx
+													spriteType = CorneredStretched
+													spriteborder = { 4 4 }
+													effectname = "NoHighlight"
+													framesize = { 16 16 }
+													upframe = 1
+													downframe = 2
+													overframe = 3
+													disableframe = 4
+													intersectionmask = yes
+													fontsize = 12
+													size = { 40 14 } 
+												}
+
+												onclick = "[JominiServer.Join]"
+												enabled = "[JominiServer.IsSameVersion]"
+												
+												tooltip_enabled = "[Not(JominiServer.IsSameVersion)]"
+												tooltip = "JOMINI_MULTIPLAYER_GUI_VERSION_MISMATCH_SERVER_BROWSER"
+												
+												text = "JOMINI_MULTIPLAYER_GUI_SERVER_BROWSER_JOIN_BUTTON_IN_LIST"
+											}
+										}
+									}
+								}
+
+								JominiMultiplayerTextbox = {
+									layoutpolicy_vertical = expanding
+									text = "JOMINI_MULTIPLAYER_SERVER_BROWSER_EMPTY"
+									autoresize = yes
+									visible = "[Or( IsDataModelEmpty( JominiServerBrowserGui.AccessServers ), JominiServerBrowserGui.IsRefreshing )]"
+								}
+							}
+						}
+					}
+				}
+			}
+
+			widget = {
+				block "serverbrowser_bottom_spacer"
+				{
+					size = { 20 10 }
+					layoutpolicy_horizontal = expanding
+				}
+			}
+
+			widget = {
+				block "serverbrowser_bottom_hbox" {
+					size = { 20 20 }
+				}
+				layoutpolicy_horizontal = expanding 
+				hbox = {
+					spacing = 10
+					JominiMultiplayerTextbox = {
+						text = "JOMINI_MULTIPLAYER_GUI_SERVER_BROWSER_ID_LABEL"
+						autoresize = yes
+					}
+
+					JominiMultiplayerEditbox = {
+						name = "server_id_editbox"
+					}
+
+					JominiMultiplayerPushButton = {
+						text = "JOMINI_MULTIPLAYER_GUI_SERVER_BROWSER_JOIN_SERVER_BUTTON"
+						size = { 200 20 }
+						onclick = "[JominiServerBrowserGui.JoinServerWithId]"
+						block "serverbrowser_join_server" {}
+					}
+				}
+			}
+		}
+	}
+
+	type JominiJoinServerDialogWindow = window {
+		name = "JominiJoinServerDialog"
+		modal = yes
+		modality = all
+
+		position = { 0 0 }
+		parentanchor = center
+		widgetanchor = center
+
+		size = { 300 75 } 
+
+		block "serverdialog_background" {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			texture = "gfx/editor_gui/editor_field.dds"
+			spriteType = CorneredStretched
+			spriteborder = { 6 6 }
+		}
+
+		vbox = {
+			spacing = 10
+			restrictparent_min = yes
+
+			block "serverdialog_margin" 
+			{
+				margin = { 10 10 }
+			}
+
+			hbox = {
+				spacing = 10
+				layoutpolicy_horizontal = expanding
+
+				JominiMultiplayerTextbox = {
+					text = "JOMINI_MULTIPLAYER_GUI_POPUP_PASSWORD"
+					autoresize = yes
+				}
+
+				JominiMultiplayerEditbox = {
+					name = "password"
+					password = yes
+					onreturnpressed = "[JominiPasswordPopup.OnSubmit]"
+					layoutpolicy_horizontal = expanding
+				}
+			}
+
+			hbox = {
+				spacing = 10
+				layoutpolicy_horizontal = expanding
+
+				JominiMultiplayerPushButton = {
+					block "serverbrowser_cancel_join_button"
+					{
+						text = "JOMINI_MULTIPLAYER_GUI_POPUP_DECLINE"
+						layoutpolicy_horizontal = expanding
+					}
+					onclick = "[JominiPasswordPopup.OnDecline]"
+					shortcut = close_window
+				}
+
+				JominiMultiplayerPushButton = {
+					block "serverbrowser_join_button"
+					{
+						text = "JOMINI_MULTIPLAYER_GUI_POPUP_SUBMIT"
+						layoutpolicy_horizontal = expanding
+					}
+					onclick = "[JominiPasswordPopup.OnSubmit]"
+				}
+			}
+		}
+	}
+}
+
+types JominiMultiplayerIngame {
+	type JominiMultiplayerJoinRequest = window {
+		name = "multiplayer_join_request_dialog"
+		visible = "[JominiHasPlayerJoinRequests]"
+
+		resizable = yes
+
+		minimumsize = { 100 300 }
+		widgetanchor = center
+		parentanchor = center
+
+		block "joinrequest_background" {
+			
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			texture = "gfx/editor_gui/editor_field.dds"
+			spriteType = CorneredStretched
+			spriteborder = { 6 6 }
+		}
+
+		vbox = {
+			block "joinrequest_margins" {}
+
+			restrictparent_min = yes
+
+			spacing = 10
+
+			textbox = {
+				text = "JOMINI_MULTIPLAYER_GUI_PLAYER_JOIN_REQUEST"
+				autoresize = yes
+				margin = { 5 5 }
+				block "joinrequest_font" {}
+			}
+
+			scrollarea = {
+				block "joinrequest_scrollarea_size" {}
+
+				layoutpolicy_vertical = expanding
+				layoutpolicy_horizontal = expanding
+
+				scrollbarpolicy_vertical   = as_needed
+				scrollbaralign_vertical = right
+				scrollbar_vertical = {
+					block "joinrequest_scrollbar" {
+						using = editor_vertical_scrollbar
+					}
+				}
+
+				scrollbarpolicy_horizontal = as_needed
+				scrollbaralign_horizontal = bottom
+				scrollbar_horizontal = {
+					using = editor_horizontal_scrollbar
+				}
+
+				scrollwidget = {
+					fixedgridbox = {
+						name = "player_request_list"
+
+						addcolumn = 100%
+						block "joinrequest_addrow" {
+							addrow = 20
+						}
+						setitemsizefromcell = yes
+
+						datamodel = "[JominiAccessPlayerJoinRequests]"
+
+						item = {
+							hbox = {
+								layoutpolicy_horizontal = expanding
+								layoutpolicy_vertical = fixed
+
+								size = { 0 40 }
+								spacing = 5
+
+								widget = { size = { 10 0 } }
+
+								textbox = {
+									text = "[PlayerJoinRequest.GetPlayerName]"
+									autoresize = yes
+									layoutpolicy_horizontal = expanding
+									layoutpolicy_vertical = expanding
+									block "joinrequest_playername" {}
+								}
+
+								button = { 
+									block "buttonstyle" {
+										size = { 75 20 }
+										layoutpolicy_horizontal = fixed
+										texture = "gfx/editor_gui/editor_button.dds"
+		   								gfxtype = framedbuttongfx
+		   								spriteType = CorneredStretched
+		   								spriteborder = { 4 4 }
+		   								effectname = "NoHighlight"
+		   								framesize = { 16 16 }
+		   								upframe = 1
+		   								downframe = 2
+		   								overframe = 3
+		   								disableframe = 4
+		   								intersectionmask = yes
+									}
+									name = "accept_button"
+									text = "JOMINI_MULTIPLAYER_GUI_PLAYER_JOIN_REQUEST_ACCEPT"
+									onclick = "[PlayerJoinRequest.Accept]"
+								}
+
+								button = { 
+									block "buttonstyle" {
+										size = { 75 20 }
+										layoutpolicy_horizontal = fixed
+										texture = "gfx/editor_gui/editor_button.dds"
+		   								gfxtype = framedbuttongfx
+		   								spriteType = CorneredStretched
+		   								spriteborder = { 4 4 }
+		   								effectname = "NoHighlight"
+		   								framesize = { 16 16 }
+		   								upframe = 1
+		   								downframe = 2
+		   								overframe = 3
+		   								disableframe = 4
+		   								intersectionmask = yes
+									}
+									
+									name = "reject_button"
+									text = "JOMINI_MULTIPLAYER_GUI_PLAYER_JOIN_REQUEST_REJECT"
+									onclick = "[PlayerJoinRequest.Reject]"
+									layoutpolicy_horizontal = fixed
+								}
+
+								widget = { size = { 10 0 } }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	type JominiMultiplayerOosMessage = window {
+		name = "multiplayer_oos_message"
+		size = { 600 700 }
+		parentanchor = center
+		visible = "[DataModelHasItems( OosWindow.GetOosData )]"
+
+		vbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+
+			block "oos_background" {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				texture = "gfx/editor_gui/editor_field.dds"
+				spriteType = CorneredStretched
+				spriteborder = { 6 6 }
+			}
+
+			margin = { 10 10 }
+			spacing = 5
+
+			textbox = {
+				text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_HEADER"
+				autoresize = yes
+				block "oos_textbox" {}
+			}
+
+			textbox = {
+				margin { 50 0 }
+				text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_MY"
+				minimumsize = { 0 50 }
+				multiline = yes
+				visible = "[OosWindow.IsLocalOos]"
+				layoutpolicy_horizontal = expanding
+				block "oos_textbox" {}
+			}
+
+			textbox = {
+				margin { 50 0 }
+				text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_DESC"
+				visible = "[Not( OosWindow.IsLocalOos )]"
+				minimumsize = { 0 50 }
+				multiline = yes
+				layoutpolicy_horizontal = expanding
+				block "oos_textbox" {}
+			}
+
+			textbox = {
+				margin { 50 0 }
+				text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_DESC_LOCAL"
+				visible = "[OosWindow.IsLocalOos]"
+				layoutpolicy_horizontal = expanding
+				block "oos_textbox" {}
+			}
+
+			scrollarea = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				scrollbarpolicy_horizontal = always_off
+
+				scrollbar_vertical = {
+					using = editor_vertical_scrollbar
+				}
+
+				scrollwidget = {
+					vbox = {
+						vbox = {
+							margin = { 5 5 }
+							layoutpolicy_horizontal = expanding
+							datamodel = "[OosWindow.GetOosData]"
+
+							item = {
+								vbox = {
+									block "oos_item" {
+										layoutpolicy_horizontal = expanding
+
+										textbox = {
+											text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_PLAYER_NAME"
+											max_width = 490
+											autoresize = yes
+											layoutpolicy_horizontal = expanding
+										}
+
+										textbox = {
+											text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_TYPE"
+											max_width = 490
+											autoresize = yes
+											layoutpolicy_horizontal = expanding
+										}
+
+										textbox = {
+											text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_FOLDER"
+											max_width = 490
+											autoresize = yes
+											layoutpolicy_horizontal = expanding
+											multiline = yes
+										}
+									}
+								}
+							}
+						}
+
+						widget = {
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = expanding
+						}
+					}
+				}
+			}
+
+			button = {
+				block "oos_button" {}
+				size = { 300 50 }
+				text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_CONTINUE"
+				onclick = "[OosWindow.Continue]"
+			}
+
+			button = {
+				block "oos_button" {}
+				size = { 300 50 }
+				text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_EXIT_BUTTON"
+				onclick = "[OosWindow.GoToMenu]"
+			}
+		}
+	}
+}
+
+types JominiMultiplayerFrontend
+{
+	type JominiMultiplayerFrontendView = widget {
+		name = "JominiMultiplayerView"
+		size = { 100% 100% }
+
+		block "background" {}
+		block "states" {}
+
+		block "menu" 
+		{
+			flowcontainer = {
+				block "menu_properties"
+				{
+					direction = vertical
+				}
+
+				block "menu_items"
+				{
+					JominiMultiplayerFrontEndButton = {
+						onclick = "[FrontEndMultiplayerView.OnBack]"
+						text = "JOMINI_MULTIPLAYER_GUI_SERVER_BROWSER_BACK_BUTTON"
+					}
+
+					JominiMultiplayerFrontEndButton = {
+						onclick = "[FrontEndMultiplayerView.OnLoad]"
+						text = "JOMINI_MULTIPLAYER_GUI_SERVER_BROWSER_LOAD_AND_HOST_BUTTON"
+					}
+					
+					JominiMultiplayerFrontEndButton = {
+						onclick = "[FrontEndMultiplayerView.OnHost]"
+						text = "JOMINI_MULTIPLAYER_GUI_SERVER_BROWSER_HOST_BUTTON"
+					}
+					
+					JominiMultiplayerFrontEndButton = {
+						onclick = "[JominiServerBrowserGui.RefreshServers]"
+						text = "JOMINI_MULTIPLAYER_GUI_SERVER_BROWSER_SCAN_BUTTON"
+					}
+					
+				}
+			}
+		}
+	}
+}
+
+types JominiMultiplayerSetup {
+	type JominiMultiplayerSetupEditBox = editbox {
+		align = left
+		alwaystransparent = no
+		focuspolicy = all
+		block "setup_editbox" {
+			font = "standard_cw_font"
+			fontsize = 13
+			fontcolor = { 1 1 1 1 }
+			cursorcolor = { 1 1 0.5 1 }
+	
+			background = {
+				margin_left = 5
+				margin_top = 0
+				texture = "gfx/editor_gui/editor_field.dds"
+				spriteType = CorneredStretched
+				spriteborder = { 4 4 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+			}
+		}
+	}
+	
+	type JominiMultiplayerSetupTextBox = textbox {
+		align = left
+		block "setup_textbox" {
+			font = "standard_cw_font"
+			fontsize = 13
+			fontcolor = { 1 1 1 1 }
+		}
+	}
+
+	type JominiMultiplayerSetupCheckButton = hbox {
+		layoutpolicy_horizontal = expanding
+		spacing = 10
+
+		checkbutton = { 
+			gfxtype = checkbuttongfx
+			shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+
+			block "setup_checkbutton" {
+				texture = "gfx/editor_gui/editor_checkbox.dds"
+				framesize = { 16 16 }
+			}
+
+			block "checkbutton" {}
+		}
+	
+		JominiMultiplayerSetupTextBox = {
+			layoutpolicy_horizontal = expanding
+			block "label" 
+			{
+				visible = no
+			}
+		}
+	}
+
+	type JominiMultiplayerSetup = window {
+		name = "JominiMultiplayerSetupWindow"
+
+		size = { 320 250 }
+		parentanchor = center
+		widgetanchor = center
+
+		alwaystransparent = no
+		resizable = yes
+		
+		background = {
+			block "background" {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				texture = "gfx/editor_gui/editor_window.dds"
+				spriteType = CorneredStretched
+				spriteborder = { 6 6 }
+				spriteborder_top = 30
+				gfxtype = windowgfx
+			}
+		}
+
+		block "background_border_header" {}
+	
+		vbox = {
+			restrictparent_min = yes
+			block "setup_margins" {
+				margin_left = 15
+				margin_right = 15
+				margin_top = 35
+				margin_bottom = 10
+				spacing = 10
+			}
+
+			JominiMultiplayerSetupCheckButton = {
+				blockoverride "checkbutton"
+				{
+					name = "mpconfig_offline"
+					checked = "[MultiplayerSetupWindow.GetMPConfig.IsOffline]"
+					onclick = "[MultiplayerSetupWindow.AccessMPConfig.SetOffline]"
+					tooltip = "[MultiplayerSetupWindow.GetMPConfig.GetPrivateToolTip]"
+					enabled = "[JominiIsMultiplayerAccessible]"
+				}
+
+				blockoverride "label"
+				{
+					text = "JOMINI_MULTIPLAYER_GUI_GAME_MODE_OFFLINE"
+				}
+			}
+
+			JominiMultiplayerSetupCheckButton = {
+				blockoverride "checkbutton"
+				{
+					name = "mpconfig_private"
+					checked = "[MultiplayerSetupWindow.GetMPConfig.IsPrivate]"
+					onclick = "[MultiplayerSetupWindow.AccessMPConfig.SetPrivate]"
+					tooltip = "[MultiplayerSetupWindow.GetMPConfig.GetPrivateToolTip]"
+					enabled = "[JominiIsMultiplayerAccessible]"
+				}
+
+				blockoverride "label"
+				{
+					text = "JOMINI_MULTIPLAYER_GUI_PRIVATE"
+				}
+			}
+
+			JominiMultiplayerSetupCheckButton = {
+				blockoverride "checkbutton"
+				{
+					name = "mpconfig_public"
+					checked = "[MultiplayerSetupWindow.GetMPConfig.IsPublic]"
+					onclick = "[MultiplayerSetupWindow.AccessMPConfig.SetPublic]"
+					tooltip = "[MultiplayerSetupWindow.GetMPConfig.GetPublicToolTip]"
+					enabled = "[JominiIsMultiplayerAccessible]"
+				}
+
+				blockoverride "label"
+				{
+					text = "JOMINI_MULTIPLAYER_GUI_PUBLIC"
+				}
+			}
+
+
+			hbox = {
+				spacing = 10
+				layoutpolicy_horizontal = expanding
+				restrictparent_min = yes
+				block "setup_hbox_height" {
+					layoutpolicy_vertical = expanding
+				}
+
+				widget = {
+					size = { 100 0 }
+					layoutpolicy_vertical = expanding
+					layoutpolicy_horizontal = fixed
+
+					vbox = {
+						spacing = 5
+
+						JominiMultiplayerSetupTextBox = {
+							text = "JOMINI_MULTIPLAYER_GUI_SERVER_NAME_LABEL"
+							layoutpolicy_horizontal = expanding
+							visible = "[Not(MultiplayerSetupWindow.GetMPConfig.IsOffline)]"
+						}
+
+						JominiMultiplayerSetupTextBox = {
+							text = "JOMINI_MULTIPLAYER_GUI_SERVER_PASSWORD_LABEL"
+							layoutpolicy_horizontal = expanding
+							visible = "[Not(MultiplayerSetupWindow.GetMPConfig.IsOffline)]"
+						}
+
+						block "game_options_left" {}
+					}
+				}
+
+
+				vbox = {
+					layoutpolicy_vertical = expanding
+					layoutpolicy_horizontal = expanding
+					spacing = 5
+
+					JominiMultiplayerSetupEditBox = {
+						name = "game_name"
+						size = { 0 30 }
+						block "setup_editbox_margins" {}
+						text = "[MultiplayerSetupWindow.GetDefaultServerName]"
+						tooltip = "JOMINI_MULTIPLAYER_GUI_SERVER_NAME"
+						visible = "[Not(MultiplayerSetupWindow.GetMPConfig.IsOffline)]"
+						layoutpolicy_horizontal = expanding
+						onreturnpressed = "[MultiplayerSetupWindow.Host]"
+					}
+
+					JominiMultiplayerSetupEditBox = {
+						name = "game_password"
+						size = { 0 30 }
+						block "setup_editbox_margins" {}
+						text = "[MultiplayerSetupWindow.GetDefaultServerPassword]"
+						tooltip = "JOMINI_MULTIPLAYER_GUI_SERVER_PASSWORD"
+						layoutpolicy_horizontal = expanding
+						visible = "[Not(MultiplayerSetupWindow.GetMPConfig.IsOffline)]"
+						onreturnpressed = "[MultiplayerSetupWindow.Host]"
+					}
+
+					block "game_options_right" {}
+				}
+			}
+
+			JominiMultiplayerSetupCheckButton = {
+				visible = "[MultiplayerSetupWindow.GetMPConfig.IsPrivate]"
+
+				blockoverride "checkbutton"
+				{
+					name = "hotjoin_autoaccept"
+					checked = "[MultiplayerSetupWindow.GetMPConfig.IsHotjoinAutoAccept]"
+					onclick = "[MultiplayerSetupWindow.AccessMPConfig.ToggleHotjoinAutoAccept]"
+					tooltip = "JOMINI_MULTIPLAYER_GUI_AUTO_ACCEPT_TT"
+					enabled = "[JominiIsMultiplayerAccessible]"
+				}
+
+				blockoverride "label"
+				{
+					autoresize = yes
+					text = "JOMINI_MULTIPLAYER_GUI_AUTO_ACCEPT"
+					tooltip = "JOMINI_MULTIPLAYER_GUI_AUTO_ACCEPT_TT"
+				}
+			}
+
+			JominiMultiplayerSetupCheckButton = {
+				visible = "[JominiMultiplayerIsCrossplayFilterAvailable]"
+
+				blockoverride "checkbutton"
+				{
+					name = "crossplay_status"
+					enabled = "[JominiMultiplayerIsCrossplayEnabled]"
+				}
+
+				blockoverride "label"
+				{
+					autoresize = yes
+					text = "JOMINI_MULTIPLAYER_GUI_SERVER_FILTER_LABEL_CROSSPLAY_ENABLED"
+				}
+			}
+
+
+			block "game_options_rows" {}
+
+			
+			widget = {
+				layoutpolicy_vertical = expanding
+			}
+
+			text_button_square = {
+				size = { 0 25 }
+				block "setup_host_button_size" {}
+				name = "host_button"
+				blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_SESSION_HOST" }
+				blockoverride "On_click" { onclick = "[MultiplayerSetupWindow.Host]" }
+				enabled = "[MultiplayerSetupWindow.CanHost]"
+				tooltip = "[MultiplayerSetupWindow.HostToolTip]"
+				layoutpolicy_horizontal = expanding
+			}
+		
+			text_button_square = {
+				name = "cancel_button"
+				size = { 0 25 }
+				block "setup_host_button_size" {}
+				blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_SESSION_CANCEL" }
+				blockoverride "On_click" { onclick = "[MultiplayerSetupWindow.Cancel]" }
+				layoutpolicy_horizontal = expanding
+				shortcut = "close_window"
+			}
+		}
+	}
+}
+
+template JominiLobbyViewModuleBackground {
+	block "lobby_module_background"
+	{
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		texture = "gfx/editor_gui/editor_field.dds"
+		spriteType = CorneredStretched
+		spriteborder = { 6 6 }
+	}
+}
+
+types JominiMultiplayerLobby
+{
+	# Button Style
+	type JominiLobbyViewButton = button {
+		block "buttonstyle" {
+			size = { 0 40 }
+			texture = "gfx/editor_gui/editor_button.dds"
+			gfxtype = framedbuttongfx
+			spriteType = CorneredStretched
+			spriteborder = { 4 4 }
+			effectname = "NoHighlight"
+			framesize = { 16 16 }
+			upframe = 1
+			downframe = 2
+			overframe = 3
+			disableframe = 4
+			intersectionmask = yes
+		}
+	}
+
+	type JominiLobbyObserverButton = button {
+		onclick = "[LobbyView.ToggleObserve]"
+		text = "[SelectLocalization(LobbyView.IsObserver, 'JOMINI_MULTIPLAYER_GUI_DISABLE_OBSERVE', 'JOMINI_MULTIPLAYER_GUI_OBSERVE')]"
+		tooltip = "JOMINI_MULTIPLAYER_GUI_OBSERVE_TOOLTIP"
+
+		block "buttonstyle" {
+			size = { 0 40 }
+			texture = "gfx/editor_gui/editor_button.dds"
+			gfxtype = framedbuttongfx
+			spriteType = CorneredStretched
+			spriteborder = { 4 4 }
+			effectname = "NoHighlight"
+			framesize = { 16 16 }
+			upframe = 1
+			downframe = 2
+			overframe = 3
+			disableframe = 4
+			intersectionmask = yes
+		}
+	}
+
+	type JominiLobbyRemovePlayer = button {
+		enabled = "[LobbyPlayer.CanRemovePlayer]"
+		visible = "[LobbyPlayer.CanRemovePlayer]"
+
+		onclick = "[LobbyPlayer.RemovePlayer]"
+
+		block "remove_player_button_style"
+		{
+			layoutpolicy_horizontal = fixed
+			size = { 20 20 }
+
+			texture = "gfx/editor_gui/editor_button.dds"
+			gfxtype = framedbuttongfx
+			spriteType = CorneredStretched
+			spriteborder = { 4 4 }
+			effectname = "NoHighlight"
+			framesize = { 16 16 }
+			upframe = 1
+			downframe = 2
+			overframe = 3
+			disableframe = 4
+			intersectionmask = yes
+			text = "K"
+		}
+	}
+	
+	type JominiLobbyViewServerInfoEntry = button {
+		block "server_info_entry_size"
+		{
+			size = { 0 20 }
+			layoutpolicy_horizontal = expanding
+		}
+
+		block "server_info_entry_styling"
+		{
+			font = "standard_cw_font"
+			align = left
+			fontsize = 13
+			fontcolor = { 1 1 1 1 }
+			alwaystransparent = no
+
+			background = {
+				margin_left = 5
+				margin_top = 0
+				texture = "gfx/editor_gui/editor_field.dds"
+				spriteType = CorneredStretched
+				spriteborder = { 4 4 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+			}
+		}
+	}
+	
+	# Hosting status
+	type JominiLobbyViewHostingStatus = vbox {
+		layoutpolicy_horizontal = expanding
+		visible = "[LobbyView.ShowHosting]"
+		
+		background = {
+			block "window_background" {
+				using = JominiLobbyViewModuleBackground
+			}
+		}
+		
+
+		JominiMultiplayerSetupTextBox = {
+			text = "JOMINI_MULTIPLAYER_GUI_HOSTING"
+			layoutpolicy_horizontal = expanding
+		}
+	}
+
+	# Error information
+	type JominiLobbyViewHostError = vbox {
+		layoutpolicy_horizontal = expanding
+		visible = "[HasHostError]"
+		block "error_bottom_margin" {
+		}
+		
+		background = {
+			block "window_background" {
+				using = JominiLobbyViewModuleBackground
+			}
+		}
+		
+		editbox = {
+			size = { 0 60 }
+			layoutpolicy_horizontal = expanding
+			text = "[GetHostError]"
+			align = center|center	
+			block "jomini_standard_textbox" {}		
+		}
+		
+		text_button_square = {
+			size = { 0 20 }
+			layoutpolicy_horizontal = expanding
+			block "lobbyview_button_size" {}
+			blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_CLOSE" }
+			blockoverride "On_click" { onclick = "[ClearHostError]" }
+		}
+	}
+
+	type JominiLobbyExpandButton = button {
+		block "expand_button_properties" {
+			size = { 20 20 }
+
+			texture = "gfx/editor_gui/editor_button.dds"
+			gfxtype = framedbuttongfx
+			spriteType = CorneredStretched
+			spriteborder = { 4 4 }
+			effectname = "NoHighlight"
+			framesize = { 16 16 }
+			upframe = 1
+			downframe = 2
+			overframe = 3
+			disableframe = 4
+	
+			text = ">"
+		}
+	}
+
+	type JominiLobbyCollapseButton = button {
+		block "collapse_button_properties" {
+			size = { 20 20 }
+			texture = "gfx/editor_gui/editor_button.dds"
+			gfxtype = framedbuttongfx
+			spriteType = CorneredStretched
+			spriteborder = { 4 4 }
+			effectname = "NoHighlight"
+			framesize = { 16 16 }
+			upframe = 1
+			downframe = 2
+			overframe = 3
+			disableframe = 4
+	
+			text = "v"
+		}
+	}
+
+	# The MP info widget displays the multiplayer information
+	type JominiLobbyViewMPInfo = vbox {
+		name = "mp_info"
+		layoutpolicy_horizontal = expanding
+		layoutpolicy_vertical = expanding
+
+		visible = "[LobbyView.HasServerInfo]"
+		alwaystransparent = no
+		filter_mouse = left|right
+
+		block "mp_info_properties" {
+			margin = { 10 10 }
+			spacing = 10
+			
+			background = {
+				using = JominiLobbyViewModuleBackground
+			}
+		}
+
+		JominiMultiplayerSetupCheckButton = {
+			blockoverride "checkbutton"
+			{
+				name = "mpconfig_private"
+				checked = "[LobbyView.GetServerInfo.IsInvite]"
+				onclick = "[LobbyView.ToggleVisibility]"
+				enabled = "[CanEditSettingsAfterHost]"
+			}
+
+			blockoverride "label"
+			{
+				text = "JOMINI_MULTIPLAYER_GUI_PRIVATE"
+			}
+		}
+
+		JominiMultiplayerSetupCheckButton = {
+			blockoverride "checkbutton"
+			{
+				name = "mpconfig_public"
+				checked = "[LobbyView.GetServerInfo.IsPublic]"
+				onclick = "[LobbyView.ToggleVisibility]"
+				enabled = "[CanEditSettingsAfterHost]"
+			}
+
+			blockoverride "label"
+			{
+				text = "JOMINI_MULTIPLAYER_GUI_PUBLIC"
+			}
+		}
+
+		vbox = {
+			spacing = 10
+			layoutpolicy_horizontal = expanding
+			restrictparent_min = yes
+			block "setup_hbox_height" {}
+
+			hbox = {
+				layoutpolicy_horizontal = expanding
+
+				JominiMultiplayerSetupTextBox = {
+					text = "JOMINI_MULTIPLAYER_GUI_SERVER_NAME"
+					layoutpolicy_horizontal = expanding
+				}
+
+				JominiMultiplayerSetupEditBox = {
+					name = "game_name"
+					size = { 0 30 }
+					block "setup_editbox_margins" {}
+					text = "[LobbyView.GetServerInfo.GetServerName]"
+					tooltip = "JOMINI_MULTIPLAYER_GUI_SERVER_NAME"
+					layoutpolicy_horizontal = expanding
+					onreturnpressed = "[LobbyView.SetName]"
+					ontextedited = "[LobbyView.OnNameEdit]"
+					enabled = "[CanEditSettingsAfterHost]"
+				}
+
+				text_button_square = {
+					size = { 30 30 }
+					block "text_edit_button" {}
+					enabled = "[CanEditSettingsAfterHost]"
+					visible = "[CanEditSettingsAfterHost]"
+					blockoverride "On_click" { onclick = "[LobbyView.SetName]" }
+					tooltip = "JOMINI_MULTIPLAYER_GUI_CHANGE_SERVER_NAME"
+				}
+			}
+
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				visible = "[JominiIsHostOrLocal]"
+
+				JominiMultiplayerSetupTextBox = {
+					text = "JOMINI_MULTIPLAYER_GUI_SERVER_PASSWORD"
+					layoutpolicy_horizontal = expanding
+				}
+
+				JominiMultiplayerSetupEditBox = {
+					name = "game_password"
+					size = { 0 30 }
+					block "setup_editbox_margins" {}
+					tooltip = "JOMINI_MULTIPLAYER_GUI_SERVER_PASSWORD"
+					layoutpolicy_horizontal = expanding
+					onreturnpressed = "[LobbyView.SetPassword]"
+					ontextedited = "[LobbyView.OnPasswordEdit]"
+					enabled = "[CanEditSettingsAfterHost]"
+				}
+
+				text_button_square = {
+					size = { 30 30 }
+					block "text_edit_button" {}
+					enabled = "[CanEditSettingsAfterHost]"
+					visible = "[CanEditSettingsAfterHost]"
+					blockoverride "On_click" { onclick = "[LobbyView.SetPassword]" }
+					tooltip = "JOMINI_MULTIPLAYER_GUI_CHANGE_SERVER_PASSWORD"
+				}
+			}
+
+			hbox = {
+				block "game_options_left" {}
+				block "game_options_right" {}
+			}
+		}
+
+		JominiMultiplayerSetupCheckButton = {
+			visible = "[And( LobbyView.GetServerInfo.IsInvite, JominiIsHostOrLocal)]"
+
+			blockoverride "checkbutton"
+			{
+				name = "hotjoin_autoaccept"
+				checked = "[LobbyView.IsAutoAccept]"
+				onclick = "[LobbyView.ToggleAutoAccept]"
+				tooltip = "JOMINI_MULTIPLAYER_GUI_AUTO_ACCEPT_TT"
+				enabled = "[CanEditSettingsAfterHost]"
+			}
+
+			blockoverride "label"
+			{
+				autoresize = yes
+				text = "JOMINI_MULTIPLAYER_GUI_AUTO_ACCEPT"
+				tooltip = "JOMINI_MULTIPLAYER_GUI_AUTO_ACCEPT_TT"
+			}
+		}
+
+		vbox = {
+			layoutpolicy_horizontal = expanding
+			spacing = 5
+
+			block "mp_info_header" {}
+
+			block "mp_info_left_info" {}
+
+			JominiLobbyViewServerInfoEntry = {
+				visible = "[LobbyView.GetServerInfo.HasServerID]"
+				text = "JOMINI_MULTIPLAYER_GUI_SERVER_ID"
+				tooltip = "JOMINI_MULTIPLAYER_GUI_SERVER_ID_TOOLTIP"
+				onclick = "[LobbyView.CopyServerID]"
+			}
+
+			JominiLobbyViewServerInfoEntry = {
+				text = "JOMINI_MULTIPLAYER_GUI_GAME_VERSION"
+				tooltip = "JOMINI_MULTIPLAYER_GUI_GAME_VERSION_TOOLTIP"
+			}
+		}
+
+		vbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = preferred 
+
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = preferred
+				spacing = 10
+				block "mp_info_margin" {}
+
+				JominiLobbyCollapseButton = {
+					enabled = "[LobbyView.HasEnabledDLCs]"
+					onclick = "[LobbyView.ToggleShowEnabledDLCs]"
+					visible = "[LobbyView.ShouldShowEnabledDLCs]"
+				}
+
+				JominiLobbyExpandButton = {
+					enabled = "[LobbyView.HasEnabledDLCs]"
+					onclick = "[LobbyView.ToggleShowEnabledDLCs]"
+					visible = "[Not(LobbyView.ShouldShowEnabledDLCs)]"
+				}
+
+				textbox = {
+					layoutpolicy_horizontal = expanding
+					text = "JOMINI_MULTIPLAYER_GUI_ENABLED_DLCS"
+					align = nobaseline
+					autoresize = yes
+					block "jomini_standard_textbox" {}
+				}
+			}
+
+			vbox = {
+				layoutpolicy_horizontal = expanding
+				block "mp_info_margin" {}
+				visible = "[LobbyView.ShouldShowEnabledDLCs]"
+				datamodel = "[LobbyView.GetEnabledDLCs]"
+				block "mp_info_item_spacing" {}
+
+
+				item = {
+					textbox = {
+						layoutpolicy_horizontal = expanding
+						text = "[CString.GetString]"
+						autoresize = yes
+						block "mp_info_item_background" {}
+					}
+				}
+			}
+		}
+
+		vbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = preferred 
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = preferred 
+				spacing = 10
+				block "mp_info_margin" {}
+
+				JominiLobbyCollapseButton = {
+					enabled = "[LobbyView.HasEnabledMods]"
+					onclick = "[LobbyView.ToggleShowEnabledMods]"
+					visible = "[LobbyView.ShouldShowEnabledMods]"
+				}
+
+				JominiLobbyExpandButton = {
+					enabled = "[LobbyView.HasEnabledMods]"
+					onclick = "[LobbyView.ToggleShowEnabledMods]"
+					visible = "[Not(LobbyView.ShouldShowEnabledMods)]"
+				}
+
+				textbox = {
+					layoutpolicy_horizontal = expanding
+					text = "JOMINI_MULTIPLAYER_GUI_ENABLED_MODS"
+					align = nobaseline
+					autoresize = yes
+					block "jomini_standard_textbox" {}
+				}
+			}
+
+			vbox = {
+				layoutpolicy_horizontal = expanding
+
+				datamodel = "[LobbyView.GetEnabledMods]"
+				visible = "[LobbyView.ShouldShowEnabledMods]"
+				block "mp_info_item_spacing" {}
+				block "mp_info_margin" {}
+				item = {
+					textbox = {
+						layoutpolicy_horizontal = expanding
+						text = "[CString.GetString]"
+						autoresize = yes
+						block "mp_info_item_background" {}
+					}
+				}
+			}
+		}
+
+		widget = {
+			layoutpolicy_vertical = growing
+			layoutpolicy_horizontal = growing
+		}
+	}
+
+	# The Host widget shows the host button
+	type JominiLobbyViewHost = vbox {
+		layoutpolicy_horizontal = expanding
+		visible = "[And(Not(HasHostError),Not(GameIsMultiplayer))]"
+		alwaystransparent = no
+		filter_mouse = left|right
+		
+		block "host_background" {
+			background = {
+				using = JominiLobbyViewModuleBackground
+			}
+		}
+		
+		text_button_square = {
+			block "host_button"
+			{
+				blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_HOST_BUTTON" }
+			}
+			
+			blockoverride "On_click" { onclick = "[LobbyView.OpenMultiplayer]" }
+			tooltip = "[LobbyView.GetOpenMultiplayerToolTip]"
+			
+			block "host_button_enabled"
+			{
+				enabled = "[And(JominiIsMultiplayerAccessible, JominiIsHostOrLocal)]"
+			}
+
+			layoutpolicy_horizontal = expanding
+		}
+	}
+	
+	# Playerlist item
+	type JominiLobbyViewPlayerItem = widget {
+		alwaystransparent = no
+		filter_mouse = left|right
+		
+		# Background
+		block "player_item_styling"
+		{
+			background = {
+				block "playerbackgroundstyle"
+				{
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					texture = "gfx/editor_gui/editor_tooltip.dds"
+					spriteType = CorneredStretched
+					spriteborder = { 2 2 }
+				}
+			}
+		}
+
+		hbox = {
+			widget = {
+				size = { 60 60 }
+				layoutpolicy_horizontal = fixed
+				layoutpolicy_vertical = expanding
+
+				# Game specific content to show
+				block "playerlist_playable" {}
+			}
+
+			block "playerlist_item_content" {
+				widget = {
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+
+					hbox = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+						margin = { 10 5 }
+
+						block "playable_icon" {}
+
+						vbox = {
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = expanding
+
+							hbox = {
+								layoutpolicy_horizontal = expanding
+
+								textbox = {
+									layoutpolicy_horizontal = expanding
+									text = "[LobbyPlayer.GetName]"
+
+								}
+
+								textbox = {
+									visible = "[LobbyPlayer.IsHost]"
+									text = "HOST"
+								}
+							}
+
+							hbox = {
+								spacing = 5
+								layoutpolicy_horizontal = expanding
+
+								# Readyness
+								block "readyness" {
+									hbox = {
+										textbox = {
+											layoutpolicy_horizontal = expanding
+											text = "JOMINI_MULTIPLAYER_GUI_READY"
+											visible = "[And( LobbyPlayer.IsReady, Not( LobbyPlayer.IsObserver ) )]"
+											align = nobaseline
+											autoresize = yes
+										}
+
+										textbox = {
+											layoutpolicy_horizontal = expanding
+											text = "JOMINI_MULTIPLAYER_GUI_NOT_READY"
+											visible = "[And( And( Not( LobbyPlayer.IsReady ), Not( LobbyPlayer.IsHotjoining ) ), Not( LobbyPlayer.IsObserver ) )]"
+											align = nobaseline
+											autoresize = yes
+										}
+
+										textbox = {
+											layoutpolicy_horizontal = expanding
+											text = "JOMINI_MULTIPLAYER_GUI_OBSERVER"
+											visible = "[LobbyPlayer.IsObserver]"
+											align = nobaseline
+											autoresize = yes
+										}
+
+										textbox = {
+											layoutpolicy_horizontal = expanding
+											visible = "[LobbyPlayer.IsHotjoining]"
+											text = "Joining ([LobbyPlayer.GetTransferProgress|0%])"
+											align = nobaseline
+										}
+									}
+								}
+
+								text_button_square = {
+									size = { 30 30 }
+									enabled = "[LobbyPlayer.CanRemovePlayer]"
+									visible = "[LobbyPlayer.CanRemovePlayer]"
+									blockoverride "On_click" { onclick = "[LobbyPlayer.RemovePlayer]" }
+									blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_PLAYER_KICK_BUTTON_LABEL" }
+									tooltip = "JOMINI_MULTIPLAYER_GUI_PLAYER_KICK_BUTTON_LABEL_TT"
+								}
+
+								text_button_square = {
+									size = { 30 30 }
+									visible = "[And( LobbyPlayer.IsLocalPlayer, LobbyPlayer.IsReady )]"
+									blockoverride "On_click" { onclick = "[LobbyView.ClearSelection]" }
+									tooltip = "JOMINI_MULTIPLAYER_GUI_CLEAR_SELECTION"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	# Playerlist widget
+	type JominiLobbyViewPlayerList = vbox {
+		layoutpolicy_vertical = expanding
+
+		background = {
+			using = JominiLobbyViewModuleBackground
+		}
+
+		vbox = {
+			layoutpolicy_vertical = expanding
+
+			JominiLobbyViewPlayerItem = {
+				size = { 370 90 }
+				datacontext = "[LobbyView.AccessLocalPlayer]"
+			}
+
+			JominiMultiplayerTextbox = {
+				minimumsize = { 370 50 }
+				margin_left = 20
+				text = "JOMINI_MULTIPLAYER_GUI_OTHER_PLAYERS_COUNT"
+			}
+
+			scrollarea = {
+				layoutpolicy_vertical = expanding
+				visible = "[GameIsMultiplayer]"
+				minimumsize = { 390 90 }
+
+				scrollbarpolicy_vertical   = as_needed
+				scrollbaralign_vertical = right
+				scrollbar_vertical = {
+					block "jomini_standard_vertical_scrollbar" {
+						using = editor_vertical_scrollbar
+					}
+				}
+
+				scrollbarpolicy_horizontal = as_needed
+				scrollbaralign_horizontal = bottom
+				scrollbar_horizontal = {
+					using = editor_horizontal_scrollbar
+				}
+
+				scrollwidget = {
+					flowcontainer = {
+						layoutpolicy_vertical = expanding
+						layoutpolicy_horizontal = expanding
+						alwaystransparent = no
+						filter_mouse = left|right
+						datamodel = "[LobbyView.Players]"
+						direction = vertical
+						ignoreinvisible = yes
+
+						block "player_list_properties" {}
+
+						item = {
+							JominiLobbyViewPlayerItem = {
+								size = { 370 90 }
+								visible = "[Not( LobbyPlayer.IsLocalPlayer)]"
+							}
+						}
+					}
+				}
+			}
+
+			widget = {
+				layoutpolicy_vertical = growing
+				layoutpolicy_horizontal = growing
+			}
+		}
+	}
+
+	type JominiLobbyViewBack = vbox {
+		layoutpolicy_horizontal = expanding
+		alwaystransparent = no
+		filter_mouse = left|right
+
+		background = {
+			using = JominiLobbyViewModuleBackground
+		}
+
+		text_button_square = {
+			enabled = "[LobbyView.CanGoBack]"
+			tooltip = "[LobbyView.GetGoBackToolTip]"
+
+			block "lobby_view_back_onclick"
+			{
+				blockoverride "On_click" { onclick = "[LobbyView.GoBack]" }
+			}
+
+			blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_SESSION_BACK" }
+			layoutpolicy_horizontal = expanding
+		}
+	}
+
+	# Selection widget
+	type JominiLobbyViewSelectionWidget = vbox {
+		layoutpolicy_vertical = expanding
+		layoutpolicy_horizontal = expanding
+		alwaystransparent = no
+		filter_mouse = left|right
+
+		background = {
+			using = JominiLobbyViewModuleBackground
+		}
+
+		widget = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			visible = "[Not(LobbyView.HasSelectedPlayable)]"
+			JominiMultiplayerTextbox = {
+				size = { 100% 100% }
+				align = center|center
+				text = "JOMINI_MULTIPLAYER_GUI_SELECT_PLAYABLE"
+			}
+		}
+
+		# Playable Selected
+		widget = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+
+			block "selected_playable_widget" {
+				container = {
+					visible = "[LobbyView.HasSelectedPlayable]"
+
+					block "selected_playable" {
+						state = {
+							name = "jomini_preselected_changed"
+							alpha = 0.5
+						}
+					}
+				}
+			}
+		}
+
+		block "game_rules" {}
+
+		text_button_square = {
+			layoutpolicy_horizontal = expanding
+			maximumsize = { 400 40 }
+			blockoverride "Center_text" { text = "[LobbyView.GetSelectText]" }
+			blockoverride "On_click" {
+				onclick = "[LobbyView.ControlSelected]"
+				onclick = "[LobbyView.Ready]"
+			}
+			tooltip = "[LobbyView.GetControlToolTip]"
+			enabled = "[LobbyView.CanControlSelected]"
+		}
+	}
+
+	# Game Info Panel
+	type JominiLobbyViewGameInfoPanel = vbox {
+		size = { 0 0 }
+		layoutpolicy_horizontal = expanding
+		alwaystransparent = no
+		filter_mouse = left|right
+
+		background = {
+			using = JominiLobbyViewModuleBackground
+		}
+
+		block "game_info" {
+		}
+	}
+	
+	# Module for preparation specific stuff
+	type JominiLobbyViewPreparation = vbox {
+		layoutpolicy_horizontal = expanding
+		visible = "[IsPreparationLobby]"
+		alwaystransparent = no
+		filter_mouse = left|right
+
+		background = {
+			using = JominiLobbyViewModuleBackground
+		}
+
+		JominiMultiplayerTextbox = {
+			layoutpolicy_horizontal = expanding
+			visible = "[And(Not(LobbyView.IsReady),Not(PlayerIsHost))]"
+			name = "not_ready_info"
+			minimumsize = { 0 78 }
+			multiline = yes
+			align = center|center
+			text = "JOMINI_MULTIPLAYER_GUI_SELECT_PLAYABLE"
+		}
+
+		JominiMultiplayerTextbox = {
+			layoutpolicy_horizontal = expanding
+			visible = "[And(LobbyView.IsReady,Not(PlayerIsHost))]"
+			name = "ready_info"
+			minimumsize = { 0 78 }
+			multiline = yes
+			align = center|center
+			text = "JOMINI_MULTIPLAYER_GUI_WAIT_HOST_START"
+		}
+
+		text_button_square = {
+			visible = "[PlayerIsHost]"
+			blockoverride "On_click" { onclick = "[LobbyView.Start]" }
+			enabled = "[LobbyView.CanStart]"
+			tooltip = "[LobbyView.StartToolTip]"
+			blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_START" }
+			layoutpolicy_horizontal = expanding
+		}
+	}
+	
+	type JominiLobbyViewEndPreparationConfirmation = widget {
+		name = "JominiMultiplayerEndPreparationConfirmation"
+
+		block "properties"
+		{
+			size = { 300 200 }
+			parentanchor = center
+			widgetanchor = center
+			modal = yes
+			modality = all
+		}
+
+		block "background"
+		{
+			background = {
+				using = JominiLobbyViewModuleBackground
+			}
+		}
+		
+		block "content" 
+		{
+			textbox = {
+				name = "info"
+				size = { 100% 50% }
+				multiline = yes
+				align = center|center
+				text = "JOMINI_MULTIPLAYER_GUI_CONFIRMATION"
+			}
+			
+			text_button_square = {
+				blockoverride "On_click" { onclick = "[EndPrepConfirm.Cancel]" }
+				size = { 50% 20% }
+				blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_CANCEL" }
+				parentanchor = bottom|left
+				widgetanchor = bottom|left
+			}
+			
+			text_button_square = {
+				blockoverride "On_click" { onclick = "[EndPrepConfirm.Confirm]" }
+				size = { 50% 20% }
+				blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_CONFIRM" }
+				parentanchor = bottom|right
+				widgetanchor = bottom|right
+			}
+		}
+	}
+
+	type JominiMultiplayerLobby = widget {
+		name = "lobbyview"
+		size = { 100% 100% }
+	
+		block "left_panel"
+		{
+			widget = {
+				block "left_panel_properties"
+				{
+					size = { 390 100% }
+				}
+
+				vbox = {
+					block "left_panel_content"
+					{
+						JominiLobbyViewBack = {}
+						JominiLobbyViewHost = {}
+						JominiLobbyViewHostError = {}
+						JominiLobbyViewHostingStatus = {}
+
+						hbox = {
+							layoutpolicy_horizontal = expanding
+							visible = "[GameIsMultiplayer]"
+							background = {
+								using = JominiLobbyViewModuleBackground
+							}
+
+							text_button_square = {
+								layoutpolicy_horizontal = expanding
+								name = "show_players"
+								maximumsize = { 200 40 }
+								blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_SHOW_PLAYERS" }
+								enabled = "[GameIsMultiplayer]"
+								visible = "[GameIsMultiplayer]"
+								blockoverride "On_click" { onclick = "[LobbyView.SetShowPlayerList('(bool)yes')]" }
+								tooltip = "JOMINI_MULTIPLAYER_GUI_SHOW_PLAYERS_TT"
+
+								block "host_modify_button" {
+									layoutpolicy_horizontal = expanding
+								}
+							}
+
+							text_button_square = {
+								layoutpolicy_horizontal = expanding
+								name = "show_settings"
+								maximumsize = { 200 40 }
+								blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_SHOW_SETTINGS" }
+								enabled = "[GameIsMultiplayer]"
+								visible = "[GameIsMultiplayer]"
+								blockoverride "On_click" { onclick = "[LobbyView.SetShowPlayerList( '(bool)no' )]" }
+								tooltip = "JOMINI_MULTIPLAYER_GUI_SHOW_SETTINGS_TT"
+
+								block "host_modify_button" {
+									layoutpolicy_horizontal = expanding
+								}
+							}
+						}
+
+						JominiLobbyViewMPInfo = {
+							visible = "[And( GameIsMultiplayer, Not( LobbyView.ShowPlayerList ) )]"
+						}
+
+						JominiLobbyViewPlayerList = {
+							layoutpolicy_vertical = expanding
+							layoutpolicy_horizontal = expanding
+							visible = "[And( GameIsMultiplayer, LobbyView.ShowPlayerList )]"
+						}
+
+						widget = {
+							layoutpolicy_vertical = growing
+							layoutpolicy_horizontal = growing
+						}
+					}
+				}
+			}
+		}
+
+		block "observer_button"
+		{
+			JominiLobbyObserverButton = {
+				parentanchor = bottom|left
+				size = { 200 40 }
+				position = { 400 0 }
+
+				block "lobby_observer_button" {
+
+				}
+			}
+		}
+
+		block "right_panel"
+		{
+			widget = {
+				parentanchor = top|right
+				widgetanchor = top|right
+
+				block "right_panel_properties" 
+				{
+					size = { 370 100% }
+				}
+
+				vbox = {
+					block "right_panel_content"
+					{
+						JominiLobbyViewGameInfoPanel = {}
+						JominiLobbyViewSelectionWidget = {}
+						JominiLobbyViewPreparation = {}
+					}
+				}
+
+			}
+		}
+	}
+}
+
+template JominiDefaultButtonProperties {
+	block "button_style"
+	{
+		texture = "gfx/editor_gui/editor_button.dds"
+		gfxtype = framedbuttongfx
+		spriteType = CorneredStretched
+		spriteborder = { 4 4 }
+		framesize = { 16 16 }
+		upframe = 1
+		downframe = 2
+		overframe = 3
+		disableframe = 4
+	}
+}
+	
+types JominiMultiplayerGameTypes
+{
+	type JominiMultiplayerFrontEndButton = button {
+		using = JominiDefaultButtonProperties
+		size = { 200 50 }
+	}
+
+	type JominiMultiplayerSortButtonAsc = button {
+		block "asc_button_properties" {
+			using = JominiDefaultButtonProperties
+			size = { 15 12 }
+			text = "^"
+		}
+		layoutpolicy_horizontal = fixed
+	}
+
+	type JominiMultiplayerSortButtonDesc = button {
+		
+		block "desc_button_properties" {
+			using = JominiDefaultButtonProperties
+			text = "v"
+			size = { 15 12 }
+		}
+		layoutpolicy_horizontal = fixed
+	}
+
+	type JominiMultiplayerCheckbutton = container {
+		block "serverbrowser_checkbutton" {
+			checkbutton = {
+				gfxtype = checkbuttongfx
+				shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+				parentanchor = vcenter
+				texture = "gfx/editor_gui/editor_checkbox.dds"
+				framesize = { 16 16 }
+				
+				block "checkbutton" {}
+			}
+			
+			JominiMultiplayerTextbox = {
+				
+				position = { 20 0 }
+				autoresize = yes
+				
+				block "label"
+				{
+					text = "Label"
+				}
+			}
+		}
+	}
+
+	type JominiMultiplayerTextbox = textbox {
+		align = left
+		block "jominimultiplayertextbox" {
+			font = "standard_cw_font"
+			fontsize = 13
+			fontcolor = { 1 1 1 1 }
+		}
+	}
+
+	type JominiMultiplayerEditbox = editbox {
+		focuspolicy = all
+		layoutpolicy_horizontal = expanding
+		alwaystransparent = no
+
+		block "jominimultiplayereditbox" {
+			font = "standard_cw_font"
+			
+			size = { 100 24 }
+		
+			background = {
+				margin_left = 5
+				margin_top = -2
+				texture = "gfx/editor_gui/editor_field.dds"
+				spriteType = CorneredStretched
+				spriteborder = { 4 4 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+			}
+		}
+	}
+}

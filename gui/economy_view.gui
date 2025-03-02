@@ -30,19 +30,21 @@ types economy_types {
 	}
 }
 
+@mincategorybuttonwidth = 181
+@maxcategorybuttonwidth = 181
+@mincategorybuttonheight = 42
+@maxcategorybuttonheight = 42
+@window_width = 640
+@window_height = 900
+
 base_window = {
 	gfxtype = windowgfx
 	name = "economy_view"
 	parentanchor = top|left
-	size = { 640 900 }
+	size = { @window_width @window_height }
 	widgetanchor = top|left
 	movable = no
 	using = main_window_template
-	using = FadeStates
-
-	using = advice_trigger_highlights
-	
-	### Audio ###
 	state = {
 		name = _show
 		start_sound = {
@@ -59,104 +61,80 @@ base_window = {
 	}
 	
 	vbox = {
-		using = MainWindowHeaderBox
-
-		blockoverride "FlagOrIcon"
-		{
-			icon = {
-				texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
-				framesize = { 100 100 }
-				frame = 6
-				position = { -2 -2 }
-				size = { 32 32 }
-				modify_texture = {
-					texture = "gfx/interface/icons/menu_buttons/menu_economy.dds"
-					blend_mode = alphamultiply
-				}
-			}
-		}
-
-		blockoverride "Title_text"
-		{
-			text = "ECONOMY_MENU_HEADER"
-		}
-
-		blockoverride "White_buttons" 
-		{
-			button_back = { 
-				shortcut = "previous_window"
-				onclick = "[EconomyView.OnPrevious]"
-				tooltip = "PREVIOUS_ECONOMY_VIEW"
-			}
-			
-			button_close = {
-				onclick = "[EconomyView.OnClose]"
-				tooltip = "CLOSE"
-				shortcut = "close_window"
-			}
+		widget = {
+			size = { @window_width 12 }
+			using = MainWindowHeaderLine
 		}
 		margin_widget = {
-			name = "tabs"
-			size = { 100% 48 }
+			size = { @window_width 58 }
 			layoutpolicy_horizontal = expanding
-			@mincategorybuttonwidth = 181
-			@maxcategorybuttonwidth = 181
-			@mincategorybuttonheight = 28 
-			@maxcategorybuttonheight = 34
-			sub_header_v = {
-				size = { 256 0 }
-				position = { 8 8 }
-				blockoverride "Title_text" { visible = no text = "" }	
-				blockoverride "Max_text_width" { max_width = 230 }
-			}
-			icon = {
-				position = { 2 42 }
-				using = brighten_red_background
-				spriteType = Corneredtiled
-				size = { 264 2 }
-			}
-			icon = {
-				position = { 632 42 }
-				using = brighten_red_background
-				spriteType = Corneredtiled
-				size = { 5 2 }
-			}
 			hbox = { 
 				layoutpolicy_vertical = preferred
 				layoutpolicy_horizontal = expanding
-				spacing = 2
-				margin_right = 10
-				margin_top = 4
-				hbox = { layoutpolicy_horizontal = expanding }
-				category_tab = {
-					blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
-					blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
-					blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue('economy_tabs', 'national_economy'))]" }
-					blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue('economy_tabs', 'national_economy')]" }
-					######## Shared Overrides
-					blockoverride "Center_text" { text = "National Economy" }
-					######## Small Button Overrides
-					blockoverride "ClickFunction"
+				spacing = -2
+				margin_widget = {
+					using = MainWindowHeaderContentLeft
+					blockoverride "Title_text" { text = "ECONOMY_MENU_HEADER" }
+					blockoverride "FlagOrIcon"
 					{
-						onclick = "[GetVariableSystem.Set('economy_tabs', 'national_economy')]"
+						icon = {
+							using = gold_background
+							size = { 32 32 }
+							modify_texture = {
+								texture = "gfx/interface/icons/menu_buttons/menu_economy.dds"
+								blend_mode = alphamultiply
+							}
+						}
 					}
 				}
-				category_tab = {
-					blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
-					blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
-					blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue('economy_tabs', 'global_economy'))]" }
-					blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue('economy_tabs', 'global_economy')]" }
-					######## Shared Overrides
-					blockoverride "Center_text" { text = "Global Economy" }
-					######## Small Button Overrides
-					blockoverride "ClickFunction"
-					{
-						onclick = "[GetVariableSystem.Set('economy_tabs', 'global_economy')]"
+				flowcontainer = {
+					spacing = 2
+					category_tab = {
+						blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+						blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+						blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue('economy_tabs', 'national_economy'))]" }
+						blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue('economy_tabs', 'national_economy')]" }
+						######## Shared Overrides
+						blockoverride "Center_text" { text = "National Economy" }
+						######## Small Button Overrides
+						blockoverride "ClickFunction"
+						{
+							onclick = "[GetVariableSystem.Set('economy_tabs', 'national_economy')]"
+						}
 					}
-				} 
+					category_tab = {
+						blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+						blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+						blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue('economy_tabs', 'global_economy'))]" }
+						blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue('economy_tabs', 'global_economy')]" }
+						######## Shared Overrides
+						blockoverride "Center_text" { text = "Global Economy" }
+						######## Small Button Overrides
+						blockoverride "ClickFunction"
+						{
+							onclick = "[GetVariableSystem.Set('economy_tabs', 'global_economy')]"
+						}
+					}
+				}
+				margin_widget = {
+					using = MainWindowHeaderContentRight
+					blockoverride "White_buttons" 
+					{
+						button_back = { 
+							shortcut = "previous_window"
+							onclick = "[EconomyView.OnPrevious]"
+							tooltip = "PREVIOUS_ECONOMY_VIEW"
+						}
+						
+						button_close = {
+							onclick = "[EconomyView.OnClose]"
+							tooltip = "CLOSE"
+							shortcut = "close_window"
+						}
+					}
+				}
 			}
 		}
-		
 		vbox = {
 			layoutpolicy_vertical = expanding
 			layoutpolicy_horizontal = expanding
@@ -603,7 +581,7 @@ base_window = {
 							name = "income header"
 							position = { 5 0 }
 							using = NoninteractableBG
-							sub_header = {
+							sub_header_v = {
 								size = { 206 0 }
 								position = { -8 -2 }
 								blockoverride "Title_text" { text = "Treasury income" }
@@ -623,10 +601,10 @@ base_window = {
 							name = "income_grid"
 							direction = vertical
 							spacing = 5
-							position = { 0 47 }
-							item_income_1 = { }
-							item_income_2 = { }
-							item_income_3 = { }
+							position = { 0 40 }
+							item_income_taxes = { }
+							item_income_commerce = { }
+							item_income_tributes = { }
 						}
 					}
 					container = {
@@ -636,7 +614,7 @@ base_window = {
 							name = "expenses header"
 							position = { 5 0 }
 							using = NoninteractableBG
-							sub_header = {
+							sub_header_v = {
 								size = { 206 0 }
 								position = { -8 -2 }
 								blockoverride "Title_text" { text = "EXPENSES_HEADER" }
@@ -657,11 +635,11 @@ base_window = {
 							direction = vertical
 							spacing = 5
 							position = { 0 47 }
-							item_expense_1 = { }
-							item_expense_2 = { }
-							item_expense_3 = { }
-							item_expense_4 = { }
-							item_expense_5 = { }
+							item_expense_army = { }
+							item_expense_fleet = { }
+							item_expense_tributes = { }
+							item_expense_forts = { }
+							item_expense_wages = { }
 						}
 					}
 				}

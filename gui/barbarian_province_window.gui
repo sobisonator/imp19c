@@ -1,0 +1,182 @@
+base_window = {
+	name = "barbarian_province_window"
+	position = { 68 0 }
+	parentanchor = bottom|left
+	layer = middle
+	size = { 376 270 }
+	movable = no
+	
+	visible = "[BarbarianProvinceView.HasProvince]"
+	
+	state = {
+		name = _show
+		
+		start_sound = {
+			soundeffect = "event:/SFX/UI/Province/sfx_ui_province_select"
+		}
+	}
+	
+	vbox = {
+		using = MainWindowHeaderBox
+		
+		blockoverride "Title_text"
+		{
+			text = "[BarbarianProvinceView.GetProvince.GetName]"
+			fontsize_min = 14
+			elide = right
+			max_width = 270
+		}
+
+		blockoverride "Max_header_pattern_width" 
+		{
+			layoutpolicy_horizontal = preferred
+		}
+		
+		blockoverride "White_buttons"
+		{
+			button_close = {
+				onclick = "[BarbarianProvinceView.OnClose]"
+				tooltip = "CLOSE"
+			}
+		}
+
+		vbox = {
+			layoutpolicy_vertical = expanding
+			layoutpolicy_horizontal = expanding
+			
+			margin_widget = {
+				size = { 368 62 }
+				icon = {
+					name = "terrain_icon"
+					size = { 100% 100% }
+					visible = "[BarbarianProvinceView.GetProvince.GetTerrain.IsValid]"
+					texture = "[GetTerrainIconBig(BarbarianProvinceView.GetProvince.GetTerrain)]"
+					#tooltip = "[BarbarianProvinceView.GetProvince.GetTerrain.GetTooltip]"
+					#tooltipwidget = { #Intentional.
+					#	terrain_tooltip_base = {
+					#		datacontext = "[BarbarianProvinceView.GetProvince.GetTerrain]"
+					#		
+					#	}
+					#}
+					modify_texture = {
+						name = "area"
+						texture = "gfx/interface/icons/military_traditions/mt_owned_1.dds"
+						#texture = "gfx/interface/base_parts/portrait_x32y32bd_alpha.dds"
+						blend_mode = alphamultiply
+						SpriteType = corneredtiled
+						spriteborder = { 12 8 }
+					}
+				}
+				icon = {
+					name = "terrain_icon2"
+					size = { 100% 100% }
+					visible = "[Not( BarbarianProvinceView.GetProvince.GetTerrain.IsValid )]"
+					texture = "gfx/interface/icons/terrain/plains_big.dds"
+					modify_texture = { 
+						name = "area"
+						texture = "gfx/interface/icons/military_traditions/mt_owned_1.dds"
+						#texture = "gfx/interface/base_parts/portrait_x32y32bd_alpha.dds"
+						blend_mode = alphamultiply
+						SpriteType = corneredtiled
+						spriteborder = { 12 8 }
+					}
+				}
+			}
+			
+			margin_widget = {
+				size = { 0 120 }
+				margin = { 12 8 }
+				layoutpolicy_horizontal = expanding
+				flowcontainer = {
+					direction = vertical
+					parentanchor = bottom
+					position = { 0 8 }
+					spacing = 3
+					icon_and_text = {
+						name = "province_combat_width"
+						size = { 98 0 }
+						tooltip = "[BarbarianProvinceView.GetProvince.GetCombatWidthTooltip]"
+						blockoverride "Icon"
+						{
+							texture = "gfx/interface/icons/diplomatic_status/war.dds"
+						}
+						blockoverride "Text"
+						{
+							text = "[BarbarianProvinceView.GetProvince.GetCombatWidth]"
+						}
+					}
+					icon_and_text = {
+						size = { 98 0 }
+						blockoverride "Icon" { using = icon_civilization }
+						blockoverride "Text" { text = "[FixedPointToInt(BarbarianProvinceView.GetProvince.GetCivilizationValue)]" }
+						tooltip = "[BarbarianProvinceView.GetProvince.GetCivilizationTooltip]"
+					}
+					icon_and_text = {
+						size = { 98 0 }
+						blockoverride "Icon" { texture = "gfx/interface/province/barbarian_power.dds" }
+						blockoverride "Text" { text = "[BarbarianProvinceView.GetProvince.GetBarbarianPower|2]" }
+						tooltip = "[BarbarianProvinceView.GetProvince.GetBarbarianPowerTooltip]"
+					}
+					icon_and_text = {
+						size = { 98 0 }
+						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/supply_limit.dds" }
+						blockoverride "Text" { text = "[BarbarianProvinceView.GetSupplyLimit|2]" }
+						tooltip = "[BarbarianProvinceView.GetSupplyLimitDescription]"
+					}
+				}
+				
+				flowcontainer = {
+					parentanchor = bottom|right
+					direction = vertical
+					spacing = 8
+					icon_and_text = {
+						size = { 188 0 } 
+						blockoverride "Icon" { using = icon_religious }
+						blockoverride "Text" { text = "[BarbarianProvinceView.GetProvince.GetReligion.GetName]" }
+					}
+					icon_and_text = {
+						size = { 188 0 } 
+						blockoverride "Icon" { using = icon_culture }
+						blockoverride "Text" { text = "[BarbarianProvinceView.GetProvince.GetCulture.GetName]" }
+					}
+				}
+				
+				margin_widget = {
+					size = { 174 32 }
+					parentanchor = top|right
+					widgetanchor = bottom|right
+					position = { -2 22 }
+					margin = { 8 0 }
+					using = NoninteractableBG
+					blockoverride "Margins" { margin = { 4 4 } }
+					
+					overlappingitembox = {
+						datamodel = "[BarbarianProvinceView.GetProvince.GetTemporaryModifiers]"
+						position = { 0 0 }
+						size = { 150 30 }
+						spacing = 5
+						
+						item = {
+							modifier_icon = {
+								datacontext = "[TimedModifier.GetModifier]"
+								tooltip = "[TimedModifier.GetTooltip]"
+							}
+						}
+					}
+				
+					textbox = {
+						visible = "[IsDataModelEmpty(BarbarianProvinceView.GetProvince.GetTemporaryModifiers)]"
+						tooltip = NO_CURRENT_MODIFIERS_PROVINCE
+						size = { 100% 100% }
+						using = MarbleButtonFontS
+						text = None
+						align = center|nobaseline
+					}
+				}
+				
+			}
+			
+		}
+		
+	}
+}

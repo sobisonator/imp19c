@@ -1,18 +1,19 @@
-@window_margin_left = 20
-@window_margin_right = 20
-@window_margin_top = 0
-@window_margin_bottom = 0
+@mincategorybuttonwidth = 120
+@maxcategorybuttonwidth = 120
+@mincategorybuttonheight = 28 
+@maxcategorybuttonheight = 34
+@window_width = 700
+@window_height = 900
 
 base_window = {
 	name = "diplomatic_view"
-	size = { 640 900 }
+	size = { @window_width @window_height }
 	allow_outside = yes
-	#using = FadeStates
 	state = {
 		name = _show
-		
-		on_start = "[PdxGuiTriggerAllAnimations('instantiate_then_hide_subwindow')]"
+		on_start = "[GetVariableSystem.Set( 'diplomatic_windows', 'clear' )]"
 		on_start = "[GetVariableSystem.Set( 'diplomatic_tabs', 'diplomatic' )]"
+		on_start = "[GetVariableSystem.Set( 'relation_subjects', 'close' )]"
 		start_sound = {
 			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
 		}
@@ -27,87 +28,76 @@ base_window = {
 		on_start = "[GetVariableSystem.Set( 'diplomatic_tabs', 'diplomatic' )]"
 		on_start = "[GetScriptedGui('remove_player_subjects_variables_button').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
 	}
-
-	vbox = {
-		using = MainWindowHeaderBox
-
-		blockoverride "FlagOrIcon"
-		{
-			icon = {
-				texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
-				framesize = { 100 100 }
-				frame = 6
-				position = { -2 -2 }
-				size = { 32 32 }
-				modify_texture = {
-					texture = "gfx/interface/icons/menu_buttons/menu_diplomacy.dds"
-					blend_mode = alphamultiply
+	flowcontainer = {
+		direction = vertical
+		widget = {
+			size = { @window_width 48 }
+			using = MainWindowHeaderBox
+			blockoverride "Title_text" { text = "DIPLOMACY_MENU_HEADER" }
+			blockoverride "FlagOrIcon"
+			{
+				icon = {
+					texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
+					framesize = { 100 100 }
+					frame = 6
+					position = { -2 -2 }
+					size = { 32 32 }
+					modify_texture = {
+						texture = "gfx/interface/icons/menu_buttons/menu_diplomacy.dds"
+						blend_mode = alphamultiply
+					}
 				}
 			}
-		}
-
-		blockoverride "Title_text"
-		{
-			text = "DIPLOMACY_MENU_HEADER"
-		}
-		blockoverride "White_buttons" 
-		{
-			button_back = { 
-				shortcut = "previous_window"
-				onclick = "[DiplomaticView.OnPrevious]"
-				tooltip = "PREVIOUS_DIPLOMATIC_VIEW"
-			}
-			
-			button_close = {
-				onclick = "[DiplomaticView.OnClose]"
-				onclick = "[GetVariableSystem.Set( 'diplomatic_tabs', 'diplomatic' )]"
-				onclick = "[GetScriptedGui('remove_player_subjects_variables_button').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-				tooltip = "CLOSE"
-				shortcut = "close_window"
+			blockoverride "White_buttons" 
+			{
+				button_back = { 
+					shortcut = "previous_window"
+					onclick = "[DiplomaticView.OnPrevious]"
+					tooltip = "PREVIOUS_DIPLOMATIC_VIEW"
+				}
+				
+				button_close = {
+					onclick = "[DiplomaticView.OnClose]"
+					onclick = "[GetVariableSystem.Set( 'diplomatic_tabs', 'diplomatic' )]"
+					onclick = "[GetScriptedGui('remove_player_subjects_variables_button').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+					tooltip = "CLOSE"
+					shortcut = "close_window"
+				}
 			}
 		}
 		margin_widget = {
-			size = { 100% 140 }
-			layoutpolicy_horizontal = expanding
-			hbox = {
-				margin_left = -2
-				margin_top = 5
-				icon = {
-					size = { 635 182 }
-					using = black_background
-					modify_texture = {
-						blend_mode = alphamultiply
-						texture = "gfx/interface/base_parts/horizontal_gradient_stretch_sides_black.dds"
-					}
-					modify_texture = {
-						blend_mode = alphamultiply
-						texture = "gfx/interface/base_parts/gradient_black.dds"
-					}
+			size = { @window_width 158 }
+			icon = {
+				size = { @window_width 182 }
+				position = { 0 2 }
+				using = black_background
+				using = border3
+				modify_texture = {
+					blend_mode = alphamultiply
+					texture = "gfx/interface/base_parts/horizontal_gradient_stretch_sides_black.dds"
+				}
+				modify_texture = {
+					blend_mode = alphamultiply
+					texture = "gfx/interface/base_parts/gradient_black.dds"
 				}
 			}
-		
-			hbox = {
-				layoutpolicy_horizontal = expanding
+			flowcontainer = {
+				margin = { 10 10 }
 				flowcontainer = {
 					direction = vertical
-					ignoreinvisible = yes
-					widget = {
-						size = { 3 3 }	
-					}
+					spacing = 15
 					panelka_left = { #religion
 						size = { 200 32 }
 						blockoverride "Icon" { texture = "gfx/interface/icons/powers/religious.dds" }
 						blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetReligion.GetName]" }
 						blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetReligion.GetTooltip]" }
 					}
-					widget = { size = { 0 10 } }
 					panelka_left = { #culture
 						size = { 160 32 }
 						blockoverride "Icon" { texture = "gfx/interface/icons/governor_policies/cultural_assimilation.dds" }
 						blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetName]" }
 						blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetTooltip]" }
 					}
-					widget = { size = { 0 10 } }
 					panelka_left = { #manpower
 						size = { 120 32 }
 						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/manpower.dds" }
@@ -116,11 +106,10 @@ base_window = {
 					}
 				}
 				widget = {
-					size = { 220 140 }
+					size = { 280 140 }
 					icon = { #flag
 						parentanchor = hcenter|top
 						size = { 120 100 }
-						position = { 0 11 }
 						banner_migrant_horde = {
 							datacontext = "[DiplomaticView.GetTargetCountry]"
 							visible = "[DiplomaticView.GetTargetCountry.HasRank('(int32)0')]"
@@ -158,18 +147,12 @@ base_window = {
 					icon = { #country name
 						parentanchor = hcenter|bottom
 						size = { 220 40 }
+						position = { 0 18 }
 						icon_and_text = {
 							size = { 220 40 }
-							position = { 0 20 }
 							tooltip = "[DiplomaticView.GetTargetCountry.GetName]"
-							blockoverride "LineSize"
-							{
-								size = { 220 4 }
-							} 
-							blockoverride "Icon"
-							{
-								visible = no
-							}
+							blockoverride "LineSize" { size = { 220 4 } } 
+							blockoverride "Icon" { visible = no }
 							blockoverride "Text"
 							{
 								position = { 0 0 }
@@ -183,24 +166,19 @@ base_window = {
 				}
 				flowcontainer = {
 					direction = vertical
-					ignoreinvisible = yes
-					widget = {
-						size = { 3 3 }	
-					}
+					spacing = 15
 					panelka_right = { #treasury
 						size = { 200 32 }
 						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
 						blockoverride "TextBox" { text = "[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('DIPLOMACY_power')|0]" }
 						blockoverride "Tooltip" { tooltip = "Diplomatic power)" }
 					}
-					widget = { size = { 0 10 } }
 					panelka_right = { #pop
 						size = { 160 32 }
 						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/pop_type.dds" }
 						blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetTotalPopulation]" }
 						blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.BuildTotalPopulationToolTip]" }
 					}
-					widget = { size = { 0 10 } }
 					panelka_right = { #stability
 						size = { 120 32 }
 						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/stability.dds" }
@@ -215,7 +193,7 @@ base_window = {
 				cpt_button = {
 					parentanchor = left|vcenter
 					size = { 50 77 }
-					position = { 165 20 }
+					position = { 205 20 }
 					block "Context" 
 					{
 						datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
@@ -225,7 +203,7 @@ base_window = {
 				cpt_button = {
 					parentanchor = left|vcenter
 					size = { 50 77 }
-					position = { 165 20 }
+					position = { 205 20 }
 					block "Context" 
 					{
 						visible = "[DiplomaticView.GetTargetCountry.IsBarbarian]"
@@ -235,7 +213,7 @@ base_window = {
 				cpt_button = {
 					parentanchor = right|vcenter
 					size = { 50 77 }
-					position = { -165 20 }
+					position = { -205 20 }
 					block "Context" 
 					{
 						datacontext = "[DiplomaticView.GetTargetCountry.MakeScope.Var('monarch_character').GetCharacter]"
@@ -247,7 +225,7 @@ base_window = {
 					name = "civil_war_pie"
 					size = { 42 42 }
 					parentanchor = left|vcenter
-					position = { 122 44 }
+					position = { 152 44 }
 					visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
 					tooltip = "[DiplomaticView.GetTargetCountry.GetPossibleCivilWarTooltip]"
 					tooltip_offset = { 20 20 }
@@ -303,56 +281,54 @@ base_window = {
 				button_round = {
 					size = { 40 40 }
 					parentanchor = right|vcenter
-					position = { -122 44 }
+					position = { -152 44 }
 					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/population.dds" }
 					blockoverride "On_click" { onclick = "[DiplomaticView.ViewCharacters]" }
 					tooltip = "SHOW_THEIR_CHARACTERS"
 				}
 			}
 		}
-
 		margin_widget = {
-			size = { 0 50 }
-			layoutpolicy_horizontal = expanding
-			sub_header_v = {
-				size = { 378 0 }
-				position = { 8 12 }
-				blockoverride "Title_text" 
-				{
-					text = "Government"
-				}	
-				blockoverride "Max_text_width"
-				{
-					max_width = 230
-				}
+			size = { @window_width 48 }
+			icon = {
+				position = { 2 42 }
+				using = brighten_red_background
+				size = { 446 2 }
 			}
 			icon = {
-				position = { 2 46 }
+				position = { 688 42 }
 				using = brighten_red_background
-				spriteType = Corneredtiled
-				size = { 386 2 }
-			}
-			icon = {
-				position = { 628 46 }
-				using = brighten_red_background
-				spriteType = Corneredtiled
 				size = { 9 2 }
 			}
-			hbox = {
+			hbox = { 
 				spacing = 2
-				margin_top = 10
-				margin_right = 10
+				margin = { 10 0 }
+				margin_top = 4
 				@mincategorybuttonwidth = 120
 				@maxcategorybuttonwidth = 120
 				@mincategorybuttonheight = 28 
 				@maxcategorybuttonheight = 34
 
-				hbox = { layoutpolicy_horizontal = expanding }
+				margin_widget = {
+					layoutpolicy_horizontal = expanding
+					sub_header = {
+						position = { 0 3 }
+						visible = "[GetVariableSystem.HasValue('diplomatic_tabs', 'diplomatic')]"
+						blockoverride "Title_text"  { text = "government_view" }
+						blockoverride "Max_text_width" { max_width = 230 }
+					}
+					sub_header = {
+						position = { 0 3 }
+						visible = "[GetVariableSystem.HasValue('diplomatic_tabs', 'subjects')]"
+						blockoverride "Title_text"  { text = "subject_view" }
+						blockoverride "Max_text_width" { max_width = 230 }
+					}
+				}
 				category_tab = {
 					blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
 					blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
 					blockoverride "MinVisible" { visible = "[And( Not( GetVariableSystem.HasValue('diplomatic_tabs', 'diplomatic')), GetVariableSystem.Exists('diplomatic_tabs'))]" }
-					blockoverride "MaxVisible" { visible = "[Or( GetVariableSystem.HasValue( 'diplomatic_tabs', 'diplomatic'), Not( GetVariableSystem.Exists('diplomatic_tabs') ) )]" }
+					blockoverride "MaxVisible" { visible = "[Or( GetVariableSystem.HasValue('diplomatic_tabs', 'diplomatic'), Not( GetVariableSystem.Exists('diplomatic_tabs') ) )]" }
 					######## Shared Overrides
 					blockoverride "Center_text" { text = "DIPLOMATIC" }
 					blockoverride "Icon" { visible = no }
@@ -365,7 +341,7 @@ base_window = {
 				}  
 
 				category_tab = {
-					enabled = "[Not(And( Not( EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ) ), Not(DiplomaticView.GetTargetCountry.IsBarbarian) ))]"
+					blockoverride "Enabled" { enabled = "[Not(And( Not( EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ) ), Not(DiplomaticView.GetTargetCountry.IsBarbarian) ))]" }
 					blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
 					blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
 					blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue('diplomatic_tabs', 'subjects'))]" }
@@ -381,139 +357,1146 @@ base_window = {
 					}
 				}
 			}
-			icon = {
-				visible = "[Not( GetVariableSystem.HasValue('diplomatic_tabs', 'subjects'))]"
-				position = { 506 46 }
-				using = brighten_red_background
-				spriteType = Corneredtiled
-				size = { 126 2 }
-			}
 		}
-
-		################################################################
-		########Subjects view#########################################
-		################################################################
-		vbox = {
+		flowcontainer = {
+			direction = vertical
+			margin = { 10 10 }
+			ignoreinvisible = yes
+			################################################################
+			########Diplomatic view#########################################
+			################################################################
 			flowcontainer = {
-				visible = "[Not(IsDataModelEmpty(Player.MakeScope.GetList('player_subjects')))]"
+				direction = vertical
+				visible = "[GetVariableSystem.HasValue( 'diplomatic_tabs', 'diplomatic' )]"
+				state = { 
+					name = _hide
+					on_start = "[GetVariableSystem.Set( 'diplomatic_windows', 'clear' )]"
+					on_start = "[DiplomaticView.HideStances]" 
+				}
 				flowcontainer = {
-					parentanchor = bottom
+					name = "diplo_view_second_row"
 					ignoreinvisible = yes
-					text_button_square_highlighted = {
-						size = { 240 28 }
-						layoutpolicy_horizontal = expanding
-						blockoverride "Center_text"
-						{
-							text = "show_national_interactions"
+					margin_top = -5
+					flowcontainer = {
+						direction = vertical
+						visible = "[DiplomaticView.GetTargetCountry.IsBarbarian]"
+						margin_left = 12
+						sub_header = {
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = fixed
+							widgetanchor = top 
+							size = { 100% 30 }
+							blockoverride "Title_text"
+							{
+								datacontext = "[DiplomaticView.GetHorde]"
+								text = "HORDE_UI_STRING"
+							}
 						}
-						blockoverride "On_click"
-						{
-							onclick = "[PdxGuiTriggerAllAnimations('on_subject_shown')]"
-						}
-						tooltip = "show_national_interactions"
-						state = {
-							name = instantiate_then_hide_subwindow
-							on_finish = "[PdxGuiWidget.Show]"
-						}
-						state = {
-							name = "on_subject_shown"
-							on_start = "[PdxGuiWidget.Hide]"
-						}
-						state = {
-							name = "on_subject_hidden"
-							on_start = "[PdxGuiWidget.Show]"
+						icon = {
+							texture = "gfx/interface/event_window/Event_revolt.dds"
+							size = { 260 105 }
 						}
 					}
-					text_button_square_highlighted = {
-						size = { 240 28 }
-						visible = no
-						layoutpolicy_horizontal = expanding
-						blockoverride "Center_text"
-						{
-							text = "show_national_interactions"
+					flowcontainer = {
+						direction = vertical
+						spacing = 10
+						margin_left = 10
+						visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+						panelka_center = { #GDP
+							size = { 130 32 }
+							datacontext = "[DiplomaticView.GetTargetCountry]"
+							#blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/naval_combat.dds" }
+							blockoverride "TextBox" { text = "£[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('WEALTH_total_private_moveable_wealth')|3]" }
+							blockoverride "Tooltip" { tooltip = "GDP" }
 						}
-						blockoverride "On_click"
-						{
-							onclick = "[PdxGuiTriggerAllAnimations('on_subject_hidden')]"
+						panelka_center = { # % of global shipping controlled
+							size = { 130 32 }
+							#blockoverride "Icon" { texture = "" }
+							blockoverride "TextBox" { text = "[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('TRADE_percentage_of_global_shipping')|%]" }
+							blockoverride "Tooltip" { tooltip = "SHIPPING_CONTROLLED_TT" }
 						}
-						tooltip = "show_national_interactions"
-						state = {
-							name = instantiate_then_hide_subwindow
-							on_finish = "[PdxGuiWidget.Hide]"
+						panelka_center = { # Quarterly trading activity value 
+							size = { 130 32 }
+							#blockoverride "Icon" { texture = "" }
+							blockoverride "TextBox" { text = "£[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('TRADE_activity_value')|3]" }
+							blockoverride "Tooltip" { tooltip = "TRADE_ACTIVITY_VALUE_TT" }
 						}
-						state = {
-							name = "on_subject_shown"
-							on_start = "[PdxGuiWidget.Show]"
+					}
+					flowcontainer = {
+						direction = vertical
+						spacing = 10
+						visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+						panelka = { #capital
+							size = { 210 32 }
+							blockoverride "TextBox" { text = "capita_dip" }
 						}
-						state = {
-							name = "on_subject_hidden"
-							on_start = "[PdxGuiWidget.Hide]"
+						panelka = { #population
+							size = { 210 32 }
+							blockoverride "TextBox" { text = "NATIONAL_POPULATION" }
+						}
+						panelka = { #cities
+							size = { 210 32 }
+							blockoverride "TextBox" { text = "provinces_dip" }
+						}
+					}
+					flowcontainer = {
+						direction = vertical
+						spacing = 20
+						visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+						textbox = {
+							size = { 330 10 }
+							visible = "[DiplomaticView.GetTargetCountry.MakeScope.Var('member_of_federation').IsSet]"
+							align = hcenter
+							fontsize = 16
+							using = BaseFontM
+							using = Black_FontColor
+							text = "FEDERATION_MEMBERSHIP"
+						}
+						textbox = {
+							size = { 330 10 }
+							align = hcenter
+							using = BaseFontM
+							using = Black_FontColor
+							text = "[DiplomaticView.GetTargetCountry.GetGovernment.GetName]"
+						}
+						container = {
+							parentanchor = hcenter
+							flowcontainer = {
+								position = { 0 3 }
+								spacing = 16
+								name = "dummy_ideas_grid" 
+										
+								container = {
+									button = {
+										name = "space1"
+										using = idea_slot_not_available
+										size = { 42 42 }
+									}
+								}
+								container = {
+									button = {
+										name = "space2"
+										using = idea_slot_not_available
+										size = { 42 42 }
+									}
+								}
+								container = {
+									button = {
+										name = "space3"
+										using = idea_slot_not_available
+										size = { 42 42 }
+									}
+								}
+								container = {
+									button = {
+										name = "space4"
+										using = idea_slot_not_available
+										size = { 42 42 }
+										
+									}
+								}
+							} 
+								
+							fixedgridbox = {
+								position = { 0 -1 }
+								name = "ideas_grid"
+								flipdirection = yes
+								addcolumn = 58
+								addrow = 50
+								maxhorizontalslots = 4
+								maxverticalslots = 1
+								item = {
+									widget = { 
+										datacontext = "[IdeaItem.GetIdea]" 
+										size = { 50 50 }
+										icon_card_idea = {
+											name = "Idea Button"
+											size = { 48 48 }
+											position = { -4 0 }
+											widgetanchor = center
+											parentanchor = center
+											visible = "[IdeaItem.IsValid]"
+											blockoverride "Icon" { 
+												texture = "[IdeaItem.GetIcon]"
+												size = { 40 40 }
+											}
+											tooltipwidget = idea_item_desc_tooltip
+											using = DropShadow
+										}
+										 
+										button = {
+											name = "Idea Button Invalid"
+											position = { -5 0 }
+											# tooltip = "NO_IDEA_FOREIGN"
+											tooltipwidget = no_idea_tooltip
+											visible = "[Not(IdeaItem.IsValid)]"
+											alwaystransparent = no
+											size = { 50 50 }
+											gfxtype = buttongfx
+											widgetanchor = center
+											parentanchor = center	
+											enabled = no
+											using = beige_background
+											alpha = 0.5
+											widget = {
+												size = { 100% 100% }
+												background = {
+													shaderfile = "gfx/FX/pdxgui_default.shader"
+													using = portrait_x32y32bd_alpha
+													texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+													alpha = 0.3
+													modify_texture = {
+														texture = "gfx/interface/base_parts/button_vignette.dds"
+														blend_mode = alphamultiply
+														spriteType = corneredtiled
+														spriteborder = { 20 20 }
+													}
+												}
+												background = {
+													shaderfile = "gfx/FX/pdxgui_default.shader"
+													using = beige_background
+													using = portrait_x32y32bd_alpha
+													alpha = 2.0
+													margin = { -3 -3 }
+												}
+											}
+											icon = {
+												name = "Idea Mark"
+												alpha = 2.0
+												widgetanchor = center
+												parentanchor = center	
+												texture = "gfx/interface/base_parts/idea_mark.dds"
+												size = { 36 36 }
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					#hbox = {
+					#	margin_widget = {
+					#		size = { 150 134 }
+					#		allow_outside = yes
+					#		datacontext = "[DiplomaticView.GetTargetCountry]"
+					#		icon = {
+					#			position = { 28 67 }
+					#			alpha = 0.4
+					#			icon = {
+					#				texture = "gfx/interface/gov_view/laws_republic.dds"
+					#				spriteType = corneredtiled
+					#				size = { 250 60 }
+					#				position = { 0 6 }
+					#				parentanchor = bottom|hcenter
+					#				visible = "[DiplomaticView.GetTargetCountry.GetGovernment.IsRepublic]"
+					#				datacontext = "[DiplomaticView]"
+					#				tooltip = "TARGET_GOVTYPE_DIPLO_TT"
+					#				modify_texture = {
+					#					name = "Alpha"
+					#					texture = "gfx/interface/base_parts/horizontal_gradient_stretch_sides_black_invert_terrain.dds"
+					#					blend_mode = alphamultiply
+					#					spriteType = Corneredtiled
+					#					spriteborder = { 60 2 }
+					#				}
+					#				modify_texture = {
+					#					name = "Alpha"
+					#					texture = "gfx/interface/base_parts/gradient_black_short.dds"
+					#					blend_mode = alphamultiply
+					#					spriteType = Corneredtiled
+					#					spriteborder = { 60 2 }
+					#				}
+					#			} 
+								
+					#			icon = {
+					#				texture = "gfx/interface/gov_view/laws_monarchy.dds"
+					#				spriteType = corneredtiled
+					#				size = { 250 60 }
+					#				position = { 0 6 }
+					#				parentanchor = bottom|hcenter
+					#				visible = "[DiplomaticView.GetTargetCountry.GetGovernment.IsMonarchy]"
+					#				datacontext = "[DiplomaticView]"
+					#				tooltip = "TARGET_GOVTYPE_DIPLO_TT"
+					#				modify_texture = {
+					#					name = "Alpha"
+					#					texture = "gfx/interface/base_parts/horizontal_gradient_stretch_sides_black_invert_terrain.dds"
+					#					blend_mode = alphamultiply
+					#					spriteType = Corneredtiled
+					#					spriteborder = { 60 2 }
+					#				}
+					#				modify_texture = {
+					#					name = "Alpha"
+					#					texture = "gfx/interface/base_parts/gradient_black_short.dds"
+					#					blend_mode = alphamultiply
+					#					spriteType = Corneredtiled
+					#					spriteborder = { 60 2 }
+					#				}
+					#			} 
+								
+					#			icon = {
+					#				texture = "gfx/interface/gov_view/laws_tribal.dds"
+					#				spriteType = corneredtiled
+					#				size = { 250 60 }
+					#				position = { 0 6 }
+					#				parentanchor = bottom|hcenter
+					#				visible = "[DiplomaticView.GetTargetCountry.GetGovernment.IsTribal]"
+					#				datacontext = "[DiplomaticView]"
+					#				tooltip = "TARGET_GOVTYPE_DIPLO_TT" 
+					#				modify_texture = {
+					#					name = "Alpha"
+					#					texture = "gfx/interface/base_parts/horizontal_gradient_stretch_sides_black_invert_terrain.dds"
+					#					blend_mode = alphamultiply
+					#					spriteType = Corneredtiled
+					#					spriteborder = { 60 2 }
+					#				}
+					#				modify_texture = {
+					#					name = "Alpha"
+					#					texture = "gfx/interface/base_parts/gradient_black_short.dds"
+					#					blend_mode = alphamultiply
+					#					spriteType = Corneredtiled
+					#					spriteborder = { 60 2 }
+					#				}
+					#			}
+					#		}
+
+					#	}
+					#}
+				}
+				flowcontainer = {
+					name = "diplo_view_third_row"
+					margin = { 8 0 }
+					margin_top = 5
+					spacing = 4
+					flowcontainer = {
+						direction = vertical
+						sub_header_v = {   
+							size = { 320 334 }
+							blockoverride "Title_text" { text = "FOREIGN_INTERACTIONS_DIPLO_VIEW" }
+							blockoverride "Max_text_width" { max_width = 230 }
+							scrollarea = {
+								size = { 100% 290 }
+								position = { 0 38 }
+								using = VerticalScrollAreaCutOff
+								scrollbar_vertical = {
+									using = VerticalScrollBar
+								}
+								scrollbarpolicy_horizontal = always_off
+								scrollwidget = {
+									vbox = {
+										margin = { 0 4 }
+										vbox = { #trade agreements
+											name = "trade_agreements"
+											layoutpolicy_horizontal = expanding 
+											layoutpolicy_vertical = shrinking
+											margin_right = 12
+											hbox = {
+												layoutpolicy_horizontal = expanding
+												layoutpolicy_vertical = fixed
+												ignoreinvisible = yes
+												margin = { 0 2 }
+												diplomatic_category_icon = {
+													blockoverride "Color" { using = green_background }
+													blockoverride "Content" {
+														margin_widget = {
+															size = { 36 36 }
+															margin = { 2 2 }
+															icon = {
+																texture = "gfx/interface/icons/modifiers/commerce_value.dds"
+																tooltip = "Test"
+																size = { 100% 100% }
+															}
+														}
+													}
+												}
+												overlappingitembox = {
+													margin_right = 14
+													datamodel = "[DiplomaticView.GetTargetCountry.MakeScope.GetList('list_of_trade_partners_all_categories')]"
+													layoutpolicy_horizontal = expanding
+													layoutpolicy_vertical = fixed
+													size = { 0 30 }
+													spacing = 2
+													margin_left = 4
+													item = {
+														country_flag = {
+															tooltip = "TRADE_AGREEMENT_TT"
+															datacontext = "[Scope.GetCountry]"
+														
+															blockoverride "flag"
+															{
+																texture = "[Scope.GetCountry.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+																frame = "[Scope.GetCountry.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+																framesize = { 56 56 }
+															}
+														
+															blockoverride "size"
+															{
+																size = { 30 30 }
+															}
+														}
+													}
+												}
+											}
+										}
+										base_diplomatic_parts_list = { #war
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_war_tooltip'))]" }
+											blockoverride "Color" { using = darken_red_background }
+										}
+										base_diplomatic_parts_list = { #allianc
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_alliance_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										diplomatic_parts_list = { #vassalizing
+											blockoverride "Content" {
+												visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_vassalizing_tooltip'))]"
+												margin = { 0 2 }
+												diplomatic_category_icon = {
+													blockoverride "Color" { using = blueish_background }
+													blockoverride "Content" {
+														widget = {
+															size = { 34 12 }
+															visible = "[Not(GreaterThan_int32( GetDataModelSize( RelationTypeItem.GetRelations ), '(int32)6' ))]"
+														}
+														margin_widget = {
+															size = { 36 36 }
+															icon = {
+																texture = "[RelationTypeItem.AccessIcon]"
+																tooltip = "[RelationTypeItem.GetToolTip]"
+																size = { 100% 100% }
+																textbox = {
+																	position = { 0 12 }
+																	parentanchor = center
+																	using = BaseFontS
+																	using = White_FontColor
+																	visible = "[And(GetVariableSystem.HasValue('relation_subjects', 'close'), GreaterThanOrEqualTo_int32( GetDataModelSize( RelationTypeItem.GetRelations ), '(int32)7' )))]"
+																	text = "+[Subtract_int32(GetDataModelSize( RelationTypeItem.GetRelations ), '(int32)6' )]"
+																	autoresize = yes
+																	align = center|nobaseline
+																}
+															}
+														}
+														open_list_subjects = {
+															size = { 36 24 }
+															visible = "[GreaterThan_int32( GetDataModelSize( RelationTypeItem.GetRelations ), '(int32)6' )]"
+															blockoverride "Down" {
+																visible = "[GetVariableSystem.HasValue('relation_subjects', 'close')]"
+																onclick = "[GetVariableSystem.Set('relation_subjects', 'open')]"
+															}
+															blockoverride "Right" {
+																visible = "[GetVariableSystem.HasValue('relation_subjects', 'open')]"
+																onclick = "[GetVariableSystem.Set('relation_subjects', 'close')]"
+															}
+														}
+														widget = {
+															size = { 34 12 }
+															visible = "[Not(GreaterThan_int32( GetDataModelSize( RelationTypeItem.GetRelations ), '(int32)6' ))]"
+														}
+														widget = {
+																visible = "[And(GetVariableSystem.HasValue('relation_subjects', 'open'), GreaterThanOrEqualTo_int32( GetDataModelSize( RelationTypeItem.GetRelations ), '(int32)7' ))]"
+																size = { 32 58 }
+														}
+														widget = {
+																visible = "[And(GetVariableSystem.HasValue('relation_subjects', 'open'), GreaterThanOrEqualTo_int32( GetDataModelSize( RelationTypeItem.GetRelations ), '(int32)13' ))]"
+																size = { 32 58 }
+														}
+														widget = {
+																visible = "[And(GetVariableSystem.HasValue('relation_subjects', 'open'), GreaterThanOrEqualTo_int32( GetDataModelSize( RelationTypeItem.GetRelations ), '(int32)18' ))]"
+																size = { 32 58 }
+														}
+														widget = {
+																visible = "[And(GetVariableSystem.HasValue('relation_subjects', 'open'), GreaterThanOrEqualTo_int32( GetDataModelSize( RelationTypeItem.GetRelations ), '(int32)25' ))]"
+																size = { 32 58 }
+														}
+													}
+												}
+												widget = { size { 4 0 }}
+												dynamicgridbox = {
+													flipdirection = yes
+													layoutpolicy_horizontal = expanding
+													maxhorizontalslots = 6
+													visible = "[GetVariableSystem.HasValue('relation_subjects', 'close')]"
+													datamodel = "[RelationTypeItem.GetRelations]"
+													item = {
+														subjects_diplomatic_item = { }
+													}
+												}
+												scrollarea = {
+													size = { 0 100% }
+													visible = "[GetVariableSystem.HasValue('relation_subjects', 'open')]"
+													layoutpolicy_horizontal = expanding
+													scrollbarpolicy_horizontal = always_off
+													scrollbar_vertical = {
+														using = VerticalScrollBar_Diplomatic
+													}
+													scrollwidget = {
+														dynamicgridbox = {
+															position = { 0 3 }
+															flipdirection = yes
+															datamodel_wrap = 6
+															datamodel = "[RelationTypeItem.GetRelations]"
+															item = {
+																subjects_diplomatic_item = { }
+															}
+														}
+													}
+												}
+											}
+										}
+										base_diplomatic_parts_list = { #casus belli from
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_casus_belli_from_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #casus belli on
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_casus_belli_on_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #guaranteeing
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_guaranteeing_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #guaranteed
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_guaranteed_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #truce
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_truce_tooltip'))]" }
+											blockoverride "Color" { using = green_background }
+										}
+										base_diplomatic_parts_list = { #warning
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_warning_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #warned
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_warned_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #gives military access
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_gives_military_access_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #has military access
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_has_military_access_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #gives trade access
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_gives_trade_access_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #has trade access
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_has_trade_access_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #civil war
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_civil_war_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #integrate
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_integrate_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #defensive league
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_defensive_league_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #opinion improvement passive
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_opinion_improvement_passive_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										base_diplomatic_parts_list = { #opinion improvement active
+											blockoverride "Visible" { visible = "[EqualTo_string(RelationTypeItem.GetToolTip, SelectLocalization(GetVariableSystem.HasValue('diplomatic_windows', 'diplomatic'),'none','diplomatic_status_opinion_improvement_active_tooltip'))]" }
+											blockoverride "Color" { using = brighten_red_background }
+										}
+										vbox = {
+											name = "expander"
+											layoutpolicy_vertical = growing 
+										}
+									}
+								}
+							}
+						}
+						sub_header_v = {
+							size = { 320 176 }
+							blockoverride "Icon_visible" { visible = yes }
+							blockoverride "Icon" {
+								widget = { size = { 38 38 } }
+							}
+							blockoverride "Title_text" 
+							{ 
+								text = "OUR_DETAILS"
+							}
+				            country_flag = {
+				               datacontext = "[DiplomaticView.GetPlayer]"
+				                tooltip = "COUNTRY_SHORTHAND_INFO"
+				                position = { 5 5 }
+				                blockoverride "flag"
+				                {
+				                    texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+				                    frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+				                    framesize = { 56 56 }
+				                    tooltip = "[Country.Custom('TITLES_personal_union_ruler')] of [Country.GetName]"
+				                }
+				                blockoverride "size"  { size = { 38 38 } }
+				                blockoverride "click" {  onclick = "[OpenDiplomacy(Country.GetCountry)]"  }
+				            }
+							flowcontainer = {
+								position = { -2 40 }
+								name = "diplo_view_our_details"
+								spacing = 8
+								@icon_width_our_details = 120
+								direction = vertical 
+								flowcontainer = {
+									spacing = 10
+									panelka_center = { #agressive expansion
+										size = { @icon_width_our_details 32 }
+										blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/agressive_expansion_monthly_decay.dds" }
+										blockoverride "TextBox" { text = "[DiplomaticView.GetAEChange |2]" }
+										blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetAEChangeInfo]" }
+									}
+									panelka_center = { #agressive expansion impact
+										size = { @icon_width_our_details 32 }
+										blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/agressive_expansion_impact.dds" }
+										blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetModifierValue('agressive_expansion_impact')]" }
+										blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetPlayer.GetModifierTooltip('agressive_expansion_impact')]" }
+									}
+									flowcontainer = {
+										ignoreinvisible = yes
+										icon_button_square = {
+											size = { 42 42 }
+											visible = "[Not(DiplomaticView.IsShowStances)]"
+											blockoverride "Icon"
+											{
+												texture = "[GetDiplomaticStanceIcon(DiplomaticView.GetPlayer.GetDiplomaticStance)]"
+												size = { 80% 80% }
+											}
+											blockoverride "On_click"
+											{
+												onclick = "[DiplomaticView.ShowStances]"
+											}
+										} 
+
+										icon_button_square = {
+											size = { 42 42 }
+											visible = "[DiplomaticView.IsShowStances]"
+											blockoverride "Icon"
+											{
+												texture = "[GetDiplomaticStanceIcon(DiplomaticView.GetPlayer.GetDiplomaticStance)]"
+												size = { 80% 80% }
+											}
+											blockoverride "On_click"
+											{
+												onclick = "[DiplomaticView.HideStances]" 
+											}
+										}
+									}
+								}
+								flowcontainer = { 
+									spacing = 10
+									panelka_center = { #diplomatic range
+										size = { @icon_width_our_details 32 }
+										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/diplomatic_range.dds" }
+										blockoverride "TextBox" { text = "[DiplomaticView.GetDiplomaticRange]" }
+										blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetDiplomaticRangeTooltip]" }
+									}
+									panelka_center = { #diplomatic stance change cost
+										size = { @icon_width_our_details 32 }
+										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/diplomacy.dds" }
+										blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetModifierValue('change_diplomatic_stance_cost_modifier')]" }
+										blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetPlayer.GetNumStanceChangesInfo]" }
+									}
+									flowcontainer = {
+										ignoreinvisible = yes
+										icon_button_square = {
+											size = { 42 42 }
+											visible = "[GetVariableSystem.HasValue( 'diplomatic_windows', 'clear' )]"
+											blockoverride "Icon"
+											{
+												texture = "gfx/interface/icons/diplomatic_status/truce.dds"
+												size = { 80% 80% }
+											}
+											blockoverride "On_click"
+											{
+												onclick = "[GetVariableSystem.Set( 'diplomatic_windows', 'opinions' )]"
+											}
+											tooltip = "opinionsTT"
+										} 
+										icon_button_square = {
+											size = { 42 42 }
+											visible = "[GetVariableSystem.HasValue( 'diplomatic_windows', 'opinions' )]"
+											blockoverride "Icon"
+											{
+												texture = "gfx/interface/icons/diplomatic_status/truce.dds"
+												size = { 80% 80% }
+											}
+											blockoverride "On_click"
+											{
+												onclick = "[GetVariableSystem.Set( 'diplomatic_windows', 'clear' )]"
+											}
+											tooltip = "opinionsTT"
+										}
+									}
+								}
+								flowcontainer = {
+									spacing = 2
+									panelka_center = { #improve relation
+										size = { @icon_width_our_details 32 }
+										blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/improve_relation.dds" }
+										blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetModifierValue('improve_relation_impact')]" }
+										blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetPlayer.GetModifierTooltip('improve_relation_impact')]" }
+									}
+									panelka_center = { #diplomatic reputation
+										size = { 85 32 }
+										blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/diplomatic_reputation.dds" }
+										blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetModifierValue('diplomatic_reputation')]" }
+										blockoverride "Tooltip" { tooltip = "DIP_VIEW_REPUTATION_TOOLTIP" }
+									}
+									panelka_center = { #active diplomatic relations
+										size = { 85 32 }
+										blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/diplomatic_relations.dds" tooltip = "[DiplomaticView.GetPlayer.GetActiveRelationsInfo]" }
+										blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetNumActiveRelations]/[DiplomaticView.GetPlayer.GetNumActiveRelationsLimit]" }
+										blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetPlayer.GetModifierTooltip( 'diplomatic_relations' )]"  }
+									}
+								}
+							} 
+						}
+					}
+
+					margin_widget = {
+						size = { 340 540 }
+						sub_header_v = { 
+							size = { 100% 505 }
+							blockoverride "Title_text" 
+							{
+								text = "DIPLOMATIC_INTERACTIONS_DIPLO_VIEW"
+							}
+						
+							blockoverride "Max_text_width"
+							{
+								max_width = 320
+							}
+							margin_widget = {
+								size = { 100% 50 }
+								position = { 0 30 }
+								blockoverride "Margins" { margin = { 2 4 } }
+								#using = NoninteractableBG
+								visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+							
+								hbox = {
+									margin = { 4 0 }
+									layoutpolicy_horizontal = expanding
+									spacing = 0
+								
+									icon_card = {
+										name = "their_stance"
+										visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+										blockoverride "Size" { size = { 40 40 } }
+										blockoverride "Icon"
+										{
+											texture = "[GetDiplomaticStanceIcon(DiplomaticView.GetTargetCountry.GetDiplomaticStance)]"
+										}
+
+										datacontext = "[DiplomaticView.GetTargetCountry.GetDiplomaticStance]"
+										tooltipwidget = { using = diplomatic_stance_tooltip }
+									
+										blockoverride "Text"
+										{
+											text ""
+										}
+									}
+									icon_and_text = {
+										size = { 86 0 }
+										visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+										tooltip = "[DiplomaticView.GetTargetCountry.GetOpinionDescription(DiplomaticView.GetPlayer)]"
+										blockoverride "Icon"
+										{
+											texture = "gfx/interface/icons/diplomatic_status/opinion_improvement_active.dds"
+										}
+										blockoverride "Text"
+										{
+											text = "[DiplomaticView.GetTargetCountry.GetOpinionOf(DiplomaticView.GetPlayer)|+=]"
+										}
+									}
+									icon_and_text = {
+										size = { 86 0 }
+										visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+										tooltip = "[DiplomaticView.GetPlayer.GetOpinionDescription(DiplomaticView.GetTargetCountry)]"
+										blockoverride "Icon"
+										{
+											texture = "gfx/interface/icons/diplomatic_status/opinion_improvement_passive.dds"
+										}
+										blockoverride "Text"
+										{
+											text = "[DiplomaticView.GetPlayer.GetOpinionOf(DiplomaticView.GetTargetCountry)|+=]"
+										}
+									}
+									icon_and_text = {
+										size = { 70 0 }
+										visible = "[And(Not( DiplomaticView.GetTargetCountry.IsBarbarian), DiplomaticView.GetTargetCountry.IsSubject )]"
+										tooltip = "[DiplomaticView.GetTargetCountry.GetSubjectLoyaltyInfo]"
+										blockoverride "Icon"
+										{
+											texture = "gfx/interface/icons/shared_icons/loyalty.dds"
+										}
+										blockoverride "Text"
+										{
+											text = "[DiplomaticView.GetTargetCountry.GetSubjectLoyalty|0]"
+											visible = "[DiplomaticView.GetTargetCountry.IsSubject]"
+										}
+										textbox = {
+											visible = "[Not(DiplomaticView.GetTargetCountry.IsSubject)]"
+											name = "Text"
+											position = { 0 3 }
+											size = { 100% 24 }					
+											align = right 
+											elide = right
+											using = BaseFontM
+											using = Black_FontColor
+											margin_right = 6
+											text = "NOT_A_SUBJECT_MATE" 
+										}
+									}
+								}
+							}
+
+							scrollarea = {
+								size = { 332 428 }
+								position = { 0 80 }
+								scrollbarpolicy_horizontal = always_off
+								using = VerticalScrollAreaCutOff
+								scrollbar_vertical = {
+									using = VerticalScrollBar
+								}
+
+								scrollwidget = {
+
+									vbox = {
+
+										vbox = {
+											visible = "[DiplomaticView.HasDiplomaticPending]"
+											layoutpolicy_horizontal = expanding
+											layoutpolicy_vertical = fixed
+											using = NoninteractableBG
+											blockoverride "Margins" 
+											{
+												margin = { 2 8 }
+											}
+										
+											textbox = {
+												autoresize = yes
+												multiline = yes
+												maximumsize = { 368 -1 }
+												using = BaseFontS
+												using = Black_FontColor
+												text = "[DiplomaticView.GetDiplomaticPendingText]"
+											}
+											tooltip = "[DiplomaticView.GetDiplomaticPendingTooltip]"
+										}
+										vbox = {
+											layoutpolicy_horizontal = expanding
+											layoutpolicy_vertical = preferred
+											margin_left = 8
+											margin_right = 10
+											#margin_top = -35
+											datacontext = "[DiplomaticView.GetDefaultActionCategory]"
+											using = diplomatic_actions_v2
+										}
+
+										vbox = {
+											name = "actions_grid"
+											layoutpolicy_vertical = shrinking
+											datamodel = "[DiplomaticView.GetActions]"
+											layoutpolicy_horizontal = expanding
+											margin_left = 8
+											margin_right = 10
+				
+											item = {
+												vbox = {	
+													layoutpolicy_horizontal = expanding
+													vbox = {
+														visible = "[Not(IsDataModelEmpty(DiplomaticView.GetActions))]"
+														margin_left = 0
+														margin_right = 4
+														layoutpolicy_horizontal = expanding
+
+														category_drop = {
+															layoutpolicy_horizontal = expanding
+															size = { 0 32 }
+															blockoverride "Text_alignment" 
+															{ 
+																parentanchor = left|vcenter 
+																align = left
+																position = { 16 -2 }
+																max_width = 310
+															}
+															blockoverride "Text" 
+															{
+																text = "[DiplomaticActionCategory.GetName]" 
+															}
+															blockoverride "On_click" { onclick = "[DiplomaticActionCategory.OnClick]" }
+															blockoverride "Down" { visible = yes }
+															blockoverride "Right" { visible = no }
+															blockoverride "RightArrowVisible" { visible = no }
+															visible = "[DiplomaticActionCategory.IsExpanded]"
+														}
+
+														category_drop = {
+															name = "close_button_dip"
+															layoutpolicy_horizontal = expanding
+															size = { 0 32 }
+															blockoverride "Text_alignment" 
+															{ 
+																parentanchor = left|vcenter 
+																align = left
+																position = { 16 -2 }
+																max_width = 310
+															}
+															blockoverride "Text" { text = "[DiplomaticActionCategory.GetName]" }
+															blockoverride "On_click" { onclick = "[DiplomaticActionCategory.OnClick]" }
+															blockoverride "Down" { visible = no }
+															blockoverride "Right" { visible = yes }
+															blockoverride "RightArrowVisible" { visible = yes }
+														
+															visible = "[Not(DiplomaticActionCategory.IsExpanded)]" 
+														}
+													}
+												
+													vbox = {
+														using = diplomatic_actions_v2
+														layoutpolicy_horizontal = expanding
+													}
+												}
+											}
+										}
+										margin_widget = {
+											size = { 0 28 }
+											layoutpolicy_horizontal = expanding
+											margin = { 7 0 }
+											margin_right = 0
+
+
+											vbox = {
+												visible = "[Not(IsDataModelEmpty(DiplomaticView.GetActions))]"
+												margin_left = 0
+												margin_right = 22
+												layoutpolicy_horizontal = expanding
+
+												category_drop = {
+													name = "close_button_trade_dip"
+													layoutpolicy_horizontal = expanding
+													size = { 0 32 }
+													blockoverride "Text_alignment" 
+													{ 
+														parentanchor = left|vcenter 
+														align = left
+														position = { 16 -2 }
+														max_width = 300
+													}
+													blockoverride "Text" 
+													{
+														text = "Trade Actions" 
+													}
+													blockoverride "On_click" { onclick = "[GetVariableSystem.Set( 'trade_actions_open', 'no' )]" }
+													blockoverride "Down" { visible = yes }
+													blockoverride "Right" { visible = no }
+													blockoverride "RightArrowVisible" { visible = no }
+
+													visible = "[GetVariableSystem.HasValue( 'trade_actions_open', 'yes' )]"
+												}
+
+												category_drop = {
+													name = "open_button_trade_dip"
+													layoutpolicy_horizontal = expanding
+													size = { 0 32 }
+													blockoverride "Text_alignment" 
+													{ 
+														parentanchor = left|vcenter 
+														align = left
+														position = { 16 -2 }
+														max_width = 300
+													}
+													blockoverride "Text" { text = "Trade Actions" }
+													blockoverride "On_click" { onclick = "[GetVariableSystem.Set( 'trade_actions_open', 'yes' )]" }
+													blockoverride "Down" { visible = no }
+													blockoverride "Right" { visible = yes }
+													blockoverride "RightArrowVisible" { visible = yes }
+												
+													visible = "[Not( GetVariableSystem.HasValue( 'trade_actions_open', 'yes' ) )]"
+												}
+											}
+
+										}
+
+										vbox = {
+											visible = "[And(GetVariableSystem.HasValue( 'trade_actions_open', 'yes' ), And(Not(DiplomaticView.GetTargetCountry.IsBarbarian), Not(EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ))))]"
+											margin_left = -2
+											margin_right = 32
+											margin_top = 10
+											layoutpolicy_horizontal = expanding
+											# Trade agreement - all
+											diplomacy_action_button = {
+												size = { 0 22 }
+												layoutpolicy_horizontal = expanding
+												margin = { 14 0 }
+												margin_right = 0
+
+												datacontext = "[GetScriptedGui('trade_agreement_all_button')]"
+												parentanchor = hcenter
+
+												enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+
+												blockoverride "On_click"
+												{
+													enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
+													onclick = "[ScriptedGui.Execute(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+												}
+
+												blockoverride "Left_text" 
+												{ 
+													margin_left = 24
+													text = "[Select_CString( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'Cancel Trade Agreement: #T All', 'Trade Agreement: #T All' )]"
+												}
+												
+												blockoverride "Right_text"
+												{
+													text = "Test"
+													using = Negative_FontColor
+													# Make fontcolor conditional
+													tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+												}	
+												
+												blockoverride "Icon" 
+												{
+													framesize = { 46 46 }
+													#visible = "[DiplomaticActionItem.RequireAcceptance]"
+													texture = "gfx/interface/base_parts/accept_decline_flat.dds"
+													frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
+													tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+												}	
+
+												tooltip =  "[SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_title', 'offer_trade_agreement_all_tt_title' )]#T [DiplomaticView.GetTargetCountry.GetName] #! [SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_body', 'offer_trade_agreement_all_tt_body' )]"
+											}
+
+											#widget = { size = { 0 4 } } # Adds spacing between diplo buttons
+
+											#widget = { size = { 0 4 } } # Adds spacing between diplo buttons
+										}
+										margin_widget = {
+											size = { 0 38 }
+											layoutpolicy_horizontal = expanding
+											margin = { 14 0 }
+											margin_right = 7
+											margin_top = 10
+											text_button_square = {
+												size = { 100% 28 }
+												layoutpolicy_horizontal = expanding
+												datacontext = "[GetScriptedGui('sell_provinces')]"
+												enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+												visible = "[And(Not(DiplomaticView.GetTargetCountry.IsBarbarian), Not(EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId )))]"
+												blockoverride "On_click" {
+													onclick = "[ScriptedGui.Execute(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+													onclick = "[ExecuteConsoleCommand('gui.ClearWidgets sell_provinces_window')]"
+													onclick = "[ExecuteConsoleCommand('gui.createwidget gui/sell_provinces.gui sell_provinces_window')]"
+												}
+												blockoverride "Center_text"
+												{
+													text = "sell_province"
+												}
+											}
+										}
+
+										margin_widget = {
+											size = { 0 38 }
+											layoutpolicy_horizontal = expanding
+											margin = { 14 0 }
+											margin_right = 7
+											margin_top = 5
+											text_button_square = {
+												size = { 100% 28 }
+												layoutpolicy_horizontal = expanding
+												datacontext = "[GetScriptedGui('give_up_claims')]"
+												enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+												visible = "[And(Not(DiplomaticView.GetTargetCountry.IsBarbarian), Not(EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId )))]"
+												blockoverride "On_click" {
+													onclick = "[ScriptedGui.Execute(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+												}
+												blockoverride "Center_text"
+												{
+													text = "give_up_claims"
+												}
+											}
+										}
+										vbox = {
+											layoutpolicy_vertical = expanding
+										}
+									}
+								}
+							}
 						}
 					}
 				}
 			}
-			layoutpolicy_horizontal = expanding
-			layoutpolicy_vertical = expanding
-			margin_top = 5
-			margin_bottom = @window_margin_bottom
-			margin_right = 0
-			margin_left = @window_margin_left
-			visible = "[GetVariableSystem.HasValue( 'diplomatic_tabs', 'subjects' )]"
+			################################################################
+			########Subjects view#########################################
+			################################################################
 			flowcontainer = {
-				margin_top = 10
-				layoutpolicy_vertical = expanding
-				layoutpolicy_horizontal = expanding
-				scrollarea = {
-					visible = "[Not(IsDataModelEmpty(Player.MakeScope.GetList('player_subjects')))]"
-					using = VerticalScrollAreaCutOff
-					size = { 200 600 }
-					scrollbar_vertical = {
-						using = VerticalScrollBar
-					}
-
-					scrollbarpolicy_horizontal = always_off
-				
-					scrollwidget = {
-						flowcontainer = {
-							datamodel = "[Player.MakeScope.GetList('player_subjects')]"
-							direction = vertical
-							item = {
-								flowcontainer = {
-									datacontext = "[Scope.GetCountry]"
-									spacing = 5
-									country_flag = {
-										tooltip = "COUNTRY_SHORTHAND_INFO"
-										parentanchor = vcenter
-						
-										blockoverride "flag"
-										{
-											texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
-											frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
-											framesize = { 56 56 }
-										}
-
-										blockoverride "size"
-										{
-											size = { 48 48 }
-										}
-
-										blockoverride "click"
-										{
-											#onclick = "[OpenDiplomacy(Country.GetCountry)]" #change this
-										}
+				margin = { 10 }
+				visible = "[GetVariableSystem.HasValue( 'diplomatic_tabs', 'subjects' )]"
+				state = { 
+					name = _hide
+					on_start = "[GetVariableSystem.Set( 'diplomatic_windows', 'clear' )]"
+				}
+				sub_header_v = {
+					size = { 220 620 }
+					blockoverride "Title_text" { text = "list_subjects" }
+					blockoverride "Max_text_width" { max_width = 230 }
+					scrollarea = {
+						visible = "[Not(IsDataModelEmpty(Player.MakeScope.GetList('player_subjects')))]"
+						#using = VerticalScrollAreaCutOff
+						size = { 210 600 }
+						position = { 0 34 }
+						scrollbarpolicy_horizontal = always_off
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+						scrollwidget = {
+							flowcontainer = {
+								datamodel = "[Player.MakeScope.GetList('player_subjects')]"
+								direction = vertical
+								item = {
+									flowcontainer = {
+										datacontext = "[Scope.GetCountry]"
+										spacing = 5
+										country_flag = {
+											tooltip = "COUNTRY_SHORTHAND_INFO"
+											parentanchor = vcenter
 							
-										blockoverride "hover_leave"
-										{
-											onmousehierarchyleave = "[DiplomaticView.ResetHighlight]"
-										}
+											blockoverride "flag"
+											{
+												texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+												frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+												framesize = { 56 56 }
+											}
 
-									}	
-									tag_dark = {
-										text = "[Country.Custom('subject_interaction_name')]"
-										tooltip = "[Country.GetDescriptiveName]"
-										max_width = 135
-										elide = right
-									}											
+											blockoverride "size"
+											{
+												size = { 48 48 }
+											}
+
+											blockoverride "click"
+											{
+												#onclick = "[OpenDiplomacy(Country.GetCountry)]" #change this
+											}
+								
+											blockoverride "hover_leave"
+											{
+												onmousehierarchyleave = "[DiplomaticView.ResetHighlight]"
+											}
+
+										}	
+										tag_dark = {
+											text = "[Country.Custom('subject_interaction_name')]"
+											tooltip = "[Country.GetDescriptiveName]"
+											max_width = 135
+											elide = right
+										}											
+									}
 								}
 							}
 						}
@@ -522,16 +1505,51 @@ base_window = {
 				flowcontainer = { 
 					direction = vertical 
 					spacing = 16
+					widget = {
+						size = { 460 28 }
+						visible = "[Not(IsDataModelEmpty(Player.MakeScope.GetList('player_subjects')))]"
+						#parentanchor = bottom
+						#ignoreinvisible = yes
+						text_button_square_highlighted = {
+							size = { 240 28 }
+							parentanchor = center
+							visible = "[Not(GetVariableSystem.HasValue( 'diplomatic_windows', 'show_national_interactions' ))]"
+							blockoverride "Center_text"
+							{
+								text = "show_national_interactions"
+							}
+							blockoverride "On_click"
+							{
+								onclick = "[GetVariableSystem.Set( 'diplomatic_windows', 'show_national_interactions' )]"
+							}
+							tooltip = "show_national_interactions"
+						}
+						text_button_square_highlighted = {
+							size = { 240 28 }
+							parentanchor = center
+							visible = "[GetVariableSystem.HasValue( 'diplomatic_windows', 'show_national_interactions' )]"
+							blockoverride "Center_text"
+							{
+								text = "show_national_interactions"
+							}
+							blockoverride "On_click"
+							{
+								onclick = "[GetVariableSystem.Set( 'diplomatic_windows', 'clear' )]"
+							}
+							tooltip = "show_national_interactions"
+						}
+					}
 					flowcontainer = {
+						spacing = 10
 						flowcontainer = {
 							direction = vertical
-							icon = { #flag
+							widget = { #flag
 								parentanchor = center
-								size = { 140 70 }
+								size = { 180 70 }
 								cpt_button = {
 									parentanchor = left
 									size = { 50 77 }
-									position = { 10 -5 }
+									position = { 20 -5 }
 									block "Context" 
 									{
 										datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
@@ -541,7 +1559,7 @@ base_window = {
 								country_flag = {
 									tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
 									parentanchor = right
-
+									position = { -10 0 }
 									blockoverride "flag"
 									{
 										texture = "[DiplomaticView.GetTargetCountry.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
@@ -565,51 +1583,44 @@ base_window = {
 									}
 								}
 							}
-							widget = { #country name
+							icon_and_text = { #country name
+								size = { 140 20 }
 								parentanchor = center
-								size = { 100 20 }
-								icon_and_text = {
-									size = { 100 20 }
-									tooltip = "[DiplomaticView.GetTargetCountry.GetName]"
-									blockoverride "LineSize"
-									{
-										size = { 100 4 }
-									} 
-									blockoverride "Icon"
-									{
-										visible = no
-									}
-									blockoverride "Text"
-									{
-										position = { 0 0 }
-										text = "[DiplomaticView.GetTargetCountry.GetNameWithNoTooltip]"
-										align = center|center
-										multiline = no
-										fontsize = 20
-									}
+								tooltip = "[DiplomaticView.GetTargetCountry.GetName]"
+								blockoverride "LineSize"
+								{
+									size = { 100 4 }
+								} 
+								blockoverride "Icon"
+								{
+									visible = no
+								}
+								blockoverride "Text"
+								{
+									position = { 0 0 }
+									text = "[DiplomaticView.GetTargetCountry.GetNameWithNoTooltip]"
+									align = center|center
+									multiline = no
+									fontsize = 20
 								}
 							}
 						}
 						flowcontainer = {
 							direction = vertical
 							ignoreinvisible = yes
-							widget = {
-								size = { 3 3 }	
-							}
+							spacing = 10
 							panelka_center = { #religion
 								size = { 120 32 }
 								blockoverride "Icon" { texture = "gfx/interface/icons/powers/religious.dds" }
 								blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetReligion.GetName]" }
 								blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetReligion.GetTooltip]" }
 							}
-							widget = { size = { 0 10 } }
 							panelka_center = { #culture
 								size = { 120 32 }
 								blockoverride "Icon" { texture = "gfx/interface/icons/governor_policies/cultural_assimilation.dds" }
 								blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetName]" }
 								blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetTooltip]" }
 							}
-							widget = { size = { 0 10 } }
 							panelka_center = { #manpower
 								size = { 120 32 }
 								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/manpower.dds" }
@@ -620,30 +1631,19 @@ base_window = {
 						flowcontainer = {
 							direction = vertical
 							ignoreinvisible = yes
-							widget = {
-								size = { 15 3 }	
-							}
-						}
-						flowcontainer = {
-							direction = vertical
-							ignoreinvisible = yes
-							widget = {
-								size = { 3 3 }	
-							}
+							spacing = 10
 							panelka_center = { #treasury
 								size = { 120 32 }
 								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
 								blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetTreasury|0]" }
 								blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetTreasuryTooltip]" }
 							}
-							widget = { size = { 0 10 } }
 							panelka_center = { #pop
 								size = { 120 32 }
 								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/pop_type.dds" }
 								blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetTotalPopulation]" }
 								blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.BuildTotalPopulationToolTip]" }
 							}
-							widget = { size = { 0 10 } }
 							panelka_center = { #stability
 								size = { 120 32 }
 								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/stability.dds" }
@@ -653,20 +1653,17 @@ base_window = {
 						} 
 					}
 					flowcontainer = {
-						flowcontainer = {
-							direction = vertical
-							icon = {
-								parentanchor = center
-								size = { 65 70 }
-								cpt_button = {
-									parentanchor = left
-									size = { 50 77 }
-									position = { 10 -5 }
-									block "Context" 
-									{
-										datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
-										visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-									}
+						icon = {
+							parentanchor = center
+							size = { 65 70 }
+							cpt_button = {
+								parentanchor = left
+								size = { 50 77 }
+								position = { 10 -5 }
+								block "Context" 
+								{
+									datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
+									visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
 								}
 							}
 						}
@@ -921,16 +1918,13 @@ base_window = {
 						} 
 					}
 					flowcontainer = {
+						margin_left = 10
 						flowcontainer = {
 							direction = vertical
 							ignoreinvisible = yes
 							widget = {
-								size = { 0 10 }	
-							}
-							widget = {
-								size = { 0 20 }
+								size = { 180 20 }
 								textbox = {
-									position = { 10 0 }
 									using = BaseFontM
 									using = White_FontColor
 									block "progress_text" { text = "Status: Desloyal" }
@@ -975,9 +1969,8 @@ base_window = {
 								}
 							}
 							widget = {
-								size = { 0 20 }
+								size = { 180 20 }
 								textbox = {
-									position = { 10 0 }
 									using = BaseFontM
 									using = White_FontColor
 									block "progress_text" { text = "Relation: -55" }
@@ -1006,7 +1999,7 @@ base_window = {
 					}
 					flowcontainer = {
 						widget = {
-							size = { 420 30 }
+							size = { 460 30 }
 							flowcontainer = {
 								parentanchor = hcenter
 								spacing = 10
@@ -1032,7 +2025,7 @@ base_window = {
 						}
 					}
 					widget = {
-						size = { 420 100 } 
+						size = { 460 100 } 
 						text_button_square_highlighted = {
 							parentanchor = hcenter
 							size = { 230 28 }
@@ -1048,1027 +2041,16 @@ base_window = {
 				}
 			}
 		}
-
-		################################################################
-		########Diplomatic view#########################################
-		################################################################
-		vbox = {
-			layoutpolicy_horizontal = expanding
-			layoutpolicy_vertical = expanding
-			visible = "[GetVariableSystem.HasValue( 'diplomatic_tabs', 'diplomatic' )]"
-			hbox = {
-				name = "diplo_view_second_row"
-				layoutpolicy_horizontal = expanding
-				margin_left = @window_margin_left
-				margin_right = @window_margin_right
-			
-				hbox = {
-					layoutpolicy_horizontal = expanding
-					#layoutpolicy_vertical = expanding
-				
-					flowcontainer = {
-						direction = vertical
-						visible = "[DiplomaticView.GetTargetCountry.IsBarbarian]"
-
-						margin_left = 12
-						sub_header = {
-							layoutpolicy_horizontal = expanding
-							layoutpolicy_vertical = fixed
-							widgetanchor = top 
-							size = { 100% 30 }
-							blockoverride "Title_text"
-							{
-								datacontext = "[DiplomaticView.GetHorde]"
-								text = "HORDE_UI_STRING"
-							}
-						}
-						icon = {
-							texture = "gfx/interface/event_window/Event_revolt.dds"
-							size = { 260 105 }
-						}
-					}
-				
-					margin_widget = {
-						size = { 131 131 }
-						margin = { 4 4 }
-						visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-						icon = { 
-							allow_outside = yes
-							position = { 0 6 }
-							panelka_center = { #GDP
-								size = { 131 32 }
-								position = { 0 0 }
-								datacontext = "[DiplomaticView.GetTargetCountry]"
-								#blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/naval_combat.dds" }
-								blockoverride "TextBox" { text = "£[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('WEALTH_total_private_moveable_wealth')|3]" }
-								blockoverride "Tooltip" { tooltip = "GDP" }
-							}
-							panelka_center = { # % of global shipping controlled
-								size = { 120 32 }
-								position = { 0 40 }
-								#blockoverride "Icon" { texture = "" }
-								blockoverride "TextBox" { text = "[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('TRADE_percentage_of_global_shipping')|%]" }
-								blockoverride "Tooltip" { tooltip = "SHIPPING_CONTROLLED_TT" }
-							}
-							panelka_center = { # Quarterly trading activity value 
-								size = { 120 32 }
-								position = { 0 80 }
-								#blockoverride "Icon" { texture = "" }
-								blockoverride "TextBox" { text = "£[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('TRADE_activity_value')|3]" }
-								blockoverride "Tooltip" { tooltip = "TRADE_ACTIVITY_VALUE_TT" }
-							}
-						}
-					}
-					margin_widget = {
-						size = { 300 131 }
-						margin = { 4 4 }
-						visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-						icon = {
-							position = { 0 6 }
-							panelka = { #capital
-								size = { 180 32 }
-								position = { 0 0 }
-								blockoverride "TextBox" { text = "capita_dip" }
-							}
-							panelka = { #population
-								size = { 180 32 }
-								position = { 0 40 }
-								blockoverride "TextBox" { text = "NATIONAL_POPULATION" }
-							}
-							panelka = { #cities
-								size = { 180 32 }
-								position = { 0 80 }
-								blockoverride "TextBox" { text = "provinces_dip" }
-							}
-						}
-						textbox = {
-							position = { 0 15 }
-							parentanchor = top|right
-							maximumsize = { 100 -1 }
-							text = "FEDERATION_MEMBERSHIP"
-							fontsize = 16
-							autoresize = yes
-							using = BaseFontM
-							using = Black_FontColor
-							visible = "[DiplomaticView.GetTargetCountry.MakeScope.Var('member_of_federation').IsSet]"
-						} 
-					}
-					margin_widget = {
-						size = { 150 134 }
-						allow_outside = yes
-						datacontext = "[DiplomaticView.GetTargetCountry]"
-						icon = {
-							position = { 28 67 }
-							alpha = 0.4
-							#icon = {
-							#	texture = "gfx/interface/gov_view/laws_republic.dds"
-							#	spriteType = corneredtiled
-							#	size = { 250 60 }
-							#	position = { 0 6 }
-							#	parentanchor = bottom|hcenter
-							#	visible = "[DiplomaticView.GetTargetCountry.GetGovernment.IsRepublic]"
-							#	datacontext = "[DiplomaticView]"
-							#	tooltip = "TARGET_GOVTYPE_DIPLO_TT"
-							#	modify_texture = {
-							#		name = "Alpha"
-							#		texture = "gfx/interface/base_parts/horizontal_gradient_stretch_sides_black_invert_terrain.dds"
-							#		blend_mode = alphamultiply
-							#		spriteType = Corneredtiled
-							#		spriteborder = { 60 2 }
-							#	}
-							#	modify_texture = {
-							#		name = "Alpha"
-							#		texture = "gfx/interface/base_parts/gradient_black_short.dds"
-							#		blend_mode = alphamultiply
-							#		spriteType = Corneredtiled
-							#		spriteborder = { 60 2 }
-							#	}
-							#} 
-							
-							#icon = {
-							#	texture = "gfx/interface/gov_view/laws_monarchy.dds"
-							#	spriteType = corneredtiled
-							#	size = { 250 60 }
-							#	position = { 0 6 }
-							#	parentanchor = bottom|hcenter
-							#	visible = "[DiplomaticView.GetTargetCountry.GetGovernment.IsMonarchy]"
-							#	datacontext = "[DiplomaticView]"
-							#	tooltip = "TARGET_GOVTYPE_DIPLO_TT"
-							#	modify_texture = {
-							#		name = "Alpha"
-							#		texture = "gfx/interface/base_parts/horizontal_gradient_stretch_sides_black_invert_terrain.dds"
-							#		blend_mode = alphamultiply
-							#		spriteType = Corneredtiled
-							#		spriteborder = { 60 2 }
-							#	}
-							#	modify_texture = {
-							#		name = "Alpha"
-							#		texture = "gfx/interface/base_parts/gradient_black_short.dds"
-							#		blend_mode = alphamultiply
-							#		spriteType = Corneredtiled
-							#		spriteborder = { 60 2 }
-							#	}
-							#} 
-							
-							#icon = {
-							#	texture = "gfx/interface/gov_view/laws_tribal.dds"
-							#	spriteType = corneredtiled
-							#	size = { 250 60 }
-							#	position = { 0 6 }
-							#	parentanchor = bottom|hcenter
-							#	visible = "[DiplomaticView.GetTargetCountry.GetGovernment.IsTribal]"
-							#	datacontext = "[DiplomaticView]"
-							#	tooltip = "TARGET_GOVTYPE_DIPLO_TT" 
-							#	modify_texture = {
-							#		name = "Alpha"
-							#		texture = "gfx/interface/base_parts/horizontal_gradient_stretch_sides_black_invert_terrain.dds"
-							#		blend_mode = alphamultiply
-							#		spriteType = Corneredtiled
-							#		spriteborder = { 60 2 }
-							#	}
-							#	modify_texture = {
-							#		name = "Alpha"
-							#		texture = "gfx/interface/base_parts/gradient_black_short.dds"
-							#		blend_mode = alphamultiply
-							#		spriteType = Corneredtiled
-							#		spriteborder = { 60 2 }
-							#	}
-							#}
-						}
-						container = {
-							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-							position = { -80 72 }
-							textbox = {
-								position = { 0 -30 }
-								parentanchor = hcenter
-								text = "[DiplomaticView.GetTargetCountry.GetGovernment.GetName]"
-								autoresize = yes
-								using = BaseFontM
-								using = Black_FontColor
-							}
-							container = {
-								flowcontainer = {
-									position = { 0 3 }
-									spacing = 16
-									name = "dummy_ideas_grid" 
-											
-									container = {
-										button = {
-											name = "space1"
-											using = idea_slot_not_available
-											size = { 42 42 }
-										}
-									}
-									container = {
-										button = {
-											name = "space2"
-											using = idea_slot_not_available
-											size = { 42 42 }
-										}
-									}
-									container = {
-										button = {
-											name = "space3"
-											using = idea_slot_not_available
-											size = { 42 42 }
-										}
-									}
-									container = {
-										button = {
-											name = "space4"
-											using = idea_slot_not_available
-											size = { 42 42 }
-											
-										}
-									}
-								} 
-									
-								fixedgridbox = {
-									position = { 0 -1 }
-									name = "ideas_grid"
-									flipdirection = yes
-									addcolumn = 58
-									addrow = 50
-									maxhorizontalslots = 4
-									maxverticalslots = 1
-									item = {
-										widget = { 
-											datacontext = "[IdeaItem.GetIdea]" 
-											size = { 50 50 }
-											icon_card_idea = {
-												name = "Idea Button"
-												size = { 48 48 }
-												position = { -4 0 }
-												widgetanchor = center
-												parentanchor = center
-												visible = "[IdeaItem.IsValid]"
-												blockoverride "Icon" { 
-													texture = "[IdeaItem.GetIcon]"
-													size = { 40 40 }
-												}
-												tooltipwidget = idea_item_desc_tooltip
-												using = DropShadow
-											}
-											 
-											button = {
-												name = "Idea Button Invalid"
-								
-												position = { -5 0 }
-												# tooltip = "NO_IDEA_FOREIGN"
-												tooltipwidget = no_idea_tooltip
-												visible = "[Not(IdeaItem.IsValid)]"
-												alwaystransparent = no
-												size = { 50 50 }
-												gfxtype = framedbuttongfx
-												widgetanchor = center
-												parentanchor = center	
-												enabled = no
-												framesize = { 200 200 }
-												upframe = 1
-												overframe = 1
-												downframe = 1
-												disableframe = 1
-												using = button_tiled_texture
-												
-												modify_texture = {
-													name = "Alpha"
-													texture = "gfx/interface/base_parts/button2_inner_x8y8bd_alpha.dds"
-													blend_mode = alphamultiply
-													spriteType = Corneredtiled
-													spriteborder = { 6 6 }
-												}
-												
-												icon = {
-													name = "Pattern"
-													texture = "gfx/interface/base_parts/square_button_corner_pattern_x22y22bd.dds"
-													spriteType = Corneredtiled
-													spriteborder = { 11 11 }
-													size = { 100% 100% }
-												}
-												
-												icon = {
-													name = "Idea Mark"
-													widgetanchor = center
-													parentanchor = center	
-													texture = "gfx/interface/base_parts/idea_mark.dds"
-													size = { 36 36 }
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-
-					}
-				}
-			}
-			hbox = {
-				name = "diplo_view_third_row"
-				margin_bottom = @window_margin_bottom
-				margin_right = @window_margin_right
-				margin_left = @window_margin_left
-			
-				margin_widget = {
-					size = { 250 540 }
-					margin_bottom = 14
-					sub_header_v = {   
-						size = { 100% 506 }
-
-						blockoverride "Title_text" 
-						{
-							text = "FOREIGN_INTERACTIONS_DIPLO_VIEW"
-						}
-					
-						blockoverride "Max_text_width"
-						{
-							max_width = 230
-						}
-						vbox = {
-							layoutpolicy_horizontal = expanding
-							layoutpolicy_vertical = expanding
-							margin_top = 40
-							margin_right = 6
-							scrollarea = {
-								layoutpolicy_horizontal = expanding 
-								layoutpolicy_vertical = expanding
-								using = VerticalScrollAreaCutOff
-								scrollbar_vertical = {
-									using = VerticalScrollBar
-								}
-								scrollbarpolicy_horizontal = always_off
-							
-								scrollwidget = {
-								
-									vbox = {
-										vbox = {
-											name = "trade_agreements"
-											layoutpolicy_horizontal = expanding 
-											layoutpolicy_vertical = shrinking
-											margin_right = 4
-												overlappingitembox = {
-													#using = NoninteractableBG
-													#blockoverride "Margins"
-													#{
-													#	margin_right = -8
-													#	margin_bottom = -4
-													#}
-													margin_right = 14
-													datamodel = "[DiplomaticView.GetTargetCountry.MakeScope.GetList('list_of_trade_partners_all_categories')]"
-													layoutpolicy_horizontal = expanding
-													layoutpolicy_vertical = fixed
-													size = { 0 36 }
-													spacing = 2
-													margin_left = 38
-													icon = {
-														texture = "gfx/interface/icons/modifiers/commerce_value.dds"
-														tooltip = "Test"
-														position = { 0 -1 }
-														size = { 34 34 }
-													}
-													item = {
-														country_flag = {
-															tooltip = "TRADE_AGREEMENT_TT"
-															datacontext = "[Scope.GetCountry]"
-														
-															blockoverride "flag"
-															{
-																texture = "[Scope.GetCountry.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
-																frame = "[Scope.GetCountry.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
-																framesize = { 56 56 }
-															}
-														
-															blockoverride "size"
-															{
-																size = { 30 30 }
-															}
-														}
-													}
-												}
-										}
-										vbox = {
-											layoutpolicy_horizontal = expanding 
-											layoutpolicy_vertical = shrinking
-											datamodel = "[DiplomaticView.GetDiplomaticRelations]"
-											margin_right = 4
-											item = { 
-												overlappingitembox = {
-													#using = NoninteractableBG
-													#blockoverride "Margins"
-													#{
-													#	margin_right = -8
-													#	margin_bottom = -4
-													#}
-													margin_right = 14
-													datamodel = "[RelationTypeItem.GetRelations]"
-													layoutpolicy_horizontal = expanding
-													layoutpolicy_vertical = fixed
-													size = { 0 36 }
-													spacing = 2
-													margin_left = 38
-													icon = {
-														texture = "[RelationTypeItem.AccessIcon]"
-														tooltip = "[RelationTypeItem.GetToolTip]"
-														position = { 0 -1 }
-														size = { 34 34 }
-													}
-													item = {
-														country_flag = {
-															tooltip = "[RelationDescItem.GetToolTip]"
-															datacontext = "[RelationDescItem.GetCountry]"
-														
-															blockoverride "flag"
-															{
-																texture = "[RelationDescItem.AccessFlagIcon]"
-																frame = "[RelationDescItem.GetFlagFrame]"
-																framesize = { 56 56 }
-															}
-														
-															blockoverride "size"
-															{
-																size = { 30 30 }
-															}
-														
-															blockoverride "click"
-															{
-																onclick = "[RelationDescItem.OnClick]"
-															}
-														
-															blockoverride "hover_leave"
-															{
-																onmousehierarchyleave = "[DiplomaticView.ResetHighlight]"
-															}
-														}
-													}
-												}
-											}
-										}
-										vbox = {
-											name = "expander"
-											layoutpolicy_vertical = growing 
-										}
-									}
-								}
-							}
-							margin_widget = {
-								size = { 0 210 }
-								layoutpolicy_horizontal = expanding
-								sub_header_v = {
-									position = { 0 5 }
-									size = { 100% 0 }
-									blockoverride "Title_text" 
-									{ 
-										text = "OUR_DETAILS"
-									}
-								}
-								flowcontainer = {
-									position = { -2 40 }
-									name = "diplo_view_our_details"
-									spacing = 18
-									@icon_width_our_details = 105
-
-									flowcontainer = { 
-										direction = vertical 
-										spacing = 12
-										parentanchor = vcenter
-
-										panelka_center = { #agressive expansion
-											size = { @icon_width_our_details 32 }
-											blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/agressive_expansion_monthly_decay.dds" }
-											blockoverride "TextBox" { text = "[DiplomaticView.GetAEChange |2]" }
-											blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetAEChangeInfo]" }
-										}
-										panelka_center = { #agressive expansion impact
-											size = { @icon_width_our_details 32 }
-											blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/agressive_expansion_impact.dds" }
-											blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetModifierValue('agressive_expansion_impact')]" }
-											blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetPlayer.GetModifierTooltip('agressive_expansion_impact')]" }
-										}
-										panelka_center = { #agressive expansion
-											size = { @icon_width_our_details 32 }
-											blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/diplomatic_range.dds" }
-											blockoverride "TextBox" { text = "[DiplomaticView.GetDiplomaticRange]" }
-											blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetDiplomaticRangeTooltip]" }
-										}
-										panelka_center = { #diplomatic stance change cost
-											size = { @icon_width_our_details 32 }
-											blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/diplomacy.dds" }
-											blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetModifierValue('change_diplomatic_stance_cost_modifier')]" }
-											blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetPlayer.GetNumStanceChangesInfo]" }
-										}
-									}
-
-									flowcontainer = { 
-										direction = vertical
-										spacing = 12
-										parentanchor = vcenter
-
-										panelka_center = { #diplomatic relations
-											size = { @icon_width_our_details 32 }
-											blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/diplomatic_relations.dds" tooltip = "[DiplomaticView.GetPlayer.GetActiveRelationsInfo]" }
-											blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetNumActiveRelations]/[DiplomaticView.GetPlayer.GetNumActiveRelationsLimit]" }
-											blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetPlayer.GetModifierTooltip( 'diplomatic_relations' )]"  }
-										}
-										panelka_center = { #diplomatic reputation
-											size = { @icon_width_our_details 32 }
-											blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/diplomatic_reputation.dds" }
-											blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetModifierValue('diplomatic_reputation')]" }
-											blockoverride "Tooltip" { tooltip = "DIP_VIEW_REPUTATION_TOOLTIP" }
-										}
-										panelka_center = { #agressive expansion impact
-											size = { @icon_width_our_details 32 }
-											blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/improve_relation.dds" }
-											blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetModifierValue('improve_relation_impact')]" }
-											blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetPlayer.GetModifierTooltip('improve_relation_impact')]" }
-										}
-										icon = {
-											size = { 110 32 }
-											flowcontainer = {
-												ignoreinvisible = yes
-												parentanchor = vcenter
-												position = { 10 0 }
-												icon_button_square = {
-													size = { 42 42 }
-													visible = "[Not(DiplomaticView.IsShowStances)]"
-													blockoverride "Icon"
-													{
-														texture = "[GetDiplomaticStanceIcon(DiplomaticView.GetPlayer.GetDiplomaticStance)]"
-														size = { 80% 80% }
-													}
-													blockoverride "On_click"
-													{
-														onclick = "[DiplomaticView.ShowStances]"
-													}
-												} 
-
-												icon_button_square = {
-													size = { 42 42 }
-													visible = "[DiplomaticView.IsShowStances]"
-													blockoverride "Icon"
-													{
-														texture = "[GetDiplomaticStanceIcon(DiplomaticView.GetPlayer.GetDiplomaticStance)]"
-														size = { 80% 80% }
-													}
-													blockoverride "On_click"
-													{
-														onclick = "[DiplomaticView.HideStances]" 
-													}
-												}
-												widget = {
-													size = { 10 0 }
-												}
-												icon_button_square = {
-													size = { 42 42 }
-													blockoverride "Icon"
-													{
-														texture = "gfx/interface/icons/diplomatic_status/truce.dds"
-														size = { 80% 80% }
-													}
-													blockoverride "On_click"
-													{
-														onclick = "[PdxGuiTriggerAllAnimations('on_opinions_shown')]"
-													}
-													tooltip = "opinionsTT"
-													state = {
-														name = instantiate_then_hide_subwindow
-														on_finish = "[PdxGuiWidget.Show]"
-													}
-													state = {
-														name = "on_opinions_shown"
-														on_start = "[PdxGuiWidget.Hide]"
-													}
-													state = {
-														name = "on_opinions_hidden"
-														on_start = "[PdxGuiWidget.Show]"
-													}
-												} 
-												icon_button_square = {
-													size = { 42 42 }
-													visible = no
-													blockoverride "Icon"
-													{
-														texture = "gfx/interface/icons/diplomatic_status/truce.dds"
-														size = { 80% 80% }
-													}
-													blockoverride "On_click"
-													{
-														onclick = "[PdxGuiTriggerAllAnimations('on_opinions_hidden')]"
-													}
-													tooltip = "opinionsTT"
-													state = {
-														name = instantiate_then_hide_subwindow
-														on_finish = "[PdxGuiWidget.Hide]"
-													}
-													state = {
-														name = "on_opinions_shown"
-														on_start = "[PdxGuiWidget.Show]"
-													}
-													state = {
-														name = "on_opinions_hidden"
-														on_start = "[PdxGuiWidget.Hide]"
-													}
-												}
-											}
-										}
-									}
-								} 
-							}		
-						}
-					}
-				}
-
-				margin_widget = {
-					size = { 350 540 }
-					margin_left = 4
-					sub_header_v = { 
-						size = { 100% 505 }
-						blockoverride "Title_text" 
-						{
-							text = "DIPLOMATIC_INTERACTIONS_DIPLO_VIEW"
-						}
-					
-						blockoverride "Max_text_width"
-						{
-							max_width = 320
-						}
-						margin_widget = {
-							size = { 100% 48 }
-							position = { 0 30 }
-							blockoverride "Margins" { margin = { 2 4 } }
-							#using = NoninteractableBG
-							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-						
-							hbox = {
-								margin = { 4 0 }
-								layoutpolicy_horizontal = expanding
-								spacing = 0
-							
-								icon_card = {
-									name = "their_stance"
-									visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-									blockoverride "Size" { size = { 36 36 } }
-									blockoverride "Icon"
-									{
-										texture = "[GetDiplomaticStanceIcon(DiplomaticView.GetTargetCountry.GetDiplomaticStance)]"
-									}
-
-									datacontext = "[DiplomaticView.GetTargetCountry.GetDiplomaticStance]"
-									tooltipwidget = { using = diplomatic_stance_tooltip }
-								
-									blockoverride "Text"
-									{
-										text ""
-									}
-								}
-								icon_and_text = {
-									size = { 86 0 }
-									visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-									tooltip = "[DiplomaticView.GetTargetCountry.GetOpinionDescription(DiplomaticView.GetPlayer)]"
-									blockoverride "Icon"
-									{
-										texture = "gfx/interface/icons/diplomatic_status/opinion_improvement_active.dds"
-									}
-									blockoverride "Text"
-									{
-										text = "[DiplomaticView.GetTargetCountry.GetOpinionOf(DiplomaticView.GetPlayer)|+=]"
-									}
-								}
-								icon_and_text = {
-									size = { 86 0 }
-									visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-									tooltip = "[DiplomaticView.GetPlayer.GetOpinionDescription(DiplomaticView.GetTargetCountry)]"
-									blockoverride "Icon"
-									{
-										texture = "gfx/interface/icons/diplomatic_status/opinion_improvement_passive.dds"
-									}
-									blockoverride "Text"
-									{
-										text = "[DiplomaticView.GetPlayer.GetOpinionOf(DiplomaticView.GetTargetCountry)|+=]"
-									}
-								}
-								icon_and_text = {
-									size = { 70 0 }
-									visible = "[And(Not( DiplomaticView.GetTargetCountry.IsBarbarian), DiplomaticView.GetTargetCountry.IsSubject )]"
-									tooltip = "[DiplomaticView.GetTargetCountry.GetSubjectLoyaltyInfo]"
-									blockoverride "Icon"
-									{
-										texture = "gfx/interface/icons/shared_icons/loyalty.dds"
-									}
-									blockoverride "Text"
-									{
-										text = "[DiplomaticView.GetTargetCountry.GetSubjectLoyalty|0]"
-										visible = "[DiplomaticView.GetTargetCountry.IsSubject]"
-									}
-									textbox = {
-										visible = "[Not(DiplomaticView.GetTargetCountry.IsSubject)]"
-										name = "Text"
-										position = { 0 3 }
-										size = { 100% 24 }					
-										align = right 
-										elide = right
-										using = BaseFontM
-										using = Black_FontColor
-										margin_right = 6
-										text = "NOT_A_SUBJECT_MATE" 
-									}
-								}
-							}
-						}
-
-						scrollarea = {
-							size = { 342 428 }
-							position = { 0 80 }
-							scrollbarpolicy_horizontal = always_off
-							using = VerticalScrollAreaCutOff
-							scrollbar_vertical = {
-								using = VerticalScrollBar
-							}
-
-							scrollwidget = {
-
-								vbox = {
-
-									vbox = {
-										visible = "[DiplomaticView.HasDiplomaticPending]"
-										layoutpolicy_horizontal = expanding
-										layoutpolicy_vertical = fixed
-										using = NoninteractableBG
-										blockoverride "Margins" 
-										{
-											margin = { 2 8 }
-										}
-									
-										textbox = {
-											autoresize = yes
-											multiline = yes
-											maximumsize = { 368 -1 }
-											using = BaseFontS
-											using = Black_FontColor
-											text = "[DiplomaticView.GetDiplomaticPendingText]"
-										}
-										tooltip = "[DiplomaticView.GetDiplomaticPendingTooltip]"
-									}
-									vbox = {
-										layoutpolicy_horizontal = expanding
-										layoutpolicy_vertical = preferred
-										margin_left = 8
-										margin_right = 10
-										#margin_top = -35
-										datacontext = "[DiplomaticView.GetDefaultActionCategory]"
-										using = diplomatic_actions_v2
-									}
-
-									vbox = {
-										name = "actions_grid"
-										layoutpolicy_vertical = shrinking
-										datamodel = "[DiplomaticView.GetActions]"
-										layoutpolicy_horizontal = expanding
-										margin_left = 8
-										margin_right = 10
-			
-										item = {
-											vbox = {	
-												layoutpolicy_horizontal = expanding
-												vbox = {
-													visible = "[Not(IsDataModelEmpty(DiplomaticView.GetActions))]"
-													margin_left = 0
-													margin_right = 4
-													layoutpolicy_horizontal = expanding
-
-													category_drop = {
-														layoutpolicy_horizontal = expanding
-														size = { 0 32 }
-														blockoverride "Text_alignment" 
-														{ 
-															parentanchor = left|vcenter 
-															align = left
-															position = { 16 -2 }
-															max_width = 310
-														}
-														blockoverride "Text" 
-														{
-															text = "[DiplomaticActionCategory.GetName]" 
-														}
-														blockoverride "On_click" { onclick = "[DiplomaticActionCategory.OnClick]" }
-														blockoverride "Down" { visible = yes }
-														blockoverride "Right" { visible = no }
-														blockoverride "RightArrowVisible" { visible = no }
-														visible = "[DiplomaticActionCategory.IsExpanded]"
-													}
-
-													category_drop = {
-														name = "close_button_dip"
-														layoutpolicy_horizontal = expanding
-														size = { 0 32 }
-														blockoverride "Text_alignment" 
-														{ 
-															parentanchor = left|vcenter 
-															align = left
-															position = { 16 -2 }
-															max_width = 310
-														}
-														blockoverride "Text" { text = "[DiplomaticActionCategory.GetName]" }
-														blockoverride "On_click" { onclick = "[DiplomaticActionCategory.OnClick]" }
-														blockoverride "Down" { visible = no }
-														blockoverride "Right" { visible = yes }
-														blockoverride "RightArrowVisible" { visible = yes }
-													
-														visible = "[Not(DiplomaticActionCategory.IsExpanded)]" 
-													}
-												}
-											
-												vbox = {
-													using = diplomatic_actions_v2
-													layoutpolicy_horizontal = expanding
-												}
-											}
-										}
-									}
-									margin_widget = {
-										size = { 0 28 }
-										layoutpolicy_horizontal = expanding
-										margin = { 7 0 }
-										margin_right = 0
-
-
-										vbox = {
-											visible = "[Not(IsDataModelEmpty(DiplomaticView.GetActions))]"
-											margin_left = 0
-											margin_right = 22
-											layoutpolicy_horizontal = expanding
-
-											category_drop = {
-												name = "close_button_trade_dip"
-												layoutpolicy_horizontal = expanding
-												size = { 0 32 }
-												blockoverride "Text_alignment" 
-												{ 
-													parentanchor = left|vcenter 
-													align = left
-													position = { 16 -2 }
-													max_width = 300
-												}
-												blockoverride "Text" 
-												{
-													text = "Trade Actions" 
-												}
-												blockoverride "On_click" { onclick = "[GetVariableSystem.Set( 'trade_actions_open', 'no' )]" }
-												blockoverride "Down" { visible = yes }
-												blockoverride "Right" { visible = no }
-												blockoverride "RightArrowVisible" { visible = no }
-
-												visible = "[GetVariableSystem.HasValue( 'trade_actions_open', 'yes' )]"
-											}
-
-											category_drop = {
-												name = "open_button_trade_dip"
-												layoutpolicy_horizontal = expanding
-												size = { 0 32 }
-												blockoverride "Text_alignment" 
-												{ 
-													parentanchor = left|vcenter 
-													align = left
-													position = { 16 -2 }
-													max_width = 300
-												}
-												blockoverride "Text" { text = "Trade Actions" }
-												blockoverride "On_click" { onclick = "[GetVariableSystem.Set( 'trade_actions_open', 'yes' )]" }
-												blockoverride "Down" { visible = no }
-												blockoverride "Right" { visible = yes }
-												blockoverride "RightArrowVisible" { visible = yes }
-											
-												visible = "[Not( GetVariableSystem.HasValue( 'trade_actions_open', 'yes' ) )]"
-											}
-										}
-
-									}
-
-									vbox = {
-										visible = "[And(GetVariableSystem.HasValue( 'trade_actions_open', 'yes' ), And(Not(DiplomaticView.GetTargetCountry.IsBarbarian), Not(EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ))))]"
-										margin_left = 4
-										margin_right = 16
-										margin_top = 10
-										layoutpolicy_horizontal = expanding
-
-										# Trade agreement - all
-										diplomacy_action_button = {
-											size = { 0 22 }
-											layoutpolicy_horizontal = expanding
-											margin = { 14 0 }
-											margin_right = 0
-
-											datacontext = "[GetScriptedGui('trade_agreement_all_button')]"
-											parentanchor = hcenter
-
-											enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-
-											blockoverride "On_click"
-											{
-												enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('recipient', Country.MakeScope).End )]"
-												onclick = "[ScriptedGui.Execute(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											}
-
-											blockoverride "Left_text" 
-											{ 
-												margin_left = 24
-												text = "[Select_CString( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'Cancel Trade Agreement: #T All', 'Trade Agreement: #T All' )]"
-											}
-											
-											blockoverride "Right_text"
-											{
-												text = "Test"
-												using = Negative_FontColor
-												# Make fontcolor conditional
-												tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											}	
-											
-											blockoverride "Icon" 
-											{
-												framesize = { 46 46 }
-												#visible = "[DiplomaticActionItem.RequireAcceptance]"
-												texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
-												frame = "[Select_int32(ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End),'(int32)2','(int32)1')]"
-												tooltip = "[ScriptedGui.BuildTooltip(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											}	
-
-											tooltip =  "[SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_title', 'offer_trade_agreement_all_tt_title' )]#T [DiplomaticView.GetTargetCountry.GetName] #! [SelectLocalization( ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End ), 'cancel_trade_agreement_all_tt_body', 'offer_trade_agreement_all_tt_body' )]"
-										}
-
-										widget = { size = { 0 4 } } # Adds spacing between diplo buttons
-
-										widget = { size = { 0 4 } } # Adds spacing between diplo buttons
-									}
-
-									margin_widget = {
-										size = { 0 28 }
-										layoutpolicy_horizontal = expanding
-										margin = { 14 0 }
-										margin_right = 7
-
-										text_button_square = {
-											size = { 100% 28 }
-											layoutpolicy_horizontal = expanding
-											datacontext = "[GetScriptedGui('sell_provinces')]"
-											enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											visible = "[And(Not(DiplomaticView.GetTargetCountry.IsBarbarian), Not(EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId )))]"
-											blockoverride "On_click" {
-												onclick = "[ScriptedGui.Execute(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-												onclick = "[ExecuteConsoleCommand('gui.ClearWidgets sell_provinces_window')]"
-												onclick = "[ExecuteConsoleCommand('gui.createwidget gui/sell_provinces.gui sell_provinces_window')]"
-											}
-											blockoverride "Center_text"
-											{
-												text = "sell_province"
-											}
-										}
-									}
-
-									margin_widget = {
-										size = { 0 28 }
-										layoutpolicy_horizontal = expanding
-										margin = { 14 0 }
-										margin_right = 7
-
-
-										text_button_square = {
-											size = { 100% 28 }
-											layoutpolicy_horizontal = expanding
-											datacontext = "[GetScriptedGui('give_up_claims')]"
-											enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											visible = "[And(Not(DiplomaticView.GetTargetCountry.IsBarbarian), Not(EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId )))]"
-											blockoverride "On_click" {
-												onclick = "[ScriptedGui.Execute(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
-											}
-											blockoverride "Center_text"
-											{
-												text = "give_up_claims"
-											}
-										}
-									}
-									vbox = {
-										layoutpolicy_vertical = expanding
-									}
-								}
-							}
-						}
-					}
-				}		
-			}
-		}
 	}
-	widgetid = "right_attach"
-	widgetanchor = top
 	
 	base_sub_window = {
 		gfxtype = windowgfx
 		name = "diplo_view_inherited"
-		size = { 380 892 }
-		#visible = "[Not( GetVariableSystem.HasValue('diplomatic_tabs', 'subjects'))]"
-		visible = no
+		size = { 380 900 }
+		visible = "[GetVariableSystem.HasValue( 'diplomatic_windows', 'opinions' )]"
 		movable = no
 		allow_outside = yes
-		minimumsize = { 380 540 } 
-		position = { 0 8 }
+		position = { 700 0 }
 
 		blockoverride "Title_text"
 		{
@@ -2076,46 +2058,25 @@ base_window = {
 		}
 		blockoverride "White_buttons" 
 		{
-		
 			button_close = {
-				onclick = "[PdxGuiTriggerAllAnimations('on_opinions_hidden')]"
+				onclick = "[GetVariableSystem.Set( 'diplomatic_windows', 'clear' )]"
 				tooltip = "CLOSE"
 			}
 		}
 	
-		attachto = { 
-			widgetid = "right_attach" 
-			parentanchor = right
-		} 
+		#attachto = { 
+		#	widgetid = "right_attach" 
+		#	parentanchor = right
+		#} 
 	
-		state = {
-			name = diplo_reset_size
+		#state = {
+		#	name = diplo_reset_size
 		
-			animation = {
-				size = { 340 740 }
-			}
+		#	animation = {
+		#		size = { 340 740 }
+		#	}
 		
-		}
-	
-		state = {
-			name = instantiate_then_hide_subwindow
-		
-			on_finish = "[PdxGuiWidget.Hide]"
-		}
-	
-		state = {
-			name = "on_opinions_shown"
-		
-			on_start = "[PdxGuiWidget.Show]"
-		
-		}
-	
-		state = {
-			name = "on_opinions_hidden"
-		
-			on_start = "[PdxGuiWidget.Hide]"
-		
-		}
+		#}
 	
 		vbox = {
 			margin_top = 30
@@ -2244,7 +2205,7 @@ base_window = {
 									visible = yes
 									texture = "gfx/interface/diplomacy/country_rank.dds"
 									framesize = { 54 54 }
-									frame = 4
+									frame = 1
 								}
 							
 								blockoverride "On_click"
@@ -2280,7 +2241,7 @@ base_window = {
 											size = { 328 36 }
 											list_button = {
 												parentanchor = vcenter
-												size = { 240 100% }
+												size = { 100% 100% }
 												onclick = "[CountryDiplomaticItem.OnSelect]"
 												down = "[EqualTo_int32( CountryDiplomaticItem.GetCountry.GetId, DiplomaticView.GetTargetCountry.GetId )]"
 												onmousehierarchyenter = "[SetHighlightCountry( CountryDiplomaticItem.GetCountry )]"
@@ -2322,14 +2283,7 @@ base_window = {
 												using = BaseFontM
 												using = Black_FontColor
 												text = "[CountryDiplomaticItem.GetName]"
-											}
-											icon = {
-												size = { 110 6 }
-												position = { 222 -1 }
-												texture = "gfx/interface/base_parts/brown_underline_x60bd.dds"
-												spriteType = Corneredtiled
-												spriteborder = { 30 0 }
-											}						
+											}					
 
 											textbox = {
 												position = { 240 -2 }
@@ -2350,14 +2304,6 @@ base_window = {
 												frame = "[CountryDiplomaticItem.GetCountry.GetRankFrame]"
 												tooltip = "[CountryDiplomaticItem.GetCountry.GetRankInformation]"
 											}
-											icon = {
-												size = { 110 6 }
-												position = { 222 1 }
-												parentanchor = bottom
-												texture = "gfx/interface/base_parts/brown_underline_x60bd.dds"
-												spriteType = Corneredtiled
-												spriteborder = { 30 0 }
-											}
 										}
 									}
 								}
@@ -2371,8 +2317,8 @@ base_window = {
 	base_sub_window = {
 			layer = top
 			visible = "[DiplomaticView.IsShowStances]"
-			size = { 420 324 } 
-			position = { 640 566 }
+			size = { 420 330 } 
+			position = { 700 570 }
 			name = "stance_selector"
 
 			blockoverride "Title_text"
@@ -2424,7 +2370,7 @@ base_window = {
 								}
 
 								text_button_square = {
-									size = { 280 28 }
+									size = { 270 28 }
 									parentanchor = vcenter
 									datacontext = "[DiplomaticStanceItem.GetStance]"
 									blockoverride "Center_text" 
@@ -2458,29 +2404,10 @@ base_window = {
 	}
 	base_sub_window = {
 		name = "subject_focus_window"
-		size = { 330 617 }
-		position = { 1080 200 }
+		size = { 330 620 }
+		position = { 700 200 }
 		movable = no
-		visible = no
-		state = {
-			name = instantiate_then_hide_subwindow
-		
-			on_finish = "[PdxGuiWidget.Hide]"
-		}
-	
-		state = {
-			name = "on_subject_shown"
-		
-			on_start = "[PdxGuiWidget.Show]"
-		
-		}
-	
-		state = {
-			name = "on_subject_hidden"
-		
-			on_start = "[PdxGuiWidget.Hide]"
-		
-		}
+		visible = "[And(GetVariableSystem.HasValue( 'diplomatic_windows', 'show_national_interactions' ), GetVariableSystem.HasValue( 'diplomatic_tabs', 'subjects' ))]"
 		blockoverride "Title_text" { text = "subject_focus" }
 
 		flowcontainer = {
@@ -2624,548 +2551,6 @@ base_window = {
 			}
 		}
 	}
-	#base_sub_window = { #subjects
-	#	name = "subject"
-	#	layer = top
-	#	visible = "[GetVariableSystem.HasValue( 'diplomatic_tabs', 'subjects' )]"
-	#	#visible = no
-	#	size = { 440 700 } 
-	#	position = { 640 200 }
-	#	movable = no
-	#	blockoverride "Title_text"
-	#	{
-	#		text = "Subject"
-	#		using = Sub_Header_FontColor
-	#	}
-	#	flowcontainer = { 
-	#		direction = vertical 
-	#		spacing = 16
-	#		margin = { 10 40 }
-	#		flowcontainer = {
-	#			flowcontainer = {
-	#				direction = vertical
-	#				icon = { #flag
-	#					parentanchor = center
-	#					size = { 140 70 }
-	#					cpt_button = {
-	#						parentanchor = left
-	#						size = { 50 77 }
-	#						position = { 10 -5 }
-	#						block "Context" 
-	#						{
-	#							datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
-	#							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-	#						}
-	#					}
-	#					country_flag = {
-	#						tooltip = "[DiplomaticView.GetTargetCountry.GetRankInformation]"
-	#						parentanchor = right
-
-	#						blockoverride "flag"
-	#						{
-	#							texture = "[DiplomaticView.GetTargetCountry.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
-	#							frame = "[DiplomaticView.GetTargetCountry.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
-	#							framesize = { 120 120 }
-	#						}
-
-	#						blockoverride "size"
-	#						{
-	#							size = { 70 70 }
-	#						}
-
-	#						blockoverride "click"
-	#						{
-	#							onclick = "[OpenDiplomacy(Country.GetCountry)]"
-	#						}
-
-	#						blockoverride "hover_leave"
-	#						{
-	#							onmousehierarchyleave = "[DiplomaticView.ResetHighlight]"
-	#						}
-	#					}
-	#				}
-	#				widget = { #country name
-	#					parentanchor = center
-	#					size = { 100 20 }
-	#					icon_and_text = {
-	#						size = { 100 20 }
-	#						tooltip = "[DiplomaticView.GetTargetCountry.GetName]"
-	#						blockoverride "LineSize"
-	#						{
-	#							size = { 100 4 }
-	#						} 
-	#						blockoverride "Icon"
-	#						{
-	#							visible = no
-	#						}
-	#						blockoverride "Text"
-	#						{
-	#							position = { 0 0 }
-	#							text = "[DiplomaticView.GetTargetCountry.GetNameWithNoTooltip]"
-	#							align = center|center
-	#							multiline = no
-	#							fontsize = 20
-	#						}
-	#					}
-	#				}
-	#			}
-	#			flowcontainer = {
-	#				direction = vertical
-	#				ignoreinvisible = yes
-	#				widget = {
-	#					size = { 3 3 }	
-	#				}
-	#				panelka_center = { #religion
-	#					size = { 120 32 }
-	#					blockoverride "Icon" { texture = "gfx/interface/icons/powers/religious.dds" }
-	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetReligion.GetName]" }
-	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetReligion.GetTooltip]" }
-	#				}
-	#				widget = { size = { 0 10 } }
-	#				panelka_center = { #culture
-	#					size = { 120 32 }
-	#					blockoverride "Icon" { texture = "gfx/interface/icons/governor_policies/cultural_assimilation.dds" }
-	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetName]" }
-	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetPrimaryCulture.GetTooltip]" }
-	#				}
-	#				widget = { size = { 0 10 } }
-	#				panelka_center = { #manpower
-	#					size = { 120 32 }
-	#					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/manpower.dds" }
-	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetManpower]" }
-	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetManpowerTooltip]" }
-	#				}
-	#			}
-	#			flowcontainer = {
-	#				direction = vertical
-	#				ignoreinvisible = yes
-	#				widget = {
-	#					size = { 15 3 }	
-	#				}
-	#			}
-	#			flowcontainer = {
-	#				direction = vertical
-	#				ignoreinvisible = yes
-	#				widget = {
-	#					size = { 3 3 }	
-	#				}
-	#				panelka_center = { #treasury
-	#					size = { 120 32 }
-	#					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
-	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetTreasury|0]" }
-	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetTreasuryTooltip]" }
-	#				}
-	#				widget = { size = { 0 10 } }
-	#				panelka_center = { #pop
-	#					size = { 120 32 }
-	#					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/pop_type.dds" }
-	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetTotalPopulation]" }
-	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.BuildTotalPopulationToolTip]" }
-	#				}
-	#				widget = { size = { 0 10 } }
-	#				panelka_center = { #stability
-	#					size = { 120 32 }
-	#					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/stability.dds" }
-	#					blockoverride "TextBox" { text = "[DiplomaticView.GetTargetCountry.GetStability|2]" }
-	#					blockoverride "Tooltip" { tooltip = "[DiplomaticView.GetTargetCountry.GetStabilityTooltip]" }
-	#				}
-	#			} 
-	#		}
-	#		flowcontainer = {
-	#			flowcontainer = {
-	#				direction = vertical
-	#				icon = {
-	#					parentanchor = center
-	#					size = { 65 70 }
-	#					cpt_button = {
-	#						parentanchor = left
-	#						size = { 50 77 }
-	#						position = { 10 -5 }
-	#						block "Context" 
-	#						{
-	#							datacontext = "[DiplomaticView.GetTargetCountry.GetRuler]"
-	#							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-	#						}
-	#					}
-	#				}
-	#			}
-	#			flowcontainer = {
-	#				direction = vertical
-	#				layoutpolicy_horizontal = expanding
-	#				flowcontainer = {
-	#					icon_and_text = {
-	#						size = { 200 20 }
-	#						tooltip = "Overseer"
-	#						blockoverride "LineSize"
-	#						{
-	#							size = { 200 4 }
-	#						} 
-	#						blockoverride "Icon"
-	#						{
-	#							visible = no
-	#						}
-	#						blockoverride "Text"
-	#						{
-	#							position = { 0 0 }
-	#							text = "Overseer"
-	#							align = left
-	#							multiline = no
-	#							fontsize = 20
-	#						}
-	#					}
-	#					widget = {
-	#						name = "modifier_reward"
-	#						size = { 150 32 }
-	#						using = NoninteractableBG
-	#						blockoverride "Margins" {}
-	#						visible = "[OfficeHolderItem.HasHolder]"
-	#						modifier_desc_condensed = {
-	#							position = { 0 -4 } 
-	#							parentanchor = center
-	#							widgetanchor = center
-	#							datacontext = "[OfficeHolderItem.GetModifier]"
-	#							tooltip = "[OfficeHolderItem.GetTooltip]"
-	#							scale = 0.9
-	#						}
-	#					}
-	#				}
-	#				flowcontainer = { 
-	#					margin_top = 10
-	#					icon_button_square = {
-	#						size = { 40 40 }
-	#						blockoverride "On_click"
-	#						{
-	#							#onclick = ""
-	#							clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-	#							oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-	#							inherit_visual_state = no
-	#						}
-	#						blockoverride "Icon"
-	#						{
-	#							texture = "gfx/interface/icons/shared_icons/change.dds"
-	#							size = { 34 34 }
-	#						}
-							
-	#						tooltip = "Change Overseer"
-	#					} 
-	#					widget = {
-	#						size = { 120 40 }
-	#						icon = {
-	#							size = { 120 40 }
-	#							shaderfile = "gfx/FX/pdxgui_default.shader"
-	#							using = black_background
-	#							alpha = 0.4
-	#							modify_texture = {
-	#								name = "Alpha"
-	#								texture = "gfx/interface/base_parts/header_l_x20bd_alpha1.dds"
-	#								blend_mode = alphamultiply
-	#								spriteType = Corneredtiled
-	#								spriteborder = { 52 0 }
-	#							}
-	#						}
-	#						flowcontainer = {
-	#							layoutpolicy_horizontal = expanding
-	#							margin_top = 7
-	#							spacing = 6
-	#							widget = { size = { 10 0 } }
-	#							policy_button = {
-	#								enabled = no
-	#							}
-	#							policy_button = {
-	#								enabled = no
-	#							}
-	#							policy_button = {
-	#								enabled = yes
-	#							}
-	#						}
-	#					}
-	#					widget = {
-	#						size = { 180 50 }
-	#						icon = {
-	#							texture = "gfx/interface/icons/icon_skills.dds"
-	#							framesize = { 50 50 }
-	#							frame = 3
-	#							size = { 30 30 }
-	#							tooltip = "Dip"
-	#						}
-	#						textbox = {
-	#							parentanchor = right
-	#							position = { 0 15 }
-	#							using = BaseFontM
-	#							using = White_FontColor
-	#							align = right
-	#							block "progress_text" { text = "1 / 5" }
-	#						}
-	#						widget = {
-	#							position = { 0 30 }
-	#							size = { 180 8 }
-	#							icon = {
-	#								using = flat_background
-	#								size = { 4 100% }
-	#							}
-	#							margin_widget = {
-	#								size = { 100% 100% }
-	#								margin = { 6 0 }
-	#								icon = {
-	#									name = "progress_frame"
-	#									texture = "gfx/interface/base_parts/progressbar_background_frame.dds"
-	#									minimumsize = { 0 7 }
-	#									size = { 100% 100% }
-	#									color = { 0.7 0.7 0.7 1 }
-	#									block "ProgressAlpha" { alpha = 0.5 }
-	#								}
-	#								progressbar = {
-	#									using = progressbar_flat_green
-	#									parentanchor = center
-	#									position = { 0 0 }
-	#									size = { 168 8 }
-
-	#									block "progress_value"
-	#									{
-	#										value = "35"
-	#									}
-	#								}
-	#							}
-	#							icon = {
-	#								using = flat_background
-	#								parentanchor = right
-	#								size = { 4 100% }
-	#							}
-	#						}
-	#					}
-	#				}
-	#			}
-	#		}
-	#		flowcontainer = {
-	#			flowcontainer = {
-	#				direction = vertical
-	#				ignoreinvisible = yes
-	#				panelka = {
-	#					size = { 220 32 }
-	#					blockoverride "TextBox" { text = "Type: Governorate" }
-	#					blockoverride "Tooltip" { tooltip = "Type: Governorate" }
-	#				}
-	#				widget = { size = { 0 6 } }
-	#				panelka = {
-	#					size = { 220 32 }
-	#					blockoverride "TextBox" { text = "Autonomy: number" }
-	#					blockoverride "Tooltip" { tooltip = "Autonomy: number" }
-	#				}
-	#			} 
-	#			widget = {
-	#				size = { 60 35 }	
-	#			}
-	#			icon_button_square = {
-	#				size = { 40 40 }
-	#				blockoverride "On_click"
-	#				{
-	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-	#					inherit_visual_state = no
-	#				}
-	#				blockoverride "Icon"
-	#				{
-	#					texture = "gfx/interface/icons/shared_icons/change.dds"
-	#					size = { 34 34 }
-	#				}
-	#				tooltip = "Change?"
-	#			} 
-	#		}
-	#		flowcontainer = { 
-	#			spacing = 8 
-	#			widget = { size = { 5 0 } }
-	#			icon_button_square = {
-	#				size = { 40 40 }
-	#				blockoverride "On_click"
-	#				{
-	#					#onclick = ""
-	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-	#					inherit_visual_state = no
-	#				}
-	#				blockoverride "Icon"
-	#				{
-	#					texture = "gfx/interface/icons/_default.dds"
-	#					size = { 34 34 }
-	#				}
-	#				tooltip = "Change?"
-	#			} 
-	#			icon_button_square = {
-	#				size = { 40 40 }
-	#				blockoverride "On_click"
-	#				{
-	#					#onclick = ""
-	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-	#					inherit_visual_state = no
-	#				}
-	#				blockoverride "Icon"
-	#				{
-	#					texture = "gfx/interface/icons/_default.dds"
-	#					size = { 34 34 }
-	#				}
-	#				tooltip = "Change?"
-	#			} 
-	#			icon_button_square = {
-	#				size = { 40 40 }
-	#				blockoverride "On_click"
-	#				{
-	#					#onclick = ""
-	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-	#					inherit_visual_state = no
-	#				}
-	#				blockoverride "Icon"
-	#				{
-	#					texture = "gfx/interface/icons/_default.dds"
-	#					size = { 34 34 }
-	#				}
-	#				tooltip = "Change?"
-	#			} 
-	#			icon_button_square = {
-	#				size = { 40 40 }
-	#				blockoverride "On_click"
-	#				{
-	#					#onclick = ""
-	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-	#					inherit_visual_state = no
-	#				}
-	#				blockoverride "Icon"
-	#				{
-	#					texture = "gfx/interface/icons/_default.dds"
-	#					size = { 34 34 }
-	#				}
-	#				tooltip = "Change?"
-	#			} 
-	#		}
-	#		flowcontainer = {
-	#			flowcontainer = {
-	#				direction = vertical
-	#				ignoreinvisible = yes
-	#				widget = {
-	#					size = { 0 10 }	
-	#				}
-	#				widget = {
-	#					size = { 0 20 }
-	#					textbox = {
-	#						position = { 10 0 }
-	#						using = BaseFontM
-	#						using = White_FontColor
-	#						block "progress_text" { text = "Status: Desloyal" }
-	#					}
-	#				}
-	#				widget = {
-	#					size = { 180 25 }
-	#					widget = {
-	#						size = { 180 8 }
-	#						icon = {
-	#							using = flat_background
-	#							size = { 4 100% }
-	#						}
-	#						margin_widget = {
-	#							size = { 100% 100% }
-	#							margin = { 6 0 }
-	#							icon = {
-	#								name = "progress_frame"
-	#								texture = "gfx/interface/base_parts/progressbar_background_frame.dds"
-	#								minimumsize = { 0 7 }
-	#								size = { 100% 100% }
-	#								color = { 0.7 0.7 0.7 1 }
-	#								block "ProgressAlpha" { alpha = 0.5 }
-	#							}
-	#							progressbar = {
-	#								using = progressbar_flat_green
-	#								parentanchor = center
-	#								position = { 0 0 }
-	#								size = { 168 8 }
-
-	#								block "progress_value"
-	#								{
-	#									value = "35"
-	#								}
-	#							}
-	#						}
-	#						icon = {
-	#							using = flat_background
-	#							parentanchor = right
-	#							size = { 4 100% }
-	#						}
-	#					}
-	#				}
-	#				widget = {
-	#					size = { 0 20 }
-	#					textbox = {
-	#						position = { 10 0 }
-	#						using = BaseFontM
-	#						using = White_FontColor
-	#						block "progress_text" { text = "Relation: -55" }
-	#					}
-	#				}
-	#			} 
-	#			widget = {
-	#				size = { 20 0 }	
-	#			}
-	#			icon_button_square = {
-	#				size = { 50 50 }
-	#				blockoverride "On_click"
-	#				{
-	#					#onclick = ""
-	#					clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_sub_tab"
-	#					oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-	#					inherit_visual_state = no
-	#				}
-	#				blockoverride "Icon"
-	#				{
-	#					texture = "gfx/interface/icons/_default.dds"
-	#					size = { 34 34 }
-	#				}
-	#				tooltip = "Change?"
-	#			} 
-	#		}
-	#		flowcontainer = {
-	#			widget = {
-	#				size = { 440 30 }
-	#				flowcontainer = {
-	#					parentanchor = hcenter
-	#					spacing = 10
-	#					icon_and_text = {
-	#						size = { 100 20 }
-	#						blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetTreasuryChange|2+=]" }
-	#						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
-	#						tooltip = "[DiplomaticView.GetPlayer.GetTreasuryChange|2+=]"
-	#					}
-	#					icon_and_text = {
-	#						size = { 100 20 }
-	#						blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetManpowerChange]" }
-	#						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/manpower.dds" }
-	#						tooltip = "[DiplomaticView.GetPlayer.GetManpowerChange]"
-	#					}
-	#					icon_and_text = {
-	#						size = { 100 20 }
-	#						blockoverride "Text" { text = "[DiplomaticView.GetPlayer.GetPoliticalInfluenceChange|2+=]" }
-	#						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/political_influence.dds" }
-	#						tooltip = "[DiplomaticView.GetPlayer.GetPoliticalInfluenceChange|2+=]"
-	#					}
-	#				}
-	#			}
-	#		}
-	#		widget = {
-	#			size = { 440 100 } 
-	#			text_button_square_highlighted = {
-	#				parentanchor = hcenter
-	#				size = { 230 28 }
-	#				blockoverride "On_click" {
-	#					#onclick = ""
-	#				}
-	#				blockoverride "Center_text"
-	#				{
-	#					text = "Decisions"
-	#				}
-	#			}
-	#		}
-	#	}
-	#}
 }
 
 template diplomatic_actions_v2
@@ -3215,7 +2600,7 @@ template diplomatic_actions_v2
 					{
 						framesize = { 46 46 }
 						visible = "[DiplomaticActionItem.RequireAcceptance]"
-						texture = "gfx/interface/diplomacy/ai_accept_decline_icon.dds"
+						texture = "gfx/interface/base_parts/accept_decline_flat.dds"
 						frame = "[DiplomaticActionItem.GetAcceptanceFrame]"
 						tooltip = "[DiplomaticActionItem.GetAcceptanceTooltip]"
 					}	
@@ -3247,7 +2632,7 @@ template testy
 	widget = {}
 }
 
-template "button_invalid_dummy"
+template button_invalid_dummy
 {
 	button = {
 		tooltip = "SLOT_NOT_UNLOCKED"
@@ -3278,35 +2663,44 @@ template "button_invalid_dummy"
 	}
 }
 
-template "idea_slot_not_available"
+template idea_slot_not_available
 {
-	icon = {
-		tooltip = "SLOT_NOT_UNLOCKED"
+	widget = {
 		block "Size" { size = { 50 50 } }
 		parentanchor = center	
-		using = beige_background
-		alpha = 1
-		modify_texture = {
-			name = "Alpha"
-			texture = "gfx/interface/base_parts/button2_inner_x8y8bd_alpha.dds"
-			blend_mode = alphamultiply
-			spriteType = Corneredtiled
-			spriteborder = { 6 6 }
+		tooltip = "SLOT_NOT_UNLOCKED"
+		background = {
+			name = "Shadow"
+			texture = "gfx/interface/base_parts/button_square_dropshadow_x16y16bd.dds"
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			spriteType = corneredtiled
+			spriteborder = { 8 8 }
+			margin = { 4 4 }
+			alpha = 0.5
 		}
-		
-		icon = {
-			size = { 100% 100% }
-			parentanchor = center
-			using = black_background
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = beige_background
+			alpha = 0.5
+		}
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = portrait_x32y32bd_alpha
+			texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+			alpha = 0.3
 			modify_texture = {
-				name = "Pattern"
-				texture = "gfx/interface/base_parts/square_button_corner_pattern_x22y22bd.dds"
+				texture = "gfx/interface/base_parts/button_vignette.dds"
 				blend_mode = alphamultiply
-				spriteType = Corneredtiled
-				spriteborder = { 11 11 }
+				spriteType = corneredtiled
+				spriteborder = { 20 20 }
 			}
 		}
-
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = beige_background
+			using = portrait_x32y32bd_alpha
+			margin = { -3 -3 }
+		}
 		icon = {
 			name = "Idea Mark"
 			parentanchor = center

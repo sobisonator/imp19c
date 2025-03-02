@@ -1,0 +1,98 @@
+# Svalues for country administration
+
+ADMIN_required_state = {
+	# Scope: State
+	# Function: Determine how much admin capacity is required in this state
+	# Failing to meet the admin capacity has downsides:
+	# - Decreased state loyalty cap
+	# - Increased likelihood of bad events from this state
+	# As the ADMIN cap met in all states contributes to the country's overall requirement, this also has country-wide effects
+	# - Decreased political power gain at the country level 
+	# - Decreased diplomatic power at the country level
+	every_state_province = {
+		add = 2
+		if = {
+			limit = {
+				OR = {
+					terrain = low_mountain
+					terrain = desert_hills
+					terrain = desert
+					terrain = sparse_jungle
+				}
+			}
+			add = 1
+		}
+		else_if = {
+			limit = {
+				OR = {
+					terrain = extreme_mountain
+					terrain = extreme_desert
+					terrain = dense_jungle
+				}
+			}
+			add = 2
+		}
+		every_pops_in_province = {
+			if = {
+				limit = {
+					pop_culture = {
+						is_integrated = yes
+					}
+				}
+				add = 0.05
+			}
+			else = {
+				add = 0.075
+			}
+		}
+	}
+
+	# Certain laws can multiply ADMIN requirement on the state
+	multiply = owner.ADMIN_all_states_required_modifier
+}
+
+ADMIN_all_states_required_modifier = {
+	# Scope: Country
+	# Function: Add values here to administration requirement from laws and other initiatives
+	# Acts as a multiplier to ADMIN required by states
+	value = 1
+}
+
+ADMIN_country_points_from_admin_districts_modifier = {
+	# Scope: Country
+	# Function: Add values here to administration bonus from techs
+	# Acts as a multiplier to administration provided by admin buildings
+	value = 1
+}
+
+ADMIN_provided_state = {
+	# Scope: State
+	# Function: Determine how much admin capacity is provided to the state
+	# Max = ADMIN_required_state, except for in the capital
+
+	every_state_province = {
+		add = num_of_URB_administration_distrct
+	}
+	multiply = 10
+	multiply = owner.ADMIN_country_points_from_admin_districts_modifier
+
+	# 10% of ADMIN from the capital state filters out to all states
+}
+
+ADMIN_required_country = {
+	# Scope: Country
+	# Function: Determine how much admin capacity is required for the whole country
+	# Failing to meet this has the following maluses:
+	# - Decreased political power gain
+	# - Decreased diplomatic power
+
+	# This is summed up partially from all the state ADMIN requirements across the country
+	every_governorships = {
+		every_governorship_state = {
+			add = ADMIN_required_state
+		}
+	}
+
+	# Then, additional initiatives can require ADMIN
+	# For example, certain laws may require a flat amount of ADMIN, which can only be provided in the capital
+}

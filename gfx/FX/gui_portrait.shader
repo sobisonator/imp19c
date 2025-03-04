@@ -134,14 +134,14 @@ PixelShader =
 								
 				if( Input.UV1.y < PopOutThreshold )
 				{
-					vColor = BlendColorPreMultiplied( vColor, vFrame );
-					vColor = BlendColorPreMultiplied( vColor, vPortrait );
+					vColor = BlendColor( vColor, vFrame );
+					vColor = BlendColor( vColor, vPortrait );
 				}
 				else
 				{
 					vPortrait *= vMask;
-					vColor = BlendColorPreMultiplied( vColor, vPortrait );
-					vColor = BlendColorPreMultiplied( vColor, vFrame );
+					vColor = BlendColor( vColor, vPortrait );
+					vColor = BlendColor( vColor, vFrame );
 				}
 				#ifdef DISABLED
 					vColor.rgb = DisableColor( vColor.rgb );

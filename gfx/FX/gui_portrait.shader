@@ -122,7 +122,6 @@ PixelShader =
 				vPortrait.rgb *= vPortrait.a;
 				float4 vBackground = PdxTex2DLod0( Background, Input.UV1 );
 				float  vMask       = PdxTex2DLod0( Mask, Input.UV1 ).a;
-				// float  vMask       = PdxTex2DLod0( Mask, Input.UV1 );
 				
 				float4 vFrame = SampleImageSprite( Frame, Input.UV0 );
 								

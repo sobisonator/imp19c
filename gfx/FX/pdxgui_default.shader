@@ -106,6 +106,18 @@ PixelShader =
 					OutColor.rgb *= 1.2;
 				#endif
 
+				#ifdef wave_effect 
+					// https://www.shadertoy.com/view/4tlczB
+					float2 UV = Input.UV0;
+				    float2 Wave = sin((UV.x) * 12.0) * 0.04;
+
+				    UV.y*=1.1;
+				    UV.y-= 0.05;
+
+				    float4 WaveFlag = SampleImageSprite(Texture, float3(UV.x, UV.y + Wave));
+					OutColor = WaveFlag;
+				#endif
+
 			    return OutColor;
 			}
 		]]
@@ -132,9 +144,9 @@ PixelShader =
 				float4 OutColor = SampleImageSprite( Texture, Input.UV0 );
 				OutColor *= Input.Color;
 
-#ifdef DISABLED
-				OutColor.rgb = DisableColor( OutColor.rgb );
-#endif
+				#ifdef DISABLED
+					OutColor.rgb = DisableColor( OutColor.rgb );
+				#endif
 
 			    return OutColor;
 			}
@@ -222,4 +234,11 @@ Effect PdxGuiProfileGraphDisabled
 	PixelShader = "PixelShader"
 	
 	Defines = { "DISABLED" }
+}
+Effect PdxGuiWave
+{
+	VertexShader = "VertexShader"
+	PixelShader = "PixelShader"
+
+	Defines = { "wave_effect" }
 }

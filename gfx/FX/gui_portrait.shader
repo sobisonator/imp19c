@@ -122,7 +122,6 @@ PixelShader =
 				vPortrait.rgb *= vPortrait.a;
 				float4 vBackground = PdxTex2DLod0( Background, Input.UV1 );
 				float  vMask       = PdxTex2DLod0( Mask, Input.UV1 ).a;
-				// float  vMask       = PdxTex2DLod0( Mask, Input.UV1 );
 				
 				float4 vFrame = SampleImageSprite( Frame, Input.UV0 );
 								
@@ -134,14 +133,14 @@ PixelShader =
 								
 				if( Input.UV1.y < PopOutThreshold )
 				{
-					vColor = BlendColorPreMultiplied( vColor, vFrame );
-					vColor = BlendColorPreMultiplied( vColor, vPortrait );
+					vColor = BlendColor( vColor, vFrame );
+					vColor = BlendColor( vColor, vPortrait );
 				}
 				else
 				{
 					vPortrait *= vMask;
-					vColor = BlendColorPreMultiplied( vColor, vPortrait );
-					vColor = BlendColorPreMultiplied( vColor, vFrame );
+					vColor = BlendColor( vColor, vPortrait );
+					vColor = BlendColor( vColor, vFrame );
 				}
 				#ifdef DISABLED
 					vColor.rgb = DisableColor( vColor.rgb );

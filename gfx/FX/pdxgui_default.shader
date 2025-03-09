@@ -1,6 +1,7 @@
 Includes = {
 	"cw/pdxgui.fxh"
 	"cw/pdxgui_sprite.fxh"
+	"standardfuncsgfx.fxh"
 }
 
 
@@ -72,7 +73,7 @@ PixelShader =
 			SampleModeU = "Clamp"
 			SampleModeV = "Clamp"
 		}
-	
+
 		Input = "VS_OUTPUT_PDX_GUI"
 		Output = "PDX_COLOR"
 		Code
@@ -109,10 +110,19 @@ PixelShader =
 				#ifdef wave_effect 
 					// https://www.shadertoy.com/view/4tlczB
 					float2 UV = Input.UV0;
-				    float2 Wave = sin((UV.x) * 12.0) * 0.04;
-
 				    UV.y*=1.1;
 				    UV.y-= 0.05;
+				    float iTime = GlobalTime;
+					#ifdef square 
+				    	float WaveSize = 8.0;
+				    #else
+				    	float WaveSize = 12.0;
+				    #endif
+
+				    // wave animation
+				    float2 Wave = sin((UV.x+iTime*0.1) * WaveSize) * 0.04;
+
+				    // float2 Wave = sin((UV.x) * WaveSize) * 0.04;
 
 				    float4 WaveFlag = SampleImageSprite(Texture, float3(UV.x, UV.y + Wave));
 					OutColor = WaveFlag;
@@ -241,4 +251,11 @@ Effect PdxGuiWave
 	PixelShader = "PixelShader"
 
 	Defines = { "wave_effect" }
+}
+Effect PdxGuiWaveSquare
+{
+	VertexShader = "VertexShader"
+	PixelShader = "PixelShader"
+
+	Defines = { "wave_effect" "square" }
 }

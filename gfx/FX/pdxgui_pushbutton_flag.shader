@@ -63,7 +63,7 @@ PixelShader =
 			    // #endif
 
 			    // wave animation
-			    float2 Wave = sin((UV.x+iTime*0.1) * WaveSize) * 0.04;
+			    float2 Wave = sin((UV.x+iTime*0.1) * WaveSize) * 0.02;
 
 			    // float2 Wave = sin((UV.x) * WaveSize) * 0.04;
 

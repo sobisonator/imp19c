@@ -3,42 +3,49 @@
 	# Function: Determine how much admin capacity is required in this state
 	# Failing to meet the admin capacity has downsides:
 	# - Decreased state loyalty cap
+	# - Decreased tax efficiency
 	# - Increased likelihood of bad events from this state
 	# As the ADMIN cap met in all states contributes to the country's overall requirement, this also has country-wide effects
 	# - Decreased political power gain at the country level 
 	# - Decreased diplomatic power at the country level
 	value = 0
 	every_state_province = {
-		add = 2
-		if = {
-			limit = {
-				OR = {
-					terrain = low_mountain
-					terrain = desert_hills
-					terrain = desert
-					terrain = sparse_jungle
-				}
-			}
-			add = 2
-		}
-		else_if = {
-			limit = {
-				OR = {
-					terrain = extreme_mountain
-					terrain = extreme_desert
-					terrain = dense_jungle
-				}
-			}
-			add = 4
-		}
-		add = {
-			value = total_population
-			divide = 10
-		}
+		add = ADMIN_required_province
 	}
 
 	# Certain laws can multiply ADMIN requirement on the state
 	multiply = owner.ADMIN_all_states_required_modifier
+}
+
+ADMIN_required_province = {
+	# Scope: Province
+	# Function: Get how much administration is required for the given province
+	value = 2
+	if = {
+		limit = {
+			OR = {
+				terrain = low_mountain
+				terrain = desert_hills
+				terrain = desert
+				terrain = sparse_jungle
+			}
+		}
+		add = 2
+	}
+	else_if = {
+		limit = {
+			OR = {
+				terrain = extreme_mountain
+				terrain = extreme_desert
+				terrain = dense_jungle
+			}
+		}
+		add = 4
+	}
+	add = {
+		value = total_population
+		divide = 10
+	}
 }
 
 ADMIN_all_states_required_modifier = {
@@ -53,6 +60,13 @@ ADMIN_country_points_from_admin_districts_modifier = {
 	# Function: Add values here to administration bonus from techs
 	# Acts as a multiplier to administration provided by admin buildings
 	value = 1
+}
+
+ADMIN_provided_state_max_bonus = {
+	# Scope: State
+	# Function: The maximum bonus to state loyalty from administration, which should not exceed the demand for ADMIN
+	value = ADMIN_provided_state
+	max = ADMIN_required_state
 }
 
 ADMIN_provided_state = {

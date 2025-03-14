@@ -132,8 +132,7 @@ base_window = {
 				}
 				sub_header_v = {
 					visible = "[MacroBuilderView.IsLayoutActive('build_in_province_naval_units')]"
-					#size = { 480 0 }
-					size = { 450 0 }
+					size = { 480 0 }
 					blockoverride "Title_text"
 					{
 						text = [MacroBuilderView.GetActivePage.GetName]
@@ -142,13 +141,6 @@ base_window = {
 				widget = {
 					size = { 480 32 }
 					tooltip = [MacroBuilderView.GetActivePage.GetTooltip]
-					button_info = {
-						visible = "[MacroBuilderView.IsLayoutActive('build_in_province_naval_units')]"
-						parentanchor = right|vcenter
-						onclick = "[GetVariableSystem.Set( 'wiki_page', 'brig_page' )]"
-						onclick = "[GetVariableSystem.Set( 'wiki_ui', 'open' )]"
-						tooltip = "INFO"
-					}
 				}
 			}
 
@@ -164,6 +156,45 @@ base_window = {
 				layoutpolicy_horizontal = expanding
 				margin = { 18 0 }
 				margin_top = 8
+				widget = {
+					size = { 100% 100% }
+					icon = {
+						size = { 100 100 }
+						#using = gold_background
+					}
+					visible = "[And(And(Not(MacroBuilderView.IsLayoutActive('trade_goods')), Not(MacroBuilderView.GetBuildInProvince.IsInProvinceMode)), Not(MacroBuilderView.IsLayoutActive('build_in_province_naval_units')))]"
+                    building_box = {
+                        blockoverride "PortItems" {
+                            macro_build_item_port = { }
+                            macro_build_item_river_port = { }
+                        }
+                        blockoverride "EducationItems" {
+                            macro_build_item_school = { }
+                            macro_build_item_university = { }
+                        }
+                        blockoverride "IndustrialItems" {
+                            macro_build_item_industrial_estate = { }
+                            macro_build_item_resource_gathering_operation = { }
+                        }
+                        blockoverride "InfrastructureItems" {
+                            macro_build_item_sewer_infrastructure = { }
+                            macro_build_item_hospital = { }
+                            macro_build_item_canal = { }
+                            macro_build_item_railway_upgrade = { }
+                            macro_build_item_depot = { }
+                        }
+                        blockoverride "MilitaryItems" {
+                            macro_build_item_fortress_building = { }
+                            macro_build_item_arsenal_building = { }
+                        }
+                        blockoverride "UrbanDistrictsItems" {
+                            macro_build_item_commerce_district = { }
+                            macro_build_item_administration_district = { }
+                            macro_build_item_residential_district = { }
+                            macro_build_item_cultural_district = { }
+                        }
+                    }
+				}
 				scrollarea = {
 					size = { @windowwidthminusmargin 100% }
 					scrollbarpolicy_horizontal = always_off
@@ -171,7 +202,7 @@ base_window = {
 					scrollbar_vertical = {
 						using = VerticalScrollBar
 					}
-					visible = "[And(Not(MacroBuilderView.IsLayoutActive('trade_goods')), Not(MacroBuilderView.GetBuildInProvince.IsInProvinceMode))]"
+					visible = "[And(MacroBuilderView.IsLayoutActive('build_in_province_naval_units'), Not(MacroBuilderView.GetBuildInProvince.IsInProvinceMode))]"
 					
 					scrollwidget = {
 						fixedgridbox = {
@@ -185,7 +216,7 @@ base_window = {
 									size = { 470 40 }
 									hbox = {
 										spacing = 6
-										
+										margin_top = 5
 										icon_card_macro = {
 											size = { 40 40 }
 											blockoverride "Icon" { 
@@ -196,7 +227,7 @@ base_window = {
 										}
 										
 										widget = {
-											size = { 332 34 }
+											size = { 302 34 }
 											list_button = {
 												size = { 100% 100% }
 												tooltip = "[MacroBuilderProvinceBuildable.GetTooltip]"
@@ -217,7 +248,27 @@ base_window = {
 												autoresize = yes
 											}
 										}
-										
+										flowcontainer = {
+											ignoreinvisible = yes
+											button_info = {
+												visible = "[EqualTo_string(MacroBuilderProvinceBuildable.GetName, SelectLocalization(GetVariableSystem.HasValue('macro_builder_tabs', 'buildings'),'none','brig'))]"
+												onclick = "[GetVariableSystem.Set( 'wiki_page', 'brig_page' )]"
+												onclick = "[GetVariableSystem.Set( 'wiki_ui', 'open' )]"
+												tooltip = "brig"
+											}
+											button_info = {
+												visible = "[EqualTo_string(MacroBuilderProvinceBuildable.GetName, SelectLocalization(GetVariableSystem.HasValue('macro_builder_tabs', 'buildings'),'none','medium_steamer'))]"
+												onclick = "[GetVariableSystem.Set( 'wiki_page', 'medium_steamer_page' )]"
+												onclick = "[GetVariableSystem.Set( 'wiki_ui', 'open' )]"
+												tooltip = "medium_steamer"
+											}
+											button_info = {
+												visible = "[EqualTo_string(MacroBuilderProvinceBuildable.GetName, SelectLocalization(GetVariableSystem.HasValue('macro_builder_tabs', 'buildings'),'none','screw_frigate'))]"
+												onclick = "[GetVariableSystem.Set( 'wiki_page', 'screw_frigate_page' )]"
+												onclick = "[GetVariableSystem.Set( 'wiki_ui', 'open' )]"
+												tooltip = "screw_frigate"
+											}
+										}
 										text_and_icon_price = {
 											name = "cost"
 											size = { 90 28 }
@@ -233,7 +284,6 @@ base_window = {
 						}
 					}
 				}
-
 				margin_widget = {
 					name = "province_mode"
 					size = { 100% 100% }
@@ -425,7 +475,8 @@ base_window = {
 								text = "BACK"
 							}
 							blockoverride "On_click" 
-							{ 
+							{
+                                onclick = "[MacroBuilderBuildInProvince.OnBack]"
 							}
 						}
 					}

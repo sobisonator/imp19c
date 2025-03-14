@@ -473,8 +473,7 @@ template NoninteractableBG
 {
 	background = {
 		shaderfile = "gfx/FX/pdxgui_default.shader"
-		texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
-		spriteType = Corneredtiled
+		using = beige_background
 		block "BackAlpha" { alpha = 0.5 }
 		
 		block "Margins"
@@ -487,10 +486,10 @@ template NoninteractableBG
 		{
 			modify_texture = {
 				name = "Alpha"
-				texture = "gfx/interface/base_parts/background_x60bd_alpha.dds"
+				texture = "gfx/interface/base_parts/background_x60bd_alpha_small.dds"
 				blend_mode = alphamultiply
 				spriteType = Corneredtiled
-				spriteborder = { 60 60 }
+				spriteborder = { 20 20 }
 			}
 		}
 	}
@@ -900,6 +899,64 @@ template macro_divider
 		texture = "gfx/interface/base_parts/macro_divider.dds"
 		blend_mode = alphamultiply
 	}
+}
+
+#### COLORS ####
+#https://lospec.com/palette-list/duel
+template red_color
+{
+	texture = "gfx/interface/base_parts/base_color.dds"
+	color = { 0.580 0.212 0.227 1 } #94363a
+}
+template orange_color
+{
+	texture = "gfx/interface/base_parts/base_color.dds"
+	color = { 0.890 0.471 0.251 1 } #e37840
+}
+template yellow_color
+{
+	texture = "gfx/interface/base_parts/base_color.dds"
+	color = { 1.000 0.914 0.286 1 } #ffe949
+}
+template yellow_orange_color
+{
+	texture = "gfx/interface/base_parts/base_color.dds"
+	color = { 1.000 0.808 0.498 1 } #ffce7f
+}
+template blue_color
+{
+	texture = "gfx/interface/base_parts/base_color.dds"
+	color = { 0.145 0.275 0.420 1 } #25466b
+}
+template cyan_color
+{
+	texture = "gfx/interface/base_parts/base_color.dds"
+	color = { 0.192 0.557 0.722 1 } #318eb8
+}
+template violet_color
+{
+	texture = "gfx/interface/base_parts/base_color.dds"
+	color = { 0.157 0.169 0.290 1 } #282b4a
+}
+template green_color
+{
+	texture = "gfx/interface/base_parts/base_color.dds"
+	color = { 0.133 0.349 0.094 1 } #225918
+}
+template salad_color
+{
+	texture = "gfx/interface/base_parts/base_color.dds"
+	color = { 0.651 0.800 0.204 1 } #a6cc34
+}
+template beige_color
+{
+	texture = "gfx/interface/base_parts/base_color.dds"
+	color = { 0.620 0.549 0.475 1 } #9e8c79
+}
+template brown_color
+{
+	texture = "gfx/interface/base_parts/base_color.dds"
+	color = { 0.451 0.239 0.231 1 } #733d3b
 }
 
 #### TYPES ####
@@ -2325,13 +2382,12 @@ types Base_GUI_Types
 				#}
 				icon = {
 					size = { 100% 100% }
-					texture = "gfx/interface/base_parts/base_color.dds"
 					block "Color" 
 					{
-						# using = red_color - Red
-						# using = green_color - Green
-						# using = blue_color - Blue
-						# using = yellow_color - Yellow
+						# using = red_color_alert - Red
+						# using = green_color_alert - Green
+						# using = blue_color_alert - Blue
+						# using = yellow_color_alert - Yellow
 					}
 				}
 				icon = {
@@ -6883,12 +6939,12 @@ types Base_GUI_Types
 		margin = { 2 2 }
 		icon = {
 			size = { 100% 100% }
-			enabled = "[Or( BuildingItem.CanBuild, BuildingItem.HasQueue )]"
+			block "Enabled" { enabled = "[Or( BuildingItem.CanBuild, BuildingItem.HasQueue )]" }
 			using = tooltip_es
 			tooltip = "BUILDING_ITEM_WITH_INSTRUCTIONS"
 			icon = {
 				size = { 100% 100% }
-				texture = "[GetBuildingIcon( BuildingItem.GetBuilding )]"
+				block "Texture" { texture = "[GetBuildingIcon( BuildingItem.GetBuilding )]" }
 				spriteType = Corneredtiled
 				framesize = { 1 1 }
 				frame = 1
@@ -6910,7 +6966,7 @@ types Base_GUI_Types
 				margin = { 3 3 }
 				icon = {
 					size = { 100% 100% }
-					texture = "[GetBuildingIcon( BuildingItem.GetBuilding )]"
+					block "Texture" { texture = "[GetBuildingIcon( BuildingItem.GetBuilding )]" }
 					spriteType = Corneredtiled
 					framesize = { 1 1 }
 					frame = 1
@@ -6944,10 +7000,13 @@ types Base_GUI_Types
 				parentanchor = hcenter
 				position = { 0 4 }
 				gfxtype = buttongfx
-				texture = "[GetBuildingIcon( BuildingItem.GetBuilding )]"
+				block "Texture" { texture = "[GetBuildingIcon( BuildingItem.GetBuilding )]" }
 				using = portrait_x32y32bd_alpha
-				onclick = "[BuildingItem.Build]" 
-				onrightclick = "[BuildingItem.CancelOrDestroy]"
+				block "On_click"
+				{ 
+					onclick = "[BuildingItem.Build]" 
+					onrightclick = "[BuildingItem.CancelOrDestroy]"
+				}
 				icon = {
 					size = { 100% 100% }
 					using = black_background
@@ -7035,29 +7094,65 @@ types Base_GUI_Types
 		}
 		widget = {
 			size = { 100% 28 }
-			position = { 0 36 }
+			block "Position" { position = { 0 36 } }
 			hbox = {
 				widget = { layoutpolicy_horizontal = expanding }
 				icon = {
 					layoutpolicy_horizontal = fixed
 					size = { 12 14 }
+					block "Visible" { }
 					icon = {
+						block "Position2" { position = { -2 -3 } }
 						size = { 16 16 }
-						position = { -2 -3 }
 						texture = "gfx/interface/icons/font_icons/font_icon_treasury.dds"
 					}
 				}
-				textbox = {
-					layoutpolicy_horizontal = fixed
-					using = BaseFontS
-					using = Highlight_FontColor
-					text = "[BuildingItem.GetBuildCost]"
-					autoresize = yes
-					align = center|nobaseline
+				block "Textbox" {
+					textbox = {
+						layoutpolicy_horizontal = fixed
+						using = BaseFontS
+						using = Highlight_FontColor
+						text = "[BuildingItem.GetBuildCost]"
+						align = center|nobaseline
+						autoresize = yes
+					}
 				}
 				widget = { layoutpolicy_horizontal = expanding }
 			}
 		}
+	}
+
+	type macro_building_item_button = building_item_button {
+		tooltip = "[MacroBuilderProvinceBuildable.GetTooltip]"
+		down = "[MacroBuilderProvinceBuildable.IsSelected]"
+		blockoverride "Enabled" { enabled = "[MacroBuilderProvinceBuildable.IsEnabled]" }
+		blockoverride "On_click" { onclick = "[MacroBuilderProvinceBuildable.OnClick]" }
+		blockoverride "Position" { position = { 0 56 } }
+		blockoverride "Position2" { position = { -2 -1 } }
+		blockoverride "Textbox" {
+			scrollarea = {
+				size = { 55 14 }
+				layoutpolicy_horizontal = fixed
+				scrollbarpolicy_horizontal = always_off
+				scrollbarpolicy_vertical = always_off
+				scrollbar_vertical = {
+					using = VerticalScrollBar
+				}
+				
+				scrollwidget = {
+					textbox = {
+						using = BaseFontS
+						using = White_FontColor
+						text = "[MacroBuilderProvinceBuildable.GetPrice]"
+						tooltip = "MACRO_BUILDER_COST"
+						align = left|nobaseline
+						size = { 55 35 }
+						multiline = yes
+					}
+				}
+			}
+		}
+		blockoverride "Texture" { texture = "[MacroBuilderProvinceBuildable.GetIconTexture]" }
 	}
 
 	#Filterbutton

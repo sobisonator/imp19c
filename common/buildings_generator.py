@@ -84,7 +84,7 @@ def write_buildings():
                 cultural = str(int(round((int(row.middle_strata) + int(row.upper_strata)) / 13)))
                 if int(cultural) > 0:
                     f.write("       URB_cultural_district = " + cultural + "\n") 
-                school = str(int(round(int(row.middle_strata) / 4.25)*(int(row.INDUSTRIALISATION) / 30)))
+                school = str(int(round(int(row.middle_strata) / 4.25)*(int(row.INDUSTRIALISATION)*(1+(int(row.INDUSTRIALISATION)*0.02)) / 35)))
                 if row.PROVINCE_RANK > 0:
                     school = str(int(school)+1)
                 if row.upper_strata > 0:

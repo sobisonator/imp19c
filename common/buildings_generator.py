@@ -75,7 +75,7 @@ def write_buildings():
                 residential = str(int(round(int(total_population/10)*0.8)*((3*int(row.INDUSTRIALISATION)) / 100)))
                 if int(residential) > 0:
                     f.write("       URB_residential_district = " + residential + "\n")
-                administration = str(int(round(int(row.middle_strata) / 10))) 
+                administration = str(int(round(int(row.middle_strata) / 5))) 
                 if int(administration) > 0:
                     f.write("       URB_administration_district = " + administration + "\n")
                 commerce = str(int(round((int(row.middle_strata) + int(row.upper_strata)) / 10)))
@@ -84,7 +84,7 @@ def write_buildings():
                 cultural = str(int(round((int(row.middle_strata) + int(row.upper_strata)) / 13)))
                 if int(cultural) > 0:
                     f.write("       URB_cultural_district = " + cultural + "\n") 
-                school = str(int(round(int(row.middle_strata) / 4.25)*(int(row.INDUSTRIALISATION) / 60)))
+                school = str(int(round(int(row.middle_strata) / 4.25)*(int(row.INDUSTRIALISATION) / 30)))
                 if row.PROVINCE_RANK > 0:
                     school = str(int(school)+1)
                 if row.upper_strata > 0:
@@ -94,7 +94,7 @@ def write_buildings():
                 sewer = str(int(round((total_population/30)*(int(row.INDUSTRIALISATION) / 100))))
                 if int(sewer) > 0:
                     f.write("       INF_sewer_infrastructure = " + sewer + "\n" )
-                RGO = str(int(round(2 *((0.25*int(row.INDUSTRIALISATION)) ))))
+                RGO = str(int(round(2 *((0.3*int(row.INDUSTRIALISATION)) ))))
                 if int(RGO) > 0:
                     f.write("       IND_resource_gathering_operation = " + RGO + "\n" )
                 depot = str(int(round((total_population/20)*((3*int(row.INDUSTRIALISATION)) / 50))))

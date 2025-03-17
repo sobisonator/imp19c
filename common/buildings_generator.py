@@ -75,10 +75,12 @@ def write_buildings():
                 residential = str(int(round(int(total_population/10)*0.8)*((3*int(row.INDUSTRIALISATION)) / 100)))
                 if int(residential) > 0:
                     f.write("       URB_residential_district = " + residential + "\n")
-                administration = str(int(round(int(row.middle_strata) / 5))) 
+                administration = str(int(round((int(row.middle_strata) / 5)))) 
+                if row.PROVINCE_RANK > 0:
+                    administration = str(int(administration)+1)
                 if int(administration) > 0:
                     f.write("       URB_administration_district = " + administration + "\n")
-                commerce = str(int(round((int(row.middle_strata) + int(row.upper_strata)) / 10)))
+                commerce = str(int(round((int(row.middle_strata) + int(row.upper_strata)) / 5)))
                 if int(commerce) > 0:
                     f.write("       URB_commerce_district = " + commerce + "\n") 
                 cultural = str(int(round((int(row.middle_strata) + int(row.upper_strata)) / 13)))

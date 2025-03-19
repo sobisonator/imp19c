@@ -28,24 +28,83 @@ INCOME_set_country_tax_rates = {
 	}
 }
 
+INCOME_collect_all_taxes_country = {
+	# Scope: Country
+	INCOME_reset_quarterly_national_tax_income_all = yes
+	every_governorships = {
+		INCOME_deduct_all_taxes_from_wealth_governorship = yes
+	}
+	add_treasury = var:INCOME_national_from_excise_duty_essentials
+	add_treasury = var:INCOME_national_from_property_tax
+	add_treasury = var:INCOME_national_from_income_tax
+	add_treasury = var:INCOME_national_from_tariffs
+	# TODO: Tax collection is affected by admin efficiency in states
+}
+
+INCOME_deduct_all_taxes_from_wealth_governorship = {
+	INCOME_deduct_tax_from_wealth_governorship = {
+		tax_type = excise_duty_essentials
+	}
+	INCOME_deduct_tax_from_wealth_governorship = {
+		tax_type = property_tax
+	}
+	INCOME_deduct_tax_from_wealth_governorship = {
+		tax_type = income_tax
+	}
+	INCOME_deduct_tax_from_wealth_governorship = {
+		tax_type = tariffs
+	}
+}
+
+INCOME_reset_quarterly_national_tax_income_all = {
+	INCOME_reset_quarterly_national_tax_income = {
+		tax_type = excise_duty_essentials
+	}
+	INCOME_reset_quarterly_national_tax_income = {
+		tax_type = property_tax
+	}
+	INCOME_reset_quarterly_national_tax_income = {
+		tax_type = income_tax
+	}
+	INCOME_reset_quarterly_national_tax_income = {
+		tax_type = tariffs
+	}
+}
+
+INCOME_reset_quarterly_national_tax_income = {
+	set_variable = {
+		name = INCOME_national_from_$tax_type$
+		value = 0
+	}
+}
+
 INCOME_deduct_tax_from_wealth_governorship = {
 	# Scope: Governorship
 	# Function: Remove the given $tax$ from each pop type's wealth pool in a governorship corresponding to the tax amount
+	# Called: Every quarter
 	change_variable = {
 		name = upper_strata_wealth
-		subtract = INCOME_governorship_$tax_type$_upper_strata
+		add = INCOME_governorship_$tax_type$_upper_strata
 	}
 	change_variable = {
 		name = middle_strata_wealth
-		subtract = INCOME_governorship_$tax_type$_middle_strata
+		add = INCOME_governorship_$tax_type$_middle_strata
 	}
 	change_variable = {
 		name = lower_strata_wealth
-		subtract = INCOME_governorship_$tax_type$_lower_strata
+		add = INCOME_governorship_$tax_type$_lower_strata
 	}
 	change_variable = {
 		name = proletariat_wealth
-		subtract = INCOME_governorship_$tax_type$_proletariat
+		add = INCOME_governorship_$tax_type$_proletariat
+	}
+
+	save_scope_as = taxed_governorship
+	owner = {
+		change_variable = {
+			name = INCOME_national_from_$tax_type$
+			add = scope:taxed_governorship.INCOME_governorship_$tax_type$_total_positive
+		}
 	}
 }
 

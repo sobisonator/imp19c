@@ -5924,6 +5924,7 @@ GT_set_tradegood_price_all_TZs = {
 GT_set_tradegood_price = {
 	# Scope: Tradezone province
 	# Function: Calculate the base wholesale price of $tradegood$ based on supply and demand in $tradezone$
+	# Also factor in the cost of ingredients if this is a manufactured good
 	global_var:global_$tradezone$_tradezone = {
 
 		set_variable = {
@@ -5952,7 +5953,18 @@ GT_set_tradegood_price = {
 				}
 			}
 		}
-
+		# Factor in the costs of raw materials for manufactured goods
+		# This requires and presumes that every_tradegood_complex runs through raw tradegoods first, then manufactured ones
+		# Otherwise, the prices will not be set
+		if = {
+			limit = {
+				#is_manufactured_tradegood = {
+				#	tradegood = $tradegood$
+				#}
+				flag:$tradegood$ = flag:clothing
+			}
+			GT_factor_raw_input_costs_$tradegood$ = yes
+		}
 		# Factor in elasticity
 	}
 }

@@ -616,7 +616,10 @@ DEMAND_iron = { # Total
 		limit = {
 			has_variable = COTTAGEIND_produced_construction_materials
 		}
-		add = var:COTTAGEIND_produced_construction_materials
+		add = {
+			value = var:COTTAGEIND_produced_construction_materials
+			multiply = 0.5
+		}
 	}
 	if = {
 		limit = {
@@ -685,7 +688,18 @@ DEMAND_gold_reserve_size_svalue = {
 DEMAND_gold_reserve_accumulation_rate = {
 	# Scope: Governorship
 	# Function: Get the amount needed to fill the gold reserve target, divided by the number of governorships
-	value = owner.var:DEMAND_gold_reserve_accumulation_basis
+	if = {
+		limit = {
+			owner = {
+				has_variable = DEMAND_gold_reserve_accumulation_basis
+			}
+		}
+		value = owner.var:DEMAND_gold_reserve_accumulation_basis
+	}
+	else = {
+		value = 1 # Error dodger
+	}
+	
 	# Reduce the effective demand based on the shortage
 	# multiply = DEMAND_shortage_gold_inverse ## NOTE: Removed because this causes major instability in prices
 	# Scale the demand to the governorship's proportion of the country's population
@@ -773,7 +787,17 @@ DEMAND_silver_reserve_size_svalue = {
 DEMAND_silver_reserve_accumulation_rate = {
 	# Scope: Governorship
 	# Function: Get the amount needed to fill the silver reserve target, divided by the number of governorships
-	value = GOODS_governorship_silver_produced
+	if = {
+		limit = {
+			owner = {
+				has_variable = DEMAND_silver_reserve_accumulation_basis
+			}
+		}
+		value = owner.var:DEMAND_silver_reserve_accumulation_basis
+	}
+	else = {
+		value = 1 # Error dodger
+	}
 	# Reduce the effective demand based on the shortage
 	# multiply = DEMAND_shortage_silver_inverse ## ## NOTE: Removed because this causes major instability in prices
 	# Scale the demand to the governorship's proportion of the country's population

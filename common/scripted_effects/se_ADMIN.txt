@@ -1,25 +1,34 @@
 ﻿# Scripts for country administration
 
-ADMIN_set_state_loyalty_impact = {
+ADMIN_set_loyalty_impact_all_states = {
+	# Scope: Country
+	every_governorships = {
+		every_governorship_state = {
+			ADMIN_set_loyalty_impact_state = yes
+		}
+	}
+}
+
+ADMIN_set_loyalty_impact_state = {
 	# Scope: State
-	every_state_province = {
+	remove_state_modifier = ADMIN_state_loyalty_from_province_drain
+	remove_state_modifier = ADMIN_state_loyalty_gain
+	if = {
 		limit = {
-			has_province_modifier = ADMIN_state_loyalty_impact
+			ADMIN_overall_impact > 0
 		}
-		remove_province_modifier = ADMIN_state_loyalty_impact
-	}
-	every_state_province = {
-		FUNC_add_province_modifier_stack = {
+		FUNC_add_state_modifier_stack = {
 			MOD = ADMIN_state_loyalty_from_province_drain
-			NUM = ADMIN_required_province
+			NUM = ADMIN_overall_impact
 			DUR = -1
 		}
 	}
-	capital_scope = {
-		FUNC_add_province_modifier_stack = {
+	else = {
+		FUNC_add_state_modifier_stack = {
 			MOD = ADMIN_state_loyalty_gain
-			NUM = state.ADMIN_provided_state_max_bonus
+			NUM = ADMIN_overall_impact
 			DUR = -1
 		}
 	}
+	
 }

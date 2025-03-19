@@ -15,12 +15,21 @@
 
 	# Certain laws can multiply ADMIN requirement on the state
 	multiply = owner.ADMIN_all_states_required_modifier
+	min = 0
+}
+
+ADMIN_overall_impact = {
+	# Scope: State
+	# Function: Subtract the ADMIN_required_state from ADMIN_provided_state_max_bonus
+	# Supplies the value for the admin modifier
+	value = ADMIN_required_state
+	subtract = ADMIN_provided_state_max_bonus
 }
 
 ADMIN_required_province = {
 	# Scope: Province
 	# Function: Get how much administration is required for the given province
-	value = 2
+	value = 1
 	if = {
 		limit = {
 			OR = {
@@ -30,7 +39,7 @@ ADMIN_required_province = {
 				terrain = sparse_jungle
 			}
 		}
-		add = 2
+		add = 1
 	}
 	else_if = {
 		limit = {
@@ -40,7 +49,7 @@ ADMIN_required_province = {
 				terrain = dense_jungle
 			}
 		}
-		add = 4
+		add = 3
 	}
 	add = {
 		value = total_population
@@ -105,4 +114,19 @@ ADMIN_required_country = {
 
 	# Then, additional initiatives can require ADMIN
 	# For example, certain laws may require a flat amount of ADMIN, which can only be provided in the capital
+}
+
+ADMIN_supplied_country = {
+	every_governorships = {
+		every_governorship_state = {
+			add = ADMIN_provided_state
+		}
+	}
+}
+
+ADMIN_available_country = {
+	# Scope: Country
+	# Function: Subtract required from provided country administration
+	value = ADMIN_supplied_country
+	subtract = ADMIN_required_country
 }

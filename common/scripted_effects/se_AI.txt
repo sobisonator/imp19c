@@ -47,6 +47,7 @@ AI_add_control_interest = {
 	# AI interests are areas that the AI will focus on accessing diplomatically
 	# Methods of control include controlling the land directly or through a subject
 	# TODO: Have a controller script that limits the number of interests based on the power rating of a country
+	# TODO: Store a list of recently "blocked" interests, where the AI has either satisfied its goal or has been stopped and will look to try elsewhere
 
 	save_scope_as = AI_root
 
@@ -56,10 +57,14 @@ AI_add_control_interest = {
 				NOT = {
 					owner = scope:AI_root
 				}
+				# Adjacancy required if AI_root is landlocked
+				any_neighbor_province = {
+					owner = scope:AI_root
+				}
 			}
 		}
 		weight = {
-
+			value = 1
 			# Weight from religion
 			## TODO: Modify this weight based on the religious policies of the root
 			modifier = {
@@ -74,7 +79,7 @@ AI_add_control_interest = {
 							}
 						}
 					}
-					multiply = 1000
+					multiply = 100
 				}
 				always = yes
 			}
@@ -99,7 +104,7 @@ AI_add_control_interest = {
 							}
 						}
 					}
-					multiply = 1000
+					multiply = 100
 				}
 				always = yes
 			}
@@ -108,12 +113,135 @@ AI_add_control_interest = {
 			## Higher if the tradegoods in this area are in shortage in the root country
 			## Higher if the area has high value tradegoods
 
+			modifier = {
+				factor = {
+					every_area_province = {
+						switch = {
+							trigger = trade_goods
+							chocolate = {
+								AI_add_interest_weight_from_tradegood = { tradegood = chocolate }
+							}
+							fur = {
+								AI_add_interest_weight_from_tradegood = { tradegood = fur }
+							}
+							grain = {
+								AI_add_interest_weight_from_tradegood = { tradegood = grain }
+							}
+							vegetables = {
+								AI_add_interest_weight_from_tradegood = { tradegood = vegetables }
+							}
+							industrial_fibres = {
+								AI_add_interest_weight_from_tradegood = { tradegood = industrial_fibres }
+							}
+							textile_fibres = {
+								AI_add_interest_weight_from_tradegood = { tradegood = textile_fibres }
+							}
+							wool = {
+								AI_add_interest_weight_from_tradegood = { tradegood = wool }
+							}
+							silk = {
+								AI_add_interest_weight_from_tradegood = { tradegood = silk }
+							}
+							wood = {
+								AI_add_interest_weight_from_tradegood = { tradegood = wood }
+							}
+							stone = {
+								AI_add_interest_weight_from_tradegood = { tradegood = stone }
+							}
+							sulphur = {
+								AI_add_interest_weight_from_tradegood = { tradegood = sulphur }
+							}
+							whales = {
+								AI_add_interest_weight_from_tradegood = { tradegood = whales }
+							}
+							spices = {
+								AI_add_interest_weight_from_tradegood = { tradegood = spices }
+							}
+							coal = {
+								AI_add_interest_weight_from_tradegood = { tradegood = coal }
+							}
+							lead = {
+								AI_add_interest_weight_from_tradegood = { tradegood = lead }
+							}
+							dye = {
+								AI_add_interest_weight_from_tradegood = { tradegood = dye }
+							}
+							silver = {
+								AI_add_interest_weight_from_tradegood = { tradegood = silver }
+							}
+							gold = {
+								AI_add_interest_weight_from_tradegood = { tradegood = gold }
+							}
+							iron = {
+								AI_add_interest_weight_from_tradegood = { tradegood = iron }
+							}
+							copper = {
+								AI_add_interest_weight_from_tradegood = { tradegood = copper }
+							}
+							inorganic_compounds = {
+								AI_add_interest_weight_from_tradegood = { tradegood = inorganic_compounds }
+							}
+							tin = {
+								AI_add_interest_weight_from_tradegood = { tradegood = tin }
+							}
+							peat = {
+								AI_add_interest_weight_from_tradegood = { tradegood = peat }
+							}
+							gems = {
+								AI_add_interest_weight_from_tradegood = { tradegood = gems }
+							}
+							cattle = {
+								AI_add_interest_weight_from_tradegood = { tradegood = cattle }
+							}
+							oil = {
+								AI_add_interest_weight_from_tradegood = { tradegood = oil }
+							}
+							tea = {
+								AI_add_interest_weight_from_tradegood = { tradegood = tea }
+							}
+							coffee = {
+								AI_add_interest_weight_from_tradegood = { tradegood = coffee }
+							}
+							opium = {
+								AI_add_interest_weight_from_tradegood = { tradegood = opium }
+							}
+							tobacco = {
+								AI_add_interest_weight_from_tradegood = { tradegood = tobacco }
+							}
+							sugar = {
+								AI_add_interest_weight_from_tradegood = { tradegood = sugar }
+							}
+							hardwood = {
+								AI_add_interest_weight_from_tradegood = { tradegood = hardwood }
+							}
+							rubber = {
+								AI_add_interest_weight_from_tradegood = { tradegood = rubber }
+							}
+							temperate_fruit = {
+								AI_add_interest_weight_from_tradegood = { tradegood = temperate_fruit }
+							}
+							salt = {
+								AI_add_interest_weight_from_tradegood = { tradegood = salt }
+							}
+						}
+					}
+				}
+			}
+
+			# Weight from distance
+			## Lower based on the number of port levels the rooot country has
+
 		}
+
+		
 
 		# Currently here for testing - this is so that the tooltip can grab province area by scoping to a state
 		random_area_province = {
 			save_scope_as = AI_interest_target
 		}
+
+		
+		
 	}
 
 	# TESTING PURPOSES ONLY - Saves just 1 interest var
@@ -128,6 +256,33 @@ AI_add_control_interest = {
 	#	name = AI_interest_list
 	#	target = scope:AI_interest_target
 	#}
+}
+
+AI_add_interest_weight_from_tradegood = {
+	# Scope: Province within an Area targeted by AI interest calculation
+	# Function: Add to the interest weighting based on the global price of the local $tradegood$, and the shortage of that tradegood in root country
+	add = {
+		value = global_var:global_base_import_price_$tradegood$
+
+		multiply = {
+			value = scope:AI_root.DEMAND_shortage_country_$tradegood$
+			if = {
+				# Scale it down if it's gold or silver, as these are likely to have nationwide shortages due to the demand from currency reserves
+				limit = {
+					OR = {
+						flag:$tradegood$ = flag:gold
+						flag:$tradegood$ = flag:silver
+					}
+				}
+				multiply = 0.1
+			}
+		}
+
+		multiply = 1000
+
+	}
+
+	
 }
 
 # ECONOMY

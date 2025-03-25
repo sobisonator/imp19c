@@ -1,4 +1,4 @@
-## AI Behaviour scripts
+﻿## AI Behaviour scripts
 
 # DIPLOMACY
 
@@ -12,15 +12,15 @@ AI_pick_war_target = {
 	# Scope: Country
 	# Function: Pick the country which the AI is most likely to declare war on
 
-	random_country = {
-		weight = {
-
-			modifier = {
-
-			}
-
-		}
-	}
+	#random_country = {
+	#	weight = {
+#
+#			modifier = {
+#
+#			}
+#
+#		}
+#	}
 }
 
 #### DIPLOMATIC REASONING
@@ -41,6 +41,19 @@ AI_add_rival = {
 #### DIPLOMATIC INTEREST
 # Mark areas as "interests" to control
 
+AI_add_control_interest_all_countries_limited = {
+	# Scope: Any
+	# Function: Generate diplomatic interests for all countries above the threshhold
+	# Normally, diplomatic interests should be generated ad-hoc for countries rather than all at once
+	# Especially as this is a relatively demanding script in terms of performance
+	every_country = {
+		limit = {
+			DIPLOMACY_power > AI_diplomacy_interest_cutoff_threshhold
+		}
+		AI_add_control_interest = yes
+	}
+}
+
 AI_add_control_interest = {
 	# Scope: Country
 	# Function: Pick an area to mark as an interest and add it to the list in country scope
@@ -51,186 +64,295 @@ AI_add_control_interest = {
 
 	save_scope_as = AI_root
 
-	random_area = {
+	ordered_area = {
 		limit = {
+
+			# Limits based on any area in the province
 			any_area_province = {
+
+				# Must have land not owned by AI_root or its vassals
 				NOT = {
-					owner = scope:AI_root
+					owner = {
+						OR = {
+							THIS = scope:AI_root
+							scope:AI_root = THIS.overlord
+						}
+					}
 				}
-				# Adjacancy required if AI_root is landlocked
-				any_neighbor_province = {
-					owner = scope:AI_root
+
+				# Adjacency required if AI_root is landlocked
+				trigger_if = {
+					limit = {
+						scope:AI_root = {
+							NOT = {
+								any_owned_province = {
+									is_coastal = yes
+								}
+							}
+						}
+					}
+					any_neighbor_province = {
+						owner = scope:AI_root
+					}
 				}
+
+				# Only select coastal areas for overseas interests
+				trigger_if = {
+					limit = {
+						NOT = {
+							any_neighbor_province = {
+								owner = scope:AI_root
+							}
+						}
+					}
+					is_coastal = yes
+				}
+				
 			}
 		}
-		weight = {
-			value = 1
-			# Weight from religion
-			## TODO: Modify this weight based on the religious policies of the root
-			modifier = {
-				factor = {
-					every_area_province = {
-						every_pops_in_province = {
-							if = {
-								limit = {
-									pop_religion = scope:AI_root.religion
-								}
-								add = 1
+		order_by = {
+			value = {
+				# Begin order_by value
+
+				# Values from provinces
+				every_area_province = {
+					# From pops
+					every_pops_in_province = {
+						# Same religion
+						if = {
+							limit = {
+								pop_religion = scope:AI_root.religion
+							}
+							add = scope:AI_root.SPIRIT_piety
+						}
+						# Same culture
+						if = {
+							limit = {
+								pop_culture = scope:AI_root.culture
+							}
+							add = scope:AI_root.SPIRIT_nationalism
+						}
+						# Similar culture
+						else_if = {
+							limit = {
+								pop_culture_group = scope:AI_root.culture_group
+							}
+							add = {
+								value = scope:AI_root.SPIRIT_nationalism
+								divide = 2
 							}
 						}
 					}
-					multiply = 100
-				}
-				always = yes
-			}
-
-			# Weight from culture
-			## TODO: Modify this weight based on the cultural policies of the root
-			modifier = {
-				factor = {
-					every_area_province = {
-						every_pops_in_province = {
-							if = {
-								limit = {
-									pop_culture = scope:AI_root.culture
-								}
-								add = 1
-							}
-							else_if = {
-								limit = {
-									pop_culture_group = scope:AI_root.culture_group
-								}
-								add = 0.5
+					# Tradegood desirability
+					add = AI_interest_weighting_from_tradegood
+					# From how much population the province can support
+					# Discouraged coveting overlord's territory
+					if = {
+						limit = {
+							owner = scope:AI_root.overlord
+						}
+						subtract = 1000
+					}
+					# Discourage coveting allies' territory
+					if = {
+						limit = {
+							owner = {
+								alliance_with = scope:AI_root
 							}
 						}
+						subtract = 250
 					}
-					multiply = 100
 				}
-				always = yes
-			}
-
-			# Weight from trade goods
-			## Higher if the tradegoods in this area are in shortage in the root country
-			## Higher if the area has high value tradegoods
-
-			modifier = {
-				factor = {
-					every_area_province = {
-						switch = {
-							trigger = trade_goods
-							chocolate = {
-								AI_add_interest_weight_from_tradegood = { tradegood = chocolate }
-							}
-							fur = {
-								AI_add_interest_weight_from_tradegood = { tradegood = fur }
-							}
-							grain = {
-								AI_add_interest_weight_from_tradegood = { tradegood = grain }
-							}
-							vegetables = {
-								AI_add_interest_weight_from_tradegood = { tradegood = vegetables }
-							}
-							industrial_fibres = {
-								AI_add_interest_weight_from_tradegood = { tradegood = industrial_fibres }
-							}
-							textile_fibres = {
-								AI_add_interest_weight_from_tradegood = { tradegood = textile_fibres }
-							}
-							wool = {
-								AI_add_interest_weight_from_tradegood = { tradegood = wool }
-							}
-							silk = {
-								AI_add_interest_weight_from_tradegood = { tradegood = silk }
-							}
-							wood = {
-								AI_add_interest_weight_from_tradegood = { tradegood = wood }
-							}
-							stone = {
-								AI_add_interest_weight_from_tradegood = { tradegood = stone }
-							}
-							sulphur = {
-								AI_add_interest_weight_from_tradegood = { tradegood = sulphur }
-							}
-							whales = {
-								AI_add_interest_weight_from_tradegood = { tradegood = whales }
-							}
-							spices = {
-								AI_add_interest_weight_from_tradegood = { tradegood = spices }
-							}
-							coal = {
-								AI_add_interest_weight_from_tradegood = { tradegood = coal }
-							}
-							lead = {
-								AI_add_interest_weight_from_tradegood = { tradegood = lead }
-							}
-							dye = {
-								AI_add_interest_weight_from_tradegood = { tradegood = dye }
-							}
-							silver = {
-								AI_add_interest_weight_from_tradegood = { tradegood = silver }
-							}
-							gold = {
-								AI_add_interest_weight_from_tradegood = { tradegood = gold }
-							}
-							iron = {
-								AI_add_interest_weight_from_tradegood = { tradegood = iron }
-							}
-							copper = {
-								AI_add_interest_weight_from_tradegood = { tradegood = copper }
-							}
-							inorganic_compounds = {
-								AI_add_interest_weight_from_tradegood = { tradegood = inorganic_compounds }
-							}
-							tin = {
-								AI_add_interest_weight_from_tradegood = { tradegood = tin }
-							}
-							peat = {
-								AI_add_interest_weight_from_tradegood = { tradegood = peat }
-							}
-							gems = {
-								AI_add_interest_weight_from_tradegood = { tradegood = gems }
-							}
-							cattle = {
-								AI_add_interest_weight_from_tradegood = { tradegood = cattle }
-							}
-							oil = {
-								AI_add_interest_weight_from_tradegood = { tradegood = oil }
-							}
-							tea = {
-								AI_add_interest_weight_from_tradegood = { tradegood = tea }
-							}
-							coffee = {
-								AI_add_interest_weight_from_tradegood = { tradegood = coffee }
-							}
-							opium = {
-								AI_add_interest_weight_from_tradegood = { tradegood = opium }
-							}
-							tobacco = {
-								AI_add_interest_weight_from_tradegood = { tradegood = tobacco }
-							}
-							sugar = {
-								AI_add_interest_weight_from_tradegood = { tradegood = sugar }
-							}
-							hardwood = {
-								AI_add_interest_weight_from_tradegood = { tradegood = hardwood }
-							}
-							rubber = {
-								AI_add_interest_weight_from_tradegood = { tradegood = rubber }
-							}
-							temperate_fruit = {
-								AI_add_interest_weight_from_tradegood = { tradegood = temperate_fruit }
-							}
-							salt = {
-								AI_add_interest_weight_from_tradegood = { tradegood = salt }
+				# From AI root's DIPLOMACY_power in the area's TZ
+				add = {
+					value = 1
+					if = {
+						limit = {
+							any_area_province = {
+								india_tradezone = { PROVINCE = yes }
 							}
 						}
+						add = scope:AI_root.var:DIPLOMACY_power_india
 					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								east_north_america_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_east_north_america
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								west_north_america_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_west_north_america
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								caribbean_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_caribbean
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								west_south_america_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_west_south_america
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								east_south_america_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_east_south_america
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								south_east_asia_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_south_east_asia
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								indo_china_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_indo_china
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								yellow_sea_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_yellow_sea
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								southern_africa_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_southern_africa
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								west_africa_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_west_africa
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								east_africa_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_east_africa
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								middle_east_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_middle_east
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								western_steppe_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_western_steppe
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								eastern_steppe_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_eastern_steppe
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								upper_yangtzi_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_upper_yangtzi
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								atlantic_seaboard_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_atlantic_seaboard
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								central_europe_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_central_europe
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								west_mediterranean_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_west_mediterranean
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								baltic_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_baltic
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								east_europe_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_east_europe
+					}
+					else_if = {
+						limit = {
+							any_area_province = {
+								east_mediterranean_tradezone = { PROVINCE = yes }
+							}
+						}
+						add = scope:AI_root.var:DIPLOMACY_power_east_mediterranean
+					}
+					divide = 1
 				}
+				# Add weight if AI_root is not a major player in the TZ, but it aspires to be.
+				# End order_by value
 			}
+		}
 
-			# Weight from distance
-			## Lower based on the number of port levels the rooot country has
-
+		max = {
+			value = scope:AI_root.DIPLOMACY_power
+			divide = AI_diplomacy_interest_cutoff_threshhold
+			round = floor
 		}
 
 		
@@ -240,7 +362,12 @@ AI_add_control_interest = {
 			save_scope_as = AI_interest_target
 		}
 
-		
+		scope:AI_root = {
+			add_to_variable_list = {
+				name = AI_interests_list
+				target = scope:AI_interest_target
+			}
+		}
 		
 	}
 
@@ -250,6 +377,8 @@ AI_add_control_interest = {
 		value = scope:AI_interest_target
 	}
 
+
+
 	# TODO
 	# Activate this once confirmed working
 	#add_to_variable_list = {
@@ -258,32 +387,7 @@ AI_add_control_interest = {
 	#}
 }
 
-AI_add_interest_weight_from_tradegood = {
-	# Scope: Province within an Area targeted by AI interest calculation
-	# Function: Add to the interest weighting based on the global price of the local $tradegood$, and the shortage of that tradegood in root country
-	add = {
-		value = global_var:global_base_import_price_$tradegood$
 
-		multiply = {
-			value = scope:AI_root.DEMAND_shortage_country_$tradegood$
-			if = {
-				# Scale it down if it's gold or silver, as these are likely to have nationwide shortages due to the demand from currency reserves
-				limit = {
-					OR = {
-						flag:$tradegood$ = flag:gold
-						flag:$tradegood$ = flag:silver
-					}
-				}
-				multiply = 0.1
-			}
-		}
-
-		multiply = 1000
-
-	}
-
-	
-}
 
 # ECONOMY
 

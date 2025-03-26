@@ -59,8 +59,12 @@ AI_add_control_interest = {
 	# Function: Pick an area to mark as an interest and add it to the list in country scope
 	# AI interests are areas that the AI will focus on accessing diplomatically
 	# Methods of control include controlling the land directly or through a subject
-	# TODO: Have a controller script that limits the number of interests based on the power rating of a country
 	# TODO: Store a list of recently "blocked" interests, where the AI has either satisfied its goal or has been stopped and will look to try elsewhere
+	#
+	# Notes:
+	# AI countries without interests as defined here will pick activities based on a much simpler decision tree based
+	# e.g. "control pops of my culture and religion", or "control claims"
+	# Local powers will also react to plays in their TZ differently, acting more protectively.
 
 	save_scope_as = AI_root
 
@@ -116,7 +120,7 @@ AI_add_control_interest = {
 
 				# Values from provinces
 				every_area_province = {
-					# From pops
+					# BEGIN FROM POPS
 					every_pops_in_province = {
 						# Same religion
 						if = {
@@ -143,9 +147,18 @@ AI_add_control_interest = {
 							}
 						}
 					}
+					# END FROM POPS
 					# Tradegood desirability
 					add = AI_interest_weighting_from_tradegood
-					# From how much population the province can support
+					# Add how much population the province can support
+					add = modifier:local_population_capacity
+					# Add shipping power
+					add = SHIPPING_province_power
+					# Encouraged to predate on low industrialisation provinces
+					subtract = {
+						value = civilization_value
+						multiply = 20
+					}
 					# Discouraged coveting overlord's territory
 					if = {
 						limit = {
@@ -163,7 +176,13 @@ AI_add_control_interest = {
 						subtract = 250
 					}
 				}
-				# From AI root's DIPLOMACY_power in the area's TZ
+				# Turn this into an average province value for the area, so the bias is not towards purely larger areas
+				divide = {
+					every_area_province = {
+						add = 1
+					}
+				}
+				# From AI_root's DIPLOMACY_power in the area's TZ
 				add = {
 					value = 1
 					if = {
@@ -342,8 +361,8 @@ AI_add_control_interest = {
 						}
 						add = scope:AI_root.var:DIPLOMACY_power_east_mediterranean
 					}
-					divide = 1
 				}
+				 
 				# Add weight if AI_root is not a major player in the TZ, but it aspires to be.
 				# End order_by value
 			}
@@ -385,6 +404,20 @@ AI_add_control_interest = {
 	#	name = AI_interest_list
 	#	target = scope:AI_interest_target
 	#}
+}
+
+AI_begin_diplomatic_play = {
+	# Scope: Country
+	# Function: Begin a diplomatic play in an interest
+	# Activities may be aimed at the area in general with no particular diplomatic target
+	# OR
+	# If multiple countries own territory in the area, the AI_root is most likely to engage diplomatically with the country which owns the most valuable province 
+	# Province value = (tradegood output x tradegood value) + shipping power
+
+	# Diplomatic plays may range from requesting a treaty for access to an area
+	# To outright wars of conquest or espionage missions to subvert control of a rival
+
+	# The play may range from controlling the area, to the whole region, to possibly the whole of a country which controls that area, depending on the relative strength of that country. For example, if a relatively low power country controls an area, the AI_root may target that entire control for control.
 }
 
 

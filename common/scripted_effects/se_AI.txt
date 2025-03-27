@@ -149,8 +149,13 @@ AI_add_control_interest = {
 					}
 					# END FROM POPS
 					# Tradegood desirability
+					# TODO: Balance the weighting, as expensive goods are far too preferred, owning them as a small country would basically be a death wish
+					# Maybe get square root of tradegood price to diminish the distribution of prices in this calculation
+					# Or a little weighting from the actual num goods produced
+					# Alternatively, from the total possible building slots or population cap?
 					add = AI_interest_weighting_from_tradegood
 					# Add how much population the province can support
+					# TODO: This is not working as intended, it should be higher for terrains that can support more pops
 					add = modifier:local_population_capacity
 					# Encouraged to predate on low industrialisation provinces
 					subtract = {
@@ -214,196 +219,21 @@ AI_add_control_interest = {
 					}
 				}
 				# From AI_root's DIPLOMACY_power in the area's TZ
-				add = {
-					value = 1
-					if = {
-						limit = {
-							any_area_province = {
-								india_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_india
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								east_north_america_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_east_north_america
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								west_north_america_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_west_north_america
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								caribbean_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_caribbean
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								west_south_america_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_west_south_america
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								east_south_america_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_east_south_america
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								south_east_asia_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_south_east_asia
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								indo_china_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_indo_china
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								yellow_sea_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_yellow_sea
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								southern_africa_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_southern_africa
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								west_africa_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_west_africa
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								east_africa_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_east_africa
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								middle_east_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_middle_east
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								western_steppe_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_western_steppe
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								eastern_steppe_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_eastern_steppe
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								upper_yangtzi_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_upper_yangtzi
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								atlantic_seaboard_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_atlantic_seaboard
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								central_europe_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_central_europe
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								west_mediterranean_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_west_mediterranean
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								baltic_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_baltic
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								east_europe_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_east_europe
-					}
-					else_if = {
-						limit = {
-							any_area_province = {
-								east_mediterranean_tradezone = { PROVINCE = yes }
-							}
-						}
-						add = scope:AI_root.var:DIPLOMACY_power_east_mediterranean
-					}
-				}
+				add = AI_diplomacy_interest_from_tradezone_diplomacy_power_scope_ai_root
 				 
 				# Add weight if AI_root is not a major player in the TZ, but it aspires to be.
 				# End order_by value
 			}
 		}
 
-		max = {
-			value = scope:AI_root.DIPLOMACY_power
-			divide = AI_diplomacy_interest_cutoff_threshhold
-			round = floor
-		}
+		#max = {
+		#	value = scope:AI_root.DIPLOMACY_power
+		#	divide = AI_diplomacy_interest_cutoff_threshhold
+		#	round = floor
+		#}
+		# DEBUG: Currently only sets 1 for all countries so that the first priority area shows up in the tooltip
+		# TODO: Implement a list somewhere in GUI so the full list can be inspected for debugging
+		max = 1
 
 		
 
@@ -427,14 +257,6 @@ AI_add_control_interest = {
 		value = scope:AI_interest_target
 	}
 
-
-
-	# TODO
-	# Activate this once confirmed working
-	#add_to_variable_list = {
-	#	name = AI_interest_list
-	#	target = scope:AI_interest_target
-	#}
 }
 
 AI_begin_diplomatic_play = {

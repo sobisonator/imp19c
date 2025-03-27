@@ -118,7 +118,7 @@ AI_add_control_interest = {
 			value = {
 				# Begin order_by value
 
-				# Values from provinces
+				# BEGIN Values from provinces
 				every_area_province = {
 					# BEGIN FROM POPS
 					every_pops_in_province = {
@@ -152,8 +152,6 @@ AI_add_control_interest = {
 					add = AI_interest_weighting_from_tradegood
 					# Add how much population the province can support
 					add = modifier:local_population_capacity
-					# Add shipping power
-					add = SHIPPING_province_power
 					# Encouraged to predate on low industrialisation provinces
 					subtract = {
 						value = civilization_value
@@ -166,6 +164,31 @@ AI_add_control_interest = {
 						}
 						subtract = 1000
 					}
+					# Add value from intrinsic shipping modifiers (instead of adding raw shipping power, because AI interest is more about the potential of an area than its current value)
+					if = {
+						limit = {
+							has_variable = natural_harbour
+						}
+						add = SHIPPING_natural_harbour_bonus
+					}
+					if = {
+						limit = {
+							has_variable = major_estuary
+						}
+						add = SHIPPING_major_estuary_bonus
+					}
+					if = {
+						limit = {
+							has_variable = trade_chokepoint
+						}
+						add = SHIPPING_trade_chokepoint_bonus
+					}
+					if = {
+						limit = {
+							has_minor_river = yes
+						}
+						add = SHIPPING_river_or_coast_bonus
+					}
 					# Discourage coveting allies' territory
 					if = {
 						limit = {
@@ -176,6 +199,14 @@ AI_add_control_interest = {
 						subtract = 250
 					}
 				}
+				# Double the entire province score if this province is a claim of the AI_root
+				if = {
+					limit = {
+						is_core_of = scope:AI_root
+					}
+					multiply = 2
+				}
+				# END Values from provinces
 				# Turn this into an average province value for the area, so the bias is not towards purely larger areas
 				divide = {
 					every_area_province = {

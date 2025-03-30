@@ -71,17 +71,19 @@ AI_add_control_interest = {
 	ordered_area = {
 		limit = {
 
+			NOT = { THIS = area:spare_state }
 			# Limits based on any area in the province
 			any_area_province = {
 
 				# Must have land not owned by AI_root or its vassals
-				NOT = {
-					owner = {
-						OR = {
-							THIS = scope:AI_root
-							scope:AI_root = THIS.overlord
+				NOT = { owner = scope:AI_root }
+				trigger_if = {
+					limit = {
+						scope:AI_root = {
+							is_subject = yes
 						}
 					}
+					NOT = { owner.overlord = scope:AI_root }
 				}
 
 				# Adjacency required if AI_root is landlocked
@@ -125,20 +127,13 @@ AI_add_control_interest = {
 							limit = {
 								has_owner = yes
 							}
-							NOT = {
-								owner = {
-									OR = {
-										THIS = scope:AI_root
-										scope:AI_root = THIS.overlord
-									}
-								}
-							}
+							NOT = { owner = scope:AI_root }
+							NOT = { owner.overlord = scope:AI_root }
 						}
 					}
 					# BEGIN FROM POPS
 					add = {
 						every_pops_in_province = {
-							add = 0.5
 							# Same religion
 							if = {
 								limit = {
@@ -224,25 +219,37 @@ AI_add_control_interest = {
 						limit = {
 							has_variable = natural_harbour
 						}
-						add = SHIPPING_natural_harbour_bonus
+						add = {
+							value = SHIPPING_natural_harbour_bonus
+							multiply = 10
+						}
 					}
 					if = {
 						limit = {
 							has_variable = major_estuary
 						}
-						add = SHIPPING_major_estuary_bonus
+						add = {
+							value = SHIPPING_major_estuary_bonus
+							multiply = 10
+						}
 					}
 					if = {
 						limit = {
 							has_variable = trade_chokepoint
 						}
-						add = SHIPPING_trade_chokepoint_bonus
+						add = {
+							value = SHIPPING_trade_chokepoint_bonus
+							multiply = 10
+						}
 					}
 					if = {
 						limit = {
 							has_minor_river = yes
 						}
-						add = SHIPPING_river_or_coast_bonus
+						add = {
+							value = SHIPPING_river_or_coast_bonus
+							multiply = 10
+						}
 					}
 					# Discourage coveting allies' territory
 					if = {
@@ -258,17 +265,17 @@ AI_add_control_interest = {
 							subtract = 250
 						}
 					}
+					# Double the entire province score if this province is a claim of the AI_root
+					if = {
+						limit = {
+							is_core_of = scope:AI_root
+						}
+						multiply = 2
+					}
 				}
+				# END provinces loop
 				# Boost the score per province
 				multiply = 5
-				# Double the entire province score if this province is a claim of the AI_root
-				if = {
-					limit = {
-						is_core_of = scope:AI_root
-					}
-					multiply = 2
-				}
-				# END Values from provinces
 				# Turn this into an average province value for the area, so the bias is not towards purely larger areas
 				divide = {
 					every_area_province = {
@@ -277,22 +284,18 @@ AI_add_control_interest = {
 								limit = {
 									has_owner = yes
 								}
-								NOT = {
-									owner = {
-										OR = {
-											THIS = scope:AI_root
-											scope:AI_root = THIS.overlord
-										}
-									}
-								}
+								NOT = { owner = scope:AI_root }
+								NOT = { owner.overlord = scope:AI_root }
 							}
 						}
 						add = 1
 					}
 					min = 1
 				}
+				# END Values from provinces
+				
 				# From AI_root's DIPLOMACY_power in the area's TZ
-				multiply = AI_diplomacy_interest_from_tradezone_diplomacy_power_scope_ai_root
+				add = AI_diplomacy_interest_from_tradezone_diplomacy_power_scope_ai_root
 				 
 				# Add weight if AI_root is not a major player in the TZ, but it aspires to be.
 				# End order_by value

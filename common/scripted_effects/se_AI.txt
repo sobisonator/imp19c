@@ -134,32 +134,38 @@ AI_add_control_interest = {
 						}
 					}
 					# BEGIN FROM POPS
-					every_pops_in_province = {
-						# Same religion
-						if = {
-							limit = {
-								THIS.religion = scope:AI_root.religion
+					add = {
+						every_pops_in_province = {
+							add = 0.5
+							# Same religion
+							if = {
+								limit = {
+									THIS.religion = scope:AI_root.religion
+								}
+								add = scope:AI_root.SPIRIT_piety
 							}
-							add = scope:AI_root.SPIRIT_piety
+							# Same culture
+							if = {
+								limit = {
+									THIS.culture = scope:AI_root.country_culture.culture
+								}
+								add = scope:AI_root.SPIRIT_nationalism
+								multiply = 2
+							}
+							# Similar culture
+							else_if = {
+								limit = {
+									THIS.culture_group = scope:AI_root.culture.culture_group
+								}
+								add = {
+									value = scope:AI_root.SPIRIT_nationalism
+								}
+							}
 						}
-						# Same culture
-						if = {
-							limit = {
-								THIS.culture = scope:AI_root.country_culture.culture
-							}
-							add = scope:AI_root.SPIRIT_nationalism
-							multiply = 2
-						}
-						# Similar culture
-						else_if = {
-							limit = {
-								THIS.culture_group = scope:AI_root.culture.culture_group
-							}
-							add = {
-								value = scope:AI_root.SPIRIT_nationalism
-							}
-						}
+						multiply = 5
 					}
+					
+					# END FROM POPS
 					if = {
 						limit = {
 							has_owner = yes
@@ -186,8 +192,6 @@ AI_add_control_interest = {
 							}
 						}
 					}
-					
-					# END FROM POPS
 					# Tradegood desirability
 					# TODO: Balance the weighting, as expensive goods are far too preferred, owning them as a small country would basically be a death wish
 					# Maybe get square root of tradegood price to diminish the distribution of prices in this calculation
@@ -281,6 +285,7 @@ AI_add_control_interest = {
 						}
 						add = 1
 					}
+					min = 1
 				}
 				# From AI_root's DIPLOMACY_power in the area's TZ
 				add = AI_diplomacy_interest_from_tradezone_diplomacy_power_scope_ai_root

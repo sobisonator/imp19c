@@ -368,6 +368,59 @@ AI_begin_diplomatic_play = {
 	# The play may range from controlling the area, to the whole region, to possibly the whole of a country which controls that area, depending on the relative strength of that country. For example, if a relatively low power country controls an area, the AI_root may target that entire control for control.
 }
 
+AI_assess_all_adversaries = {
+	# Scope: Province (AI interest)
+	# Function: Get all the adversaries in an area and assess them using AI_assess_adversary
+
+	every_in_list = {
+		list = adversaries_to_assess
+		remove_from_list = adversaries_to_assess
+	}
+	
+	THIS.area = {
+		every_area_province = {
+			limit = {
+				has_owner = yes
+				trigger_if = {
+					limit = {
+						has_owner = yes
+					}
+					owner = {
+						NOT = {
+							is_in_list = adversaries_to_assess
+						}
+					}
+				}
+			}
+			owner = {
+				add_to_list = adversaries_to_assess
+			}
+		}
+	}
+
+	every_in_list = {
+		list = adversaries_to_assess
+
+		save_scope_as = AI_assess_target
+
+		AI_assess_adversary = {
+			AI_target = scope:AI_assess_target
+		}
+	}
+}
+
+AI_assess_adversary = {
+	# Scope: Country
+	# Function: Assess the $AI_target$ country from the perspective of AI_root
+	# This helps the AI determine whether it should:
+	# - Try to annex the target (holds core land and is small)
+	# - Try to vassalise the target (is small)
+	# - Try to vassalise the target and move on to others (is tiny)
+	# - Try to take land directly from the target (is big and holds core land)
+	# - Try to give land to an ally or new vassal (is big and holds non-core land)
+
+}
+
 
 
 # ECONOMY

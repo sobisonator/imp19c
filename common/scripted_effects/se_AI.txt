@@ -366,6 +366,34 @@ AI_begin_diplomatic_play = {
 	# To outright wars of conquest or espionage missions to subvert control of a rival
 
 	# The play may range from controlling the area, to the whole region, to possibly the whole of a country which controls that area, depending on the relative strength of that country. For example, if a relatively low power country controls an area, the AI_root may target that entire control for control.
+
+	# We begin by creating a provobj
+	random_province = {
+		limit = {
+			NOT = {
+				has_variable = is_diplomatic_play # We don't want to overwrite an existing object with this, so be sure to pick an unused province
+			}
+		}
+		set_variable = is_diplomatic_play
+		save_scope_as = diplomatic_play
+
+		set_variable = {
+			name = play_instigator
+			value = $play_instigator$ # Must be a country.
+		}
+		set_variable = {
+			name = play_target_area
+			value = $play_target_area$ # Must be an area.
+		}
+
+		# Countries supporting the play on either side
+		add_to_variable_list = {
+			name = play_supporters_instigator
+			value = $play_instigator$
+		}
+
+		# Empty list for play_supporters_list
+	}
 }
 
 AI_assess_all_adversaries = {
@@ -426,6 +454,71 @@ AI_assess_adversary = {
 	# Some actions "cost" less pressure to do and will therefore be more attractive to countries that are more on-par, or where root is less powerful than target
 
 	# Target can also seek support to gain power, but only in subsequent stages of a diplomatic play, where assessments are repeated but by both sides of the play.
+
+	# If both sides have a very high diplomatic power
+
+	#######################
+	# Get own target Diplomatic power
+	set_local_variable = {
+		name = AI_root_power
+		value = {
+			value = scope:AI_root.DIPLOMACY_power
+			scope:AI_root = {
+				every_allied_country = {
+					# Add less if allied with the target
+					if = {
+						limit = {
+							scope:AI_target = {
+								any_allied_country = PREV
+							}
+						}
+						add = {
+							value = THIS.DIPLOMACY_power
+							multiply = 0.2
+						}
+					}
+					else = {
+						add = {
+							value = THIS.DIPLOMACY_power
+							multiply = 0.5
+						}
+					}
+				}
+			}
+		}
+	}
+
+	# Get target's Diplomatic power
+	# Plus power of their allies
+	set_local_variable = {
+		name = AI_target_power
+		value = {
+			value = scope:AI_target.DIPLOMACY_power
+			scope:AI_target = {
+				every_allied_country = {
+					# Add less if allied with the target
+					if = {
+						limit = {
+							scope:AI_root = {
+								any_allied_country = PREV
+							}
+						}
+						add = {
+							value = THIS.DIPLOMACY_power
+							multiply = 0.3
+						}
+					}
+					else = {
+						add = {
+							value = THIS.DIPLOMACY_power
+							multiply = 0.5
+						}
+					}
+				}
+			}
+		}
+	}
+	#
 }
 
 

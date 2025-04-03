@@ -953,10 +953,25 @@ Effect city_building_snow
 {
 	VertexShader = "VS_standard"
 	PixelShader = "PS_standard"
-	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "ENABLE_SNOW" }
+	Defines = { "ENABLE_SNOW" }
 }
 
 Effect city_building_snowShadow
+{
+	VertexShader = "VertexPdxMeshStandardShadow"
+	PixelShader = "PixelPdxMeshStandardShadow"
+
+	RasterizerState = ShadowRasterizerState
+}
+
+Effect separate_building_snow
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_standard"
+	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "ENABLE_SNOW" }
+}
+
+Effect separate_building_snow_snowShadow
 {
 	VertexShader = "VertexPdxMeshStandardShadow"
 	PixelShader = "PixelPdxMeshStandardShadow"

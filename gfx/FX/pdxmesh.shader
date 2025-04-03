@@ -391,6 +391,12 @@ PixelShader =
 				#endif
 			#endif
 
+			#ifdef UNIQUE
+				#ifndef UNIQUE_UV_SET
+					#define UNIQUE_UV_SET Input.UV0
+				#endif
+			#endif
+
 			PDX_MAIN
 			{
 				#ifdef ANIMATE_UV
@@ -441,6 +447,11 @@ PixelShader =
 				#else
 					float4 NormalPacked = PdxTex2D( NormalMap, NORMAL_UV_SET + UvAnimationAdd );
 					float3 NormalSample = UnpackRRxGNormal( NormalPacked );
+				#endif
+
+				#ifdef UNIQUE
+					float4 Unique = PdxTex2D( UniqueMap, UNIQUE_UV_SET );
+					Diffuse.rgb *= Unique.bbb;
 				#endif
 
 				float3x3 TBN = Create3x3( normalize( Input.Tangent ), normalize( Input.Bitangent ), normalize( Input.Normal ) );
@@ -968,7 +979,7 @@ Effect separate_building_snow
 {
 	VertexShader = "VS_standard"
 	PixelShader = "PS_standard"
-	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "ENABLE_SNOW" }
+	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "UNIQUE" "ENABLE_SNOW" }
 }
 
 Effect separate_building_snow_snowShadow

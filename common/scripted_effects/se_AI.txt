@@ -384,47 +384,68 @@ AI_begin_diplomatic_play = {
 		set_variable = {
 			name = play_target_area
 			value = $play_target_area$ # Must be an area.
+			# if no area is targeted, this must have value flag:none
+			# This var is for when the play is about a particular piece of land, rather than a country
+		}
+		set_variable = {
+			name = play_target_country
+			value = $play_target_country$ # Must be a country.
+			# if no country is targeted, this must have the value flag:none
+			# This var is for when the play is not about any particular piece of land, but about an entire country
+		}
+		set_variable = {
+			name = play_goal # The goal that the AI_root wants to achieve with this diplomatic play
+			value = $play_goal$ # Available options below
+			# flag:get_territory
+			# flag:install_friendly_government
 		}
 
 		# Countries supporting the play on either side
 		add_to_variable_list = {
 			name = play_supporters_instigator
-			value = $play_instigator$
+			target = $play_instigator$
 		}
 
-		# Empty list for play_supporters_list
+		# Empty list for play_supporters_target
 	}
 }
 
 AI_assess_all_adversaries = {
-	# Scope: Province (AI interest)
+	# Scope: Province (Diplomatic play)
 	# Function: Get all the adversaries in an area and assess them using AI_assess_adversary
 
 	every_in_list = {
 		list = adversaries_to_assess
 		remove_from_list = adversaries_to_assess
 	}
-	
-	THIS.area = {
-		every_area_province = {
-			limit = {
-				has_owner = yes
-				trigger_if = {
-					limit = {
-						has_owner = yes
-					}
-					owner = {
-						NOT = {
-							is_in_list = adversaries_to_assess
+
+	if = {
+		limit = {
+			NOT = { var:play_target_area = flag:none }
+		}
+		THIS.area = {
+			every_area_province = {
+				limit = {
+					has_owner = yes
+					trigger_if = {
+						limit = {
+							has_owner = yes
+						}
+						owner = {
+							NOT = {
+								is_in_list = adversaries_to_assess
+							}
 						}
 					}
 				}
-			}
-			owner = {
-				add_to_list = adversaries_to_assess
+				owner = {
+					add_to_list = adversaries_to_assess
+				}
 			}
 		}
 	}
+	
+	
 
 	every_in_list = {
 		list = adversaries_to_assess
@@ -518,7 +539,8 @@ AI_assess_adversary = {
 			}
 		}
 	}
-	#
+	
+	# Calculate the power balance
 }
 
 

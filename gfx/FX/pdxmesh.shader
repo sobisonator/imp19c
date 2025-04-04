@@ -43,7 +43,7 @@ PixelShader =
 		SampleModeU = "Wrap"
 		SampleModeV = "Wrap"
 	}
-	TextureSampler NormalMap2
+	TextureSampler NormalMap_2
 	{
 		Index = 3
 		MagFilter = "Linear"
@@ -82,6 +82,15 @@ PixelShader =
 	TextureSampler UniqueMap
     {
 		Index = 5
+        MagFilter = "Linear"
+        MinFilter = "Linear"
+        MipFilter = "Linear"
+		SampleModeU = "Wrap"
+		SampleModeV = "Wrap"
+    }
+	TextureSampler ColorMap
+    {
+		Index = 6
         MagFilter = "Linear"
         MinFilter = "Linear"
         MipFilter = "Linear"
@@ -270,6 +279,12 @@ PixelShader =
 	#else
 		static const int COLOR_OFFSET = 0;
 	#endif
+
+	#ifdef USER_COLOR_SHIP
+		static const int USER_DATA_PRIMARY_COLOR = 0;
+		static const int USER_DATA_SECONDARY_COLOR = 1;
+	#endif
+
 	#if defined( FLAG )
 			static const int USER_DATA_ATLAS_SLOT = 2;
 	#endif
@@ -397,6 +412,12 @@ PixelShader =
 				#endif
 			#endif
 
+			#ifdef USER_COLOR_SHIP
+				#ifndef COLOR_UV_SET
+					#define COLOR_UV_SET Input.UV0
+				#endif
+			#endif
+
 			PDX_MAIN
 			{
 				#ifdef ANIMATE_UV
@@ -405,8 +426,6 @@ PixelShader =
 				#else
 					float2 UvAnimationAdd = vec2( 0.0f );
 				#endif
-
-
 
 				float4 Diffuse = PdxTex2D( DiffuseMap, DIFFUSE_UV_SET + UvAnimationAdd );
 
@@ -427,7 +446,7 @@ PixelShader =
 				//float3 UserColor = GetUserData( Input.InstanceIndex, USER_DATA_PRIMARY_COLOR ).rgb;
 
 				#if defined( ATLAS )
-					float4 NormalPacked = PdxTex2D( NormalMap2, NORMAL_UV_SET2 + UvAnimationAdd );
+					float4 NormalPacked = PdxTex2D( NormalMap_2, NORMAL_UV_SET2 + UvAnimationAdd );
 					float3 NormalSample = UnpackRRxGNormal( NormalPacked );
 
 					float4 Unique = PdxTex2D( UniqueMap, UNIQUE_UV_SET );
@@ -463,9 +482,10 @@ PixelShader =
 				#endif
 
 				#ifdef USER_COLOR_SHIP
-					UserColor = float3( 0.75f, 0.75f, 0.75f );
-					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_PRIMARY_COLOR ).rgb, Properties.r );
-					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_SECONDARY_COLOR ).rgb, NormalPacked.b );
+					float4 ColorPick = PdxTex2D( ColorMap, COLOR_UV_SET );
+					float3 ColorB = float3( 0.2f, 0.2f, 0.2f );
+					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_PRIMARY_COLOR ).rgb * ColorB, ColorPick.b );
+					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_SECONDARY_COLOR ).rgb * ColorB, ColorPick.g );
 				#endif
 
 				#ifdef FLAG
@@ -476,21 +496,9 @@ PixelShader =
 
 				Diffuse.rgb *= UserColor;
 
-/*				#if defined( ATLAS )
-					float4 Unique = PdxTex2D( UniqueMap, UNIQUE_UV_SET );
-
-					// blend normals
-					float3 UniqueNormalSample = UnpackRRxGNormal( Unique );
-					NormalSample = ReorientNormal( UniqueNormalSample, NormalSample );
-
-					// multiply AO
-					Diffuse.rgb *= Unique.bbb;
-				#endif*/
-
 				#if defined( ENABLE_SNOW )
 					ApplySnowMesh( Diffuse.rgb, Normal, Properties, Input.WorldSpacePos, TerrainColorMapTexture, WinterMap, TerrainDiffuseArray, TerrainNormalsArray, TerrainMaterialArray );
 				#endif
-
 
 				SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse.rgb, Normal, Properties.a, Properties.g, Properties.b );
 				SLightingProperties LightingProps = GetSunLightingProperties( Input.WorldSpacePos, ShadowTexture );
@@ -539,6 +547,7 @@ PixelShader =
 			#ifndef PROPERTIES_UV_SET
 				#define PROPERTIES_UV_SET Input.UV0
 			#endif
+
 			#ifndef UNIQUE_UV_SET
 				#define UNIQUE_UV_SET Input.UV0
 			#endif
@@ -884,7 +893,7 @@ Effect standard_usercolor_ship
 	VertexShader = "VS_standard"
 	PixelShader = "PS_standard"
 
-	Defines = { "USER_COLOR" "USER_COLOR_SHIP" }
+	Defines = { "USER_COLOR_SHIP" "UNIQUE" }
 }
 
 Effect standard_usercolor_shipShadow
@@ -893,7 +902,6 @@ Effect standard_usercolor_shipShadow
 	PixelShader = "PixelPdxMeshStandardShadow"
 
 	RasterizerState = ShadowRasterizerState
-	Defines = { "USER_COLOR" "USER_COLOR_SHIP" }
 }
 
 Effect mapcolor

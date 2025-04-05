@@ -488,6 +488,12 @@ PixelShader =
 					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_SECONDARY_COLOR ).rgb * ColorB, ColorPick.g );
 				#endif
 
+				#ifdef USER_FLAG_SHIP
+					float4 CoAAtlasSlot = GetUserData( Input.InstanceIndex, 2 );
+ 					float2 FlagCoords = CoAAtlasSlot.xy + ( MirrorOutsideUV( Input.UV0 ) * CoAAtlasSlot.zw );
+ 					Diffuse.rgb = PdxTex2D( FlagTexture, FlagCoords ).rgb;
+				#endif
+
 				#ifdef FLAG
 					float4 CoAAtlasSlot = GetUserData( Input.InstanceIndex, USER_DATA_ATLAS_SLOT );
 					float2 FlagCoords = CoAAtlasSlot.xy + ( MirrorOutsideUV( Input.UV1 ) * CoAAtlasSlot.zw );
@@ -568,7 +574,6 @@ PixelShader =
 				#ifdef NEWSPAPER_FLAG
 					float4 CoAAtlasSlot = GetUserData( Input.InstanceIndex, 2 );
 					float2 FlagCoords = CoAAtlasSlot.xy + ( MirrorOutsideUV( Input.UV1 ) * CoAAtlasSlot.zw );
-					// UserColor = PdxTex2D( FlagTexture, DIFFUSE_UV_SET );
 					Diffuse.rgb *= mul(PdxTex2D( FlagTexture, Input.UV0 ).rgb, PdxTex2D( UniqueMap, Input.UV0).r);
 				#endif
 

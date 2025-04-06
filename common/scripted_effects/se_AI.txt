@@ -189,6 +189,7 @@ AI_add_control_interest = {
 							}
 							subtract = {
 								value = scope:AI_root.SPIRIT_nationalism
+								min = 0.01
 								divide = 2
 							}
 						}
@@ -310,7 +311,10 @@ AI_add_control_interest = {
 							}
 						}
 					}
-					divide = AI_ports_to_land_ratio
+					divide = {
+						value = AI_ports_to_land_ratio
+						min = 0.01
+					}
 				}
 				
 				# From AI_root's DIPLOMACY_power in the area's TZ
@@ -355,7 +359,7 @@ AI_add_control_interest = {
 }
 
 AI_begin_diplomatic_play = {
-	# Scope: Country
+	# Scope: Country (instigator of the play)
 	# Function: Begin a diplomatic play in an interest
 	# Activities may be aimed at the area in general with no particular diplomatic target
 	# OR
@@ -383,14 +387,14 @@ AI_begin_diplomatic_play = {
 		}
 		set_variable = {
 			name = play_target_area
-			value = $play_target_area$ # Must be an area.
-			# if no area is targeted, this must have value flag:none
+			value = $play_target_area$ # Must be a province.
+			# if no area is targeted, this must have value of a province in area:spare_state
 			# This var is for when the play is about a particular piece of land, rather than a country
 		}
 		set_variable = {
 			name = play_target_country
 			value = $play_target_country$ # Must be a country.
-			# if no country is targeted, this must have the value flag:none
+			# if no country is targeted, this must be the same as the instigator
 			# This var is for when the play is not about any particular piece of land, but about an entire country
 		}
 		set_variable = {
@@ -408,6 +412,18 @@ AI_begin_diplomatic_play = {
 
 		# Empty list for play_supporters_target
 	}
+
+	# Now add this diplomatic play to the list of diplomatic plays in progress in the instigator
+	add_to_variable_list = {
+		name = list_of_diplomatic_plays_instigated
+		target = scope:diplomatic_play
+	}
+
+	scope:diplomatic_play = {
+		AI_assess_all_adversaries = {
+			diplomatic_play = scope:diplomatic_play
+		}
+	}
 }
 
 AI_assess_all_adversaries = {
@@ -419,11 +435,13 @@ AI_assess_all_adversaries = {
 		remove_from_list = adversaries_to_assess
 	}
 
+	$diplomatic_play$ = { save_scope_as = diplomatic_play }
+
 	if = {
 		limit = {
-			NOT = { var:play_target_area ?= flag:none }
+			always = yes
 		}
-		THIS.area = {
+		scope:diplomatic_play.var:play_target_area.area = {
 			every_area_province = {
 				limit = {
 					has_owner = yes
@@ -434,6 +452,7 @@ AI_assess_all_adversaries = {
 						owner = {
 							NOT = {
 								is_in_list = adversaries_to_assess
+								THIS = scope:diplomatic_play.var:play_instigator
 							}
 						}
 					}
@@ -450,16 +469,34 @@ AI_assess_all_adversaries = {
 	every_in_list = {
 		list = adversaries_to_assess
 
-		save_scope_as = AI_assess_target
+		save_scope_as = AI_target
 
 		AI_assess_adversary = {
-			AI_target = scope:AI_assess_target
+			AI_target = scope:AI_target
+			diplomatic_play = scope:diplomatic_play
+		}
+	}
+}
+
+AI_debug_test_begin_diplomatic_play_all = {
+	# Scope: Any
+	# Function: Test assess adversary on all countries with an interest
+	every_country = {
+		limit = {
+			has_variable = AI_interest
+		}
+		save_scope_as = AI_root
+		AI_begin_diplomatic_play = {
+			play_instigator = scope:AI_root
+			play_target_area = scope:AI_root.var:AI_interest
+			play_target_country = scope:AI_root # No specific country
+			play_goal = flag:get_territory
 		}
 	}
 }
 
 AI_assess_adversary = {
-	# Scope: Country
+	# Scope: Country (AI_target)
 	# Function: Assess the $AI_target$ country from the perspective of AI_root
 	# This helps the AI determine whether it should:
 	# - Try to annex the target (holds core land and is small)
@@ -476,36 +513,45 @@ AI_assess_adversary = {
 
 	# Target can also seek support to gain power, but only in subsequent stages of a diplomatic play, where assessments are repeated but by both sides of the play.
 
-	# If both sides have a very high diplomatic power
+	# Mark the level of risk by the total power between the two sides
 
 	#######################
 	# Save the current target in a scope
-	save_scope_as = AI_target
+	$diplomatic_play$.var:play_instigator = { save_scope_as = AI_root }
+
 
 	# Get own target Diplomatic power
 	set_local_variable = {
 		name = AI_root_power
 		value = {
 			value = scope:AI_root.DIPLOMACY_power
-			scope:AI_root = {
-				every_allied_country = {
-					# Add less if allied with the target
-					if = {
-						limit = {
-							scope:AI_target = {
-								any_allied_country = PREV
-							}
-						}
-						add = {
-							value = THIS.DIPLOMACY_power
-							multiply = 0.2
-						}
+		}
+	}
+
+	scope:AI_root = {
+		every_allied_country = {
+			# Add less if allied with the target
+			save_scope_as = test_ally
+			if = {
+				limit = {
+					$AI_target$ = {
+						any_allied_country = {THIS = scope:test_ally}
 					}
-					else = {
-						add = {
-							value = THIS.DIPLOMACY_power
-							multiply = 0.5
-						}
+				}
+				change_local_variable = {
+					name = AI_root_power
+					add = {
+						value = THIS.DIPLOMACY_power
+						multiply = 0.2
+					}
+				}
+			}
+			else = {
+				change_local_variable = {
+					name = AI_root_power
+					add = {
+						value = THIS.DIPLOMACY_power
+						multiply = 0.5
 					}
 				}
 			}
@@ -517,26 +563,47 @@ AI_assess_adversary = {
 	set_local_variable = {
 		name = AI_target_power
 		value = {
-			value = scope:AI_target.DIPLOMACY_power
-			scope:AI_target = {
-				every_allied_country = {
-					# Add less if allied with the target
-					if = {
-						limit = {
-							scope:AI_root = {
-								any_allied_country = PREV
-							}
-						}
-						add = {
-							value = THIS.DIPLOMACY_power
-							multiply = 0.3
-						}
+			value = $AI_target$.DIPLOMACY_power
+		}
+	}
+	$AI_target$ = {
+		every_allied_or_guaranteeing_country = {
+			# Add less if allied with the target
+			save_scope_as = test_ally
+			if = {
+				limit = {
+					scope:AI_root = {
+						any_allied_country = {THIS = scope:test_ally}
 					}
-					else = {
-						add = {
-							value = THIS.DIPLOMACY_power
-							multiply = 0.5
-						}
+				}
+				change_local_variable = {
+					name = AI_target_power
+					add = {
+						value = THIS.DIPLOMACY_power
+						multiply = 0.5
+					}
+				}
+			}
+			else = {
+				change_local_variable = {
+					name = AI_target_power
+					add = {
+						value = THIS.DIPLOMACY_power
+						multiply = 0.7
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				is_subject = yes
+			}
+			overlord = {
+				change_local_variable = {
+					name = AI_target_power
+					add = {
+						value = THIS.DIPLOMACY_power
+						multiply = 1
 					}
 				}
 			}
@@ -544,6 +611,35 @@ AI_assess_adversary = {
 	}
 	
 	# Calculate the power balance
+	# Positive value = balance in favour of the instigator
+	# Negative value = balance in favour of the target
+	$diplomatic_play$ = {
+		set_variable = {
+			name = AI_play_power_balance_instigator_root
+			value = {
+				value = local_var:AI_root_power
+				subtract = local_var:AI_target_power
+			}
+		}
+	}
+
+	# DEBUG ONLY
+	# Save the power balance and target country to vars in the instigator scope
+	scope:AI_root = {
+		set_variable = {
+			name = DEBUG_diplomatic_play
+			value = $diplomatic_play$
+		}
+	}
+
+	# Now add the AI_target to the right list in the diplomatic play so the instigator can decide how to treat them.
+	$diplomatic_play$ = {
+		if = {
+			limit = {
+				var:AI_play_power_balance_instigator_root > 1000
+			}
+		}
+	}
 }
 
 

@@ -231,6 +231,36 @@ VertexShader =
 			Out.WorldSpacePos = In.WorldSpacePos;
 			return Out;
 		}
+		// void CalculateSineAnimation( float2 UV, inout float3 Position, inout float3 Normal, inout float4 Tangent )
+		// {
+		// 	float AnimSeed = UV.x;
+		// 	float SmallWaveScale = 2.5f;
+		// 	float WaveScale = 2.5f;
+		// 	float AnimationSpeed = 20.0f;
+
+		// 	float Time = GlobalTime * AnimationSpeed;
+
+		// 	float SmallWaveV = Time - AnimSeed * SmallWaveScale;
+		// 	float SmallWaveD = -( AnimSeed * SmallWaveScale );
+		// 	float SmallWave = sin( SmallWaveV );
+		// 	float CombinedWave = SmallWave;
+
+		// 	// Wave
+		// 	float3 AnimationDir = float3( 0, 0, -1 );
+		// 	float Wave = WaveScale * smoothstep( 0.0, 0.12, AnimSeed ) * CombinedWave;
+		// 	float Derivative = ( WaveScale * 1.0f) * AnimSeed * -( SmallWave + cos( SmallWaveV ) * SmallWaveD );
+
+		// 	// Vertex position
+		// 	Position += AnimationDir * Wave;
+
+		// 	// Normals
+		// 	float2 WaveTangent = normalize( float2( 1.0f, Derivative ) );
+		// 	float3 WaveNormal = normalize( float3( WaveTangent.y, 0.0f, -WaveTangent.x ));
+
+		// 	float WaveNormalStrength = 1.0f;
+
+		// 	Normal = normalize( lerp( Normal, WaveNormal, 0.65f ) ); // Wave normal strength
+		// }
 	]]
 
 	MainCode VS_standard
@@ -241,6 +271,10 @@ VertexShader =
 		[[
 			PDX_MAIN
 			{
+				// #ifdef USER_FLAG_SHIP
+				// 	float2 AnimUV = saturate( Input.Position.xy / float2( 9.0f, 6.0f ) + vec2( 0.5f ) );
+				// 	CalculateSineAnimation( AnimUV, Input.Position, Input.Normal, Input.Tangent );
+				// #endif
 				VS_OUTPUT Out = ConvertOutput( PdxMeshVertexShaderStandard( Input ) );
 				Out.InstanceIndex = Input.InstanceIndices.y;
 				return Out;
@@ -489,9 +523,10 @@ PixelShader =
 				#endif
 
 				#ifdef USER_FLAG_SHIP
+					float3 ColorC = float3( 0.2f, 0.2f, 0.2f );
 					float4 CoAAtlasSlot = GetUserData( Input.InstanceIndex, 2 );
  					float2 FlagCoords = CoAAtlasSlot.xy + ( MirrorOutsideUV( Input.UV0 ) * CoAAtlasSlot.zw );
- 					Diffuse.rgb = PdxTex2D( FlagTexture, FlagCoords ).rgb;
+ 					// Diffuse.rgb = PdxTex2D( FlagTexture, FlagCoords ).rgb * ColorC;
 				#endif
 
 				#ifdef FLAG
@@ -521,6 +556,7 @@ PixelShader =
 				#endif
 
 				float Alpha = Diffuse.a;
+
 				#ifdef UNDERWATER
 					clip( WaterHeight - Input.WorldSpacePos.y + 0.1 ); // +0.1 to avoid gap between water and mesh
 
@@ -996,6 +1032,23 @@ Effect separate_building_snow
 }
 
 Effect separate_building_snow_snowShadow
+{
+	VertexShader = "VertexPdxMeshStandardShadow"
+	PixelShader = "PixelPdxMeshStandardShadow"
+
+	RasterizerState = ShadowRasterizerState
+}
+
+Effect flag_ship
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_standard"
+	// BlendState = "alpha_to_coverage"
+	
+	Defines = { "USER_FLAG_SHIP" }
+}
+
+Effect flag_shipShadow
 {
 	VertexShader = "VertexPdxMeshStandardShadow"
 	PixelShader = "PixelPdxMeshStandardShadow"

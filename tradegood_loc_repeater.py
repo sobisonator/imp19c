@@ -1,8 +1,19 @@
 def print_out_good(tradegood_name):
   tradegood = tradegood_name
   tradegood_caps = tradegood.upper()
-  loc = '''WEALTH_{tradegood}_durability = {{
-	value = 1
+  loc = '''else_if = {{
+	limit = {{
+		trade_goods = {tradegood}
+	}}
+		add = {{
+			value = global_var:global_base_import_price_{tradegood}
+
+    			multiply = {{
+            			value = scope:AI_root.DEMAND_shortage_country_{tradegood}
+            		}}
+    		}}
+   	 	multiply = AI_interest_tradegood_weighting_multiplier
+	}}
 }}'''.format(tradegood=tradegood)
   print(loc)
 

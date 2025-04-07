@@ -56,16 +56,10 @@ PixelShader =
 			    UV.y*=1.1;
 			    UV.y-= 0.05;
 			    float iTime = GlobalTime * -1 * 0.5;
-				// #ifdef square 
-			    // 	float WaveSize = 8.0;
-			    // #else
-			    	float WaveSize = 12.0;
-			    // #endif
+			    float WaveSize = 12.0;
 
 			    // wave animation
 			    float2 Wave = sin((UV.x+iTime*0.1) * WaveSize) * 0.03;
-
-			    // float2 Wave = sin((UV.x) * WaveSize) * 0.02;
 
 			    float4 WaveFlag = SampleImageSprite(Texture, float3(UV.x, UV.y + Wave));
 
@@ -81,6 +75,31 @@ PixelShader =
 				WaveFlag.xyz += lerp(0.08f, 0.25f, outerness) * float3(1.0f, 1.0f, 0.5f) * value * value * max(0.0, sin(GlobalTime * -3.3 + Input.Position.x * 0.12 + Input.Position.y * 0.14 + 0.51 * sin(Input.Position.y * 0.011)));
 
 				OutColor = WaveFlag;
+
+			    // UV.y*= 1.1;
+			    // UV.y-= 1.0;
+
+				// float SmallWaveScale = 5.5;
+				// float WaveScale = 0.3;
+				// float AnimationSpeed = 1.0;
+
+				// float AnimSeed = UV.x;
+				
+				// float Time = GlobalTime * AnimationSpeed;
+				
+				// float SmallWaveV = Time - AnimSeed * SmallWaveScale;
+				// float SmallWaveD = -( AnimSeed * SmallWaveScale );
+				// float SmallWave = sin( SmallWaveV );
+				// float CombinedWave = SmallWave;
+				
+				// // Wave
+				// float3 AnimationDir = float3( 0, 0.08, -1 );
+				// float Wave = WaveScale * smoothstep( 0.0, 0.12, AnimSeed ) * CombinedWave;
+				// float Derivative = ( WaveScale * 1.0f) * AnimSeed * -( SmallWave + cos( SmallWaveV ) * SmallWaveD );
+				// float2 WaveTangent = normalize( float2( 3.0f, Derivative ) );
+
+				// float4 WaveFlag = SampleImageSprite(Texture, float3(UV.x, UV.y + WaveTangent));
+				// OutColor = WaveFlag;
 
 				#ifndef NO_HIGHLIGHT
 					OutColor.rgb += HighlightColor;

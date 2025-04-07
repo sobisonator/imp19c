@@ -1,0 +1,88 @@
+pdxmesh = {
+	name = "new_medium_steamer_mesh"
+	file = "new_medium_steamer.mesh"
+
+	animation = { id = "idle" 			type = "new_medium_steamer_idle.anim" }
+	animation = { id = "move_start" 	type = "new_medium_steamer_idle.anim" }
+	animation = { id = "moving" 		type = "new_medium_steamer_moving.anim" }
+	animation = { id = "port_idle" 		type = "new_medium_steamer_idle.anim" }
+	animation = { id = "death" 			type = "new_medium_steamer_idle.anim" }
+	animation = { id = "combat" 		type = "new_medium_steamer_combat.anim" }
+
+	meshsettings = {
+		name = "medium_steamer_LOD0"
+		index = 0
+		texture_diffuse = "new_medium_steamer_diffuse.dds"
+		texture_normal = "new_medium_steamer_normal.dds"
+		texture_specular = "new_medium_steamer_properties.dds"
+		texture = { file = "new_medium_steamer_unique.dds" index = 5 }
+		texture = { file = "new_medium_steamer_color.dds" index = 6 }
+		shader = "standard_usercolor_ship"
+		shader_file = "gfx/FX/pdxmesh.shader"
+	}
+	
+	scale = 2.0
+}
+
+entity = {
+	name = "new_medium_steamer"
+	pdxmesh = "new_medium_steamer_mesh"
+	
+	locator = { name = "combat_effect" position = { 0 0 0 } rotation = { 0 0 0 } }
+	
+	default_state = "idle"
+	state = {
+		name = "idle"
+    	animation = "idle"
+		event = { time = 0 node = "ship_main" particle = "units/ship_idle_wave_01_effect" keep_particle = yes trigger_once = no }
+		event = { time = 3 node = "ship_main" particle = "units/ship_idle_wave_01_effect" keep_particle = yes trigger_once = no }
+		start_event = { trigger_once = yes sound = { soundeffect = "event:/SFX/Animations/Ships/Generic/sfx_anim_ship_generic_idle" } keep_sound = yes }
+    }
+	state = {
+		name = "port_idle"
+    	animation = "idle"
+    }
+	state = {
+		name = "move"
+    	animation = "moving"
+		looping = yes
+		chance = {
+			if_current_state = {
+				"idle" = 0
+				"move" = 100
+			}
+		}
+		next_state = "move"
+		event = { time = 0 node = "hull_front_locator" particle = "units/ship_water_front_01_effect" keep_particle = yes trigger_once = yes }
+		event = { time = 0 node = "hull_back_locator" particle = "units/ship_water_back_01_effect" keep_particle = yes trigger_once = yes }
+		event = { time = 0 node = "hull_smoke" particle = "environment/siege_smoke_01_effect" keep_particle = yes trigger_once = yes }
+		event = { time = 0 node = "root" particle = "units/ship_wind_01_effect" keep_particle = yes trigger_once = yes }
+		start_event = { sound = { soundeffect = "event:/SFX/Animations/Ships/Generic/sfx_anim_ship_generic_move" } keep_sound = yes }
+		
+    }
+	state = {
+		name = "death"
+    	animation = "death"
+		looping = no
+		event = { time = 0 node = "hull_front_locator" particle = "units/ship_sinking_front_effect" keep_particle = yes trigger_once = yes }
+		event = { time = 0 node = "root" particle = "units/ship_sinking_middle_effect" keep_particle = yes trigger_once = no }
+		event = { time = 0 node = "root" particle = "units/ship_sinking_fire_01_effect" keep_particle = yes trigger_once = no }
+		start_event = { sound = { soundeffect = "event:/SFX/Animations/Ships/Generic/sfx_anim_ship_generic_death" } keep_sound = yes }
+    }
+	state = {
+		name = "combat"
+    	animation = "combat"
+		looping = yes
+		rotation = { 0 0 0 }
+		event = { time = 0 node = "ship_main" particle = "units/ship_idle_wave_01_effect" keep_particle = yes trigger_once = no }
+		event = { time = 3 node = "ship_main" particle = "units/ship_idle_wave_01_effect" keep_particle = yes trigger_once = no }
+		start_event = { sound = { soundeffect = "event:/SFX/Animations/Ships/Generic/sfx_anim_ship_vfx_combat_arrows"}}	
+	}
+	
+	scale = 1
+}
+
+entity = {
+	name = "greek_gfx_medium_steamer"
+	clone = "new_medium_steamer"
+}

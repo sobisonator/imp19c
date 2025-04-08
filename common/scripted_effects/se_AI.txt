@@ -76,15 +76,21 @@ AI_add_control_interest = {
 			any_area_province = {
 
 				# Must have land not owned by AI_root or its vassals
-				NOT = { owner = scope:AI_root }
 				trigger_if = {
 					limit = {
-						scope:AI_root = {
-							is_subject = yes
-						}
+						has_owner = yes
 					}
-					NOT = { owner.overlord = scope:AI_root }
+					NOT = { owner = scope:AI_root }
+					trigger_if = {
+						limit = {
+							owner = {
+								is_subject = yes
+							}
+						}
+						NOT = { owner.overlord = scope:AI_root }
+					}
 				}
+				
 
 				# Adjacency required if AI_root is landlocked
 				trigger_if = {
@@ -343,10 +349,26 @@ AI_add_control_interest = {
 			save_scope_as = AI_interest_target
 		}
 
+
 		scope:AI_root = {
-			add_to_variable_list = {
-				name = AI_interests_list
-				target = scope:AI_interest_target
+			if = {
+				limit = {
+					NOR = {
+						is_target_in_variable_list = {
+							name = AI_interests_list
+							target = scope:AI_interest_target
+						}
+						any_in_list = {
+							variable = AI_interests_list
+
+							THIS.area = scope:AI_interest_target.area
+						}
+					}
+				}
+				add_to_variable_list = {
+					name = AI_interests_list
+					target = scope:AI_interest_target
+				}
 			}
 		}
 		
@@ -521,6 +543,7 @@ AI_debug_test_begin_diplomatic_play_all = {
 		variable = global_all_diplomatic_plays
 		AI_remove_diplomatic_play = yes
 	}
+
 
 	every_country = {
 		limit = {

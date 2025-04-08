@@ -331,14 +331,10 @@ AI_add_control_interest = {
 			}
 		}
 
-		#max = {
-		#	value = scope:AI_root.DIPLOMACY_power
-		#	divide = AI_diplomacy_interest_cutoff_threshhold
-		#	round = floor
-		#}
+		max = 1
 		# DEBUG: Currently only sets 1 for all countries so that the first priority area shows up in the tooltip
 		# TODO: Implement a list somewhere in GUI so the full list can be inspected for debugging
-		max = 1
+		#max = 1
 
 		
 
@@ -424,6 +420,10 @@ AI_begin_diplomatic_play = {
 		name = list_of_diplomatic_plays_instigated
 		target = scope:diplomatic_play
 	}
+	add_to_global_variable_list = {
+		name = global_all_diplomatic_plays
+		target = scope:diplomatic_play
+	}
 
 	scope:diplomatic_play = {
 		AI_assess_all_adversaries = {
@@ -484,19 +484,58 @@ AI_assess_all_adversaries = {
 	}
 }
 
+AI_remove_diplomatic_play = {
+	# Scope: Province (diplomatic play object)
+	# Function: Delete a diplomatic play
+	save_scope_as = play_to_delete
+	if = {
+		limit = {
+			has_variable = play_instigator
+		}
+		var:play_instigator = {
+			remove_list_variable = {
+				name = list_of_diplomatic_plays_instigated
+				target = scope:play_to_delete
+			}
+		}
+	}
+	remove_list_global_variable = {
+		name = global_all_diplomatic_plays
+		target = THIS
+	}
+	remove_variable = is_diplomatic_play
+	remove_variable = play_instigator
+	remove_variable = play_target_area
+	remove_variable = play_target_country
+	remove_variable = play_goal
+	clear_variable_list = play_supporters_instigator
+	clear_variable_list = play_supporters_target
+}
+
 AI_debug_test_begin_diplomatic_play_all = {
 	# Scope: Any
 	# Function: Test assess adversary on all countries with an interest
+
+	# First, delete all diplomatic plays
+	every_in_global_list = {
+		variable = global_all_diplomatic_plays
+		AI_remove_diplomatic_play = yes
+	}
+
 	every_country = {
 		limit = {
 			has_variable = AI_interest
 		}
 		save_scope_as = AI_root
-		AI_begin_diplomatic_play = {
-			play_instigator = scope:AI_root
-			play_target_area = scope:AI_root.var:AI_interest
-			play_target_country = scope:AI_root # No specific country
-			play_goal = flag:get_territory
+		every_in_list = {
+			variable = AI_interests_list
+			save_scope_as = target_area
+			AI_begin_diplomatic_play = {
+				play_instigator = scope:AI_root
+				play_target_area = scope:target_area
+				play_target_country = scope:AI_root # No specific country
+				play_goal = flag:get_territory
+			}
 		}
 	}
 }

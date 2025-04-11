@@ -272,6 +272,18 @@ AI_add_control_interest = {
 								owner = {
 									alliance_with = scope:AI_root
 								}
+								if = {
+									limit = {
+										owner = { is_subject = yes }
+									}
+									owner.overlord = {
+										OR = {
+											alliance_with = scope:AI_root
+											is_subject_of = scope:AI_root
+										}
+									}
+								}
+								
 							}
 							subtract = 250
 						}
@@ -330,7 +342,7 @@ AI_add_control_interest = {
 				}
 				
 				# From AI_root's DIPLOMACY_power in the area's TZ
-				add = AI_diplomacy_interest_from_tradezone_diplomacy_power_scope_ai_root
+				multiply = AI_diplomacy_interest_from_tradezone_diplomacy_power_scope_ai_root
 				 
 				# Add weight if AI_root is not a major player in the TZ, but it aspires to be.
 				# End order_by value
@@ -596,6 +608,7 @@ AI_assess_adversary = {
 	#######################
 	# Save the current target in a scope
 	$diplomatic_play$.var:play_instigator = { save_scope_as = AI_root }
+	save_scope_as = AI_target
 
 
 	# Get own target Diplomatic power
@@ -681,6 +694,19 @@ AI_assess_adversary = {
 					name = AI_target_power
 					add = {
 						value = THIS.DIPLOMACY_power
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				is_subject = yes
+			}
+			overlord = {
+				change_local_variable = {
+					name = AI_target_power
+					add = {
+						value = THIS.DIPLOMACY_power
 						multiply = 1
 					}
 				}
@@ -696,7 +722,7 @@ AI_assess_adversary = {
 			name = AI_play_power_balance_instigator_root
 			value = {
 				value = local_var:AI_root_power
-				subtract = local_var:AI_target_power
+				divide = local_var:AI_target_power
 			}
 		}
 	}
@@ -718,6 +744,7 @@ AI_assess_adversary = {
 			}
 		}
 	}
+	add_to_list = play_targets
 }
 
 

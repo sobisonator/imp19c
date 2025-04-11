@@ -470,6 +470,24 @@ AI_begin_diplomatic_play = {
 			diplomatic_play = scope:diplomatic_play
 		}
 	}
+	ordered_in_list = {
+		list = play_targets
+		order_by = var:play_target_rating
+
+		save_scope_as = play_target_country_scope
+		scope:diplomatic_play = {
+			set_variable = {
+				name = play_target_country
+				value = scope:play_target_country_scope
+			}
+		}
+
+		max = 1 # Select only the best one
+	}
+	every_in_list = {
+		list = play_targets
+		remove_from_list = play_targets
+	}
 }
 
 AI_assess_all_adversaries = {
@@ -743,6 +761,11 @@ AI_assess_adversary = {
 				var:AI_play_power_balance_instigator_root > 1000
 			}
 		}
+	}
+	set_variable = {
+		name = play_target_rating # Higher value = easier to eat
+		value = $diplomatic_play$.var:AI_play_power_balance_instigator_root
+		days = 1
 	}
 	add_to_list = play_targets
 }

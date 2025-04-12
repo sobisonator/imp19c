@@ -234,9 +234,9 @@ VertexShader =
 		// void CalculateSineAnimation( float2 UV, inout float3 Position, inout float3 Normal, inout float4 Tangent )
 		// {
 		// 	float AnimSeed = UV.x;
-		// 	float SmallWaveScale = 0.5f;
-		// 	float WaveScale = 0.5f;
-		// 	float AnimationSpeed = 2.0f;
+		// 	float SmallWaveScale = 2.5f;
+		// 	float WaveScale = 2.5f;
+		// 	float AnimationSpeed = 20.0f;
 
 		// 	float Time = GlobalTime * AnimationSpeed;
 
@@ -246,7 +246,7 @@ VertexShader =
 		// 	float CombinedWave = SmallWave;
 
 		// 	// Wave
-		// 	float3 AnimationDir = float3( 0, 1, -1 );
+		// 	float3 AnimationDir = float3( 0, 0, -1 );
 		// 	float Wave = WaveScale * smoothstep( 0.0, 0.12, AnimSeed ) * CombinedWave;
 		// 	float Derivative = ( WaveScale * 1.0f) * AnimSeed * -( SmallWave + cos( SmallWaveV ) * SmallWaveD );
 
@@ -312,6 +312,11 @@ PixelShader =
 		static const int COLOR_OFFSET = 2;
 	#else
 		static const int COLOR_OFFSET = 0;
+	#endif
+
+	#ifdef USER_COLOR_SHIP
+		static const int USER_DATA_PRIMARY_COLOR = 0;
+		static const int USER_DATA_SECONDARY_COLOR = 1;
 	#endif
 
 	#if defined( FLAG )
@@ -510,22 +515,18 @@ PixelShader =
 					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_SECONDARY_COLOR ).rgb, NormalPacked.b );
 				#endif
 
-				float3 ColorA = float3( 0.2f, 0.2f, 0.2f );
-
 				#ifdef USER_COLOR_SHIP
 					float4 ColorPick = PdxTex2D( ColorMap, COLOR_UV_SET );
-					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, 0 ).rgb * ColorA, ColorPick.b );
-					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, 1 ).rgb * ColorA, ColorPick.g );
+					float3 ColorB = float3( 0.2f, 0.2f, 0.2f );
+					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_PRIMARY_COLOR ).rgb * ColorB, ColorPick.b );
+					UserColor = lerp( UserColor, GetUserData( Input.InstanceIndex, USER_DATA_SECONDARY_COLOR ).rgb * ColorB, ColorPick.g );
 				#endif
 
 				#ifdef USER_FLAG_SHIP
+					float3 ColorC = float3( 0.2f, 0.2f, 0.2f );
 					float4 CoAAtlasSlot = GetUserData( Input.InstanceIndex, 2 );
  					float2 FlagCoords = CoAAtlasSlot.xy + ( MirrorOutsideUV( Input.UV0 ) * CoAAtlasSlot.zw );
- 					Diffuse.rgb = lerp( GetUserData( Input.InstanceIndex, 0 ).rgb * ColorA, PdxTex2D( FlagTexture, FlagCoords ).rgb * ColorA, PdxTex2D( FlagTexture, FlagCoords ).a );
-				#endif
-
-				#ifdef USER_FLAG_COLOR_SHIP
- 					Diffuse.rgb = GetUserData( Input.InstanceIndex, 0 ).rgb * ColorA;
+ 					// Diffuse.rgb = PdxTex2D( FlagTexture, FlagCoords ).rgb * ColorC;
 				#endif
 
 				#ifdef FLAG
@@ -1048,22 +1049,6 @@ Effect flag_ship
 }
 
 Effect flag_shipShadow
-{
-	VertexShader = "VertexPdxMeshStandardShadow"
-	PixelShader = "PixelPdxMeshStandardShadow"
-
-	RasterizerState = ShadowRasterizerState
-}
-
-Effect flag_color_ship
-{
-	VertexShader = "VS_standard"
-	PixelShader = "PS_standard"
-	
-	Defines = { "USER_FLAG_COLOR_SHIP" }
-}
-
-Effect flag_color_shipShadow
 {
 	VertexShader = "VertexPdxMeshStandardShadow"
 	PixelShader = "PixelPdxMeshStandardShadow"

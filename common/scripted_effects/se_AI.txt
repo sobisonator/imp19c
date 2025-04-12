@@ -356,11 +356,6 @@ AI_add_control_interest = {
 			round = floor
 			min = 1
 		}
-		# DEBUG: Currently only sets 1 for all countries so that the first priority area shows up in the tooltip
-		# TODO: Implement a list somewhere in GUI so the full list can be inspected for debugging
-		#max = 1
-
-		
 
 		# Currently here for testing - this is so that the tooltip can grab province area by scoping to a state
 		random_area_province = {
@@ -555,53 +550,118 @@ AI_begin_diplomatic_play = {
 			}
 		}
 
-		# Countries supporting the play on either side
+		# Now add this diplomatic play to the list of diplomatic plays in progress in the instigator
+		# And assess the targets
 		add_to_variable_list = {
-			name = play_supporters_instigator
-			target = $play_instigator$
+			name = list_of_diplomatic_plays_instigated
+			target = scope:diplomatic_play
+		}
+		add_to_global_variable_list = {
+			name = global_all_diplomatic_plays
+			target = scope:diplomatic_play
 		}
 
-		# Empty list for play_supporters_target
-	}
-
-	# Now add this diplomatic play to the list of diplomatic plays in progress in the instigator
-	add_to_variable_list = {
-		name = list_of_diplomatic_plays_instigated
-		target = scope:diplomatic_play
-	}
-	add_to_global_variable_list = {
-		name = global_all_diplomatic_plays
-		target = scope:diplomatic_play
-	}
-
-	scope:diplomatic_play = {
-		AI_assess_all_adversaries = {
-			diplomatic_play = scope:diplomatic_play
-		}
-	}
-	ordered_in_list = {
-		list = play_targets
-		order_by = var:play_target_rating
-
-		if = {
-			limit = {
-				NOT = { THIS = var:play_instigator }
+		scope:diplomatic_play = {
+			AI_assess_all_adversaries = {
+				diplomatic_play = scope:diplomatic_play
 			}
-			save_scope_as = play_target_country_scope
-			scope:diplomatic_play = {
-				set_variable = {
-					name = play_target_country
-					value = scope:play_target_country_scope
+		}
+		ordered_in_list = {
+			list = play_targets
+			order_by = var:play_target_rating
+
+			if = {
+				limit = {
+					NOT = { THIS = var:play_instigator }
+				}
+				save_scope_as = play_target_country_scope
+				scope:diplomatic_play = {
+					set_variable = {
+						name = play_target_country
+						value = scope:play_target_country_scope
+					}
+				}
+			}
+
+			max = 1 # Select only the best one
+		}
+		every_in_list = {
+			list = play_targets
+			remove_from_list = play_targets
+		}
+
+		# SUPPORTERS:
+		# Now that the country target has been selected, create lists for supporters
+		# Regional powers (i.e. countries with great power status in the interest area's tradezone)
+		# are allowed to pick a side, or sit on the fence, to mediate the play
+
+		# Get all great powers in this TZ
+		every_in_list = {
+			list = local_great_powers
+			remove_from_list = local_great_powers
+		}
+		scope:diplomatic_play.var:play_target_area.area.region = {
+			random_region_province = {
+				limit = {
+					has_owner = yes
+				}
+				governorship.var:trade_center = {
+					var:DIPLOMACY_power_n1 = { add_to_list = local_great_powers }
+					var:DIPLOMACY_power_n2 = { add_to_list = local_great_powers }
+					var:DIPLOMACY_power_n3 = { add_to_list = local_great_powers }
+					var:DIPLOMACY_power_n4 = { add_to_list = local_great_powers }
+				}
+			}
+		}
+		every_in_list = {
+			list = local_great_powers
+
+			save_scope_as = play_observer
+
+			if = {
+				limit = {
+					OR = {
+						scope:play_observer = scope:diplomatic_play.var:play_instigator
+						scope:play_observer.overlord ?= scope:diplomatic_play.var:play_instigator
+					}
+				}
+				scope:diplomatic_play = {
+					add_to_variable_list = {
+						name = play_observers_support_instigator
+						target = scope:play_observer
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					OR = {
+						scope:play_observer ?= scope:diplomatic_play.var:play_target_country.overlord
+						scope:play_observer ?= scope:diplomatic_play.var:play_target_country.overlord.overlord
+						scope:play_observer = scope:diplomatic_play.var:play_target_country
+					}
+				}
+				scope:diplomatic_play = {
+					add_to_variable_list = {
+						name = play_observers_support_target
+						target = scope:play_observer
+					}
+				}
+			}
+			else = {
+				scope:diplomatic_play = {
+					add_to_variable_list = {
+						name = play_observers_undecided
+						target = scope:play_observer
+					}
 				}
 			}
 		}
 
-		max = 1 # Select only the best one
+		# Empty list for play_supporters_instigator
+
+		# Empty list for play_supporters_target
 	}
-	every_in_list = {
-		list = play_targets
-		remove_from_list = play_targets
-	}
+
 }
 
 AI_assess_all_adversaries = {

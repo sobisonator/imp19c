@@ -467,6 +467,31 @@ AI_begin_diplomatic_play = {
 								value = civilization_value
 								multiply = 2
 							}
+							# If the owner is a great power, increase the cost
+							if = {
+								limit = {
+									OR = {
+										any_in_global_list = {
+											variable = global_powers_list
+											THIS = PREV.owner
+										}
+										trigger_if = {
+											limit = {
+												PREV.owner = { 
+													is_subject = yes
+													NOT = { is_subject_type = tributary }
+													NOT = { is_subject_type = sinosphere_tributary }
+												}
+											}
+											any_in_global_list = {
+												variable = global_powers_list
+												THIS = PREV.owner.overlord
+											}
+										}
+									}
+								}
+								subtract = 30
+							}
 						}
 					}
 					divide = {
@@ -794,6 +819,10 @@ AI_assess_adversary = {
 		if = {
 			limit = {
 				is_subject = yes
+				NOT = {
+					is_subject_type = tributary # Tributaries do not get protected in wars
+					is_subject_type = sinosphere_tributary
+				}
 			}
 			overlord = {
 				change_local_variable = {

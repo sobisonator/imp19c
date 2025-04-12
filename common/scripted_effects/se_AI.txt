@@ -449,6 +449,86 @@ AI_begin_diplomatic_play = {
 			# flag:get_territory
 			# flag:install_friendly_government
 		}
+		set_variable = {
+			name = play_infamy_cost_war # How much infamy (AE) is gained from declaring war. Represents the international disapproval of resolving the play militarily. This is a starting value which is modified by events and play actions
+			value = {
+				value = 100
+				subtract = {
+					var:play_target_area.area = {
+						every_area_province = {
+							if = {
+								limit = {
+									is_core_of = scope:diplomatic_play.var:play_instigator
+								}
+								add = 75
+							}
+							subtract = { # Less infamy from attacking backwaters
+								# More from attacking industralised areas
+								value = civilization_value
+								multiply = 2
+							}
+						}
+					}
+					divide = {
+						var:play_target_area.area {
+							every_area_province = {
+								add = 1
+							}
+						}
+						min = 1
+					}
+				}
+				min = 0
+			}
+		}
+		set_variable = {
+			name = play_stability_cost_war # How much stability is lost from declaring war. Represents the public support for a war over this play. This is a starting value which is modified by events and play actions
+			value = {
+				value = 50
+				subtract = {
+					var:play_target_area.area = {
+						every_area_province = {
+							if = {
+								limit = {
+									is_core_of = scope:diplomatic_play.var:play_instigator
+								}
+								add = 75
+							}
+							if = {
+								limit = {
+									NOT = { 
+										owner.culture = scope:diplomatic_play.var:play_instigator.culture 
+									}
+								}
+								every_pops_in_province = {
+									if = {
+										limit = {
+											culture = scope:diplomatic_play.var:play_instigator.culture
+										}
+										add = 2
+									}
+									if = {
+										limit = {
+											culture.culture_group = scope:diplomatic_play.var:play_instigator.culture.culture_group
+										}
+										add = 1
+									}
+								}
+							}
+						}
+					}
+					divide = {
+						var:play_target_area.area {
+							every_area_province = {
+								add = 1
+							}
+						}
+						min = 1
+					}
+				}
+				min = 1
+			}
+		}
 
 		# Countries supporting the play on either side
 		add_to_variable_list = {

@@ -76,15 +76,21 @@ AI_add_control_interest = {
 			any_area_province = {
 
 				# Must have land not owned by AI_root or its vassals
-				NOT = { owner = scope:AI_root }
 				trigger_if = {
 					limit = {
-						scope:AI_root = {
-							is_subject = yes
-						}
+						has_owner = yes
 					}
-					NOT = { owner.overlord = scope:AI_root }
+					NOT = { owner = scope:AI_root }
+					trigger_if = {
+						limit = {
+							owner = {
+								is_subject = yes
+							}
+						}
+						NOT = { owner.overlord = scope:AI_root }
+					}
 				}
+				
 
 				# Adjacency required if AI_root is landlocked
 				trigger_if = {
@@ -98,7 +104,7 @@ AI_add_control_interest = {
 						}
 					}
 					any_neighbor_province = {
-						owner = scope:AI_root
+						owner ?= scope:AI_root
 					}
 				}
 
@@ -107,7 +113,7 @@ AI_add_control_interest = {
 					limit = {
 						NOT = {
 							any_neighbor_province = {
-								owner = scope:AI_root
+								owner ?= scope:AI_root
 							}
 						}
 					}
@@ -150,7 +156,7 @@ AI_add_control_interest = {
 									THIS.culture = scope:AI_root.country_culture.culture
 								}
 								add = scope:AI_root.SPIRIT_nationalism
-								multiply = 4
+								multiply = 8
 							}
 							# Similar culture
 							else_if = {
@@ -159,7 +165,7 @@ AI_add_control_interest = {
 								}
 								add = {
 									value = scope:AI_root.SPIRIT_nationalism
-									multiply = 2
+									multiply = 5
 								}
 							}
 						}
@@ -266,6 +272,18 @@ AI_add_control_interest = {
 								owner = {
 									alliance_with = scope:AI_root
 								}
+								if = {
+									limit = {
+										owner = { is_subject = yes }
+									}
+									owner.overlord = {
+										OR = {
+											alliance_with = scope:AI_root
+											is_subject_of = scope:AI_root
+										}
+									}
+								}
+								
 							}
 							subtract = 250
 						}
@@ -304,10 +322,16 @@ AI_add_control_interest = {
 					limit = {
 						any_area_province = {
 							any_neighbor_province = {
-								OR = {
-									owner = scope:AI_root
-									owner = { is_subject_of = scope:AI_root }
+								trigger_if = {
+									limit = {
+										has_owner = yes
+									}
+									OR = {
+										owner ?= scope:AI_root
+										owner ?= { is_subject_of = scope:AI_root }
+									}
 								}
+								
 							}
 						}
 					}
@@ -318,33 +342,46 @@ AI_add_control_interest = {
 				}
 				
 				# From AI_root's DIPLOMACY_power in the area's TZ
-				add = AI_diplomacy_interest_from_tradezone_diplomacy_power_scope_ai_root
+				multiply = AI_diplomacy_interest_from_tradezone_diplomacy_power_scope_ai_root
 				 
 				# Add weight if AI_root is not a major player in the TZ, but it aspires to be.
 				# End order_by value
 			}
 		}
 
-		#max = {
-		#	value = scope:AI_root.DIPLOMACY_power
-		#	divide = AI_diplomacy_interest_cutoff_threshhold
-		#	round = floor
-		#}
-		# DEBUG: Currently only sets 1 for all countries so that the first priority area shows up in the tooltip
-		# TODO: Implement a list somewhere in GUI so the full list can be inspected for debugging
-		max = 1
-
-		
+		max = {
+			value = scope:AI_root.DIPLOMACY_power
+			divide = AI_diplomacy_interest_cutoff_threshhold
+			divide = 20
+			round = floor
+			min = 1
+		}
 
 		# Currently here for testing - this is so that the tooltip can grab province area by scoping to a state
 		random_area_province = {
 			save_scope_as = AI_interest_target
 		}
 
+
 		scope:AI_root = {
-			add_to_variable_list = {
-				name = AI_interests_list
-				target = scope:AI_interest_target
+			if = {
+				limit = {
+					NOR = {
+						is_target_in_variable_list = {
+							name = AI_interests_list
+							target = scope:AI_interest_target
+						}
+						any_in_list = {
+							variable = AI_interests_list
+
+							THIS.area = scope:AI_interest_target.area
+						}
+					}
+				}
+				add_to_variable_list = {
+					name = AI_interests_list
+					target = scope:AI_interest_target
+				}
 			}
 		}
 		
@@ -372,6 +409,10 @@ AI_begin_diplomatic_play = {
 	# The play may range from controlling the area, to the whole region, to possibly the whole of a country which controls that area, depending on the relative strength of that country. For example, if a relatively low power country controls an area, the AI_root may target that entire control for control.
 
 	# We begin by creating a provobj
+	every_in_list = {
+		list = play_targets
+		remove_from_list = play_targets
+	}
 	random_province = {
 		limit = {
 			NOT = {
@@ -403,27 +444,234 @@ AI_begin_diplomatic_play = {
 			# flag:get_territory
 			# flag:install_friendly_government
 		}
-
-		# Countries supporting the play on either side
-		add_to_variable_list = {
-			name = play_supporters_instigator
-			target = $play_instigator$
+		set_variable = {
+			name = play_infamy_cost_war # How much infamy (AE) is gained from declaring war. Represents the international disapproval of resolving the play militarily. This is a starting value which is modified by events and play actions
+			value = {
+				value = 100
+				subtract = {
+					var:play_target_area.area = {
+						every_area_province = {
+							if = {
+								limit = {
+									is_core_of = scope:diplomatic_play.var:play_instigator
+								}
+								add = 75
+							}
+							subtract = { # Less infamy from attacking backwaters
+								# More from attacking industralised areas
+								value = civilization_value
+								multiply = 2
+							}
+							# If the owner is a great power, increase the cost
+							if = {
+								limit = {
+									OR = {
+										any_in_global_list = {
+											variable = global_powers_list
+											THIS = PREV.owner
+										}
+										trigger_if = {
+											limit = {
+												PREV.owner = { 
+													is_subject = yes
+													NOT = { is_subject_type = tributary }
+													NOT = { is_subject_type = sinosphere_tributary }
+												}
+											}
+											any_in_global_list = {
+												variable = global_powers_list
+												THIS = PREV.owner.overlord
+											}
+										}
+									}
+								}
+								subtract = 30
+							}
+						}
+					}
+					divide = {
+						var:play_target_area.area {
+							every_area_province = {
+								add = 1
+							}
+						}
+						min = 1
+					}
+				}
+				min = 0
+			}
 		}
+		set_variable = {
+			name = play_stability_cost_war # How much stability is lost from declaring war. Represents the public support for a war over this play. This is a starting value which is modified by events and play actions
+			value = {
+				value = 50
+				subtract = {
+					var:play_target_area.area = {
+						every_area_province = {
+							if = {
+								limit = {
+									is_core_of = scope:diplomatic_play.var:play_instigator
+								}
+								add = 75
+							}
+							if = {
+								limit = {
+									NOT = { 
+										owner.culture = scope:diplomatic_play.var:play_instigator.culture 
+									}
+								}
+								every_pops_in_province = {
+									if = {
+										limit = {
+											culture = scope:diplomatic_play.var:play_instigator.culture
+										}
+										add = 2
+									}
+									if = {
+										limit = {
+											culture.culture_group = scope:diplomatic_play.var:play_instigator.culture.culture_group
+										}
+										add = 1
+									}
+								}
+							}
+						}
+					}
+					divide = {
+						var:play_target_area.area {
+							every_area_province = {
+								add = 1
+							}
+						}
+						min = 1
+					}
+				}
+				min = 1
+			}
+		}
+
+		# Now add this diplomatic play to the list of diplomatic plays in progress in the instigator
+		# And assess the targets
+		add_to_variable_list = {
+			name = list_of_diplomatic_plays_instigated
+			target = scope:diplomatic_play
+		}
+		add_to_global_variable_list = {
+			name = global_all_diplomatic_plays
+			target = scope:diplomatic_play
+		}
+
+		scope:diplomatic_play = {
+			AI_assess_all_adversaries = {
+				diplomatic_play = scope:diplomatic_play
+			}
+		}
+		ordered_in_list = {
+			list = play_targets
+			order_by = var:play_target_rating
+
+			if = {
+				limit = {
+					NOT = { THIS = var:play_instigator }
+				}
+				save_scope_as = play_target_country_scope
+				scope:diplomatic_play = {
+					set_variable = {
+						name = play_target_country
+						value = scope:play_target_country_scope
+					}
+				}
+			}
+
+			max = 1 # Select only the best one
+		}
+		every_in_list = {
+			list = play_targets
+			remove_from_list = play_targets
+		}
+
+		# SUPPORTERS:
+		# Now that the country target has been selected, create lists for supporters
+		# Regional powers (i.e. countries with great power status in the interest area's tradezone)
+		# are allowed to pick a side, or sit on the fence, to mediate the play
+
+		# Get all great powers in this TZ
+		every_in_list = {
+			list = local_great_powers
+			remove_from_list = local_great_powers
+		}
+		scope:diplomatic_play.var:play_target_area.area.region = {
+			random_region_province = {
+				limit = {
+					has_owner = yes
+				}
+				governorship.var:trade_center = {
+					var:DIPLOMACY_power_n1 = { add_to_list = local_great_powers }
+					var:DIPLOMACY_power_n2 = { add_to_list = local_great_powers }
+					var:DIPLOMACY_power_n3 = { add_to_list = local_great_powers }
+					var:DIPLOMACY_power_n4 = { add_to_list = local_great_powers }
+				}
+			}
+		}
+		every_in_list = {
+			list = local_great_powers
+
+			save_scope_as = play_observer
+
+			if = {
+				limit = {
+					OR = {
+						scope:play_observer = scope:diplomatic_play.var:play_instigator
+						AND = {
+							scope:play_observer.overlord ?= scope:diplomatic_play.var:play_instigator
+							NOT = {
+								scope:play_observer = {
+									OR = {
+										is_subject_type = tributary
+										is_subject_type = sinosphere_tributary
+									}
+								}
+							}
+						}
+					}
+				}
+				scope:diplomatic_play = {
+					add_to_variable_list = {
+						name = play_observers_support_instigator
+						target = scope:play_observer
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					OR = {
+						scope:play_observer ?= scope:diplomatic_play.var:play_target_country.overlord
+						scope:play_observer ?= scope:diplomatic_play.var:play_target_country.overlord.overlord
+						scope:play_observer = scope:diplomatic_play.var:play_target_country
+					}
+				}
+				scope:diplomatic_play = {
+					add_to_variable_list = {
+						name = play_observers_support_target
+						target = scope:play_observer
+					}
+				}
+			}
+			else = {
+				scope:diplomatic_play = {
+					add_to_variable_list = {
+						name = play_observers_undecided
+						target = scope:play_observer
+					}
+				}
+			}
+		}
+
+		# Empty list for play_supporters_instigator
 
 		# Empty list for play_supporters_target
 	}
 
-	# Now add this diplomatic play to the list of diplomatic plays in progress in the instigator
-	add_to_variable_list = {
-		name = list_of_diplomatic_plays_instigated
-		target = scope:diplomatic_play
-	}
-
-	scope:diplomatic_play = {
-		AI_assess_all_adversaries = {
-			diplomatic_play = scope:diplomatic_play
-		}
-	}
 }
 
 AI_assess_all_adversaries = {
@@ -444,15 +692,14 @@ AI_assess_all_adversaries = {
 		scope:diplomatic_play.var:play_target_area.area = {
 			every_area_province = {
 				limit = {
-					has_owner = yes
-					trigger_if = {
-						limit = {
-							has_owner = yes
-						}
-						owner = {
-							NOT = {
-								is_in_list = adversaries_to_assess
-								THIS = scope:diplomatic_play.var:play_instigator
+					NOT = { owner = scope:diplomatic_play.var:play_instigator }
+					owner = {
+						OR = {
+							any_owned_province = { is_coastal = yes }
+							any_owned_province = { 
+								any_neighbor_province = { 
+									owner = scope:diplomatic_play.var:play_instigator 
+								} 
 							}
 						}
 					}
@@ -478,19 +725,63 @@ AI_assess_all_adversaries = {
 	}
 }
 
+AI_remove_diplomatic_play = {
+	# Scope: Province (diplomatic play object)
+	# Function: Delete a diplomatic play
+	save_scope_as = play_to_delete
+	if = {
+		limit = {
+			has_variable = play_instigator
+		}
+		var:play_instigator = {
+			remove_list_variable = {
+				name = list_of_diplomatic_plays_instigated
+				target = scope:play_to_delete
+			}
+		}
+	}
+	remove_list_global_variable = {
+		name = global_all_diplomatic_plays
+		target = THIS
+	}
+	remove_variable = is_diplomatic_play
+	remove_variable = play_instigator
+	remove_variable = play_target_area
+	remove_variable = play_target_country
+	remove_variable = play_goal
+	clear_variable_list = play_supporters_instigator
+	clear_variable_list = play_supporters_target
+}
+
 AI_debug_test_begin_diplomatic_play_all = {
 	# Scope: Any
 	# Function: Test assess adversary on all countries with an interest
+
+	# First, delete all diplomatic plays
+	every_in_global_list = {
+		variable = global_all_diplomatic_plays
+		AI_remove_diplomatic_play = yes
+	}
+
+	every_country = {
+		clear_variable_list = AI_interests_list
+	}
+
+	AI_add_control_interest_all_countries_limited = yes
 	every_country = {
 		limit = {
 			has_variable = AI_interest
 		}
 		save_scope_as = AI_root
-		AI_begin_diplomatic_play = {
-			play_instigator = scope:AI_root
-			play_target_area = scope:AI_root.var:AI_interest
-			play_target_country = scope:AI_root # No specific country
-			play_goal = flag:get_territory
+		every_in_list = {
+			variable = AI_interests_list
+			save_scope_as = target_area
+			AI_begin_diplomatic_play = {
+				play_instigator = scope:AI_root
+				play_target_area = scope:target_area
+				play_target_country = scope:AI_root # No specific country
+				play_goal = flag:get_territory
+			}
 		}
 	}
 }
@@ -518,6 +809,7 @@ AI_assess_adversary = {
 	#######################
 	# Save the current target in a scope
 	$diplomatic_play$.var:play_instigator = { save_scope_as = AI_root }
+	save_scope_as = AI_target
 
 
 	# Get own target Diplomatic power
@@ -597,6 +889,23 @@ AI_assess_adversary = {
 		if = {
 			limit = {
 				is_subject = yes
+				NOT = {
+					is_subject_type = tributary # Tributaries do not get protected in wars
+					is_subject_type = sinosphere_tributary
+				}
+			}
+			overlord = {
+				change_local_variable = {
+					name = AI_target_power
+					add = {
+						value = THIS.DIPLOMACY_power
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				is_subject = yes
 			}
 			overlord = {
 				change_local_variable = {
@@ -618,7 +927,7 @@ AI_assess_adversary = {
 			name = AI_play_power_balance_instigator_root
 			value = {
 				value = local_var:AI_root_power
-				subtract = local_var:AI_target_power
+				divide = local_var:AI_target_power
 			}
 		}
 	}
@@ -640,7 +949,18 @@ AI_assess_adversary = {
 			}
 		}
 	}
+	set_variable = {
+		name = play_target_rating # Higher value = easier to eat
+		value = $diplomatic_play$.var:AI_play_power_balance_instigator_root
+		days = 1
+	}
+	add_to_list = play_targets
 }
+
+### AI Behaviour in diplomatic plays
+
+#### Regional great powers: choosing sides
+# Great powers (let's call it observer_root) will oppose a play if another great power is making a play for an area in the same region where observer_root, or one of its subjects, also owns land
 
 
 

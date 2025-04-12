@@ -8,6 +8,9 @@ INCOME_governorship_total = {
 	add = INCOME_governorship_property_tax_total_positive
 	add = INCOME_governorship_income_tax_total_positive
 	add = INCOME_governorship_tariffs_total_positive
+	add = INCOME_governorship_state_port_charges
+	add = INCOME_governorship_state_resource_extraction
+	add = INCOME_governorship_state_manufacturing
 }
 
 ### TAXATION & TARIFFS
@@ -25,6 +28,7 @@ INCOME_governorship_excise_duty_essentials_total_positive = {
 	multiply = -1
 }
 
+# TODO: Combine this with excise duty on luxuries!
 INCOME_governorship_excise_duty_essentials_upper_strata = {
 	if = {
 		limit = {
@@ -128,8 +132,19 @@ INCOME_governorship_property_tax = {
 				has_variable = INCOME_taxrate_property_tax
 			}
 		}
-		value = governorship_num_of_URB_residential_district
-		multiply = -0.5 # TODO: Make this sensitive to property prices, perhaps a property demand value
+		value = {
+			value = governorship_num_of_URB_residential_district
+			multiply = 5
+		}
+		add = {
+			every_governorship_state = {
+				every_state_province = {
+					add = population_cap
+				}
+			}
+			divide = 50
+		}
+		multiply = -1 # TODO: Make this sensitive to property prices, perhaps a property demand value
 		multiply = owner.var:INCOME_taxrate_property_tax
 	}
 	else = {
@@ -368,7 +383,7 @@ INCOME_governorship_tariffs_tribesmen = {
 INCOME_governorship_state_port_charges = {
 	# This is calculated as the state's share in shipping income in a province, instead of as a tax out of the pops' governorship shipping income
 	value = var:this_income_from_shipping_the_state
-	subtract = var:this_expenses_from_shipping_the_state
+	add = var:this_expenses_from_shipping_the_state
 }
 INCOME_governorship_state_resource_extraction = {
 	# This is calculated as the state's share in shipping income in a province, instead of as a tax out of the pops' governorship shipping income

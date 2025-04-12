@@ -414,6 +414,10 @@ AI_begin_diplomatic_play = {
 	# The play may range from controlling the area, to the whole region, to possibly the whole of a country which controls that area, depending on the relative strength of that country. For example, if a relatively low power country controls an area, the AI_root may target that entire control for control.
 
 	# We begin by creating a provobj
+	every_in_list = {
+		list = play_targets
+		remove_from_list = play_targets
+	}
 	random_province = {
 		limit = {
 			NOT = {
@@ -474,11 +478,16 @@ AI_begin_diplomatic_play = {
 		list = play_targets
 		order_by = var:play_target_rating
 
-		save_scope_as = play_target_country_scope
-		scope:diplomatic_play = {
-			set_variable = {
-				name = play_target_country
-				value = scope:play_target_country_scope
+		if = {
+			limit = {
+				NOT = { THIS = var:play_instigator }
+			}
+			save_scope_as = play_target_country_scope
+			scope:diplomatic_play = {
+				set_variable = {
+					name = play_target_country
+					value = scope:play_target_country_scope
+				}
 			}
 		}
 
@@ -508,33 +517,14 @@ AI_assess_all_adversaries = {
 		scope:diplomatic_play.var:play_target_area.area = {
 			every_area_province = {
 				limit = {
-					has_owner = yes
-					trigger_if = {
-						limit = {
-							has_owner = yes
-						}
-						owner = {
-							NOT = {
-								is_in_list = adversaries_to_assess
-								THIS = scope:diplomatic_play.var:play_instigator
-							}
-							any_owned_province = {
-								OR = {
-									any_neighbor_province = {
-										trigger_if = {
-											limit = {
-												has_owner = yes
-											}
-											OR = {
-												owner = scope:diplomatic_play.var:instigator_country
-												owner = {
-													is_subject_of = scope:diplomatic_play.var:instigator_country
-												}
-											}
-										}
-									}
-									is_coastal = yes
-								}
+					NOT = { owner = scope:diplomatic_play.var:play_instigator }
+					owner = {
+						OR = {
+							any_owned_province = { is_coastal = yes }
+							any_owned_province = { 
+								any_neighbor_province = { 
+									owner = scope:diplomatic_play.var:play_instigator 
+								} 
 							}
 						}
 					}

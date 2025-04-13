@@ -87,7 +87,7 @@ AI_add_control_interest = {
 								is_subject = yes
 							}
 						}
-						NOT = { owner.overlord = scope:AI_root }
+						NOT = { owner.overlord ?= scope:AI_root }
 					}
 				}
 				
@@ -134,7 +134,7 @@ AI_add_control_interest = {
 								has_owner = yes
 							}
 							NOT = { owner = scope:AI_root }
-							NOT = { owner.overlord = scope:AI_root }
+							NOT = { owner.overlord ?= scope:AI_root }
 						}
 					}
 					# BEGIN FROM POPS
@@ -281,7 +281,7 @@ AI_add_control_interest = {
 									owner = {
 										alliance_with = scope:AI_root
 									}
-									owner.overlord = {
+									owner.overlord ?= {
 										OR = {
 											alliance_with = scope:AI_root
 											is_subject_of = scope:AI_root
@@ -312,7 +312,7 @@ AI_add_control_interest = {
 									has_owner = yes
 								}
 								NOT = { owner = scope:AI_root }
-								NOT = { owner.overlord = scope:AI_root }
+								NOT = { owner.overlord ?= scope:AI_root }
 							}
 						}
 						add = 0
@@ -353,14 +353,13 @@ AI_add_control_interest = {
 			}
 		}
 
-		max = 5
-		#max = {
-		#	value = scope:AI_root.DIPLOMACY_power
-		#	divide = AI_diplomacy_interest_cutoff_threshhold
-		#	divide = 20
-		#	round = floor
-		#	min = 1
-		#}
+		max = {
+			value = scope:AI_root.DIPLOMACY_power
+			divide = AI_diplomacy_interest_cutoff_threshhold
+			divide = 20
+			round = floor
+			min = 1
+		}
 
 		# Currently here for testing - this is so that the tooltip can grab province area by scoping to a state
 		random_area_province = {
@@ -816,6 +815,17 @@ AI_debug_test_begin_diplomatic_play_all = {
 			}
 		}
 	}
+	every_province = {
+		limit = {
+			has_variable = is_diplomatic_play
+		}
+		AI_diplomatic_play_evaluate_attitude = {
+			diplomatic_play = THIS
+		}
+		AI_diplomatic_play_evaluate_war = {
+			diplomatic_play = THIS
+		}
+	}
 }
 
 AI_assess_adversary = {
@@ -838,7 +848,12 @@ AI_assess_adversary = {
 
 	# Mark the level of risk by the total power between the two sides
 
+
 	#######################
+	every_in_list = {
+		list = play_assessed_already
+		remove_from_list = play_assessed_already
+	}
 	# Save the current target in a scope
 	$diplomatic_play$.var:play_instigator = { save_scope_as = AI_root }
 	save_scope_as = AI_target
@@ -851,6 +866,7 @@ AI_assess_adversary = {
 			value = scope:AI_root.DIPLOMACY_power
 		}
 	}
+	scope:AI_root = { add_to_list = play_assessed_already }
 
 	scope:AI_root = {
 		every_allied_country = {
@@ -879,6 +895,7 @@ AI_assess_adversary = {
 					}
 				}
 			}
+			add_to_list = play_assessed_already
 		}
 	}
 
@@ -917,6 +934,7 @@ AI_assess_adversary = {
 					}
 				}
 			}
+			add_to_list = play_assessed_already
 		}
 		if = {
 			limit = {
@@ -933,20 +951,7 @@ AI_assess_adversary = {
 						value = THIS.DIPLOMACY_power
 					}
 				}
-			}
-		}
-		if = {
-			limit = {
-				is_subject = yes
-			}
-			overlord = {
-				change_local_variable = {
-					name = AI_target_power
-					add = {
-						value = THIS.DIPLOMACY_power
-						multiply = 1
-					}
-				}
+				add_to_list = play_assessed_already
 			}
 		}
 	}
@@ -955,11 +960,40 @@ AI_assess_adversary = {
 	# Positive value = balance in favour of the instigator
 	# Negative value = balance in favour of the target
 	$diplomatic_play$ = {
+
+		every_in_list = {
+			variable = play_observers_support_target
+			limit = {
+				NOT = { is_in_list = play_assessed_already }
+			}
+			change_local_variable = {
+				name = AI_target_power
+				add = value = THIS.DIPLOMACY_power
+			}
+		}
+		every_in_list = {
+			variable = play_observers_support_instigator
+			limit = {
+				NOT = { is_in_list = play_assessed_already }
+			}
+			change_local_variable = {
+				name = AI_root_power
+				add = value = THIS.DIPLOMACY_power
+			}
+		}
+
 		set_variable = {
 			name = AI_play_power_balance_instigator_root
 			value = {
-				value = local_var:AI_root_power
-				divide = local_var:AI_target_power
+				value = {
+					value = local_var:AI_root_power
+					divide = 100
+				}
+				divide = {
+					value = local_var:AI_target_power
+					min = 1
+					divide = 100
+				}
 			}
 		}
 	}
@@ -998,11 +1032,59 @@ AI_assess_adversary = {
 
 ### Declare war
 
-AI_diplomatic_play_evaluate_friendly_or_hostile = {
+AI_diplomatic_play_evaluate_attitude = {
 	# Scope: Country
 	# Function: Evaluate whether the AI should act in a friendly way or a hostile way towards the target
 	# Do their interests align
 	# Takes a diplomatic play province as argument
+	$diplomatic_play$ = { save_scope_as = diplomatic_play }
+
+	scope:diplomatic_play = {
+		set_local_variable = {
+			name = AI_friendly
+			value = {
+				value = 0
+				if = {
+					limit = {
+						var:play_target_country.religion = var:play_instigator.religion
+					}
+					add = 50
+				}
+				if = {
+					limit = {
+						var:play_target_country.culture = var:play_instigator.culture
+					}
+					add = 50
+				}
+
+			}
+		}
+		set_local_variable = {
+			name = AI_hostile
+			value = {
+				value = 0
+				add = {
+					value = var:AI_play_power_balance_instigator_root # Higher balance of power = likelier to be aggressive
+				}
+				var:play_target_area.area = {
+					every_area_province = {
+						limit = {
+							is_core_of = scope:diplomatic_play.var:play_instigator
+						}
+						add = 20
+					}
+				}
+			}
+		}
+
+		set_variable = {
+			name = AI_play_attitude
+			value = {
+				add = local_var:AI_friendly
+				subtract = local_var:AI_hostile
+			}
+		}
+	}
 }
 
 AI_diplomatic_play_evaluate_course_of_hostile_action = {
@@ -1011,7 +1093,7 @@ AI_diplomatic_play_evaluate_course_of_hostile_action = {
 }
 
 AI_diplomatic_play_evaluate_war = {
-	# Scope: Country
+	# Scope: Any
 	# Function: Evaluate whether it is worth starting a war for a diplomatic play this country instigated
 	# Negative value = not worth
 	# Positive value = worth, declare war
@@ -1023,10 +1105,55 @@ AI_diplomatic_play_evaluate_war = {
 		set_local_variable = {
 			name = AI_play_war_assessment
 			value = {
-				subtract= var:play_infamy_cost_war
+				value = 0
+				subtract = var:play_infamy_cost_war
 				subtract = var:play_stability_cost_war
+				subtract = { # negative attitudes will encourage war
+					value = var:AI_play_attitude
+					multiply = var:AI_play_power_balance_instigator_root
+				}
+				subtract = {
+					value = var:play_instigator.war_exhaustion
+					multiply = 6
+				}
+				add = var:play_instigator.stability	
+				add = {
+					value = var:play_target_country.war_exhaustion
+					multiply = 6
+				}
+				subtract = var:play_target_country.stability
+				add = var:play_instigator.treasury
 			}
 		}
+
+		# A war with many huge powers on both sides is more costly, less likely to go ahead
+		every_in_list = {
+			variable = play_observers_support_target
+			change_local_variable = {
+				name = AI_play_war_assessment
+				subtract = {
+					value = THIS.DIPLOMACY_power
+					multiply = 0.01
+				}
+			}
+		}
+		every_in_list = {
+			variable = play_observers_support_instigator
+			change_local_variable = {
+				name = AI_play_war_assessment
+				subtract = {
+					value = THIS.DIPLOMACY_power
+					multiply = 0.005
+				}
+			}
+		}
+
+		### DEBUG only - there is no reason to keep this variable
+		set_variable = {
+			name = war_assessment
+			value = local_var:AI_play_war_assessment
+		}
+
 	}
 
 }

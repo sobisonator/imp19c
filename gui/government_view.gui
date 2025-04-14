@@ -571,412 +571,6 @@ base_window = {
 			layoutpolicy_vertical = expanding
 			layoutpolicy_horizontal = expanding
 			ignoreinvisible = yes
-			
-			vbox = {
-				name = "Offices tab"
-				layoutpolicy_horizontal = expanding
-				layoutpolicy_vertical = expanding
-				visible = "[GovernmentView.IsShowOffices]"
-				scrollarea = {
-					layoutpolicy_horizontal = expanding
-					layoutpolicy_vertical = expanding
-					scrollbarpolicy_horizontal = always_off
-					scrollbar_vertical = {
-						using = VerticalScrollBar
-					}
-					
-					scrollwidget = {
-						dynamicgridbox = {
-							parentanchor = hcenter
-							ignoreinvisible = yes
-							datamodel = "[GovernmentView.GetOfficeHolders]"
-							datamodel_wrap = 4
-							item = {
-								margin_widget = {
-									size = { 460 160 }
-									margin = { 5 5 }
-									datacontext = "[OfficeHolderItem.GetCharacter]"
-									offices_color_background = {
-										blockoverride "Color" { using = orange_color }
-										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_interior'))]"
-									}
-									offices_color_background = {
-										blockoverride "Color" { using = green_color }
-										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_foreign_affairs'))]"
-									}
-									offices_color_background = {
-										blockoverride "Color" { using = red_color }
-										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_army'))]"
-									}
-									offices_color_background = {
-										blockoverride "Color" { using = cyan_color }
-										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_culture'))]"
-									}
-									offices_color_background = {
-										blockoverride "Color" { using = yellow_orange_color }
-										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_finance'))]"
-									}
-									offices_color_background = {
-										blockoverride "Color" { using = violet_color }
-										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','office_r_attorney_general'))]"
-									}
-									offices_color_background = {
-										blockoverride "Color" { using = beige_color }
-										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_industry'))]"
-									}
-									offices_color_background = {
-										blockoverride "Color" { using = salad_color }
-										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_health'))]"
-									}
-									flowcontainer = {
-										direction = vertical
-										margin = { 3 3 }
-										spacing = 5
-										sub_header = {
-											size = { 444 32 }
-											blockoverride "Title_text" { text = "[OfficeHolderItem.GetName]" }
-											tooltip = "[OfficeHolderItem.GetNameDesc]"
-										}
-										flowcontainer = {
-											spacing = 5
-											cpt_button = {
-												size = { 70 105 }
-											}
-											flowcontainer = {
-												direction = vertical
-												ignoreinvisible = yes
-												tag = {
-													text = "[OfficeHolderItem.GetCharacter.GetName]"
-													maximumsize = { 320 28 }
-													visible = "[OfficeHolderItem.HasHolder]"
-													align = left
-													using = BaseFontS
-													using = Black_FontColor
-												}
-												flowcontainer = {
-													visible = "[Not( OfficeHolderItem.GetCharacter.IsValid )]"
-													direction = vertical
-													spacing = 1
-													alpha = 0.55
-													textbox = {
-														using = BaseFontS
-														using = Black_FontColor
-														size = { 320 28 }
-														elide = right
-														fontsize_min = 11
-														text = "ASSIGNING_OFFICER_WILL"
-													}
-													textbox = {
-														using = BaseFontM
-														using = Black_FontColor
-														size = { 320 40 }
-														elide = right
-														align = top
-														fontsize_min = 11
-														text = "[OfficeHolderItem.GetOffice.GetSkillDescription]"
-													}
-												}
-												flowcontainer = {
-													spacing = 15
-													visible = "[OfficeHolderItem.HasHolder]"
-													icon_and_text = {
-														name = "loyalty"
-														size = { 100 38 }
-														tooltipwidget = { 
-															using = character_loyalty_tooltip 
-														}
-														blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/loyalty.dds" }
-														blockoverride "Text" { text = "[OfficeHolderItem.GetCharacter.GetLoyalty|0]" }
-													}
-													icon_and_text_progress = {
-														name = "statesmanship"
-														blockoverride "Icon" {
-															framesize = { 50 50 }
-															texture = "gfx/interface/icons/icon_skills.dds"
-															frame = "[OfficeHolderItem.GetCharacter.GetAttributes.GetFrame(OfficeHolderItem.GetOffice.GetRequiredSkill)]"
-														}
-														blockoverride "Text" { 
-															text = "[OfficeHolderItem.GetCharacter.GetEffectiveModifiedAttribute(OfficeHolderItem.GetOffice.GetRequiredSkill)]/[OfficeHolderItem.GetCharacter.GetModifiedAttribute(OfficeHolderItem.GetOffice.GetRequiredSkill)]"
-															using = BaseFontM
-															using = Black_FontColor
-															position = { -10 -4 }
-														}
-														blockoverride "Value" { value = "[FixedPointToFloat(OfficeHolderItem.GetCharacter.GetExperience)]" }
-														tooltip = "[OfficeHolderItem.GetSkillTooltip]"
-													}
-												}
-												flowcontainer = {
-													spacing = 5
-													ignoreinvisible = yes
-													icon_button_square = {
-														size = { 36 36 }
-														parentanchor = vcenter
-														blockoverride "On_click"
-														{
-															onclick = "[OfficeHolderItem.ChangeHolder]"
-															enabled = "[OfficeHolderItem.CanChange]"
-														}
-														blockoverride "Icon"
-														{
-															texture = "gfx/interface/icons/shared_icons/change.dds"
-															size = { 30 30 }
-														}
-														
-														tooltip = "[OfficeHolderItem.GetChangeTooltip]"
-													}
-													widget = {
-														name = "modifier_reward"
-														size = { 240 42 }
-														using = NoninteractableBG
-														blockoverride "Margins" {}
-														visible = "[OfficeHolderItem.HasHolder]"
-														modifier_desc_condensed = {
-															position = { 0 -4 } 
-															parentanchor = center
-															widgetanchor = center
-															datacontext = "[OfficeHolderItem.GetModifier]"
-															tooltip = "[OfficeHolderItem.GetTooltip]"
-															scale = 0.9
-														}
-													}
-													flowcontainer = {
-														spacing = 2
-														visible = "[Not( OfficeHolderItem.GetCharacter.IsValid )]"
-														alpha = 0.60
-														textbox = {
-															using = BaseFontS
-															using = Black_FontColor
-															parentanchor = vcenter
-															autoresize = yes
-															elide = right
-															max_width = 330
-															fontsize_min = 11
-															text = "PER_POINT_DESC"
-														}
-														icon = {
-															texture = "gfx/interface/icons/icon_skills.dds"
-															framesize = { 50 50 }
-															size = { 34 34 }
-															frame = "[OfficeHolderItem.GetCharacter.GetAttributes.GetFrame(OfficeHolderItem.GetOffice.GetRequiredSkill)]"
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					#icon = {
-					#	texture = "gfx/interface/event_window/event_scribe_writing.dds"
-					#	scale = 0.45
-					#	position = { -12 -17 }
-					#	parentanchor = bottom|hcenter
-					#} 
-				}
-			}
-			vbox = {
-				name = "Laws tab"
-				layoutpolicy_horizontal = expanding
-				layoutpolicy_vertical = expanding
-				visible = "[GovernmentView.IsShowLaws]"
-				
-				margin_widget = {
-					size = { 0 28 }
-					layoutpolicy_horizontal = expanding
-					flowcontainer = {
-						position = { 24 0 }
-						parentanchor = left
-						tooltip = "[GovernmentView.GetPlayer.GetPriceTooltip('enact_law')]"
-						
-						tag = {
-							using = BaseFontM
-							using = Black_FontColor
-							text = "LAW_PRICE_CHANGE"
-						}
-						
-						textbox = {
-							margin_left = 10
-							autoresize = yes
-							using = BaseFontM
-							using = Black_FontColor
-							text = "[GovernmentView.GetPlayer.GetPrice('enact_law')]"
-							parentanchor = left
-						}
-					}
-				}
-				margin_widget = {
-					layoutpolicy_vertical = expanding
-					layoutpolicy_horizontal = expanding
-					margin = { 6 6 }
-
-					scrollarea = {
-						size = { 100% 758 }
-						scrollbarpolicy_horizontal = always_off
-						
-						scrollbar_vertical = {
-							using = VerticalScrollBar
-						}
-						
-						scrollwidget = {
-							dynamicgridbox = {
-								name = "possible_laws_grid"
-								layoutpolicy_horizontal = expanding
-								layoutpolicy_vertical = expanding
-								flipdirection = yes
-								datamodel_wrap = 3
-								datamodel = "[GovernmentView.GetCurrentLaws]"
-								parentanchor = hcenter|top
-								item = {
-									container = {
-										margin_widget = {
-											size = { 306 32 }
-											hbox = {
-												layoutpolicy_horizontal = expanding
-												sub_header_v = {
-													name = "law_header"
-													size = { 0 0 }
-													layoutpolicy_horizontal = expanding
-													blockoverride "Title_text"
-													{
-														datacontext = "[GovernmentView.GetPlayer]"
-														text = "[LawGroupItem.GetName]"
-													}
-												}
-												
-												flowcontainer = {
-													tooltip = [LawGroupItem.GetClansTooltip]
-													visible = "[LawGroupItem.HasClans]"
-													icon = {											
-														name = "clans_icon"
-														texture = "gfx/interface/icons/shared_icons/clan_chiefs.dds"
-														size = { 32 32 }	
-														tooltip = [LawGroupItem.GetClansTooltip]
-													}
-													icon = {
-														parentanchor = right
-														name = "clans_yesno"
-														texture = "gfx/interface/icons/shared_icons/tick_cross.dds"
-														frame = "[LawGroupItem.GetClansFrame]"
-														size = { 30 30 }
-														framesize = { 25 25 }
-													}
-												}
-												widget = {
-													size = { 8 0 }
-													visible = "[Not( LawGroupItem.HasClans )]"
-												}
-											}
-										}
-										flowcontainer = {
-											position = { 0 36 }
-											
-											dynamicgridbox = {
-												datamodel = "[LawGroupItem.GetLaws]"
-												
-												item = {
-													widget = {
-														size = { 280 32 }
-
-														
-														alpha = "[TransparentIfFalse(LawItem.IsAllowed)]"
-
-														button_radial = {
-															position = { 4 0 }
-															enabled = "[And( LawItem.CanEnact, LawItem.IsAllowed )]"
-															scale = 0.9
-															
-															blockoverride "On_click" 
-															{
-																onclick = "[LawItem.Enact]"
-																inherit_visual_state = no
-																enabled = yes
-															}
-															blockoverride "ShowDot"
-															{
-																trigger_when = "[LawItem.HasLaw]"
-															} 
-															
-															blockoverride "HideDot" 
-															{
-																trigger_when = "[Not(LawItem.HasLaw)]"
-															}
-															tooltip = "[LawItem.GetCanSetLawDescription]"
-														}
-														tooltipwidget = player_law_item_tooltip
-														widget = {
-															position = { 34 0 }
-															size = { 260 24 }
-															using = NoninteractableBG
-															blockoverride "Margins" { margin = { 4 6 } }
-															textbox = {
-																position = { 8 3 }
-																autoresize = yes
-																align = nobaseline|left
-																using = BaseFontS
-																using = Black_FontColor
-																text = "[LawItem.GetName]"
-																max_width = 220
-																elide = right
-															}
-														}
-														
-														widget = {
-															parentanchor = top|right
-															widgetanchor = top|right
-															position = { 5 -6 }
-															size = { 32 32 }
-															
-															
-															icon = {
-																texture = "[LawItem.GetLaw.GetModifier.GetIcon]"
-																size = { 32 32 }
-															}
-															
-															icon = {
-																texture = "gfx/interface/icons/laws/law_agnatic.dds"
-																visible = "[LawItem.GetLaw.IsSuccession('agnatic')]"
-																size = { 32 32 }
-																position = { 6 0 }
-															}
-															icon = {
-																texture = "gfx/interface/icons/laws/law_agnatic_cognatic.dds"
-																visible = "[LawItem.GetLaw.IsSuccession('cognatic')]"
-																size = { 32 32 }
-																position = { 6 0 }
-															}
-															icon = {
-																texture = "gfx/interface/icons/laws/law_agnatic_seniority.dds"
-																visible = "[LawItem.GetLaw.IsSuccession('agnatic_seniority')]"
-																size = { 32 32 }
-																position = { 6 0 }
-															}
-															icon = {
-																texture = "gfx/interface/icons/laws/law_elective.dds"
-																visible = "[LawItem.GetLaw.IsSuccession('elective_monarchy')]"
-																size = { 32 32 }
-																position = { 6 0 }
-															}
-															icon = {
-																texture = "gfx/interface/icons/laws/law_familial_marriage.dds"
-																visible = "[LawItem.GetLaw.IsSuccession('old_egyptian_succession')]"
-																size = { 32 32 }
-																position = { 7 0 }
-															}
-														}
-
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
 			vbox = {
 				name = "Government Tab tab"
 				layoutpolicy_horizontal = expanding
@@ -1799,6 +1393,419 @@ base_window = {
 				}
 				vbox = {
 					layoutpolicy_vertical = expanding
+				}
+			}
+			vbox = {
+				name = "Offices tab"
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				visible = "[GovernmentView.IsShowOffices]"
+				scrollarea = {
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					scrollbarpolicy_horizontal = always_off
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+					
+					scrollwidget = {
+						dynamicgridbox = {
+							parentanchor = hcenter
+							ignoreinvisible = yes
+							datamodel = "[GovernmentView.GetOfficeHolders]"
+							datamodel_wrap = 4
+							item = {
+								margin_widget = {
+									size = { 460 160 }
+									margin = { 5 5 }
+									datacontext = "[OfficeHolderItem.GetCharacter]"
+									offices_color_background = {
+										blockoverride "Color" { using = orange_color }
+										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_interior'))]"
+									}
+									offices_color_background = {
+										blockoverride "Color" { using = green_color }
+										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_foreign_affairs'))]"
+									}
+									offices_color_background = {
+										blockoverride "Color" { using = red_color }
+										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_army'))]"
+									}
+									offices_color_background = {
+										blockoverride "Color" { using = cyan_color }
+										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_culture'))]"
+									}
+									offices_color_background = {
+										blockoverride "Color" { using = yellow_orange_color }
+										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_finance'))]"
+									}
+									offices_color_background = {
+										blockoverride "Color" { using = violet_color }
+										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','office_r_attorney_general'))]"
+									}
+									offices_color_background = {
+										blockoverride "Color" { using = beige_color }
+										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_industry'))]"
+									}
+									offices_color_background = {
+										blockoverride "Color" { using = salad_color }
+										visible = "[EqualTo_string(OfficeHolderItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'offices'),'none','secretary_r_health'))]"
+									}
+									flowcontainer = {
+										direction = vertical
+										margin = { 3 3 }
+										spacing = 5
+										sub_header = {
+											size = { 444 32 }
+											blockoverride "Title_text" { text = "[OfficeHolderItem.GetName]" }
+											tooltip = "[OfficeHolderItem.GetNameDesc]"
+										}
+										flowcontainer = {
+											spacing = 5
+											cpt_button = {
+												size = { 70 105 }
+											}
+											flowcontainer = {
+												direction = vertical
+												ignoreinvisible = yes
+												tag = {
+													text = "[OfficeHolderItem.GetCharacter.GetName]"
+													maximumsize = { 320 28 }
+													visible = "[OfficeHolderItem.HasHolder]"
+													align = left
+													using = BaseFontS
+													using = Black_FontColor
+												}
+												flowcontainer = {
+													visible = "[Not( OfficeHolderItem.GetCharacter.IsValid )]"
+													direction = vertical
+													spacing = 1
+													alpha = 0.55
+													textbox = {
+														using = BaseFontS
+														using = Black_FontColor
+														size = { 320 28 }
+														elide = right
+														fontsize_min = 11
+														text = "ASSIGNING_OFFICER_WILL"
+													}
+													textbox = {
+														using = BaseFontM
+														using = Black_FontColor
+														size = { 320 40 }
+														elide = right
+														align = top
+														fontsize_min = 11
+														text = "[OfficeHolderItem.GetOffice.GetSkillDescription]"
+													}
+												}
+												flowcontainer = {
+													spacing = 15
+													visible = "[OfficeHolderItem.HasHolder]"
+													icon_and_text = {
+														name = "loyalty"
+														size = { 100 38 }
+														tooltipwidget = { 
+															using = character_loyalty_tooltip 
+														}
+														blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/loyalty.dds" }
+														blockoverride "Text" { text = "[OfficeHolderItem.GetCharacter.GetLoyalty|0]" }
+													}
+													icon_and_text_progress = {
+														name = "statesmanship"
+														blockoverride "Icon" {
+															framesize = { 50 50 }
+															texture = "gfx/interface/icons/icon_skills.dds"
+															frame = "[OfficeHolderItem.GetCharacter.GetAttributes.GetFrame(OfficeHolderItem.GetOffice.GetRequiredSkill)]"
+														}
+														blockoverride "Text" { 
+															text = "[OfficeHolderItem.GetCharacter.GetEffectiveModifiedAttribute(OfficeHolderItem.GetOffice.GetRequiredSkill)]/[OfficeHolderItem.GetCharacter.GetModifiedAttribute(OfficeHolderItem.GetOffice.GetRequiredSkill)]"
+															using = BaseFontM
+															using = Black_FontColor
+															position = { -10 -4 }
+														}
+														blockoverride "Value" { value = "[FixedPointToFloat(OfficeHolderItem.GetCharacter.GetExperience)]" }
+														tooltip = "[OfficeHolderItem.GetSkillTooltip]"
+													}
+												}
+												flowcontainer = {
+													spacing = 5
+													ignoreinvisible = yes
+													icon_button_square = {
+														size = { 36 36 }
+														parentanchor = vcenter
+														blockoverride "On_click"
+														{
+															onclick = "[OfficeHolderItem.ChangeHolder]"
+															enabled = "[OfficeHolderItem.CanChange]"
+														}
+														blockoverride "Icon"
+														{
+															texture = "gfx/interface/icons/shared_icons/change.dds"
+															size = { 30 30 }
+														}
+														
+														tooltip = "[OfficeHolderItem.GetChangeTooltip]"
+													}
+													widget = {
+														name = "modifier_reward"
+														size = { 240 42 }
+														using = NoninteractableBG
+														blockoverride "Margins" {}
+														visible = "[OfficeHolderItem.HasHolder]"
+														modifier_desc_condensed = {
+															position = { 0 -4 } 
+															parentanchor = center
+															widgetanchor = center
+															datacontext = "[OfficeHolderItem.GetModifier]"
+															tooltip = "[OfficeHolderItem.GetTooltip]"
+															scale = 0.9
+														}
+													}
+													flowcontainer = {
+														spacing = 2
+														visible = "[Not( OfficeHolderItem.GetCharacter.IsValid )]"
+														alpha = 0.60
+														textbox = {
+															using = BaseFontS
+															using = Black_FontColor
+															parentanchor = vcenter
+															autoresize = yes
+															elide = right
+															max_width = 330
+															fontsize_min = 11
+															text = "PER_POINT_DESC"
+														}
+														icon = {
+															texture = "gfx/interface/icons/icon_skills.dds"
+															framesize = { 50 50 }
+															size = { 34 34 }
+															frame = "[OfficeHolderItem.GetCharacter.GetAttributes.GetFrame(OfficeHolderItem.GetOffice.GetRequiredSkill)]"
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					#icon = {
+					#	texture = "gfx/interface/event_window/event_scribe_writing.dds"
+					#	scale = 0.45
+					#	position = { -12 -17 }
+					#	parentanchor = bottom|hcenter
+					#} 
+				}
+			}
+			vbox = {
+				name = "Laws tab"
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				visible = "[GovernmentView.IsShowLaws]"
+				
+				margin_widget = {
+					size = { 0 28 }
+					layoutpolicy_horizontal = expanding
+					flowcontainer = {
+						position = { 24 0 }
+						parentanchor = left
+						tooltip = "[GovernmentView.GetPlayer.GetPriceTooltip('enact_law')]"
+						
+						tag = {
+							using = BaseFontM
+							using = Black_FontColor
+							text = "LAW_PRICE_CHANGE"
+						}
+						
+						textbox = {
+							margin_left = 10
+							autoresize = yes
+							using = BaseFontM
+							using = Black_FontColor
+							text = "[GovernmentView.GetPlayer.GetPrice('enact_law')]"
+							parentanchor = left
+						}
+					}
+				}
+				margin_widget = {
+					layoutpolicy_vertical = expanding
+					layoutpolicy_horizontal = expanding
+					margin = { 6 6 }
+
+					scrollarea = {
+						size = { 100% 758 }
+						scrollbarpolicy_horizontal = always_off
+						
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+						
+						scrollwidget = {
+							flowcontainer = {
+								direction = vertical
+								ignoreinvisible = yes
+								margin = { 10 10 }
+								laws_area = {
+									blockoverride "Text" {  text = "administrative_law" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'administrative_law', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'administrative_law', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'administrative_law', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'administrative_law', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'administrative_law', 'yes' )]"
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','monetary_policy_law'))]" }
+									}
+								}
+								laws_area = {
+									blockoverride "Text" {  text = "army_laws" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'army_laws', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'army_laws', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'army_laws', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'army_laws', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'army_laws', 'yes' )]"
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','army_recruitment_law'))]" }
+									}
+								}
+								laws_area = {
+									blockoverride "Text" {  text = "civil_laws" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'civil_laws', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'civil_laws', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'civil_laws', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'civil_laws', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'civil_laws', 'yes' )]"
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','citizens_rights'))]" }
+									}
+								}
+								laws_area = {
+									blockoverride "Text" {  text = "constitutional_laws" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'constitutional_laws', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'constitutional_laws', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'constitutional_laws', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'constitutional_laws', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'constitutional_laws', 'yes' )]"
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','constitutional_monarchy_laws'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','election_terms_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','oligarchy_type'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','election_terms_stratocracy'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','election_terms_megacorporation'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','election_terms_viceroyalty'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','judiciary_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','supreme_court_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','regional_government_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','suffrage_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','vote_count_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','treaty_making_power'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','legislative_body_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','legislative_process_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','constitutional_process_law'))]" }
+									}
+								}
+								laws_area = {
+									blockoverride "Text" {  text = "economic_laws" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'economic_laws', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'economic_laws', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'economic_laws', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'economic_laws', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'economic_laws', 'yes' )]"
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','currency_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','non_tribal_land_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','labour_organisation_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','business_regulation_law'))]" }
+									}
+								}
+								laws_area = {
+									blockoverride "Text" {  text = "governmental_laws" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'governmental_laws', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'governmental_laws', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'governmental_laws', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'governmental_laws', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'governmental_laws', 'yes' )]"
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','government_office_appointment_law'))]" }
+									}
+								}
+								laws_area = {
+									blockoverride "Text" {  text = "monarchy_laws" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'monarchy_laws', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'monarchy_laws', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'monarchy_laws', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'monarchy_laws', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'monarchy_laws', 'yes' )]"
+										#laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','law'))]" }
+									}
+								}
+								laws_area = {
+									blockoverride "Text" {  text = "monetary_policy_setting" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'monetary_policy_setting', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'monetary_policy_setting', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'monetary_policy_setting', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'monetary_policy_setting', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'monetary_policy_setting', 'yes' )]"
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','monetary_policy_setting'))]" }
+									}
+								}
+								laws_area = {
+									blockoverride "Text" {  text = "republic_laws" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'republic_laws', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'republic_laws', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'republic_laws', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'republic_laws', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'republic_laws', 'yes' )]"
+										#laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','law'))]" }
+									}
+								}
+								laws_area = {
+									blockoverride "Text" {  text = "social_laws" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'social_laws', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'social_laws', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'social_laws', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'social_laws', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'social_laws', 'yes' )]"
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','immigration_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','emigration_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','cultural_protections_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','religious_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','womens_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','healthcare_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','university_law'))]" }
+									}
+								}
+								laws_area = {
+									blockoverride "Text" {  text = "standing_army_laws" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'standing_army_laws', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'standing_army_laws', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'standing_army_laws', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'standing_army_laws', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'standing_army_laws', 'yes' )]"
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','standing_army_laws'))]" }
+									}
+								}
+								laws_area = {
+									blockoverride "Text" {  text = "upper_house_laws" }
+									blockoverride "Onclick_1" { onclick = "[GetVariableSystem.Set( 'upper_house_laws', 'no' )]" }
+									blockoverride "Onclick_2" { onclick = "[GetVariableSystem.Set( 'upper_house_laws', 'yes' )]" }
+									blockoverride "Visible_1" { visible = "[GetVariableSystem.HasValue( 'upper_house_laws', 'yes' )]" }
+									blockoverride "Visible_2" { visible = "[Not( GetVariableSystem.HasValue( 'upper_house_laws', 'yes' ) )]" }
+									blockoverride "Content" {
+										visible = "[GetVariableSystem.HasValue( 'upper_house_laws', 'yes' )]"
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','upper_house_powers_law'))]" }
+										laws_item = { visible = "[EqualTo_string(LawGroupItem.GetName, SelectLocalization(GetVariableSystem.HasValue('government_tabs', 'laws'),'none','upper_house_composition_law'))]" }
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}

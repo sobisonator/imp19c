@@ -198,7 +198,6 @@ types NEW_GUI {
 				using = BaseFontS
 				using = Black_FontColor
 			}
-			block "Tooltip" { tooltip = "none" }
 		}
 	}
 	type panelka_right = icon {
@@ -240,7 +239,6 @@ types NEW_GUI {
 				using = BaseFontS
 				using = Black_FontColor
 			}
-			block "Tooltip" { tooltip = "none" }
 		}
 	}
 	type panelka_center = icon {
@@ -261,7 +259,6 @@ types NEW_GUI {
 				using = BaseFontS
 				using = Black_FontColor
 			}
-			block "Tooltip" { }
 		}
 	}
 	type panelka_gov = icon {
@@ -325,7 +322,6 @@ types NEW_GUI {
 				using = BaseFontS
 				using = Black_FontColor
 			}
-			block "Tooltip" { }
 		}
 		textbox = {
 			name = "Text"
@@ -1333,6 +1329,214 @@ types NEW_GUI {
 			modify_texture = {
 				texture = "gfx/interface/base_parts/gradient_black_invert.dds"
 				blend_mode = alphamultiply
+			}
+		}
+	}
+	type laws_item = container {
+		margin_widget = {
+			size = { 306 32 }
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				sub_header_v = {
+					name = "law_header"
+					size = { 0 0 }
+					layoutpolicy_horizontal = expanding
+					blockoverride "Title_text"
+					{
+						datacontext = "[GovernmentView.GetPlayer]"
+						text = "[LawGroupItem.GetName]"
+					}
+				}
+				
+				flowcontainer = {
+					tooltip = [LawGroupItem.GetClansTooltip]
+					visible = "[LawGroupItem.HasClans]"
+					icon = {											
+						name = "clans_icon"
+						texture = "gfx/interface/icons/shared_icons/clan_chiefs.dds"
+						size = { 32 32 }	
+						tooltip = [LawGroupItem.GetClansTooltip]
+					}
+					icon = {
+						parentanchor = right
+						name = "clans_yesno"
+						texture = "gfx/interface/icons/shared_icons/tick_cross.dds"
+						frame = "[LawGroupItem.GetClansFrame]"
+						size = { 30 30 }
+						framesize = { 25 25 }
+					}
+				}
+				widget = {
+					size = { 8 0 }
+					visible = "[Not( LawGroupItem.HasClans )]"
+				}
+			}
+		}
+		flowcontainer = {
+			position = { 0 36 }
+			
+			dynamicgridbox = {
+				datamodel = "[LawGroupItem.GetLaws]"
+				
+				item = {
+					widget = {
+						size = { 280 32 }
+
+						
+						alpha = "[TransparentIfFalse(LawItem.IsAllowed)]"
+
+						button_radial = {
+							position = { 4 0 }
+							enabled = "[And( LawItem.CanEnact, LawItem.IsAllowed )]"
+							scale = 0.9
+							
+							blockoverride "On_click" 
+							{
+								onclick = "[LawItem.Enact]"
+								inherit_visual_state = no
+								enabled = yes
+							}
+							blockoverride "ShowDot"
+							{
+								trigger_when = "[LawItem.HasLaw]"
+							} 
+							
+							blockoverride "HideDot" 
+							{
+								trigger_when = "[Not(LawItem.HasLaw)]"
+							}
+							tooltip = "[LawItem.GetCanSetLawDescription]"
+						}
+						tooltipwidget = player_law_item_tooltip
+						widget = {
+							position = { 34 0 }
+							size = { 260 24 }
+							using = NoninteractableBG
+							blockoverride "Margins" { margin = { 4 6 } }
+							textbox = {
+								position = { 8 3 }
+								autoresize = yes
+								align = nobaseline|left
+								using = BaseFontS
+								using = Black_FontColor
+								text = "[LawItem.GetName]"
+								max_width = 220
+								elide = right
+							}
+						}
+						
+						widget = {
+							parentanchor = top|right
+							widgetanchor = top|right
+							position = { 5 -6 }
+							size = { 32 32 }
+							
+							
+							icon = {
+								texture = "[LawItem.GetLaw.GetModifier.GetIcon]"
+								size = { 32 32 }
+							}
+							
+							icon = {
+								texture = "gfx/interface/icons/laws/law_agnatic.dds"
+								visible = "[LawItem.GetLaw.IsSuccession('agnatic')]"
+								size = { 32 32 }
+								position = { 6 0 }
+							}
+							icon = {
+								texture = "gfx/interface/icons/laws/law_agnatic_cognatic.dds"
+								visible = "[LawItem.GetLaw.IsSuccession('cognatic')]"
+								size = { 32 32 }
+								position = { 6 0 }
+							}
+							icon = {
+								texture = "gfx/interface/icons/laws/law_agnatic_seniority.dds"
+								visible = "[LawItem.GetLaw.IsSuccession('agnatic_seniority')]"
+								size = { 32 32 }
+								position = { 6 0 }
+							}
+							icon = {
+								texture = "gfx/interface/icons/laws/law_elective.dds"
+								visible = "[LawItem.GetLaw.IsSuccession('elective_monarchy')]"
+								size = { 32 32 }
+								position = { 6 0 }
+							}
+							icon = {
+								texture = "gfx/interface/icons/laws/law_familial_marriage.dds"
+								visible = "[LawItem.GetLaw.IsSuccession('old_egyptian_succession')]"
+								size = { 32 32 }
+								position = { 7 0 }
+							}
+						}
+
+					}
+				}
+			}
+		}
+	}
+	type laws_subheader = sub_header {
+		blockoverride "Title_text" { block "Text" {  text = "text" } }
+		size = { 900 32 }
+		button = {
+			size = { 100% 100% }
+			block "On_click" {}
+		}
+		icon = {
+			block "ArrowSize" { size = { 18 18 } }
+			block "Right" { visible = no }
+			parentanchor = vcenter|right
+			position = { -6 0 }
+			using = red_background
+			icon = {
+				name = "Alpha"
+				texture = "gfx/interface/base_parts/arrow_right.dds"
+				spriteType = Corneredtiled
+				spriteborder = { 0 0 }
+				parentanchor = center
+			}
+		}
+		icon = {
+			block "ArrowSize"{ size = { 18 18 } }
+			block "Down" {}
+			parentanchor = vcenter|right
+			position = { -6 0 }
+			using = red_background
+			icon = {
+				name = "Alpha"
+				texture = "gfx/interface/base_parts/arrow.dds"
+				spriteType = Corneredtiled
+				spriteborder = { 0 0 }
+				parentanchor = center
+				position = { 1 1 }
+			}
+		}
+	}
+	type laws_area = flowcontainer {
+		ignoreinvisible = yes
+		direction = vertical
+		spacing = 5
+		laws_subheader = {
+				blockoverride "On_click" { block "Onclick_1" {  } }
+				blockoverride "Down" { visible = yes }
+				blockoverride "Right" { visible = no }
+				block "Visible_1" {  }
+		}
+		laws_subheader = {
+				blockoverride "On_click" { block "Onclick_2"  {  } }
+				blockoverride "Down" { visible = no }
+				blockoverride "Right" { visible = yes }
+				block "Visible_2"  {  }
+		}
+		dynamicgridbox = {
+			ignoreinvisible = yes
+			datamodel = "[GovernmentView.GetCurrentLaws]"
+			flipdirection = yes
+			datamodel_wrap = 3
+			item = {
+				flowcontainer = {
+					ignoreinvisible = yes
+					block "Content" { }
+				}
 			}
 		}
 	}

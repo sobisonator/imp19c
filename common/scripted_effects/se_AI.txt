@@ -347,6 +347,7 @@ AI_add_control_interest = {
 				
 				# From AI_root's DIPLOMACY_power in the area's TZ
 				multiply = AI_diplomacy_interest_from_tradezone_diplomacy_power_scope_ai_root
+				# TODO: Try adding half the diplomacy power of AI_root from neighbouring TZs as well
 				 
 				# Add weight if AI_root is not a major player in the TZ, but it aspires to be.
 				# End order_by value
@@ -481,11 +482,11 @@ AI_begin_diplomatic_play = {
 										OR = {
 											any_in_global_list = {
 												variable = global_powers_list
-												THIS = PREV.owner
+												THIS = owner
 											}
 											trigger_if = {
 												limit = {
-													PREV.owner = { 
+													owner = { 
 														is_subject = yes
 														NOT = { is_subject_type = tributary }
 														NOT = { is_subject_type = sinosphere_tributary }
@@ -493,7 +494,7 @@ AI_begin_diplomatic_play = {
 												}
 												any_in_global_list = {
 													variable = global_powers_list
-													THIS = PREV.owner.overlord
+													THIS = owner.overlord
 												}
 											}
 										}
@@ -703,7 +704,12 @@ AI_assess_all_adversaries = {
 			every_area_province = {
 				limit = {
 					NOT = { owner = scope:diplomatic_play.var:play_instigator }
-					NOT = { owner.overlord ?= scope:diplomatic_play.var:play_instigator }
+					trigger_if = {
+						limit = {
+							owner = { is_subject = yes }
+						}
+						NOT = { owner.overlord = scope:diplomatic_play.var:play_instigator }
+					}
 					owner = {
 						OR = {
 							any_owned_province = { is_coastal = yes }
@@ -968,7 +974,7 @@ AI_assess_adversary = {
 			}
 			change_local_variable = {
 				name = AI_target_power
-				add = value = THIS.DIPLOMACY_power
+				add = THIS.DIPLOMACY_power
 			}
 		}
 		every_in_list = {
@@ -978,7 +984,7 @@ AI_assess_adversary = {
 			}
 			change_local_variable = {
 				name = AI_root_power
-				add = value = THIS.DIPLOMACY_power
+				add = THIS.DIPLOMACY_power
 			}
 		}
 
@@ -1106,8 +1112,14 @@ AI_diplomatic_play_evaluate_war = {
 			name = AI_play_war_assessment
 			value = {
 				value = 0
-				subtract = var:play_infamy_cost_war
-				subtract = var:play_stability_cost_war
+				subtract = { 
+					value = var:play_infamy_cost_war
+					multiply = var:play_infamy_cost_war
+				}
+				subtract = {
+					value = var:play_stability_cost_war
+					multiply var:play_stability_cost_war
+				}
 				subtract = { # negative attitudes will encourage war
 					value = var:AI_play_attitude
 					multiply = var:AI_play_power_balance_instigator_root

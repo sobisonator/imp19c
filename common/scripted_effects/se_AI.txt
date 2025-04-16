@@ -497,7 +497,7 @@ AI_begin_diplomatic_play = {
 										OR = {
 											any_in_global_list = {
 												variable = global_powers_list
-												THIS = owner
+												THIS = PREV.owner
 											}
 											trigger_if = {
 												limit = {
@@ -509,7 +509,7 @@ AI_begin_diplomatic_play = {
 												}
 												any_in_global_list = {
 													variable = global_powers_list
-													THIS = owner.overlord
+													THIS = PREV.owner.overlord
 												}
 											}
 										}
@@ -546,9 +546,15 @@ AI_begin_diplomatic_play = {
 							}
 							if = {
 								limit = {
-									NOT = { 
-										owner.culture = scope:diplomatic_play.var:play_instigator.culture 
+									trigger_if = {
+										limit = {
+											has_owner = yes
+										}
+										NOT = { 
+											owner.culture = scope:diplomatic_play.var:play_instigator.culture 
+										}
 									}
+									
 								}
 								every_pops_in_province = {
 									if = {
@@ -592,8 +598,13 @@ AI_begin_diplomatic_play = {
 		}
 
 		scope:diplomatic_play = {
-			AI_assess_all_adversaries = {
-				diplomatic_play = scope:diplomatic_play
+			if = {
+				limit = {
+					has_variable = play_target_area
+				}
+				AI_assess_all_adversaries = {
+					diplomatic_play = scope:diplomatic_play
+				}
 			}
 		}
 		ordered_in_list = {
@@ -602,7 +613,7 @@ AI_begin_diplomatic_play = {
 
 			if = {
 				limit = {
-					NOT = { THIS = var:play_instigator }
+					NOT = { THIS = scope:diplomatic_play.var:play_instigator }
 				}
 				save_scope_as = play_target_country_scope
 				scope:diplomatic_play = {
@@ -626,19 +637,27 @@ AI_begin_diplomatic_play = {
 		# are allowed to pick a side, or sit on the fence, to mediate the play
 
 		# Get all great powers in this TZ
-		scope:diplomatic_play.var:play_target_area.area.region = {
-			random_region_province = {
+		scope:diplomatic_play = {
+			if = {
 				limit = {
-					has_owner = yes
+					has_variable = play_target_area
 				}
-				governorship.var:trade_center = {
-					var:DIPLOMACY_power_n1 = { add_to_list = local_great_powers }
-					var:DIPLOMACY_power_n2 = { add_to_list = local_great_powers }
-					var:DIPLOMACY_power_n3 = { add_to_list = local_great_powers }
-					var:DIPLOMACY_power_n4 = { add_to_list = local_great_powers }
+				scope:diplomatic_play.var:play_target_area.area.region = {
+					random_region_province = {
+						limit = {
+							has_owner = yes
+						}
+						governorship.var:trade_center = {
+							var:DIPLOMACY_power_n1 = { add_to_list = local_great_powers }
+							var:DIPLOMACY_power_n2 = { add_to_list = local_great_powers }
+							var:DIPLOMACY_power_n3 = { add_to_list = local_great_powers }
+							var:DIPLOMACY_power_n4 = { add_to_list = local_great_powers }
+						}
+					}
 				}
 			}
 		}
+		
 		every_in_list = {
 			list = local_great_powers
 
@@ -671,8 +690,18 @@ AI_begin_diplomatic_play = {
 			else_if = {
 				limit = {
 					OR = {
-						scope:play_observer = scope:diplomatic_play.var:play_target_country.overlord
-						scope:play_observer = scope:diplomatic_play.var:play_target_country.overlord.overlord
+						trigger_if = {
+							limit = {
+								scope:diplomatic_play.var:play_target_country = { is_subject = yes }
+							}
+							scope:play_observer = scope:diplomatic_play.var:play_target_country.overlord
+							trigger_if = {
+								limit = {
+									scope:diplomatic_play.var:play_target_country.overlord = { is_subject = yes }
+								}
+								scope:play_observer = scope:diplomatic_play.var:play_target_country.overlord.overlord
+							}
+						}
 						scope:play_observer = scope:diplomatic_play.var:play_target_country
 					}
 				}
@@ -718,20 +747,26 @@ AI_assess_all_adversaries = {
 		scope:diplomatic_play.var:play_target_area.area = {
 			every_area_province = {
 				limit = {
-					NOT = { owner = scope:diplomatic_play.var:play_instigator }
+					has_owner = yes
 					trigger_if = {
 						limit = {
-							owner = { is_subject = yes }
+							has_owner = yes
 						}
-						NOT = { owner.overlord = scope:diplomatic_play.var:play_instigator }
-					}
-					owner = {
-						OR = {
-							any_owned_province = { is_coastal = yes }
-							any_owned_province = { 
-								any_neighbor_province = { 
-									owner = scope:diplomatic_play.var:play_instigator 
-								} 
+						NOT = { owner = scope:diplomatic_play.var:play_instigator }
+						trigger_if = {
+							limit = {
+								owner = { is_subject = yes }
+							}
+							NOT = { owner.overlord = scope:diplomatic_play.var:play_instigator }
+						}
+						owner = {
+							OR = {
+								any_owned_province = { is_coastal = yes }
+								any_owned_province = { 
+									any_neighbor_province = { 
+										owner = scope:diplomatic_play.var:play_instigator 
+									} 
+								}
 							}
 						}
 					}

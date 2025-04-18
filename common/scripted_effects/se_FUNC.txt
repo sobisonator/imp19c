@@ -320,6 +320,8 @@ GT_factor_raw_input_costs_clothing = {
 FUNC_declare_war_with_wargoal_province = {
 	# Scope: Country
 	# Function: Declares war on target country while "excluding protected_when_attacked = no" subjects
+	# Also brings in colonies, autonomous governorships and territories
+	save_scope_as = instigator
 	$target$ = {
 		# Momentarily remove tributary status from self
 		if = {
@@ -330,7 +332,10 @@ FUNC_declare_war_with_wargoal_province = {
 			# Save the subject type
 			if = {
 				limit = {
-					is_subject_type = tributary
+					OR = {
+						is_subject_type = tributary
+						is_subject_type = sinosphere_tributary
+					}
 				}
 				set_local_variable = tributary_was_released
 			}
@@ -347,6 +352,37 @@ FUNC_declare_war_with_wargoal_province = {
 		province = $province$
 		target = $target$
 	}
+
+	random_current_war = {
+		limit = {
+			any_war_participant = { THIS = scope:instigator }
+			any_war_participant = { THIS = $target$ }
+			is_war_leader = scope:instigator
+			is_war_leader = $target$
+		}
+		save_scope_as = current_war_scope
+	}
+
+	every_subject = {
+		limit = {
+			OR = {
+				is_subject_type = client_colony
+				is_subject_type = autonomous_colony
+				is_subject_type = autonomous_governorship
+				is_subject_type = semi_autonomous_governorship
+				is_subject_type = subsidiary_ally
+				is_subject_type = feudatory
+				is_subject_type = territory
+			}
+		}
+		add_to_war = {
+			target = scope:current_war_scope
+			attacker = yes
+			leader = no
+		} 
+	}
+	# Consider an effect for removing great power allies from wars targeting minor countries
+
 	if = {
 		limit = {
 			always = no # Disabled for now, as this immediately ends the war

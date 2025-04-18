@@ -317,18 +317,46 @@ GT_factor_raw_input_costs_clothing = {
 	}
 }
 
-FUNC_declare_war_with_wargoal = {
+FUNC_declare_war_with_wargoal_province = {
 	# Scope: Country
 	# Function: Declares war on target country while "excluding protected_when_attacked = no" subjects
 	$target$ = {
-		# Momentarily remove all tributaries
+		# Momentarily remove tributary status from self
+		if = {
+			limit = {
+				is_subject = yes
+			}
+			save_scope_as = vassal_to_remove
+			# Save the subject type
+			if = {
+				limit = {
+					is_subject_type = tributary
+				}
+				set_local_variable = tributary_was_released
+			}
+			# ...add any other subject types not defended by overlord
+			# And remove the relationship
+			overlord = {
+				save_scope_as = overlord_to_reinstate
+				release_subject = scope:vassal_to_remove
+			}
+		}
 	}
 	declare_war_with_wargoal = {
 		war_goal = $war_goal$
 		province = $province$
 		target = $target$
 	}
-	$target$ = {
-		# Reinstate all tributaries
+	if = {
+		limit = {
+			always = no # Disabled for now, as this immediately ends the war
+			has_local_variable = tributary_was_released
+		}
+		scope:overlord_to_reinstate = {
+			make_subject = {
+				target = scope:vassal_to_remove
+				type = tributary
+			}
+		}
 	}
 }

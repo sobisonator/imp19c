@@ -1237,6 +1237,46 @@ AI_diplomatic_play_evaluate_war = {
 
 }
 
+AI_debug_test_war_all_diplomatic_plays = {
+	every_province = {
+		limit = {
+			has_variable = is_diplomatic_play
+			trigger_if = {
+				limit = {
+					has_variable = war_assessment
+				}
+				var:war_assessment > 0
+			}
+		}
+		save_scope_as = diplomatic_play
+		var:play_target_country = { save_scope_as = target_country }
+		# Get the capital of the state in the target country
+		var:play_target_area = {
+			area = {
+				random_area_province = {
+					limit = {
+						trigger_if = {
+							limit = {
+								has_owner = yes
+							}
+							owner = scope:diplomatic_play.var:play_target_country
+						}
+					}
+					state.capital_scope = { save_scope_as = wargoal_target_province }
+				}
+			}
+		}
+		var:play_instigator = {
+			declare_war_with_wargoal = {
+				war_goal = conquer_wargoal
+				province = scope:wargoal_target_province
+				target = scope:target_country
+			}
+		}
+		
+	}
+}
+
 # ECONOMY
 
 ## CURRENCY

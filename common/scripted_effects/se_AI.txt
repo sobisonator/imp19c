@@ -1304,22 +1304,116 @@ AI_assess_peace = {
 	# Function: Assess whether the AI countries in this war want to make peace
 }
 
+AI_debug_peace_deal_all_wars = {
+	every_in_list = {
+		list = wars_checked
+		remove_from_list = wars_checked
+	}
+
+	every_country = {
+		limit = {
+			war = yes
+		}
+		every_current_war = {
+			limit = {
+				NOT = {
+					THIS = { is_in_list = wars_checked }
+				}
+			}
+			AI_make_peace_province_wishlist = {
+				target = defender
+			}
+
+
+			add_to_list = wars_checked
+		}
+	}
+}
+
+
+
 AI_make_peace_province_wishlist = {
 	# Scope: War
 	# Function: Make a list of provinces the AI wants to demand in a peace deal
 	# Should be run for every war participant so they can each put their wishlist forward for final demands
 	# The wishlists should be saved as variable lists in each country, and destroyed once the peace resolution is complete
 	# This shouldn't cause cross over between peace assessments, because the entire process should be concurrent from start to finish for each war, so the lists should be created and destroyed before any other wars are assessed for peace.
-	# Takes argument $targeting$, which is either "attacker" or "defender"
+	# Takes argument $target$, which is either "attacker" or "defender"
+	# It is the target, therefore this is run against the opposite side of the calling scope
 	# If this is run from the perspective of the attacker, then it should be run on all defenders
-	every_war_$targeting$ = {
-		every_country_state = {
-			# Put states into a list if they are worth assessing
-			# Then assess each province within those states
+	every_in_list = {
+		list = AI_peace_wishlist_stage_1
+		remove_from_list = AI_peace_wishlist_stage_1
+	}
 
-			# +Coastal
-			# +Bordering
+	if = {
+		limit = {
+			flag:$target$ = flag:defender
 		}
+		attacker_warleader = { save_scope_as = AI_root }
+	}
+	else_if = {
+		limit = {
+			flag:$target$ = flag:attacker
+		}
+		defender_warleader = { save_scope_as = AI_root }
+	}
+	every_war_$target$ = {
+		every_owned_province = {
+			limit = {
+				OR = {
+					trigger_if = {
+						limit = {
+							scope:AI_root = {
+								any_owned_province = { is_coastal = yes }
+							}
+						}
+						is_coastal = yes
+					}
+					any_neighbor_province = {
+						trigger_if = {
+							limit = {
+								has_owner = yes
+							}
+							owner = scope:AI_root
+						}
+					}
+				}
+			}
+			add_to_list = AI_peace_wishlist_stage_1
+		}
+	}
+	every_in_list = {
+		list = AI_peace_wishlist_stage_1
+		set_variable = {
+			name = debug_original_owner
+			value = owner
+		}
+	}
+	LAND_transfer_provinces = {
+		target_provinces = AI_peace_wishlist_stage_1
+		grantee = scope:AI_root
+	}
+}
+
+AI_debug_restitute_land = {
+	every_in_list = {
+		list = restituted_land
+		remove_from_list = restituted_land
+	}
+	every_province = {
+		limit = {
+			has_variable = debug_original_owner
+		}
+		add_to_list = restituted_land
+	}
+	LAND_transfer_provinces = {
+		target_provinces = restituted_land
+		grantee = var:debug_original_owner
+	}
+	every_in_list = {
+		list = restituted_land
+		remove_variable = debug_original_owner
 	}
 }
 

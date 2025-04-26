@@ -316,3 +316,81 @@ GT_factor_raw_input_costs_clothing = {
 		}
 	}
 }
+
+FUNC_declare_war_with_wargoal_province = {
+	# Scope: Country
+	# Function: Declares war on target country while "excluding protected_when_attacked = no" subjects
+	# Also brings in colonies, autonomous governorships and territories
+	save_scope_as = instigator
+	$target$ = {
+		# Momentarily remove tributary status from self
+		if = {
+			limit = {
+				is_subject = yes
+			}
+			save_scope_as = vassal_to_remove
+			# Save the subject type
+			if = {
+				limit = {
+					OR = {
+						is_subject_type = tributary
+						is_subject_type = sinosphere_tributary
+					}
+				}
+				set_local_variable = tributary_was_released
+				overlord = {
+					save_scope_as = overlord_to_reinstate
+					release_subject = scope:vassal_to_remove
+				}
+			}
+		}
+	}
+	declare_war_with_wargoal = {
+		war_goal = $war_goal$
+		province = $province$
+		target = $target$
+	}
+
+	random_current_war = {
+		limit = {
+			any_war_participant = { THIS = scope:instigator }
+			any_war_participant = { THIS = $target$ }
+			is_war_leader = scope:instigator
+			is_war_leader = $target$
+		}
+		save_scope_as = current_war_scope
+	}
+
+	every_subject = {
+		limit = {
+			OR = {
+				is_subject_type = client_colony
+				is_subject_type = autonomous_colony
+				is_subject_type = autonomous_governorship
+				is_subject_type = semi_autonomous_governorship
+				is_subject_type = subsidiary_ally
+				is_subject_type = feudatory
+				is_subject_type = territory
+			}
+		}
+		add_to_war = {
+			target = scope:current_war_scope
+			attacker = yes
+			leader = no
+		} 
+	}
+	# Consider an effect for removing great power allies from wars targeting minor countries
+
+	if = {
+		limit = {
+			always = no # Disabled for now, as this immediately ends the war
+			has_local_variable = tributary_was_released
+		}
+		scope:overlord_to_reinstate = {
+			make_subject = {
+				target = scope:vassal_to_remove
+				type = tributary
+			}
+		}
+	}
+}

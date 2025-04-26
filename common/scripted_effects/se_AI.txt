@@ -1362,6 +1362,7 @@ AI_make_peace_province_wishlist = {
 		every_owned_province = {
 			limit = {
 				OR = {
+					is_core_of = scope:AI_root
 					trigger_if = {
 						limit = {
 							scope:AI_root = {
@@ -1383,12 +1384,59 @@ AI_make_peace_province_wishlist = {
 			}
 			add_to_list = AI_peace_wishlist_stage_1
 		}
+		every_owned_province = {
+			# Provinces in states neighbouring the AI_root
+			limit = {
+				NOT = { is_in_list = AI_peace_wishlist_stage_1 }
+				state = {
+					any_state_province = {
+						any_neighbor_province = {
+							owner = scope:AI_root
+						}
+					}
+				}
+				# Or are part of an AI interest state
+				area = { save_scope_as = test_area }
+				scope:AI_root = {
+					every_in_list = {
+						variable = AI_interests_list
+
+						THIS.area = scope:test_area
+					}
+				}
+			}
+			add_to_list = AI_peace_wishlist_stage_1
+		}
 	}
-	every_in_list = {
+
+	set_local_variable = {
+		name = warscore_cost_available
+		value = 100 # Debug, it should be taken from the war scope
+	}
+
+	ordered_in_list = {
 		list = AI_peace_wishlist_stage_1
-		set_variable = {
-			name = debug_original_owner
-			value = owner
+		order_by = {
+			value = AI_interest_value
+		}
+		max = 9999
+		if = {
+			limit = {
+				local_var:warscore_cost_available > WARSCORE_province_value
+			}
+			# Keep in the list
+			change_local_variable = {
+				name = warscore_cost_available
+				subtract = WARSCORE_province_value
+			}
+			set_variable = {
+				name = debug_original_owner
+				value = owner
+			}
+		}
+		# Once all warscore cost has been used, remove all other provinces from the list
+		else = {
+			remove_from_list = AI_peace_wishlist_stage_1
 		}
 	}
 	LAND_transfer_provinces = {

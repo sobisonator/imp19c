@@ -1,0 +1,544 @@
+template tooltip_background
+{
+	background = {
+		name = "Shadow"
+		texture = "gfx/interface/base_parts/button_square_dropshadow_x16y16bd.dds"
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		spriteType = corneredtiled
+		spriteborder = { 8 8 }
+		margin = { 4 4 }
+		alpha = 0.5
+	}
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		using = black_background
+		using = portrait_x32y32bd_alpha
+		alpha = 0.75
+	}
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		using = pattern_black_background
+		using = portrait_x32y32bd_alpha
+		margin = { -2 -2 }
+	}
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		block "Color" { texture = "[GetBuildingIcon( BuildingItem.GetBuilding )]" }
+		spriteType = Corneredtiled
+		framesize = { 1 1 }
+		frame = 1
+		using = portrait_x32y32bd_alpha
+		alpha = 0.5
+		modify_texture = {
+			texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
+			blend_mode = alphamultiply
+		}
+		modify_texture = {
+			texture = "gfx/interface/base_parts/gradient_black_invert.dds"
+			blend_mode = alphamultiply
+		}
+	}
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		using = portrait_x32y32bd_alpha
+		using = beige_background
+		alpha = 0.5
+		modify_texture = {
+			texture = "gfx/interface/base_parts/button_vignette.dds"
+			blend_mode = alphamultiply
+			spriteType = corneredtiled
+			spriteborder = { 20 20 }
+		}
+	}
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		using = black_background
+		using = portrait_x32y32bd_alpha
+		alpha = 0.5
+		margin = { -2 -2 }
+	}
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		using = portrait_x32y32bd_alpha
+		using = beige_background
+		alpha = 0.15
+		margin = { -2 -2 }
+		modify_texture = {
+			texture = "gfx/interface/base_parts/gradient_black_invert.dds"
+			blend_mode = alphamultiply
+		}
+	}
+}
+types NEW_TOOLTIPS {
+	type new_tooltip_text_area = textbox {
+		using = BaseFontS
+		align = left
+		autoresize = yes
+		alwaystransparent = no
+		multiline = yes
+		max_width = 400
+		fonttintcolor = "[TooltipInfo.GetTintColor]"
+	}
+	type building_tooltip = flowcontainer {
+		alwaystransparent = no 
+		ignoreinvisible = yes
+		filter_mouse = all
+		using = tooltip_background
+		widget = {
+			block "ImageVisible" { visible = yes }
+			icon = {
+				size = { 200 200 }
+				position = { 2 2 }
+				block "Image" { texture = "[GetBuildingIcon( BuildingItem.GetBuilding )]" }
+				using = portrait_x32y32bd_alpha
+				alpha = 0.35
+				modify_texture = {
+					texture = "gfx/interface/base_parts/horizontal_gradient_stretch.dds"
+					blend_mode = alphamultiply
+				}
+				modify_texture = {
+					texture = "gfx/interface/base_parts/gradient_black.dds"
+					blend_mode = alphamultiply
+				}
+			}
+		}
+		flowcontainer = {
+			direction = vertical
+			ignoreinvisible = yes
+			margin = { 20 0 }
+			margin_top = 15
+			block "header_tt" {}
+			block "header_additions" {}
+			margin_widget = {
+				name = "title_container"
+				size = { 400 45 }
+				
+				flowcontainer = {
+					name = "FancyHeader"
+					alwaystransparent = no
+					ignoreinvisible = yes
+					direction = vertical
+
+					normal_text = {
+						name = "title"
+						autoresize = yes
+						margin_bottom = 2
+						max_width = 400
+						fontsize_min = 14
+						using = BaseFontM
+						align = left
+						block "title_text" { text = "tooltip_title" }
+						fonttintcolor = "[TooltipInfo.GetTintColor]"
+					}
+					
+					flowcontainer = {
+						spacing = 4
+						block "ConceptLinkPreVisibility" { }
+						normal_text = {
+							name = "concept_link_pre"
+							autoresize = yes
+							text = "READ_MORE_ABOUT"
+							using = TooltipConceptFont
+							alwaystransparent = yes
+							multiline = no
+							fontsize = 14
+							max_width = 200
+						}
+						normal_text = {
+							name = "concept_link"
+							autoresize = yes
+							block "concept_link" { text = "" }
+							using = TooltipConceptFont
+							alwaystransparent = yes
+							multiline = no
+							fontsize = 14
+							max_width = 200
+						}
+					}
+				}
+			}
+			flowcontainer = {
+				direction = vertical
+				spacing = 5
+				#new_tooltip_text_area = {
+				#	text = "tooltip_in"
+				#}
+				new_tooltip_text_area = {
+					text = "[BuildingItem.GetBuilding.GetDescription]"
+				}
+				widget = {
+					size = { 100% 2 }
+					widget = {
+						size = { 100% 6 }
+						parentanchor = center
+						using = brown_underline
+					}
+				}
+				block "extra_data" {}
+			}
+			textbox = {
+				name = "BottomText"
+			
+				using = GameConceptFlavorTooltipText
+				multiline = yes
+				block "bottom_text" { text = "tooltip_bottom" }
+				fonttintcolor = "[TooltipInfo.GetTintColor]"
+				alwaystransparent = no
+				elide = right
+				max_width = 400
+			}
+			textbox = {
+				name = "TooltipTextShortcut"
+				using = DefaultTooltipText
+				parentanchor = right
+				margin = { 10 10 }
+				block "Cull" { visible = yes }
+			}
+		}
+		margin_widget = {
+			size = { 22 100% }
+			margin = { 0 6 }
+			using = ProgressLockIndicator
+		}
+	}
+	type new_building_tooltip_pop_out = flowcontainer {
+		alwaystransparent = no 
+		ignoreinvisible = yes
+		filter_mouse = all
+		using = tooltip_background
+		widget = {
+			margin_widget = {
+				size = { 64 64 }
+				position = { 372 10 }
+				margin = { 3 3 }
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					using = portrait_x32y32bd_alpha
+					block "IconTexture" { 
+						#texture = "gfx/interface/icons/_default.dds"
+					}
+					spriteType = Corneredtiled
+					framesize = { 1 1 }
+					frame = 1
+					alpha = 0.5
+				}
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					using = portrait_x32y32bd_alpha
+					using = beige_background
+					alpha = 0.5
+					modify_texture = {
+						texture = "gfx/interface/base_parts/button_vignette.dds"
+						blend_mode = alphamultiply
+						spriteType = corneredtiled
+						spriteborder = { 20 20 }
+					}
+				}
+				widget = {
+					size = { 100% 100% }
+					background = {
+						name = "Shadow"
+						texture = "gfx/interface/base_parts/button_square_dropshadow_x16y16bd.dds"
+						shaderfile = "gfx/FX/pdxgui_default.shader"
+						spriteType = corneredtiled
+						spriteborder = { 8 8 }
+						margin = { 3 3 }
+						alpha = 0.5
+					}
+				}
+				widget = {
+					size = { 100% 100% }
+					background = {
+						shaderfile = "gfx/FX/pdxgui_default.shader"
+						using = portrait_x32y32bd_alpha
+						block "IconTexture" { 
+							#texture = "gfx/interface/icons/_default.dds"
+						}
+					}
+					background = {
+						shaderfile = "gfx/FX/pdxgui_default.shader"
+						using = black_background
+						using = portrait_x32y32bd_alpha
+						alpha = 0.5
+						modify_texture = {
+							texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
+							blend_mode = alphamultiply
+						}
+						modify_texture = {
+							texture = "gfx/interface/base_parts/gradient_black_invert.dds"
+							blend_mode = alphamultiply
+						}
+					}
+					background = {
+						shaderfile = "gfx/FX/pdxgui_default.shader"
+						using = portrait_x32y32bd_alpha
+						using = beige_background
+						alpha = 0.5
+						modify_texture = {
+							texture = "gfx/interface/base_parts/gradient_black_invert.dds"
+							blend_mode = alphamultiply
+						}
+					}
+					background = {
+						shaderfile = "gfx/FX/pdxgui_default.shader"
+						using = portrait_x32y32bd_alpha
+						using = black_background
+						alpha = 0.5
+						modify_texture = {
+							texture = "gfx/interface/base_parts/button_vignette.dds"
+							blend_mode = alphamultiply
+							spriteType = corneredtiled
+							spriteborder = { 20 20 }
+						}
+					}
+				}
+			}
+		}
+		flowcontainer = {
+			direction = vertical
+			ignoreinvisible = yes
+			margin = { 20 0 }
+			margin_top = 15
+			block "header_tt" {}
+			block "header_additions" {}
+			margin_widget = {
+				name = "title_container"
+				size = { 400 45 }
+				
+				flowcontainer = {
+					name = "FancyHeader"
+					alwaystransparent = no
+					ignoreinvisible = yes
+					direction = vertical
+
+					normal_text = {
+						name = "title"
+						autoresize = yes
+						margin_bottom = 2
+						max_width = 400
+						fontsize_min = 14
+						using = BaseFontM
+						align = left
+						block "title_text" {}
+						fonttintcolor = "[TooltipInfo.GetTintColor]"
+					}
+					
+					flowcontainer = {
+						spacing = 4
+						block "ConceptLinkPreVisibility" {}
+						normal_text = {
+							name = "concept_link_pre"
+							autoresize = yes
+							text = "READ_MORE_ABOUT"
+							using = TooltipConceptFont
+							alwaystransparent = yes
+							multiline = no
+							fontsize = 14
+							max_width = 200
+						}
+						normal_text = {
+							name = "concept_link"
+							autoresize = yes
+							block "concept_link" {
+								text = "#D TODO#!"
+							}
+							using = TooltipConceptFont
+							alwaystransparent = yes
+							multiline = no
+							fontsize = 14
+							max_width = 200
+						}
+					}
+				}
+			}
+			flowcontainer = {
+				direction = vertical
+				spacing = 5
+				block "extra_data" { }
+			}
+			textbox = {
+				name = "TooltipTextShortcut"
+				using = DefaultTooltipText
+				parentanchor = right
+				margin = { 10 10 }
+				block "Cull" { visible = yes }
+			}
+		}
+		margin_widget = {
+			size = { 22 100% }
+			margin = { 0 6 }
+			using = ProgressLockIndicator
+		}
+	}
+}
+
+template building_port_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_port"
+			}
+		}
+	}
+}
+template building_river_port_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_river_port"
+			}
+		}
+	}
+}
+template building_university_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_university"
+			}
+		}
+	}
+}
+template building_school_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_school"
+			}
+		}
+	}
+}
+template building_industrial_estate_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_industrial_estate"
+			}
+		}
+	}
+}
+template building_resource_gathering_operation_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_resource_gathering_operation"
+			}
+		}
+	}
+}
+template building_sewer_infrastructure_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_sewer_infrastructure"
+			}
+		}
+	}
+}
+template building_hospital_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_hospital"
+			}
+		}
+	}
+}
+template building_canal_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_canal"
+			}
+		}
+	}
+}
+template building_railway_upgrade_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_railway_upgrade"
+			}
+		}
+	}
+}
+template building_depot_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_depot"
+			}
+		}
+	}
+}
+template building_fortress_building_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_fortress_building"
+			}
+		}
+	}
+}
+template building_arsenal_building_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_arsenal_building"
+			}
+		}
+	}
+}
+template building_commerce_district_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_commerce_district"
+			}
+		}
+	}
+}
+template building_administration_district_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_administration_district"
+			}
+		}
+	}
+}
+template building_residential_district_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_residential_district"
+			}
+		}
+	}
+}
+template building_cultural_district_tooltip
+{
+	building_tooltip = {
+		blockoverride "extra_data" {
+			new_tooltip_text_area = {
+				text = "tooltip_cultural_district"
+			}
+		}
+	}
+}

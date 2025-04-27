@@ -34,7 +34,7 @@ types economy_types {
 @maxcategorybuttonwidth = 181
 @mincategorybuttonheight = 42
 @maxcategorybuttonheight = 42
-@window_width = 640
+@window_width = 660
 @window_height = 900
 
 base_window = {
@@ -60,7 +60,8 @@ base_window = {
 		}
 	}
 	
-	vbox = {
+	flowcontainer = {
+		direction = vertical
 		widget = {
 			size = { @window_width 12 }
 			using = MainWindowHeaderLine
@@ -135,523 +136,444 @@ base_window = {
 				}
 			}
 		}
-		vbox = {
-			layoutpolicy_vertical = expanding
-			layoutpolicy_horizontal = expanding
+		flowcontainer = {
+			margin = { 10 0 }
+			spacing = 10
 			visible = "[GetVariableSystem.HasValue('economy_tabs', 'national_economy')]"
-			vbox = {
-				layoutpolicy_vertical = expanding
-				layoutpolicy_horizontal = expanding
-				allow_outside = yes
-				container = {
-					allow_outside = yes
+			flowcontainer = {
+				direction = vertical
+				spacing = 20
+				ignoreinvisible = yes
+				flowcontainer = {
+					direction = vertical
+					spacing = 5
+					name = "Currency"
+					datacontext = "[EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').GetProvince]"
 					visible = "[EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').IsSet]"
-					margin_widget = {
-					allow_outside = yes
-						name = "Debt and reserves"
-						minimumsize = { 0 198 }
-						margin_top = -20
-						margin_left = -300
-						layoutpolicy_horizontal = expanding
-
-						flowcontainer = {
-						direction = vertical
-						spacing = 6
-
-							flowcontainer = {
-							direction = vertical
-							spacing = 6
-
-								sub_header_v = {
-									size = { 100% 0 }
-									blockoverride "Title_text" { text = "National debt" }
-								}
-								flowcontainer = {
-									direction = horizontal 
-									spacing = 6
-									margin_top = 20
-
-									text_button_square = {
-										position = { 90 -3 }
-										name = "unlock_national_debt"
-										blockoverride "Center_text" { text = "U" }
-										blockoverride "On_click" { 
-											onclick = "[GetVariableSystem.Toggle('national_debt_lock')]"
-										}
-										enabled = "[EconomyView.GetPlayer.MakeScope.GetVariable('public_debt_administration').IsSet]"
-										tooltip = "NATIONAL_DEBT_LOCK_TT"
-										parentanchor = hcenter
-										size = { 24 24 }
+					flowcontainer = {
+						widget = {
+							size = { 65 64 }
+							icon_button_square = {
+								size = { 54 54 }
+								parentanchor = center
+								tooltip = "[EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').GetProvince.MakeScope.GetVariable('currency_name').GetFlagName]"
+								blockoverride "Icon"
+								{
+									size = { 48 48 }
+									using = white_background
+									modify_texture = {
+										texture = "gfx/interface/icons/shared_icons/treasury.dds"
+										blend_mode = alphamultiply   
 									}
-
-									icon_and_text = {
-										tooltip = "NATIONAL_DEBT_TOOLTIP"
-										size = { 150 0 }
-										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
-										blockoverride "Text" { align = left text = "[EconomyView.GetPlayer.Custom('national_debt_text')]" }	
-									}
-									text_button_square = {
-										position = { 90 -3 }
-										name = "issue_national_debt_big"
-										datacontext = "[GetScriptedGui('CURRENCY_issue_national_debt_100k')]"
-										enabled = "[And(GetVariableSystem.Exists('national_debt_lock'), ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End ))]"
-										blockoverride "Center_text" { text = "++" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
-											onrightclick = "[GetScriptedGui('CURRENCY_issue_national_debt_1m').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "ISSUE_NATIONAL_DEBT_BIG_TT" # TODO: Change this from millions to displaying plain wealth value
-										parentanchor = top|hcenter
-										size = { 24 24 }
-									}
-									text_button_square = {
-										position = { 90 -3 }
-										name = "issue_national_debt"
-										datacontext = "[GetScriptedGui('CURRENCY_issue_national_debt')]"
-										enabled = "[And(GetVariableSystem.Exists('national_debt_lock'), ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End ))]"
-										blockoverride "Center_text" { text = "+" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
-											onrightclick = "[GetScriptedGui('CURRENCY_issue_national_debt_10k').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "ISSUE_NATIONAL_DEBT_TT"
-										parentanchor = top|hcenter
-										size = { 24 24 }
-									}
-									text_button_square = {
-										position = { 120 -3 }
-										name = "repay_national_debt"
-										datacontext = "[GetScriptedGui('CURRENCY_repay_national_debt')]"
-										enabled = "[And(GetVariableSystem.Exists('national_debt_lock'), ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End ))]"
-										blockoverride "Center_text" { text = "-" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-											onrightclick = "[GetScriptedGui('CURRENCY_repay_national_debt_10k').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "REPAY_NATIONAL_DEBT_TT"
-										parentanchor = top|hcenter
-										size = { 24 24 }
-									}
-									text_button_square = {
-										position = { 90 -3 }
-										name = "repay_national_debt_big" 
-										datacontext = "[GetScriptedGui('CURRENCY_repay_national_debt_100k')]"
-										enabled = "[And(GetVariableSystem.Exists('national_debt_lock'), ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End ))]"
-										blockoverride "Center_text" { text = "--" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
-											onrightclick = "[GetScriptedGui('CURRENCY_repay_national_debt_1m').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "REPAY_NATIONAL_DEBT_BIG_TT" # TODO: Change this from millions to displaying plain wealth value
-										parentanchor = top|hcenter
-										size = { 24 24 }
-									}
-								}
-								flowcontainer = {
-									direction = horizontal
-									icon_and_text = {
-										tooltip = "NATIONAL_DEBT_INTEREST_TT"
-										size = { 300 0 }
-										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
-										blockoverride "Text" { align = left text = "NATIONAL_DEBT_INTEREST_TEXT" }	
-									}
-								}
-							}
-
-							sub_header_v = {
-								size = { 100% 0 }
-								blockoverride "Title_text" { text = "Privately held cash" }
-							}
-
-							flowcontainer = {
-								direction = vertical 
-								spacing = 6
-								margin_top = 20
-
-								icon_and_text = {
-									tooltip = "AMT_CIRCULATED_TOOLTIP"
-									size = { 300 0 }
-									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
-									blockoverride "Text" { align = left text = "AMT_CIRCULATED_TEXT" }	
-								}
-								flowcontainer = {
-									icon_and_text = {
-										tooltip = "MINTING_RATE_TT"
-										size = { 250 0 }
-										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/income.dds" }
-										blockoverride "Text" { align = left text = "MINTING_RATE_TEXT" }	
-									}
-									text_button_square = {
-										position = { 90 -3 }
-										name = "increase_minting_rate"
-										datacontext = "[GetScriptedGui('CURRENCY_increase_minting_rate')]"
-										blockoverride "Center_text" { text = "+" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
-											onrightclick = "[GetScriptedGui('CURRENCY_increase_minting_rate_10k').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "#L #G Increase #!#!minting rate by 1,000 (right click 10x)"
-										parentanchor = bottom|hcenter
-										size = { 24 24 }
-									}
-									text_button_square = {
-										position = { 120 -3 }
-										name = "decrease_minting_rate"
-										datacontext = "[GetScriptedGui('CURRENCY_decrease_minting_rate')]"
-										blockoverride "Center_text" { text = "-" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-											onrightclick = "[GetScriptedGui('CURRENCY_decrease_minting_rate_10k').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "#L #R Decrease #!#!minting rate by 1,000 (right click 10x)"
-										parentanchor = bottom|hcenter
-										size = { 24 24 }
-									}
-								}
-								textbox = {
-									tooltip = "[EconomyView.GetPlayer.Custom('inflation_deflation_tooltip')]"
-									size = { 300 45 } 
-									align = left 
-									using = BaseFontM
-									text = "[EconomyView.GetPlayer.Custom('inflation_deflation_text')]"
-								}
-							}
-							sub_header_v = {
-								size = { 100% 0 }
-								blockoverride "Title_text" { text = "State precious metal reserves" }
-							}
-							flowcontainer = {
-								direction = vertical
-								spacing = 6
-								margin_top = 25
-								text_button_square = {
-									position = { 0 3 }
-									name = "freeze_reserves"
-									datacontext = "[GetScriptedGui('CURRENCY_toggle_freeze_reserves')]"
-									blockoverride "Center_text" { text = "[EconomyView.GetPlayer.Custom('toggle_freeze_reserves_text')]" }
-									blockoverride "On_click" { 
-										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-									}
-									tooltip = "FREEZE_RESERVES_TT"
-									parentanchor = top|hcenter
-									size = { 160 24 }
-								}
-								icon_and_text = {
-									tooltip = "RESERVE_VALUE_GOLD_TT"
-									size = { 340 0 }
-									blockoverride "Icon" { texture = "gfx/interface/icons/tradegoods/gold.dds" }
-									blockoverride "Text" { align = left text = "GOLD_ACCUMULATION_RATE" fontsize = 14 }
-									text_button_square = {
-										position = { 70 -3 }
-										name = "increase_gold_reserve_rate"
-										datacontext = "[GetScriptedGui('CURRENCY_increase_reserve_accumulation_gold')]"
-										blockoverride "Center_text" { text = "+" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
-											onrightclick = "[GetScriptedGui('CURRENCY_increase_reserve_accumulation_gold_10x').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "#L #G Increase #!#!accumulation rate by 100 lb (Right-click 1,000lb)"
-										parentanchor = bottom|hcenter
-										size = { 24 24 }
-									}
-									text_button_square = {
-										position = { 100 -3 }
-										name = "decrease_gold_reserve_rate"
-										datacontext = "[GetScriptedGui('CURRENCY_decrease_reserve_accumulation_gold')]"
-										blockoverride "Center_text" { text = "-" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-											onrightclick = "[GetScriptedGui('CURRENCY_decrease_reserve_accumulation_gold_10x').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "#L #R Decrease #!#!accumulation rate by 100 lb (Right-click 1,000lb)"
-										parentanchor = bottom|hcenter
-										size = { 24 24 }
-									}
-									text_button_square = {
-										position = { 140 -3 }
-										name = "sell_off_reserve_gold"
-										datacontext = "[GetScriptedGui('CURRENCY_sell_off_reserve_gold')]"
-										blockoverride "Center_text" { text = "S" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-											onrightclick = "[GetScriptedGui('CURRENCY_sell_off_reserve_gold_10').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "SELL_OFF_RESERVE_GOLD_TT"
-										parentanchor = bottom|hcenter
-										size = { 24 24 }
-									}
-								}
-								icon_and_text = {
-									tooltip = "RESERVE_VALUE_SILVER_TT"
-									size = { 340 0 }
-									blockoverride "Icon" { texture = "gfx/interface/icons/tradegoods/silver.dds" }
-									blockoverride "Text" { align = left text = "SILVER_ACCUMULATION_RATE" fontsize = 14 }
-
-									text_button_square = {
-										position = { 70 -3 }
-										name = "increase_silver_reserve_rate"
-										datacontext = "[GetScriptedGui('CURRENCY_increase_reserve_accumulation_silver')]"
-										visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
-										blockoverride "Center_text" { text = "+" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-											onrightclick = "[GetScriptedGui('CURRENCY_increase_reserve_accumulation_silver_10x').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "#L #G Increase #!#!accumulation rate by 100 lb (Right-click 1,000lb)"
-										parentanchor = bottom|hcenter
-										size = { 24 24 }
-									}
-									text_button_square = {
-										position = { 100 -3 }
-										name = "decrease_silver_reserve_rate"
-										datacontext = "[GetScriptedGui('CURRENCY_decrease_reserve_accumulation_silver')]"
-										visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
-										blockoverride "Center_text" { text = "-" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-											onrightclick = "[GetScriptedGui('CURRENCY_decrease_reserve_accumulation_silver_10x').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "#L #R Decrease #!#!accumulation rate by 100 lb (Right-click 1,000lb)"
-										parentanchor = bottom|hcenter
-										size = { 24 24 }
-									}
-									text_button_square = {
-										position = { 140 -3 }
-										name = "sell_off_reserve_silver"
-										datacontext = "[GetScriptedGui('CURRENCY_sell_off_reserve_silver')]"
-										blockoverride "Center_text" { text = "S" }
-										blockoverride "On_click" { 
-											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-											onrightclick = "[GetScriptedGui('CURRENCY_sell_off_reserve_silver_10').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										tooltip = "SELL_OFF_RESERVE_SILVER_TT"
-										parentanchor = bottom|hcenter
-										size = { 24 24 }
-									}	
 								}
 							}
 						}
-						
-					}
-					margin_widget = {
-						allow_outside = yes
-						name = "Currency"
-						minimumsize = { 0 198 }
-						margin_top = -20
-						margin_left = 0
-						layoutpolicy_horizontal = expanding
-
 						flowcontainer = {
-						direction = vertical
-						spacing = 6
-						position = { 30 0 }
-
-							sub_header_v = {
-								size = { 275 0 }
+							direction = vertical
+							sub_header = {
+								size = { 250 32 }
 								blockoverride "Title_text" { text = "Currency: [EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').GetProvince.MakeScope.GetVariable('currency_name').GetFlagName]" }
 							}
-
-							flowcontainer = {
-								direction = vertical 
-								spacing = 6
-								margin_top = 20
-								datacontext = "[EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').GetProvince]"
-
-								icon_and_text = {
-									tooltip = "CURRENCY_RESERVE_EXCHANGE_RATE_TT"
-									size = { 250 0 }
-									blockoverride "Icon" { texture = "gfx/interface/icons/tradegoods/gold.dds" }
-									blockoverride "Text" { align = left text = " [Province.MakeScope.GetVariable('units_to_the_lb').GetValue|0] / lb" }
-									flowcontainer = {	
-									position = { 180 5 }
-										text_button_square = {
-											position = { 80 0 }
-											name = "decrease_reserve_exchange"
-											datacontext = "[GetScriptedGui('CURRENCY_decrease_reserve_exchange')]"
-											blockoverride "Center_text" { text = "v" }
-											blockoverride "On_click" { 
-												onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-											}
-											tooltip = "DECREASE_RESERVE_EXCHANGE_RATE_TT"
-											parentanchor = bottom|hcenter
-											size = { 24 24 }
-											enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-										text_button_square = {
-											position = { 110 0 }
-											name = "increase_reserve_exchange"
-											datacontext = "[GetScriptedGui('CURRENCY_increase_reserve_exchange')]"
-											blockoverride "Center_text" { text = "^" }
-											blockoverride "On_click" { 
-												onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-											}
-											tooltip = "INCREASE_RESERVE_EXCHANGE_RATE_TT"
-											parentanchor = bottom|hcenter
-											size = { 24 24 }
-											enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										}
-									}
-								}
-
-								icon_and_text = {
-									tooltip = "CURRENCY_BASE_EXCHANGE_VALUE_TT"
-									size = { 250 0 }
-									blockoverride "Icon" { texture = "gfx/interface/icons/governor_policies/acquisition_of_wealth.dds" }
-									blockoverride "Text" { align = left text = "[GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_wealth_value_1_unit')|3] ([GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio')|3])" }	
-								}
-
-								icon_and_text = {
-									tooltip = "CURRENCY_RESERVE_RATIO_TT"
-									size = { 250 0 }
-									blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/local_tax_modifier.dds" }
-									blockoverride "Text" { align = left text = "[GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_reserve_ratio_total')|%] ([GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_reserve_ratio_impact')|%])" }	
-								}
-
-								widget = {
-									size = { 0 20 }
-								}
-
-								icon_and_text = {
-									tooltip = "Average quarterly cost of living for 1 family"
-									size = { 250 0 }
-									blockoverride "Icon" { texture = "gfx/interface/icons/great_work/effects/gw_effect_tax_and_commerce.dds" }
-									blockoverride "Text" { align = left text = "[GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_essentials_buying_power')|2] [EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').GetProvince.MakeScope.GetVariable('currency_name').GetFlagName]" }	
-								}
-
-								widget = {
-									size = { 0 20 }
-								}
-								icon_and_text = {
-									tooltip = "Test"
-									size = { 250 0 }
-									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
-									blockoverride "Text" { align = left text = "Controlled by [EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').GetProvince.MakeScope.GetVariable('originator_country').GetCountry.GetName]" }	
-								}
+							icon_and_text = {
+								tooltip = "Test"
+								size = { 250 32 }
+								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
+								blockoverride "Text" { align = left text = "Controlled by [EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').GetProvince.MakeScope.GetVariable('originator_country').GetCountry.GetName]" }	
 							}
-
 						}
-						
+					}
+					flowcontainer = {
+						spacing = 5
+						icon_and_text = {
+							tooltip = "CURRENCY_RESERVE_EXCHANGE_RATE_TT"
+							size = { 260 32 }
+							blockoverride "Icon" { texture = "gfx/interface/icons/tradegoods/gold.dds" }
+							blockoverride "Text" { align = left text = " [Province.MakeScope.GetVariable('units_to_the_lb').GetValue|0] / lb" }
+						}
+						flowcontainer = {
+							spacing = 2
+							text_button_square = {
+								name = "decrease_reserve_exchange"
+								datacontext = "[GetScriptedGui('CURRENCY_decrease_reserve_exchange')]"
+								blockoverride "Center_text" { text = "v" }
+								blockoverride "On_click" { 
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+								}
+								tooltip = "DECREASE_RESERVE_EXCHANGE_RATE_TT"
+								size = { 24 24 }
+								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
+							}
+							text_button_square = {
+								name = "increase_reserve_exchange"
+								datacontext = "[GetScriptedGui('CURRENCY_increase_reserve_exchange')]"
+								blockoverride "Center_text" { text = "^" }
+								blockoverride "On_click" { 
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+								}
+								tooltip = "INCREASE_RESERVE_EXCHANGE_RATE_TT"
+								size = { 24 24 }
+								enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
+							}
+						}
+					}
+					icon_and_text = {
+						tooltip = "CURRENCY_BASE_EXCHANGE_VALUE_TT"
+						size = { 315 32 }
+						blockoverride "Icon" { texture = "gfx/interface/icons/governor_policies/acquisition_of_wealth.dds" }
+						blockoverride "Text" { align = left text = "[GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_wealth_value_1_unit')|3] ([GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio')|3])" }	
+					}
+					icon_and_text = {
+						tooltip = "CURRENCY_RESERVE_RATIO_TT"
+						size = { 315 32 }
+						blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/local_tax_modifier.dds" }
+						blockoverride "Text" { align = left text = "[GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_reserve_ratio_total')|%] ([GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_reserve_ratio_impact')|%])" }	
+					}
+					icon_and_text = {
+						tooltip = "Average quarterly cost of living for 1 family"
+						size = { 315 32 }
+						blockoverride "Icon" { texture = "gfx/interface/icons/great_work/effects/gw_effect_tax_and_commerce.dds" }
+						blockoverride "Text" { align = left text = "[GuiScope.SetRoot( EconomyView.GetPlayer.MakeScope ).ScriptValue('CURRENCY_essentials_buying_power')|2] [EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').GetProvince.MakeScope.GetVariable('currency_name').GetFlagName]" }	
 					}
 				}
-				container = {
-					name = "No currency"
-					visible = "[Not(EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').IsSet)]"
-					margin_widget = {
-						allow_outside = yes
+				flowcontainer = {
+					direction = vertical
+					spacing = 5
+					sub_header = {
+						size = { 315 32 }
+						blockoverride "Title_text" { text = "State precious metal reserves" }
+					}
+					text_button_square = {
+						name = "freeze_reserves"
+						datacontext = "[GetScriptedGui('CURRENCY_toggle_freeze_reserves')]"
+						blockoverride "Center_text" { text = "[EconomyView.GetPlayer.Custom('toggle_freeze_reserves_text')]" }
+						blockoverride "On_click" { 
+							onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+						}
+						tooltip = "FREEZE_RESERVES_TT"
+						parentanchor = hcenter
+						size = { 160 24 }
+					}
+					flowcontainer = {
+						spacing = 5
+						icon_and_text = {
+							size = { 231 25 }
+							tooltip = "RESERVE_VALUE_GOLD_TT"
+							blockoverride "Icon" { texture = "gfx/interface/icons/tradegoods/gold.dds" }
+							blockoverride "Text" { align = left text = "GOLD_ACCUMULATION_RATE" fontsize = 14 }
+						}
 						flowcontainer = {
-							direction = vertical 
-							spacing = 6
-							margin_top = -70
-							margin_left = 5
-							parentanchor = top|left
-							allow_outside = yes
-							sub_header_v = {
-								size = { 100% 0 }
-								blockoverride "Title_text" { text = "Non-monetary economy" }
-							}
-							flowcontainer = {
-								margin_top = 40
-								icon_and_text = {
-									tooltip = "Non-monetary economy tooltip"
-									size = { 250 0 }
-									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/income.dds" }
-									blockoverride "Text" { align = left text = "Non-monetary economy" }	
+							spacing = 2
+							text_button_square = {
+								name = "increase_gold_reserve_rate"
+								datacontext = "[GetScriptedGui('CURRENCY_increase_reserve_accumulation_gold')]"
+								blockoverride "Center_text" { text = "+" }
+								blockoverride "On_click" { 
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
+									onrightclick = "[GetScriptedGui('CURRENCY_increase_reserve_accumulation_gold_10x').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
 								}
+								tooltip = "#L #G Increase #!#!accumulation rate by 100 lb (Right-click 1,000lb)"
+								size = { 24 24 }
 							}
-							textbox = {
-								tooltip = "[EconomyView.GetPlayer.Custom('inflation_deflation_tooltip')]"
-								size = { 300 45 } 
-								align = left 
-								using = BaseFontM
-								text = "[EconomyView.GetPlayer.Custom('inflation_deflation_text')]"
+							text_button_square = {
+								name = "decrease_gold_reserve_rate"
+								datacontext = "[GetScriptedGui('CURRENCY_decrease_reserve_accumulation_gold')]"
+								blockoverride "Center_text" { text = "-" }
+								blockoverride "On_click" { 
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									onrightclick = "[GetScriptedGui('CURRENCY_decrease_reserve_accumulation_gold_10x').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+								}
+								tooltip = "#L #R Decrease #!#!accumulation rate by 100 lb (Right-click 1,000lb)"
+								size = { 24 24 }
 							}
 						}
+						text_button_square = {
+							name = "sell_off_reserve_gold"
+							datacontext = "[GetScriptedGui('CURRENCY_sell_off_reserve_gold')]"
+							blockoverride "Center_text" { text = "S" }
+							blockoverride "On_click" { 
+								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+								onrightclick = "[GetScriptedGui('CURRENCY_sell_off_reserve_gold_10').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+							}
+							tooltip = "SELL_OFF_RESERVE_GOLD_TT"
+							size = { 24 24 }
+						}
+					}
+					flowcontainer = {
+						spacing = 5
+						icon_and_text = {
+							size = { 231 24 }
+							tooltip = "RESERVE_VALUE_SILVER_TT"
+							blockoverride "Icon" { texture = "gfx/interface/icons/tradegoods/silver.dds" }
+							blockoverride "Text" { align = left text = "SILVER_ACCUMULATION_RATE" fontsize = 14 }
+						}
+						flowcontainer = {
+							spacing = 2
+							text_button_square = {
+								name = "increase_silver_reserve_rate"
+								datacontext = "[GetScriptedGui('CURRENCY_increase_reserve_accumulation_silver')]"
+								visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
+								blockoverride "Center_text" { text = "+" }
+								blockoverride "On_click" { 
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									onrightclick = "[GetScriptedGui('CURRENCY_increase_reserve_accumulation_silver_10x').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+								}
+								tooltip = "#L #G Increase #!#!accumulation rate by 100 lb (Right-click 1,000lb)"
+								size = { 24 24 }
+							}
+							text_button_square = {
+								name = "decrease_silver_reserve_rate"
+								datacontext = "[GetScriptedGui('CURRENCY_decrease_reserve_accumulation_silver')]"
+								visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
+								blockoverride "Center_text" { text = "-" }
+								blockoverride "On_click" { 
+									onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									onrightclick = "[GetScriptedGui('CURRENCY_decrease_reserve_accumulation_silver_10x').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+								}
+								tooltip = "#L #R Decrease #!#!accumulation rate by 100 lb (Right-click 1,000lb)"
+								size = { 24 24 }
+							}
+						}
+						text_button_square = {
+							name = "sell_off_reserve_silver"
+							datacontext = "[GetScriptedGui('CURRENCY_sell_off_reserve_silver')]"
+							blockoverride "Center_text" { text = "S" }
+							blockoverride "On_click" { 
+								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+								onrightclick = "[GetScriptedGui('CURRENCY_sell_off_reserve_silver_10').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+							}
+							tooltip = "SELL_OFF_RESERVE_SILVER_TT"
+							size = { 24 24 }
+						}
+					}
+				}
+				flowcontainer = {
+					direction = vertical
+					spacing = 5
+					flowcontainer = {
+						sub_header = {
+							name = "income header"
+							size = { 215 32 }
+							blockoverride "Title_text" { text = "Treasury income" }
+						}
+						textbox = {
+							align = top|right
+							size = { 100 32 }
+							text = "#g +#![EconomyView.GetTotalIncome|+2]@gold!" # IMP19C INCOME: TODO change
+							using = BaseFontM
+						}
+					}
+					flowcontainer = {
+						name = "income_grid"
+						direction = vertical
+						spacing = 5
+						item_income_taxes = { }
+						item_income_commerce = { }
+						item_income_tributes = { }
 					}
 				}
 			}
-			vbox = {
-				layoutpolicy_horizontal = expanding
-				layoutpolicy_vertical = expanding
-				container = {
-
-					container = {
-						position = { 0 160 }
-					
-						container = {
-							name = "income header"
-							position = { 5 0 }
-							using = NoninteractableBG
-							sub_header_v = {
-								size = { 206 0 }
-								position = { -8 -2 }
-								blockoverride "Title_text" { text = "Treasury income" }
-							}
-							textbox = {
-								position = { 1 -2 }
-								parentanchor = top|right
-								autoresize = yes
-								text = "#g +#![EconomyView.GetTotalIncome|+2]@gold!" # IMP19C INCOME: TODO change
-								using = BaseFontM
-							}
-							widget = {
-								position = { 273 0 }
-							}
+			flowcontainer = {
+				direction = vertical
+				spacing = 20
+				ignoreinvisible = yes
+				flowcontainer = {
+					name = "Debt and reserves"
+					visible = "[EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').IsSet]"
+					direction = vertical
+					spacing = 20
+					flowcontainer = {
+						direction = vertical
+						spacing = 5
+						sub_header = {
+							size = { 315 32 }
+							blockoverride "Title_text" { text = "National debt" }
 						}
 						flowcontainer = {
-							name = "income_grid"
-							direction = vertical
 							spacing = 5
-							position = { 0 40 }
-							item_income_taxes = { }
-							item_income_commerce = { }
-							item_income_tributes = { }
+							text_button_square = {
+								name = "unlock_national_debt"
+								blockoverride "Center_text" { text = "U" }
+								blockoverride "On_click" { 
+									onclick = "[GetVariableSystem.Toggle('national_debt_lock')]"
+								}
+								enabled = "[EconomyView.GetPlayer.MakeScope.GetVariable('public_debt_administration').IsSet]"
+								tooltip = "NATIONAL_DEBT_LOCK_TT"
+								size = { 24 24 }
+							}
+							icon_and_text = {
+								tooltip = "NATIONAL_DEBT_TOOLTIP"
+								size = { 179 24 }
+								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
+								blockoverride "Text" { align = left text = "[EconomyView.GetPlayer.Custom('national_debt_text')]" }	
+							}
+							flowcontainer = {
+								spacing = 2
+								text_button_square = {
+									name = "issue_national_debt_big"
+									datacontext = "[GetScriptedGui('CURRENCY_issue_national_debt_100k')]"
+									enabled = "[And(GetVariableSystem.Exists('national_debt_lock'), ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End ))]"
+									blockoverride "Center_text" { text = "++" }
+									blockoverride "On_click" { 
+										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
+										onrightclick = "[GetScriptedGui('CURRENCY_issue_national_debt_1m').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									}
+									tooltip = "ISSUE_NATIONAL_DEBT_BIG_TT" # TODO: Change this from millions to displaying plain wealth value
+									size = { 24 24 }
+								}
+								text_button_square = {
+									name = "issue_national_debt"
+									datacontext = "[GetScriptedGui('CURRENCY_issue_national_debt')]"
+									enabled = "[And(GetVariableSystem.Exists('national_debt_lock'), ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End ))]"
+									blockoverride "Center_text" { text = "+" }
+									blockoverride "On_click" { 
+										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
+										onrightclick = "[GetScriptedGui('CURRENCY_issue_national_debt_10k').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									}
+									tooltip = "ISSUE_NATIONAL_DEBT_TT"
+									size = { 24 24 }
+								}
+								text_button_square = {
+									name = "repay_national_debt"
+									datacontext = "[GetScriptedGui('CURRENCY_repay_national_debt')]"
+									enabled = "[And(GetVariableSystem.Exists('national_debt_lock'), ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End ))]"
+									blockoverride "Center_text" { text = "-" }
+									blockoverride "On_click" { 
+										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+										onrightclick = "[GetScriptedGui('CURRENCY_repay_national_debt_10k').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									}
+									tooltip = "REPAY_NATIONAL_DEBT_TT"
+									size = { 24 24 }
+								}
+								text_button_square = {
+									name = "repay_national_debt_big" 
+									datacontext = "[GetScriptedGui('CURRENCY_repay_national_debt_100k')]"
+									enabled = "[And(GetVariableSystem.Exists('national_debt_lock'), ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End ))]"
+									blockoverride "Center_text" { text = "--" }
+									blockoverride "On_click" { 
+										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
+										onrightclick = "[GetScriptedGui('CURRENCY_repay_national_debt_1m').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									}
+									tooltip = "REPAY_NATIONAL_DEBT_BIG_TT" # TODO: Change this from millions to displaying plain wealth value
+									size = { 24 24 }
+								}
+							}
+						}
+						icon_and_text = {
+							tooltip = "NATIONAL_DEBT_INTEREST_TT"
+							size = { 315 32 }
+							blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
+							blockoverride "Text" { align = left text = "NATIONAL_DEBT_INTEREST_TEXT" }	
 						}
 					}
-					container = {
-						position = { 340 60 }
-						
-						container = {
-							name = "expenses header"
-							position = { 5 0 }
-							using = NoninteractableBG
-							sub_header_v = {
-								size = { 206 0 }
-								position = { -8 -2 }
-								blockoverride "Title_text" { text = "EXPENSES_HEADER" }
-							}
-							textbox = {
-								position = { 1 -2 }
-								parentanchor = top|right
-								autoresize = yes
-								text = "#r -#![EconomyView.GetTotalExpense|-2]@gold!"
-								using = BaseFontM
-							}
-							widget = {
-								position = { 273 0 }
-							}
+					flowcontainer = {
+						direction = vertical
+						spacing = 5
+						sub_header = {
+							size = { 315 32 }
+							blockoverride "Title_text" { text = "Privately held cash" }
+						}
+						icon_and_text = {
+							tooltip = "AMT_CIRCULATED_TOOLTIP"
+							size = { 315 32 }
+							blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/treasury.dds" }
+							blockoverride "Text" { align = left text = "AMT_CIRCULATED_TEXT" }	
 						}
 						flowcontainer = {
-							name = "expense_grid"
-							direction = vertical
 							spacing = 5
-							position = { 0 47 }
-							item_expense_army = { }
-							item_expense_fleet = { }
-							item_expense_tributes = { }
-							item_expense_forts = { }
-							item_expense_wages = { }
+							icon_and_text = {
+								tooltip = "MINTING_RATE_TT"
+								size = { 260 32 }
+								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/income.dds" }
+								blockoverride "Text" { align = left text = "MINTING_RATE_TEXT" }	
+							}
+							flowcontainer = {
+								spacing = 2
+								text_button_square = {
+									name = "increase_minting_rate"
+									datacontext = "[GetScriptedGui('CURRENCY_increase_minting_rate')]"
+									blockoverride "Center_text" { text = "+" }
+									blockoverride "On_click" { 
+										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
+										onrightclick = "[GetScriptedGui('CURRENCY_increase_minting_rate_10k').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									}
+									tooltip = "#L #G Increase #!#!minting rate by 1,000 (right click 10x)"
+									size = { 24 24 }
+								}
+								text_button_square = {
+									name = "decrease_minting_rate"
+									datacontext = "[GetScriptedGui('CURRENCY_decrease_minting_rate')]"
+									blockoverride "Center_text" { text = "-" }
+									blockoverride "On_click" { 
+										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+										onrightclick = "[GetScriptedGui('CURRENCY_decrease_minting_rate_10k').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									}
+									tooltip = "#L #R Decrease #!#!minting rate by 1,000 (right click 10x)"
+									size = { 24 24 }
+								}
+							}
+						}
+						textbox = {
+							tooltip = "[EconomyView.GetPlayer.Custom('inflation_deflation_tooltip')]"
+							size = { 315 45 } 
+							align = left 
+							using = BaseFontM
+							text = "[EconomyView.GetPlayer.Custom('inflation_deflation_text')]"
 						}
 					}
 				}
-				vbox = {
-					layoutpolicy_vertical = expanding
+				flowcontainer = {
+					name = "No currency"
+					visible = "[Not(EconomyView.GetPlayer.MakeScope.GetVariable('official_currency').IsSet)]"
+					direction = vertical
+					spacing = 5
+					sub_header = {
+						size = { 315 32 }
+						blockoverride "Title_text" { text = "Non-monetary economy" }
+					}
+					icon_and_text = {
+						tooltip = "Non-monetary economy tooltip"
+						size = { 315 24 }
+						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/income.dds" }
+						blockoverride "Text" { align = left text = "Non-monetary economy" }	
+					}
+					textbox = {
+						tooltip = "[EconomyView.GetPlayer.Custom('inflation_deflation_tooltip')]"
+						size = { 315 45 } 
+						align = left 
+						using = BaseFontM
+						text = "[EconomyView.GetPlayer.Custom('inflation_deflation_text')]"
+					}
+				}
+				flowcontainer = {
+					direction = vertical
+					spacing = 5
+					flowcontainer = {
+						sub_header = {
+							name = "income header"
+							size = { 215 32 }
+							blockoverride "Title_text" { text = "EXPENSES_HEADER" }
+						}
+						textbox = {
+							align = top|right
+							size = { 100 32 }
+							text = "#r -#![EconomyView.GetTotalExpense|-2]@gold!"
+							using = BaseFontM
+						}
+					}
+					flowcontainer = {
+						name = "expense_grid"
+						direction = vertical
+						spacing = 5
+						item_expense_army = { }
+						item_expense_fleet = { }
+						item_expense_tributes = { }
+						item_expense_forts = { }
+						item_expense_wages = { }
+					}
 				}
 			}
 		}
-
 		flowcontainer = {
-			layoutpolicy_vertical = expanding
-			layoutpolicy_horizontal = expanding
 			visible = "[GetVariableSystem.HasValue('economy_tabs', 'global_economy')]"
 			margin = { 12 12 }
 		    scrollarea = {

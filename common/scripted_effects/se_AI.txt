@@ -1397,6 +1397,17 @@ AI_make_peace_province_wishlist = {
 			value = AI_interest_value_province
 			divide = 1000
 			# Reduce desirability of ports without a contiguous border or nearby port
+			if = {
+				limit = {
+					any_neighbor_province = {
+						limit = {
+							has_owner = yes
+						}
+						owner = scope:AI_root
+					}
+				}
+				add = 10000
+			}
 			state = {
 				if = {
 					limit = {
@@ -1414,64 +1425,50 @@ AI_make_peace_province_wishlist = {
 					subtract = 10000
 				}
 			}
-			# If is coastal and is not sharing a sea province with AI_root's land
-			if = {
-				limit = {
-					is_coastal = yes
-				}
-				state = {
-					if = {
-						limit = {
-							NOT = {
-								any_state_province = {
-									trigger_if = {
-										limit = {
-											is_coastal = yes
+			# If is coastal and this region is not sharing a sea province with AI_root's land
+			region = {
+				if = {
+					limit = {
+						any_region_area = {
+							any_area_province = {
+								limit = {
+									is_coastal = yes
+								}
+								any_neighbor_province = {
+									limit = {
+										is_sea = yes
+									}
+									any_neighbor_province = {
+										limit = { 
+											is_sea = no
+											has_owner = yes 
 										}
-										any_neighbor_province = {
-											trigger_if = {
-												limit = {
-													is_sea = yes
-												}
-												any_neighbor_province = {
-													limit = { has_owner = yes }
-													owner = scope:AI_root
-												}
-											}
-										}
+										owner = scope:AI_root
 									}
 								}
 							}
 						}
-						subtract = 10000
+					}
+					add = 10000
+				}
+			}
+			# Increase likelihood of taking ports where the country already has ports in the same tradezone
+			if = {
+				limit = {
+					is_coastal = yes
+				}
+				governorship.var:trade_center = {
+					if = {
+						limit = {
+							scope:AI_root = {
+								any_owned_province = {
+									governorship.var:trade_center = PREV.PREV.PREV
+								}
+							}
+						}
+						add = 0
 					}
 				}
-				# TODO: Improve this seazone contiguousness check
-				#state = {
-				#	if = {
-				#		limit = {
-				#			any_state_province = {
-				#				trigger_if = {
-				#					limit = {
-				#						is_coastal = yes
-				#					}
-				#					any_neighbor_province = {
-				#						trigger_if = {
-				#							limit = {
-				#								is_sea = yes
-				#							}
-				#							any_neighbor_province = {
-				#								limit = { has_owner = yes }
-				#								owner = scope:AI_root
-				#							}
-				#						}
-				#					}
-				#				}
-				#			}
-				#		}
-				#		add = 10000
-				#	}
-				#}
 			}
 			subtract = {
 				value = WARSCORE_province_value

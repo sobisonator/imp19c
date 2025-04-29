@@ -1502,6 +1502,66 @@ AI_make_peace_province_wishlist = {
 		# Once all warscore cost has been used, remove all other provinces from the list
 		
 	}
+	# Clean up for contiguousness and reasonable borders
+	every_in_list = {
+		list = AI_peace_wishlist_stage_1
+		# Remove non-coastal isolated exclaves in non-OPMs
+		if = {
+			limit = {
+				NOT = {
+					any_neighbor_province = {
+						is_in_list = AI_peace_wishlist_stage_1
+					}
+					owner = {
+						num_of_provinces < 2
+					}
+					is_coastal = yes
+				}
+			}
+			remove_from_list = AI_peace_wishlist_stage_1
+			# Refund the warscore cost for use elsewhere
+			change_global_variable = {
+				name = warscore_cost_available
+				add = WARSCORE_province_value
+			}
+		}
+		# Remove provinces that would create an exclave of the former owner's land
+		set_local_variable = {
+			name = negative_if_exclaved
+			value = {
+				every_neighbor_province = {
+					limit = {
+						NOT = {
+							is_in_list = AI_peace_wishlist_stage_1
+							is_sea = yes
+						}
+					}
+					add = 1
+				}
+				every_neighbor_province = {
+					limit = {
+						OR = {
+							is_in_list = AI_peace_wishlist_stage_1
+							is_sea = yes
+						}
+					}
+					subtract = 1
+				}
+			}
+		}
+		
+		if = {
+			limit = {
+				local_var:negative_if_exclaved < 0
+			}
+			remove_from_list = AI_peace_wishlist_stage_1
+			# Refund the warscore cost for use elsewhere
+			change_global_variable = {
+				name = warscore_cost_available
+				add = WARSCORE_province_value
+			}
+		}
+	}
 	LAND_transfer_provinces = {
 		target_provinces = AI_peace_wishlist_stage_1
 		grantee = scope:AI_root

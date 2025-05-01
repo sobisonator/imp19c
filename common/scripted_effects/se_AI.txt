@@ -1410,7 +1410,7 @@ AI_make_peace_province_wishlist = {
 						}
 					}
 				}
-				divide = 2
+				divide = 1 # Testing no extra impact from being inland
 			}
 			# Reduce desirability of ports without a contiguous border or nearby port
 			if = {
@@ -1527,23 +1527,15 @@ AI_make_peace_province_wishlist = {
 		}
 		# Remove provinces that would create an exclave of the former owner's land
 		set_local_variable = {
-			name = negative_if_exclaved
+			name = zero_if_exclaved
 			value = {
+				value = 0
 				every_neighbor_province = {
-					limit = {
-						NOT = {
-							is_in_list = AI_peace_wishlist_stage_1
-							is_sea = yes
-						}
-					}
 					add = 1
 				}
 				every_neighbor_province = {
 					limit = {
-						OR = {
-							is_in_list = AI_peace_wishlist_stage_1
-							is_sea = yes
-						}
+						is_in_list = AI_peace_wishlist_stage_1
 					}
 					subtract = 1
 				}
@@ -1552,7 +1544,7 @@ AI_make_peace_province_wishlist = {
 		
 		if = {
 			limit = {
-				local_var:negative_if_exclaved < 0
+				local_var:zero_if_exclaved = 0
 			}
 			remove_from_list = AI_peace_wishlist_stage_1
 			# Refund the warscore cost for use elsewhere
@@ -1560,6 +1552,38 @@ AI_make_peace_province_wishlist = {
 				name = warscore_cost_available
 				add = WARSCORE_province_value
 			}
+		}
+
+		# Subsume inland enemy exclaves for clean borders
+		every_neighbor_province = {
+			limit = {
+				is_coastal = no # inland
+				NOT = { is_in_list = AI_peace_wishlist_stage_1 } # not already in the list
+				NOT = { # No neighbor province is not already in the list
+					# i.e., they are all in the list, so it is surrounded
+					any_neighbor_province = {
+						NOT = { is_in_list = AI_peace_wishlist_stage_1 }
+					}
+				}
+			}
+			add_to_list = AI_peace_wishlist_stage_1
+		}
+	}
+	# Repeat the enemy exclaves cleanup and remove offshore provinces with no route to sea
+	every_in_list = {
+		list = AI_peace_wishlist_stage_1
+		every_neighbor_province = {
+			limit = {
+				is_coastal = no # inland
+				NOT = { is_in_list = AI_peace_wishlist_stage_1 } # not already in the list
+				NOT = { # No neighbor province is not already in the list
+					# i.e., they are all in the list, so it is surrounded
+					any_neighbor_province = {
+						NOT = { is_in_list = AI_peace_wishlist_stage_1 }
+					}
+				}
+			}
+			add_to_list = AI_peace_wishlist_stage_1
 		}
 	}
 	LAND_transfer_provinces = {

@@ -1304,34 +1304,6 @@ AI_assess_peace = {
 	# Function: Assess whether the AI countries in this war want to make peace
 }
 
-AI_debug_peace_deal_all_wars = {
-	every_in_list = {
-		list = wars_checked
-		remove_from_list = wars_checked
-	}
-
-	every_country = {
-		limit = {
-			war = yes
-		}
-		every_current_war = {
-			limit = {
-				NOT = {
-					THIS = { is_in_list = wars_checked }
-				}
-			}
-			AI_make_peace_province_wishlist = {
-				target = defender
-			}
-
-
-			add_to_list = wars_checked
-		}
-	}
-}
-
-
-
 AI_make_peace_province_wishlist = {
 	# Scope: War
 	# Function: Make a list of provinces the AI wants to demand in a peace deal
@@ -1341,6 +1313,11 @@ AI_make_peace_province_wishlist = {
 	# Takes argument $target$, which is either "attacker" or "defender"
 	# It is the target, therefore this is run against the opposite side of the calling scope
 	# If this is run from the perspective of the attacker, then it should be run on all defenders
+	set_global_variable = {
+		name = warscore_cost_available
+		value = 100 # Debug, it should be taken from the war scope
+	}
+
 	every_in_list = {
 		list = AI_peace_wishlist_stage_1
 		remove_from_list = AI_peace_wishlist_stage_1
@@ -1388,44 +1365,127 @@ AI_make_peace_province_wishlist = {
 			# Provinces in states neighbouring the AI_root
 			limit = {
 				NOT = { is_in_list = AI_peace_wishlist_stage_1 }
-				state = {
-					any_state_province = {
-						any_neighbor_province = {
-							owner = scope:AI_root
+				OR = {
+					state = {
+						any_state_province = {
+							any_neighbor_province = {
+								owner = scope:AI_root
+							}
 						}
 					}
-				}
-				# Or are part of an AI interest state
-				area = { save_scope_as = test_area }
-				scope:AI_root = {
-					every_in_list = {
-						variable = AI_interests_list
+					# Or are part of an AI interest state
+					scope:AI_root = {
+						any_in_list = {
+							variable = AI_interests_list
 
-						THIS.area = scope:test_area
+							THIS.area = PREV.PREV
+						}
 					}
+					# Or are part of a state with fewer than 45% inland provinces
+					state.FUNC_state_coastal_ratio > 0.45
 				}
 			}
 			add_to_list = AI_peace_wishlist_stage_1
+			set_variable = {
+				name = PEACE_requested_by # Needed to calculate warscore effects relative to the requestor
+				value = scope:AI_root
+			}
 		}
-	}
-
-	set_local_variable = {
-		name = warscore_cost_available
-		value = 100 # Debug, it should be taken from the war scope
 	}
 
 	ordered_in_list = {
 		list = AI_peace_wishlist_stage_1
 		order_by = {
-			value = AI_interest_value
+			value = AI_interest_value_province
+			# Reduce desirability of inland provinces without a contiguous border
+			if = {
+				limit = {
+					is_coastal = no
+					any_neighbor_province = {
+						limit = {
+							has_owner = yes
+						}
+						NOT = {
+							owner = scope:AI_root
+						}
+					}
+				}
+				divide = 2
+			}
+			# Reduce desirability of ports without a contiguous border or nearby port
+			if = {
+				limit = {
+					any_neighbor_province = {
+						limit = {
+							has_owner = yes
+						}
+						owner = scope:AI_root
+					}
+				}
+				add = 10000
+			}
+			state = {
+				if = {
+					limit = {
+						NOT = {
+							any_state_province = {
+								any_neighbor_province = {
+									limit = {
+										has_owner = yes
+									}
+									owner = scope:AI_root
+								}
+							}
+						}
+					}
+					subtract = 10000
+				}
+			}
+			# If is coastal and this region is not sharing a sea province with AI_root's land
+			region = {
+				if = {
+					limit = {
+						any_region_area = {
+							any_area_province = {
+								limit = {
+									is_coastal = yes
+								}
+								any_neighbor_province = {
+									limit = {
+										is_sea = yes
+									}
+									any_neighbor_province = {
+										limit = { 
+											is_sea = no
+										}
+										any_neighbor_province = {
+											limit = {
+												is_coastal = yes
+												has_owner = yes
+											}
+											owner = scope:AI_root
+										}
+									}
+								}
+							}
+						}
+					}
+					add = 10000
+				}
+			}
+			# TODO: Increased likelihood of landlocked countries seeking coastal provinces in neighbouring states
+			subtract = {
+				value = WARSCORE_province_value
+				multiply = 2
+			}
 		}
 		max = 9999
 		if = {
 			limit = {
-				local_var:warscore_cost_available > WARSCORE_province_value
+				global_var:warscore_cost_available > WARSCORE_province_value
 			}
 			# Keep in the list
-			change_local_variable = {
+			change_global_variable = {
 				name = warscore_cost_available
 				subtract = WARSCORE_province_value
 			}
@@ -1434,15 +1494,79 @@ AI_make_peace_province_wishlist = {
 				value = owner
 			}
 		}
-		# Once all warscore cost has been used, remove all other provinces from the list
 		else = {
 			remove_from_list = AI_peace_wishlist_stage_1
+		}
+		remove_variable = PEACE_requested_by # No longer needed as the deal is being concluded, warscore cost has already been calculated
+
+		# Once all warscore cost has been used, remove all other provinces from the list
+		
+	}
+	# Clean up for contiguousness and reasonable borders
+	every_in_list = {
+		list = AI_peace_wishlist_stage_1
+		# Remove non-coastal isolated exclaves in non-OPMs
+		if = {
+			limit = {
+				NOT = {
+					any_neighbor_province = {
+						is_in_list = AI_peace_wishlist_stage_1
+					}
+					owner = {
+						num_of_provinces < 2
+					}
+					is_coastal = yes
+				}
+			}
+			remove_from_list = AI_peace_wishlist_stage_1
+			# Refund the warscore cost for use elsewhere
+			change_global_variable = {
+				name = warscore_cost_available
+				add = WARSCORE_province_value
+			}
+		}
+		# Remove provinces that would create an exclave of the former owner's land
+		set_local_variable = {
+			name = negative_if_exclaved
+			value = {
+				every_neighbor_province = {
+					limit = {
+						NOT = {
+							is_in_list = AI_peace_wishlist_stage_1
+							is_sea = yes
+						}
+					}
+					add = 1
+				}
+				every_neighbor_province = {
+					limit = {
+						OR = {
+							is_in_list = AI_peace_wishlist_stage_1
+							is_sea = yes
+						}
+					}
+					subtract = 1
+				}
+			}
+		}
+		
+		if = {
+			limit = {
+				local_var:negative_if_exclaved < 0
+			}
+			remove_from_list = AI_peace_wishlist_stage_1
+			# Refund the warscore cost for use elsewhere
+			change_global_variable = {
+				name = warscore_cost_available
+				add = WARSCORE_province_value
+			}
 		}
 	}
 	LAND_transfer_provinces = {
 		target_provinces = AI_peace_wishlist_stage_1
 		grantee = scope:AI_root
 	}
+	remove_global_variable = warscore_cost_available
 }
 
 # TODO:
@@ -1465,6 +1589,32 @@ AI_make_peace_province_wishlist = {
 # In the case where the AI_root wants to vassalise the war target, expend warscore on that first, then consider taking land for themselves using the above wishlist method, but only for provinces over a certain desirability threshhold.
 
 ###########################
+
+AI_debug_peace_deal_all_wars = {
+	every_in_list = {
+		list = wars_checked
+		remove_from_list = wars_checked
+	}
+
+	every_country = {
+		limit = {
+			war = yes
+		}
+		every_current_war = {
+			limit = {
+				NOT = {
+					THIS = { is_in_list = wars_checked }
+				}
+			}
+			AI_make_peace_province_wishlist = {
+				target = defender
+			}
+
+
+			add_to_list = wars_checked
+		}
+	}
+}
 
 AI_debug_restitute_land = {
 	every_in_list = {

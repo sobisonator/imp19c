@@ -1365,3 +1365,168 @@ AI_interest_value = {
 		# End order_by value
 	}
 }
+
+AI_interest_value_province = {
+	value = 1
+	add = {
+		every_pops_in_province = {
+			# Same religion
+			if = {
+				limit = {
+					THIS.religion = scope:AI_root.religion
+				}
+				add = {
+					value = scope:AI_root.SPIRIT_piety
+					multiply = 2
+				}
+			}
+			# Same culture
+			if = {
+				limit = {
+					THIS.culture = scope:AI_root.culture
+				}
+				add = scope:AI_root.SPIRIT_nationalism
+				multiply = 8
+			}
+			# Similar culture
+			else_if = {
+				limit = {
+					THIS.culture_group = scope:AI_root.culture.culture_group
+				}
+				add = {
+					value = scope:AI_root.SPIRIT_nationalism
+					multiply = 5
+				}
+			}
+		}
+		multiply = 5
+	}
+
+	# END FROM POPS
+	if = {
+		limit = {
+			has_owner = yes
+		}
+		if = {
+			limit = {
+				owner.religion = scope:AI_root.religion
+				owner = { is_subject = no }
+			}
+			subtract = scope:AI_root.SPIRIT_piety
+		}
+		if = {
+			limit = {
+				owner.culture = scope:AI_root.culture
+				owner = { is_subject = no }
+			}
+			subtract = scope:AI_root.SPIRIT_nationalism
+		}
+		else_if = {
+			limit = {
+				owner.culture_group = scope:AI_root.culture_group
+				owner = { is_subject = no }
+			}
+			subtract = {
+				value = scope:AI_root.SPIRIT_nationalism
+				min = 0.01
+				divide = 2
+			}
+		}
+	}
+	# Tradegood desirability
+	# TODO: Balance the weighting, as expensive goods are far too preferred, owning them as a small country would basically be a death wish
+	# Maybe get square root of tradegood price to diminish the distribution of prices in this calculation
+	# Or a little weighting from the actual num goods produced
+	# Alternatively, from the total possible building slots or population cap?
+	add = AI_interest_weighting_from_tradegood
+	# Add how much population the province can support
+	# TODO: This is not working as intended, it should be higher for terrains that can support more pops
+	# Encouraged to predate on low industrialisation provinces
+	subtract = {
+		value = civilization_value
+		multiply = 20
+	}
+	# Discouraged coveting overlord's territory
+	if = {
+		limit = {
+			has_owner = yes
+		}
+		if = {
+			limit = {
+				owner = scope:AI_root.overlord
+			}
+			subtract = 1000
+		}
+	}
+	# Add value from intrinsic shipping modifiers (instead of adding raw shipping power, because AI interest is more about the potential of an area than its current value)
+	if = {
+		limit = {
+			has_variable = natural_harbour
+		}
+		add = {
+			value = SHIPPING_natural_harbour_bonus
+			multiply = 10
+		}
+	}
+	if = {
+		limit = {
+			has_variable = major_estuary
+		}
+		add = {
+			value = SHIPPING_major_estuary_bonus
+			multiply = 10
+		}
+	}
+	if = {
+		limit = {
+			has_variable = trade_chokepoint
+		}
+		add = {
+			value = SHIPPING_trade_chokepoint_bonus
+			multiply = 10
+		}
+	}
+	if = {
+		limit = {
+			has_minor_river = yes
+		}
+		add = {
+			value = SHIPPING_river_or_coast_bonus
+			multiply = 10
+		}
+	}
+	# Discourage coveting allies' territory
+	if = {
+		limit = {
+			has_owner = yes
+		}
+		if = {
+			limit = {
+				OR = {
+					owner = {
+						alliance_with = scope:AI_root
+					}
+					trigger_if = {
+						limit = {
+							owner = { is_subject = yes }
+						}
+						owner.overlord = {
+							OR = {
+								alliance_with = scope:AI_root
+								is_subject_of = scope:AI_root
+							}
+						}
+					}
+				}
+			}
+			value = 1
+		}
+	}
+	# Triple the entire province score if this province is a claim of the AI_root
+	if = {
+		limit = {
+			is_core_of = scope:AI_root
+		}
+		multiply = 3
+	}
+}

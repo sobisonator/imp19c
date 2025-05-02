@@ -1397,6 +1397,14 @@ AI_make_peace_province_wishlist = {
 		list = AI_peace_wishlist_stage_1
 		order_by = {
 			value = AI_interest_value_province
+			# Increase interest in gaining claims
+			if = {
+				limit = {
+					is_core_of = scope:AI_root
+				}
+				multiply = 2
+				add = 999999
+			}
 			# Reduce desirability of inland provinces without a contiguous border
 			if = {
 				limit = {
@@ -1473,21 +1481,37 @@ AI_make_peace_province_wishlist = {
 					add = 10000
 				}
 			}
+			# Reduce the value of provinces not in neighbouring regions to countries with low naval power
+			region = {
+				if = {
+					limit = {
+						NOT = {
+							any_region_province = {
+								any_neighbor_province = {
+									owner = scope:AI_root
+								}
+							}
+						}
+					}
+					multiply = scope:AI_root.AI_coastal_port_states_power_ratio
+				}
+			}
 			# TODO: Increased likelihood of landlocked countries seeking coastal provinces in neighbouring states
 			subtract = {
-				value = WARSCORE_province_value
+				value = WARSCORE_province_value_AI_root_claim_discount
 				multiply = 2
 			}
+			max = 999999
 		}
 		max = 9999
 		if = {
 			limit = {
-				global_var:warscore_cost_available > WARSCORE_province_value
+				global_var:warscore_cost_available > WARSCORE_province_value_AI_root_claim_discount
 			}
 			# Keep in the list
 			change_global_variable = {
 				name = warscore_cost_available
-				subtract = WARSCORE_province_value
+				subtract = WARSCORE_province_value_AI_root_claim_discount
 			}
 			set_variable = {
 				name = debug_original_owner
@@ -1522,7 +1546,7 @@ AI_make_peace_province_wishlist = {
 			# Refund the warscore cost for use elsewhere
 			change_global_variable = {
 				name = warscore_cost_available
-				add = WARSCORE_province_value
+				add = WARSCORE_province_value_AI_root_claim_discount
 			}
 		}
 		# Remove provinces that would create an exclave of the former owner's land
@@ -1550,7 +1574,7 @@ AI_make_peace_province_wishlist = {
 			# Refund the warscore cost for use elsewhere
 			change_global_variable = {
 				name = warscore_cost_available
-				add = WARSCORE_province_value
+				add = WARSCORE_province_value_AI_root_claim_discount
 			}
 		}
 

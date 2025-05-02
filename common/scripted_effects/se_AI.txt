@@ -1702,7 +1702,7 @@ AI_make_peace_province_wishlist = {
 		change_local_variable = {
 			name = num_surrounding_hostile_provs
 			divide = {
-				value = num_surrounding_wishlisted_provs
+				value = local_var:num_surrounding_wishlisted_provs
 				min = 1
 			}
 		}
@@ -1713,6 +1713,27 @@ AI_make_peace_province_wishlist = {
 			remove_from_list = AI_peace_wishlist_stage_1
 		}
 
+	}
+
+	## Now that we have this, start breaking them down into states
+	# Any non "treaty-port" provinces should be taken as an entire state.
+	# Entire states should be taken where >80% of the provinces were demanded
+	every_war_$target$ = {
+		every_country_state = {
+			if = {
+				limit = {
+					AI_state_ratio_provinces_in_peace_wishlist >= 0.8
+				}
+				every_state_province = {
+					add_to_list = AI_peace_wishlist_stage_1
+				}
+			}
+			else = {
+				every_state_province = {
+				#	remove_from_list = AI_peace_wishlist_stage_1
+				}
+			}
+		}
 	}
 	
 	LAND_transfer_provinces = {

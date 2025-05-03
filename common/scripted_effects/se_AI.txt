@@ -1817,6 +1817,56 @@ AI_make_peace_province_wishlist = {
 	# Where the whole state is not in AI_peace_wishlist_stage_1, remove every non-coastal province
 	# For states that are inland:
 	# Where the whole state is not in AI_peace_wishlist_stage_1, remove every non-border province
+	every_war_$target$ = {
+		# Coastal
+		every_country_state = {
+			limit = {
+				any_state_province = {
+					is_coastal = yes
+				}
+			}
+			if = {
+				limit = {
+					any_state_province = {
+						NOT = { is_in_list = AI_peace_wishlist_stage_1 }
+					}
+				}
+				every_state_province = {
+					limit = {
+						is_coastal = no
+					}
+					remove_from_list = AI_peace_wishlist_stage_1
+				}
+			}
+		}
+		# Inland
+		every_country_state = {
+			limit = {
+				NOT = {
+					any_state_province = {
+						is_coastal = yes
+					}
+				}
+			}
+			if = {
+				limit = {
+					any_state_province = {
+						NOT = { is_in_list = AI_peace_wishlist_stage_1 }
+					}
+				}
+				every_state_province = {
+					limit = {
+						NOT = {
+							any_neighbor_province = {
+								owner = scope:AI_root
+							}
+						}
+					}
+					remove_from_list = AI_peace_wishlist_stage_1
+				}
+			}
+		}
+	}
 	
 
 	LAND_transfer_provinces = {

@@ -1392,7 +1392,58 @@ AI_make_peace_province_wishlist = {
 			}
 		}
 	}
-
+	# Create a list of tradezones in AI_root, we'll need this later
+	scope:AI_root = {
+		every_governorships = {
+			limit = {
+				NOT = {
+					var:trade_center = {
+						is_in_list = tradezones_in_AI_root
+					}
+				}
+			}
+			var:trade_center = {
+				add_to_list = tradezones_in_AI_root
+			}
+		}
+	}
+	# Now make a list of any target-owned tradezones
+	every_war_$target$ = {
+		every_governorships = {
+			limit = {
+				NOT = {
+					var:trade_center = {
+						is_in_list = tradezones_in_target
+					}
+				}
+			}
+			var:trade_center = {
+				add_to_list = tradezones_in_target
+			}
+		}
+	}
+	# Now make a list of any target tradezones which match or neighbour tradezones in AI_root
+	every_in_list = {
+		list = tradezones_in_target
+		save_scope_as = tradezone_checked
+		if = {
+			limit = {
+				is_in_list = tradezones_in_AI_root
+			}
+			add_to_list = matching_neighbouring_tradezones
+		}
+		every_in_list = {
+			variable = neighbouring_tradezones
+			if = {
+				limit = {
+					is_in_list = tradezones_in_AI_root
+				}
+				scope:tradezone_checked = {
+					add_to_list = matching_neighbouring_tradezones
+				}
+			}
+		}
+	}
 	ordered_in_list = {
 		list = AI_peace_wishlist_stage_1
 		order_by = {
@@ -1496,6 +1547,23 @@ AI_make_peace_province_wishlist = {
 					multiply = scope:AI_root.AI_coastal_port_states_power_ratio
 				}
 			}
+			# Reduce the value of provinces not in a shared or neighbouring tradezone to countries with low naval power
+			if = {
+				limit = {
+					scope:AI_root.AI_coastal_port_states_power_ratio < 1
+				}
+				if = {
+					limit = {
+						NOT = {
+							governorship.var:trade_center = {
+								is_in_list = matching_neighbouring_tradezones
+							}
+						}
+					}
+					subtract = 20000
+				}
+			}
+			
 			# TODO: Increased likelihood of landlocked countries seeking coastal provinces in neighbouring states
 			subtract = {
 				value = WARSCORE_province_value_AI_root_claim_discount
@@ -1524,7 +1592,15 @@ AI_make_peace_province_wishlist = {
 		remove_variable = PEACE_requested_by # No longer needed as the deal is being concluded, warscore cost has already been calculated
 
 		# Once all warscore cost has been used, remove all other provinces from the list
-		
+	}
+	# Clean up tradezones list
+	every_in_list = {
+		list = tradezones_in_AI_root
+		remove_from_list = tradezones_in_AI_root
+	}
+	every_in_list = {
+		list = tradezones_in_target
+		remove_from_list = tradezones_in_target
 	}
 	# Clean up for contiguousness and reasonable borders
 	every_in_list = {
@@ -1844,6 +1920,7 @@ AI_make_peace_province_wishlist_states = {
 						}
 					}
 				}
+				# Add impact of being overseas
 				divide = {
 					every_state_province = {
 						add = 1
@@ -1898,7 +1975,7 @@ AI_debug_peace_deal_all_wars = {
 				}
 			}
 			AI_make_peace_province_wishlist = {
-				target = attacker
+				target = defender
 			}
 
 

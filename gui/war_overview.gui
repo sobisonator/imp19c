@@ -71,12 +71,15 @@ template WarParticipants
 		}
 	}
 }
+@window_width = 820
+@window_height = 740
+@column_width = 385
 
 base_window = {
 	name = "war_overview"
-	size = { 818 712 }
+	size = { @window_width @window_height }
+	#parentanchor = center
 	parentanchor = bottom
-	position = { 55 5 }
 	movable = no
 	state = {
 		name = _show
@@ -88,229 +91,171 @@ base_window = {
 			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
 		}
 	}
-	vbox = {
-		using = MainWindowHeaderBoxCenteredNew
-		blockoverride "Title_text" { text = "[WarOverview.GetWar.GetName]" }
-		blockoverride "White_buttons" {
-			button_close = {
-				onclick = "[WarOverview.OnClose]"
-				onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-				shortcut = "close_window"
+	flowcontainer = {
+		direction = vertical
+		widget = {
+			size = { @window_width 48 }
+			using = MainWindowHeaderBoxCenteredNew
+			blockoverride "Title_text" {
+				text = "[WarOverview.GetWar.GetName]"
+				datacontext = "[WarOverview]"
+				tooltip = "WAR_DATE_DETAILS"
+			}
+			blockoverride "White_buttons" 
+			{
+				button_close = {
+					onclick = "[WarOverview.OnClose]"
+					onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+					shortcut = "close_window"
+				}
 			}
 		}
-		vbox = {
-			layoutpolicy_vertical = expanding
-		}		
-	}
-	vbox = {
-		vbox = {
-			layoutpolicy_vertical = expanding
-			layoutpolicy_horizontal = expanding
-			margin = { 12 12 }
-			margin_top = 54
-			margin_widget = {
-				size = { 0 54 }
-				layoutpolicy_horizontal = expanding
-				
-				#button_close = {
-				#	onclick = "[WarOverview.OnClose]"
-				#	onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-				#	tooltip = "CLOSE"
-				#}
-
-				textbox = {
-					using = BaseFontM
-					using = Black_FontColor
-					autoresize = yes
-					datacontext = "[WarOverview]"
-					text = "WAR_DATE_DETAILS"
-				}
-				textbox = {
-					position = { 0 24 }
-					using = BaseFontM
-					using = Black_FontColor
-					autoresize = yes
-					datacontext = "[WarOverview]"
-					text = "WAR_WARGOAL_DETAILS"
-					tooltip = "WAR_OVERVIEW_WAR_GOAL_TOOLTIP"
-				}
-				
-				widget = {
-					name = "frame"
-					visible = "[WarOverview.GetWar.HasTickingWarScore]"
-					parentanchor = right
-					widgetanchor = right
-					position = { -100 0 }
-					minimumsize = { 100 54 }
-					textbox = {
-						size = { 200 26 }
-						using = BaseFontM
-						using = Black_FontColor
-						datacontext = "[WarOverview]"
-						text = "WARSCORE_DETAILS"
-						tooltip = "[WarOverview.GetTickingWarScoreTooltip]"
-						autoresize = yes
-						resizeparent = yes
-						margin_right = 12
+		flowcontainer = {
+			margin = { 10 10 }
+			direction = vertical
+			ignoreinvisible = yes
+			flowcontainer = {
+				spacing = 10
+				margin_bottom = 10
+				flag_war_leader = {
+					size = { 150 100 }
+					datacontext = "[GetScriptedGui('select_peace_recipient_country_attacker')]"
+					blockoverride "flag"
+					{
+						texture = "[WarOverview.GetWar.GetAttackerWarLeader.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+						frame = "[WarOverview.GetWar.GetAttackerWarLeader.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+						framesize = { 120 120 }
 					}
-					icon = {
-						texture = "gfx/interface/arrows_strip.dds"
-						position = { 0 18 }
-						parentanchor = right
-						framesize = { 50 50 }
-						size = { 40 40 }
-						frame = "[WarOverview.GetTickingWarScoreChangeFrame]"
-						tooltip = "[WarOverview.GetTickingWarScoreChangeTooltip]"
-						visible = "[WarOverview.HasTickingWarScore]"
-					}
+					onmousehierarchyenter = "[SetHighlightCountry(WarOverview.GetWar.GetAttackerWarLeader.GetCountry)]"
+					onmousehierarchyleave = "[ClearHighlightColors]"
+					tooltip = "[WarOverview.GetWar.GetAttackerWarLeader.GetName]"
 				}
-				
 				flowcontainer = {
-					parentanchor = right
+					#parentanchor = center
 					ignoreinvisible = yes
-					spacing = 4
-					icon_card = {
-						size = { 45 45 }
-						blockoverride "Icon" { texture = "gfx/interface/icons/diplomatic_status/enforce_peace.dds" }
-						visible = "[WarOverview.GetWar.IsConquestWar]"
-						enabled = "[WarOverview.GetWar.IsTickingForAutoConquest]"
+					#POSITIVE WARSCORE BAR
+					fixed_size_progressbar_war_score = {
+						blockoverride "ProgressColor" { using = green_color }
+						visible = "[GreaterThan_int32( WarOverview.GetWarScore, '(int32)0' )]"
+						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/warscore_cost.dds" }
+						blockoverride "Value" { value = "[IntToFloat( WarOverview.GetWarScore )]" }
+						blockoverride "Text" { position = { 0 -5 } text = "[WarOverview.GetWarScore]" }
+						#tooltip = "[WarOverview.GetWarScoreTooltip]"
 					}
-					icon_card = {
-						size = { 45 45 }
-						blockoverride "Icon" { texture = "gfx/interface/icons/diplomatic_status/truce.dds" }
-						visible = "[WarOverview.GetWar.IsConquestWar]"
-						enabled = "[WarOverview.GetWar.IsTickingForAutoWhitePeace]"
-						tooltip = "[WarOverview.GetWar.GetWhitePeaceInfo]"
+					#NEGATIVE WARSCORE BAR
+					fixed_size_progressbar_war_score = {
+						blockoverride "ProgressColor" { using = red_color }
+						visible = "[LessThanOrEqualTo_int32( WarOverview.GetWarScore, '(int32)0' )]"
+						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/warscore_cost.dds" }
+						blockoverride "Value" { 
+							value = "[IntToFloat( Abs_int32(WarOverview.GetWarScore) )]" 
+						}
+						blockoverride "Text" { position = { 0 -5 } text = "[WarOverview.GetWar.MakeScope.GetVariable('warscore_balance').GetValue|0]" } # EGG
+						#tooltip = "[WarOverview.GetWarScoreTooltip]"
 					}
 				}
-				
+				flag_war_leader = {
+					size = { 150 100 }
+					datacontext = "[GetScriptedGui('select_peace_recipient_country_defender')]"
+					blockoverride "flag"
+					{
+						texture = "[WarOverview.GetWar.GetDefenderWarLeader.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+						frame = "[WarOverview.GetWar.GetDefenderWarLeader.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+						framesize = { 120 120 }
+					}
+					onmousehierarchyenter = "[SetHighlightCountry(WarOverview.GetWar.GetDefenderWarLeader.GetCountry)]"
+					onmousehierarchyleave = "[ClearHighlightColors]"
+					tooltip = "[WarOverview.GetWar.GetDefenderWarLeader.GetName]"
+				}
 			}
-			hbox = {
-				layoutpolicy_horizontal = expanding
-				layoutpolicy_vertical = expanding
-				vbox = {
-					layoutpolicy_vertical = expanding
-					layoutpolicy_horizontal = expanding
+			#flowcontainer = {
+			#	parentanchor = right
+			#	ignoreinvisible = yes
+			#	spacing = 4
+			#	icon_card = {
+			#		size = { 45 45 }
+			#		blockoverride "Icon" { texture = "gfx/interface/icons/diplomatic_status/enforce_peace.dds" }
+			#		#visible = "[WarOverview.GetWar.IsConquestWar]"
+			#		enabled = "[WarOverview.GetWar.IsTickingForAutoConquest]"
+			#	}
+			#	icon_card = {
+			#		size = { 45 45 }
+			#		blockoverride "Icon" { texture = "gfx/interface/icons/diplomatic_status/truce.dds" }
+			#		#visible = "[WarOverview.GetWar.IsConquestWar]"
+			#		enabled = "[WarOverview.GetWar.IsTickingForAutoWhitePeace]"
+			#		tooltip = "[WarOverview.GetWar.GetWhitePeaceInfo]"
+			#	}
+			#}
+			flowcontainer = {
+				spacing = 5
+				margin_bottom = 15
+				flowcontainer = {
+					direction = vertical
+					margin = { 5 0 }
+					overlappingitembox = {
+						name = "Friendly_units"
+						size = { @column_width 104 }
+						datamodel = "[WarOverview.GetFriendlySubUnitCounts]"
+						spacing = 5
+						item = {
+							unit_card = {
+								blockoverride "Size" { size = { 68 102 } }
+								tooltip = "[SubUnitCounts.GetTooltip]"
+								alwaystransparent = no
+								filter_mouse = all
+							}
+						}
+					}
 					margin_widget = {
-						size = { 0 0 }
-						layoutpolicy_horizontal = expanding
-						layoutpolicy_vertical = expanding
-						overlappingitembox = {
-							name = "Friendly_units"
-							size = { 100% 104 }
-							position = { 4 4 } 
-							list_entry = { 
-								size = { 100% 90% } 
-								parentanchor = vcenter
-							}
-							datamodel = "[WarOverview.GetFriendlySubUnitCounts]"
-							item = {
-								unit_card = {
-									blockoverride "Size" { size = { 68 102 } }
-									tooltip = "[SubUnitCounts.GetTooltip]"
-									alwaystransparent = no
-									filter_mouse = all
-								}
-							}
-						}
-						margin_widget = {
-							size = { 100% 300 }
-							position = { 0 120 }
-							flowcontainer = {
-								spacing = 2
-								text_button_sort = {
-									size = { 184 0 }
-									tooltip = "OFFER_PEACE_SORT_BY_NAME_TOOLTIP"
-									
-									blockoverride "Button_text" { text = "A_Z" }
-									blockoverride "Icon" { 
-										visible = no
-									}
-									blockoverride "On_click" { onclick = "[WarOverview.SortFriendly('name')]" }
-									blockoverride "DownState" { down = "[WarOverview.IsFriendlySorted('name')]" }
-								}
-								text_button_sort = {
-									size = { 53 0 }
-									tooltip = "OFFER_PEACE_SORT_BY_EXHAUSTION_TOOLTIP"
-									blockoverride "Button_text" {  visible = no }
-									blockoverride "Icon" { 
-										texture = "gfx/interface/icons/modifiers/war_exhaustion.dds"
-									}
-									blockoverride "On_click" { onclick = "[WarOverview.SortFriendly('exhaustion')]" }
-									blockoverride "DownState" { down = "[WarOverview.IsFriendlySorted('exhaustion')]" }
-								}
-								text_button_sort = {
-									size = { 53 0 }
-									tooltip = "OFFER_PEACE_SORT_BY_STABILITY_TOOLTIP"
-									blockoverride "Button_text" {  visible = no }
-									blockoverride "Icon" { 
-										using = icon_stability
-									}
-									blockoverride "On_click" { onclick = "[WarOverview.SortFriendly('stability')]" }
-									blockoverride "DownState" { down = "[WarOverview.IsFriendlySorted('stability')]" }
-								}
-								text_button_sort = {
-									size = { 92 0 }
-									tooltip = "OFFER_PEACE_SORT_BY_BLOCKADE_TOOLTIP"
-									blockoverride "Button_text" {  visible = no }
-									blockoverride "Icon" { 
-										texture = "gfx/interface/icons/modifiers/blockade_efficiency.dds"
-									}
-									blockoverride "On_click" { onclick = "[WarOverview.SortFriendly('blockade')]" }
-									blockoverride "DownState" { down = "[WarOverview.IsFriendlySorted('blockade')]" }
-								}
-							}
-							scrollarea = {
-								position = { 0 34 }
-								size = { 100% 184 }
-								scrollbarpolicy_horizontal = always_off
-								using = VerticalScrollAreaCutOff
-								scrollbar_vertical = {
-									using = VerticalScrollBar
-								}
-								
-								scrollwidget = {
-									dynamicgridbox = {
-										using = WarParticipants
-										datamodel = "[WarOverview.GetFriendlyParticipants]"
-									}
-								}
-							}
-						}
+						size = { @column_width 225 }
 						flowcontainer = {
-							position = { 0 348 }
-							spacing = 4
-							icon_and_text = {
-								size = { 104 0 }
-								blockoverride "Icon" { texture = "gfx/interface/icons/font_icons/font_icon_light_infantry.dds" }
-								blockoverride "Text" { text = "[WarOverview.GetFriendlyLandLosses]" }
-								tooltip = "[WarOverview.GetFriendlyLandLossesTooltip]"
+							spacing = 2
+							parentanchor = hcenter
+							text_button_sort = {
+								size = { 184 0 }
+								tooltip = "OFFER_PEACE_SORT_BY_NAME_TOOLTIP"
+								
+								blockoverride "Button_text" { text = "A_Z" }
+								blockoverride "Icon" { 
+									visible = no
+								}
+								blockoverride "On_click" { onclick = "[WarOverview.SortFriendly('name')]" }
+								blockoverride "DownState" { down = "[WarOverview.IsFriendlySorted('name')]" }
 							}
-							
-							icon_and_text = {
-								size = { 70 0 }
-								blockoverride "Icon" { texture = "gfx/interface/icons/font_icons/font_icon_trireme.dds" }
-								blockoverride "Text" { text = "[WarOverview.GetFriendlyNavalLosses]" }
-								tooltip = "[WarOverview.GetFriendlyNavalLossesTooltip]"
+							text_button_sort = {
+								size = { 53 0 }
+								tooltip = "OFFER_PEACE_SORT_BY_EXHAUSTION_TOOLTIP"
+								blockoverride "Button_text" {  visible = no }
+								blockoverride "Icon" { 
+									texture = "gfx/interface/icons/modifiers/war_exhaustion.dds"
+								}
+								blockoverride "On_click" { onclick = "[WarOverview.SortFriendly('exhaustion')]" }
+								blockoverride "DownState" { down = "[WarOverview.IsFriendlySorted('exhaustion')]" }
 							}
-							
-							icon_and_text = {
-								size = { 70 0 }
-								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/attrition.dds" }
-								blockoverride "Text" { text = "[WarOverview.GetFriendlyPopStats.GetKilled]" }
-								tooltip = "POPS_KILLED"
+							text_button_sort = {
+								size = { 53 0 }
+								tooltip = "OFFER_PEACE_SORT_BY_STABILITY_TOOLTIP"
+								blockoverride "Button_text" {  visible = no }
+								blockoverride "Icon" { 
+									using = icon_stability
+								}
+								blockoverride "On_click" { onclick = "[WarOverview.SortFriendly('stability')]" }
+								blockoverride "DownState" { down = "[WarOverview.IsFriendlySorted('stability')]" }
 							}
-							
-							icon_and_text = {
-								size = { 70 0 }
-								blockoverride "Icon" { using = icon_pop_slaves }
-								blockoverride "Text" { text = "[WarOverview.GetFriendlyPopStats.GetEnslaved]" }
-								tooltip = "POPS_ENSLAVED"
+							text_button_sort = {
+								size = { 92 0 }
+								tooltip = "OFFER_PEACE_SORT_BY_BLOCKADE_TOOLTIP"
+								blockoverride "Button_text" {  visible = no }
+								blockoverride "Icon" { 
+									texture = "gfx/interface/icons/modifiers/blockade_efficiency.dds"
+								}
+								blockoverride "On_click" { onclick = "[WarOverview.SortFriendly('blockade')]" }
+								blockoverride "DownState" { down = "[WarOverview.IsFriendlySorted('blockade')]" }
 							}
 						}
 						scrollarea = {
-							position = { 0 394 }
-							size = { 100% 146 }
+							position = { 0 34 }
+							size = { 100% 184 }
 							scrollbarpolicy_horizontal = always_off
 							using = VerticalScrollAreaCutOff
 							scrollbar_vertical = {
@@ -319,58 +264,104 @@ base_window = {
 							
 							scrollwidget = {
 								dynamicgridbox = {
-									datamodel = "[WarOverview.GetBattlesWon]"
-									size = { 100% 100% }
-									item = {
-										widget = {
-											size = { 372 45 }
-											tooltip = "WAR_OVERVIEW_BATTLE_RESULT_TT" 
-											list_entry = {
-												size = { 100% 100% }
-											}
-											icon = {
-												position = { 2 -3 }
-												size = { 50 50 }
-												texture = "[WarOverviewBattle.GetTypeTexture]"
-											}
+									using = WarParticipants
+									datamodel = "[WarOverview.GetFriendlyParticipants]"
+								}
+							}
+						}
+					}
+					flowcontainer = {
+						spacing = 4
+						margin_bottom = 5
+						icon_and_text = {
+							size = { 104 32 }
+							blockoverride "Icon" { texture = "gfx/interface/icons/font_icons/font_icon_light_infantry.dds" }
+							blockoverride "Text" { text = "[WarOverview.GetFriendlyLandLosses]" }
+							tooltip = "[WarOverview.GetFriendlyLandLossesTooltip]"
+						}
+						
+						icon_and_text = {
+							size = { 70 32 }
+							blockoverride "Icon" { texture = "gfx/interface/icons/font_icons/font_icon_trireme.dds" }
+							blockoverride "Text" { text = "[WarOverview.GetFriendlyNavalLosses]" }
+							tooltip = "[WarOverview.GetFriendlyNavalLossesTooltip]"
+						}
+						
+						icon_and_text = {
+							size = { 70 32 }
+							blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/attrition.dds" }
+							blockoverride "Text" { text = "[WarOverview.GetFriendlyPopStats.GetKilled]" }
+							tooltip = "POPS_KILLED"
+						}
+						
+						icon_and_text = {
+							size = { 70 32 }
+							blockoverride "Icon" { using = icon_pop_slaves }
+							blockoverride "Text" { text = "[WarOverview.GetFriendlyPopStats.GetEnslaved]" }
+							tooltip = "POPS_ENSLAVED"
+						}
+					}
+					scrollarea = {
+						size = { @column_width 146 }
+						scrollbarpolicy_horizontal = always_off
+						using = VerticalScrollAreaCutOff
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+						
+						scrollwidget = {
+							dynamicgridbox = {
+								datamodel = "[WarOverview.GetBattlesWon]"
+								size = { 100% 100% }
+								item = {
+									widget = {
+										size = { 372 45 }
+										tooltip = "WAR_OVERVIEW_BATTLE_RESULT_TT" 
+										list_entry = {
+											size = { 100% 100% }
+										}
+										icon = {
+											position = { 2 -3 }
+											size = { 50 50 }
+											texture = "[WarOverviewBattle.GetTypeTexture]"
+										}
+										
+										textbox = {
+											position = { 49 1 }
+											elide = right
+											max_width = 120
+											autoresize = yes
+											fontsize_min = 12
+											using = BaseFontM
+											using = Black_FontColor
+											text = "[WarOverviewBattle.GetBattleResult.GetName]"
+										}
+										
+										textbox = {
+											position = { 49 19 }
 											
-											textbox = {
-												position = { 49 1 }
-												elide = right
-												max_width = 120
-												autoresize = yes
-												fontsize_min = 12
-												using = BaseFontM
-												using = Black_FontColor
-												text = "[WarOverviewBattle.GetBattleResult.GetName]"
-											}
-											
-											textbox = {
-												position = { 49 19 }
-												
-												autoresize = yes
-												using = BaseFontS
-												text = "[WarOverviewBattle.GetResult]"
-											}
-											
-											textbox = {
-												position = { 172 17 }
-												size = { 104 22 }
-												using = BaseFontS
-												using = Black_FontColor
-												text = "[WarOverviewBattle.GetWinLose]"
-												align = center
-											}
-											
-											textbox = {
-												position = { 348 17 }
-												size = { 60 22 }
-												using = BaseFontM
-												using = Black_FontColor
-												text = "[WarOverviewBattle.GetScore]"
-												widgetanchor = right|top
-												align = right
-											}
+											autoresize = yes
+											using = BaseFontS
+											text = "[WarOverviewBattle.GetResult]"
+										}
+										
+										textbox = {
+											position = { 172 17 }
+											size = { 104 22 }
+											using = BaseFontS
+											using = Black_FontColor
+											text = "[WarOverviewBattle.GetWinLose]"
+											align = center
+										}
+										
+										textbox = {
+											position = { 348 17 }
+											size = { 60 22 }
+											using = BaseFontM
+											using = Black_FontColor
+											text = "[WarOverviewBattle.GetScore]"
+											widgetanchor = right|top
+											align = right
 										}
 									}
 								}
@@ -378,138 +369,77 @@ base_window = {
 						}
 					}
 				}
-				margin_widget = {
-					size = { 20 0 }
-				}
-				vbox = {
-					layoutpolicy_horizontal = expanding
-					layoutpolicy_vertical = expanding
+				flowcontainer = {
+					direction = vertical
+					margin = { 5 0 }
+					overlappingitembox = {
+						name = "Friendly_units"
+						size = { @column_width 104 }
+						datamodel = "[WarOverview.GetEnemySubUnitCounts]"
+						spacing = 5
+						item = {
+							unit_card = {
+								blockoverride "Size" { size = { 68 102 } }
+								blockoverride "TotalText" { text = "SUBUNITCOUNT_HIDDEN_VALUE" }
+								blockoverride "CountText" { text = "SUBUNITCOUNT_HIDDEN_VALUE" }
+								tooltip = "[SubUnitCounts.GetTooltip]"
+								blockoverride "TotalTextTooltip" { tooltip = "[SubUnitCounts.GetHiddenTotalTooltip]" }
+								blockoverride "CountTextTooltip" { tooltip = "[SubUnitCounts.GetHiddenAmountTooltip]" }
+								alwaystransparent = no
+								filter_mouse = all
+							}
+						}
+					}
 					margin_widget = {
-						size = { 0 0 }
-						layoutpolicy_horizontal = expanding
-						layoutpolicy_vertical = expanding
-						overlappingitembox = {
-							name = "Friendly_units"
-							size = { 100% 104 }
-							position = { 4 4 }
-							list_entry = { 
-								size = { 100% 90% } 
-								parentanchor = vcenter
-							}
-							datamodel = "[WarOverview.GetEnemySubUnitCounts]"
-							item = {
-								unit_card = {
-									blockoverride "Size" { size = { 68 102 } }
-									blockoverride "TotalText" { text = "SUBUNITCOUNT_HIDDEN_VALUE" }
-									blockoverride "CountText" { text = "SUBUNITCOUNT_HIDDEN_VALUE" }
-									tooltip = "[SubUnitCounts.GetTooltip]"
-									blockoverride "TotalTextTooltip" { tooltip = "[SubUnitCounts.GetHiddenTotalTooltip]" }
-									blockoverride "CountTextTooltip" { tooltip = "[SubUnitCounts.GetHiddenAmountTooltip]" }
-									alwaystransparent = no
-									filter_mouse = all
-								}
-							}
-						}
-						margin_widget = {
-							size = { 100% 300 }
-							position = { 0 120 }
-							flowcontainer = {
-								spacing = 2
-								parentanchor = right
-								text_button_sort = {
-									size = { 184 0 }
-									tooltip = "OFFER_PEACE_SORT_BY_NAME_TOOLTIP"
-									
-									blockoverride "Button_text" { text = "A_Z" }
-									blockoverride "Icon" { 
-										visible = no
-									}
-									blockoverride "On_click" { onclick = "[WarOverview.SortEnemy('name')]" }
-									blockoverride "DownState" { down = "[WarOverview.IsEnemySorted('name')]" }
-								}
-								text_button_sort = {
-									size = { 53 0 }
-									tooltip = "OFFER_PEACE_SORT_BY_EXHAUSTION_TOOLTIP"
-									blockoverride "Button_text" {  visible = no }
-									blockoverride "Icon" { 
-										texture = "gfx/interface/icons/modifiers/war_exhaustion.dds"
-									}
-									blockoverride "On_click" { onclick = "[WarOverview.SortEnemy('exhaustion')]" }
-									blockoverride "DownState" { down = "[WarOverview.IsEnemySorted('exhaustion')]" }
-								}
-								text_button_sort = {
-									size = { 53 0 }
-									tooltip = "OFFER_PEACE_SORT_BY_STABILITY_TOOLTIP"
-									blockoverride "Button_text" {  visible = no }
-									blockoverride "Icon" { 
-										using = icon_stability
-									}
-									blockoverride "On_click" { onclick = "[WarOverview.SortEnemy('stability')]" }
-									blockoverride "DownState" { down = "[WarOverview.IsEnemySorted('stability')]" }
-								}
-								text_button_sort = {
-									size = { 92 0 }
-									tooltip = "OFFER_PEACE_SORT_BY_BLOCKADE_TOOLTIP"
-									blockoverride "Button_text" {  visible = no }
-									blockoverride "Icon" { 
-										texture = "gfx/interface/icons/modifiers/blockade_efficiency.dds"
-									}
-									blockoverride "On_click" { onclick = "[WarOverview.SortEnemy('blockade')]" }
-									blockoverride "DownState" { down = "[WarOverview.IsEnemySorted('blockade')]" }
-								}
-							}
-							scrollarea = {
-								position = { 0 34 }
-								size = { 100% 184 }
-								scrollbarpolicy_horizontal = always_off
-								using = VerticalScrollAreaCutOff
-								scrollbar_vertical = {
-									using = VerticalScrollBar
-								}
-								
-								scrollwidget = {
-									dynamicgridbox = {
-										using = WarParticipants
-										datamodel = "[WarOverview.GetEnemyParticipants]"
-									}
-								}
-							}
-						}
+						size = { @column_width 225 }
 						flowcontainer = {
-							position = { 0 348 }
-							parentanchor = right
-							spacing = 4
-							icon_and_text = {
-								size = { 104 0 }
-								blockoverride "Icon" { texture = "gfx/interface/icons/font_icons/font_icon_light_infantry.dds" }
-								blockoverride "Text" { text = "[WarOverview.GetEnemyLandLosses]" }
-								tooltip = "[WarOverview.GetEnemyLandLossesTooltip]"
+							spacing = 2
+							parentanchor = hcenter
+							text_button_sort = {
+								size = { 184 0 }
+								tooltip = "OFFER_PEACE_SORT_BY_NAME_TOOLTIP"
+								
+								blockoverride "Button_text" { text = "A_Z" }
+								blockoverride "Icon" { 
+									visible = no
+								}
+								blockoverride "On_click" { onclick = "[WarOverview.SortEnemy('name')]" }
+								blockoverride "DownState" { down = "[WarOverview.IsEnemySorted('name')]" }
 							}
-							
-							icon_and_text = {
-								size = { 70 0 }
-								blockoverride "Icon" { texture = "gfx/interface/icons/font_icons/font_icon_trireme.dds" }
-								blockoverride "Text" { text = "[WarOverview.GetEnemyNavalLosses]" }
-								tooltip = "[WarOverview.GetEnemyNavalLossesTooltip]"
+							text_button_sort = {
+								size = { 53 0 }
+								tooltip = "OFFER_PEACE_SORT_BY_EXHAUSTION_TOOLTIP"
+								blockoverride "Button_text" {  visible = no }
+								blockoverride "Icon" { 
+									texture = "gfx/interface/icons/modifiers/war_exhaustion.dds"
+								}
+								blockoverride "On_click" { onclick = "[WarOverview.SortEnemy('exhaustion')]" }
+								blockoverride "DownState" { down = "[WarOverview.IsEnemySorted('exhaustion')]" }
 							}
-							
-							icon_and_text = {
-								size = { 70 0 }
-								blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/attrition.dds" }
-								blockoverride "Text" { text = "[WarOverview.GetEnemyPopStats.GetKilled]" }
-								tooltip = "POPS_KILLED"
+							text_button_sort = {
+								size = { 53 0 }
+								tooltip = "OFFER_PEACE_SORT_BY_STABILITY_TOOLTIP"
+								blockoverride "Button_text" {  visible = no }
+								blockoverride "Icon" { 
+									using = icon_stability
+								}
+								blockoverride "On_click" { onclick = "[WarOverview.SortEnemy('stability')]" }
+								blockoverride "DownState" { down = "[WarOverview.IsEnemySorted('stability')]" }
 							}
-							
-							icon_and_text = {
-								size = { 70 0 }
-								blockoverride "Icon" { using = icon_pop_slaves }
-								blockoverride "Text" { text = "[WarOverview.GetEnemyPopStats.GetEnslaved]" }
-								tooltip = "POPS_ENSLAVED"
+							text_button_sort = {
+								size = { 92 0 }
+								tooltip = "OFFER_PEACE_SORT_BY_BLOCKADE_TOOLTIP"
+								blockoverride "Button_text" {  visible = no }
+								blockoverride "Icon" { 
+									texture = "gfx/interface/icons/modifiers/blockade_efficiency.dds"
+								}
+								blockoverride "On_click" { onclick = "[WarOverview.SortEnemy('blockade')]" }
+								blockoverride "DownState" { down = "[WarOverview.IsEnemySorted('blockade')]" }
 							}
 						}
 						scrollarea = {
-							position = { 0 394 }
-							size = { 100% 146 }
+							position = { 0 34 }
+							size = { 100% 184 }
 							scrollbarpolicy_horizontal = always_off
 							using = VerticalScrollAreaCutOff
 							scrollbar_vertical = {
@@ -517,61 +447,108 @@ base_window = {
 							}
 							
 							scrollwidget = {
-								
-								
 								dynamicgridbox = {
-									datamodel = "[WarOverview.GetBattlesLost]"
-									size = { 100% 100% }
-									item = {
-										widget = {
-											size = { 372 45 }
-											tooltip = "WAR_OVERVIEW_BATTLE_RESULT_TT"
-											list_entry = {
-												size = { 100% 100% }
-											}
-											icon = {
-												position = { 2 -3 }
-												size = { 50 50 }
-												texture = "[WarOverviewBattle.GetTypeTexture]"
-											}
+									using = WarParticipants
+									datamodel = "[WarOverview.GetEnemyParticipants]"
+								}
+							}
+						}
+					}
+					flowcontainer = {
+						spacing = 5
+						margin_bottom = 5
+						parentanchor = right
+						icon_and_text = {
+							size = { 104 32 }
+							blockoverride "Icon" { texture = "gfx/interface/icons/font_icons/font_icon_light_infantry.dds" }
+							blockoverride "Text" { text = "[WarOverview.GetEnemyLandLosses]" }
+							tooltip = "[WarOverview.GetEnemyLandLossesTooltip]"
+						}
+						
+						icon_and_text = {
+							size = { 70 32}
+							blockoverride "Icon" { texture = "gfx/interface/icons/font_icons/font_icon_trireme.dds" }
+							blockoverride "Text" { text = "[WarOverview.GetEnemyNavalLosses]" }
+							tooltip = "[WarOverview.GetEnemyNavalLossesTooltip]"
+						}
+						
+						icon_and_text = {
+							size = { 70 32 }
+							blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/attrition.dds" }
+							blockoverride "Text" { text = "[WarOverview.GetEnemyPopStats.GetKilled]" }
+							tooltip = "POPS_KILLED"
+						}
+						
+						icon_and_text = {
+							size = { 70 32 }
+							blockoverride "Icon" { using = icon_pop_slaves }
+							blockoverride "Text" { text = "[WarOverview.GetEnemyPopStats.GetEnslaved]" }
+							tooltip = "POPS_ENSLAVED"
+						}
+					}
+					scrollarea = {
+						size = { @column_width 146 }
+						scrollbarpolicy_horizontal = always_off
+						using = VerticalScrollAreaCutOff
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+						
+						scrollwidget = {
+							
+							
+							dynamicgridbox = {
+								datamodel = "[WarOverview.GetBattlesLost]"
+								size = { 100% 100% }
+								item = {
+									widget = {
+										size = { 372 45 }
+										tooltip = "WAR_OVERVIEW_BATTLE_RESULT_TT"
+										list_entry = {
+											size = { 100% 100% }
+										}
+										icon = {
+											position = { 2 -3 }
+											size = { 50 50 }
+											texture = "[WarOverviewBattle.GetTypeTexture]"
+										}
+										
+										textbox = {
+											position = { 49 1 }
+											elide = right
+											max_width = 120
+											autoresize = yes
+											fontsize_min = 12
+											using = BaseFontM
+											using = Black_FontColor
+											text = "[WarOverviewBattle.GetBattleResult.GetName]"
+										}
+										
+										textbox = {
+											position = { 49 19 }
 											
-											textbox = {
-												position = { 49 1 }
-												elide = right
-												max_width = 120
-												autoresize = yes
-												fontsize_min = 12
-												using = BaseFontM
-												using = Black_FontColor
-												text = "[WarOverviewBattle.GetBattleResult.GetName]"
-											}
-											
-											textbox = {
-												position = { 49 19 }
-												
-												autoresize = yes
-												using = BaseFontS
-												text = "[WarOverviewBattle.GetResult]"
-											}
-											
-											textbox = {
-												position = { 172 17 }
-												size = { 104 22 }
-												using = BaseFontS
-												using = Black_FontColor
-												text = "[WarOverviewBattle.GetWinLose]"
-												align = center
-											}
-											
-											textbox = {
-												position = { 348 17 }
-												size = { 60 22 }
-												using = BaseFontM
-												using = Black_FontColor
-												text = "[WarOverviewBattle.GetScore]"
-												widgetanchor = right|top
-												align = right
-											}
+											autoresize = yes
+											using = BaseFontS
+											text = "[WarOverviewBattle.GetResult]"
+										}
+										
+										textbox = {
+											position = { 172 17 }
+											size = { 104 22 }
+											using = BaseFontS
+											using = Black_FontColor
+											text = "[WarOverviewBattle.GetWinLose]"
+											align = center
+										}
+										
+										textbox = {
+											position = { 348 17 }
+											size = { 60 22 }
+											using = BaseFontM
+											using = Black_FontColor
+											text = "[WarOverviewBattle.GetScore]"
+											widgetanchor = right|top
+											align = right
 										}
 									}
 								}
@@ -580,63 +557,60 @@ base_window = {
 					}
 				}
 			}
-		
+			text_button_square = {
+				name = "alt_view"
+				datacontext = "[GetScriptedGui('alt_peace_button')]"
+				visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
+				blockoverride "Center_text" { text = "Sue for peace" }
+				blockoverride "On_click" { 
+					onclick = "[GetVariableSystem.Set( 'show_alternative_peace_deals', 'yes' )]" 
+					onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
+				}
+				tooltip = "#T Sue for peace#!"
+				parentanchor = hcenter
+				size = { 250 24 }
+			}
 		}
-		
 	}
 	
-	icon = {
-		maximumsize = { 999 33 }
-		position = { 0 457 }
-		texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
-		alpha = 0.95
-		modify_texture = {
-			name = "Alpha"
-			texture = "gfx/interface/base_parts/header_l_x60bd_right_cut_alpha.dds"
-			blend_mode = alphamultiply
-			spriteType = Corneredtiled
-			spriteborder = { 60 -10 }
-		}
+	#icon = {
+	#	maximumsize = { 999 33 }
+	#	position = { 0 457 }
+	#	texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+	#	alpha = 0.95
+	#	modify_texture = {
+	#		name = "Alpha"
+	#		texture = "gfx/interface/base_parts/header_l_x60bd_right_cut_alpha.dds"
+	#		blend_mode = alphamultiply
+	#		spriteType = Corneredtiled
+	#		spriteborder = { 60 -10 }
+	#	}
 		
-		blockoverride "Margins"
-		{
-			alpha = 0.95
-		}
+	#	blockoverride "Margins"
+	#	{
+	#		alpha = 0.95
+	#	}
 		
-		textbox = {
-			position = { 0 0 }
-			using = BaseFontL
-			using = Black_FontColor
-			parentanchor = top|left
-			autoresize = yes
-			minimumsize = { -1 34 }
-			resizeparent = yes
-			align = center|nobaseline
-			elide = right
-			text = "[WarOverview.GetWarScore]"
-			margin_left = 30
-			margin_right = 30
-			margin_bottom = 3
-		}
-		parentanchor = hcenter
-		visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
-		tooltip = "[WarOverview.GetWarScoreTooltip]"
-	}	
+	#	textbox = {
+	#		position = { 0 0 }
+	#		using = BaseFontL
+	#		using = Black_FontColor
+	#		parentanchor = top|left
+	#		autoresize = yes
+	#		minimumsize = { -1 34 }
+	#		resizeparent = yes
+	#		align = center|nobaseline
+	#		elide = right
+	#		text = "[WarOverview.GetWarScore]"
+	#		margin_left = 30
+	#		margin_right = 30
+	#		margin_bottom = 3
+	#	}
+	#	parentanchor = hcenter
+	#	visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
+	#	tooltip = "[WarOverview.GetWarScoreTooltip]"
+	#}	
 
-	text_button_square = {
-		position = { 0 -20 }
-		name = "alt_view"
-		datacontext = "[GetScriptedGui('alt_peace_button')]"
-		visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
-		blockoverride "Center_text" { text = "Sue for peace" }
-		blockoverride "On_click" { 
-			onclick = "[GetVariableSystem.Set( 'show_alternative_peace_deals', 'yes' )]" 
-			onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-		}
-		tooltip = "#T Sue for peace#!"
-		parentanchor = bottom|hcenter
-		size = { 250 24 }
-	}
 	#Alt Peace window
 	base_window = {
 		size = { 818 712 }
@@ -655,7 +629,7 @@ base_window = {
 			animation = {
 				alpha = 1
 			}
-			duration = 0.25
+			#duration = 0.25
 		}
 		state = {
 			name = _hide
@@ -671,7 +645,7 @@ base_window = {
 			on_start = "[GetVariableSystem.Clear( 'delegitimize_up' )]"
 			on_start = "[GetVariableSystem.Clear( 'steal_knowledge_up' )]"
 			on_start = "[GetVariableSystem.Clear( 'extort_population_up' )]"
-			duration = 0.2
+			#duration = 0.2
 		}
 		movable = no
 		alwaystransparent = no

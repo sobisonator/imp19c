@@ -1798,7 +1798,7 @@ AI_make_peace_province_wishlist = {
 		every_country_state = {
 			if = {
 				limit = {
-					AI_state_ratio_provinces_in_peace_wishlist >= 0.8
+					AI_state_ratio_provinces_in_peace_wishlist >= 0.7
 				}
 				every_state_province = {
 					add_to_list = AI_peace_wishlist_stage_1
@@ -1812,6 +1812,7 @@ AI_make_peace_province_wishlist = {
 		}
 	}
 	
+
 	LAND_transfer_provinces = {
 		target_provinces = AI_peace_wishlist_stage_1
 		grantee = scope:AI_root
@@ -1839,124 +1840,6 @@ AI_make_peace_province_wishlist = {
 # In the case where the AI_root wants to vassalise the war target, expend warscore on that first, then consider taking land for themselves using the above wishlist method, but only for provinces over a certain desirability threshhold.
 
 ###########################
-
-AI_make_peace_province_wishlist_states = {
-	set_global_variable = {
-		name = warscore_cost_available
-		value = 100 # Debug, it should be taken from the war scope
-	}
-
-	every_in_list = {
-		list = AI_peace_wishlist_stage_1
-		remove_from_list = AI_peace_wishlist_stage_1
-	}
-
-	if = {
-		limit = {
-			flag:$target$ = flag:defender
-		}
-		attacker_warleader = { save_scope_as = AI_root }
-	}
-	else_if = {
-		limit = {
-			flag:$target$ = flag:attacker
-		}
-		defender_warleader = { save_scope_as = AI_root }
-	}
-	every_war_$target$ = {
-		ordered_country_state = {
-			limit = {
-				any_state_province = {
-					OR = {
-						is_coastal = yes
-						any_neighbor_province = {
-							OR = {
-								AND = {
-									is_sea = yes
-									any_neighbor_province = {
-										owner = scope:AI_root
-									}
-								}
-								owner = scope:AI_root
-							}
-						}
-					}
-				}
-			}
-			order_by = {
-				every_state_province = {
-					value = AI_interest_value_province
-					divide = 2
-					# Increase interest in gaining claims
-					if = {
-						limit = {
-							is_core_of = scope:AI_root
-						}
-						multiply = 2
-						add = 100000
-					}
-					if = {
-						limit = {
-							any_neighbor_province = {
-								owner = scope:AI_root
-								add = 100000
-							}
-						}
-					}
-				}
-				random_state_province = {
-					region = {
-						if = {
-							limit = {
-								NOT = {
-									any_region_province = {
-										any_neighbor_province = {
-											owner = scope:AI_root
-										}
-									}
-								}
-							}
-							multiply = scope:AI_root.AI_coastal_port_states_power_ratio
-						}
-					}
-				}
-				# Add impact of being overseas
-				divide = {
-					every_state_province = {
-						add = 1
-					}
-				}
-			}
-			max = 9999
-			check_range_bounds = no
-			if = {
-				limit = {
-					global_var:warscore_cost_available > 0
-				}
-				every_state_province = {
-					add_to_list = AI_peace_wishlist_stage_1
-					change_global_variable = {
-						name = warscore_cost_available
-						subtract = WARSCORE_province_value_AI_root_claim_discount
-					}
-					set_variable = {
-						name = PEACE_requested_by # Needed to calculate warscore effects relative to the requestor
-						value = scope:AI_root
-					}
-				}
-			}
-		}
-	}
-	LAND_transfer_provinces = {
-		target_provinces = AI_peace_wishlist_stage_1
-		grantee = scope:AI_root
-	}
-	every_in_list = {
-		list = AI_peace_wishlist_stage_1
-		remove_variable = PEACE_requested_by
-	}
-	remove_global_variable = warscore_cost_available
-}
 
 AI_debug_peace_deal_all_wars = {
 	every_in_list = {

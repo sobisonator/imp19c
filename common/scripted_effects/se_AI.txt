@@ -1547,22 +1547,7 @@ AI_make_peace_province_wishlist = {
 					multiply = scope:AI_root.AI_coastal_port_states_power_ratio
 				}
 			}
-			# Reduce the value of provinces not in a shared or neighbouring tradezone to countries with low naval power
-			if = {
-				limit = {
-					scope:AI_root.AI_coastal_port_states_power_ratio < 1
-				}
-				if = {
-					limit = {
-						NOT = {
-							governorship.var:trade_center = {
-								is_in_list = matching_neighbouring_tradezones
-							}
-						}
-					}
-					subtract = 20000
-				}
-			}
+			
 			
 			# TODO: Increased likelihood of landlocked countries seeking coastal provinces in neighbouring states
 			subtract = {
@@ -1572,9 +1557,31 @@ AI_make_peace_province_wishlist = {
 			max = 999999
 		}
 		max = 9999
+		# Prevent the AI from taking provinces not in a shared or neighbouring tradezone to countries with low naval power
 		if = {
 			limit = {
-				global_var:warscore_cost_available > WARSCORE_province_value_AI_root_claim_discount
+				scope:AI_root.AI_coastal_port_states_power_ratio < 1
+			}
+			if = {
+				limit = {
+					NOT = {
+						governorship.var:trade_center = {
+							is_in_list = matching_neighbouring_tradezones
+						}
+					}
+				}
+				remove_from_list = AI_peace_wishlist_stage_1
+			}
+		}
+		if = {
+			limit = {
+				trigger_if = {
+					limit = {
+						has_global_variable = warscore_cost_available
+					}
+					global_var:warscore_cost_available > WARSCORE_province_value_AI_root_claim_discount
+				}
+				
 			}
 			# Keep in the list
 			change_global_variable = {

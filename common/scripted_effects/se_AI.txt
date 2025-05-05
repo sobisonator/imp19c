@@ -1373,14 +1373,7 @@ AI_make_peace_province_wishlist = {
 							}
 						}
 					}
-					# Or are part of an AI interest state
-					scope:AI_root = {
-						any_in_list = {
-							variable = AI_interests_list
-
-							THIS.area = PREV.PREV
-						}
-					}
+					
 					# Or are part of a state with fewer than 45% inland provinces
 					state.FUNC_state_coastal_ratio > 0.45
 				}
@@ -1391,6 +1384,26 @@ AI_make_peace_province_wishlist = {
 				value = scope:AI_root
 			}
 		}
+	}
+	# Add all provinces which are part of an AI interest state
+	every_war_$target$ = {
+		add_to_list = list_of_targets
+	}
+	scope:AI_root = {
+		every_in_list = {
+			variable = AI_interests_list
+			area = {
+				every_area_province = {
+					limit = {
+						owner = { is_in_list = list_of_targets }
+					}
+				}
+			}
+		}
+	}
+	every_in_list = {
+		list = list_of_targets
+		remove_from_list = list_of_targets
 	}
 	# Create a list of tradezones in AI_root, we'll need this later
 	scope:AI_root = {
@@ -1624,34 +1637,6 @@ AI_make_peace_province_wishlist = {
 					}
 					is_coastal = yes
 				}
-			}
-			remove_from_list = AI_peace_wishlist_stage_1
-			# Refund the warscore cost for use elsewhere
-			change_global_variable = {
-				name = warscore_cost_available
-				add = WARSCORE_province_value_AI_root_claim_discount
-			}
-		}
-		# Remove provinces that would create an exclave of the former owner's land
-		set_local_variable = {
-			name = zero_if_exclaved
-			value = {
-				value = 0
-				every_neighbor_province = {
-					add = 1
-				}
-				every_neighbor_province = {
-					limit = {
-						is_in_list = AI_peace_wishlist_stage_1
-					}
-					subtract = 1
-				}
-			}
-		}
-		
-		if = {
-			limit = {
-				local_var:zero_if_exclaved = 0
 			}
 			remove_from_list = AI_peace_wishlist_stage_1
 			# Refund the warscore cost for use elsewhere

@@ -68,16 +68,16 @@ LAND_get_share_of_governorship_wealth_var = {
 	# Function: Get the amount of a governorship wealth pool held in the province based on the number of corresponding pops
 	set_variable = {
 		name = $poptype$_wealth
-		value = state.governorship.var:$poptype$_wealth
+		value = governorship.var:$poptype$_wealth
 	}
 	# Divide by the number of this poptype in the governorship
 	if = {
 		limit = {
-			state.governorship.governorship_$poptype$ > 0
+			governorship.governorship_$poptype$ > 0
 		}
 		change_variable = {
 			name = $poptype$_wealth
-			divide = state.governorship.governorship_$poptype$
+			divide = governorship.governorship_$poptype$
 		}
 	}
 	change_variable = {
@@ -91,20 +91,20 @@ LAND_get_share_of_governorship_stockpile_var = {
 	# Function: Get the amount of a governorship tradegood stockpile held in the province based on the number of trade buildings
 	if = {
 		limit = {
-			state.governorship.var:$tradegood$_stockpile > 0
+			governorship.var:$tradegood$_stockpile > 0
 		}
 		set_variable = {
 			name = $tradegood$_stockpile
-			value = state.governorship.var:$tradegood$_stockpile
+			value = governorship.var:$tradegood$_stockpile
 		}
 		# Divide by the number of this poptype in the governorship
 		if = {
 			limit = {
-				state.governorship.SHIPPING_depots_ports_river_ports_and_canals_bonus_governorship > 0
+				governorship.SHIPPING_depots_ports_river_ports_and_canals_bonus_governorship > 0
 			}
 			change_variable = {
 				name = $tradegood$_stockpile
-				divide = state.governorship.SHIPPING_depots_ports_river_ports_and_canals_bonus_governorship
+				divide = governorship.SHIPPING_depots_ports_river_ports_and_canals_bonus_governorship
 			}
 		}
 		change_variable = {
@@ -126,7 +126,7 @@ LAND_cache_values_for_new_governorship = {
 
 	# Save the old governorship scope as well, so we can subtract these variables from it when we're transferring them over to the new governorship
 	governorship = {
-		save_scope_as = old_governorship
+		save_scope_as = old_governorship # ISSUE: This will cease to exist once all land is taken in the old governorship. Needs to be rethought
 	}
 	set_variable = {
 		name = old_governorship
@@ -161,7 +161,7 @@ LAND_update_new_governorship_var = {
 	# Scope: province
 	# Function: After the ownership has been transferred, update the new governorship's variables with the shares of stockpiles and wealth pools, while subtracting them from the old governorship if it still exist
 	save_scope_as = origin_province
-	state.governorship = {
+	governorship = {
 		if = {
 			limit = {
 				has_variable = $variable$
@@ -195,7 +195,7 @@ LAND_update_new_governorship_var = {
 		}
 	}
 
-	var:old_governorship = {
+	var:old_governorship ?= {
 		change_variable = {
 			name = $variable$
 			subtract = scope:origin_province.var:$variable$
@@ -209,7 +209,7 @@ LAND_update_new_governorship_stockpile = {
 	# Scope: province
 	# Function: After the ownership has been transferred, update the new governorship's variables with the shares of stockpiles and wealth pools, while subtracting them from the old governorship if it still exist
 	save_scope_as = origin_province
-	state.governorship = {
+	governorship = {
 		if = {
 			limit = {
 				has_variable = $tradegood$_stockpile
@@ -240,7 +240,7 @@ LAND_update_new_governorship_stockpile = {
 		}
 	}
 
-	var:old_governorship = {
+	var:old_governorship ?= {
 		change_variable = {
 			name = $tradegood$_stockpile
 			subtract = scope:origin_province.var:$tradegood$_stockpile
@@ -292,6 +292,23 @@ LAND_transfer_provinces = {
 			grantee = $grantee$
 		}
 	}
+	every_in_list = {
+		list = $target_provinces$
+		governorship = {
+			if = {
+				limit = {
+					NOT = { is_in_list = governorship_vars_updated }
+				}
+				LAND_update_trade_center_and_internal_trade_scope = yes
+				DEMAND_update_all_vars = yes
+				add_to_list = governorship_vars_updated
+			}
+		}
+	}
+	every_in_list = {
+		list = governorship_vars_updated
+		remove_from_list = governorship_vars_updated
+	}
 }
 
 LAND_transfer_province = {
@@ -313,7 +330,7 @@ LAND_transfer_province = {
 				has_owner = yes
 			}
 
-			#state.governorship = {
+			#governorship = {
 			#	if = {
 			#		limit = {
 			#			NOT = {
@@ -374,11 +391,6 @@ LAND_transfer_province = {
 			APPLY = LAND_update_new_governorship_stockpile
 		}
 
-		state.governorship = {
-			LAND_update_trade_center_and_internal_trade_scope = yes
-			DEMAND_update_all_vars = yes
-		}
-
 		remove_variable = old_governorship
 	}	
 }
@@ -402,6 +414,7 @@ LAND_update_trade_center_and_internal_trade_scope = {
 LAND_cache_all_old_governorship_values = {
 	# Scope: Governorship
 	# Function: Cache all the variables from a governorship that need to be carried over or split up if provinces change ownership
+	# DEFUNCT - not in use
 
 	save_scope_as = old_governorship
 

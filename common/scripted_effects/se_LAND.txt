@@ -482,3 +482,73 @@ LAND_cache_old_governorship_value = {
 		value = scope:old_governorship.var:$var_name$
 	}
 }
+
+LAND_release_from_list = {
+	# Scope: Country which is creating a new country from the $list$ of provinces
+	# Function: Create a new country from a list of provinces
+	# Arguments will determine whether the new country is a subject, independent, and other values
+	# args:
+	# list
+	# capital_location
+	# country_name_key
+	# country_adj_key
+	# primary_culture
+	# country_religion
+
+
+	# TODO: Pick an appropriate
+
+	ordered_in_list = {
+		# Ordered in order to pick the capital
+		list = $list$
+		# Select capital
+		order_by = {
+			value = 1
+			if = {
+				limit = {
+					flag:$capital_location$ = flag:by_population
+				}
+				add = total_population
+			}
+		}
+		max = 1
+		save_scope_as = new_capital_scope
+
+		create_country = {
+			save_scope_as = new_country_scope
+			# Set culture
+            if = {
+            	limit = {
+            		flag:$primary_culture$ = flag:as_capital
+            	}
+            	set_primary_culture = scope:new_capital_scope.dominant_province_culture # TODO: Add conditions
+            }
+            # Set religion
+            if = {
+            	limit = {
+            		flag:$country_religion$ = flag:as_capital
+            	}
+            	set_country_religion = scope:new_capital_scope.dominant_province_religion # TODO: Add conditions
+            }
+            # Set name
+            if = {
+				limit = {
+					AND = {
+						flag:$country_name_key$ = flag:as_capital_region
+						flag:$country_adj_key$ = flag:country_adj_key
+					}
+				}
+				name = {
+	                name = region.name
+	                adjective = region.name
+	            }
+			}
+        }
+
+    }
+	LAND_transfer_provinces = {
+		target_provinces = $list$
+		grantee = scope:new_country_scope
+	}
+
+}

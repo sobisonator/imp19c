@@ -1865,8 +1865,50 @@ AI_make_peace_province_wishlist = {
 		target_provinces = AI_peace_wishlist_stage_1
 		grantee = scope:AI_root
 	}
+	every_in_list = {
+		list = AI_peace_wishlist_stage_1
+		# Now we're going to add each region to a list, and release countries by region
+		region = {
+			if = {
+				limit = {
+					NOT = { is_in_list = releasable_region_list }
+				}
+				add_to_list = releasable_region_list
+			}
+		}
+
+	}
+
+	every_in_list = {
+		list = releasable_region_list
+
+		every_in_list = {
+			list = released_from_war
+			remove_from_list = released_from_war
+		}
+		every_region_province = {
+			limit = {
+				# We're going to exclude the AI_root's claims
+				NOT = { is_core_of = scope:AI_root }
+				is_in_list = AI_peace_wishlist_stage_1
+			}
+			add_to_list = released_from_war
+		}
+		LAND_release_from_list = {
+			list = released_from_war
+			capital_location = by_population
+			country_name_key = as_capital_region
+			country_adj_key = as_capital_region
+			primary_culture = as_capital
+			country_religion = as_capital
+		}
+
+	}
+	
 	remove_global_variable = warscore_cost_available
 }
+
+
 
 # TODO:
 ## Creating an actual wishlist:

@@ -61,14 +61,14 @@ PixelShader =
 			
 			loc_ApplyFogOfWarPattern( Alpha, Coordinate, FogOfWarAlphaMask );
 			return FogOfWarAlphaMin + Alpha * (1.0f - FogOfWarAlphaMin);
-			
+
 
 			// float2 uv = Coordinate.xz * InverseWorldSize;
 			// uv.y++;
 
-
 			// float mx = 1.0; // start smoothing wt.
-			// float size = 1024.0;
+			// float sizeX = 1024.0;
+			// float sizeY = 512.0;
 			// const float k = -1.10; // wt. decrease factor
 			// const float max_w = 1.0; // max filter weigth
 			// const float min_w = 0.0; // min filter weigth
@@ -78,8 +78,8 @@ PixelShader =
 			// float3 c = color.xyz;
 
 
-			// float x = 0.5 * (1.0 / size);
-			// float y = 0.5 * (1.0 / size);
+			// float x = 0.5 * (1.0 / sizeX);
+			// float y = 0.5 * (1.0 / sizeY);
 
 			// const float3 dt = 1.0*float3(1.0, 1.0, 1.0);
 
@@ -139,8 +139,6 @@ PixelShader =
 			// w4 = clamp(w4+mx,min_w,max_w);
 
 			// color = float4((w1*(i1+i3)+w2*(i2+i4)+w3*(s1+s3)+w4*(s2+s4)+c)/(2.0*(w1+w2+w3+w4)+1.0), 1.0);
-			// float split = clamp(5.0*sin(10.0)*0.5 + 2.5, 0.0, 1.0);
-			// color.xyz = split * color.xyz + (1.0-split) * PdxTex2D(FogOfWarAlphaMask, uv).xyz;
 
 			// return color;
 		}

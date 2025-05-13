@@ -497,7 +497,7 @@ LAND_release_from_list = {
 
 
 	# TODO: Pick an appropriate
-
+	save_scope_as = releaser
 	ordered_in_list = {
 		# Ordered in order to pick the capital
 		list = $list$
@@ -539,10 +539,71 @@ LAND_release_from_list = {
 		target_provinces = $list$
 		grantee = scope:new_country_scope
 	}
+	# Determine subject status
+	if = {
+		limit = {
+			flag:$as_subject_type$ = flag:dynamic
+		}
+		# Colony conditions:
+		if = {
+			limit = {
+				AND = {
+					OR = {
+						NOR = {
+							# Capital neither shares or neighbours releaser's capital scope TZ
+							scope:new_country_scope.capital_scope.governorship.var:trade_center =  scope:releaser.capital_scope.governorship.var:trade_center
+							scope:new_country_scope.capital_scope.governorship.var:trade_center = {
+								any_in_list = {
+									variable = neighbouring_tradezones
+									THIS = scope:releaser.capital_scope.governorship.var:trade_center
+								}
+							}
+						}
+						scope:new_country_scope.capital_scope.civilization_value < scope:new_country_scope.capital_scope.FUNC_capital_industrialisation_colonial
+					}
+					any_province = {
+						NOT = {
+							any_neighbor_province = {
+								owner = scope:releaser
+							}
+						}
+					}
+				}
+			}
+			FUNC_make_subject = {
+				target = scope:new_country_scope
+				type = client_colony
+			}
+		}
+		# Territory conditions (same as colonial, but must be neighbouring releaser scope)
+		# TODO
+	}
+	else_if = {
+		limit = {
+			flag:$as_subject_type$ = flag:independent
+		}
+		# Do nothing
+	}
+	else_if = {
+		limit = {
+			NOR = {
+				flag:$as_subject_type$ = flag:dynamic
+				flag:$as_subject_type$ = flag:independent
+			}
+		}
+		PREV = {
+			FUNC_make_subject = {
+				target = scope:new_country_scope
+				type = $as_subject_type$
+			}
+		}
+	}
 	# Select name after full transfer of land, so that territory is accounted for in name
 	scope:new_country_scope = {
 		COUNTRYNAME_select_custom_country_name = yes
 	}
+	
+
 
 }
 

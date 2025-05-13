@@ -66,24 +66,41 @@ LAND_get_new_governorship_cache = { # POSSIBLY DEFUNCT
 LAND_get_share_of_governorship_wealth_var = {
 	# Scope: province
 	# Function: Get the amount of a governorship wealth pool held in the province based on the number of corresponding pops
-	set_variable = {
-		name = $poptype$_wealth
-		value = governorship.var:$poptype$_wealth
-	}
-	# Divide by the number of this poptype in the governorship
 	if = {
 		limit = {
-			governorship.governorship_$poptype$ > 0
+			governorship ?= {
+				has_variable = $poptype$_wealth
+			}
+		}
+		set_variable = {
+			name = $poptype$_wealth
+			value = governorship.var:$poptype$_wealth
+		}
+		# Divide by the number of this poptype in the governorship
+		if = {
+			limit = {
+				governorship.governorship_$poptype$ > 0
+			}
+			change_variable = {
+				name = $poptype$_wealth
+				divide = governorship.governorship_$poptype$
+			}
 		}
 		change_variable = {
 			name = $poptype$_wealth
-			divide = governorship.governorship_$poptype$
+			multiply = num_of_$poptype$
 		}
 	}
-	change_variable = {
-		name = $poptype$_wealth
-		multiply = num_of_$poptype$
+	else = {
+		set_variable = {
+			name = $poptype$_wealth
+			value = {
+				value = num_of_$poptype$
+				multiply = WEALTH_$poptype$_mod
+			}
+		}
 	}
+	
 }
 
 LAND_get_share_of_governorship_stockpile_var = {
@@ -157,42 +174,77 @@ LAND_cache_values_for_new_governorship = {
 	LAND_get_share_of_governorship_wealth_var = {
 		poptype = slaves
 	}
+	LAND_get_share_of_governorship_wealth_var = {
+		poptype = indentured
+	}
 }
 
 LAND_update_new_governorship_var = {
 	# Scope: province
 	# Function: After the ownership has been transferred, update the new governorship's variables with the shares of stockpiles and wealth pools, while subtracting them from the old governorship if it still exist
 	save_scope_as = origin_province
-	governorship ?= {
-		if = {
-			limit = {
-				has_variable = $variable$
-				scope:origin_province = {
-					has_variable = $variable$
-				}
-			}
-			change_variable = {
-				name = $variable$
-				add = scope:origin_province.var:$variable$
-			}
+	if = {
+		limit = {
+			NOT = { flag:$variable$ = flag:proletariat_wealth } # I don't know why this is needed, but this poptype seems broken in this scenario
 		}
-		else = {
+		governorship ?= {
 			if = {
 				limit = {
+					has_variable = $variable$
 					scope:origin_province = {
 						has_variable = $variable$
 					}
 				}
-				set_variable = {
+				change_variable = {
 					name = $variable$
-					value = scope:origin_province.var:$variable$
+					add = scope:origin_province.var:$variable$
 				}
 			}
 			else = {
-				set_variable = {
-					name = $variable$
-					value = $default$
+				if = {
+					limit = {
+						scope:origin_province = {
+							has_variable = $variable$
+						}
+						NOT = {
+							has_variable = $variable$
+						}
+					}
+					set_variable = {
+						name = $variable$
+						value = scope:origin_province.var:$variable$
+					}
 				}
+				else = {
+					set_variable = {
+						name = $variable$
+						value = $default$
+					}
+				}
+			}
+		}
+	}
+
+	if = { # Please, if you're reading this, ignore this jiggeryfuckery
+		# I just needed the pain to go away
+		limit = {
+			governorship = {
+				has_variable = proletariat_wealth
+			}
+			flag:$variable$ = flag:proletariat_wealth
+		}
+		governorship = {
+			change_variable = {
+				name = proletariat_wealth
+				add = scope:origin_province.WEALTH_starting_proletariat_province
+			}
+		}
+	}
+	else = {
+		governorship = {
+			set_variable = {
+				name = proletariat_wealth
+				value = WEALTH_starting_proletariat
 			}
 		}
 	}
@@ -554,13 +606,20 @@ LAND_release_from_list = {
 			limit = {
 				AND = {
 					OR = {
-						NOR = {
-							# Capital neither shares or neighbours releaser's capital scope TZ
-							scope:new_country_scope.capital_scope.governorship.var:trade_center =  scope:releaser.capital_scope.governorship.var:trade_center
-							scope:new_country_scope.capital_scope.governorship.var:trade_center = {
-								any_in_list = {
-									variable = neighbouring_tradezones
-									THIS = scope:releaser.capital_scope.governorship.var:trade_center
+						trigger_if = {
+							limit = {
+								scope:new_country_scope.capital_scope.governorship ?= {
+									has_variable = var:trade_center
+								}
+							}
+							NOR = {
+								# Capital neither shares or neighbours releaser's capital scope TZ
+								scope:new_country_scope.capital_scope.governorship.var:trade_center = scope:releaser.capital_scope.governorship.var:trade_center
+								scope:new_country_scope.capital_scope.governorship.var:trade_center = {
+									any_in_list = {
+										variable = neighbouring_tradezones
+										THIS = scope:releaser.capital_scope.governorship.var:trade_center
+									}
 								}
 							}
 						}

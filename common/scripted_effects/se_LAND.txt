@@ -155,7 +155,7 @@ LAND_update_new_governorship_var = {
 	# Scope: province
 	# Function: After the ownership has been transferred, update the new governorship's variables with the shares of stockpiles and wealth pools, while subtracting them from the old governorship if it still exist
 	save_scope_as = origin_province
-	governorship = {
+	governorship ?= {
 		if = {
 			limit = {
 				has_variable = $variable$
@@ -190,10 +190,17 @@ LAND_update_new_governorship_var = {
 	}
 
 	var:old_governorship ?= {
-		change_variable = {
-			name = $variable$
-			subtract = scope:origin_province.var:$variable$
+		if = {
+			limit = {
+				has_variable = $variable$
+				scope:origin_province = { has_variable = $variable$ }
+			}
+			change_variable = {
+				name = $variable$
+				subtract = scope:origin_province.var:$variable$
+			}
 		}
+		
 	}
 
 	remove_variable = $variable$

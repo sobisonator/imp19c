@@ -112,12 +112,6 @@ LAND_get_share_of_governorship_stockpile_var = {
 			multiply = SHIPPING_depots_ports_river_ports_and_canals_bonus
 		}
 	}
-	else = {
-		set_variable = {
-			name = $tradegood$_stockpile
-			value = 0
-		}
-	}
 }
 
 LAND_cache_values_for_new_governorship = {
@@ -209,10 +203,11 @@ LAND_update_new_governorship_stockpile = {
 	# Scope: province
 	# Function: After the ownership has been transferred, update the new governorship's variables with the shares of stockpiles and wealth pools, while subtracting them from the old governorship if it still exist
 	save_scope_as = origin_province
-	governorship = {
+	governorship ?= {
 		if = {
 			limit = {
 				has_variable = $tradegood$_stockpile
+				scope:origin_province = { has_variable = $tradegood$_stockpile }
 			}
 			change_variable = {
 				name = $tradegood$_stockpile
@@ -240,12 +235,18 @@ LAND_update_new_governorship_stockpile = {
 		}
 	}
 
-	var:old_governorship ?= {
-		change_variable = {
-			name = $tradegood$_stockpile
-			subtract = scope:origin_province.var:$tradegood$_stockpile
+	if = {
+		limit = {
+			scope:origin_province = { has_variable = $tradegood$_stockpile }
+		}
+		var:old_governorship ?= {
+			change_variable = {
+				name = $tradegood$_stockpile
+				subtract = scope:origin_province.var:$tradegood$_stockpile
+			}
 		}
 	}
+	
 
 	remove_variable = $tradegood$_stockpile
 }
@@ -294,59 +295,7 @@ LAND_transfer_provinces = {
 	}
 	every_in_list = {
 		list = $target_provinces$
-		governorship = {
-			if = {
-				limit = {
-					NOT = { is_in_list = governorship_vars_updated }
-				}
-				LAND_update_trade_center_and_internal_trade_scope = yes
-				DEMAND_update_all_vars = yes
-				add_to_list = governorship_vars_updated
-			}
-		}
-	}
-	every_in_list = {
-		list = governorship_vars_updated
-		remove_from_list = governorship_vars_updated
-	}
-}
-
-LAND_transfer_province = {
-	# Scope: province
-	# Function: Transfer land between one province and another
-	if = {
-		limit = {
-			NOT = {
-				owner = $grantee$
-			}
-		}
 		save_scope_as = province_under_transfer
-
-		# Get a new_governorship_cache scope corresponding to this province's region. This is where we will add up the variables to be given to the new governorship, such as pop wealth pools and tradegood stockpiles, that should be shared out based on the summed-up province attributes.
-
-		if = { # Only execute this block if the province is part of an existing governorship.
-		# Otherwise, set up values from 0, and create local wealth based on the base values from the pops
-			limit = {
-				has_owner = yes
-			}
-
-			#governorship = {
-			#	if = {
-			#		limit = {
-			#			NOT = {
-			#				has_variable = governorship_counted
-			#			}
-			#		}
-			#		LAND_cache_values_for_new_governorship = yes
-			#	}
-			#}
-
-			LAND_cache_values_for_new_governorship = yes
-
-		}
-
-		set_conquered_by = $grantee$
-
 		LAND_update_new_governorship_var = {
 			variable = upper_strata_wealth
 			default = WEALTH_starting_upper_strata
@@ -390,8 +339,63 @@ LAND_transfer_province = {
 		every_tradegood_complex = {
 			APPLY = LAND_update_new_governorship_stockpile
 		}
-
+		governorship = {
+			if = {
+				limit = {
+					NOT = { is_in_list = governorship_vars_updated }
+				}
+				LAND_update_trade_center_and_internal_trade_scope = yes
+				DEMAND_update_all_vars = yes
+				add_to_list = governorship_vars_updated
+			}
+		}
 		remove_variable = old_governorship
+	}
+	every_in_list = {
+		list = governorship_vars_updated
+		remove_from_list = governorship_vars_updated
+	}
+}
+
+LAND_transfer_province = {
+	# Scope: province
+	# Function: Transfer land between one province and another
+	if = {
+		limit = {
+			NOT = {
+				owner = $grantee$
+			}
+		}
+		
+
+		# Get a new_governorship_cache scope corresponding to this province's region. This is where we will add up the variables to be given to the new governorship, such as pop wealth pools and tradegood stockpiles, that should be shared out based on the summed-up province attributes.
+
+		if = { # Only execute this block if the province is part of an existing governorship.
+		# Otherwise, set up values from 0, and create local wealth based on the base values from the pops
+			limit = {
+				has_owner = yes
+			}
+
+			#governorship = {
+			#	if = {
+			#		limit = {
+			#			NOT = {
+			#				has_variable = governorship_counted
+			#			}
+			#		}
+			#		LAND_cache_values_for_new_governorship = yes
+			#	}
+			#}
+
+			LAND_cache_values_for_new_governorship = yes
+
+		}
+
+		set_conquered_by = $grantee$
+
+
+
+		
 	}	
 }
 
@@ -497,7 +501,7 @@ LAND_release_from_list = {
 
 
 	# TODO: Pick an appropriate
-	save_scope_as = releaser
+	$releaser$ = { save_scope_as = releaser }
 	ordered_in_list = {
 		# Ordered in order to pick the capital
 		list = $list$
@@ -561,10 +565,17 @@ LAND_release_from_list = {
 						}
 						scope:new_country_scope.capital_scope.civilization_value < scope:new_country_scope.capital_scope.FUNC_capital_industrialisation_colonial
 					}
-					any_province = {
-						NOT = {
-							any_neighbor_province = {
-								owner = scope:releaser
+					NOT = {
+						scope:new_country_scope = {
+							any_province = {
+								any_neighbor_province = {
+									trigger_if = {
+										limit = {
+											has_owner = yes
+										}
+										owner = scope:releaser
+									}
+								}
 							}
 						}
 					}
@@ -573,6 +584,7 @@ LAND_release_from_list = {
 			FUNC_make_subject = {
 				target = scope:new_country_scope
 				type = client_colony
+				overlord = scope:releaser
 			}
 		}
 		# Territory conditions (same as colonial, but must be neighbouring releaser scope)
@@ -595,6 +607,7 @@ LAND_release_from_list = {
 			FUNC_make_subject = {
 				target = scope:new_country_scope
 				type = $as_subject_type$
+				overlord = scope:releaser
 			}
 		}
 	}

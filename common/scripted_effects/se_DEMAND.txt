@@ -87,7 +87,12 @@ DEMAND_set_demand_from_food = {
 
 	if = {
 		limit = {
-			var:DEMAND_food_$tradegood$ > 0
+			trigger_if = {
+				limit = {
+					has_variable = DEMAND_food_$tradegood
+				}
+				var:DEMAND_food_$tradegood$ > 0
+			}
 		}
 		change_variable = {
 			name = DEMAND_food_$tradegood$
@@ -100,10 +105,18 @@ DEMAND_set_demand_from_food = {
 		value = var:trade_center.var:local_price_$tradegood$
 	}
 
-	change_local_variable = {
-		name = l_DEMAND_$tradegood$_price_diff_to_food_mean
-		divide = var:trade_center.var:PRICE_food_mean_normalised # Set by PRICE_set_food_mean_normalised_price
+	if = {
+		limit = {
+			var:trade_center = {
+				has_variable = PRICE_food_mean_normalised
+			}
+		}
+		change_local_variable = {
+			name = l_DEMAND_$tradegood$_price_diff_to_food_mean
+			divide = var:trade_center.var:PRICE_food_mean_normalised # Set by PRICE_set_food_mean_normalised_price
+		}
 	}
+	
 
 	if = {
 		limit = {
@@ -433,7 +446,13 @@ DEMAND_set_demand_from_luxury = {
 	if = {
 		limit = {
 			has_global_variable = first_time_price_setup_done
-			var:DEMAND_luxury_$tradegood$ > 0
+			trigger_if = {
+				limit = {
+					has_variable = DEMAND_luxury_$tradegood$
+				}
+				var:DEMAND_luxury_$tradegood$ > 0
+			}
+			
 		}
 		set_local_variable = {
 			name = l_$tradegood$_price_div_average_governorship_wealth
@@ -521,18 +540,6 @@ DEMAND_update_fasionability = {
 
 # Demand from industry is set by industry production scripts in MANUFACTURE_
 
-DEMAND_set_demand_from_pops = {
-	set_variable = {
-		name = DEMAND_$tradegood$_from_pops
-		value = 0
-	}
-
-	DEMAND_set_demand_from_pops_step = {
-		tradegood = $tradegood$
-		lower_strata
-	}
-}
-
 DEMAND_set_demand_from_pops_step = {
 	# Scope: governorship
 	# Function: Set how much the demand for a good from pops is, per poptype present in a governorship.
@@ -595,9 +602,4 @@ DEMAND_set_demand = {
 		}
 	}
 
-}
-
-DEMAND_update_tradegood = {
-	tradegood = glass
-	industry = 
 }

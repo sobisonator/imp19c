@@ -376,6 +376,7 @@ AI_add_control_interest = {
 			round = floor
 			min = 1
 		}
+		check_range_bounds = no
 
 		# Currently here for testing - this is so that the tooltip can grab province area by scoping to a state
 		random_area_province = {
@@ -625,6 +626,7 @@ AI_begin_diplomatic_play = {
 			}
 
 			max = 1 # Select only the best one
+			check_range_bounds = no
 		}
 		every_in_list = {
 			list = play_targets
@@ -1570,6 +1572,7 @@ AI_make_peace_province_wishlist = {
 			max = 999999
 		}
 		max = 9999
+		check_range_bounds = no
 		# Prevent the AI from taking provinces not in a shared or neighbouring tradezone to countries with low naval power
 		if = {
 			limit = {
@@ -1682,18 +1685,28 @@ AI_make_peace_province_wishlist = {
 				is_coastal = no
 				NOT = {
 					any_neighbor_province = {
-						NOT = {
-							owner = {
-								war_with = scope:AI_root
+						trigger_if = {
+							limit = {
+								has_owner = yes
+							}
+							NOT = {
+								owner = {
+									war_with = scope:AI_root
+								}
 							}
 						}
 					}
 				}
 				region = {
 					any_region_province = {
-						NOT = {
-							any_neighbor_province = {
-								owner = scope:AI_root
+						trigger_if = {
+							limit = {
+								has_owner = yes
+							}
+							NOT = {
+								any_neighbor_province = {
+									owner = scope:AI_root
+								}
 							}
 						}
 					}
@@ -1718,14 +1731,24 @@ AI_make_peace_province_wishlist = {
 			value = {
 				every_neighbor_province = {
 					limit = {
-						owner = {
-							war_with = scope:AI_root
-						}
-						NOT = {
-							any_neighbor_province = {
-								NOT = {
-									owner = {
-										war_with = scope:AI_root
+						trigger_if = {
+							limit = {
+								has_owner = yes
+							}
+							owner = {
+								war_with = scope:AI_root
+							}
+							NOT = {
+								any_neighbor_province = {
+									trigger_if = {
+										limit = {
+											has_owner = yes
+										}
+										NOT = {
+											owner = {
+												war_with = scope:AI_root
+											}
+										}
 									}
 								}
 							}
@@ -1745,14 +1768,24 @@ AI_make_peace_province_wishlist = {
 			value = {
 				every_neighbor_province = {
 					limit = {
-						owner = {
-							war_with = scope:AI_root
-						}
-						NOT = {
-							any_neighbor_province = {
-								NOT = {
-									owner = {
-										war_with = scope:AI_root
+						trigger_if = {
+							limit = {
+								has_owner = yes
+							}
+							owner = {
+								war_with = scope:AI_root
+							}
+							NOT = {
+								any_neighbor_province = {
+									trigger_if = {
+										limit = {
+											has_owner = yes
+										}
+										NOT = {
+											owner = {
+												war_with = scope:AI_root
+											}
+										}
 									}
 								}
 							}
@@ -1767,18 +1800,23 @@ AI_make_peace_province_wishlist = {
 				}
 			}
 		}
-		change_local_variable = {
-			name = num_surrounding_hostile_provs
-			divide = {
-				value = local_var:num_surrounding_wishlisted_provs
-				min = 1
-			}
-		}
 		if = {
 			limit = {
-				local_var:num_surrounding_hostile_provs > 2.6
+				has_local_variable = num_surrounding_hostile_provs
 			}
-			remove_from_list = AI_peace_wishlist_stage_1
+			change_local_variable = {
+				name = num_surrounding_hostile_provs
+				divide = {
+					value = local_var:num_surrounding_wishlisted_provs
+					min = 1
+				}
+			}
+			if = {
+				limit = {
+					local_var:num_surrounding_hostile_provs > 2.6
+				}
+				remove_from_list = AI_peace_wishlist_stage_1
+			}
 		}
 
 	}
@@ -1850,7 +1888,12 @@ AI_make_peace_province_wishlist = {
 					limit = {
 						NOT = {
 							any_neighbor_province = {
-								owner = scope:AI_root
+								trigger_if = {
+									limit = {
+										has_owner = yes
+									}
+									owner = scope:AI_root
+								}
 							}
 						}
 					}
@@ -1865,8 +1908,52 @@ AI_make_peace_province_wishlist = {
 		target_provinces = AI_peace_wishlist_stage_1
 		grantee = scope:AI_root
 	}
+	every_in_list = {
+		list = AI_peace_wishlist_stage_1
+		# Now we're going to add each region to a list, and release countries by region
+		region = {
+			if = {
+				limit = {
+					NOT = { is_in_list = releasable_region_list }
+				}
+				add_to_list = releasable_region_list
+			}
+		}
+
+	}
+
+	every_in_list = {
+		list = releasable_region_list
+
+		every_in_list = {
+			list = released_from_war
+			remove_from_list = released_from_war
+		}
+		every_region_province = {
+			limit = {
+				# We're going to exclude the AI_root's claims
+				NOT = { is_core_of = scope:AI_root }
+				is_in_list = AI_peace_wishlist_stage_1
+			}
+			add_to_list = released_from_war
+		}
+		LAND_release_from_list = {
+			releaser = scope:AI_root
+			list = released_from_war
+			capital_location = by_population
+			#country_name_key = as_capital_region
+			#country_adj_key = as_capital_region
+			primary_culture = as_capital
+			country_religion = as_capital
+			as_subject_type = dynamic
+		}
+
+	}
+	
 	remove_global_variable = warscore_cost_available
 }
+
+
 
 # TODO:
 ## Creating an actual wishlist:

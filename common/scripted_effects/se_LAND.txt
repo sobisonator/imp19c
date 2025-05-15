@@ -612,43 +612,12 @@ LAND_release_from_list = {
 		# Colony conditions:
 		if = {
 			limit = {
-				trigger_if = {
-					limit = {
-						exists = scope:new_country_scope.capital_scope.governorship
-					}
-					AND = {
-						OR = {
-							trigger_if = {
-								limit = {
-									scope:new_country_scope.capital_scope.governorship ?= {
-										has_variable = var:trade_center
-									}
-								}
-								NOR = {
-									# Capital neither shares or neighbours releaser's capital scope TZ
-									scope:new_country_scope.capital_scope.governorship.var:trade_center ?= scope:releaser.capital_scope.governorship.var:trade_center
-									scope:new_country_scope.capital_scope.governorship.var:trade_center ?= {
-										any_in_list = {
-											variable = neighbouring_tradezones
-											THIS = scope:releaser.capital_scope.governorship.var:trade_center
-										}
-									}
-								}
-							}
-							scope:new_country_scope.capital_scope.civilization_value < scope:new_country_scope.capital_scope.FUNC_capital_industrialisation_colonial
-						}
-						NOT = {
-							scope:new_country_scope = {
-								any_province = {
-									any_neighbor_province = {
-										trigger_if = {
-											limit = {
-												has_owner = yes
-											}
-											owner = scope:releaser
-										}
-									}
-								}
+				scope:new_country_scope.capital_scope.civilization_value < scope:releaser.capital_scope.FUNC_capital_industrialisation_colonial
+				scope:new_country_scope = {
+					NOT = {
+						any_owned_province = {
+							any_neighbor_province = {
+								owner = scope:releaser
 							}
 						}
 					}
@@ -660,29 +629,22 @@ LAND_release_from_list = {
 				overlord = scope:releaser
 			}
 		}
+		else = {
+			FUNC_make_subject = {
+				target = scope:new_country_scope
+				type = client_state
+				overlord = scope:releaser
+			}
+		}
 		# Territory conditions (same as colonial, but must be neighbouring releaser scope)
 		# TODO
+
 	}
 	else_if = {
 		limit = {
 			flag:$as_subject_type$ = flag:independent
 		}
 		# Do nothing
-	}
-	else_if = {
-		limit = {
-			NAND = {
-				flag:$as_subject_type$ = flag:dynamic
-				flag:$as_subject_type$ = flag:independent
-			}
-		}
-		PREV = {
-			FUNC_make_subject = {
-				target = scope:new_country_scope
-				type = $as_subject_type$
-				overlord = scope:releaser
-			}
-		}
 	}
 	# Select name after full transfer of land, so that territory is accounted for in name
 	scope:new_country_scope = {

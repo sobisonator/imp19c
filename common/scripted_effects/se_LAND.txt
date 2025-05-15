@@ -186,6 +186,7 @@ LAND_update_new_governorship_var = {
 	if = {
 		limit = {
 			NOT = { flag:$variable$ = flag:proletariat_wealth } # I don't know why this is needed, but this poptype seems broken in this scenario
+			exists = governorship
 		}
 		governorship ?= {
 			if = {
@@ -225,26 +226,31 @@ LAND_update_new_governorship_var = {
 		}
 	}
 
-	if = { # Please, if you're reading this, ignore this jiggeryfuckery
-		# I just needed the pain to go away
+	if = {
 		limit = {
+			exists = governorship
+		}
+		if = { # Please, if you're reading this, ignore this jiggeryfuckery
+			# I just needed the pain to go away
+			limit = {
+				governorship = {
+					has_variable = proletariat_wealth
+				}
+				flag:$variable$ = flag:proletariat_wealth
+			}
 			governorship = {
-				has_variable = proletariat_wealth
-			}
-			flag:$variable$ = flag:proletariat_wealth
-		}
-		governorship = {
-			change_variable = {
-				name = proletariat_wealth
-				add = scope:origin_province.WEALTH_starting_proletariat_province
+				change_variable = {
+					name = proletariat_wealth
+					add = scope:origin_province.WEALTH_starting_proletariat_province
+				}
 			}
 		}
-	}
-	else = {
-		governorship = {
-			set_variable = {
-				name = proletariat_wealth
-				value = WEALTH_starting_proletariat
+		else = {
+			governorship = {
+				set_variable = {
+					name = proletariat_wealth
+					value = WEALTH_starting_proletariat
+				}
 			}
 		}
 	}
@@ -403,7 +409,9 @@ LAND_transfer_province = {
 
 		}
 
-		set_conquered_by = $grantee$
+		FUNC_set_conquered_by = {
+			grantee = $grantee$
+		}
 
 		LAND_update_new_governorship_var = {
 			variable = upper_strata_wealth
@@ -604,36 +612,41 @@ LAND_release_from_list = {
 		# Colony conditions:
 		if = {
 			limit = {
-				AND = {
-					OR = {
-						trigger_if = {
-							limit = {
-								scope:new_country_scope.capital_scope.governorship ?= {
-									has_variable = var:trade_center
+				trigger_if = {
+					limit = {
+						exists = scope:new_country_scope.capital_scope.governorship
+					}
+					AND = {
+						OR = {
+							trigger_if = {
+								limit = {
+									scope:new_country_scope.capital_scope.governorship ?= {
+										has_variable = var:trade_center
+									}
 								}
-							}
-							NOR = {
-								# Capital neither shares or neighbours releaser's capital scope TZ
-								scope:new_country_scope.capital_scope.governorship.var:trade_center = scope:releaser.capital_scope.governorship.var:trade_center
-								scope:new_country_scope.capital_scope.governorship.var:trade_center = {
-									any_in_list = {
-										variable = neighbouring_tradezones
-										THIS = scope:releaser.capital_scope.governorship.var:trade_center
+								NOR = {
+									# Capital neither shares or neighbours releaser's capital scope TZ
+									scope:new_country_scope.capital_scope.governorship.var:trade_center ?= scope:releaser.capital_scope.governorship.var:trade_center
+									scope:new_country_scope.capital_scope.governorship.var:trade_center ?= {
+										any_in_list = {
+											variable = neighbouring_tradezones
+											THIS = scope:releaser.capital_scope.governorship.var:trade_center
+										}
 									}
 								}
 							}
+							scope:new_country_scope.capital_scope.civilization_value < scope:new_country_scope.capital_scope.FUNC_capital_industrialisation_colonial
 						}
-						scope:new_country_scope.capital_scope.civilization_value < scope:new_country_scope.capital_scope.FUNC_capital_industrialisation_colonial
-					}
-					NOT = {
-						scope:new_country_scope = {
-							any_province = {
-								any_neighbor_province = {
-									trigger_if = {
-										limit = {
-											has_owner = yes
+						NOT = {
+							scope:new_country_scope = {
+								any_province = {
+									any_neighbor_province = {
+										trigger_if = {
+											limit = {
+												has_owner = yes
+											}
+											owner = scope:releaser
 										}
-										owner = scope:releaser
 									}
 								}
 							}
@@ -658,7 +671,7 @@ LAND_release_from_list = {
 	}
 	else_if = {
 		limit = {
-			NOR = {
+			NAND = {
 				flag:$as_subject_type$ = flag:dynamic
 				flag:$as_subject_type$ = flag:independent
 			}

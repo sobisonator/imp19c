@@ -83,8 +83,8 @@ PixelShader =
 		MipFilter = "Linear"
 		SampleModeU = "Border"
 		SampleModeV = "Border"
-		// Border_Color = { 1 1 1 1 }
-		// File = "gfx/map/surround_map/surround_mask.dds"
+		Border_Color = { 1 1 1 1 }
+		File = "gfx/map/surround_map/surround_mask.dds"
 	}
 	TextureSampler SurroundTile
 	{

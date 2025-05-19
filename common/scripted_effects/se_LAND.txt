@@ -627,6 +627,7 @@ LAND_release_from_list = {
 				target = scope:new_country_scope
 				type = client_colony
 				overlord = scope:releaser
+				#give_hos = scope:releaser.var:monarch_character
 			}
 		}
 		else = {
@@ -634,11 +635,12 @@ LAND_release_from_list = {
 				target = scope:new_country_scope
 				type = client_state
 				overlord = scope:releaser
+				#give_hos_character = scope:releaser.var:monarch_character
 			}
 		}
 		# Territory conditions (same as colonial, but must be neighbouring releaser scope)
 		# TODO
-
+		
 	}
 	else_if = {
 		limit = {
@@ -646,9 +648,39 @@ LAND_release_from_list = {
 		}
 		# Do nothing
 	}
-	# Select name after full transfer of land, so that territory is accounted for in name
+	
 	scope:new_country_scope = {
+		# Add monarch
+		# TODO: Dynamic monarch assignment
+		# Maybe give territories to members of the royal family?
+		if = {
+			limit = {
+				trigger_if = {
+					limit = {
+						is_subject = yes
+					}
+					$give_overlord_hos$ = yes
+					overlord = {
+						has_variable = monarch_character
+					}
+				}
+			}
+			set_variable = {
+				name = monarch_character
+				value = overlord.var:monarch_character
+			}
+		}
+		#Determine government type
+		if = {
+			limit = {
+				flag:$government_type$ = flag:dynamic
+			}
+			change_government = viceroyalty
+			# Also determine hidden royalty rank (i.e. county, principality, etc.)
+		}
+		# Select name after full transfer of land, so that territory is accounted for in name
 		COUNTRYNAME_select_custom_country_name = yes
+
 	}
 
 }
@@ -660,5 +692,31 @@ LAND_apply_custom_country_name = {
 			has_variable = uses_custom_name
 		}
 		change_country_name = $key$
+	}
+}
+
+LAND_form_formable = {
+	# Scope: Country
+	# Function: Form the given formable tag
+	if = {
+		limit = {
+			imp19c_can_form_country_trigger = {
+				tag = $tag$
+			}
+		}
+		save_scope_as = former
+
+		# Change cosmetically, keep the same tag
+		change_country_name = $tag_name$
+		change_country_adjective = $tag_adj$
+		change_country_color =  $colour$
+		change_country_flag = $tag$
+
+		every_in_list = {
+			list = $tag$_claim_list
+			add_claim = scope:former
+		}
+
+		set_variable = formed_$tag$
 	}
 }

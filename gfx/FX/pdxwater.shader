@@ -16,6 +16,9 @@ PixelShader =
 		MagFilter = "Linear"
 		MinFilter = "Linear"
 		MipFilter = "Linear"
+		// MagFilter = "Point"
+		// MinFilter = "Point"
+		// MipFilter = "Point"
 		SampleModeU = "Wrap"
 		SampleModeV = "Wrap"
 	}

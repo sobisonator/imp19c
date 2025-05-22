@@ -270,25 +270,20 @@ types Imp19c_GUI_Types
 	}
 
 	#IMP19C TYPES 
-	##POSITIVE WAR SCORE BAR
-	type fixed_size_progressbar_war_score = margin_widget {
-		
-		block "size"
-		{
-			size = { 510 19 }
-		}
-		
-		icon = {
-			using = flat_background
-			size = { 4 100% }
-		}
-		
-		margin_widget = {
-			size = { 100% 100% }
-			margin = { 6 0 }
-			
-			widget = {
-				size = { 100% 100% }
+	##WAR SCORE BAR
+	type fixed_size_progressbar_war_score = widget {
+		size = { 480 90 }
+		widget = {
+			size = { 100% 20 }
+			parentanchor = bottom
+			icon = {
+				using = flat_background
+				size = { 4 20 }
+			}
+			margin_widget = {
+				size = { 100% 20 }
+				margin = { 6 0 }
+				tooltip = "[WarOverview.GetWarScoreTooltip]"
 				icon = {
 					name = "progress_frame"
 					texture = "gfx/interface/base_parts/progressbar_background_frame.dds"
@@ -300,15 +295,9 @@ types Imp19c_GUI_Types
 				}
 				progressbar = {
 					name = "progress_value"
-					position = { 0 0 }
 					size = { 100% 100% }
-					alpha = 1
-					using = progressbar_flat_green
-					block "Value"
-					{
-						value = 1
-					}
-					
+					block "ProgressColor" { using = green_color }
+					block "Value" { value = 1 }
 					marker = {
 						container = {
 							name = "progress_marker2"           
@@ -343,249 +332,89 @@ types Imp19c_GUI_Types
 							}
 						}
 					}
-					
 				}
 			}
+			icon = {
+				using = flat_background
+				parentanchor = right
+				size = { 4 20 }
+			}
 		}
-		
-		icon = {
-			using = flat_background
+		flowcontainer = {
+			direction = vertical
+			#textbox = {
+			#	size = { 220 80 }
+			#	using = BaseFontM
+			#	using = Black_FontColor
+			#	datacontext = "[WarOverview]"
+			#	text = "WAR_DATE_DETAILS"
+			#	multiline = yes
+			#}
+			textbox = {
+				size = { 220 60 }
+				align = bottom
+				multiline = yes
+				using = BaseFontM
+				using = Black_FontColor
+				datacontext = "[WarOverview]"
+				text = "WAR_WARGOAL_DETAILS"
+				tooltip = "WAR_OVERVIEW_WAR_GOAL_TOOLTIP"
+			}
+		}
+		flowcontainer = {
+			visible = "[WarOverview.GetWar.HasTickingWarScore]"
 			parentanchor = right
-			size = { 4 100% }
-		}
-	}
-	type icon_and_text_progress_war_score = widget {
-		# Static Size
-		block "TotalSize" { size = { 350 38 } }
-		##minimumsize = { 102 38 }
-		
-		fixed_size_progressbar_war_score = {
-			position = { 7 28 }
-			block "BarSize" { blockoverride "size" { size = { 350 7 } } }
-			#Passes "Value" override
-		}
-		
-		hbox = {
-			
-			widget = {
-				size = { 0 0 }
-				layoutpolicy_horizontal = fixed
+			position = { 0 10 }
+			direction = vertical
+			textbox = {
+				size = { 200 26 }
+				align = right
+				using = BaseFontM
+				using = Black_FontColor
+				datacontext = "[WarOverview]"
+				text = "WARSCORE_DETAILS"
+				tooltip = "[WarOverview.GetTickingWarScoreTooltip]"
 			}
-			
-			container = {
-				icon = {
-					position = { 230 -63 }
-					framesize = { 50 50 }
-					size = { 32 32 }
-					layoutpolicy_horizontal = fixed
-					
-					block "Icon"
-					{
-						texture = "gfx/interface/icons/shared_icons/leader.dds"
-					}
-					icon = {
-						texture = "gfx/interface/icons/shared_icons/plus.dds"
-						block "UpIndicator" { visible = no }
-						position = { -2 12 }
-					}
-					icon = {
-						texture = "gfx/interface/icons/shared_icons/minus.dds"
-						block "DownIndicator" { visible = no }
-						position = { -2 12 }
-					}
-				}
-			}
-
-			widget = {
-				size = { 0 0 }
-				layoutpolicy_horizontal = fixed
-			}
-			
-			widget = {
-				size = { 0 24}
-				layoutpolicy_horizontal = expanding
-				
+			flowcontainer = {
 				textbox = {
 					name = "Text"
-					position = { 0 -10 }
-					size = { 100% 24 }
-					fontsize = 24	
-					align = right
+					size = { 160 36 }
+					fontsize = 24
+					align = vcenter|right
 					elide = right
 					using = BaseFontM
 					using = Black_FontColor
-	
-					block "Text"
-					{
-						
-						text = "888.88%"
-					}
+					block "Text" { text = "888.88%" }
+					visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
+					tooltip = "[WarOverview.GetWarScoreTooltip]"
 				}
-			}
-			
-			widget = {
-				size = { 6 6 }
-				layoutpolicy_horizontal = fixed
-			}			
-		}
-	}
-	##NEGATIVE WAR SCORE BAR
-	type fixed_size_progressbar_war_score_red = margin_widget {
-		
-		block "size"
-		{
-			size = { 510 19 }
-		}
-		
-		icon = {
-			using = flat_background
-			size = { 4 100% }
-		}
-		
-		margin_widget = {
-			size = { 100% 100% }
-			margin = { 6 0 }
-			
-			widget = {
-				size = { 100% 100% }
 				icon = {
-					name = "progress_frame"
-					texture = "gfx/interface/base_parts/progressbar_background_frame.dds"
-					
-					minimumsize = { 0 7 }
-					size = { 100% 100% }
-					color = { 0.7 0.7 0.7 1 }
-					block "ProgressAlpha" { alpha = 0.5 }
-				}
-				progressbar = {
-					name = "progress_value"
-					position = { 0 0 }
-					size = { 100% 100% }
-					alpha = 1
-					using = progressbar_red_horizontal
-					block "Value"
-					{
-						value = 1
-					}
-					
-					marker = {
-						container = {
-							name = "progress_marker2"           
-							alwaystransparent = yes
-							icon = {
-								texture = "gfx/interface/icons/shared_icons/plus.dds"
-								size = { 23 23 }
-								position = { -24 0 }
-								color = { 0 0 0 1 }
-								block "PlusMarker" { visible = no }
-							}
-							icon = {
-								texture = "gfx/interface/icons/shared_icons/plus.dds"
-								size = { 23 23 }
-								position = { -30 0 }
-								color = { 0 0 0 1 }
-								block "PlusMarker" { visible = no }
-							}
-							icon = {
-								texture = "gfx/interface/icons/shared_icons/minus.dds"
-								size = { 23 23 }
-								position = { -24 0 }
-								color = { 0.4 0 0 1 }
-								block "MinusMarker" { visible = no }
-							}
-							icon = {
-								texture = "gfx/interface/icons/shared_icons/minus.dds"
-								size = { 23 23 }
-								position = { -30 0 }
-								color = { 0.4 0 0 1 }
-								block "MinusMarker" { visible = no }
-							}
-						}
-					}
-					
-				}
-			}
-		}
-		
-		icon = {
-			using = flat_background
-			parentanchor = right
-			size = { 4 100% }
-		}
-	}
-	type icon_and_text_progress_war_score_red = widget {
-		# Static Size
-		block "TotalSize" { size = { 350 38 } }
-		##minimumsize = { 102 38 }
-		
-		fixed_size_progressbar_war_score_red = {
-			position = { 7 28 }
-			block "BarSize" { blockoverride "size" { size = { 350 7 } } }
-			#Passes "Value" override
-		}
-		
-		hbox = {
-			
-			widget = {
-				size = { 0 0 }
-				layoutpolicy_horizontal = fixed
-			}
-			
-			container = {
-				icon = {
-					position = { 230 -63 }
+					texture = "gfx/interface/arrows_strip.dds"
+					position = { 8 18 }
 					framesize = { 50 50 }
-					size = { 32 32 }
-					layoutpolicy_horizontal = fixed
-					
-					block "Icon"
-					{
-						texture = "gfx/interface/icons/shared_icons/leader.dds"
-					}
-					icon = {
-						texture = "gfx/interface/icons/shared_icons/plus.dds"
-						block "UpIndicator" { visible = no }
-						position = { -2 12 }
-					}
-					icon = {
-						texture = "gfx/interface/icons/shared_icons/minus.dds"
-						block "DownIndicator" { visible = no }
-						position = { -2 12 }
-					}
+					size = { 40 40 }
+					frame = "[WarOverview.GetTickingWarScoreChangeFrame]"
+					tooltip = "[WarOverview.GetTickingWarScoreChangeTooltip]"
+					visible = "[WarOverview.HasTickingWarScore]"
 				}
 			}
-
-			widget = {
-				size = { 0 0 }
-				layoutpolicy_horizontal = fixed
-			}
+		}
+		icon = {
+			parentanchor = hcenter
+			framesize = { 50 50 }
+			size = { 60 60 }
 			
-			widget = {
-				size = { 0 24}
-				layoutpolicy_horizontal = expanding
-				
-				textbox = {
-					name = "Text"
-					position = { 0 -10 }
-					size = { 100% 24 }
-					fontsize = 24	
-					align = right
-					elide = right
-					using = BaseFontM
-					using = Black_FontColor
-	
-					block "Text"
-					{
-						
-						text = "888.88%"
-					}
-				}
+			block "Icon" { texture = "gfx/interface/icons/shared_icons/leader.dds" }
+			icon = {
+				texture = "gfx/interface/icons/shared_icons/plus.dds"
+				block "UpIndicator" { visible = no }
+				position = { -2 12 }
 			}
-			
-			widget = {
-				size = { 6 6 }
-				layoutpolicy_horizontal = fixed
-			}			
+			icon = {
+				texture = "gfx/interface/icons/shared_icons/minus.dds"
+				block "DownIndicator" { visible = no }
+				position = { -2 12 }
+			}
 		}
 	}
 	#Bigger size plus button

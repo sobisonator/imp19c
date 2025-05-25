@@ -1306,6 +1306,58 @@ AI_assess_peace = {
 	# Function: Assess whether the AI countries in this war want to make peace
 }
 
+AI_make_peace_province_wishlist_p0 = {
+	# Scope: War
+	# Function: Trigger peace province wishlist script for every member of the war on the appropriate side
+	set_global_variable = {
+		name = total_warscore_cost_available
+		value = 100 # Debug, it should be taken from the war scope
+	}
+	save_scope_as = war_scope
+
+	if = {
+		limit = {
+			flag:$target$ = flag:defender
+		}
+		# TODO: Make the block below into a scripted effect so it's not repeated for each scenario
+		set_global_variable = {
+			name = total_diplomacy_power
+			value = {
+				every_war_attacker = {
+					add = DIPLOMACY_power
+				}
+			}
+		}
+		ordered_war_attacker = {
+			order_by = {
+				value = DIPLOMACY_power
+				multiply = -1
+			}
+			max = 999
+			check_range_bounds = no
+			save_scope_as = AI_root
+			scope:war_scope = { AI_make_peace_province_wishlist = { target = $target$ } }
+		}
+	}
+	else = {
+		set_global_variable = {
+			name = total_diplomacy_power
+			value = {
+				every_war_defender = {
+					add = DIPLOMACY_power
+				}
+			}
+		}
+		ordered_war_defender = {
+			save_scope_as = AI_root
+			scope:war_scope = { AI_make_peace_province_wishlist = { target = $target$ } }
+		}
+	}
+	remove_global_variable = total_diplomacy_power
+	remove_global_variable = total_warscore_cost_available
+
+}
+
 AI_make_peace_province_wishlist = {
 	# Scope: War
 	# Function: Make a list of provinces the AI wants to demand in a peace deal
@@ -1315,9 +1367,16 @@ AI_make_peace_province_wishlist = {
 	# Takes argument $target$, which is either "attacker" or "defender"
 	# It is the target, therefore this is run against the opposite side of the calling scope
 	# If this is run from the perspective of the attacker, then it should be run on all defenders
+
 	set_global_variable = {
 		name = warscore_cost_available
-		value = 100 # Debug, it should be taken from the war scope
+		value = {
+			value = global_var:total_warscore_cost_available
+			multiply = {
+				value = scope:AI_root.DIPLOMACY_power
+				divide = global_var:total_diplomacy_power
+			}
+		}
 	}
 
 	every_in_list = {
@@ -1325,18 +1384,6 @@ AI_make_peace_province_wishlist = {
 		remove_from_list = AI_peace_wishlist_stage_1
 	}
 
-	if = {
-		limit = {
-			flag:$target$ = flag:defender
-		}
-		attacker_warleader = { save_scope_as = AI_root }
-	}
-	else_if = {
-		limit = {
-			flag:$target$ = flag:attacker
-		}
-		defender_warleader = { save_scope_as = AI_root }
-	}
 	every_war_$target$ = {
 		every_owned_province = {
 			limit = {
@@ -1904,6 +1951,8 @@ AI_make_peace_province_wishlist = {
 	}
 	
 
+	# TODO: Make the release / annex decision below into a separate scripted effect which is called here
+
 	LAND_transfer_provinces = {
 		target_provinces = AI_peace_wishlist_stage_1
 		grantee = scope:AI_root
@@ -1937,26 +1986,47 @@ AI_make_peace_province_wishlist = {
 			}
 			add_to_list = released_from_war
 		}
-		LAND_release_from_list = {
-			releaser = scope:AI_root
-			list = released_from_war
-			capital_location = by_population
-			#country_name_key = as_capital_region
-			#country_adj_key = as_capital_region
-			primary_culture = as_capital # TODO: Should be dynamic
-			country_religion = as_capital # TODO: Should be dynamic
-			as_subject_type = dynamic
-			government_type = dynamic
-			give_overlord_hos = yes # TODO: Should be dynamic
-		}
 
+		if = {
+			limit = {
+				# Prevent colonies from releasing new client states
+				scope:AI_root = {
+					trigger_if = {
+						limit = {
+							is_subject = yes
+						}
+						NOR = {
+							is_subject_type = client_colony
+							is_subject_type = autonomous_colony
+						}
+					}
+					trigger_else = {
+						always = yes
+					}
+				}
+			}
+			LAND_release_from_list = {
+				releaser = scope:AI_root
+				list = released_from_war
+				capital_location = by_population
+				#country_name_key = as_capital_region
+				#country_adj_key = as_capital_region
+				primary_culture = as_capital # TODO: Should be dynamic
+				country_religion = as_capital # TODO: Should be dynamic
+				as_subject_type = dynamic
+				government_type = dynamic
+				give_overlord_hos = yes # TODO: Should be dynamic
+			}
+		}
+		
+	}
+
+	every_in_list = {
+		list = releasable_region_list
+		remove_from_list = releasable_region_list
 	}
 	
 	remove_global_variable = warscore_cost_available
-}
-
-AI_make_peace_province_wishlist_specified = {
-
 }
 
 
@@ -1998,14 +2068,12 @@ AI_debug_peace_deal_all_wars = {
 					THIS = { is_in_list = wars_checked }
 				}
 			}
-			ordered_war_attacker = {
-				# TODO: Make a version which specifies the AI_root scope
-				# And then use this to go through the ordered members of a war
-				# in inverse order of diplomacy power, so the smallest contributors get to act first
-				# The warscore available to each one is scaled by diplomacy power
-				AI_make_peace_province_wishlist_specified = {
-					target = defender
-				}
+			# TODO: Make a version which specifies the AI_root scope
+			# And then use this to go through the ordered members of a war
+			# in inverse order of diplomacy power, so the smallest contributors get to act first
+			# The warscore available to each one is scaled by diplomacy power
+			AI_make_peace_province_wishlist_p0 = {
+				target = defender
 			}
 
 			add_to_list = wars_checked

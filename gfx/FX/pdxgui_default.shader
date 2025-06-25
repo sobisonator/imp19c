@@ -85,27 +85,7 @@ PixelShader =
 				#ifdef DISABLED
 					OutColor.rgb = DisableColor( OutColor.rgb );
 				#endif
-
-				#ifdef gui_zero_seven 
-					OutColor.rgb *= 0.7;
-				#endif
-
-				#ifdef gui_zero_eight
-					OutColor.rgb *= 0.8;
-				#endif
-
-				#ifdef gui_zero_nine 
-					OutColor.rgb *= 0.9;
-				#endif
-
-				#ifdef gui_one_one 
-					OutColor.rgb *= 1.1;
-				#endif
-
-				#ifdef gui_one_two 
-					OutColor.rgb *= 1.2;
-				#endif
-
+				
 			    return OutColor;
 			}
 		]]

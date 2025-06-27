@@ -554,16 +554,17 @@ LAND_release_from_list = {
 	# Arguments will determine whether the new country is a subject, independent, and other values
 	# args + accepted values:
 	# list  			: list of provinces (NOT a variable list)
-	# capital_location 	: by_population
+	# capital_location 	: by_population / p:provid
 	# primary_culture 	: as_capital / culture script name
 	# country_religion 	: dynamic / religion script name
 	# country_name 		: dynamic / loc key
 	# country_adj 		: dynamic / loc key
 	# country_flag 		: dynamic / coat_of_arms script tag
 	# give_overlord_hos : bool
+	# as_subject_type 	: dynamic / independent
+	# releaser 			: c:TAG / can be any value if the releaser country can be ignored
 
 
-	# TODO: Pick an appropriate
 	$releaser$ = { save_scope_as = releaser }
 	ordered_in_list = {
 		# Ordered in order to pick the capital
@@ -580,6 +581,18 @@ LAND_release_from_list = {
 		}
 		max = 1
 		save_scope_as = new_capital_scope
+
+		# Overwrite with the predetermined capital scope if it is a valid province
+		if = {
+			limit = {
+				any_province = {
+					THIS = $capital_location$
+				}
+			}
+			$capital_location$ = {
+				save_scope_as = new_capital_scope
+			}
+		}
 
 		create_country = {
 			save_scope_as = new_country_scope

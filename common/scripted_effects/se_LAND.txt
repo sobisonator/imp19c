@@ -552,16 +552,19 @@ LAND_release_from_list = {
 	# Scope: Country which is creating a new country from the $list$ of provinces
 	# Function: Create a new country from a list of provinces
 	# Arguments will determine whether the new country is a subject, independent, and other values
-	# args:
-	# list
-	# capital_location
-	# country_name_key
-	# country_adj_key
-	# primary_culture
-	# country_religion
+	# args + accepted values:
+	# list  			: list of provinces (NOT a variable list)
+	# capital_location 	: by_population / p:provid
+	# primary_culture 	: as_capital / culture script name
+	# country_religion 	: dynamic / religion script name
+	# country_name 		: dynamic / loc key
+	# country_adj 		: dynamic / loc key
+	# country_flag 		: dynamic / coat_of_arms script tag
+	# give_overlord_hos : bool
+	# as_subject_type 	: dynamic / independent
+	# releaser 			: c:TAG / can be any value if the releaser country can be ignored
 
 
-	# TODO: Pick an appropriate
 	$releaser$ = { save_scope_as = releaser }
 	ordered_in_list = {
 		# Ordered in order to pick the capital
@@ -579,6 +582,18 @@ LAND_release_from_list = {
 		max = 1
 		save_scope_as = new_capital_scope
 
+		# Overwrite with the predetermined capital scope if it is a valid province
+		if = {
+			limit = {
+				any_province = {
+					THIS = $capital_location$
+				}
+			}
+			$capital_location$ = {
+				save_scope_as = new_capital_scope
+			}
+		}
+
 		create_country = {
 			save_scope_as = new_country_scope
 			# Set culture
@@ -587,6 +602,9 @@ LAND_release_from_list = {
             		flag:$primary_culture$ = flag:as_capital
             	}
             	set_primary_culture = scope:new_capital_scope.dominant_province_culture # TODO: Add conditions
+            }
+            else = {
+            	set_primary_culture = $primary_culture$
             }
             # Set religion
             if = {
@@ -678,8 +696,52 @@ LAND_release_from_list = {
 			change_government = viceroyalty
 			# Also determine hidden royalty rank (i.e. county, principality, etc.)
 		}
-		# Select name after full transfer of land, so that territory is accounted for in name
-		COUNTRYNAME_select_custom_country_name = yes
+
+		if = {
+			limit = {
+				flag:$country_name$ = flag:dynamic
+			}
+			# Select name after full transfer of land, so that territory is accounted for in name
+			COUNTRYNAME_select_custom_country_name = yes
+		}
+		else = {
+			change_country_name = $country_name$
+		}
+
+		if = {
+			limit = {
+				flag:$country_adj$ = flag:dynamic
+			}
+			# Pass, already dealt with by COUNTRYNAME_select_custom_country_name
+		}
+		else = {
+			change_country_adjective = $country_adj$
+		}
+
+		if = {
+			limit = {
+				flag:$country_flag$ = flag:dynamic
+			}
+			# Do nothing
+		}
+		else = {
+			change_country_flag = $country_flag$
+		}
+
+		if = {
+			limit = {
+				flag:$country_color$ = flag:dynamic
+			}
+			# Do nothing
+		}
+		else = {
+			change_country_color = $country_color$
+		}
+
+		trigger_event = {
+			id = ECON_events.7
+			days = 1
+		}
 
 	}
 

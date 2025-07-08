@@ -461,16 +461,6 @@ PixelShader =
 				WaterFade *= ExtraFade;
 			#endif
 			
-			#ifdef eveningLight
-				FinalColor *= 0.4;
-			#endif
-			#ifdef morningLight
-				FinalColor *= 0.7;
-			#endif
-			#ifdef nightLight
-				FinalColor *= 0.1;
-			#endif
-			
 			return float4( FinalColor, WaterFade );
 		}
 		

@@ -184,21 +184,6 @@ PixelShader =
 		SampleModeU = "Wrap"
 		SampleModeV = "Wrap"
 	}
-	# MOD(map-skybox)
-	TextureSampler SkyboxSample
-	{
-		Index = 12
-		MagFilter = "Linear"
-		MinFilter = "Linear"
-		MipFilter = "Linear"
-		SampleModeU = "Clamp"
-		SampleModeV = "Clamp"
-		Type = "Cube"
-		File = "gfx/map/environment/SkyBox.dds"
-		srgb = yes
-		Border_Color = { 1 1 1 1 }
-	}
-	# END MOD
 }
 
 VertexStruct VS_OUTPUT
@@ -353,43 +338,6 @@ PixelShader =
 			#endif
 		}
 	]]
-
-	# MOD(map-skybox)
-	MainCode SKYX_PS_sky
-	{
-		Input = "VS_OUTPUT"
-		Output = "PDX_COLOR"
-		Code
-		[[
-			PDX_MAIN
-			{
-				float3 FromCameraDir = normalize(Input.WorldSpacePos - CameraPosition);
-				FromCameraDir.y *= 2;
-				FromCameraDir.y += 0.07;
-				//float3 FromCameraDir = normalize(Input.WorldSpacePos - CameraPosition) + 0.07;
-				//TODO: Figure out a way to have this number adjust so the clouds look like they "move"
-				//FromCameraDir.x *= 2;
-				float4 CubemapSample = PdxTexCube(SkyboxSample, FromCameraDir);
-
-				#ifdef eveningLight
-					CubemapSample.r *= 5.00;
-					CubemapSample.g *= 0.7;
-					CubemapSample.b *= 0.31;
-				#endif
-				#ifdef morningLight
-					CubemapSample.r *= 2.00;
-					CubemapSample.g *= 0.93;
-					CubemapSample.b *= 0.89;
-				#endif
-				#ifdef nightLight
-					CubemapSample *= 0.015;
-				#endif
-
-				return CubemapSample;
-			}
-		]]
-	}
-	# END MOD
 
 	MainCode PS_standard
 	{
@@ -906,26 +854,6 @@ Effect standard_atlasShadow_mapobject
 	VertexShader = "VS_jomini_mapobject_shadow"
 	PixelShader = "PS_jomini_mapobject_shadow"
 	RasterizerState = ShadowRasterizerState
-}
-
-
-# MOD(map-skybox)
-Effect SKYX_sky
-{
-	VertexShader = "VS_standard"
-	PixelShader = "SKYX_PS_sky"
-}
-
-Effect SKYX_sky_mapobject
-{
-	VertexShader = "VS_mapobject"
-	PixelShader = "SKYX_PS_sky"
-}
-
-Effect SKYX_sky_selection_mapobject
-{
-	VertexShader = "VS_mapobject"
-	PixelShader = "SKYX_PS_sky"
 }
 
 Effect standard_usercolor_ship

@@ -108,3 +108,58 @@ ECON_events.7 = {
         }
     }
 }
+
+ECON_events.7 = {
+    # Set up governorships data for newly created country
+    # Called one day after a new country has been created, once governorships exist
+    type = country_event
+    hidden = yes
+
+    immediate = {
+        TRADE_count_country_TZs = yes
+        CULTURE_set_islamic_alcohol_taboo = yes
+
+        set_variable = {
+            name = internal_income_pool
+            value = 0
+        }
+        set_variable = {
+            name = national_trade_income_pool
+            value = 0
+        }
+        every_tradegood_complex = {
+            APPLY = TRADE_reset_tradegood_total_internal_stockpile
+        }
+        every_tradegood_complex = {
+            APPLY = TRADE_setup_governorship_for_export_internal_vars
+        }
+        every_tradegood_complex = {
+            APPLY = TRADE_reset_internal_trade_stockpiles
+        }
+        every_tradegood_complex = {
+            APPLY = TRADE_reset_total_ordered_sold_and_bought_pools
+        }
+        TRADE_reset_quarterly_tax_totals = yes
+
+        every_governorships = {
+            INDUSTRY_setup_all_factory_assignments = yes
+            TRADE_governorship_get_pops_this_quarter = yes
+            TRADE_set_internal_trade_scope = yes
+            TRADE_update_governorship_TZs = yes
+            TRADE_setup_internal_trade_cuts = yes
+            TRADE_reset_quarterly_governorship_values = yes
+            TRADE_setup_tax_rates = yes
+            GT_reset_trade_transaction_totals = yes
+        }
+
+        CURRENCY_country_setup_reserves = {
+            gold_reserve_size = CURRENCY_base_starting_reserve_gold # hundreds lb
+            gold_reserve_accumulation_rate = CURRENCY_base_starting_reserve_accumulation_rate_gold # hundreds lb
+
+            silver_reserve_size = CURRENCY_base_starting_reserve_silver # hundreds lb
+            silver_reserve_accumulation_rate = CURRENCY_base_starting_reserve_accumulation_rate_silver # hundreds lb
+        }
+
+        WEALTH_cache_national_wealth = yes
+    }
+}

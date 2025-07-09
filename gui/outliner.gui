@@ -98,7 +98,7 @@ window = {
 								visible = "[And(And(OutlinerCategory.IsVisible,NotEqualTo_int32(OutlinerCategory.GetItemCount,'(int32)0')), EqualTo_string(OutlinerCategory.GetName, Localize('OUTLINER_CATEGORY_PLAYER_NAVIES')))]"
 								blockoverride "button" {
 									outline_button = {
-										blockoverride "icon" { texture = "gfx/interface/icons/subunits/brig.dds" }
+										blockoverride "icon" { texture = "gfx/interface/icons/subunits/medium_steamer.dds" }
 									}
 								}
 							}
@@ -356,12 +356,14 @@ window = {
 	button_slide_out = {
 		name = "hide_outliner_button"
 		position = { 0 11 }
+		visible = "[GetVariableSystem.HasValue('outliner', 'show')]"
 		alwaystransparent = no
 		inherit_visual_state = yes
-		onclick = "[PdxGuiTriggerAllAnimations('hide_outliner')]"
-		onclick = "[PdxGuiWidget.Hide]"
-		onclick = "[PdxGuiWidget.AccessParent.FindChild('show_outliner_button').Show]"
+		#onclick = "[PdxGuiTriggerAllAnimations('hide_outliner')]"
+		#onclick = "[PdxGuiWidget.Hide]"
+		#onclick = "[PdxGuiWidget.AccessParent.FindChild('show_outliner_button').Show]"
 		onclick = "[Outliner.OnHideSettings]"
+		onclick = "[GetVariableSystem.Set('outliner', 'hide')]"
 		### Audio ###
 		state = {
 			name = _show
@@ -374,12 +376,14 @@ window = {
 	button_slide_in = {
 		name = "show_outliner_button"
 		position = { 0 11 }
-		visible = no
+		#visible = no
+		visible = "[GetVariableSystem.HasValue('outliner', 'hide')]"
 		alwaystransparent = no
 		inherit_visual_state = yes
-		onclick = "[PdxGuiTriggerAllAnimations('show_outliner')]"
-		onclick = "[PdxGuiWidget.Hide]"
-		onclick = "[PdxGuiWidget.AccessParent.FindChild('hide_outliner_button').Show]"
+		#onclick = "[PdxGuiTriggerAllAnimations('show_outliner')]"
+		#onclick = "[PdxGuiWidget.Hide]"
+		#onclick = "[PdxGuiWidget.AccessParent.FindChild('hide_outliner_button').Show]"
+		onclick = "[GetVariableSystem.Set('outliner', 'show')]"
 		### Audio ###
 		state = {
 			name = _show
@@ -393,6 +397,7 @@ window = {
 		name = "show_outliner"
 		animation = { position = { 3 @outliner_height } }
 		bezier = { 0.44 1.11 0.74 0.91 }
+		trigger_when = "[GetVariableSystem.HasValue('outliner', 'show')]"
 		duration = 0.2
 	}
 	
@@ -400,6 +405,7 @@ window = {
 		name = "hide_outliner"
 		animation = { position = { 245 @outliner_height } }
 		bezier = { 0.44 0.2 0.74 0.91 }
+		trigger_when = "[GetVariableSystem.HasValue('outliner', 'hide')]"
 		duration = 0.2
 	}
 	

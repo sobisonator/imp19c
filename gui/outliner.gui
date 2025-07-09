@@ -9,7 +9,7 @@ window = {
 	parentanchor = top|right
 	position = { 3 @outliner_height }
 
-	size = { 278 580 }
+	size = { 280 580 }
 	movable = no
 	filter_mouse = all
 	alwaystransparent = no
@@ -26,7 +26,34 @@ window = {
 		duration = 0.5
 		alpha = 1
 	}
-
+	background = {
+		name = "Shadow"
+		texture = "gfx/interface/base_parts/shadows/background_x60bd_shadow_one_corner_v2.dds"
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		blend_mode = alphamultiply
+		spriteType = Corneredtiled
+		spriteborder = { 60 60 }
+		#margin_left = -18
+		alpha = 0.5			
+	}
+	background = {
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		using = black_background
+		spriteType = Corneredtiled
+		alpha = 0.95
+		#margin_left = -19
+		modify_texture = {
+			blend_mode = alphamultiply
+			texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
+		}
+		modify_texture = {
+			name = "Alpha"
+			texture = "gfx/interface/base_parts/background_x60bd_alpha_one_corner.dds"
+			blend_mode = alphamultiply
+			spriteType = Corneredtiled
+			spriteborder = { 60 60 }
+		}
+	}
 	#button = { 
 	#	position = { -50 3 }	
 	#	size = { 58 48 }
@@ -46,8 +73,8 @@ window = {
 	#}	
 	
 	outline_header = {
-		position = { 20 3 }
-		size = { 260 38 }
+		position = { 0 3 }
+		size = { 100% 38 }
 		blockoverride "Title_text" { text = "OUTLINER" }
 		blockoverride "White_buttons" 
 		{   
@@ -59,13 +86,27 @@ window = {
 	}
 
 	margin_widget = {
-		position = { -35 34 }
-		size = { 350 546 }
+		position = { -30 40 }
+		size = { 300 536 }
 		#margin = { 4 0 }
 		filter_mouse = all
 		alwaystransparent = no
+		state = {
+			name = "show_outliner"
+			animation = { position = { -30 40 } }
+			bezier = { 0.44 1.11 0.74 0.91 }
+			trigger_when = "[GetVariableSystem.HasValue('outliner', 'show')]"
+			duration = 0.2
+		}
+		state = {
+			name = "hide_outliner"
+			animation = { position = { -60 40 } }
+			bezier = { 0.44 0.2 0.74 0.91 }
+			trigger_when = "[GetVariableSystem.HasValue('outliner', 'hide')]"
+			duration = 0.2
+		}
 		scrollarea = {
-			size = { 350 542 }
+			size = { 305 536 }
 			scrollbarpolicy_horizontal = always_off
 			scrollbar_vertical = {
 				using = VerticalScrollBar
@@ -85,6 +126,43 @@ window = {
 								blockoverride "button" {
 									outline_button = {
 										blockoverride "icon" { texture = "gfx/interface/buttons/inventions/war.dds" }
+										blockoverride "color" { using = red_color }
+									}
+								}
+							}
+						}
+					}
+					dynamicgridbox = {
+						datamodel = "[Outliner.GetCategories]"
+						ignoreinvisible = yes
+						item = {
+							outliner_block = {
+								visible = "[And(And(OutlinerCategory.IsVisible,NotEqualTo_int32(OutlinerCategory.GetItemCount,'(int32)0')), EqualTo_string(OutlinerCategory.GetName, Localize('OUTLINER_CATEGORY_PLAYER_ARMIES')))]"
+								blockoverride "button" {
+									outline_button = {
+										blockoverride "icon" { texture = "gfx/interface/icons/new_icons/color/military.dds" }
+										blockoverride "color" { using = green_color }
+									}
+								}
+							}
+						}
+					}
+					dynamicgridbox = {
+						datamodel = "[Outliner.GetCategories]"
+						ignoreinvisible = yes
+						item = {
+							outliner_block = {
+								visible = "[And(And(OutlinerCategory.IsVisible,NotEqualTo_int32(OutlinerCategory.GetItemCount,'(int32)0')), EqualTo_string(OutlinerCategory.GetName, Localize('OUTLINER_CATEGORY_AUTOMATED_ARMIES')))]"
+								blockoverride "button" {
+									outline_button = {
+										blockoverride "icon" { texture = "gfx/interface/icons/new_icons/color/military.dds" }
+										blockoverride "color" { using = green_color }
+										blockoverride "action_icon" {
+											modify_texture = {
+												texture = "gfx/interface/icons/shared_icons/change.dds"
+												blend_mode = alphamultiply
+											}
+										}
 									}
 								}
 							}
@@ -98,7 +176,29 @@ window = {
 								visible = "[And(And(OutlinerCategory.IsVisible,NotEqualTo_int32(OutlinerCategory.GetItemCount,'(int32)0')), EqualTo_string(OutlinerCategory.GetName, Localize('OUTLINER_CATEGORY_PLAYER_NAVIES')))]"
 								blockoverride "button" {
 									outline_button = {
-										blockoverride "icon" { texture = "gfx/interface/icons/subunits/medium_steamer.dds" }
+										blockoverride "icon" { texture = "gfx/interface/icons/macro_builder/recruit_naval_units.dds" }
+										blockoverride "color" { using = blue_color }
+									}
+								}
+							}
+						}
+					}
+					dynamicgridbox = {
+						datamodel = "[Outliner.GetCategories]"
+						ignoreinvisible = yes
+						item = {
+							outliner_block = {
+								visible = "[And(And(OutlinerCategory.IsVisible,NotEqualTo_int32(OutlinerCategory.GetItemCount,'(int32)0')), EqualTo_string(OutlinerCategory.GetName, Localize('OUTLINER_CATEGORY_AUTOMATED_NAVIES')))]"
+								blockoverride "button" {
+									outline_button = {
+										blockoverride "icon" { texture = "gfx/interface/icons/macro_builder/recruit_naval_units.dds" }
+										blockoverride "color" { using = blue_color }
+										blockoverride "action_icon" {
+											modify_texture = {
+												texture = "gfx/interface/icons/shared_icons/change.dds"
+												blend_mode = alphamultiply
+											}
+										}
 									}
 								}
 							}
@@ -355,7 +455,7 @@ window = {
 	
 	button_slide_out = {
 		name = "hide_outliner_button"
-		position = { 0 11 }
+		position = { -20 11 }
 		visible = "[Not(GetVariableSystem.HasValue('outliner', 'hide'))]"
 		alwaystransparent = no
 		inherit_visual_state = yes
@@ -375,7 +475,7 @@ window = {
 	
 	button_slide_in = {
 		name = "show_outliner_button"
-		position = { 0 11 }
+		position = { -20 11 }
 		#visible = no
 		visible = "[GetVariableSystem.HasValue('outliner', 'hide')]"
 		alwaystransparent = no
@@ -403,7 +503,7 @@ window = {
 	
 	state = {
 		name = "hide_outliner"
-		animation = { position = { 245 @outliner_height } }
+		animation = { position = { 270 @outliner_height } }
 		bezier = { 0.44 0.2 0.74 0.91 }
 		trigger_when = "[GetVariableSystem.HasValue('outliner', 'hide')]"
 		duration = 0.2

@@ -1381,9 +1381,346 @@ widget = {
 	widgetanchor = top|hcenter
 	visible = "[Not( IsMapMode('cool_map_effect') )]"
 	layer = top
-	 
+
+
+
 	flowcontainer = {
 		resizeparent = yes
+		widget = {
+			size = { 50 36 }
+			visible = "[UnitMapIcon.HasSiege]"
+			icon = {
+				texture = "gfx/interface/pie_charts/pie_chart_alpha_60_shadow.dds"
+				size = { 44 44 }
+				parentanchor = center
+				alpha = 0.5
+			}
+			icon = {
+				texture = "gfx/interface/base_parts/buttons_ls.dds"
+				size = { 44 44 }
+				framesize = { 40 40 }
+				frame = 2
+				parentanchor = center
+				modify_texture = {
+					texture = "gfx/interface/pie_charts/pie_chart_alpha_60.dds"
+					blend_mode = alphamultiply
+				}
+			}
+			icon = {
+				size = { 34 34 }
+				texture = "gfx/interface/base_parts/background_texture.dds"
+				parentanchor = center
+				modify_texture = {
+					texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
+					blend_mode = alphamultiply
+				}
+			}
+			progresspie = {
+				name = "progress"
+				parentanchor = center
+				size = { 44 44 }
+				texture = "gfx/interface/pie_charts/pie_chart_alpha_60.dds"
+				framesize = { 68 68 }
+				frame = 2
+				value = "[UnitMapIcon.GetSiege.GetSiegePhaseProgress]"
+				visible = "[Not( UnitMapIcon.GetSiege.IsTooFewMen )]"
+				tooltip = "[UnitMapIcon.GetSiege.GetSiegePhaseProgressTooltip]"
+				icon = {
+					size = { 42 42 }
+					texture = "[GetSubUnitIcon(MilitaryConstructionIcon.GetType)]"
+					parentanchor = center
+					modify_texture = {
+						texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
+						blend_mode = alphamultiply
+					}
+				}
+			}
+			widget = {
+				size = { 100% 100% }
+				textbox = {
+					position = { 0 1 }
+					parentanchor = center
+					size = { 100% 100% }
+					visible = "[Not(UnitMapIcon.GetSiege.IsTooFewMen)]"
+					using = BaseFontS
+					using = Black_FontColor
+					fontsize = 12
+					align = center|nobaseline
+					text = "[UnitMapIcon.GetSiege.GetFallChance|2%]"
+					autoresize = yes
+					tooltip = "[UnitMapIcon.GetSiege.GetFallChanceTooltip]"
+				}
+				textbox = {
+					position = { 0 1 }
+					parentanchor = center
+					size = { 100% 100% }
+					visible = "[UnitMapIcon.GetSiege.IsTooFewMen]"
+					using = BaseFontS
+					using = Negative_FontColor
+					fontsize = 12
+					align = center|nobaseline
+					text = "SIEGE_TOO_FEW_MEN_TXT"
+					autoresize = yes
+					tooltip = "SIEGE_TOO_FEW_MEN_TOOLTIP"
+				}
+			}
+		}
+		dynamicgridbox = {
+			name = "unit_items_grid"
+			visible = "[Not(IsMapMode('religion'))]"
+			item = {
+				flowcontainer = {
+					ignoreinvisible = yes
+					button = {
+						name = "total_units_bg"
+						size = { 36 36 }
+						visible = "[And(UnitItem.ShowTotalUnits, UnitItem.ShouldBeShownFullWidth)]"
+						tooltip = "STACK_OF_UNITS_TT"
+						onclick = "[UnitItem.OnClick]"
+						texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
+						framesize = { 200 200 }
+						frame = "[UnitItem.GetBackgroundFrame]"
+						textbox = {
+							name = "total_units"
+							position = { 0 -2 }
+							size = { 36 36 }
+							parentanchor = center
+							align = center
+							multiline = no
+							using = BaseFontM
+							visible = "[UnitItem.ShowTotalUnits]"
+							text = "[UnitItem.GetTotalUnits]"
+						}
+					}
+					flowcontainer = {
+						direction = vertical
+						widget = {
+							size = { 100% 0 }
+							widget = {
+								size = { 100% 5 }
+								visible = "[UnitItem.IsSelected]"
+								background = {
+									shaderfile = "gfx/FX/pdxgui_default.shader"
+									using = red_background
+									margin = { 5 5 }
+								}
+							}
+						}
+						button = {
+							onclick = "[UnitItem.OnClick]"
+							tooltip = "[UnitItem.GetTooltip]"
+							button_ignore = right
+							flowcontainer = {
+								resizeparent = yes
+								ignoreinvisible = yes
+								background = {
+									shaderfile = "gfx/FX/pdxgui_default.shader"
+									texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
+									framesize = { 200 200 }
+									frame = "[UnitItem.GetBackgroundFrame]"
+								}
+
+								#Clickable Flag
+								container = {
+									visible = "[Not( UnitItem.GetUnit.IsUnemployedMercenary )]"
+									country_flag = {
+										datacontext = "[UnitItem.GetUnit.GetCountry]"
+										tooltip = "COUNTRY_FLAG_TT"
+										
+										name = "unit_flag"
+										
+										blockoverride "flag"
+										{
+											texture = "[UnitItem.GetFlagTexture('(int32)32','(int32)32')]"
+											frame = "[UnitItem.GetFlagTextureFrame('(int32)32','(int32)32')]"
+											framesize = { 32 32 }
+										}
+										
+										blockoverride "size"
+										{
+											size = { 33 33 }
+										}
+										
+										blockoverride "click"
+										{
+											onclick = "[UnitItem.OnFlagClick]"
+										}
+										
+										blockoverride "hover" {}
+									}
+								}
+								
+								#Mercenary flag
+								container = {
+									country_flag = {
+										visible = "[UnitItem.GetUnit.IsUnemployedMercenary]"
+										name = "unit_flag"
+										tooltip = "MERC_FLAG_TT"
+										
+										blockoverride "flag"
+										{
+											texture = "[UnitItem.GetFlagTexture('(int32)32','(int32)32')]"
+											frame = "[UnitItem.GetFlagTextureFrame('(int32)32','(int32)32')]"
+											framesize = { 32 32 }
+										}
+										
+										blockoverride "size"
+										{
+											size = { 33 33 }
+										}
+										
+										blockoverride "click"
+										{
+											onclick = "[UnitItem.OnClick]"
+										}
+										blockoverride "hover" {}
+									}
+								}
+								progressbar = {
+									using = vertical_moralebar
+									size = { 8 50 }
+									value = "[UnitItem.GetAverageMoralePercent]"
+									tooltip = "[UnitItem.GetUnit.GetMoraleTooltip]"
+								}
+								widget = {
+									size = { 50 50 }
+									visible = "[Not(And( And( UnitItem.ShouldBeShownShortWidth, Not( UnitItem.GetUnit.IsUnemployedMercenary ) ), Or( Or( UnitItem.GetUnit.IsArmy, Or( Not( UnitItem.GetUnit.GetLocation.HasPort ), EqualTo_int32( UnitItem.GetCountry.GetId, Player.GetId ) ) ), UnitItem.IsSelected ) ) )]"	
+									button = {
+										name = "commander_ranking"
+										size = { 100% 100% }
+										framesize = { 60 32 }
+										frame = "[UnitItem.GetLeaderFrame]"
+										texture = "gfx/interface/map/ranking.dds"
+										visible = "[GreaterThan_int32(UnitItem.GetLeaderFrame,'(int32)1')]"
+										onclick = "[UnitItem.OnLeaderClick]"
+										tooltip = "GENERAL_TT"
+									}
+									button = {
+										name = "no_commander_ranking"
+										size = { 100% 100% }
+										framesize = { 60 32 }
+										frame = 2
+										texture = "gfx/interface/map/ranking.dds"
+										visible = "[Not(GreaterThan_int32(UnitItem.GetLeaderFrame,'(int32)1'))]"
+										onclick = "[UnitItem.OnClick]"
+										tooltip = "NO_LEADER_TT"
+									}
+								}
+								textbox = {
+									name = "strength_full"
+									size = { 50 50 }
+									using = BaseFontS
+									using = Black_FontColor
+									align = center
+									visible = "[UnitItem.ShouldBeShownFullWidth]"
+									text = "[UnitItem.GetLabel]"
+									max_width = 48
+									fontsize_min = 10
+								}
+								textbox = {
+									name = "strength_short"
+									size = { 50 50 }
+									using = BaseFontS
+									using = Black_FontColor
+									parentanchor = left|top
+									align = center
+									visible = "[And( And( UnitItem.ShouldBeShownShortWidth, Not( UnitItem.GetUnit.IsUnemployedMercenary ) ), Or( Or( UnitItem.GetUnit.IsArmy, Or( Not( UnitItem.GetUnit.GetLocation.HasPort ), EqualTo_int32( UnitItem.GetCountry.GetId, Player.GetId ) ) ), UnitItem.IsSelected ) )]"	
+									text = "[UnitItem.GetLabel]"
+									max_width = 48
+									fontsize_min = 10
+								}
+								#widget = {
+								#	size = { 50 50 }
+								#}
+							}
+						}
+						flowcontainer = {
+							ignoreinvisible = yes
+							spacing = 5
+							background = {
+								shaderfile = "gfx/FX/pdxgui_default.shader"
+								using = black_background
+							}
+							container = {
+								visible = "[UnitItem.IsMovementLocked]"
+								icon = {
+									texture = "gfx/interface/mapitems/movement_lock.dds"
+									tooltip = "MOVEMENT_LOCKED"
+									size = { 20 19 }
+									position = { 0 3 }
+								}
+							}
+							
+							container = {
+								visible = "[UnitItem.IsLosingSoldiers]"
+								icon = {
+									using = icon_attrition
+									tooltip = "[UnitItem.GetAttritionTooltip]"
+									size = { 20 20 }
+									position = { 0 3 }
+								}
+							}
+							
+							container = {
+								visible = "[UnitItem.IsLosingFood]"
+								icon = {
+									using = icon_food_deficiency
+									tooltip = "[UnitItem.GetAttritionTooltip]"
+									size = { 20 20 }
+									position = { 0 2 }
+								}
+							}
+							
+							container = {
+								parentanchor = vcenter
+								visible = "[UnitItem.IsRegainingFood]"
+								icon = {
+									texture = "gfx/interface/icons/shared_icons/has_attrition_with_food_supply.dds"
+									tooltip = "[UnitItem.GetAttritionTooltip]"
+									size = { 20 20 }
+									position = { 0 2 }
+								}
+							}
+							
+							icon = {
+								parentanchor = vcenter
+								texture = "[UnitItem.GetActiveAbilityIcon]"
+								size = { 20 20 }
+								visible = "[UnitItem.ShowActiveAbility]"
+								tooltip = "[UnitItem.GetActiveAbilityTooltip]"
+							}
+							
+							container = {
+								parentanchor = vcenter
+								visible = "[UnitItem.IsExiled]"
+								icon = {
+									texture = "gfx/interface/icons/shared_icons/exiles.dds"
+									size = { 20 20 }
+									tooltip = "IS_EXILED_TT"
+									position = { 0 3 }
+								}
+							}
+							
+							container = {
+								parentanchor = vcenter
+								visible = "[UnitItem.IsRetreating]"
+								icon = {
+									texture = "gfx/interface/icons/shared_icons/retreating.dds"
+									size = { 20 20 }
+									tooltip = "UNIT_IS_RETREAT_TT"
+									position = { 0 3 }
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	flowcontainer = {
+		#position = { 0 100 }
+		#resizeparent = yes
 		#direction = vertical
 		ignoreinvisible = yes
 		widget = {
@@ -1465,126 +1802,6 @@ widget = {
 				}
 			}
 		}
-		#widget = {
-		#	size = { 60 36 }
-		#	visible = "[UnitMapIcon.HasSiege]"
-		#	icon = {
-		#		name = "Shadow"
-		#		texture = "gfx/interface/map/on_map_siege_bar_shadow.dds"
-		#		size = { 56 56 }
-		#		alpha = 0.3
-		#		position = { 3 -11 }
-		#	}
-					
-		#	icon = {
-		#		size = { 50 50 }
-		#		texture = "gfx/interface/map/on_map_siege_bar_bg.dds"
-		#		position = { 6 -8 }
-				
-		#		widget = {
-		#			size = { 100% 100% }
-		#			textbox = {
-		#				position = { 0 1 }
-		#				parentanchor = center
-		#				size = { 100% 100% }
-		#				visible = "[Not(UnitMapIcon.GetSiege.IsTooFewMen)]"
-		#				using = BaseFontS
-		#				using = Black_FontColor
-		#				fontsize = 14
-		#				align = center|nobaseline
-		#				text = "[UnitMapIcon.GetSiege.GetFallChance|2%]"
-		#				autoresize = yes
-		#				tooltip = "[UnitMapIcon.GetSiege.GetFallChanceTooltip]"
-		#			}
-		#			textbox = {
-		#				parentanchor = center
-		#				size = { 100% 100% }
-		#				position = { 0 2 }
-		#				visible = "[UnitMapIcon.GetSiege.IsTooFewMen]"
-		#				using = BaseFontS
-		#				fontsize = 13
-		#				align = left|nobaseline
-		#				text = "SIEGE_TOO_FEW_MEN_TXT"
-		#				autoresize = yes
-		#				tooltip = "SIEGE_TOO_FEW_MEN_TOOLTIP"
-		#			}
-				
-		#		}
-		#		progresspie = {
-		#			name = "progresspiepie"
-		#			parentanchor = center
-		#			size = { 54 54 }
-		#			texture = "gfx/interface/map/on_map_siege_bar.dds"
-		#			framesize = { 70 70 }
-		#			frame = 2
-		#			value = "[UnitMapIcon.GetSiege.GetSiegePhaseProgress]"
-		#			visible = "[UnitMapIcon.GetSiege.IsTooFewMen]"
-		#			tooltip = "SIEGE_TOO_FEW_MEN_TOOLTIP"
-		#		}
-				
-		#		progresspie = {
-		#			name = "progress"
-		#			parentanchor = center
-		#			size = { 50 50 }
-		#			texture = "gfx/interface/map/on_map_siege_bar.dds"
-		#			framesize = { 70 70 }
-		#			frame = 2
-		#			value = "[UnitMapIcon.GetSiege.GetSiegePhaseProgress]"
-		#			visible = "[Not( UnitMapIcon.GetSiege.IsTooFewMen )]"
-		#			tooltip = "[UnitMapIcon.GetSiege.GetSiegePhaseProgressTooltip]"
-		#		}
-		#	}
-		#}
-		
-		#entry_button = {
-		#	position = { -8 0 }
-		#	size = { 147 35 }
-		#	visible = "[UnitMapIcon.HasSiege]"
-		#	parentanchor = top|hcenter
-		#	widgetanchor = top|hcenter
-		#	onclick = "[OpenSiege(UnitMapIcon.GetSiege)]"
-		#	
-		#	container = {
-		#		position = { 10 7 }
-		#		icon = {
-		#			texture = "gfx/interface/icons/shared_icons/siege.dds"
-		#			size = { 24 24 }
-		#			position = { 0 -3 }
-		#			tooltip = "[UnitMapIcon.GetSiege.GetFallChanceTooltip]"
-		#		}
-		#		
-		#		container = {
-		#			position = { 24 0 }
-		#			container = {
-		#				visible = "[Not(UnitMapIcon.GetSiege.IsTooFewMen)]"
-		#				
-		#				icon = {
-		#					name = "progressbar_frame"
-		#					spriteType = Corneredtiled
-		#					spriteborder = { 5 4 }
-		#					size = { 102 20 }
-		#					texture = "gfx/interface/tiles/progressbar_green_frame.dds"
-		#				}
-		#				
-		#				progressbar = {
-		#					position = { 2 2 }
-		#					using = progressbar_green_horizontal
-		#					size = { 98 16 }
-		#					value = "[UnitMapIcon.GetSiege.GetSiegePhaseProgress]"
-		#					tooltip = "[UnitMapIcon.GetSiege.GetSiegePhaseProgressTooltip]"
-		#					
-		#					blockoverride "L_bar"
-		#					{
-		#						spriteType = Corneredtiled
-		#						spriteborder = { 0 2 }
-		#					}
-		#				}
-		#			}
-		#			
-		#			
-		#		}
-		#	}
-		#}
 		
 		dynamicgridbox = {
 			name = "unit_items_grid"

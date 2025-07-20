@@ -109,6 +109,17 @@ PixelShader =
 			File = "gfx/interface/images/test/noise.png"
 			srgb = yes
 		}
+		TextureSampler WheelTexture
+		{
+			Ref = PdxTexture5
+			MagFilter = "Point"
+			MinFilter = "Point"
+			MipFilter = "Point"
+			SampleModeU = "Clamp"
+			SampleModeV = "Clamp"
+			File = "gfx/interface/images/test/wheel.png"
+			srgb = yes
+		}
 		Input = "VS_OUTPUT_PDX_GUI"
 		Output = "PDX_COLOR"
 
@@ -126,12 +137,20 @@ PixelShader =
 			}
 			float2 rotateUV(float2 uv, float rotation)
 			{
+			    float mid = 0.9;
 			    return float2(
-			        cos(rotation) * uv.x + sin(rotation) * uv.y,
-			        cos(rotation) * uv.y - sin(rotation) * uv.x
+			        cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
+			        cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
 			    );
 			}
-
+			float2 rotateUV_2(float2 uv, float rotation)
+			{
+			    float mid = 0.5;
+			    return float2(
+			        cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
+			        cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
+			    );
+			}
 		]]
 
 		Code
@@ -148,22 +167,28 @@ PixelShader =
 			    float iTime = GlobalTime * -2.0;
 			    float WaveSize = 12.0;
 			    float Scale = 1.2;
-			    float2 Wave = sin((UV.x+iTime*0.1) * WaveSize) * 0.02;
+			    float2 Wave = sin((UV.x + iTime * 0.1) * WaveSize) * 0.02;
 				float2 UV0 = UV;
-				UV0.x *= 2 * Scale;
+				UV0.x *= 2.0 * Scale;
 				UV0.y += -0.02 * Scale;
 				UV0.x += -0.5 * Scale;
-				UV0.y += sin((iTime*0.1) * WaveSize) * 0.02;
+				UV0.y += sin((iTime * 0.1) * WaveSize) * 0.02;
 
-				float2 halfSize = float2( UV0.x * 1.0, UV0.y * 0.5 );
-				UV0 -= halfSize;
-
-				UV0 = rotateUV(UV0, sin((iTime*0.1) * WaveSize) * 0.02);
-				UV0 += halfSize;
+				UV0 = rotateUV(UV0, sin((iTime * 0.1) * WaveSize) * 0.02);
 
 				float4 Barque = SampleImageSprite( BarqueTexture, UV0 );
 
 				OutColor = MixImages( OutColor, Barque );
+
+				float2 UV2 = UV;
+				UV0.x *= 2.0;
+				UV2 = float2((UV0.x - 0.5), UV0.y - 0.2);
+				UV2 = rotateUV_2( UV2, iTime * 0.5);
+				// UV2 = rotateUV_2( UV2, iTime * 0.1);
+
+				float4 Wheel = SampleImageSprite( WheelTexture, UV2 );
+
+				OutColor = MixImages( OutColor, Wheel );
 
 				float4 DownFogAlpha = SampleImageSprite( FogAlphaTexture, float3(UV.x, (UV.y - 0.45) + Wave) );
 				float4 DownFogColor = float4( 1.0f, 1.0f, 1.0f, DownFogAlpha.a * 0.5 );

@@ -57,7 +57,7 @@ PixelShader =
 			    UV.y-= 0.05;
 			    float iTime = GlobalTime * -1 * 0.5;
 			    float WaveSize = 12.0;
-
+			    // UV.y -= sin((iTime * 0.1) * WaveSize) * 0.03;
 			    // wave animation
 			    float2 Wave = sin((UV.x+iTime*0.1) * WaveSize) * 0.03;
 

@@ -235,7 +235,7 @@ PixelShader =
 				float4 OutColor = BaseColor;
 				OutColor *= Input.Color;
 
-			    float iTime = GlobalTime * -2.0;
+			    float iTime = GuiTime * -2.0;
 			    float WaveSize = 12.0;
 			    float Scale = 0.55;
 			    float2 Wave = sin((UV.x + iTime * 0.1) * WaveSize) * 0.02;

@@ -2078,45 +2078,82 @@ types NEW_GUI {
 	}
 	type outliner_block = container {
 		button = {
-			size = { 240 32 }
-			onclick = "[OutlinerCategory.ToggleCollapsed]"
-			position = { 50 6 }
-			state = {
-				name = "show_outliner"
-				animation = { position = { 50 6 } }
-				bezier = { 0.44 1.11 0.74 0.91 }
-				duration = 0.2
-			}
-			state = {
-				name = "hide_outliner"
-				animation = { position = { 70 6 } }
-				bezier = { 0.44 0.2 0.74 0.91 }
-				duration = 0.2
-			}
-		}
-		outliner_category_button_square = {
-			size = { 240 32 }
-			position = { 50 6 }
-			using = tooltip_es
-			blockoverride "Text" { text = "[OutlinerCategory.GetName]" }
+			size = { 270 30 }
+			position = { 37 0 }
+			gfxtype = buttongfx
+			#onclick = "[OutlinerCategory.ToggleCollapsed]"
 			tooltip = "[OutlinerCategory.GetTooltip]"
-			blockoverride "Down" { visible = "[Not( OutlinerCategory.IsCollapsed )]" }
-			blockoverride "Up" { visible = "[OutlinerCategory.IsCollapsed]" }
-			blockoverride "On_click" { onclick = "[OutlinerCategory.ToggleCollapsed]" }
+			alpha = 0.5
+			using = tooltip_es
+			#using = beige_background
+			using = black_background
+			#modify_texture = {
+			#	blend_mode = alphamultiply
+			#	texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
+			#}
+			widget = {
+				size = { 3 100% }
+				alpha = 2.0
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					using = brighten_red_background
+				}
+			}
+			open_list_subjects = {
+				size = { 18 18 }
+				parentanchor = vcenter
+				position = { 10 0 }
+				alpha = 2.0
+				blockoverride "Down" {
+					#onclick = "[GetVariableSystem.Toggle(OverviewGovernorshipItem.GetGovernorship.GetName)]"
+					visible = "[Not(GetVariableSystem.HasValue(OutlinerCategory.GetName, 'hide'))]"
+					#onclick = "[GetVariableSystem.Set( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
+					#visible = "[Or( Not( GetVariableSystem.Exists( OverviewGovernorshipItem.GetGovernorship.GetName ) ), GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'no' ) )]"
+				}
+				blockoverride "Right" {
+					#onclick = "[GetVariableSystem.Toggle(OverviewGovernorshipItem.GetGovernorship.GetName)]"
+					visible = "[GetVariableSystem.HasValue(OutlinerCategory.GetName, 'hide')]"
+					#onclick = "[GetVariableSystem.Set( OverviewGovernorshipItem.GetGovernorship.GetName, 'no' )]"
+					#visible = "[GetVariableSystem.HasValue( OverviewGovernorshipItem.GetGovernorship.GetName, 'yes' )]"
+				}
+			}
+			textbox = {
+				using = SubHeaderFont
+				using = Sub_Header_FontColor
+				alpha = 2.0
+				fontsize = 16
+				text = "[OutlinerCategory.GetName]"
+				autoresize = yes
+				parentanchor = left
+				position = { 35 6 }
+			}
+			button = {
+				size = { 100% 100% }
+				onclick = "[OutlinerCategory.ToggleCollapsed]"
+				onclick = "[GetVariableSystem.Set(OutlinerCategory.GetName, 'hide')]"
+				visible = "[Not(GetVariableSystem.HasValue(OutlinerCategory.GetName, 'hide'))]"
+			}
+			button = {
+				size = { 100% 100% }
+				onclick = "[OutlinerCategory.ToggleCollapsed]"
+				onclick = "[GetVariableSystem.Set(OutlinerCategory.GetName, 'show')]"
+				visible = "[GetVariableSystem.HasValue(OutlinerCategory.GetName, 'hide')]"
+			}
 			state = {
 				name = "show_outliner"
-				animation = { position = { 50 6 } }
+				animation = { position = { 37 0 } }
 				bezier = { 0.44 1.11 0.74 0.91 }
+				trigger_when = "[GetVariableSystem.HasValue('outliner', 'show')]"
 				duration = 0.2
 			}
 			state = {
 				name = "hide_outliner"
-				animation = { position = { 70 6 } }
+				animation = { position = { 65 0 } }
 				bezier = { 0.44 0.2 0.74 0.91 }
+				trigger_when = "[GetVariableSystem.HasValue('outliner', 'hide')]"
 				duration = 0.2
 			}
 		} 
-		
 		dynamicgridbox = {
 			name = "item_grid"
 			position = { 0 30 }
@@ -2134,37 +2171,100 @@ types NEW_GUI {
 		onclick = "[OutlinerItem.OnClick]"
 		onrightclick = "[OutlinerItem.OnRightClick]"
 		using = black_background
+		alpha = 0.5
 		modify_texture = {
 			texture = "gfx/interface/base_parts/round_button_right_alpha_x1.dds"
 			blend_mode = alphamultiply
 			spriteType = corneredtiled
 			spriteborder = { 21 20 }
 		}
-		textbox = {
-			size = { 80 16 }
+		background = {
+			name = "Shadow"
+			texture = "gfx/interface/base_parts/shadows/round_button_right_alpha_x2_shadow.dds"
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			spriteType = corneredtiled
+			spriteborder = { 18 17 }
+			alpha = 0.5
+		}
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = portrait_x32y32bd_alpha
+			texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+			margin = { 26 -2 }
+			alpha = 0.25
+			modify_texture = {
+				texture = "gfx/interface/base_parts/round_button_right_alpha_x1.dds"
+				blend_mode = alphamultiply
+				spriteType = corneredtiled
+				spriteborder = { 21 20 }
+			}
+			modify_texture = {
+				texture = "gfx/interface/base_parts/button_vignette.dds"
+				blend_mode = alphamultiply
+				spriteType = corneredtiled
+				spriteborder = { 20 32 }
+			}
+		}
+		widget = {
+			size = { 100% 100% }
+			background = {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = black_background
+				margin = { -2 -2 }
+				modify_texture = {
+					texture = "gfx/interface/base_parts/round_button_right_alpha_x25.dds"
+					blend_mode = alphamultiply
+					spriteType = corneredtiled
+					spriteborder = { 16 15 }
+				}
+			}
+		}
+		widget = {
+			size = { 20 16 }
 			position = { 10 0 }
 			parentanchor = left|vcenter
-			using = BaseFontS
-			fontsize_min = 12
-			elide = right
-			align = left
-			fontcolor = { 1 1 1 1 }
-			text = "[OutlinerItem.GetStatus]"
-			visible = "[And(OutlinerItem.IsStatusText,Not(OutlinerItem.HasCharacter))]"
+			scissor = yes
+			state = {
+				name = "show_outliner"
+				animation = { size = { 20 16 } }
+				bezier = { 0.44 1.11 0.74 0.91 }
+				trigger_when = "[GetVariableSystem.HasValue('outliner', 'show')]"
+				duration = 0.2
+			}
+			state = {
+				name = "hide_outliner"
+				animation = { size = { 30 16 } }
+				bezier = { 0.44 0.2 0.74 0.91 }
+				trigger_when = "[GetVariableSystem.HasValue('outliner', 'hide')]"
+				duration = 0.2
+			}
+			textbox = {
+				size = { 80 16 }
+				using = BaseFontS
+				fontsize_min = 12
+				elide = right
+				align = left
+				alpha = 2.0
+				text = "[OutlinerItem.GetStatus]"
+				visible = "[And(OutlinerItem.IsStatusText,Not(OutlinerItem.HasCharacter))]"
+			}
 		}
 		margin_widget = {
 			size = { 40 40 }
 			margin = { 5 5 }
+			alpha = 2.0
 			state = {
 				name = "show_outliner"
 				animation = { position = { 0 0 } }
 				bezier = { 0.44 1.11 0.74 0.91 }
+				trigger_when = "[GetVariableSystem.HasValue('outliner', 'show')]"
 				duration = 0.2
 			}
 			state = {
 				name = "hide_outliner"
 				animation = { position = { 30 0 } }
 				bezier = { 0.44 0.2 0.74 0.91 }
+				trigger_when = "[GetVariableSystem.HasValue('outliner', 'hide')]"
 				duration = 0.2
 			}
 
@@ -2179,7 +2279,16 @@ types NEW_GUI {
 				}
 				background = {
 					shaderfile = "gfx/FX/pdxgui_default.shader"
-					using = red_background
+					using = black_background
+					modify_texture = {
+						texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
+						blend_mode = alphamultiply
+					}
+				}
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					block "color" { using = red_background }
+					alpha = 0.75
 					modify_texture = {
 						texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
 						blend_mode = alphamultiply
@@ -2188,7 +2297,20 @@ types NEW_GUI {
 				icon = {
 					size = { 26 26 }
 					parentanchor = center
-					block "icon" { texture = "gfx/interface/buttons/inventions/war.dds" }
+					block "icon" { texture = "gfx/interface/icons/_default.dds" }
+					icon = {
+						size = { 18 18 }
+						position = { 5 5 }
+						parentanchor = bottom|right
+						using = white_background
+						block "action_icon" {
+							visible = no
+							modify_texture = {
+								texture = "gfx/interface/icons/_default.dds"
+								blend_mode = alphamultiply
+							}
+						}
+					}
 				}
 			}
 		}
@@ -2200,7 +2322,7 @@ types NEW_GUI {
 			elide = right
 			fontsize_min = 10
 			using = BaseFontS
-			fontcolor = { 1 1 1 1 }
+			alpha = 2.0
 			align = left
 			text = "[OutlinerItem.GetText]"
 			visible = "[Not( OutlinerItem.HasCharacter )]"
@@ -2208,25 +2330,27 @@ types NEW_GUI {
 				name = "show_outliner"
 				animation = { position = { 40 0 } }
 				bezier = { 0.44 1.11 0.74 0.91 }
+				trigger_when = "[GetVariableSystem.HasValue('outliner', 'show')]"
 				duration = 0.2
 			}
 			state = {
 				name = "hide_outliner"
 				animation = { position = { 70 0 } }
 				bezier = { 0.44 0.2 0.74 0.91 }
+				trigger_when = "[GetVariableSystem.HasValue('outliner', 'hide')]"
 				duration = 0.2
 			}
 		}
 		textbox = {
 			name = "item_text"
 			size = { 80 16 }
-			position = { -10 0 }
+			position = { -20 0 }
 			parentanchor = right|vcenter
 			using = BaseFontS
 			fontsize_min = 12
 			elide = right
 			align = right
-			fontcolor = { 1 1 1 1 }
+			alpha = 2.0
 			text = "[OutlinerItem.GetStatus]"
 			visible = "[And(OutlinerItem.IsStatusText,Not(OutlinerItem.HasCharacter))]"
 		}

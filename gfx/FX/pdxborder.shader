@@ -89,8 +89,8 @@ PixelShader =
 			{
 				float2 UV = Input.UV;
 				float ZoomSepMix = 50;
-				float ZoomSepMax = 850;
-				UV.y = UV.y * ( 1 - smoothstep(ZoomSepMix, ZoomSepMax, CameraPosition.y) * 0.7);
+				float ZoomSepMax = 400;
+				UV.y = UV.y * ( 1 - smoothstep(ZoomSepMix, ZoomSepMax, CameraPosition.y) * 0.8);
 				UV.y = UV.y + smoothstep(ZoomSepMix, ZoomSepMax, CameraPosition.y) * 0.3;
 				// UV.x = UV.x * ( 1 - smoothstep(ZoomSepMix, ZoomSepMax, CameraPosition.y) * 0.7);
 				// UV.x = UV.x + smoothstep(ZoomSepMix, ZoomSepMax, CameraPosition.y) * 0.3;

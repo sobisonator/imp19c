@@ -49,7 +49,7 @@
 		requires = { tech_experimental_railway }	
 		# TRIGGER NEWS EVENT - players only 
 		potential = {
-			invention = tech_grasshopper_engine
+			country_civilization_value > 45
 		}
 	}
 	
@@ -165,6 +165,15 @@ medical_and_chemistry_tech = {
 		}
 		requires = {
 
+		}
+	}
+
+	tech_bonesaw = {
+		modifier = {
+			global_supply_limit_modifier = 0.05 # Casualties reduction
+		}
+		requires = {
+			tech_clinical_science
 		}
 	}
 
@@ -410,12 +419,70 @@ civic_tech_manufacturing = {
 		}
 	}
 
-	tech_manufactories = {
+	tech_gear_systems = {
+		modifier = {
+			country_civilization_value = 5
+		}
 		requires = {
 			tech_construction
 		}
+	}
+
+	tech_spinning_frame = {
 		modifier = {
-			country_civilization_value = 3
+			country_civilization_value = 2
+			# Increased textile production
+		}
+		requires = {
+			tech_gear_systems
+		}
+	}
+
+	tech_threshing_machine = {
+		modifier = {
+			country_civilization_value = 5
+		}
+		requires = {
+			tech_spinning_frame
+		}
+	}
+
+	tech_templating = {
+		modifier = {
+			country_civilization_value = 1
+			global_monthly_civilization = 0.01
+		}
+		requires = {
+			tech_construction
+		}
+	}
+
+	tech_mechanical_tools = {
+		modifier = {
+			country_civilization_value = 5
+			hidden_effect = {
+				global_slaves_output = 0.1
+				global_tribesmen_output = 0.1
+				global_indentured_output = 0.1
+				global_proletariat_output = 0.1
+				global_lower_strata_output = 0.1
+				global_middle_strata_output = 0.1
+				military_tech_investment = 0.05
+			}
+		}
+		requires = {
+			tech_templating
+			tech_gear_systems
+		}
+		on_activate = { custom_tooltip = "tech_bonus_mechanical_tools" }
+	}
+
+	tech_manufactories = {
+		requires = {
+			tech_mechanical_tools
+		}
+		modifier = {
+			country_civilization_value = 5
 			hidden_effect = {
 				global_slaves_output = 0.05
 				global_tribesmen_output = 0.05
@@ -430,26 +497,9 @@ civic_tech_manufacturing = {
 		on_activate = { custom_tooltip = "tech_bonus_manufactories" }
 	}
 
-	tech_mechanical_tools = {
-		modifier = {
-			country_civilization_value = 3
-			hidden_effect = {
-				global_slaves_output = 0.1
-				global_tribesmen_output = 0.1
-				global_indentured_output = 0.1
-				global_proletariat_output = 0.1
-				global_lower_strata_output = 0.1
-				global_middle_strata_output = 0.1
-				military_tech_investment = 0.05
-			}
-		}
-		requires = { tech_manufactories }
-		on_activate = { custom_tooltip = "tech_bonus_mechanical_tools" }
-	}
-
 	tech_bloomery = {
 		modifier = {
-			country_civilization_value = 1
+			country_civilization_value = 5
 		}
 		requires = { 
 			tech_mechanical_tools
@@ -506,7 +556,7 @@ civic_tech_manufacturing = {
 	}
 	tech_electrochemistry = {
 		modifier = {
-			country_civilization_value = 3
+			country_civilization_value = 5
 		}
 		requires = {
 			tech_voltaic_pile
@@ -533,7 +583,7 @@ civic_tech_manufacturing = {
 
 	# End electricity
 
-	tech_blast_furance = {
+	tech_blast_furnace = {
 		modifier = {
 			country_civilization_value = 2
 		}
@@ -560,17 +610,20 @@ civic_tech_manufacturing = {
 
 	tech_cotton_gin = {
 		modifier = {
-			country_civilization_value = 1
+			country_civilization_value = 3
 			# TODO: Increased textiles and clothing production
 		}
 		requires = {
 			tech_reciprocating_engine
 		}
+		potential = {
+			invention = tech_spinning_frame
+		}
 	}
 
 	tech_double_acting_cylinders = {
 		modifier = {
-			country_civilization_value = 1
+			country_civilization_value = 5
 		}
 		requires = {
 			tech_reciprocating_engine
@@ -579,155 +632,10 @@ civic_tech_manufacturing = {
 
 	tech_grasshopper_engine = {
 		modifier = {
-			country_civilization_value = 1
+			country_civilization_value = 5
 		}
 		requires = {
 			tech_double_acting_cylinders
 		}
 	}
 }
-
-#manufacturing_tree = {
-#	technology = civic_tech
-#	color = hsv { 0.38 0.8 0.3 }
-#
-#	alchemy = {
-#		# modifier = { TBC }
-#	}
-#
-#### Machinery branch
-#	blast_furance = {
-#		modifier = { country_civilization_value = 1 }
-#		requires = { alchemy }
-#		#POTENTIAL - HAS RIGHT HERITAGE, either by gamestart or completion of pre-modern tech tree. 
-#	}
-#
-#	reciprocating_engine = {
-#		# modifier = { TBC }
-#		requires = { blast_furance }
-#	}
-#	
-#	# Level 2	
-#	rotative_beam_engine = {
-#		modifier = { country_civilization_value = 1 }
-#		requires = { reciprocating_engine }
-#
-#	}
-#
-#	cotton_gin = {
-#		# modifier = { TBC }
-#		requires = { reciprocating_engine }
-#	}
-#
-#	# Level 3
-#	double_acting_cylinders = {
-#		# modifier = { TBC }
-#		requires = { rotative_beam_engine }
-#	}
-#
-#	grasshopper_engine = {
-#		# modifier = { TBC }
-#		requires = { double_acting_cylinders }
-#		modifier = { global_proletariat_output = 0.05 }
-#	}
-#
-#### Chemistry branch
-#	organometallic_compounds = {
-#		# One of the requirements for steel and bronze factories?
-#		# modifier = { TBC }
-#		requires = { alchemy }
-#	} 
-#
-#### Railway branch
-#	experimental_railway = {
-#		modifier = { global_supply_limit_modifier = 0.05 }
-#		requires = { grasshopper_engine }
-#		#POTENTIAL - HAS RIGHT HERITAGE, either by gamestart or completion of pre-modern tech tree. 
-#	}
-#
-#	# Level 1
-#	rack_railway = {
-#		modifier = { global_supply_limit_modifier = 0.05 }
-#		requires = { experimental_railway }
-#		potential  = {   
-#			any_owned_province = {
-#				OR = {
-#					terrain = low_mountain
-#					terrain = extreme_mountain 
-#					terrain = hills
-#					terrain = desert_hills 
-#				}
-#			}
-#		}
-#	}
-#	
-#	adhesion_railway = {
-#		modifier = { global_supply_limit_modifier = 0.05 }
-#		requires = { experimental_railway }
-#
-#	}
-#
-#	# Level 2	
-#	steam_locomotive = {
-#		modifier = { global_supply_limit_modifier = 0.05 }
-#		requires_or = { adhesion_railway rack_railway }	
-#		# TRIGGER NEWS EVENT - players only 
-#	}
-#	
-#	horse_tramway = {
-#		modifier = { global_supply_limit_modifier = 0.05 }
-#		requires = { adhesion_railway }	
-#	}
-#	
-#	# Level 3
-#	tender_carriage = {
-#		modifier = { global_supply_limit_modifier = 0.05 }
-#		requires = { steam_locomotive }	
-#	}
-#	
-#	passenger_railway = {
-#		modifier = { global_supply_limit_modifier = 0.05 }
-#		requires = { steam_locomotive }	
-#		# TRIGGER EVENT - flavour for formation of first railway company in getcountryname. that country only 
-#	}
-#	
-#	horse_drawn_sprinkler_cart = {
-#		modifier = { global_supply_limit_modifier = 0.05 }
-#		requires = { horse_tramway }	
-#		# Require a firehose tech? 
-#	}
-#	
-#	# Level 4 
-#	
-#	sand_pumps = {
-#		modifier = { global_supply_limit_modifier = 0.05 }
-#		requires = { passenger_railway }		
-#	}
-#	
-#	electrified_railway = {
-#		modifier = { global_supply_limit_modifier = 0.05 }
-#		requires = { passenger_railway }		
-#		# Require a electric tech? 
-#	}
-#	
-#	stock_car = {
-#		modifier = { global_lower_strata_output = 0.05 }
-#		requires  = { steam_locomotive }	
-#	}
-#	
-#	# Level 5
-#	
-#	#Underground railway tech? 
-#	
-#	passenger_tramway = {
-#		modifier = { global_supply_limit_modifier = 0.05 }
-#		requires = { sand_pumps electrified_railway }	
-#		# PREREQ - BATTERY ? 
-#	}
-#	
-#	# Level 6
-#	sprinkler_car = {
-#		modifier = { global_lower_strata_output = 0.05 }
-#		requires  = { passenger_tramway horse_drawn_sprinkler_cart }	
-#	}
-#}

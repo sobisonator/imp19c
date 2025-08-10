@@ -9,6 +9,14 @@ INCOME_national_total_quarterly = {
 	add = INCOME_national_total_from_subjects
 }
 
+INCOME_national_total_from_regions = {
+	# Scope: Country
+	value = 0
+	every_governorships = {
+		add = INCOME_governorship_total
+	}
+}
+
 INCOME_national_total_from_tax = {
 	# Scope: Country
 	value = 0
@@ -36,8 +44,31 @@ INCOME_national_total_from_tariffs_and_shipping = {
 INCOME_national_total_from_subjects = {
 	# Scope: Country
 	value = 0
-	every_subject = {
-		add = INCOME_subject_overlord_duty
+	if = {
+		limit = {
+			is_subject = no
+		}
+		every_subject = {
+			add = INCOME_subject_overlord_duty
+			add = {
+				value = INCOME_national_total_from_subjects
+				multiply = INCOME_subject_overlord_duty_rate
+			}
+		}
+	}
+	else = {
+		subtract = INCOME_subject_overlord_duty
+		every_subject = {
+			add = INCOME_subject_overlord_duty
+			subtract = {
+				value = INCOME_subject_overlord_duty
+				multiply = overlord.INCOME_subject_overlord_duty_rate
+			}
+			add = {
+				value = INCOME_national_total_from_subjects
+				multiply = INCOME_subject_overlord_duty_rate 
+			}
+		}
 	}
 }
 
@@ -48,11 +79,15 @@ INCOME_national_total_from_subjects = {
 # Subject-overlord duty
 # This is a tax paid on the national income of a country to the overlord.
 
+INCOME_subject_overlord_duty_rate = {
+	value = 0.2 # TODO: Make this based on a variable stored in the Country scope
+}
+
 INCOME_subject_overlord_duty = {
-	value = INCOME_national_total_quarterly
-	# Depends on the subject-overlord contract
-	multiply = 0.2 # TODO: Make this based on a variable stored in the Country scope
+	value = INCOME_national_total_from_regions
 	min = 0
+	# Depends on the subject-overlord contract
+	multiply = INCOME_subject_overlord_duty_rate
 }
 
 ###

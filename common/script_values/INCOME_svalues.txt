@@ -1,5 +1,84 @@
 ﻿## Script values used in the calculation of government income
 
+# National summary
+
+INCOME_national_total_quarterly = {
+	# Scope: Country
+	# This should be cached quarterly to minimise hot-loading it all the time as it is always visible in the ingame topbar
+	value = INCOME_national_total_from_regions
+	add = INCOME_national_total_from_subjects
+}
+
+INCOME_national_total_from_tax = {
+	# Scope: Country
+	value = 0
+	every_governorships = {
+		add = INCOME_governorship_tax
+	}
+}
+
+INCOME_national_total_production = {
+	# Scope: Country
+	value = 0
+	every_governorships = {
+		add = INCOME_governorship_production
+	}
+}
+
+INCOME_national_total_from_tariffs_and_shipping = {
+	# Scope: Country
+	value = 0
+	every_governorships = {
+		add = INCOME_governorship_tariffs_and_shipping
+	}
+}
+
+INCOME_national_total_from_subjects = {
+	# Scope: Country
+	value = 0
+	every_subject = {
+		add = INCOME_subject_overlord_duty
+	}
+}
+
+# End national summary
+
+###
+
+# Subject-overlord duty
+# This is a tax paid on the national income of a country to the overlord.
+
+INCOME_subject_overlord_duty = {
+	value = INCOME_national_total_quarterly
+	# Depends on the subject-overlord contract
+	multiply = 0.2 # TODO: Make this based on a variable stored in the Country scope
+	min = 0
+}
+
+###
+
+INCOME_governorship_tax = {
+	# Scope: Governorship
+	# Function: Get all the tax income from a governorship
+	value = INCOME_governorship_property_tax_total_positive
+	add = INCOME_governorship_excise_duty_essentials_total_positive
+	add = INCOME_governorship_income_tax_total_positive
+}
+
+INCOME_governorship_tariffs_and_shipping = {
+	# Scope: Governorship
+	# Get all tariff and shipping income from a governorship
+	value = INCOME_governorship_tariffs_total_positive
+	add = INCOME_governorship_state_port_charges
+}
+
+INCOME_governorship_production = {
+	# Scope: Governorship
+	# Get all government production income from a governorship
+	value = INCOME_governorship_state_resource_extraction
+	add = INCOME_governorship_state_manufacturing
+}
+
 INCOME_governorship_total = {
 	# Scope: Governorship
 	# Function: Get the total amount of government income in a governorship

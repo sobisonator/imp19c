@@ -16,9 +16,6 @@ PixelShader =
 		MagFilter = "Linear"
 		MinFilter = "Linear"
 		MipFilter = "Linear"
-		// MagFilter = "Point"
-		// MinFilter = "Point"
-		// MipFilter = "Point"
 		SampleModeU = "Wrap"
 		SampleModeV = "Wrap"
 	}
@@ -158,9 +155,6 @@ PixelShader =
 				Water.rgb = ApplyFogOfWarMultiSampled( Water.rgb, Input.WorldSpacePos, FogOfWarAlpha );
 
 				float vFogFactor = min(CalculateDistanceFogFactor( Input.WorldSpacePos ),0.6);
-				#if defined(nightLight)
-					vFogFactor *= 0.05;
-				#endif
 				Water.rgb = ApplyDistanceFog( Water.rgb, vFogFactor );
 
 				// Lerp to flat map terrain for smooth transition. When FlatMapLerp >= 1.0 this shader is not called at all!

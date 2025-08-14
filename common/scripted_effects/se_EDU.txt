@@ -154,14 +154,37 @@ EDU_set_education_available_from_trade = {
 	# Function: Add a bonus to education numbers of both t1 and t2 in all governorships from trade agreements, simulating foreign professionals lending their services
 	# This adds a base value to the number of educated pops available to work, not to the cap.
 	# TODO: This also needs to add a way of distributing the wealth that these pops generate back to the trade partners. 
+	save_scope_as = root_country
 	set_variable = {
 		name = EDU_available_from_trade_$tier$
 		value = {
 			value = 0
-				every_in_list = {
-					variable = list_of_trade_partners_all_categories
+			every_in_list = {
+				variable = list_of_trade_partners_all_categories
 
-					add = var:EDU_available_for_trade_$tier$
+				add = var:EDU_available_for_trade_$tier$
+			}
+			# Add federation partners
+			# TODO: Make this dependent on federal migration law
+			if = {
+				limit = {
+					has_variable = member_of_federation
+				}
+				var:member_of_federation = {
+					every_in_list = {
+						variable = list_of_members
+						limit = {
+							NOT = {
+								already_trade_partners = {
+									category = all_categories
+									country_A = THIS
+									country_B = scope:root_country
+								}
+							}
+						}
+						add = var:EDU_available_for_trade_$tier$
+					}
+				}
 			}
 		}
 	}
@@ -184,9 +207,16 @@ EDU_set_t2_research_bonus = {
 				is_capital = yes
 			}
 		}
-		FUNC_add_province_modifier_stack = {
+		FUNC_add_province_modifier_stack = { # Add a bonus from all universities
 			MOD = EDU_t2_education_research_bonus
 			NUM = EDU_province_research_bonus_from_universities
+			DUR = -1
+		}
+	}
+	capital_scope = { # Add a bonus from percentage t2 educated population
+		FUNC_add_province_modifier_stack = {
+			MOD = EDU_t2_education_research_bonus
+			NUM = owner.EDU_country_total_educated_t2
 			DUR = -1
 		}
 	}

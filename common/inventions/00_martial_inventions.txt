@@ -20,11 +20,30 @@
 		requires = { tech_permanent_army }
 	}
 
+	tech_regimental_structure = {
+		modifier = {
+			discipline = 0.1
+		}
+		requires = { tech_commissioned_staff }
+	}
+
+	tech_specialised_corps = {
+		modifier = {
+			discipline = 0.1
+		}
+		requires = {
+			tech_regimental_structure
+		}
+	}
+
 	tech_mass_mobilisation = {
 		modifier = {
 			global_cohort_recruit_speed = -0.25
 		}
-		requires = { tech_permanent_army }
+		requires = { tech_regimental_structure }
+		potential = {
+			invention = tech_census
+		}
 	}
 
 	tech_field_ambulances = {
@@ -43,7 +62,9 @@
 			global_defensive = 0.05
 			regular_infantry_offensive = 0.1
 		}
-		requires = { tech_commissioned_staff }
+		requires = {
+			tech_specialised_corps
+		}
 	}
 
 	tech_military_technical_journals_and_drawings = {  #Need a better name 
@@ -60,6 +81,9 @@
 			# + Artillery discipline
 		}
 		requires = { tech_commissioned_staff }
+		potential = {
+			invention = tech_limber
+		}
 	}
 
 	### EARLY ###
@@ -69,7 +93,22 @@
 			discipline = 0.1
 			land_unit_attrition = -0.05
 		}
-		requires = { tech_military_technical_journals_and_drawings }
+		requires = {
+			tech_military_technical_journals_and_drawings
+			tech_skirmisher_corps
+		}
+	}
+
+	tech_snipers = {
+		modifier = {
+			regular_infantry_offensive = 0.1
+		}
+		requires = {
+			tech_post_napoleonic_warfare
+		}
+		potential = {
+			invention = tech_bullet_innovation
+		}
 	}
 
 	### MID-TO-LATE-GAME FIELD TACTICS ###
@@ -78,7 +117,7 @@
 		modifier = {
 			global_defensive = 0.2
 		}
-		requires = { tech_post_napoleonic_warfare }
+		requires = { tech_snipers }
 	}
 
 	tech_dispersed_unit_tactics = {
@@ -100,7 +139,9 @@
 		modifier = {
 			regular_infantry_offensive = 0.15
 		}
-		requires = { tech_trench_warfare }
+		requires = { 
+			tech_trench_warfare
+		}
 	}
 
 }
@@ -116,6 +157,7 @@ military_tech_firearms = {
 			cohort_reinforcement_speed = 0.1
 			global_cohort_recruit_speed = -0.25
 			army_maintenance_cost = -0.1
+			country_civilization_value = 1
 		}
 	}
 
@@ -129,8 +171,16 @@ military_tech_firearms = {
 			naval_damage_done = 0.05
 		}
 		requires = { tech_weapon_manufacturing }
+	}
+
+	tech_rifles = {
+		modifier = { 
+			conscripts_offensive = 0.15
+			regulary_infantry_offensive = 0.15
+		}
+		requires = { tech_firearms }
 		potential = {
-			invention = tech_chemistry
+			invention = tech_mechanical_tools
 		}
 	}
 
@@ -140,8 +190,14 @@ military_tech_firearms = {
 			navy_maintenance_cost = -0.1
 			ship_repair_at_sea = 0.05
 			cohort_reinforcement_speed = 0.1
+			country_civilization_value = 1
 		}
-		requires = { tech_weapon_manufacturing }
+		requires = { 
+			tech_weapon_manufacturing
+		}
+		potential = {
+			invention = tech_mechanical_tools
+		}
 	}
 
 	tech_sword_bayonet = {
@@ -149,21 +205,7 @@ military_tech_firearms = {
 			global_defensive = 0.1
 		}
 		requires = { 
-			tech_weapon_manufacturing
 			tech_firearms
-		}
-	}
-
-	tech_cannons = {
-		modifier = {
-			# + Artillery attack
-		}
-		requires = {
-			tech_firearms
-			tech_weapon_manufacturing
-		}
-		on_activate = {
-			# Enables artillery unit type
 		}
 	}
 
@@ -191,7 +233,7 @@ military_tech_firearms = {
 		}
 		requires = { 
 			tech_replaceable_weapon_parts
-			tech_firearms
+			tech_rifles
 		}
 		# requires_or
 	}
@@ -242,9 +284,17 @@ military_tech_firearms = {
 		modifier = { 
 			conscripts_offensive = 0.05
 			regular_infantry_offensive = 0.05
-			army_maintenance_cost = -0.05
 		}
 		requires = { tech_bullet_innovation }
+	}
+
+	tech_improved_cartridges = { 
+		modifier = { 
+			conscripts_offensive = 0.01
+			regular_infantry_offensive = 0.01
+			army_maintenance_cost = -0.05
+		}
+		requires = { tech_early_cartridges }
 	}
 	
 	tech_breechloader = { 
@@ -267,28 +317,18 @@ military_tech_firearms = {
 
 	tech_dynamite = {  # More complicated triggers 
 		modifier = { 
-			
+			country_civilization_value = 5
 		}
 		requires = {
 			tech_nitroglycerin
 			tech_percussion_cap_ignition
 		}
 		on_activate = {
-			# +0.1 goods increased output per RGO building in provinces with:
-			# Stone
-			# Gold
-			# Silver
-			# Iron
-			# Coal
-			# Copper
-			# Tin
-			# Lead
-			# +Small demand to following per RGO building where modifier applies
-			# Stone
-			# Sulphur
-			# TODO: Add this info into desc
-			apply_tech_modifier_country = {
-				tech = tech_dynamite
+			custom_tooltip = "tech_bonus_dynamite"
+			hidden_effect = {
+				apply_tech_modifier_country = {
+					tech = tech_dynamite
+				}
 			}
 		}
 	}
@@ -322,16 +362,29 @@ military_tech_firearms = {
 			global_defensive = 0.05
 		}
 		requires = { tech_experimental_revolver }
+		potential = {
+			military_tech >= 25
+		}
 	}
 
 	### LATE GAME ###
+
+	tech_late_small_arms_manufacturing = {
+		modifier = {
+			# TODO: Enables the late_munitions factory
+		}
+		requires = {
+			tech_pinfire_primer
+			tech_hand_cranked_machine_guns
+		}
+	}
 
 	tech_bolt_action_rifle = {
 		modifier = {
 			conscripts_offensive = 0.15
 			regular_infantry_offensive = 0.15
 		}
-		requires = { tech_pinfire_primer }
+		requires = { tech_late_small_arms_manufacturing }
 	}
 
 	tech_recoil_powered_machine_guns = {
@@ -340,24 +393,65 @@ military_tech_firearms = {
 			regular_infantry_offensive = 0.1
 			global_defensive = 0.3
 		}
-		requires = { tech_hand_cranked_machine_guns }
+		requires = { tech_late_small_arms_manufacturing }
+	}
+
+	tech_rifle_grenade = {
+		modifier = {
+			conscripts_offensive = 0.15
+			regular_infantry_offensive = 0.15
+			assault_ability = 0.1
+		}
+		requires = { tech_bolt_action_rifle }
+	}
+
+	tech_fragmentation_hand_grenade = {
+		modifier = {
+			conscripts_offensive = 0.15
+			regular_infantry_offensive = 0.15
+			assault_ability = 0.1
+		}
+		requires = { tech_rifle_grenade }
+	}
+
+	tech_anti_tank_grenade = {
+		modifier = {
+			conscripts_defensive = 0.15
+			regular_infantry_defensive = 0.15
+			global_defensive = 0.15
+		}
+		requires = { tech_fragmentation_hand_grenade }
+	}
+
+	tech_rocket_propelled_grenade = {
+		modifier = {
+			siege_engineers = 0.15
+			assault_ability = 0.15
+			conscripts_offensive = 0.05
+			regular_infantry_offensive = 0.05
+			global_defensive = 0.15
+		}
+		requires = { tech_anti_tank_grenade }
 	}
 
 	tech_sniper_rifles = {
 		modifier = {
-			regular_infantry_offensive = 0.2
+			regular_infantry_defensive = 0.15
 		}
 		requires = { tech_bolt_action_rifle }
 	}
 
 	tech_semi_automatic_pistols = {
 		modifier = {
-			conscripts_offensive = 0.1
-			regular_infantry_offensive = 0.1
+			regular_infantry_defensive = 0.1
+			regular_infantry_defensive = 0.1
 		}
 		requires = {
 			tech_bolt_action_rifle
 			tech_recoil_powered_machine_guns
+		}
+		potential = {
+			military_tech >= 30
 		}
 	}
 
@@ -368,6 +462,9 @@ military_tech_firearms = {
 			global_defensive = 0.4
 		}
 		requires = { tech_recoil_powered_machine_guns }
+		potential = {
+			military_tech >= 30
+		}
 	}
 
 	tech_machine_pistols = {
@@ -398,7 +495,7 @@ military_tech_firearms = {
 		}
 		requires = { tech_cannons } # TODO: Make this advanced artillery
 		potential = {
-			invention = stock_car
+			invention = tech_stock_car
 		}
 	}
 }
@@ -411,27 +508,225 @@ military_tech_vehicles = {
 
 	tech_shipyards = {
 		# Allows construction of port buildings
+		modifier = {
+			country_civilization_value = 1
+		}
+	}
+
+	tech_marine_barometer = {
+		modifier = {
+			# Ship speed
+		}
+		requires = {
+			tech_shipyards
+		}
+		potential = {
+			invention = tech_mechanical_tools
+		}
+	}
+
+	tech_diving_bells = {
+		modifier = {
+			# Ship recovery & lower maintenance cost
+		}
+		requires = {
+			tech_marine_barometer
+		}
 	}
 
 	tech_warships = {
-		naval_damage_done = 0.1
+		modifier = {
+			naval_damage_done = 0.1
+		}
+		
 		requires = { tech_shipyards }
 	}
 
 	tech_multiple_deck_warships = {
-		naval_damage_taken = -0.1
+		modifier = {
+			naval_damage_taken = -0.1
+		}
 		requires = { 
 			tech_warships
 			tech_shipyards
 		}
 	}
 
+	tech_round_bow_megavessels = {
+		modifier = {
+			naval_damage_taken = -0.2
+		}
+		requires = {
+			tech_multiple_deck_warships
+		}
+	}
+
+	tech_copper_plating = {
+		modifier = {
+			naval_damage_taken = -0.1
+			navy_maintenance_cost = -0.1
+		}
+		requires = {
+			tech_round_bow_megavessels
+		}
+	}
+
+	tech_steam_powered_ships = {
+		modifier = {
+			navy_movement_speed = 0.2
+		}
+		requires = {
+			tech_copper_plating
+		}
+		potential = {
+			invention = tech_reciprocating_engine
+		}
+	}
+
 	tech_naval_explosives = {
-		naval_damage_done = 0.5
+		modifier = {
+			naval_damage_done = 0.25
+		}
 		requires = { tech_warships }
 		potential = {
 			invention = tech_firearms
 		}
 	}
 
+	tech_carronade = {
+		modifier = {
+			naval_damage_done = 0.25
+		}
+		requires = {
+			tech_naval_explosives
+		}
+		potential = {
+			invention = tech_mortar
+		}
+	}
+
+	tech_torpedoes = {
+		modifier = {
+			naval_damage_done = 0.33
+		}
+		requires = { tech_naval_explosives }
+		potential = {
+			military_tech > 15
+			invention = tech_rocket_artillery
+		}
+	}
+
+}
+
+military_tech_artillery = {
+	technology = military_tech
+	color = hsv { 0.7 0.7 0.4 }
+
+	tech_cannons = {
+		modifier = {
+			# TODO: + Artillery attack
+		}
+		requires = {
+		}
+		potential = {
+			invention = tech_firearms
+			invention = tech_weapon_manufacturing
+		}
+		on_activate = {
+			# TODO: Enables artillery unit type
+		}
+	}
+
+	tech_rocket_artillery = {
+		modifier = {
+			# TODO: + Artillery attack
+		}
+		requires = {
+			tech_cannons
+		}
+	}
+
+	tech_bombard_cannons = {
+		modifier = {
+			# TODO: + Artillery siege
+		}
+		requires = {
+			tech_cannons
+		}
+	}
+
+	tech_wheeled_cannons = {
+		modifier = {
+			# TODO: + Artillery mobility
+		}
+		requires = {
+			tech_cannons
+		}
+	}
+
+	tech_limber = {
+		modifier = {
+			# TODO: + Artillery mobility
+		}
+		requires = {
+			tech_wheeled_cannons
+		}
+		potential = {
+			invention = tech_mechanical_tools
+		}
+	}
+
+	tech_mortar = {
+		modifier = {
+			# TODO: + Artillery siege
+		}
+		requires = {
+			tech_bombard_cannons
+		}
+	}
+
+	tech_howitzer = {
+		modifier = {
+			# TODO: + Artillery siege & damage
+		}
+		requires = {
+			tech_mortar
+			tech_limber
+		}
+	}
+
+	tech_artillery_cartridges = {
+		modifier = {
+			# TODO
+		}
+		requires = {
+			tech_howitzer
+		}
+		potential = {
+			invention = tech_improved_cartridges
+		}
+	}
+
+	tech_recoil_buffers = {
+		modifier = {
+			# TODO
+		}
+		requires = {
+			tech_howitzer
+		}
+	}
+
+	tech_quick_firing_gun = {
+		modifier = {
+			# TODO: + Artillery siege & damage
+		}
+		requires = {
+			tech_recoil_buffers
+			tech_artillery_cartridges
+		}
+		potential = {
+			invention = tech_breechloader
+			invention = tech_smokeless_powder
+		}
+	}
 }

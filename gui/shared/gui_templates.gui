@@ -2355,6 +2355,133 @@ types NEW_GUI {
 			visible = "[And(OutlinerItem.IsStatusText,Not(OutlinerItem.HasCharacter))]"
 		}
 	}
+
+	type global_powers = margin_widget {
+		size = { 420 75 }
+		margin = { 5 5 }
+		datacontext = "[Scope.GetCountry]"
+		using = main_window_template
+		state = {
+			trigger_when = "[GetVariableSystem.HasValue('supranational_tabs', 'global')]"
+			on_start = "[GetScriptedGui('show_player_subjects_button').Execute( GuiScope.SetRoot( Country.MakeScope ).End )]"
+		}
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = black_background
+			alpha = 0.5
+		}
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = beige_background
+			alpha = 0.5
+			modify_texture = {
+				texture = "gfx/interface/base_parts/button_vignette.dds"
+				blend_mode = alphamultiply
+				spriteType = corneredtiled
+				spriteborder = { 20 20 }
+			}
+		}
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = black_background
+			using = portrait_x32y32bd_alpha
+			margin = { -3 -3 }
+			alpha = 0.5
+		}
+		flowcontainer = {
+			spacing = 5
+			country_flag = {
+				parentanchor = vcenter
+				blockoverride "flag"
+				{
+					texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+					frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+					framesize = { 56 56 }
+				}
+				blockoverride "size"
+				{
+					size = { 56 56 }
+				}
+				blockoverride "click"
+				{
+					onclick = "[OpenDiplomacy(Country)]"
+				}
+				tooltip = "[Country.GetName]: [GuiScope.SetRoot( Scope.Country.MakeScope ).ScriptValue('DIPLOMACY_global_power_score')|0]"
+			}
+			flowcontainer = {
+				direction = vertical
+				widget = {
+					size = { 300 30 }
+					tag_dark = {
+						text = "[Country.GetName]"
+						tooltip = "[Country.GetDescriptiveName]"
+						max_width = 300
+						elide = right
+					}
+				}
+				overlappingitembox = {
+					size = { 300 30 }
+					spacing = 5
+					datamodel = "[Country.MakeScope.GetList('player_subjects')]"
+					background = {
+						shaderfile = "gfx/FX/pdxgui_default.shader"
+						using = beige_background
+						using = portrait_x32y32bd_alpha
+						alpha = 0.15
+						margin = { 3 3 }
+					}
+					item = {
+						country_flag = {
+							tooltip = "COUNTRY_SHORTHAND_INFO"
+							datacontext = "[Scope.GetCountry]"
+							parentanchor = vcenter
+			
+							blockoverride "flag"
+							{
+								texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+								frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+								framesize = { 56 56 }
+							}
+
+							blockoverride "size"
+							{
+								 size = { 30 30 }
+							}
+
+							blockoverride "click"
+							{
+								#onclick = "[OpenDiplomacy(Country.GetCountry)]" #change this
+							}
+				
+							blockoverride "hover_leave"
+							{
+								onmousehierarchyleave = "[DiplomaticView.ResetHighlight]"
+							}
+						}
+					}
+				}
+			}
+			flowcontainer = {
+				direction = vertical
+				margin = { 5 5 }
+				religion = {
+					blockoverride "size" { size = { 32 32 } }
+					blockoverride "datacontext" { datacontext = "[Country.GetReligion]" }
+					tooltip = "[Country.GetReligion.GetTooltip]"
+				}
+				widget = {
+					size = { 32 25 }
+					tag_dark = {
+						text = "[GuiScope.SetRoot( Scope.Country.MakeScope ).ScriptValue('DIPLOMACY_global_power_score')|0]"
+						tooltip = "[GuiScope.SetRoot( Scope.Country.MakeScope ).ScriptValue('DIPLOMACY_global_power_score')|0]"
+						max_width = 32
+						elide = right
+						parentanchor = hcenter
+					}
+				}
+			}
+		}
+	}
 }
 #LessThan_int32 - Меньше
 #GreaterThan_int32 - Больше

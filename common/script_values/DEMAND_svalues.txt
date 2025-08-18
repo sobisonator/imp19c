@@ -28,6 +28,18 @@ DEMAND_huge = {
 	value = 1
 }
 
+DEMAND_military_supplies_modifier = {
+	# Scope: Country
+	# Function: Modifies the demand for military supplies based on government spending policy
+	value = 1
+}
+
+DEMAND_navy_supplies_modifier = {
+	# Scope: Governorship
+	# Function: Modifies the demand for navy supplies based on government spending policy
+	value = 1
+}
+
 # Base levels for categories
 
 # - Obsolete for now
@@ -246,7 +258,15 @@ DEMAND_clothing = { # Total
 		}
 		add = var:DEMAND_from_industry_clothing
 	}
+	add = DEMAND_clothing_from_military
 }
+
+DEMAND_clothing_from_military = {
+	value = JOBS_military_governorship
+	multiply = 0.01
+	multiply = DEMAND_military_supplies_modifier
+}
+
 DEMAND_furniture = { # Total
 	value = 0
 	add = DEMAND_consumer_medium
@@ -280,6 +300,13 @@ DEMAND_pharmaceuticals = { # Total
 		add = var:DEMAND_from_industry_pharmaceuticals
 	}
 }
+
+DEMAND_pharmaceuticals_from_military = {
+	value = JOBS_military_governorship
+	multiply = 0.005
+	multiply = DEMAND_military_supplies_modifier
+}
+
 DEMAND_coal = { # Total
 	value = 0
 	# Domestically burned coal
@@ -1031,7 +1058,24 @@ DEMAND_construction_materials = { # Total
 		}
 		add = var:DEMAND_from_industry_construction_materials
 	}
+	add = DEMAND_construction_materials_military
 }
+
+DEMAND_construction_materials_military = {
+	value = 0
+	every_governorship_state = {
+		every_state_province = {
+			add = num_of_fortress_building
+			add = num_of_arsenal_building
+		}
+	}
+	add = {
+		value = JOBS_military_governorship
+		multiply = 0.001
+	}
+	multiply = DEMAND_military_supplies_modifier
+}
+
 DEMAND_steel = { # Total
 	value = 0
 	if = {
@@ -1108,16 +1152,6 @@ DEMAND_chemicals = { # Total
 }
 DEMAND_naval_supplies = { # Total
 	value = 0
-	owner = {
-		if = {
-			limit = {
-				ROOT.FUNC_num_governorships_with_ports > 0
-				num_of_ships > 0
-			}
-			add = num_of_ships
-			divide = FUNC_num_governorships_with_ports
-		}
-	}
 	every_governorship_state = {
 		every_state_province = {
 			add = num_of_port_building
@@ -1130,6 +1164,13 @@ DEMAND_naval_supplies = { # Total
 		}
 		add = var:DEMAND_from_industry_naval_supplies
 	}
+	add = DEMAND_naval_supplies_navy
+}
+
+DEMAND_naval_supplies_navy = {
+	value = owner.num_of_ships
+	multiply = FUNC_governorship_ports_ratio
+	multiply = DEMAND_navy_supplies_modifier
 }
 
 DEMAND_navy_ratio_steel_ships = {
@@ -1167,6 +1208,17 @@ DEMAND_steel_ships = { # Total
 }
 DEMAND_wooden_ships = { # Total
 	value = 0
+	add = DEMAND_wooden_ships_navy
+	every_governorship_state = {
+		every_state_province = {
+			add = {
+				value = num_of_port_building
+			}
+		}
+	}
+}
+
+DEMAND_wooden_ships_navy = {
 	if = {
 		limit = {
 			any_governorship_state = {
@@ -1186,15 +1238,7 @@ DEMAND_wooden_ships = { # Total
 		}
 		multiply = DEMAND_navy_ratio_wooden_ships
 	}
-	every_governorship_state = {
-		every_state_province = {
-			add = {
-				value = num_of_port_building
-				multiply = 4
-			}
-		}
-	}
-	multiply = 0.25
+	multiply = DEMAND_navy_supplies_modifier
 }
 
 
@@ -1233,6 +1277,7 @@ DEMAND_early_munitions = { # Total
 	add = {
 		value = JOBS_military_governorship
 		divide = 4
+		multiply = DEMAND_military_supplies_modifier
 	}
 	multiply = DEMAND_army_ratio_early_munitions
 }
@@ -1251,6 +1296,7 @@ DEMAND_late_munitions = { # Total
 	add = {
 		value = JOBS_military_governorship
 		divide = 4
+		multiply = DEMAND_military_supplies_modifier
 	}
 	multiply = DEMAND_army_ratio_late_munitions
 }
@@ -1270,6 +1316,7 @@ DEMAND_early_artillery = { # Total
 	add = {
 		value = JOBS_military_governorship
 		divide = 40
+		multiply = DEMAND_military_supplies_modifier
 	}
 	multiply = 2
 }

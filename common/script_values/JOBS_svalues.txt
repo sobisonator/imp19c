@@ -78,14 +78,44 @@ JOBS_commercial_governorship = {
 JOBS_military = {
 	value = num_of_arsenal_building
 	add = num_of_fortress_building
+	add = {
+		value = owner.manpower
+		divide = 40
+		multiply = {
+			value = total_population # Province population
+			# Proletariat and lower strata have double impact on reserves
+			add = num_of_proletariat
+			add = num_of_lower_strata
+			# Upper and middle strata have half impact on reserves
+			subtract = num_of_upper_strata
+			subtract = num_of_middle_strata
+			min = 1
+			divide = owner.country_population
+		}
+		round = ceiling
+	}
+}
+
+JOBS_military_no_reserves = {
+	# Scope: Province
+	# Function: Exists to have a low-performance impact value for calculating governorship totals
+	value = num_of_arsenal_building
+	add = num_of_fortress_building
 }
 
 JOBS_military_governorship = {
+	# Scope: Governorship
+	# Approximation, a bit looser than the province calculation for performance reasons, but should add up to roughly the right sum for all provs in the governorship
 	value = 0
 	every_governorship_state = {
 		every_state_province = {
-			add = JOBS_military
+			add = JOBS_military_no_reserves # Does not account for reserves for performance reasons. That is accounted for in the add ={} block below
 		}
+	}
+	add = {
+		value = owner.manpower
+		multiply = FUNC_governorship_country_pops_ratio
+		divide = 40
 	}
 }
 

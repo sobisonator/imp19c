@@ -210,11 +210,7 @@ PixelShader =
 			
 			#ifndef TERRAIN_UNDERWATER
 				FinalColor = ApplyFogOfWar( FinalColor, Input.WorldSpacePos, FogOfWarAlpha );
-				
 				float vFogFactor = min(CalculateDistanceFogFactor( Input.WorldSpacePos ),0.6);
-				#if defined(nightLight)
-					vFogFactor *= 0.05;
-				#endif
 				FinalColor = ApplyDistanceFog( FinalColor, vFogFactor );
 			#endif
 

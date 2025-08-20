@@ -1182,192 +1182,446 @@ widget = {
 	name = "small_unit_widget"
 	position = { 5 8 }
 	widgetanchor = top|hcenter
-	container = {
+
+	flowcontainer = {
 		resizeparent = yes
-		
+		widget = {
+			size = { 50 36 }
+			visible = "[UnitMapIcon.HasSiege]"
+			icon = {
+				texture = "gfx/interface/pie_charts/pie_chart_alpha_60_shadow.dds"
+				size = { 44 44 }
+				parentanchor = center
+				alpha = 0.5
+			}
+			icon = {
+				texture = "gfx/interface/base_parts/buttons_ls.dds"
+				size = { 44 44 }
+				framesize = { 40 40 }
+				frame = 2
+				parentanchor = center
+				modify_texture = {
+					texture = "gfx/interface/pie_charts/pie_chart_alpha_60.dds"
+					blend_mode = alphamultiply
+				}
+			}
+			icon = {
+				size = { 34 34 }
+				texture = "gfx/interface/base_parts/background_texture.dds"
+				parentanchor = center
+				modify_texture = {
+					texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
+					blend_mode = alphamultiply
+				}
+			}
+			progresspie = {
+				name = "progress"
+				parentanchor = center
+				size = { 44 44 }
+				texture = "gfx/interface/pie_charts/pie_chart_alpha_60.dds"
+				framesize = { 68 68 }
+				frame = 2
+				value = "[UnitMapIcon.GetSiege.GetSiegePhaseProgress]"
+				visible = "[Not( UnitMapIcon.GetSiege.IsTooFewMen )]"
+				tooltip = "[UnitMapIcon.GetSiege.GetSiegePhaseProgressTooltip]"
+				icon = {
+					size = { 42 42 }
+					texture = "[GetSubUnitIcon(MilitaryConstructionIcon.GetType)]"
+					parentanchor = center
+					modify_texture = {
+						texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
+						blend_mode = alphamultiply
+					}
+				}
+			}
+			widget = {
+				size = { 100% 100% }
+				textbox = {
+					position = { 0 1 }
+					parentanchor = center
+					size = { 100% 100% }
+					visible = "[Not(UnitMapIcon.GetSiege.IsTooFewMen)]"
+					using = BaseFontS
+					using = Black_FontColor
+					fontsize = 12
+					align = center|nobaseline
+					text = "[UnitMapIcon.GetSiege.GetFallChance|2%]"
+					autoresize = yes
+					tooltip = "[UnitMapIcon.GetSiege.GetFallChanceTooltip]"
+				}
+				textbox = {
+					position = { 0 1 }
+					parentanchor = center
+					size = { 100% 100% }
+					visible = "[UnitMapIcon.GetSiege.IsTooFewMen]"
+					using = BaseFontS
+					using = Negative_FontColor
+					fontsize = 12
+					align = center|nobaseline
+					text = "SIEGE_TOO_FEW_MEN_TXT"
+					autoresize = yes
+					tooltip = "SIEGE_TOO_FEW_MEN_TOOLTIP"
+				}
+			}
+		}
 		dynamicgridbox = {
 			name = "unit_items_grid"
-			visible = "[And( Not(IsMapMode('religion')), Not( IsMapMode('cool_map_effect') ) )]"
+			visible = "[Not(IsMapMode('religion'))]"
 			item = {
 				flowcontainer = {
-					direction = vertical
 					ignoreinvisible = yes
-					visible = "[And( Not( UnitItem.GetUnit.IsUnemployedMercenary ), Or( Or( UnitItem.GetUnit.IsArmy, Or( Not( UnitItem.GetUnit.GetLocation.HasPort ), EqualTo_int32( UnitItem.GetCountry.GetId, Player.GetId ) ) ), UnitItem.IsSelected ) )]"	 
-					tooltip = "[UnitItem.GetTooltip]"
-					spacing = -7
-					widget = {
-						size = { 122 36 }
-						scale = 0.9
-						alwaystransparent = no
-						tooltip = "[UnitItem.GetTooltip]"
-						icon = {
-							name = "glowlong"
-							texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
-							shaderfile = "gfx/FX/pdxgui_default.shader"
-							framesize = { 200 200 }
-							frame = 6
-							size = { 132 32 }
-							position = { 0 7 }
-							visible = "[UnitItem.IsSelected]"
-							modify_texture = { 
-								name = "unit_glow_long"
-								texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
-								spriteborder = { 60 0 }
-								spriteType = corneredtiled
-								blend_mode = alphamultiply	
+					#spacing = 2
+					visible = "[And( Not( UnitItem.GetUnit.IsUnemployedMercenary ), Or( Or( UnitItem.GetUnit.IsArmy, Or( Not( UnitItem.GetUnit.GetLocation.HasPort ), EqualTo_int32( UnitItem.GetCountry.GetId, Player.GetId ) ) ), UnitItem.IsSelected ) )]"	
+					flowcontainer = {
+						direction = vertical
+						widget = {
+							size = { 100% 0 }
+							widget = {
+								size = { 100% 5 }
+								visible = "[UnitItem.IsSelected]"
+								background = {
+									shaderfile = "gfx/FX/pdxgui_default.shader"
+									using = gold_background
+									margin = { 3 0 }
+									margin_top = 3
+									margin_bottom = 33
+									alpha = 0.75
+									modify_texture = {
+										texture = "gfx/interface/base_parts/round_button_right_alpha_x1_flip.dds"
+										blend_mode = alphamultiply
+										spriteType = corneredtiled
+										spriteborder = { 21 20 }
+									}
+								}
 							}
 						}
 						button = {
-							size = { 100% 100% }
 							onclick = "[UnitItem.OnClick]"
+							tooltip = "[UnitItem.GetTooltip]"
 							button_ignore = right
-							visible = "[UnitItem.IsClickable]"
-						}
-						icon = {
-							using = flat_background_white
-							size = { 108 32 }
-							position = { 24 3 }
-							modify_texture = { 
-								texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
-								spriteborder = { 60 0 }
-								spriteType = corneredtiled
-								blend_mode = alphamultiply								
-							}
-						}
-						icon = {
-							texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
-							framesize = { 200 200 }
-							frame = "[UnitItem.GetBackgroundFrame]"
-							size = { 7 100% }
-							position = { 42 0 }
-							alpha = 0.9
-							
-							modify_texture = {
-								name = "unit"
-								texture = "gfx/interface/map/on_map_unit_type_x12bd_alph_left.dds"
-								blend_mode = alphamultiply
-								spriteType = Corneredtiled
-								spriteborder = { 6 0 }
-							}
-							
-							modify_texture = {
-								name = "unit_legion"
-								texture = "gfx/interface/map/on_map_unit_legion_x120bd_alpha.dds"
-								blend_mode = alphamultiply
-								spriteType = Corneredstretched
-								spriteborder = { -60 0 }
-							}
-						}
-						
-						icon = {
-							texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
-							framesize = { 200 200 }
-							frame = "[UnitItem.GetBackgroundFrame]"
-							alpha = 0.9
-							size = { 60 100% }
-							position = { 42 0 }
-							
-							modify_texture = {
-								name = "Decay"
-								texture = "gfx/interface/map/on_map_unit_type_x80bd_alpha_right.dds"
-								blend_mode = alphamultiply
-								spriteType = Corneredstretched
-								spriteborder = { 0 0 }
-							}
-							
-							modify_texture = {
-								name = "Decay"
-								texture = "gfx/interface/map/on_map_unit_legion_x120bd_alpha.dds"
-								blend_mode = alphamultiply
-								spriteType = Corneredstretched
-								spriteborder = { 0 0 }
-							}
-							
-						}
-						
-						textbox = {
-							name = "strength"
-							position = { 46 7 }
-							size = { 48 20 }
-							using = BaseFontS
-							using = Black_FontColor
-							parentanchor = left|top
-							align = center
-							visible = "[UnitItem.ShouldBeShownShortWidth]"
-							text = "[UnitItem.GetLabel]"
-							max_width = 48
-							fontsize_min = 10
-						}
-						
-						progressbar = {
-							using = vertical_moralebar
-							position = { 33 4 }
-							size = { 8 28 }
-							value = "[UnitItem.GetAverageMoralePercent]"
-							tooltip = "[UnitItem.GetUnit.GetMoraleTooltip]"
-						}
-						
-						#Clickable Flag
-						
-						container = {
-							visible = "[Not( UnitItem.GetUnit.IsUnemployedMercenary )]"
-							position = { 0 2 }
-							country_flag = {
-								datacontext = "[UnitItem.GetUnit.GetCountry]"
-								tooltip = "COUNTRY_FLAG_TT"
-								
-								name = "unit_flag"
-								
-								blockoverride "flag"
-								{
-									texture = "[UnitItem.GetFlagTexture('(int32)32','(int32)32')]"
-									frame = "[UnitItem.GetFlagTextureFrame('(int32)32','(int32)32')]"
+							flowcontainer = {
+								resizeparent = yes
+								ignoreinvisible = yes
+								background = {
+									shaderfile = "gfx/FX/pdxgui_default.shader"
+									using = black_background
+									margin = { 1 1 }
+									alpha = 0.75
+									modify_texture = {
+										texture = "gfx/interface/base_parts/shadows/round_button_right_alpha_x2_shadow_flip.dds"
+										blend_mode = alphamultiply
+										spriteType = corneredtiled
+										spriteborder = { 18 17 }
+									}
+								}
+								background = {
+									shaderfile = "gfx/FX/pdxgui_default.shader"
+									texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
 									framesize = { 32 32 }
+									frame = "[UnitItem.GetBackgroundFrame]"
+									alpha = 0.5
+									modify_texture = {
+										texture = "gfx/interface/base_parts/round_button_right_alpha_x2_flip.dds"
+										blend_mode = alphamultiply
+										spriteType = corneredtiled
+										spriteborder = { 18 17 }
+									}
+								}
+								background = {
+									shaderfile = "gfx/FX/pdxgui_default.shader"
+									texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
+									framesize = { 32 32 }
+									frame = "[UnitItem.GetBackgroundFrame]"
+									margin = { -2 -2 }
+									alpha = 0.5
+									modify_texture = {
+										texture = "gfx/interface/base_parts/round_button_right_alpha_x25_flip.dds"
+										blend_mode = alphamultiply
+										spriteType = corneredtiled
+										spriteborder = { 16 15 }
+									}
+								}
+								background = {
+									shaderfile = "gfx/FX/pdxgui_default.shader"
+									using = black_background
+									margin = { -2 -2 }
+									alpha = 0.5
+									modify_texture = {
+										texture = "gfx/interface/base_parts/horizontal_gradient_stretch_black.dds"
+										blend_mode = alphamultiply
+									}
+									modify_texture = {
+										texture = "gfx/interface/base_parts/round_button_right_alpha_x25_flip.dds"
+										blend_mode = alphamultiply
+										spriteType = corneredtiled
+										spriteborder = { 16 15 }
+									}
+								}
+								#Clickable Flag
+								container = {
+									visible = "[Not( UnitItem.GetUnit.IsUnemployedMercenary )]"
+									country_flag = {
+										datacontext = "[UnitItem.GetUnit.GetCountry]"
+										tooltip = "COUNTRY_FLAG_TT"
+										
+										name = "unit_flag"
+										
+										blockoverride "flag"
+										{
+											texture = "[UnitItem.GetFlagTexture('(int32)32','(int32)32')]"
+											frame = "[UnitItem.GetFlagTextureFrame('(int32)32','(int32)32')]"
+											framesize = { 32 32 }
+										}
+										
+										blockoverride "size"
+										{
+											size = { 33 33 }
+										}
+										
+										blockoverride "click"
+										{
+											onclick = "[UnitItem.OnFlagClick]"
+										}
+										
+										blockoverride "hover" {}
+									}
 								}
 								
-								blockoverride "size"
-								{
-									size = { 32 32 }
+								#Mercenary flag
+								container = {
+									visible = "[UnitItem.GetUnit.IsUnemployedMercenary]"
+									country_flag = {
+										name = "unit_flag"
+										tooltip = "MERC_FLAG_TT"
+										
+										blockoverride "flag"
+										{
+											texture = "[UnitItem.GetFlagTexture('(int32)32','(int32)32')]"
+											frame = "[UnitItem.GetFlagTextureFrame('(int32)32','(int32)32')]"
+											framesize = { 32 32 }
+										}
+										
+										blockoverride "size"
+										{
+											size = { 33 33 }
+										}
+										
+										blockoverride "click"
+										{
+											onclick = "[UnitItem.OnClick]"
+										}
+										blockoverride "hover" {}
+									}
 								}
-								
-								blockoverride "click"
-								{
-									onclick = "[UnitItem.OnFlagClick]"
+								margin_widget = {
+									size = { 8 34 }
+									margin = { 0 4 }
+									widget = {
+										size = { 100% 100% }
+										background = {
+											using = white_background
+										}
+									}
+									progressbar = {
+										using = vertical_moralebar
+										size = { 100% 100% }
+										value = "[UnitItem.GetAverageMoralePercent]"
+										tooltip = "[UnitItem.GetUnit.GetMoraleTooltip]"
+									}
 								}
-								
-								blockoverride "hover" {}
+								widget = {
+									size = { 50 34 }
+									visible = "[Not(And( And( UnitItem.ShouldBeShownShortWidth, Not( UnitItem.GetUnit.IsUnemployedMercenary ) ), Or( Or( UnitItem.GetUnit.IsArmy, Or( Not( UnitItem.GetUnit.GetLocation.HasPort ), EqualTo_int32( UnitItem.GetCountry.GetId, Player.GetId ) ) ), UnitItem.IsSelected ) ) )]"	
+									button = {
+										name = "commander_ranking"
+										size = { 100% 100% }
+										framesize = { 60 32 }
+										frame = "[UnitItem.GetLeaderFrame]"
+										texture = "gfx/interface/map/ranking.dds"
+										visible = "[GreaterThan_int32(UnitItem.GetLeaderFrame,'(int32)1')]"
+										onclick = "[UnitItem.OnLeaderClick]"
+										tooltip = "GENERAL_TT"
+									}
+									button = {
+										name = "no_commander_ranking"
+										size = { 100% 100% }
+										framesize = { 60 32 }
+										frame = 2
+										texture = "gfx/interface/map/ranking.dds"
+										visible = "[Not(GreaterThan_int32(UnitItem.GetLeaderFrame,'(int32)1'))]"
+										onclick = "[UnitItem.OnClick]"
+										tooltip = "NO_LEADER_TT"
+									}
+								}
+								textbox = {
+									name = "strength_full"
+									size = { 50 34 }
+									using = BaseFontS
+									using = Black_FontColor
+									align = center
+									visible = "[UnitItem.ShouldBeShownFullWidth]"
+									text = "[UnitItem.GetLabel]"
+									max_width = 48
+									fontsize_min = 10
+								}
+								textbox = {
+									name = "strength_short"
+									size = { 50 34 }
+									using = BaseFontS
+									using = Black_FontColor
+									parentanchor = left|top
+									align = center
+									visible = "[And( And( UnitItem.ShouldBeShownShortWidth, Not( UnitItem.GetUnit.IsUnemployedMercenary ) ), Or( Or( UnitItem.GetUnit.IsArmy, Or( Not( UnitItem.GetUnit.GetLocation.HasPort ), EqualTo_int32( UnitItem.GetCountry.GetId, Player.GetId ) ) ), UnitItem.IsSelected ) )]"	
+									text = "[UnitItem.GetLabel]"
+									max_width = 48
+									fontsize_min = 10
+								}
+								widget = {
+									size = { 10 34 }
+								}
 							}
 						}
-						
-						#Mercenary flag
-						container = {
-							position = { 0 2 }
-							country_flag = {
-								visible = "[UnitItem.GetUnit.IsUnemployedMercenary]"
-								name = "unit_flag"
-								tooltip = "MERC_FLAG_TT"
-								
-								blockoverride "flag"
-								{
-									texture = "[UnitItem.GetFlagTexture('(int32)32','(int32)32')]"
-									frame = "[UnitItem.GetFlagTextureFrame('(int32)32','(int32)32')]"
-									framesize = { 32 32 }
+						flowcontainer = {
+							ignoreinvisible = yes
+							spacing = 5
+							background = {
+								shaderfile = "gfx/FX/pdxgui_default.shader"
+								using = black_background
+							}
+							container = {
+								visible = "[UnitItem.IsMovementLocked]"
+								icon = {
+									texture = "gfx/interface/mapitems/movement_lock.dds"
+									tooltip = "MOVEMENT_LOCKED"
+									size = { 20 19 }
+									position = { 0 3 }
 								}
-								
-								blockoverride "size"
-								{
-									size = { 32 32 }
+							}
+							
+							container = {
+								visible = "[UnitItem.IsLosingSoldiers]"
+								icon = {
+									using = icon_attrition
+									tooltip = "[UnitItem.GetAttritionTooltip]"
+									size = { 20 20 }
+									position = { 0 3 }
 								}
-								
-								blockoverride "click"
-								{
-									onclick = "[UnitItem.OnClick]"
+							}
+							
+							container = {
+								visible = "[UnitItem.IsLosingFood]"
+								icon = {
+									using = icon_food_deficiency
+									tooltip = "[UnitItem.GetAttritionTooltip]"
+									size = { 20 20 }
+									position = { 0 2 }
 								}
-								blockoverride "hover" {}
+							}
+							
+							container = {
+								parentanchor = vcenter
+								visible = "[UnitItem.IsRegainingFood]"
+								icon = {
+									texture = "gfx/interface/icons/shared_icons/has_attrition_with_food_supply.dds"
+									tooltip = "[UnitItem.GetAttritionTooltip]"
+									size = { 20 20 }
+									position = { 0 2 }
+								}
+							}
+							
+							icon = {
+								parentanchor = vcenter
+								texture = "[UnitItem.GetActiveAbilityIcon]"
+								size = { 20 20 }
+								visible = "[UnitItem.ShowActiveAbility]"
+								tooltip = "[UnitItem.GetActiveAbilityTooltip]"
+							}
+							
+							container = {
+								parentanchor = vcenter
+								visible = "[UnitItem.IsExiled]"
+								icon = {
+									texture = "gfx/interface/icons/shared_icons/exiles.dds"
+									size = { 20 20 }
+									tooltip = "IS_EXILED_TT"
+									position = { 0 3 }
+								}
+							}
+							
+							container = {
+								parentanchor = vcenter
+								visible = "[UnitItem.IsRetreating]"
+								icon = {
+									texture = "gfx/interface/icons/shared_icons/retreating.dds"
+									size = { 20 20 }
+									tooltip = "UNIT_IS_RETREAT_TT"
+									position = { 0 3 }
+								}
 							}
 						}
 					}
-					# Can port icons from below if desired
+					margin_widget = {
+						size = { 36 36 }
+						margin = { 2 2 }
+						visible = "[And(UnitItem.ShowTotalUnits, UnitItem.ShouldBeShownFullWidth)]"
+						widget = {
+							size = { 36 36 }
+							parentanchor = center
+							background = {
+								shaderfile = "gfx/FX/pdxgui_default.shader"
+								using = black_background
+								alpha = 0.75
+								modify_texture = {
+									texture = "gfx/interface/base_parts/roung_shadow_52.dds"
+									blend_mode = alphamultiply
+								}
+							}
+						}
+						button = {
+							name = "total_units_bg"
+							size = { 100% 100% }
+							tooltip = "STACK_OF_UNITS_TT"
+							onclick = "[UnitItem.OnClick]"
+							texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
+							framesize = { 32 32 }
+							frame = "[UnitItem.GetBackgroundFrame]"
+							alpha = 0.5
+							modify_texture = {
+								texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
+								blend_mode = alphamultiply
+							}
+							widget = {
+								size = { 28 28 }
+								parentanchor = center
+								background = {
+									shaderfile = "gfx/FX/pdxgui_default.shader"
+									texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
+									framesize = { 32 32 }
+									frame = "[UnitItem.GetBackgroundFrame]"
+									#margin = { 3 0 }
+									#margin_top = 3
+									#margin_bottom = 33
+									#alpha = 0.5
+									modify_texture = {
+										texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
+										blend_mode = alphamultiply
+									}
+								}
+							}
+							textbox = {
+								name = "total_units"
+								alpha = 2.0
+								position = { 0 -2 }
+								size = { 36 36 }
+								parentanchor = center
+								align = center
+								multiline = no
+								using = BaseFontM
+								visible = "[UnitItem.ShowTotalUnits]"
+								text = "[UnitItem.GetTotalUnits]"
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1381,8 +1635,6 @@ widget = {
 	widgetanchor = top|hcenter
 	visible = "[Not( IsMapMode('cool_map_effect') )]"
 	layer = top
-
-
 
 	flowcontainer = {
 		resizeparent = yes
@@ -1820,770 +2072,6 @@ widget = {
 								visible = "[UnitItem.ShowTotalUnits]"
 								text = "[UnitItem.GetTotalUnits]"
 							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	flowcontainer = {
-		#position = { 0 100 }
-		#resizeparent = yes
-		#direction = vertical
-		ignoreinvisible = yes
-		widget = {
-			size = { 50 36 }
-			visible = "[UnitMapIcon.HasSiege]"
-			icon = {
-				texture = "gfx/interface/pie_charts/pie_chart_alpha_60_shadow.dds"
-				size = { 44 44 }
-				parentanchor = center
-				alpha = 0.5
-			}
-			icon = {
-				texture = "gfx/interface/base_parts/buttons_ls.dds"
-				size = { 44 44 }
-				framesize = { 40 40 }
-				frame = 2
-				parentanchor = center
-				modify_texture = {
-					texture = "gfx/interface/pie_charts/pie_chart_alpha_60.dds"
-					blend_mode = alphamultiply
-				}
-			}
-			icon = {
-				size = { 34 34 }
-				texture = "gfx/interface/base_parts/background_texture.dds"
-				parentanchor = center
-				modify_texture = {
-					texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
-					blend_mode = alphamultiply
-				}
-			}
-			progresspie = {
-				name = "progress"
-				parentanchor = center
-				size = { 44 44 }
-				texture = "gfx/interface/pie_charts/pie_chart_alpha_60.dds"
-				framesize = { 68 68 }
-				frame = 2
-				value = "[UnitMapIcon.GetSiege.GetSiegePhaseProgress]"
-				visible = "[Not( UnitMapIcon.GetSiege.IsTooFewMen )]"
-				tooltip = "[UnitMapIcon.GetSiege.GetSiegePhaseProgressTooltip]"
-				icon = {
-					size = { 42 42 }
-					texture = "[GetSubUnitIcon(MilitaryConstructionIcon.GetType)]"
-					parentanchor = center
-					modify_texture = {
-						texture = "gfx/interface/base_parts/round_button_back_alpha.dds"
-						blend_mode = alphamultiply
-					}
-				}
-			}
-			widget = {
-				size = { 100% 100% }
-				textbox = {
-					position = { 0 1 }
-					parentanchor = center
-					size = { 100% 100% }
-					visible = "[Not(UnitMapIcon.GetSiege.IsTooFewMen)]"
-					using = BaseFontS
-					using = Black_FontColor
-					fontsize = 12
-					align = center|nobaseline
-					text = "[UnitMapIcon.GetSiege.GetFallChance|2%]"
-					autoresize = yes
-					tooltip = "[UnitMapIcon.GetSiege.GetFallChanceTooltip]"
-				}
-				textbox = {
-					position = { 0 1 }
-					parentanchor = center
-					size = { 100% 100% }
-					visible = "[UnitMapIcon.GetSiege.IsTooFewMen]"
-					using = BaseFontS
-					using = Negative_FontColor
-					fontsize = 12
-					align = center|nobaseline
-					text = "SIEGE_TOO_FEW_MEN_TXT"
-					autoresize = yes
-					tooltip = "SIEGE_TOO_FEW_MEN_TOOLTIP"
-				}
-			}
-		}
-		
-		dynamicgridbox = {
-			name = "unit_items_grid"
-			visible = "[Not(IsMapMode('religion'))]"
-			item = {
-				container = {
-					ignoreinvisible = yes
-					parentanchor = top|hcenter
-					widgetanchor = top|hcenter
-					
-					flowcontainer = {
-						ignoreinvisible = yes
-						
-						#Stacked plates information
-						#This is really hacky and should probably be fixed
-						widget = {
-							size = { 24 30 }
-							visible = "[And(UnitItem.ShowTotalUnits, UnitItem.ShouldBeShownFullWidth)]"
-							tooltip = "STACK_OF_UNITS_TT"
-							parentanchor = top
-							
-							button = {
-								name = "total_units_bg"
-								texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
-								framesize = { 200 200 }
-								frame = "[UnitItem.GetBackgroundFrame]"
-								onclick = "[UnitItem.OnClick]"
-								visible = "[UnitItem.IsClickable]"
-								position = { 0 4 }
-								size = { 100% 100% }
-								
-								using = DropShadow
-								
-								modify_texture = {
-									name = "Decay"
-									texture = "gfx/interface/map/on_map_unit_type_x12bd_alph_left.dds"
-									blend_mode = alphamultiply
-									spriteType = Corneredtiled
-									spriteborder = { 6 0 }
-								}
-								
-								textbox = {
-									name = "total_units"
-									position = { 0 -2 }
-									size = { 24 30 }
-									parentanchor = center
-									autoresize = yes
-									align = center
-									multiline = no
-									using = BaseFontM
-									visible = "[UnitItem.ShowTotalUnits]"
-									text = "[UnitItem.GetTotalUnits]"
-								}
-							}
-							
-							icon = {
-								name = "total_units_bg_unclickable"
-								texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
-								shaderfile = "gfx/FX/pdxgui_default.shader"
-								framesize = { 200 200 }
-								frame = "[UnitItem.GetBackgroundFrame]"
-								visible = "[Not(UnitItem.IsClickable)]"
-								position = { 0 4 }
-								size = { 100% 100% }
-								
-								using = DropShadow
-								
-								modify_texture = {
-									name = "Decay"
-									texture = "gfx/interface/map/on_map_unit_type_x12bd_alph_left.dds"
-									blend_mode = alphamultiply
-									spriteType = Corneredtiled
-									spriteborder = { 6 0 }
-								}
-								
-								textbox = {
-									name = "total_units"
-									position = { 0 -2 }
-									size = { 24 30 }
-									parentanchor = center
-									autoresize = yes
-									align = right
-									multiline = no
-									using = BaseFontM
-									visible = "[UnitItem.ShowTotalUnits]"
-									text = "[UnitItem.GetTotalUnits]"
-								}
-							}
-						}
-						
-						container = {
-							#Full width button
-							ignoreinvisible = yes
-							
-							#Long Button
-							flowcontainer = {
-								direction = vertical
-								visible = "[UnitItem.ShouldBeShownFullWidth]"
-								ignoreinvisible = yes
-								spacing = -4
-								widget = {
-									size = { 172 40 }
-									allow_outside = yes
-									alwaystransparent = no
-									tooltip = "[UnitItem.GetTooltip]"
-									icon = {
-										name = "glowlong"
-										texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
-										shaderfile = "gfx/FX/pdxgui_default.shader"
-										framesize = { 200 200 }
-										frame = 6
-										size = { 172 32 }
-										position = { 0 7 }
-										visible = "[And(UnitItem.IsSelected, UnitItem.ShouldBeShownFullWidth)]"
-										modify_texture = { 
-											name = "unit_glow_long"
-											texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
-											spriteborder = { 60 0 }
-											spriteType = corneredtiled
-											blend_mode = alphamultiply	
-										}
-									}
-									button = {
-										size = { 100% 100% }
-										onclick = "[UnitItem.OnClick]"
-										button_ignore = right
-										visible = "[UnitItem.IsClickable]"
-									}
-									icon = {
-										using = flat_background_white
-										size = { 148 32 }
-										position = { 24 3 }
-										modify_texture = { 
-											texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
-											spriteborder = { 60 0 }
-											spriteType = corneredtiled
-											blend_mode = alphamultiply								
-										}
-									}
-									icon = {	
-										name = "colored_square_commander_rank"
-										texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
-										framesize = { 200 200 }
-										frame = "[UnitItem.GetBackgroundFrame]"
-										size = { 30 100% }
-										position = { 40 0 }
-										alpha = 0.9
-										
-										modify_texture = {
-											name = "Decay"
-											texture = "gfx/interface/map/on_map_unit_type_x12bd_alph_left.dds"
-											blend_mode = alphamultiply
-											spriteType = Corneredtiled
-											spriteborder = { 6 0 }
-										}
-										
-										modify_texture = {
-											name = "Decay"
-											texture = "gfx/interface/map/on_map_unit_legion_x120bd_alpha.dds"
-											blend_mode = alphamultiply
-											spriteType = Corneredstretched
-											spriteborder = { -60 0 }
-										}
-										
-									}
-									
-									icon = {
-										name = "colored_lines_top_and_bottom"
-										texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
-										framesize = { 200 200 }
-										frame = "[UnitItem.GetBackgroundFrame]"
-										size = { 62 100% }
-										position = { 68 0 }
-										alpha = 0.9
-										
-										modify_texture = {
-											name = "Decay"
-											texture = "gfx/interface/map/on_map_unit_type_x80bd_alpha_right.dds"
-											blend_mode = alphamultiply
-											spriteType = Corneredstretched
-											spriteborder = { 0 0 }
-										}
-										
-										modify_texture = {
-											name = "Decay2"
-											texture = "gfx/interface/map/on_map_unit_legion_x120bd_alpha.dds"
-											blend_mode = alphamultiply
-											spriteType = Corneredstretched
-											spriteborder = { 0 0 }
-										}
-										
-									}
-									
-									button = {
-										position = { 28 -1 }
-										parentanchor = vcenter
-										name = "commander_ranking"
-										framesize = { 60 32 }
-										frame = "[UnitItem.GetLeaderFrame]"
-										texture = "gfx/interface/map/ranking.dds"
-										visible = "[GreaterThan_int32(UnitItem.GetLeaderFrame,'(int32)1')]"
-										onclick = "[UnitItem.OnLeaderClick]"
-										tooltip = "GENERAL_TT"
-										scale = 0.9
-									}
-									
-									button = {
-										position = { 28 0 }
-										parentanchor = vcenter
-										name = "no_commander_ranking"
-										framesize = { 60 32 }
-										frame = 2
-										texture = "gfx/interface/map/ranking.dds"
-										visible = "[Not(GreaterThan_int32(UnitItem.GetLeaderFrame,'(int32)1'))]"
-										onclick = "[UnitItem.OnClick]"
-										tooltip = "NO_LEADER_TT"
-										scale = 0.9
-									}
-									
-									textbox = {
-										name = "strength"
-										position = { 72 9 }
-										size = { 48 20 }
-										using = BaseFontS
-										using = Black_FontColor
-										parentanchor = left|top
-										align = center
-										visible = "[UnitItem.ShouldBeShownFullWidth]"
-										text = "[UnitItem.GetLabel]"
-										max_width = 48
-										fontsize_min = 10
-									}
-									
-									progressbar = {
-										parentanchor = vcenter
-										using = vertical_moralebar
-										position = { 31 0 }
-										size = { 8 30 }
-										value = "[UnitItem.GetAverageMoralePercent]"
-										tooltip = "[UnitItem.GetUnit.GetMoraleTooltip]"
-									}
-									
-									#Clickable Flag
-									
-									container = {
-										visible = "[Not( UnitItem.GetUnit.IsUnemployedMercenary )]"
-										position = { -2 3 }
-										country_flag = {
-											datacontext = "[UnitItem.GetUnit.GetCountry]"
-											tooltip = "COUNTRY_FLAG_TT"
-											
-											name = "unit_flag"
-											
-											blockoverride "flag"
-											{
-												texture = "[UnitItem.GetFlagTexture('(int32)32','(int32)32')]"
-												frame = "[UnitItem.GetFlagTextureFrame('(int32)32','(int32)32')]"
-												framesize = { 32 32 }
-											}
-											
-											blockoverride "size"
-											{
-												size = { 33 33 }
-											}
-											
-											blockoverride "click"
-											{
-												onclick = "[UnitItem.OnFlagClick]"
-											}
-											
-											blockoverride "hover" {}
-										}
-									}
-									
-									#Mercenary flag
-									container = {
-										position = { -2 3 }
-										country_flag = {
-											visible = "[UnitItem.GetUnit.IsUnemployedMercenary]"
-											name = "unit_flag"
-											tooltip = "MERC_FLAG_TT"
-											
-											blockoverride "flag"
-											{
-												texture = "[UnitItem.GetFlagTexture('(int32)32','(int32)32')]"
-												frame = "[UnitItem.GetFlagTextureFrame('(int32)32','(int32)32')]"
-												framesize = { 32 32 }
-											}
-											
-											blockoverride "size"
-											{
-												size = { 33 33 }
-											}
-											
-											blockoverride "click"
-											{
-												onclick = "[UnitItem.OnClick]"
-											}
-											blockoverride "hover" {}
-										}
-									}
-									
-								}
-								
-								flowcontainer = {
-									ignoreinvisible = yes
-									scale = 0.9
-									spacing = -2
-									background = {
-										using = flat_background_white
-										shaderfile = "gfx/FX/pdxgui_default.shader"
-										margin_bottom = 1
-										margin_right = 12
-										modify_texture = {
-											name = "Decay"
-											texture = "gfx/interface/map/on_map_unit_icons_bg_x32bd_alpha.dds"
-											blend_mode = alphamultiply
-											spriteType = Corneredtiled
-											spriteborder = { 16 0 }
-										}
-									}
-									widget = { size = { 6 0 } }
-									container = {
-										visible = "[UnitItem.IsMovementLocked]"
-										icon = {
-											texture = "gfx/interface/mapitems/movement_lock.dds"
-											tooltip = "MOVEMENT_LOCKED"
-											size = { 20 19 }
-											position = { 0 3 }
-										}
-									}
-									
-									container = {
-										visible = "[UnitItem.IsLosingSoldiers]"
-										icon = {
-											using = icon_attrition
-											tooltip = "[UnitItem.GetAttritionTooltip]"
-											size = { 20 20 }
-											position = { 0 3 }
-										}
-									}
-									
-									container = {
-										visible = "[UnitItem.IsLosingFood]"
-										icon = {
-											using = icon_food_deficiency
-											tooltip = "[UnitItem.GetAttritionTooltip]"
-											size = { 20 20 }
-											position = { 0 2 }
-										}
-									}
-									
-									container = {
-										parentanchor = vcenter
-										visible = "[UnitItem.IsRegainingFood]"
-										icon = {
-											texture = "gfx/interface/icons/shared_icons/has_attrition_with_food_supply.dds"
-											tooltip = "[UnitItem.GetAttritionTooltip]"
-											size = { 20 20 }
-											position = { 0 2 }
-										}
-									}
-									
-									icon = {
-										parentanchor = vcenter
-										texture = "[UnitItem.GetActiveAbilityIcon]"
-										size = { 20 20 }
-										visible = "[UnitItem.ShowActiveAbility]"
-										tooltip = "[UnitItem.GetActiveAbilityTooltip]"
-									}
-									
-									container = {
-										parentanchor = vcenter
-										visible = "[UnitItem.IsExiled]"
-										icon = {
-											texture = "gfx/interface/icons/shared_icons/exiles.dds"
-											size = { 20 20 }
-											tooltip = "IS_EXILED_TT"
-											position = { 0 3 }
-										}
-									}
-									
-									container = {
-										parentanchor = vcenter
-										visible = "[UnitItem.IsRetreating]"
-										icon = {
-											texture = "gfx/interface/icons/shared_icons/retreating.dds"
-											size = { 20 20 }
-											tooltip = "UNIT_IS_RETREAT_TT"
-											position = { 0 3 }
-										}
-									}
-								}
-								
-							}
-							#End Long button
-							
-							#Short button
-							flowcontainer = {
-								direction = vertical
-								ignoreinvisible = yes
-								visible = "[And( And( UnitItem.ShouldBeShownShortWidth, Not( UnitItem.GetUnit.IsUnemployedMercenary ) ), Or( Or( UnitItem.GetUnit.IsArmy, Or( Not( UnitItem.GetUnit.GetLocation.HasPort ), EqualTo_int32( UnitItem.GetCountry.GetId, Player.GetId ) ) ), UnitItem.IsSelected ) )]"	
-								spacing = -7
-								widget = {
-									size = { 122 40 }
-									scale = 0.9
-									alwaystransparent = no
-									tooltip = "[UnitItem.GetTooltip]"
-									icon = {
-										name = "glowlong"
-										texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
-										shaderfile = "gfx/FX/pdxgui_default.shader"
-										framesize = { 200 200 }
-										frame = 6
-										size = { 132 32 }
-										position = { 0 7 }
-										visible = "[UnitItem.IsSelected]"
-										modify_texture = { 
-											name = "unit_glow_long"
-											texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
-											spriteborder = { 60 0 }
-											spriteType = corneredtiled
-											blend_mode = alphamultiply	
-										}
-									}
-									button = {
-										size = { 100% 100% }
-										onclick = "[UnitItem.OnClick]"
-										button_ignore = right
-										visible = "[UnitItem.IsClickable]"
-									}
-									icon = {
-										using = flat_background_white
-										size = { 108 32 }
-										position = { 24 3 }
-										modify_texture = { 
-											texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
-											spriteborder = { 60 0 }
-											spriteType = corneredtiled
-											blend_mode = alphamultiply								
-										}
-									}
-
-									icon = {
-										texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
-										framesize = { 200 200 }
-										frame = "[UnitItem.GetBackgroundFrame]"
-										size = { 7 100% }
-										position = { 42 0 }
-										alpha = 0.9
-										
-										modify_texture = {
-											name = "Decay"
-											texture = "gfx/interface/map/on_map_unit_type_x12bd_alph_left.dds"
-											blend_mode = alphamultiply
-											spriteType = Corneredtiled
-											spriteborder = { 6 0 }
-										}
-										
-										modify_texture = {
-											name = "Decay"
-											texture = "gfx/interface/map/on_map_unit_legion_x120bd_alpha.dds"
-											blend_mode = alphamultiply
-											spriteType = Corneredstretched
-											spriteborder = { -60 0 }
-										}
-										
-									}
-									
-									icon = {
-										texture = "gfx/interface/map/on_map_unit_colors_200fs.dds"
-										framesize = { 200 200 }
-										frame = "[UnitItem.GetBackgroundFrame]"
-										alpha = 0.9
-										size = { 60 100% }
-										position = { 42 0 }
-										
-										modify_texture = {
-											name = "Decay"
-											texture = "gfx/interface/map/on_map_unit_type_x80bd_alpha_right.dds"
-											blend_mode = alphamultiply
-											spriteType = Corneredstretched
-											spriteborder = { 0 0 }
-										}
-										
-										modify_texture = {
-											name = "Decay"
-											texture = "gfx/interface/map/on_map_unit_legion_x120bd_alpha.dds"
-											blend_mode = alphamultiply
-											spriteType = Corneredstretched
-											spriteborder = { 0 0 }
-										}
-										
-									}
-									
-									textbox = {
-										name = "strength"
-										position = { 46 8 }
-										size = { 48 20 }
-										using = BaseFontS
-										using = Black_FontColor
-										parentanchor = left|top
-										align = center
-										visible = "[UnitItem.ShouldBeShownShortWidth]"
-										text = "[UnitItem.GetLabel]"
-										max_width = 48
-										fontsize_min = 10
-									}
-									
-									progressbar = {
-										using = vertical_moralebar
-										position = { 33 4 }
-										size = { 8 32 }
-										value = "[UnitItem.GetAverageMoralePercent]"
-										tooltip = "[UnitItem.GetUnit.GetMoraleTooltip]"
-									}
-									
-									#Clickable Flag
-									
-									container = {
-										visible = "[Not( UnitItem.GetUnit.IsUnemployedMercenary )]"
-										position = { -1 2 }
-										country_flag = {
-											datacontext = "[UnitItem.GetUnit.GetCountry]"
-											tooltip = "COUNTRY_FLAG_TT"
-											
-											name = "unit_flag"
-											
-											blockoverride "flag"
-											{
-												texture = "[UnitItem.GetFlagTexture('(int32)32','(int32)32')]"
-												frame = "[UnitItem.GetFlagTextureFrame('(int32)32','(int32)32')]"
-												framesize = { 32 32 }
-											}
-											
-											blockoverride "size"
-											{
-												size = { 34 34 }
-											}
-											
-											blockoverride "click"
-											{
-												onclick = "[UnitItem.OnFlagClick]"
-											}
-											
-											blockoverride "hover" {}
-										}
-									}
-									
-									#Mercenary flag
-									container = {
-										position = { -1 2 }
-										country_flag = {
-											visible = "[UnitItem.GetUnit.IsUnemployedMercenary]"
-											name = "unit_flag"
-											tooltip = "MERC_FLAG_TT"
-											
-											blockoverride "flag"
-											{
-												texture = "[UnitItem.GetFlagTexture('(int32)32','(int32)32')]"
-												frame = "[UnitItem.GetFlagTextureFrame('(int32)32','(int32)32')]"
-												framesize = { 32 32 }
-											}
-											
-											blockoverride "size"
-											{
-												size = { 34 34 }
-											}
-											
-											blockoverride "click"
-											{
-												onclick = "[UnitItem.OnClick]"
-											}
-											blockoverride "hover" {}
-										}
-									}
-								}
-								flowcontainer = {
-									ignoreinvisible = yes
-									scale = 0.9
-									spacing = -2
-									background = {
-										using = flat_background_white
-										shaderfile = "gfx/FX/pdxgui_default.shader"
-										margin_bottom = 1
-										margin_right = 12
-										modify_texture = {
-											name = "Decay"
-											texture = "gfx/interface/map/on_map_unit_icons_bg_x32bd_alpha.dds"
-											blend_mode = alphamultiply
-											spriteType = Corneredtiled
-											spriteborder = { 16 0 }
-										}
-									}
-									widget = { size = { 6 0 } }
-									container = {
-										visible = "[UnitItem.IsMovementLocked]"
-										icon = {
-											texture = "gfx/interface/mapitems/movement_lock.dds"
-											tooltip = "MOVEMENT_LOCKED"
-											size = { 20 19 }
-											position = { 0 3 }
-										}
-									}
-									
-									container = {
-										visible = "[UnitItem.IsLosingSoldiers]"
-										icon = {
-											using = icon_attrition
-											tooltip = "[UnitItem.GetAttritionTooltip]"
-											size = { 20 20 }
-											position = { 0 3 }
-										}
-									}
-									
-									container = {
-										visible = "[UnitItem.IsLosingFood]"
-										icon = {
-											using = icon_food_deficiency
-											tooltip = "[UnitItem.GetAttritionTooltip]"
-											size = { 20 20 }
-											position = { 0 2 }
-										}
-									}
-									
-									container = {
-										parentanchor = vcenter
-										visible = "[UnitItem.IsRegainingFood]"
-										icon = {
-											texture = "gfx/interface/icons/shared_icons/has_attrition_with_food_supply.dds"
-											tooltip = "[UnitItem.GetAttritionTooltip]"
-											size = { 20 20 }
-											position = { 0 2 }
-										}
-									}
-									
-									icon = {
-										parentanchor = vcenter
-										texture = "[UnitItem.GetActiveAbilityIcon]"
-										size = { 20 20 }
-										visible = "[UnitItem.ShowActiveAbility]"
-										tooltip = "[UnitItem.GetActiveAbilityTooltip]"
-									}
-									
-									container = {
-										parentanchor = vcenter
-										visible = "[UnitItem.IsExiled]"
-										icon = {
-											texture = "gfx/interface/icons/shared_icons/exiles.dds"
-											size = { 20 20 }
-											tooltip = "IS_EXILED_TT"
-											position = { 0 3 }
-										}
-									}
-									
-									container = {
-										parentanchor = vcenter
-										visible = "[UnitItem.IsRetreating]"
-										icon = {
-											texture = "gfx/interface/icons/shared_icons/retreating.dds"
-											size = { 20 20 }
-											tooltip = "UNIT_IS_RETREAT_TT"
-											position = { 0 3 }
-										}
-									}
-								}
-							}
-						}
-						
-						#horrible hack to get the unit plates to look balanced
-						widget = {
-							size = { 22 33 }
-							visible = "[And(UnitItem.ShowTotalUnits, UnitItem.ShouldBeShownFullWidth)]"
 						}
 					}
 				}

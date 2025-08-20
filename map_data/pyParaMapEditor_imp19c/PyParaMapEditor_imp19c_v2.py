@@ -759,6 +759,7 @@ class EditorGUI():
         colour = self.px[cx,cy]
         params = colour # Pass the RGB colour as a database query to find the PROVID
         self.refresh_selector_position(cx, cy) # Redraw selector and canvas, prevents lag
+        print("Province lookup parameters: " + str(params))
         province = self.lookup_province_rgb(params)
         # Do not refresh / overwrite the contents of data entry fields if the province is already selected
         if province != self.prevprovince:

@@ -955,7 +955,7 @@ types NEW_GUI {
 	type economy_income_item_base = flowcontainer {
 		direction = vertical
 		alpha = "[TransparentIfTrue( And( EqualTo_int32( EconomyView.GetPlayer.GetNumOfSubjects, '(int32)0' ), IncomeItem.IsTribute ) )]"
-		margin = { 5 5 }
+		margin = { 2 5 }
 		widget = {
 			size = { 100% 100% }
 			using = background_widget
@@ -963,10 +963,11 @@ types NEW_GUI {
 		}
 		flowcontainer = {
 			margin_top = 5
+			margin_bottom = 2
 			widget = {
-				size = { 205 30 }
+				size = { 215 38 }
 				textbox = {
-					size = { 100% 25 }
+					size = { 100% 34 }
 					margin_left = 10
 					align = vcenter
 					using = BaseFontS
@@ -977,16 +978,23 @@ types NEW_GUI {
 			}
 			dynamicgridbox = {
 				size = { 90 30 }
+				parentanchor = bottom
 				datamodel = "[IncomeItem.GetPolicies]"
 				flipdirection = yes
 				item = {
-					widget = {
-						size = { 30 30 }
-						policy_button = {
-							enabled = "[And(EconomicPolicyGlue.CanClick, Not(And(EqualTo_int32( EconomyView.GetPlayer.GetNumOfSubjects, '(int32)0' ), IncomeItem.IsTribute)))]"
-							blockoverride "transparency" {
-								alpha = "[TransparentIfTrue( And( EqualTo_int32( EconomyView.GetPlayer.GetNumOfSubjects, '(int32)0' ), IncomeItem.IsTribute ) )]"
-							}
+					policy_button = {
+						enabled = "[And(EconomicPolicyGlue.CanClick, Not(And(EqualTo_int32( EconomyView.GetPlayer.GetNumOfSubjects, '(int32)0' ), IncomeItem.IsTribute)))]"
+						blockoverride "transparency" {
+							alpha = "[TransparentIfTrue( And( EqualTo_int32( EconomyView.GetPlayer.GetNumOfSubjects, '(int32)0' ), IncomeItem.IsTribute ) )]"
+						}
+						blockoverride "On_click" {
+							onclick = "[EconomicPolicyGlue.OnClick]"
+						}
+						blockoverride "ShowDot" {
+							trigger_when = "[EconomicPolicyGlue.IsSelected]"
+						} 
+						blockoverride "HideDot" {
+							trigger_when = "[Not(EconomicPolicyGlue.IsSelected)]"
 						}
 					}
 				}
@@ -994,14 +1002,14 @@ types NEW_GUI {
 		}
 		flowcontainer = {
 			spacing = 5
-			margin_left = 10
+			margin = { 10 0 }
 			background = {
 				shaderfile = "gfx/FX/pdxgui_default.shader"
 				using = beige_background
 				using = portrait_x32y32bd_alpha
 				alpha = 0.15
-				margin = { -2 -2 }
-				margin_right = 8
+				margin = { -2 0 }
+				margin_right = 6
 				margin_bottom = 8
 			}
 			icon_and_text = {
@@ -1020,7 +1028,7 @@ types NEW_GUI {
 	type economy_expense_item_base = flowcontainer {
 		direction = vertical
 		alpha = "[TransparentIfTrue(Not(ExpenseItem.IsEnabled))]"
-		margin = { 5 5 }
+		margin = { 2 5 }
 		widget = {
 			size = { 100% 100% }
 			using = background_widget
@@ -1028,10 +1036,11 @@ types NEW_GUI {
 		}
 		flowcontainer = {
 			margin_top = 5
+			margin_bottom = 2
 			widget = {
-				size = { 205 30 }
+				size = { 215 38 }
 				textbox = {
-					size = { 100% 25 }
+					size = { 100% 34 }
 					margin_left = 10
 					align = vcenter
 					using = BaseFontS
@@ -1041,17 +1050,24 @@ types NEW_GUI {
 				}
 			}
 			dynamicgridbox = {
-				size = { 90 30 }
+				size = { 90 38 }
+				parentanchor = bottom
 				datamodel = "[ExpenseItem.GetPolicies]"
 				flipdirection = yes
 				item = {
-					widget = {
-						size = { 30 30 }
-						policy_button = {
-							enabled = "[And(EconomicPolicyGlue.CanClick, ExpenseItem.IsEnabled)]"
-							blockoverride "transparency" {
-								alpha = "[TransparentIfTrue(Not(ExpenseItem.IsEnabled))]"
-							}
+					policy_button = {
+						enabled = "[And(EconomicPolicyGlue.CanClick, ExpenseItem.IsEnabled)]"
+						blockoverride "transparency" {
+							alpha = "[TransparentIfTrue(Not(ExpenseItem.IsEnabled))]"
+						}
+						blockoverride "On_click" {
+							onclick = "[EconomicPolicyGlue.OnClick]"
+						}
+						blockoverride "ShowDot" {
+							trigger_when = "[EconomicPolicyGlue.IsSelected]"
+						} 
+						blockoverride "HideDot" {
+							trigger_when = "[Not(EconomicPolicyGlue.IsSelected)]"
 						}
 					}
 				}
@@ -1059,14 +1075,14 @@ types NEW_GUI {
 		}
 		flowcontainer = {
 			spacing = 5
-			margin_left = 10
+			margin = { 10 0 }
 			background = {
 				shaderfile = "gfx/FX/pdxgui_default.shader"
 				using = beige_background
 				using = portrait_x32y32bd_alpha
 				alpha = 0.15
-				margin = { -2 -2 }
-				margin_right = 8
+				margin = { -2 0 }
+				margin_right = 6
 				margin_bottom = 8
 			}
 			icon_and_text = {
@@ -2482,11 +2498,11 @@ types NEW_GUI {
 			}
 		}
 	}
+
 	type tree_widget = cpt_button {
 		blockoverride "ShowIcons" { visible = no }
 		size = { 50 76 }
 	}
-
 	type tree_widget_arrow = margin_widget {
 		size = { 100% 26 }
 		margin = { 5 0 }
@@ -2509,12 +2525,48 @@ types NEW_GUI {
 			}
 		}
 	}
-
 	type tree_block = flowcontainer {
 		using = background_widget
 		margin = { 5 5 }
 	}
 	
+	type economy_button_check = button {
+		size = { 36 36 }
+		block "On_click" { }
+		widget = {
+			size = { 36 36 }
+			parentanchor = center
+			background = {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = gold_background
+			}
+			background = {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = beige_background
+				alpha = 0.5
+				modify_texture = {
+					texture = "gfx/interface/base_parts/button_vignette.dds"
+					blend_mode = alphamultiply
+					spriteType = corneredtiled
+					spriteborder = { 20 20 }
+				}
+			}
+			widget = {
+				size = { 32 32 }
+				parentanchor = center
+				alpha = 0.5
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					using = black_background
+				}
+			}
+			block "Visible" { }
+		}
+		icon_button_square = {
+			size = { 30 30 }
+			parentanchor = center
+		}
+	}
 }
 #LessThan_int32 - Меньше
 #GreaterThan_int32 - Больше

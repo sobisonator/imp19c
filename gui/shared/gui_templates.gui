@@ -2188,6 +2188,16 @@ types NEW_GUI {
 		onrightclick = "[OutlinerItem.OnRightClick]"
 		using = black_background
 		alpha = 0.5
+		state = {
+			name = "character"
+			animation = { size = { 310 70 } }
+			trigger_when = "[OutlinerItem.HasCharacter]"
+		}
+		state = {
+			name = "no_character"
+			animation = { size = { 310 40 } }
+			trigger_when = "[Not(OutlinerItem.HasCharacter)]"
+		}
 		modify_texture = {
 			texture = "gfx/interface/base_parts/round_button_right_alpha_x1.dds"
 			blend_mode = alphamultiply
@@ -2269,6 +2279,7 @@ types NEW_GUI {
 			size = { 40 40 }
 			margin = { 5 5 }
 			alpha = 2.0
+			visible = "[Not(OutlinerItem.HasCharacter)]"
 			state = {
 				name = "show_outliner"
 				animation = { position = { 0 0 } }
@@ -2369,6 +2380,109 @@ types NEW_GUI {
 			alpha = 2.0
 			text = "[OutlinerItem.GetStatus]"
 			visible = "[And(OutlinerItem.IsStatusText,Not(OutlinerItem.HasCharacter))]"
+		}
+		widget = {
+			ignoreinvisible = yes
+			position = { 16 5 }
+			alpha = 2.0
+			visible = "[OutlinerItem.HasCharacter]"
+			flowcontainer = {
+				spacing = 5
+				ignoreinvisible = yes
+				cpt_button = {
+					blockoverride "Context" { datacontext = "[OutlinerItem.GetCharacter]" }
+					blockoverride "Margin" { margin = { 2 2 } }
+					size = { 40 60 }
+					blockoverride "portrait_button_template_tooltip" {}
+				}
+				widget = {
+					size = { 1 60 }
+					visible = "[GetVariableSystem.HasValue('outliner', 'hide')]"
+				}
+				flowcontainer = {
+					direction = vertical
+					margin_top = 2
+					spacing = 5
+					flowcontainer = {
+						textbox = {
+							name = "item_status_text"
+							visible = "[OutlinerItem.HasCharacter]"
+							size = { 150 18 }
+							elide = right
+							using = BaseFontS
+							using = Black_FontColor
+							text = "[OutlinerItem.GetText]"
+						}
+						flowcontainer = {
+							spacing = 2
+							icon = {
+								using = icon_loyalty
+								size = { 22 22 }
+							}
+							textbox = {
+								name = "loyalty"
+								size = { 48 20 }
+								using = BaseFontS
+								using = Black_FontColor
+								align = right
+								elide = right
+								autoresize = yes
+								text = "[OutlinerItem.GetStatus]"
+							}
+						}
+					}
+					flowcontainer = {
+						spacing = 5
+						flowcontainer = {
+							direction = vertical
+							spacing = 5
+							textbox = {
+								using = BaseFontS
+								using = Black_FontColor
+								autoresize = yes
+								maximumsize = { 164 24 }
+								elide = right
+								align = left
+								visible = "[OutlinerItem.GetCharacter.HasActiveAmbition]"
+								text = "[OutlinerItem.GetCharacter.GetAmbitionName]"
+								widgetanchor = top|left
+								fontsize = 12
+							}
+							fixed_size_progressbar = {
+								tooltip = "[OutlinerItem.GetCharacter.GetAmbitionInformation]"
+								using = tooltip_below
+								blockoverride "size" { size = { 166 7 } }
+								blockoverride "Value" 
+								{ 
+									value = "[FixedPointToFloat( OutlinerItem.GetCharacter.GetAmbitionProgress )]" 
+								}
+								position = { 6 0 }
+								visible = "[And(OutlinerItem.GetCharacter.HasCheckedAmbition, GreaterThan_int32(OutlinerItem.GetCharacter.GetAge, '(int32)15'))]"
+							}
+						}
+						country_flag = {
+							datacontext = "[OutlinerItem.GetCharacter.GetEmployer]"
+							blockoverride "flag"
+							{
+								
+								texture = "[OutlinerItem.GetCharacter.GetEmployer.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+								frame = "[OutlinerItem.GetCharacter.GetEmployer.AccessCoatOfArms.GetFrame('(int32)120','(int32)120'))]"
+								framesize = { 120 120 }
+							}
+							
+							blockoverride "size"
+							{
+								size = { 26 26 }
+							}
+
+							blockoverride "click"
+							{
+								onclick = "[OpenDiplomacy(OutlinerItem.GetCharacter.GetEmployer)]"
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 

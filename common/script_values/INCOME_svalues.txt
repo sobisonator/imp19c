@@ -608,3 +608,106 @@ INCOME_governorship_state_manufacturing = {
 	value = var:this_income_from_manufacturing_the_state
 	add = var:this_expenses_from_manufacturing_the_state
 }
+
+# TODO: Move into MILITARY svalues file
+
+MILITARY_supplies_country_consumed_quarterly = {
+	# Scope: Country
+	# Function: Get the amount of supplies consumed out of the country stockpile every quarter by the military
+	value = 0
+	every_governorships = {
+		add = DEMAND_early_munitions_base
+		add = DEMAND_late_munitions_base
+		add = DEMAND_clothing_from_military_base
+		add = DEMAND_pharmaceuticals_from_military_base
+		add = DEMAND_construction_materials_military_base
+	}
+	multiply = {
+		value = -1
+	}
+}
+
+MILITARY_supplies_income_country = {
+	# Scope: Country
+	# Function: Get the income of military supplies based on the fulfilled base demand
+	value = 0
+	every_governorships = {
+		add = {
+			value = DEMAND_early_munitions
+			if = {
+				limit = {
+					has_variable = shortage_early_munitions
+				}
+			}
+			multiply = {
+				value = 1 
+				subtract = var:shortage_early_munitions
+			}
+		}
+		add = {
+			value = DEMAND_late_munitions
+			if = {
+				limit = {
+					has_variable = shortage_late_munitions
+				}
+			}
+			multiply = {
+				value = 1 
+				subtract = var:shortage_early_munitions
+			}
+		}
+		add = {
+			value = DEMAND_clothing_from_military
+			if = {
+				limit = {
+					has_variable = shortage_clothing
+				}
+			}
+			multiply = {
+				value = 1 
+				subtract = var:shortage_clothing
+			}
+		}
+		add = {
+			value = DEMAND_pharmaceuticals_from_military
+			if = {
+				limit = {
+					has_variable = shortage_pharmaceuticals
+				}
+			}
+			multiply = {
+				value = 1 
+				subtract = var:shortage_pharmaceuticals
+			}
+		}
+		add = {
+			value = DEMAND_construction_materials_military
+			if = {
+				limit = {
+					has_variable = shortage_construction_materials
+				}
+			}
+			multiply = {
+				value = 1 
+				subtract = var:shortage_construction_materials
+			}
+		}						
+	}
+	if = {
+		limit = {
+			has_variable = INCOME_military_supplies_spending_rate
+		}
+		if = {
+			limit = {
+				var:INCOME_military_supplies_spending_rate > 1
+			}
+			multiply = var:INCOME_military_supplies_spending_rate
+		}
+	}
+}
+
+MILITARY_supplies_balance_country = {
+	# Scope: Country
+	value = MILITARY_supplies_income_country
+	add = MILITARY_supplies_country_consumed_quarterly # Negative
+}

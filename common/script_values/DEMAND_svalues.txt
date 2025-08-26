@@ -29,9 +29,15 @@ DEMAND_huge = {
 }
 
 DEMAND_military_supplies_modifier = {
-	# Scope: Country
+	# Scope: Governorship
 	# Function: Modifies the demand for military supplies based on government spending policy
 	value = 1
+	if = {
+		limit = {
+			owner = { has_variable = INCOME_military_supplies_spending_rate }
+		}
+		multiply = owner.var:INCOME_military_supplies_spending_rate
+	}
 }
 
 DEMAND_navy_supplies_modifier = {
@@ -261,9 +267,16 @@ DEMAND_clothing = { # Total
 	add = DEMAND_clothing_from_military
 }
 
-DEMAND_clothing_from_military = {
+DEMAND_clothing_from_military_base = {
+	# Scope: Governorship
+	# Function: The amount actually required to support the military's demand for supplies before spending cut or boosts
 	value = JOBS_military_governorship
 	multiply = 0.01
+}
+
+
+DEMAND_clothing_from_military = {
+	value = DEMAND_clothing_from_military_base
 	multiply = DEMAND_military_supplies_modifier
 }
 
@@ -301,9 +314,15 @@ DEMAND_pharmaceuticals = { # Total
 	}
 }
 
-DEMAND_pharmaceuticals_from_military = {
+DEMAND_pharmaceuticals_from_military_base = {
+	# Scope: Governorship
+	# Function: The amount actually required to support the military's demand for supplies before spending cut or boosts
 	value = JOBS_military_governorship
 	multiply = 0.005
+}
+
+DEMAND_pharmaceuticals_from_military = {
+	value = DEMAND_pharmaceuticals_from_military_base
 	multiply = DEMAND_military_supplies_modifier
 }
 
@@ -1061,7 +1080,7 @@ DEMAND_construction_materials = { # Total
 	add = DEMAND_construction_materials_military
 }
 
-DEMAND_construction_materials_military = {
+DEMAND_construction_materials_military_base = {
 	value = 0
 	every_governorship_state = {
 		every_state_province = {
@@ -1073,6 +1092,10 @@ DEMAND_construction_materials_military = {
 		value = JOBS_military_governorship
 		multiply = 0.001
 	}
+}
+
+DEMAND_construction_materials_military = {
+	value = DEMAND_construction_materials_military_base
 	multiply = DEMAND_military_supplies_modifier
 }
 
@@ -1266,7 +1289,7 @@ DEMAND_army_ratio_late_munitions = {
 	# Create a system to total up how many of a country's units are using early vs late munitions
 }
 
-DEMAND_early_munitions = { # Total
+DEMAND_early_munitions_base = {
 	value = 0
 	if = {
 		limit = {
@@ -1286,13 +1309,17 @@ DEMAND_early_munitions = { # Total
 		add = {
 			value = JOBS_military_governorship
 			divide = 6
-			multiply = DEMAND_military_supplies_modifier
 		}
 		multiply = DEMAND_army_ratio_early_munitions
 	}
 }
 
-DEMAND_late_munitions = { # Total
+DEMAND_early_munitions = { # Total
+	value = DEMAND_early_munitions_base
+	multiply = DEMAND_military_supplies_modifier
+}
+
+DEMAND_late_munitions_base = {
 	value = 0
 	owner = {
 		value = num_of_cohorts
@@ -1306,13 +1333,16 @@ DEMAND_late_munitions = { # Total
 	add = {
 		value = JOBS_military_governorship
 		divide = 6
-		multiply = DEMAND_military_supplies_modifier
 	}
 	multiply = DEMAND_army_ratio_late_munitions
 }
 
+DEMAND_late_munitions = { # Total
+	value = DEMAND_late_munitions_base
+	multiply = DEMAND_military_supplies_modifier
+}
 
-DEMAND_early_artillery = { # Total
+DEMAND_early_artillery_base = {
 	value = 0
 	if = {
 		limit = {
@@ -1331,7 +1361,6 @@ DEMAND_early_artillery = { # Total
 		add = {
 			value = JOBS_military_governorship
 			divide = 60
-			multiply = DEMAND_military_supplies_modifier
 		}
 		multiply = 2
 		if = {
@@ -1341,6 +1370,11 @@ DEMAND_early_artillery = { # Total
 			multiply = 1.5
 		}
 	}
+}
+
+DEMAND_early_artillery = { # Total
+	value = DEMAND_early_artillery_base
+	multiply = DEMAND_military_supplies_modifier
 	# TODO: Add demand from navy
 }
 DEMAND_late_artillery = { # Total

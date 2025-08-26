@@ -207,7 +207,7 @@ template color_background
 }
 
 types NEW_GUI {
-	type panelka = icon {
+	type panelka = widget {
 		background = {
 			shaderfile = "gfx/FX/pdxgui_default.shader"
 			using = black_background
@@ -245,7 +245,7 @@ types NEW_GUI {
 			using = Black_FontColor
 		}
 	}
-	type panelka_left = icon {
+	type panelka_left = widget {
 		background = {
 			shaderfile = "gfx/FX/pdxgui_default.shader"
 			using = black_background
@@ -284,7 +284,7 @@ types NEW_GUI {
 			}
 		}
 	}
-	type panelka_right = icon {
+	type panelka_right = widget {
 		parentanchor = right
 		background = {
 			shaderfile = "gfx/FX/pdxgui_default.shader"
@@ -325,7 +325,7 @@ types NEW_GUI {
 			}
 		}
 	}
-	type panelka_center = icon {
+	type panelka_center = widget {
 		background = {
 			shaderfile = "gfx/FX/pdxgui_default.shader"
 			using = black_background
@@ -345,7 +345,7 @@ types NEW_GUI {
 			}
 		}
 	}
-	type panelka_gov = icon {
+	type panelka_gov = widget {
 		icon = {
 			size = { 300 32 }
 			shaderfile = "gfx/FX/pdxgui_default.shader"
@@ -382,7 +382,7 @@ types NEW_GUI {
 			using = Black_FontColor
 		}
 	}
-	type panelka_trade = icon {
+	type panelka_trade = widget {
 		#block "Size" { size = { 100% 32 } }
 		background = {
 			shaderfile = "gfx/FX/pdxgui_default.shader"
@@ -955,18 +955,19 @@ types NEW_GUI {
 	type economy_income_item_base = flowcontainer {
 		direction = vertical
 		alpha = "[TransparentIfTrue( And( EqualTo_int32( EconomyView.GetPlayer.GetNumOfSubjects, '(int32)0' ), IncomeItem.IsTribute ) )]"
-		margin = { 5 5 }
+		margin = { 2 5 }
 		widget = {
 			size = { 100% 100% }
-			using = list_item
+			using = background_widget
 			blockoverride "Margin" { margin = { 2 2 } }
 		}
 		flowcontainer = {
 			margin_top = 5
+			margin_bottom = 2
 			widget = {
-				size = { 205 30 }
+				size = { 215 38 }
 				textbox = {
-					size = { 100% 25 }
+					size = { 100% 34 }
 					margin_left = 10
 					align = vcenter
 					using = BaseFontS
@@ -977,16 +978,23 @@ types NEW_GUI {
 			}
 			dynamicgridbox = {
 				size = { 90 30 }
+				parentanchor = bottom
 				datamodel = "[IncomeItem.GetPolicies]"
 				flipdirection = yes
 				item = {
-					widget = {
-						size = { 30 30 }
-						policy_button = {
-							enabled = "[And(EconomicPolicyGlue.CanClick, Not(And(EqualTo_int32( EconomyView.GetPlayer.GetNumOfSubjects, '(int32)0' ), IncomeItem.IsTribute)))]"
-							blockoverride "transparency" {
-								alpha = "[TransparentIfTrue( And( EqualTo_int32( EconomyView.GetPlayer.GetNumOfSubjects, '(int32)0' ), IncomeItem.IsTribute ) )]"
-							}
+					policy_button = {
+						enabled = "[And(EconomicPolicyGlue.CanClick, Not(And(EqualTo_int32( EconomyView.GetPlayer.GetNumOfSubjects, '(int32)0' ), IncomeItem.IsTribute)))]"
+						blockoverride "transparency" {
+							alpha = "[TransparentIfTrue( And( EqualTo_int32( EconomyView.GetPlayer.GetNumOfSubjects, '(int32)0' ), IncomeItem.IsTribute ) )]"
+						}
+						blockoverride "On_click" {
+							onclick = "[EconomicPolicyGlue.OnClick]"
+						}
+						blockoverride "ShowDot" {
+							trigger_when = "[EconomicPolicyGlue.IsSelected]"
+						} 
+						blockoverride "HideDot" {
+							trigger_when = "[Not(EconomicPolicyGlue.IsSelected)]"
 						}
 					}
 				}
@@ -994,14 +1002,14 @@ types NEW_GUI {
 		}
 		flowcontainer = {
 			spacing = 5
-			margin_left = 10
+			margin = { 10 0 }
 			background = {
 				shaderfile = "gfx/FX/pdxgui_default.shader"
 				using = beige_background
 				using = portrait_x32y32bd_alpha
 				alpha = 0.15
-				margin = { -2 -2 }
-				margin_right = 8
+				margin = { -2 0 }
+				margin_right = 6
 				margin_bottom = 8
 			}
 			icon_and_text = {
@@ -1020,18 +1028,19 @@ types NEW_GUI {
 	type economy_expense_item_base = flowcontainer {
 		direction = vertical
 		alpha = "[TransparentIfTrue(Not(ExpenseItem.IsEnabled))]"
-		margin = { 5 5 }
+		margin = { 2 5 }
 		widget = {
 			size = { 100% 100% }
-			using = list_item
+			using = background_widget
 			blockoverride "Margin" { margin = { 2 2 } }
 		}
 		flowcontainer = {
 			margin_top = 5
+			margin_bottom = 2
 			widget = {
-				size = { 205 30 }
+				size = { 215 38 }
 				textbox = {
-					size = { 100% 25 }
+					size = { 100% 34 }
 					margin_left = 10
 					align = vcenter
 					using = BaseFontS
@@ -1041,17 +1050,24 @@ types NEW_GUI {
 				}
 			}
 			dynamicgridbox = {
-				size = { 90 30 }
+				size = { 90 38 }
+				parentanchor = bottom
 				datamodel = "[ExpenseItem.GetPolicies]"
 				flipdirection = yes
 				item = {
-					widget = {
-						size = { 30 30 }
-						policy_button = {
-							enabled = "[And(EconomicPolicyGlue.CanClick, ExpenseItem.IsEnabled)]"
-							blockoverride "transparency" {
-								alpha = "[TransparentIfTrue(Not(ExpenseItem.IsEnabled))]"
-							}
+					policy_button = {
+						enabled = "[And(EconomicPolicyGlue.CanClick, ExpenseItem.IsEnabled)]"
+						blockoverride "transparency" {
+							alpha = "[TransparentIfTrue(Not(ExpenseItem.IsEnabled))]"
+						}
+						blockoverride "On_click" {
+							onclick = "[EconomicPolicyGlue.OnClick]"
+						}
+						blockoverride "ShowDot" {
+							trigger_when = "[EconomicPolicyGlue.IsSelected]"
+						} 
+						blockoverride "HideDot" {
+							trigger_when = "[Not(EconomicPolicyGlue.IsSelected)]"
 						}
 					}
 				}
@@ -1059,14 +1075,14 @@ types NEW_GUI {
 		}
 		flowcontainer = {
 			spacing = 5
-			margin_left = 10
+			margin = { 10 0 }
 			background = {
 				shaderfile = "gfx/FX/pdxgui_default.shader"
 				using = beige_background
 				using = portrait_x32y32bd_alpha
 				alpha = 0.15
-				margin = { -2 -2 }
-				margin_right = 8
+				margin = { -2 0 }
+				margin_right = 6
 				margin_bottom = 8
 			}
 			icon_and_text = {
@@ -2172,6 +2188,16 @@ types NEW_GUI {
 		onrightclick = "[OutlinerItem.OnRightClick]"
 		using = black_background
 		alpha = 0.5
+		state = {
+			name = "character"
+			animation = { size = { 310 70 } }
+			trigger_when = "[OutlinerItem.HasCharacter]"
+		}
+		state = {
+			name = "no_character"
+			animation = { size = { 310 40 } }
+			trigger_when = "[Not(OutlinerItem.HasCharacter)]"
+		}
 		modify_texture = {
 			texture = "gfx/interface/base_parts/round_button_right_alpha_x1.dds"
 			blend_mode = alphamultiply
@@ -2253,6 +2279,7 @@ types NEW_GUI {
 			size = { 40 40 }
 			margin = { 5 5 }
 			alpha = 2.0
+			visible = "[Not(OutlinerItem.HasCharacter)]"
 			state = {
 				name = "show_outliner"
 				animation = { position = { 0 0 } }
@@ -2354,41 +2381,121 @@ types NEW_GUI {
 			text = "[OutlinerItem.GetStatus]"
 			visible = "[And(OutlinerItem.IsStatusText,Not(OutlinerItem.HasCharacter))]"
 		}
+		widget = {
+			ignoreinvisible = yes
+			position = { 16 5 }
+			alpha = 2.0
+			visible = "[OutlinerItem.HasCharacter]"
+			flowcontainer = {
+				spacing = 5
+				ignoreinvisible = yes
+				cpt_button = {
+					blockoverride "Context" { datacontext = "[OutlinerItem.GetCharacter]" }
+					blockoverride "Margin" { margin = { 2 2 } }
+					size = { 40 60 }
+					blockoverride "portrait_button_template_tooltip" {}
+				}
+				widget = {
+					size = { 1 60 }
+					visible = "[GetVariableSystem.HasValue('outliner', 'hide')]"
+				}
+				flowcontainer = {
+					direction = vertical
+					margin_top = 2
+					spacing = 5
+					flowcontainer = {
+						textbox = {
+							name = "item_status_text"
+							visible = "[OutlinerItem.HasCharacter]"
+							size = { 150 18 }
+							elide = right
+							using = BaseFontS
+							using = Black_FontColor
+							text = "[OutlinerItem.GetText]"
+						}
+						flowcontainer = {
+							spacing = 2
+							icon = {
+								using = icon_loyalty
+								size = { 22 22 }
+							}
+							textbox = {
+								name = "loyalty"
+								size = { 48 20 }
+								using = BaseFontS
+								using = Black_FontColor
+								align = right
+								elide = right
+								autoresize = yes
+								text = "[OutlinerItem.GetStatus]"
+							}
+						}
+					}
+					flowcontainer = {
+						spacing = 5
+						flowcontainer = {
+							direction = vertical
+							spacing = 5
+							textbox = {
+								using = BaseFontS
+								using = Black_FontColor
+								autoresize = yes
+								maximumsize = { 164 24 }
+								elide = right
+								align = left
+								visible = "[OutlinerItem.GetCharacter.HasActiveAmbition]"
+								text = "[OutlinerItem.GetCharacter.GetAmbitionName]"
+								widgetanchor = top|left
+								fontsize = 12
+							}
+							fixed_size_progressbar = {
+								tooltip = "[OutlinerItem.GetCharacter.GetAmbitionInformation]"
+								using = tooltip_below
+								blockoverride "size" { size = { 166 7 } }
+								blockoverride "Value" 
+								{ 
+									value = "[FixedPointToFloat( OutlinerItem.GetCharacter.GetAmbitionProgress )]" 
+								}
+								position = { 6 0 }
+								visible = "[And(OutlinerItem.GetCharacter.HasCheckedAmbition, GreaterThan_int32(OutlinerItem.GetCharacter.GetAge, '(int32)15'))]"
+							}
+						}
+						country_flag = {
+							datacontext = "[OutlinerItem.GetCharacter.GetEmployer]"
+							blockoverride "flag"
+							{
+								
+								texture = "[OutlinerItem.GetCharacter.GetEmployer.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+								frame = "[OutlinerItem.GetCharacter.GetEmployer.AccessCoatOfArms.GetFrame('(int32)120','(int32)120'))]"
+								framesize = { 120 120 }
+							}
+							
+							blockoverride "size"
+							{
+								size = { 26 26 }
+							}
+
+							blockoverride "click"
+							{
+								onclick = "[OpenDiplomacy(OutlinerItem.GetCharacter.GetEmployer)]"
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	type global_powers = margin_widget {
 		size = { 420 75 }
-		margin = { 5 5 }
 		datacontext = "[Scope.GetCountry]"
-		using = main_window_template
 		state = {
 			trigger_when = "[GetVariableSystem.HasValue('supranational_tabs', 'global')]"
 			on_start = "[GetScriptedGui('show_player_subjects_button').Execute( GuiScope.SetRoot( Country.MakeScope ).End )]"
 		}
-		background = {
-			shaderfile = "gfx/FX/pdxgui_default.shader"
-			using = black_background
-			alpha = 0.5
-		}
-		background = {
-			shaderfile = "gfx/FX/pdxgui_default.shader"
-			using = beige_background
-			alpha = 0.5
-			modify_texture = {
-				texture = "gfx/interface/base_parts/button_vignette.dds"
-				blend_mode = alphamultiply
-				spriteType = corneredtiled
-				spriteborder = { 20 20 }
-			}
-		}
-		background = {
-			shaderfile = "gfx/FX/pdxgui_default.shader"
-			using = black_background
-			using = portrait_x32y32bd_alpha
-			margin = { -3 -3 }
-			alpha = 0.5
-		}
+		using = list_item
 		flowcontainer = {
+			margin = { 5 5 }
 			spacing = 5
 			country_flag = {
 				parentanchor = vcenter
@@ -2480,6 +2587,75 @@ types NEW_GUI {
 					}
 				}
 			}
+		}
+	}
+
+	type tree_widget = cpt_button {
+		blockoverride "ShowIcons" { visible = no }
+		size = { 50 76 }
+	}
+	type tree_widget_arrow = margin_widget {
+		size = { 100% 26 }
+		margin = { 5 0 }
+		parentanchor = hcenter
+		icon = {
+			size = { 100% 6 }
+			using = red_background
+			modify_texture = {
+				texture = "gfx/interface/missions/arrow_texture.dds"
+				blend_mode = alphamultiply
+			}
+		}
+		icon = {
+			size = { 26 30 }
+			parentanchor = hcenter
+			using = red_background
+			modify_texture = {
+				texture = "gfx/interface/missions/arrow_tip_d.dds"
+				blend_mode = alphamultiply
+			}
+		}
+	}
+	type tree_block = flowcontainer {
+		using = background_widget
+		margin = { 5 5 }
+	}
+	
+	type economy_button_check = button {
+		size = { 36 36 }
+		block "On_click" { }
+		widget = {
+			size = { 36 36 }
+			parentanchor = center
+			background = {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = gold_background
+			}
+			background = {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = beige_background
+				alpha = 0.5
+				modify_texture = {
+					texture = "gfx/interface/base_parts/button_vignette.dds"
+					blend_mode = alphamultiply
+					spriteType = corneredtiled
+					spriteborder = { 20 20 }
+				}
+			}
+			widget = {
+				size = { 32 32 }
+				parentanchor = center
+				alpha = 0.5
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					using = black_background
+				}
+			}
+			block "Visible" { }
+		}
+		icon_button_square = {
+			size = { 30 30 }
+			parentanchor = center
 		}
 	}
 }

@@ -163,3 +163,156 @@ INCOME_cache_governorship_income = {
 		value = INCOME_governorship_total
 	}
 }
+
+INCOME_cache_governorship_military_supplies_demand = {
+	# Scope: Governorship
+	# Function: Save to var the total military supplies demanded by this governorship so it can be re-referenced
+	set_variable = {
+		name = INCOME_military_supplies_demand_governorship
+		value = INCOME_military_supplies_demand_governorship
+	}
+}
+
+INCOME_cache_country_military_supplies_demand = {
+	set_variable = {
+		name = INCOME_military_supplies_demand_country
+		value = {
+			value = 0
+			every_governorships = {
+				add = var:INCOME_military_supplies_demand_governorship
+			}
+		}
+	}
+}
+
+INCOME_get_wealth_owed_for_military_supplies_governorship = {
+	# Scope: Governorship
+	# Function: Get the amount of wealth owed for military supplies procurement
+	set_variable = {
+		name = INCOME_wealth_owed_for_military_supplies
+		value = {
+			value = var:INCOME_military_supplies_demand_governorship
+			divide = owner.var:INCOME_military_supplies_demand_country
+			multiply = owner.var:INCOME_cost_military_supplies_country
+			multiply = -1
+		}
+	}
+}
+
+INCOME_calculate_all_military_procurement_wealth_owed = {
+	# Scope: Country
+	# Function: Get the amount of wealth owed for military procurement for all governorships
+	every_governorships = {
+		INCOME_cache_governorship_military_supplies_demand = yes
+	}
+	INCOME_cache_country_military_supplies_demand = yes
+	every_governorships = {
+		INCOME_get_wealth_owed_for_military_supplies_governorship = yes
+	}
+}
+
+INCOME_calculate_and_distribute_military_procurement_wealth_owed = {
+	# Scope: Country
+	INCOME_calculate_all_military_procurement_wealth_owed = yes
+	every_governorships = {
+		change_variable = {
+			name = upper_strata_wealth
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_upper_strata
+			}
+		}
+		change_variable = {
+			name = middle_strata_wealth
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_middle_strata
+			}
+		}
+		change_variable = {
+			name = lower_strata_wealth
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_lower_strata
+			}
+		}
+		change_variable = {
+			name = proletariat_wealth
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_proletariat
+			}
+		}
+		change_variable = {
+			name = indentured_wealth
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_indentured
+			}
+		}
+		change_variable = {
+			name = slaves_wealth
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_slaves
+			}
+		}
+		change_variable = {
+			name = tribesmen_wealth
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_tribesmen
+			}
+		}
+		##################
+		change_variable = {
+			name = this_income_from_manufacturing_upper_strata
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_upper_strata
+			}
+		}
+		change_variable = {
+			name = this_income_from_manufacturing_middle_strata
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_middle_strata
+			}
+		}
+		change_variable = {
+			name = this_income_from_manufacturing_lower_strata
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_lower_strata
+			}
+		}
+		change_variable = {
+			name = this_income_from_manufacturing_proletariat
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_proletariat
+			}
+		}
+		change_variable = {
+			name = this_income_from_manufacturing_indentured
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_indentured
+			}
+		}
+		change_variable = {
+			name = this_income_from_manufacturing_slaves
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_slaves
+			}
+		}
+		change_variable = {
+			name = this_income_from_manufacturing_tribesmen
+			add = {
+				value = var:INCOME_wealth_owed_for_military_supplies
+				multiply = GT_trade_share_percentage_manufacturing_tribesmen
+			}
+		}
+	}
+}

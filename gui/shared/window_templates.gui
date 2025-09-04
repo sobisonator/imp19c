@@ -1746,6 +1746,78 @@ types NEW_WINDOW {
 		}
 	}
 
+	type mp_select_tab = widget {
+		size = { 1300 100% }
+		parentanchor = hcenter
+		widget = {
+			size = { 100% 1000 }
+			parentanchor = center
+			icon = {
+				size = { 100% 100% }
+				block "map_texture" { texture = "gfx/interface/images/mp_select/maps/europe.png" }
+				using = portrait_x32y32bd_alpha_2
+			}
+			block "countries" { }
+			# logo
+			icon = {
+				size = { 128 128 }
+				position = { 16 16 }
+				alpha = 0.5
+				using = beige_background
+				modify_texture = {
+					blend_mode = alphamultiply
+					texture = "gfx/interface/images/logo_a.png"
+				}
+			}
+		}
+		base_window = {
+			size = { 420 70 }
+			parentanchor = hcenter
+			filter_mouse = left|right
+			alwaystransparent = no
+			blockoverride "GradientAlpha" { alpha = 0.0 }
+			movable = no
+			flowcontainer = {
+				spacing = 5
+				position = { 0 10 }
+				parentanchor = hcenter
+				text_button_square = {
+					blockoverride "Center_text" {
+						using = HeaderFont
+						fontsize = 30
+						text = "<"
+					}
+					blockoverride "On_click" { block "left_button" { } }
+					block "left_tooltip" { }
+					size = { 40 40 }
+				}
+				widget = {
+					size = { 300 36 }
+					parentanchor = vcenter
+					using = background_widget
+					textbox = {
+						size = { 100% 100% }
+						block "name" { text = "europe" }
+						elide = right
+						align = center
+						using = HeaderFont
+						using = White_FontColor
+					}
+				}
+				text_button_square = {
+					blockoverride "Center_text" {
+						using = HeaderFont
+						fontsize = 30
+						text = ">"
+					}
+					blockoverride "On_click" { block "right_button" { } }
+					block "right_tooltip" { }
+					size = { 40 40 }
+				}
+			}
+		}
+	}
+
 	type mp_select_button = widget {
 		size = { 280 50 }
 		button = {
@@ -1890,76 +1962,171 @@ types NEW_WINDOW {
 		#		using = black_background
 		#	}
 		#}
-		widget = {
-			size = { 1300 1000 }
-			parentanchor = center
-			# europe
-			widget = {
-				size = { 100% 100% }
-				visible = "[Or( Or( Or( Or(EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'GBR'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'PRU') ), Or(EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'RUS'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'FRA') ) ), Or( Or(EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'NED'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'AUS') ), Or(EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'TUR'), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'SAR') ) ) ), EqualTo_string(LobbyView.GetSelectedPlayable.GetCountry.GetTag, 'SPA') )]"
-				state = {
-					name = europe_show
-					delay = 0.001
-					on_start = "[PdxGuiWidget.Show]"
-				}
-				icon = {
-					size = { 100% 100% }
-					parentanchor = center
-					texture = "gfx/interface/images/mp_select/maps/europe.png"
-					using = portrait_x32y32bd_alpha_2
-				}
+		mp_select_tab = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'europe')]"
+			blockoverride "name" { text = "mp_select_tab_europe" }
+			blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/europe.png" }
+			blockoverride "left_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'north_america')]" }
+			blockoverride "left_tooltip" { tooltip = "mp_select_tt_north_america" }
+			blockoverride "right_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'middle_east')]" }
+			blockoverride "right_tooltip" { tooltip = "mp_select_tt_middle_east" }
+			blockoverride "countries" {
 				mp_select_country_map = {
 					datacontext = "[GetCountry('GBR')]"
-					blockoverride "texture" { texture = "gfx/interface/images/mp_select/maps/GBR.png" }
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/GBR.png" }
 					blockoverride "position" { position = { 230 350 } }
 					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/GBR_COA.dds" }
 				}
 				mp_select_country_map = {
 					datacontext = "[GetCountry('PRU')]"
-					blockoverride "texture" { texture = "gfx/interface/images/mp_select/maps/PRU.png" }
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/PRU.png" }
 					blockoverride "position" { position = { 610 400 } }
 					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/PRU_COA.dds" }
 				}
 				mp_select_country_map = {
 					datacontext = "[GetCountry('RUS')]"
-					blockoverride "texture" { texture = "gfx/interface/images/mp_select/maps/RUS.png" }
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/RUS.png" }
 					blockoverride "position" { position = { 1000 300 } }
 					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/RUS_COA.dds" }
 				}
 				mp_select_country_map = {
 					datacontext = "[GetCountry('FRA')]"
-					blockoverride "texture" { texture = "gfx/interface/images/mp_select/maps/FRA.png" }
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/FRA.png" }
 					blockoverride "position" { position = { 340 540 } }
 					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/FRA_COA.dds" }
 				}
 				mp_select_country_map = {
 					datacontext = "[GetCountry('NED')]"
-					blockoverride "texture" { texture = "gfx/interface/images/mp_select/maps/NED.png" }
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/NED.png" }
 					blockoverride "position" { position = { 400 400 } }
 					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/NED_COA.dds" }
 				}
 				mp_select_country_map = {
+					datacontext = "[GetCountry('AUS')]"
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/AUS.png" }
+					blockoverride "position" { position = { 400 400 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/AUS_COA.dds" }
+				}
+				mp_select_country_map = {
 					datacontext = "[GetCountry('SAR')]"
-					blockoverride "texture" { texture = "gfx/interface/images/mp_select/maps/SAR.png" }
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/SAR.png" }
 					blockoverride "position" { position = { 460 610 } }
 					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/SAR_COA.dds" }
 				}
 				mp_select_country_map = {
 					datacontext = "[GetCountry('SPA')]"
-					blockoverride "texture" { texture = "gfx/interface/images/mp_select/maps/SPA.png" }
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/SPA.png" }
 					blockoverride "position" { position = { 210 780 } }
 					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/SPA_COA.dds" }
 				}
 			}
-			# logo
-			icon = {
-				size = { 128 128 }
-				position = { 16 16 }
-				alpha = 0.5
-				using = beige_background
-				modify_texture = {
-					blend_mode = alphamultiply
-					texture = "gfx/interface/images/logo_a.png"
+		}
+		mp_select_tab = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'middle_east')]"
+			blockoverride "name" { text = "mp_select_tab_middle_east" }
+			blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/middle_east.png" }
+			blockoverride "left_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'europe')]" }
+			blockoverride "left_tooltip" { tooltip = "mp_select_tt_europe" }
+			blockoverride "right_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'south_asia')]" }
+			blockoverride "right_tooltip" { tooltip = "mp_select_tt_south_asia" }
+			blockoverride "countries" {
+				mp_select_country_map = {
+					datacontext = "[GetCountry('TUR')]"
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/TUR.png" }
+					blockoverride "position" { position = { 200 100 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/TUR_COA.dds" }
+				}
+				mp_select_country_map = {
+					datacontext = "[GetCountry('EGY')]"
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/EGY.png" }
+					blockoverride "position" { position = { 280 450 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/TUR_COA.dds" }
+				}
+			}
+		}
+		mp_select_tab = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'south_asia')]"
+			blockoverride "name" { text = "mp_select_tab_south_asia" }
+			blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/south_asia.png" }
+			blockoverride "left_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'middle_east')]" }
+			blockoverride "left_tooltip" { tooltip = "mp_select_tt_middle_east" }
+			blockoverride "right_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'east_asia')]" }
+			blockoverride "right_tooltip" { tooltip = "mp_select_tt_east_asia" }
+			blockoverride "countries" {
+				mp_select_country_map = {
+					datacontext = "[GetCountry('EIC')]"
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/EIC.png" }
+					blockoverride "position" { position = { 120 350 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/EIC_COA.dds" }
+				}
+				mp_select_country_map = {
+					datacontext = "[GetCountry('KHL')]"
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/KHL.png" }
+					blockoverride "position" { position = { 90 100 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/KHL_COA.dds" }
+				}
+			}
+		}
+		mp_select_tab = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'east_asia')]"
+			blockoverride "name" { text = "mp_select_tab_east_asia" }
+			blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/east_asia.png" }
+			blockoverride "left_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'south_asia')]" }
+			blockoverride "left_tooltip" { tooltip = "mp_select_tt_south_asia" }
+			blockoverride "right_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'central_america')]" }
+			blockoverride "right_tooltip" { tooltip = "mp_select_tt_central_america" }
+			blockoverride "countries" {
+				mp_select_country_map = {
+					datacontext = "[GetCountry('CHI')]"
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/CHI.png" }
+					blockoverride "position" { position = { 450 250 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/CHI_COA.dds" }
+				}
+				mp_select_country_map = {
+					datacontext = "[GetCountry('TKG')]"
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/TKG.png" }
+					blockoverride "position" { position = { 960 360 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/TKG_COA.dds" }
+				}
+			}
+		}
+		mp_select_tab = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'central_america')]"
+			blockoverride "name" { text = "mp_select_tab_central_america" }
+			blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/central_america.png" }
+			blockoverride "left_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'east_asia')]" }
+			blockoverride "left_tooltip" { tooltip = "mp_select_tt_north_america" }
+			blockoverride "right_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'north_america')]" }
+			blockoverride "right_tooltip" { tooltip = "mp_select_tt_central_america" }
+			blockoverride "countries" {
+				mp_select_country_map = {
+					datacontext = "[GetCountry('VNZ')]"
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/VNZ.png" }
+					blockoverride "position" { position = { 750 600 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/VNZ_COA.dds" }
+				}
+				mp_select_country_map = {
+					datacontext = "[GetCountry('MEX')]"
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/MEX.png" }
+					blockoverride "position" { position = { 300 400 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/MEX_COA.dds" }
+				}
+			}
+		}
+		mp_select_tab = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'north_america')]"
+			blockoverride "name" { text = "mp_select_tab_north_america" }
+			blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/north_america.png" }
+			blockoverride "left_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'central_america')]" }
+			blockoverride "left_tooltip" { tooltip = "mp_select_tt_central_america" }
+			blockoverride "right_button" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'europe')]" }
+			blockoverride "right_tooltip" { tooltip = "mp_select_tt_europe" }
+			blockoverride "countries" {
+				mp_select_country_map = {
+					datacontext = "[GetCountry('USA')]"
+					blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/USA.png" }
+					blockoverride "position" { position = { 600 400 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/COA/USA_COA.dds" }
 				}
 			}
 		}
@@ -2013,56 +2180,104 @@ types NEW_WINDOW {
 					
 					scrollwidget = {
 						flowcontainer = {
-							#margin_left = 10
-							direction = vertical
-							spacing = 5
-							mp_select_button = {
-								datacontext = "[GetCountry('GBR')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/GBR.dds" }
+							ignoreinvisible = yes
+							flowcontainer = {
+								visible = "[GetVariableSystem.HasValue('mp_select_tab', 'europe')]"
+								direction = vertical
+								spacing = 5
+								mp_select_button = {
+									datacontext = "[GetCountry('GBR')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/GBR.dds" }
+								}
+								mp_select_button = {
+									datacontext = "[GetCountry('PRU')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/PRU.dds" }
+								}
+								mp_select_button = {
+									datacontext = "[GetCountry('RUS')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/RUS.dds" }
+								}
+								mp_select_button = {
+									datacontext = "[GetCountry('FRA')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/FRA.dds" }
+								}
+								mp_select_button = {
+									datacontext = "[GetCountry('NED')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/NED.dds" }
+								}
+								mp_select_button = {
+									datacontext = "[GetCountry('AUS')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/AUS.dds" }
+								}
+								mp_select_button = {
+									datacontext = "[GetCountry('SAR')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/SAR.dds" }
+								}
+								mp_select_button = {
+									datacontext = "[GetCountry('SPA')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/SPA.dds" }
+								}
 							}
-							mp_select_button = {
-								datacontext = "[GetCountry('PRU')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/PRU.dds" }
+							flowcontainer = {
+								visible = "[GetVariableSystem.HasValue('mp_select_tab', 'middle_east')]"
+								direction = vertical
+								spacing = 5
+								mp_select_button = {
+									datacontext = "[GetCountry('TUR')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/TUR.dds" }
+								}
+								mp_select_button = {
+									datacontext = "[GetCountry('EGY')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/EGY.dds" }
+								}
 							}
-							mp_select_button = {
-								datacontext = "[GetCountry('RUS')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/RUS.dds" }
+							flowcontainer = {
+								visible = "[GetVariableSystem.HasValue('mp_select_tab', 'south_asia')]"
+								direction = vertical
+								spacing = 5
+								mp_select_button = {
+									datacontext = "[GetCountry('EIC')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/EIC.dds" }
+								}
+								mp_select_button = {
+									datacontext = "[GetCountry('KHL')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/KHL.dds" }
+								}
 							}
-							mp_select_button = {
-								datacontext = "[GetCountry('FRA')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/FRA.dds" }
+							flowcontainer = {
+								visible = "[GetVariableSystem.HasValue('mp_select_tab', 'east_asia')]"
+								direction = vertical
+								spacing = 5
+								mp_select_button = {
+									datacontext = "[GetCountry('CHI')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/CHI.dds" }
+								}
+								mp_select_button = {
+									datacontext = "[GetCountry('TKG')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/TKG.dds" }
+								}
 							}
-							mp_select_button = {
-								datacontext = "[GetCountry('NED')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/NED.dds" }
+							flowcontainer = {
+								visible = "[GetVariableSystem.HasValue('mp_select_tab', 'central_america')]"
+								direction = vertical
+								spacing = 5
+								mp_select_button = {
+									datacontext = "[GetCountry('VNZ')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/VNZ.dds" }
+								}
+								mp_select_button = {
+									datacontext = "[GetCountry('MEX')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/MEX.dds" }
+								}
 							}
-							mp_select_button = {
-								datacontext = "[GetCountry('AUS')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/AUS.dds" }
-							}
-							mp_select_button = {
-								datacontext = "[GetCountry('TUR')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/TUR.dds" }
-							}
-							mp_select_button = {
-								datacontext = "[GetCountry('SAR')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/SAR.dds" }
-							}
-							mp_select_button = {
-								datacontext = "[GetCountry('SPA')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/SPA.dds" }
-							}
-							mp_select_button = {
-								datacontext = "[GetCountry('USA')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/USA.dds" }
-							}
-							mp_select_button = {
-								datacontext = "[GetCountry('VNZ')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/VNZ.dds" }
-							}
-							mp_select_button = {
-								datacontext = "[GetCountry('MEX')]"
-								blockoverride "texture" { texture = "gfx/interface/images/background/MEX.dds" }
+							flowcontainer = {
+								visible = "[GetVariableSystem.HasValue('mp_select_tab', 'north_america')]"
+								direction = vertical
+								spacing = 5
+								mp_select_button = {
+									datacontext = "[GetCountry('USA')]"
+									blockoverride "texture" { texture = "gfx/interface/images/background/USA.dds" }
+								}	
 							}
 						}
 					}

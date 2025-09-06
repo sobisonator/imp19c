@@ -2,6 +2,7 @@ Includes = {
 	"cw/pdxgui.fxh"
 	"cw/pdxgui_sprite.fxh"
 	"standardfuncsgfx.fxh"
+	"gui_flags.fxh"
 }
 
 
@@ -47,59 +48,31 @@ PixelShader =
 		Code
 		[[
 			PDX_MAIN
-			{			
-				float4 OutColor = SampleImageSprite( Texture, Input.UV0 );
-				OutColor *= Input.Color;
-
+			{
 				// https://www.shadertoy.com/view/4tlczB
-				float2 UV = Input.UV0;
+			    // UV.y -= sin((Time * 0.1) * WaveSize) * 0.03;
+			    // wave animation
+
+			    float Time = GlobalTime * -1 * 0.5;
+			    float WaveSize = 12.0;
+				float2 UV = SettingsUV0ToFlag(SpriteTranslateRotateUVAndAlpha[1].a, Input.UV0);
 			    UV.y*=1.1;
 			    UV.y-= 0.05;
-			    float iTime = GlobalTime * -1 * 0.5;
-			    float WaveSize = 12.0;
-			    // UV.y -= sin((iTime * 0.1) * WaveSize) * 0.03;
-			    // wave animation
-			    float2 Wave = sin((UV.x+iTime*0.1) * WaveSize) * 0.03;
+			    float2 Wave = sin((UV.x + Time * 0.1) * WaveSize) * 0.03;
+				float4 OutColor = SampleSpriteTexture( Texture, float3(UV.x, UV.y + Wave), 0 );
+				float2 UV1 = SettingsUV1ToFlag(SpriteTranslateRotateUVAndAlpha[1].a, Input.UV0);
 
-			    float4 WaveFlag = SampleImageSprite(Texture, float3(UV.x, UV.y + Wave));
+			    UV1.y*=1.1;
+			    UV1.y-= 0.05;
 
-				float value = dot(float3(1, 1, 1) / 45, WaveFlag.xyz);
-				float f = sin(GlobalTime * -1 * 0.5 * (1.0f + 0.0001 * abs(sin(Input.Position.y * 0.02))) + Input.Position.x * 0.06 + 0.5 * sin(Input.Position.y * 0.02));
-				f *= f;
-				f *= 1.0 - value;
-				f *= f;
-				float outerness = 1.0f - 2.0f * min(min(min(Input.UV0.x, Input.UV0.y), 1.0f - Input.UV0.x), 1.0f - Input.UV0.y);
-				f *= outerness;
-				f = lerp(0.75f, 1.0f, 1.0 - f);
-				WaveFlag.xyz *= f;
-				WaveFlag.xyz += lerp(0.08f, 0.25f, outerness) * float3(1.0f, 1.0f, 0.5f) * value * value * max(0.0, sin(GlobalTime * -3.3 + Input.Position.x * 0.12 + Input.Position.y * 0.14 + 0.51 * sin(Input.Position.y * 0.011)));
+				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, float3(UV1.x, UV1.y + Wave), 1);
+				OutColor = float4(OutColor.rgb, AlphaColor.a);
 
-				OutColor = WaveFlag;
+				float4 ShadowColor = SampleSpriteTexture( ModifyTexture1, float3(UV1.x, UV1.y + Wave), 1 );
+				OutColor = lerp(ShadowColor, OutColor, lerp(ShadowColor.a, OutColor.a, 1.0));
 
-			    // UV.y*= 1.1;
-			    // UV.y-= 1.0;
-
-				// float SmallWaveScale = 5.5;
-				// float WaveScale = 0.3;
-				// float AnimationSpeed = 1.0;
-
-				// float AnimSeed = UV.x;
-				
-				// float Time = GlobalTime * AnimationSpeed;
-				
-				// float SmallWaveV = Time - AnimSeed * SmallWaveScale;
-				// float SmallWaveD = -( AnimSeed * SmallWaveScale );
-				// float SmallWave = sin( SmallWaveV );
-				// float CombinedWave = SmallWave;
-				
-				// // Wave
-				// float3 AnimationDir = float3( 0, 0.08, -1 );
-				// float Wave = WaveScale * smoothstep( 0.0, 0.12, AnimSeed ) * CombinedWave;
-				// float Derivative = ( WaveScale * 1.0f) * AnimSeed * -( SmallWave + cos( SmallWaveV ) * SmallWaveD );
-				// float2 WaveTangent = normalize( float2( 3.0f, Derivative ) );
-
-				// float4 WaveFlag = SampleImageSprite(Texture, float3(UV.x, UV.y + WaveTangent));
-				// OutColor = WaveFlag;
+				float4 StyleColor = SampleSpriteTexture( ModifyTexture2, float3(UV1.x, UV1.y + Wave), 1 );
+				OutColor = CreateStyleToFlag( OutColor, AlphaColor.a, StyleColor, Input.UV0, Input.Position, GlobalTime);
 
 				#ifndef NO_HIGHLIGHT
 					OutColor.rgb += HighlightColor;

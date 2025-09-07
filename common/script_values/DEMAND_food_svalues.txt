@@ -138,9 +138,7 @@ DEMAND_food_avg_price = {
 		value = var:price_grain
 		add = var:price_fish
 		add = var:price_livestock
-		add = var:price_mediterranean_fruit
 		add = var:price_temperate_fruit
-		add = var:price_tropical_fruit
 		add = var:price_vegetables
 		add = var:price_processed_foods
 	}
@@ -155,12 +153,16 @@ DEMAND_food_price_MAD = {
 	value = DEMAND_price_grain_deviation_from_mean_absolute
 	add = DEMAND_price_fish_deviation_from_mean_absolute
 	add = DEMAND_price_livestock_deviation_from_mean_absolute
-	add = DEMAND_price_mediterranean_fruit_deviation_from_mean_absolute
 	add = DEMAND_price_temperate_fruit_deviation_from_mean_absolute
-	add = DEMAND_price_tropical_fruit_deviation_from_mean_absolute
 	add = DEMAND_price_vegetables_deviation_from_mean_absolute
 	add = DEMAND_price_processed_foods_deviation_from_mean_absolute
 	divide = DEMAND_num_food_tradegoods
+}
+
+DEMAND_food_price_MAD_var = {
+	# Scope: Governorship
+	# Function: Get the variable so that it can be used on the right site of a comparison
+	value = var:DEMAND_food_price_mad
 }
 
 DEMAND_food_avg_price_normalised = {
@@ -174,37 +176,37 @@ DEMAND_food_avg_price_normalised = {
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_grain_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:DEMAND_price_grain_deviation_from_mean_absolute < DEMAND_food_price_MAD_var
 		}
 		add = var:price_grain
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_fish_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:DEMAND_price_fish_deviation_from_mean_absolute < DEMAND_food_price_MAD_var
 		}
 		add = var:price_fish
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_livestock_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:DEMAND_price_livestock_deviation_from_mean_absolute < DEMAND_food_price_MAD_var
 		}
 		add = var:price_livestock
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_temperate_fruit_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:DEMAND_price_temperate_fruit_deviation_from_mean_absolute < DEMAND_food_price_MAD_var
 		}
 		add = var:price_temperate_fruit
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_vegetables_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:DEMAND_price_vegetables_deviation_from_mean_absolute < DEMAND_food_price_MAD_var
 		}
 		add = var:price_vegetables
 	}
 	if = {
 		limit = { 
-			var:DEMAND_price_processed_foods_deviation_from_mean_absolute < var:DEMAND_food_price_MAD
+			var:DEMAND_price_processed_foods_deviation_from_mean_absolute < DEMAND_food_price_MAD_var
 		}
 		add = var:price_processed_foods
 	}
@@ -267,34 +269,6 @@ DEMAND_price_vegetables_deviation_from_mean_absolute = {
 	value = DEMAND_price_vegetables_deviation_from_mean
 	if = {
 		limit = { DEMAND_price_vegetables_deviation_from_mean < 0 }
-		multiply = -1
-	}
-}
-DEMAND_price_tropical_fruit_deviation_from_mean = {
-	if = {
-		limit = { has_variable = var_DEMAND_food_avg_price }
-	}
-	value = var:price_tropical_fruit
-	subtract = var:var_DEMAND_food_avg_price
-}
-DEMAND_price_tropical_fruit_deviation_from_mean_absolute = {
-	value = DEMAND_price_tropical_fruit_deviation_from_mean
-	if = {
-		limit = { DEMAND_price_tropical_fruit_deviation_from_mean < 0 }
-		multiply = -1
-	}
-}
-DEMAND_price_mediterranean_fruit_deviation_from_mean = {
-	if = {
-		limit = { has_variable = var_DEMAND_food_avg_price }
-	}
-	value = var:price_mediterranean_fruit
-	subtract = var:var_DEMAND_food_avg_price
-}
-DEMAND_price_mediterranean_fruit_deviation_from_mean_absolute = {
-	value = DEMAND_price_mediterranean_fruit_deviation_from_mean
-	if = {
-		limit = { DEMAND_price_mediterranean_fruit_deviation_from_mean < 0 }
 		multiply = -1
 	}
 }
@@ -462,30 +436,6 @@ DEMAND_vegetables_price_div_per_capita_wealth = { # Price of vegetables divided 
 	}	
 }
 
-DEMAND_consumer_tropical_fruit = { # Consumer demand for tropical_fruit; the amount bought locally
-	value = DEMAND_total_food_need_governorship
-	divide = DEMAND_tropical_fruit_price_diff_to_food_avg
-	divide = DEMAND_tropical_fruit_price_diff_to_food_avg
-	if = {
-		limit = {
-			NOT = { DEMAND_tropical_fruit_price_div_per_capita_wealth = 0 }
-		}
-		divide = DEMAND_tropical_fruit_price_div_per_capita_wealth
-	}
-	max = DEMAND_total_food_need_governorship_doubled # Should this be the amount available to buy?
-	divide = DEMAND_num_food_tradegoods
-}
-
-DEMAND_tropical_fruit_price_div_per_capita_wealth = { # Price of tropical_fruit divided by per capita wealth, used to multiply consumer demand - consumers turn away from food goods that cost too much compared to the wealth they have.
-	if = {
-		limit = { has_variable = price_tropical_fruit }
-		value = var:price_tropical_fruit
-	}
-	if = {
-		limit = { has_variable = var_WEALTH_governorship_per_capita }
-		divide = var:var_WEALTH_governorship_per_capita
-	}	
-}
 
 DEMAND_consumer_mediterranean_fruit = { # Consumer demand for mediterranean_fruit; the amount bought locally
 	value = DEMAND_total_food_need_governorship

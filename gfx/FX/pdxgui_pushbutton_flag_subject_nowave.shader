@@ -2,6 +2,7 @@ Includes = {
 	"cw/pdxgui.fxh"
 	"cw/pdxgui_sprite.fxh"
 	"standardfuncsgfx.fxh"
+	"gui_flags.fxh"
 }
 
 
@@ -47,21 +48,25 @@ PixelShader =
 		Code
 		[[
 			PDX_MAIN
-			{			
-				float4 OutColor = SampleImageSprite( Texture, Input.UV0 * 2.0 );
-				OutColor *= Input.Color;
+			{
+				float2 UV = Input.UV0;
+				UV *= 2.0;
+				float4 OutColor = SampleImageSprite( Texture, UV );
+				// UV.x *= 0.5;
+				UV.x *= 0.5;
+				UV.x += 1.5 - SpriteTranslateRotateUVAndAlpha[1].a;
+				// UV.x += -1 + (-1 * SpriteTranslateRotateUVAndAlpha[1].a);
 
-				float value = dot(float3(1, 1, 1) / 45, OutColor.xyz);
-				float f = sin(GlobalTime * -1 * 0.5 * (1.0f + 0.0001 * abs(sin(Input.Position.y * 0.02))) + Input.Position.x * 0.06 + 0.5 * sin(Input.Position.y * 0.02));
-				f *= f;
-				f *= 1.0 - value;
-				f *= f;
-				float outerness = 1.0f - 2.0f * min(min(min(Input.UV0.x, Input.UV0.y), 1.0f - Input.UV0.x), 1.0f - Input.UV0.y);
-				f *= outerness;
-				f = lerp(0.75f, 1.0f, 1.0 - f);
-				OutColor.xyz *= f;
-				OutColor.xyz += lerp(0.08f, 0.25f, outerness) * float3(1.0f, 1.0f, 0.5f) * value * value * max(0.0, sin(GlobalTime * -3.3 + Input.Position.x * 0.12 + Input.Position.y * 0.14 + 0.51 * sin(Input.Position.y * 0.011)));
+				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV, 1);
+				OutColor = float4(OutColor.rgb, AlphaColor.a);
 
+				float4 ShadowColor = SampleSpriteTexture( ModifyTexture1, UV, 1 );
+				OutColor = lerp(ShadowColor, OutColor, lerp(ShadowColor.a, OutColor.a, 1.0));
+
+				float4 StyleColor = SampleSpriteTexture( ModifyTexture2, UV, 1 );
+				OutColor = CreateStyleToFlag( OutColor, AlphaColor.a, StyleColor, Input.UV0, Input.Position, GlobalTime);
+				OutColor = float4(OutColor.rgb, AlphaColor.a);
+				
 				#ifndef NO_HIGHLIGHT
 					OutColor.rgb += HighlightColor;
 				#endif

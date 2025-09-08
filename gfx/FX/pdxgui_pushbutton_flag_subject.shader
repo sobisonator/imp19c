@@ -54,16 +54,14 @@ PixelShader =
 				float2 UV = Input.UV0;
 
 				UV *= 2.0;
-				// UV.x *= 0.5;
-				// UV.x *= 0.5;
 				UV.x += -0.5;
-				UV.x += 1.5 - SpriteTranslateRotateUVAndAlpha[1].a;
+				UV.x += 1.5 - SpriteFramesTypeBlendMode[4].x;
 
 			    float2 Wave = sin((Input.UV0.x + Time * 0.1) * WaveSize) * 0.03 * 2;
 				float4 OutColor = SampleSpriteTexture( Texture, float3(UV.x, UV.y + Wave), 0 );
 
 				UV.x *= 0.5;
-				UV.x += 1.5 - SpriteTranslateRotateUVAndAlpha[1].a;
+				UV.x += 1.5 - SpriteFramesTypeBlendMode[4].x;
 				Wave = sin((Input.UV0.x + Time * 0.1) * WaveSize) * 0.03 * 2;
 
 				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, float3(UV.x, UV.y + Wave), 1);

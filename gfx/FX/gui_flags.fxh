@@ -2,27 +2,29 @@ PixelShader =
 {
 	Code
 	[[
-		float2 SettingsUV0ToFlag( float Alpha, float2 UV ) {
-			if ( SpriteTranslateRotateUVAndAlpha[1].a == 2.0 )
+		float2 SettingsUV0ToFlag( float2 UV ) {
+			float FlagShape = SpriteFramesTypeBlendMode[4].x;
+			if ( FlagShape == 2.0 )
 			{
 				UV.x *= 1.5;
 				UV.x += -0.25;
 			}
-			if ( SpriteTranslateRotateUVAndAlpha[1].a == 4.0 )
+			if ( FlagShape == 4.0 )
 			{
 				UV.y *= 1.5;
 				UV.y += -0.25;
 			}
-			if ( SpriteTranslateRotateUVAndAlpha[1].a == 7.0 )
+			if ( FlagShape == 7.0 )
 			{
 				UV.x *= 2.0;
 				UV.x += -0.5;
 			}
 			return UV;
 		}
-		float2 SettingsUV1ToFlag( float Alpha, float2 UV ) {
+		float2 SettingsUV1ToFlag( float2 UV ) {
+			float FlagShape = SpriteFramesTypeBlendMode[4].x;
 			UV.x *= 0.125;
-			UV.x += 0.125 * SpriteTranslateRotateUVAndAlpha[1].a;
+			UV.x += 0.125 * FlagShape;
 			return UV;
 		}
 		float4 CreateStyleToFlag( float4 OutColor, float AlphaColor, float4 StyleColor, float2 UV, float3 UVPos, float GlobalTime) {

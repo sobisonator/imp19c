@@ -1631,9 +1631,16 @@ CURRENCY_add_tradegood_total_demand_cost = {
 		name = amount_to_add
 		value = scope:this_country.DEMAND_country_$tradegood$
 	}
-	change_local_variable = {
-		name = amount_to_add
-		multiply = scope:this_country.var:country_unit_price_$tradegood$
+	if = {
+		limit = {
+			var:originator_country = {
+				has_variable = country_unit_price_$tradegood$
+			}
+		}
+		change_local_variable = {
+			name = amount_to_add
+			multiply = scope:this_country.var:country_unit_price_$tradegood$
+		}
 	}
 
 	change_variable = {
@@ -1650,56 +1657,80 @@ CURRENCY_update_backing_value = {
 		limit = {
 			var:backing_type = flag:gold_standard
 		}
-		set_variable = {
-			name = backing_value
-			value = var:originator_country.var:country_unit_price_gold
-		}
-		change_variable = {
-			name = backing_value
-			multiply = var:originator_country.var:gold_reserve_size
+		if = {
+			limit = {
+				var:originator_country = {
+					has_variable = country_unit_price_gold
+				}
+			}
+			set_variable = {
+				name = backing_value
+				value = var:originator_country.var:country_unit_price_gold
+			}
+			change_variable = {
+				name = backing_value
+				multiply = var:originator_country.var:gold_reserve_size
+			}
 		}
 	}
 	else_if = {
 		limit = {
 			var:backing_type = flag:silver_standard
 		}
-		set_variable = {
-			name = backing_value
-			value = var:originator_country.var:country_unit_price_silver
+		if = {
+			limit = {
+				var:originator_country = {
+					has_variable = country_unit_price_silver
+				}
+			}
+			set_variable = {
+				name = backing_value
+				value = var:originator_country.var:country_unit_price_silver
+			}
+			change_variable = {
+				name = backing_value
+				multiply = var:originator_country.var:silver_reserve_size
+			}
 		}
-		change_variable = {
-			name = backing_value
-			multiply = var:originator_country.var:silver_reserve_size
-		}
+		
 	}
 	else_if = {
 		limit = {
 			var:backing_type = flag:bimetallic_standard
 		}
-		set_local_variable = {
-			name = backing_value_from_silver
-			value = var:originator_country.var:country_unit_price_silver
+		if = {
+			limit = {
+				var:originator_country = {
+					has_variable = country_unit_price_silver
+					has_variable = country_unit_price_gold
+				}
+			}
+			set_local_variable = {
+				name = backing_value_from_silver
+				value = var:originator_country.var:country_unit_price_silver
+			}
+			change_local_variable = {
+				name = backing_value_from_silver
+				multiply = var:originator_country.var:silver_reserve_size
+			}
+			set_local_variable = {
+				name = backing_value_from_gold
+				value = var:originator_country.var:country_unit_price_gold
+			}
+			change_local_variable = {
+				name = backing_value_from_gold
+				multiply = var:originator_country.var:gold_reserve_size
+			}
+			set_variable = {
+				name = backing_value
+				value = local_var:backing_value_from_silver
+			}
+			change_variable = {
+				name = backing_value
+				add = local_var:backing_value_from_gold
+			}
 		}
-		change_local_variable = {
-			name = backing_value_from_silver
-			multiply = var:originator_country.var:silver_reserve_size
-		}
-		set_local_variable = {
-			name = backing_value_from_gold
-			value = var:originator_country.var:country_unit_price_gold
-		}
-		change_local_variable = {
-			name = backing_value_from_gold
-			multiply = var:originator_country.var:gold_reserve_size
-		}
-		set_variable = {
-			name = backing_value
-			value = local_var:backing_value_from_silver
-		}
-		change_variable = {
-			name = backing_value
-			add = local_var:backing_value_from_gold
-		}
+		
 	}
 
 }

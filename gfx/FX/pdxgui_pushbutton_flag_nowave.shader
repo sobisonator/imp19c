@@ -48,9 +48,9 @@ PixelShader =
 		[[
 			PDX_MAIN
 			{
-				float2 UV = SettingsUV0ToFlag(SpriteTranslateRotateUVAndAlpha[1].a, Input.UV0);
+				float2 UV = SettingsUV0ToFlag( Input.UV0 );
 				float4 OutColor = SampleSpriteTexture( Texture, UV, 0 );
-				float2 UV1 = SettingsUV1ToFlag(SpriteTranslateRotateUVAndAlpha[1].a, Input.UV0);
+				float2 UV1 = SettingsUV1ToFlag( Input.UV0 );
 
 				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV1, 1);
 				OutColor = float4(OutColor.rgb, AlphaColor.a);

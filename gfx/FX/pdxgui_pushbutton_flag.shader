@@ -55,12 +55,12 @@ PixelShader =
 
 			    float Time = GlobalTime * -1 * 0.5;
 			    float WaveSize = 12.0;
-				float2 UV = SettingsUV0ToFlag(SpriteTranslateRotateUVAndAlpha[1].a, Input.UV0);
+				float2 UV = SettingsUV0ToFlag( Input.UV0 );
 			    UV.y*=1.1;
 			    UV.y-= 0.05;
 			    float2 Wave = sin((UV.x + Time * 0.1) * WaveSize) * 0.03;
 				float4 OutColor = SampleSpriteTexture( Texture, float3(UV.x, UV.y + Wave), 0 );
-				float2 UV1 = SettingsUV1ToFlag(SpriteTranslateRotateUVAndAlpha[1].a, Input.UV0);
+				float2 UV1 = SettingsUV1ToFlag( Input.UV0 );
 
 			    UV1.y*=1.1;
 			    UV1.y-= 0.05;

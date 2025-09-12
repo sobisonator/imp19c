@@ -52,10 +52,8 @@ PixelShader =
 				float2 UV = Input.UV0;
 				UV *= 2.0;
 				float4 OutColor = SampleImageSprite( Texture, UV );
-				// UV.x *= 0.5;
 				UV.x *= 0.5;
-				UV.x += 1.5 - SpriteTranslateRotateUVAndAlpha[1].a;
-				// UV.x += -1 + (-1 * SpriteTranslateRotateUVAndAlpha[1].a);
+				UV.x += 1.5 - SpriteFramesTypeBlendMode[4].x;
 
 				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV, 1);
 				OutColor = float4(OutColor.rgb, AlphaColor.a);

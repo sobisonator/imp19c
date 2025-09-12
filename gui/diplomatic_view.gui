@@ -3,7 +3,7 @@
 @mincategorybuttonheight = 28 
 @maxcategorybuttonheight = 34
 @window_width = 700
-@window_height = 900
+@window_height = 910
 
 base_window = {
 	name = "diplomatic_view"
@@ -114,9 +114,9 @@ base_window = {
 				}
 				widget = {
 					size = { 280 140 }
-					new_country_flag = { #flag
+					new_country_banner = { #flag
 						datacontext = "[DiplomaticView.GetTargetCountry]"
-						blockoverride "size" { size = { 150 150 } }
+						blockoverride "Size" { size = { 150 150 } }
 						parentanchor = hcenter|top
 					}
 					icon = { #country name
@@ -337,7 +337,8 @@ base_window = {
 				flowcontainer = {
 					name = "diplo_view_second_row"
 					ignoreinvisible = yes
-					margin_top = -5
+					margin_top = -10
+					margin_left = 10
 					flowcontainer = {
 						direction = vertical
 						visible = "[DiplomaticView.GetTargetCountry.IsBarbarian]"
@@ -359,108 +360,105 @@ base_window = {
 						}
 					}
 					flowcontainer = {
-						direction = vertical
+						using = background_widget
+						margin = { 5 5 }
 						spacing = 10
-						margin_left = 10
-						visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-						panelka_center = { #GDP
-							size = { 130 32 }
-							datacontext = "[DiplomaticView.GetTargetCountry]"
-							#blockoverride "Icon" { texture = "" }
-							blockoverride "TextBox" { text = "£[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('WEALTH_total_private_moveable_wealth')|3]" }
-							tooltip = "GDP"
+						flowcontainer = {
+							direction = vertical
+							spacing = 10
+							margin_left = 10
+							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+							panelka_center = { #GDP
+								size = { 130 32 }
+								datacontext = "[DiplomaticView.GetTargetCountry]"
+								#blockoverride "Icon" { texture = "" }
+								blockoverride "TextBox" { text = "£[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('WEALTH_total_private_moveable_wealth')|3]" }
+								tooltip = "GDP"
+							}
+							panelka_center = { # % of global shipping controlled
+								size = { 130 32 }
+								#blockoverride "Icon" { texture = "" }
+								blockoverride "TextBox" { text = "[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('TRADE_percentage_of_global_shipping')|%]" }
+								tooltip = "SHIPPING_CONTROLLED_TT"
+							}
+							panelka_center = { # Quarterly trading activity value 
+								size = { 130 32 }
+								#blockoverride "Icon" { texture = "" }
+								blockoverride "TextBox" { text = "£[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('TRADE_activity_value')|3]" }
+								tooltip = "TRADE_ACTIVITY_VALUE_TT"
+							}
 						}
-						panelka_center = { # % of global shipping controlled
-							size = { 130 32 }
-							#blockoverride "Icon" { texture = "" }
-							blockoverride "TextBox" { text = "[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('TRADE_percentage_of_global_shipping')|%]" }
-							tooltip = "SHIPPING_CONTROLLED_TT"
-						}
-						panelka_center = { # Quarterly trading activity value 
-							size = { 130 32 }
-							#blockoverride "Icon" { texture = "" }
-							blockoverride "TextBox" { text = "£[GuiScope.SetRoot(DiplomaticView.GetTargetCountry.MakeScope).ScriptValue('TRADE_activity_value')|3]" }
-							tooltip = "TRADE_ACTIVITY_VALUE_TT"
+						flowcontainer = {
+							direction = vertical
+							spacing = 10
+							visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
+							panelka = { #capital
+								size = { 210 32 }
+								blockoverride "TextBox" { text = "capita_dip" }
+							}
+							panelka = { #population
+								size = { 210 32 }
+								blockoverride "TextBox" { text = "NATIONAL_POPULATION" }
+							}
+							panelka = { #cities
+								size = { 210 32 }
+								blockoverride "TextBox" { text = "provinces_dip" }
+							}
 						}
 					}
 					flowcontainer = {
 						direction = vertical
-						spacing = 10
-						visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
-						panelka = { #capital
-							size = { 210 32 }
-							blockoverride "TextBox" { text = "capita_dip" }
-						}
-						panelka = { #population
-							size = { 210 32 }
-							blockoverride "TextBox" { text = "NATIONAL_POPULATION" }
-						}
-						panelka = { #cities
-							size = { 210 32 }
-							blockoverride "TextBox" { text = "provinces_dip" }
-						}
-					}
-					flowcontainer = {
-						direction = vertical
-						spacing = 20
+						#spacing = 20
 						visible = "[Not(DiplomaticView.GetTargetCountry.IsBarbarian)]"
 						textbox = {
-							size = { 330 10 }
+							size = { 300 30 }
 							visible = "[DiplomaticView.GetTargetCountry.MakeScope.Var('member_of_federation').IsSet]"
-							align = hcenter
+							align = center
 							fontsize = 16
 							using = BaseFontM
 							using = Black_FontColor
 							text = "FEDERATION_MEMBERSHIP"
 						}
 						textbox = {
-							size = { 330 10 }
-							align = hcenter
+							size = { 300 30 }
+							align = hcenter|top
 							using = BaseFontM
 							using = Black_FontColor
 							text = "[DiplomaticView.GetTargetCountry.GetGovernment.GetName]"
 						}
-						container = {
-							parentanchor = hcenter
+						widget = {
+							size = { 300 50 }
 							flowcontainer = {
-								position = { 0 3 }
-								spacing = 16
 								name = "dummy_ideas_grid" 
-										
-								container = {
-									button = {
-										name = "space1"
-										using = idea_slot_not_available
-										size = { 42 42 }
-									}
+								parentanchor = hcenter
+								spacing = 16
+								button = {
+									name = "space1"
+									using = idea_slot_not_available
+									size = { 42 42 }
 								}
-								container = {
-									button = {
-										name = "space2"
-										using = idea_slot_not_available
-										size = { 42 42 }
-									}
+								button = {
+									name = "space2"
+									using = idea_slot_not_available
+									size = { 42 42 }
 								}
-								container = {
-									button = {
-										name = "space3"
-										using = idea_slot_not_available
-										size = { 42 42 }
-									}
+								button = {
+									name = "space3"
+									using = idea_slot_not_available
+									size = { 42 42 }
 								}
-								container = {
-									button = {
-										name = "space4"
-										using = idea_slot_not_available
-										size = { 42 42 }
-										
-									}
+								button = {
+									name = "space4"
+									using = idea_slot_not_available
+									size = { 42 42 }
+									
 								}
 							} 
 								
 							fixedgridbox = {
-								position = { 0 -1 }
 								name = "ideas_grid"
+								parentanchor = hcenter
+								position = { 4 -4 }
 								flipdirection = yes
 								addcolumn = 58
 								addrow = 50
@@ -473,8 +471,6 @@ base_window = {
 										icon_card_idea = {
 											name = "Idea Button"
 											size = { 48 48 }
-											position = { -4 0 }
-											widgetanchor = center
 											parentanchor = center
 											visible = "[IdeaItem.IsValid]"
 											blockoverride "Icon" { 
@@ -482,20 +478,15 @@ base_window = {
 												size = { 40 40 }
 											}
 											tooltipwidget = idea_item_desc_tooltip
-											using = DropShadow
 										}
-										 
 										button = {
 											name = "Idea Button Invalid"
-											position = { -5 0 }
+											gfxtype = buttongfx
 											# tooltip = "NO_IDEA_FOREIGN"
 											tooltipwidget = no_idea_tooltip
 											visible = "[Not(IdeaItem.IsValid)]"
-											alwaystransparent = no
 											size = { 50 50 }
-											gfxtype = buttongfx
-											widgetanchor = center
-											parentanchor = center	
+											parentanchor = center
 											enabled = no
 											using = beige_background
 											alpha = 0.5
@@ -677,21 +668,10 @@ base_window = {
 													spacing = 2
 													margin_left = 4
 													item = {
-														country_flag = {
+														new_country_flag = {
 															tooltip = "TRADE_AGREEMENT_TT"
 															datacontext = "[Scope.GetCountry]"
-														
-															blockoverride "flag"
-															{
-																texture = "[Scope.GetCountry.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
-																frame = "[Scope.GetCountry.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
-																framesize = { 56 56 }
-															}
-														
-															blockoverride "size"
-															{
-																size = { 30 30 }
-															}
+															blockoverride "Size" { size = { 30 30 } }
 														}
 													}
 												}
@@ -999,7 +979,7 @@ base_window = {
 									}
 								}
 								flowcontainer = {
-									spacing = 2
+									spacing = 10
 									panelka_center = { #improve relation
 										size = { @icon_width_our_details 32 }
 										blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/improve_relation.dds" }
@@ -1007,13 +987,13 @@ base_window = {
 										tooltip = "[DiplomaticView.GetPlayer.GetModifierTooltip('improve_relation_impact')]"
 									}
 									panelka_center = { #diplomatic reputation
-										size = { 85 32 }
+										size = { 80 32 }
 										blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/diplomatic_reputation.dds" }
 										blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetModifierValue('diplomatic_reputation')]" }
 										tooltip = "DIP_VIEW_REPUTATION_TOOLTIP"
 									}
 									panelka_center = { #active diplomatic relations
-										size = { 85 32 }
+										size = { 80 32 }
 										blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/diplomatic_relations.dds" tooltip = "[DiplomaticView.GetPlayer.GetActiveRelationsInfo]" }
 										blockoverride "TextBox" { text = "[DiplomaticView.GetPlayer.GetNumActiveRelations]/[DiplomaticView.GetPlayer.GetNumActiveRelationsLimit]" }
 										tooltip = "[DiplomaticView.GetPlayer.GetModifierTooltip( 'diplomatic_relations' )]"

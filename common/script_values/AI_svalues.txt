@@ -1609,8 +1609,6 @@ AI_diplomatic_play_assess_side = {
 			divide = 60
 		}
 
-		divide = scope:diplomatic_play.var:play_instigator.DIPLOMACY_global_power_score
-
 		if = {
 			limit = {
 				OR = {
@@ -1626,27 +1624,6 @@ AI_diplomatic_play_assess_side = {
 				}
 			}
 			multiply = 10
-		}
-
-		if = {
-			limit = {
-				any_subject = { 
-					THIS = scope:diplomatic_play.var:play_instigator
-				}
-			}
-			multiply = 2
-			max = 100000
-		}
-		else_if = {
-			limit = {
-				any_subject = { 
-					any_subject = {
-						THIS = scope:diplomatic_play.var:play_instigator
-					}
-				}
-			}
-			multiply = 2
-			max = 100000
 		}
 
 		scope:diplomatic_play.var:play_instigator = {
@@ -1669,7 +1646,47 @@ AI_diplomatic_play_assess_side = {
 				}
 			}
 		}
+
+		# Do not want interventions near our own turf
+		if = {
+			limit = {
+				scope:diplomatic_play.var:play_target_country = {
+					any_owned_province = {
+						any_neighbor_province = { owner = scope:assessor_country }
+					}
+				}
+			}
+			multiply = 0.3
+		}
 		
+		if = {
+			limit = {
+				scope:diplomatic_play.var:play_instigator.DIPLOMACY_global_power_score > 0
+			}
+			divide = scope:diplomatic_play.var:play_instigator.DIPLOMACY_global_power_score
+		}
+
+		if = {
+			limit = {
+				any_subject = { 
+					THIS = scope:diplomatic_play.var:play_instigator
+				}
+			}
+			multiply = 3
+			max = 100000
+		}
+		else_if = {
+			limit = {
+				any_subject = { 
+					any_subject = {
+						THIS = scope:diplomatic_play.var:play_instigator
+					}
+				}
+			}
+			multiply = 3
+			max = 100000
+		}
+
 	}
 
 	subtract = {
@@ -1696,45 +1713,9 @@ AI_diplomatic_play_assess_side = {
 
 		divide = scope:diplomatic_play.var:play_target_country.DIPLOMACY_global_power_score
 
-		if = {
-			limit = {
-				OR = {
-					alliance_with = scope:diplomatic_play.var:play_target_country
-					trigger_if = {
-						limit = {
-							scope:diplomatic_play.var:play_target_country = {
-								is_subject = yes
-							}
-						}
-						alliance_with = scope:diplomatic_play.var:play_target_country.overlord
-					}	
-				}
-			}
-			multiply = 10
-		}
+		
 
-		if = {
-			limit = {
-				any_subject = { 
-					THIS = scope:diplomatic_play.var:play_target_country
-				}
-			}
-			multiply = 100
-			max = 100000
-		}
-		else_if = {
-			limit = {
-				any_subject = { 
-					any_subject = {
-						THIS = scope:diplomatic_play.var:play_target_country
-					}
-				}
-			}
-			multiply = 100
-			max = 100000
-		}
-
-		scope:diplomatic_play.var:play_target = {
+		scope:diplomatic_play.var:play_target_country = {
 			every_allied_country = {
 				add = {
 					value = DIPLOMACY_power
@@ -1763,6 +1744,53 @@ AI_diplomatic_play_assess_side = {
 				multiply = 2
 			}
 		}
+
+		if = {
+			limit = {
+				scope:diplomatic_play.var:play_target_country.DIPLOMACY_global_power_score > 0
+			}
+			divide = scope:diplomatic_play.var:play_target_country.DIPLOMACY_global_power_score
+		}
+
+		if = {
+			limit = {
+				any_subject = { 
+					THIS = scope:diplomatic_play.var:play_target_country
+				}
+			}
+			multiply = 1000
+			max = 100000
+		}
+		else_if = {
+			limit = {
+				any_subject = { 
+					any_subject = {
+						THIS = scope:diplomatic_play.var:play_target_country
+					}
+				}
+			}
+			multiply = 1000
+			max = 100000
+		}
+
+		else_if = {
+			limit = {
+				OR = {
+					alliance_with = scope:diplomatic_play.var:play_target_country
+					trigger_if = {
+						limit = {
+							scope:diplomatic_play.var:play_target_country = {
+								is_subject = yes
+							}
+						}
+						alliance_with = scope:diplomatic_play.var:play_target_country.overlord
+					}	
+				}
+			}
+			multiply = 1000
+			max = 100000
+		}
+
 	}
 
 	# Divide with factors making the assessor less likely to pick a side, and more likely to remain neutral

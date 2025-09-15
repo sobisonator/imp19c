@@ -724,6 +724,51 @@ AI_begin_diplomatic_play = {
 			}
 		}
 
+		# Also allow great powers bordering the incident to be involved
+		every_country = {
+			limit = {
+				DIPLOMACY_global_power_score > 16
+				OR = {
+					DIPLOMACY_global_power_score > 100
+					trigger_if = {
+						limit = {
+							scope:diplomatic_play = {
+								has_variable = play_target_country
+								has_variable = play_instigator
+							}
+						}
+						AND = {
+							DIPLOMACY_global_power_score > 16
+							any_owned_province = {
+								any_neighbor_province = {
+									OR = {
+										owner = scope:diplomatic_play.var:play_target_country
+										owner = scope:diplomatic_play.var:play_instigator
+									}
+								}
+							}
+						}
+					}
+					
+				}
+			}
+			if = {
+				limit = {
+					NOR = {
+						THIS = scope:diplomatic_play.var:play_target_country
+						THIS = scope:diplomatic_play.var:play_instigator
+					}
+				}
+			}
+			save_scope_as = play_observer
+			scope:diplomatic_play = {
+				add_to_variable_list = {
+					name = play_observers_undecided
+					target = scope:play_observer
+				}
+			}
+		}
+
 		# Empty list for play_supporters_instigator
 
 		# Empty list for play_supporters_target
@@ -1250,7 +1295,7 @@ AI_diplomatic_play_evaluate_war = {
 				}
 				if = {
 					limit = {
-						var:play_instigator_country = {
+						var:play_instigator = {
 							has_truce_with = scope:diplomatic_play.var:play_target_country
 						}
 						subtract = 100000

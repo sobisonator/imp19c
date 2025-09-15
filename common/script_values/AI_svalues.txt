@@ -1576,3 +1576,227 @@ AI_interest_value_province = {
 		multiply = 3
 	}
 }
+
+# DIPLOMATIC PLAY ASSESSMENTS
+AI_diplomatic_play_assess_side = {
+	# Scope: Country
+	# Function: Assess which side to pick
+	# Positive = play instigator
+	# Negative = play target
+	# Requires scope:diplomatic_play to be set
+
+	value = 0
+
+	add = {
+		# Instigator
+		value = scope:diplomatic_play.var:play_instigator.DIPLOMACY_power
+		if = {
+			limit = {
+				opinion = { target = scope:diplomatic_play.var:play_instigator value > 30 }
+			}
+			multiply = 2
+		}
+		else_if = {
+			limit = {
+				opinion = { target = scope:diplomatic_play.var:play_instigator value < 0 }
+			}
+			divide = 30
+		}
+		else_if = {
+			limit = {
+				opinion = { target = scope:diplomatic_play.var:play_instigator value < -50 }
+			}
+			divide = 60
+		}
+
+		if = {
+			limit = {
+				OR = {
+					alliance_with = scope:diplomatic_play.var:play_target_country
+					trigger_if = {
+						limit = {
+							scope:diplomatic_play.var:play_target_country = {
+								is_subject = yes
+							}
+						}
+						alliance_with = scope:diplomatic_play.var:play_target_country.overlord
+					}	
+				}
+			}
+			multiply = 10
+		}
+
+		scope:diplomatic_play.var:play_instigator = {
+			every_allied_country = {
+				add = {
+					value = DIPLOMACY_power
+					multiply = 0.1
+				}
+			}
+		}
+
+		scope:diplomatic_play.var:play_instigator = {
+			divide = {
+				value = 1
+				every_owned_province = {
+					limit = {
+						is_core_of = scope:assessor_country
+					}
+					add = 4
+				}
+			}
+		}
+
+		# Do not want interventions near our own turf
+		if = {
+			limit = {
+				scope:diplomatic_play.var:play_target_country = {
+					any_owned_province = {
+						any_neighbor_province = { owner = scope:assessor_country }
+					}
+				}
+			}
+			multiply = 0.3
+		}
+		
+		if = {
+			limit = {
+				scope:diplomatic_play.var:play_instigator.DIPLOMACY_global_power_score > 0
+			}
+			divide = scope:diplomatic_play.var:play_instigator.DIPLOMACY_global_power_score
+		}
+
+		if = {
+			limit = {
+				any_subject = { 
+					THIS = scope:diplomatic_play.var:play_instigator
+				}
+			}
+			multiply = 3
+			max = 100000
+		}
+		else_if = {
+			limit = {
+				any_subject = { 
+					any_subject = {
+						THIS = scope:diplomatic_play.var:play_instigator
+					}
+				}
+			}
+			multiply = 3
+			max = 100000
+		}
+
+	}
+
+	subtract = {
+		# Target
+		value = scope:diplomatic_play.var:play_target_country.DIPLOMACY_power
+		if = {
+			limit = {
+				opinion = { target = scope:diplomatic_play.var:play_instigator value > 30 }
+			}
+			multiply = 2
+		}
+		else_if = {
+			limit = {
+				opinion = { target = scope:diplomatic_play.var:play_target_country value < 0 }
+			}
+			divide = 30
+		}
+		else_if = {
+			limit = {
+				opinion = { target = scope:diplomatic_play.var:play_target_country value < -50 }
+			}
+			divide = 60
+		}
+
+		divide = scope:diplomatic_play.var:play_target_country.DIPLOMACY_global_power_score
+
+		
+
+		scope:diplomatic_play.var:play_target_country = {
+			every_allied_country = {
+				add = {
+					value = DIPLOMACY_power
+					multiply = 0.1
+				}
+			}
+		}
+
+		scope:diplomatic_play.var:play_target_country = {
+			divide = {
+				value = 1
+				every_owned_province = {
+					limit = {
+						is_core_of = scope:assessor_country
+					}
+					add = 4
+				}
+			}
+		}
+
+		scope:diplomatic_play.var:play_target_area = {
+			every_area_province = {
+				limit = {
+					is_core_of = scope:assessor_country
+				}
+				multiply = 2
+			}
+		}
+
+		if = {
+			limit = {
+				scope:diplomatic_play.var:play_target_country.DIPLOMACY_global_power_score > 0
+			}
+			divide = scope:diplomatic_play.var:play_target_country.DIPLOMACY_global_power_score
+		}
+
+		if = {
+			limit = {
+				any_subject = { 
+					THIS = scope:diplomatic_play.var:play_target_country
+				}
+			}
+			multiply = 1000
+			max = 100000
+		}
+		else_if = {
+			limit = {
+				any_subject = { 
+					any_subject = {
+						THIS = scope:diplomatic_play.var:play_target_country
+					}
+				}
+			}
+			multiply = 1000
+			max = 100000
+		}
+
+		else_if = {
+			limit = {
+				OR = {
+					alliance_with = scope:diplomatic_play.var:play_target_country
+					trigger_if = {
+						limit = {
+							scope:diplomatic_play.var:play_target_country = {
+								is_subject = yes
+							}
+						}
+						alliance_with = scope:diplomatic_play.var:play_target_country.overlord
+					}	
+				}
+			}
+			multiply = 1000
+			max = 100000
+		}
+
+	}
+
+	# Divide with factors making the assessor less likely to pick a side, and more likely to remain neutral
+	# Multiply with factors making the assessor more likely to intervene
+
+	# Support the side opposite the side with the most diplo power - competition
+
+	# + Support for allies
+}

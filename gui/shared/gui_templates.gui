@@ -1651,6 +1651,110 @@ types NEW_GUI {
 		}
 	}
 
+
+	type test_laws_widget = margin_widget {
+		size = { 200 42 }
+		using = background_widget
+		flowcontainer = {
+			direction = vertical
+			#widget = {
+			#	size = { 302 32 }
+			#}
+			resizeparent = yes
+			flowcontainer = {
+				direction = vertical
+				#margin_bottom = 5
+				margin = { 5 5 }
+				margin_top = 32
+				datamodel = "[LawGroupItem.GetLaws]"
+				item = {
+					margin_widget = {
+						size = { 292 0 }
+						alpha = "[TransparentIfFalse(LawItem.IsAllowed)]"
+						state = {
+							name = "open_law"
+							trigger_when = "[GetVariableSystem.Exists(LawGroupItem.GetName)]"
+							delay = 0.005
+							duration = 0.001
+							size = { 292 46 }
+							alpha = 1
+						}
+						state = {
+							name = "close_law"
+							trigger_when = "[Not(GetVariableSystem.Exists(LawGroupItem.GetName))]"
+							duration = 0.01
+							size = { 292 0 }
+							alpha = 0
+						}
+						state = {
+							name = "clear_law"
+							on_start =  "[GetVariableSystem.Clear(LawGroupItem.GetName)]"
+						}
+						flowcontainer = {
+							parentanchor = vcenter
+							margin = { 5 5 }
+							spacing = 5
+							using = background_widget
+							button_radial = {
+								enabled = "[And( LawItem.CanEnact, LawItem.IsAllowed )]"
+								parentanchor = vcenter
+								blockoverride "On_click" 
+								{
+									onclick = "[LawItem.Enact]"
+									inherit_visual_state = no
+									enabled = yes
+								}
+								blockoverride "ShowDot"
+								{
+									trigger_when = "[LawItem.HasLaw]"
+								} 
+								blockoverride "HideDot" 
+								{
+									trigger_when = "[Not(LawItem.HasLaw)]"
+								}
+								tooltip = "[LawItem.GetCanSetLawDescription]"
+							}
+							tooltipwidget = player_law_item_tooltip
+							widget = {
+								size = { 214 26 }
+								parentanchor = vcenter
+								using = NoninteractableBG
+								blockoverride "Margins" { margin = { 4 6 } }
+								textbox = {
+									position = { 8 3 }
+									autoresize = yes
+									align = vcenter|left
+									using = BaseFontS
+									using = Black_FontColor
+									text = "[LawItem.GetName]"
+									max_width = 210
+									fontsize_min = 11
+									elide = right
+								}
+							}
+							widget = {
+								size = { 32 32 }
+								icon = {
+									texture = "[LawItem.GetLaw.GetModifier.GetIcon]"
+									size = { 32 32 }
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		text_button_square = {
+			blockoverride "Center_text" { text = "[LawGroupItem.GetName]" }
+			blockoverride "On_click" { 
+				onclick = "[GetVariableSystem.Toggle(LawGroupItem.GetName)]"
+			}
+			size = { 100% 32 }
+		}
+	}
+
+
+
 	@topbar_left_button_height = 56
 	type topbar_left_button = widget {
 		size = { 70 @topbar_left_button_height }

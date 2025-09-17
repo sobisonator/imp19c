@@ -1445,315 +1445,126 @@ types NEW_GUI {
 		using = color_background
 	}
 
-	type laws_sub_header = sub_header {
-		blockoverride "Title_text" { block "Text" {  text = "text" } }
-		size = { 871 32 }
-		button = {
-			size = { 100% 100% }
-			block "On_click" {}
-		}
-		icon = {
-			block "ArrowSize" { size = { 18 18 } }
-			block "Right" { visible = no }
-			parentanchor = vcenter|right
-			position = { -6 0 }
-			using = red_background
-			icon = {
-				name = "Alpha"
-				texture = "gfx/interface/base_parts/arrow_right.dds"
-				spriteType = Corneredtiled
-				spriteborder = { 0 0 }
-				parentanchor = center
-			}
-		}
-		icon = {
-			block "ArrowSize"{ size = { 18 18 } }
-			block "Down" {}
-			parentanchor = vcenter|right
-			position = { -6 0 }
-			using = red_background
-			icon = {
-				name = "Alpha"
-				texture = "gfx/interface/base_parts/arrow.dds"
-				spriteType = Corneredtiled
-				spriteborder = { 0 0 }
-				parentanchor = center
-				position = { 1 1 }
-			}
-		}
-	}
-
-	type laws_base_item = flowcontainer {
-		direction = vertical
-		margin = { 3 3 }
-		using = background_widget
-		sub_header = {
-			size = { 290 32 }
-			blockoverride "Title_text"
-			{
-				datacontext = "[GovernmentView.GetPlayer]"
-				text = "[LawGroupItem.GetName]"
-				fontsize_min = 11
-			}
-			flowcontainer = {
-				parentanchor = right
-				tooltip = [LawGroupItem.GetClansTooltip]
-				visible = "[LawGroupItem.HasClans]"
-				icon = {											
-					name = "clans_icon"
-					texture = "gfx/interface/icons/shared_icons/clan_chiefs.dds"
-					size = { 32 32 }	
-					tooltip = [LawGroupItem.GetClansTooltip]
-				}
-				icon = {
-					parentanchor = right
-					name = "clans_yesno"
-					texture = "gfx/interface/icons/shared_icons/tick_cross.dds"
-					frame = "[LawGroupItem.GetClansFrame]"
-					size = { 30 30 }
-					framesize = { 25 25 }
-				}
-			}
-		}
-		flowcontainer = {
-			margin_top = 5
-			dynamicgridbox = {
-				datamodel = "[LawGroupItem.GetLaws]"
-				item = {
-					flowcontainer = {
-						margin = { 4 4 }
-						spacing = 5
-						alpha = "[TransparentIfFalse(LawItem.IsAllowed)]"
-
-						button_radial = {
-							enabled = "[And( LawItem.CanEnact, LawItem.IsAllowed )]"
-							
-							blockoverride "On_click" 
-							{
-								onclick = "[LawItem.Enact]"
-								inherit_visual_state = no
-								enabled = yes
-							}
-							blockoverride "ShowDot"
-							{
-								trigger_when = "[LawItem.HasLaw]"
-							} 
-							
-							blockoverride "HideDot" 
-							{
-								trigger_when = "[Not(LawItem.HasLaw)]"
-							}
-							tooltip = "[LawItem.GetCanSetLawDescription]"
-						}
-						tooltipwidget = player_law_item_tooltip
-						widget = {
-							size = { 214 26 }
-							using = NoninteractableBG
-							blockoverride "Margins" { margin = { 4 6 } }
-							textbox = {
-								position = { 8 3 }
-								autoresize = yes
-								align = vcenter|left
-								using = BaseFontS
-								using = Black_FontColor
-								text = "[LawItem.GetName]"
-								max_width = 210
-								fontsize_min = 11
-								elide = right
-							}
-						}
-						widget = {
-							size = { 32 32 }
-							icon = {
-								texture = "[LawItem.GetLaw.GetModifier.GetIcon]"
-								size = { 32 32 }
-							}
-							#icon = {
-							#	texture = "gfx/interface/icons/laws/law_agnatic.dds"
-							#	visible = "[LawItem.GetLaw.IsSuccession('agnatic')]"
-							#	size = { 32 32 }
-							#	position = { 6 0 }
-							#}
-							#icon = {
-							#	texture = "gfx/interface/icons/laws/law_agnatic_cognatic.dds"
-							#	visible = "[LawItem.GetLaw.IsSuccession('cognatic')]"
-							#	size = { 32 32 }
-							#	position = { 6 0 }
-							#}
-							#icon = {
-							#	texture = "gfx/interface/icons/laws/law_agnatic_seniority.dds"
-							#	visible = "[LawItem.GetLaw.IsSuccession('agnatic_seniority')]"
-							#	size = { 32 32 }
-							#	position = { 6 0 }
-							#}
-							#icon = {
-							#	texture = "gfx/interface/icons/laws/law_elective.dds"
-							#	visible = "[LawItem.GetLaw.IsSuccession('elective_monarchy')]"
-							#	size = { 32 32 }
-							#	position = { 6 0 }
-							#}
-							#icon = {
-							#	texture = "gfx/interface/icons/laws/law_familial_marriage.dds"
-							#	visible = "[LawItem.GetLaw.IsSuccession('old_egyptian_succession')]"
-							#	size = { 32 32 }
-							#	position = { 7 0 }
-							#}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	type laws_item = container {
+	type laws_widget = flowcontainer {
 		datamodel = "[GovernmentView.GetCurrentLaws]"
 		ignoreinvisible = yes
 		item = {
-			laws_base_item = { block "VisibleItem" { } }
-		}
-	}
-
-	type laws_grid = flowcontainer {
-		margin_left = 5
-		margin_bottom = 5
-		spacing = 5
-		ignoreinvisible = yes
-	}
-
-	type laws_area = flowcontainer {
-		ignoreinvisible = yes
-		direction = vertical
-		spacing = 5
-		flowcontainer = {
-			ignoreinvisible = yes
-			spacing = 5
-			widget = {
-				size = { 32 32 }
-				using = color_background
-			}
-			laws_sub_header = {
-				blockoverride "On_click" { block "Onclick_1" {  } }
-				blockoverride "Down" { visible = yes }
-				blockoverride "Right" { visible = no }
-				block "Visible_1" {  }
-			}
-			laws_sub_header = {
-				blockoverride "On_click" { block "Onclick_2"  {  } }
-				blockoverride "Down" { visible = no }
-				blockoverride "Right" { visible = yes }
-				block "Visible_2"  {  }
-			}
-		}
-		flowcontainer = {
-			direction = vertical
-			block "Visible_1" { }
-			block "Content" { }
-		}
-	}
-
-
-	type test_laws_widget = margin_widget {
-		size = { 200 42 }
-		using = background_widget
-		flowcontainer = {
-			direction = vertical
-			#widget = {
-			#	size = { 302 32 }
-			#}
-			resizeparent = yes
-			flowcontainer = {
-				direction = vertical
-				#margin_bottom = 5
-				margin = { 5 5 }
-				margin_top = 32
-				datamodel = "[LawGroupItem.GetLaws]"
-				item = {
-					margin_widget = {
-						size = { 292 0 }
-						alpha = "[TransparentIfFalse(LawItem.IsAllowed)]"
-						state = {
-							name = "open_law"
-							trigger_when = "[GetVariableSystem.Exists(LawGroupItem.GetName)]"
-							delay = 0.005
-							duration = 0.001
-							size = { 292 46 }
-							alpha = 1
-						}
-						state = {
-							name = "close_law"
-							trigger_when = "[Not(GetVariableSystem.Exists(LawGroupItem.GetName))]"
-							duration = 0.01
-							size = { 292 0 }
-							alpha = 0
-						}
-						state = {
-							name = "clear_law"
-							on_start =  "[GetVariableSystem.Clear(LawGroupItem.GetName)]"
-						}
-						flowcontainer = {
-							parentanchor = vcenter
-							margin = { 5 5 }
-							spacing = 5
-							using = background_widget
-							button_radial = {
-								enabled = "[And( LawItem.CanEnact, LawItem.IsAllowed )]"
-								parentanchor = vcenter
-								blockoverride "On_click" 
-								{
-									onclick = "[LawItem.Enact]"
-									inherit_visual_state = no
-									enabled = yes
+			margin_widget = {
+				size = { 286 42 }
+				using = background_widget
+				block "visible" { }
+				flowcontainer = {
+					direction = vertical
+					#widget = {
+					#	size = { 302 32 }
+					#}
+					resizeparent = yes
+					flowcontainer = {
+						direction = vertical
+						#margin_bottom = 5
+						margin = { 5 5 }
+						margin_top = 32
+						datamodel = "[LawGroupItem.GetLaws]"
+						item = {
+							margin_widget = {
+								size = { 286 0 }
+								alpha = "[TransparentIfFalse(LawItem.IsAllowed)]"
+								state = {
+									name = "open_law"
+									trigger_when = "[GetVariableSystem.Exists(LawGroupItem.GetName)]"
+									delay = 0.005
+									duration = 0.001
+									size = { 286 46 }
+									alpha = 1
 								}
-								blockoverride "ShowDot"
-								{
-									trigger_when = "[LawItem.HasLaw]"
-								} 
-								blockoverride "HideDot" 
-								{
-									trigger_when = "[Not(LawItem.HasLaw)]"
+								state = {
+									name = "close_law"
+									trigger_when = "[Not(GetVariableSystem.Exists(LawGroupItem.GetName))]"
+									duration = 0.01
+									size = { 286 0 }
+									alpha = 0
 								}
-								tooltip = "[LawItem.GetCanSetLawDescription]"
-							}
-							tooltipwidget = player_law_item_tooltip
-							widget = {
-								size = { 214 26 }
-								parentanchor = vcenter
-								using = NoninteractableBG
-								blockoverride "Margins" { margin = { 4 6 } }
-								textbox = {
-									position = { 8 3 }
-									autoresize = yes
-									align = vcenter|left
-									using = BaseFontS
-									using = Black_FontColor
-									text = "[LawItem.GetName]"
-									max_width = 210
-									fontsize_min = 11
-									elide = right
+								state = {
+									name = "clear_law"
+									on_start =  "[GetVariableSystem.Clear(LawGroupItem.GetName)]"
 								}
-							}
-							widget = {
-								size = { 32 32 }
-								icon = {
-									texture = "[LawItem.GetLaw.GetModifier.GetIcon]"
-									size = { 32 32 }
+								flowcontainer = {
+									parentanchor = vcenter
+									margin = { 5 5 }
+									spacing = 5
+									using = background_widget
+									button_radial = {
+										enabled = "[And( LawItem.CanEnact, LawItem.IsAllowed )]"
+										parentanchor = vcenter
+										blockoverride "On_click" 
+										{
+											onclick = "[LawItem.Enact]"
+											inherit_visual_state = no
+											enabled = yes
+										}
+										blockoverride "ShowDot"
+										{
+											trigger_when = "[LawItem.HasLaw]"
+										} 
+										blockoverride "HideDot" 
+										{
+											trigger_when = "[Not(LawItem.HasLaw)]"
+										}
+										tooltip = "[LawItem.GetCanSetLawDescription]"
+									}
+									tooltipwidget = player_law_item_tooltip
+									widget = {
+										size = { 208 26 }
+										parentanchor = vcenter
+										using = NoninteractableBG
+										blockoverride "Margins" { margin = { 4 6 } }
+										textbox = {
+											position = { 8 3 }
+											autoresize = yes
+											align = vcenter|left
+											using = BaseFontS
+											using = Black_FontColor
+											text = "[LawItem.GetName]"
+											max_width = 210
+											fontsize_min = 11
+											elide = right
+										}
+									}
+									widget = {
+										size = { 32 32 }
+										icon = {
+											texture = "[LawItem.GetLaw.GetModifier.GetIcon]"
+											size = { 32 32 }
+										}
+									}
 								}
 							}
 						}
 					}
 				}
+				text_button_square = {
+					blockoverride "Center_text" { text = "[LawGroupItem.GetName]" }
+					blockoverride "On_click" { 
+						onclick = "[GetVariableSystem.Toggle(LawGroupItem.GetName)]"
+					}
+					size = { 100% 32 }
+				}
 			}
-		}
-		text_button_square = {
-			blockoverride "Center_text" { text = "[LawGroupItem.GetName]" }
-			blockoverride "On_click" { 
-				onclick = "[GetVariableSystem.Toggle(LawGroupItem.GetName)]"
-			}
-			size = { 100% 32 }
 		}
 	}
 
-
+	type laws_widget_area = flowcontainer {
+		direction = vertical
+		margin_bottom = 10
+		spacing = 5
+		sub_header = {
+			size = { 296 32 }
+		}
+		flowcontainer = {
+			direction = vertical
+			block "laws" { }
+		}
+	}
 
 	@topbar_left_button_height = 56
 	type topbar_left_button = widget {

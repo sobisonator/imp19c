@@ -604,7 +604,8 @@ PixelShader =
 				#endif
 
 				#ifdef MAPCOLOR_S
-					Color /= float3( 0.7, 0.7, 0.7 );
+					// Color /= float3( 0.7, 0.7, 0.7 );
+					Color *= float3( 1.258, 1.394, 1.69 );
 				#endif
 
 				DebugReturn( Color, MaterialProps, LightingProps, EnvironmentMap );

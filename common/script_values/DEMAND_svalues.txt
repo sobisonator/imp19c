@@ -126,42 +126,6 @@ DEMAND_grain_weighted = { # This is how we weight the demand for purchase orders
 	add = 10
 }
 
-#******************************************************
-#*                 Mediterranean Fruit                *
-#******************************************************
-
-
-DEMAND_mediterranean_fruit_from_pops = {
-	value = governorship_population
-	multiply = DEMAND_tiny
-}
-
-#----------------------------------
-#-     Med Fruit from Alcohol     -
-#----------------------------------
-
-DEMAND_mediterranean_fruit_from_industry_alcohol = {
-	value = var:INDUSTRY_factories_assigned_alcohol
-	multiply = DEMAND_huge
-}
-
-DEMAND_mediterranean_fruit_industry_alcohol_malus = {
-	value = DEMAND_mediterranean_fruit_from_industry_alcohol
-	if = {
-		limit = {
-			var:mediterranean_fruit_stockpile > 0
-		}
-		divide = var:mediterranean_fruit_stockpile
-	}
-	else_if = {
-		limit = {
-			var:mediterranean_fruit_stockpile = 0
-		}
-		value = deficit_malus_large
-	}
-	min = deficit_malus_large
-}
-
 #DEMAND_mediterranean_fruit = { # Total
 #	value = DEMAND_mediterranean_fruit_from_pops
 #	add = DEMAND_mediterranean_fruit_from_industry_alcohol
@@ -822,7 +786,10 @@ DEMAND_gold_base_minus_gold_reserve_demand = {
 }
 DEMAND_gold_for_reserve_divided_by_base_demand = {
 	value = DEMAND_gold_reserve_accumulation_rate
-	divide = DEMAND_gold_base_minus_gold_reserve_demand
+	divide = {
+		value = DEMAND_gold_base_minus_gold_reserve_demand
+		min = 1
+	}
 }
 
 
@@ -920,7 +887,10 @@ DEMAND_silver_base_minus_silver_reserve_demand = {
 }
 DEMAND_silver_for_reserve_divided_by_base_demand = {
 	value = DEMAND_silver_reserve_accumulation_rate
-	divide = DEMAND_silver_base_minus_silver_reserve_demand
+	divide = {
+		value = DEMAND_silver_base_minus_silver_reserve_demand
+		min = 1
+	}
 }
 
 
@@ -1311,6 +1281,7 @@ DEMAND_early_munitions_base = {
 		}
 		add = {
 			value = JOBS_military_governorship
+			min = 1
 			divide = 6
 		}
 		multiply = DEMAND_army_ratio_early_munitions
@@ -1335,6 +1306,7 @@ DEMAND_late_munitions_base = {
 	}
 	add = {
 		value = JOBS_military_governorship
+		min = 1
 		divide = 6
 	}
 	multiply = DEMAND_army_ratio_late_munitions
@@ -1363,6 +1335,7 @@ DEMAND_early_artillery_base = {
 
 		add = {
 			value = JOBS_military_governorship
+			min = 1
 			divide = 60
 		}
 		multiply = 2

@@ -1424,6 +1424,7 @@ AI_interest_value_province = {
 				add = {
 					value = scope:AI_root.SPIRIT_piety
 					multiply = 2
+					min = 0
 				}
 			}
 			# Same culture
@@ -1433,6 +1434,7 @@ AI_interest_value_province = {
 				}
 				add = scope:AI_root.SPIRIT_nationalism
 				multiply = 20 # Increased from the state value
+				min = 0
 			}
 			# Similar culture
 			else_if = {
@@ -1442,6 +1444,7 @@ AI_interest_value_province = {
 				add = {
 					value = scope:AI_root.SPIRIT_nationalism
 					multiply = 10 # Increased from the state value
+					min = 0
 				}
 			}
 		}
@@ -1459,6 +1462,7 @@ AI_interest_value_province = {
 				owner = { is_subject = no }
 			}
 			subtract = scope:AI_root.SPIRIT_piety
+			min = 0
 		}
 		if = {
 			limit = {
@@ -1466,6 +1470,7 @@ AI_interest_value_province = {
 				owner = { is_subject = no }
 			}
 			subtract = scope:AI_root.SPIRIT_nationalism
+			min = 0
 		}
 		else_if = {
 			limit = {
@@ -1476,6 +1481,7 @@ AI_interest_value_province = {
 				value = scope:AI_root.SPIRIT_nationalism
 				min = 0.01
 				divide = 2
+				min = 0
 			}
 		}
 	}
@@ -1585,11 +1591,17 @@ AI_diplomatic_play_assess_side = {
 	# Negative = play target
 	# Requires scope:diplomatic_play to be set
 
-	value = 0
+	# Divide with factors making the assessor less likely to pick a side, and more likely to remain neutral
+	# Multiply with factors making the assessor more likely to intervene
+
+	value = 1
 
 	add = {
 		# Instigator
-		value = scope:diplomatic_play.var:play_instigator.DIPLOMACY_power
+		add = {
+			value = scope:diplomatic_play.var:play_target_country.DIPLOMACY_power
+			multiply = 0.01
+		}
 		if = {
 			limit = {
 				opinion = { target = scope:diplomatic_play.var:play_instigator value > 30 }
@@ -1630,7 +1642,7 @@ AI_diplomatic_play_assess_side = {
 			every_allied_country = {
 				add = {
 					value = DIPLOMACY_power
-					multiply = 0.1
+					multiply = 0.01
 				}
 			}
 		}
@@ -1659,11 +1671,10 @@ AI_diplomatic_play_assess_side = {
 			multiply = 0.3
 		}
 		
-		if = {
-			limit = {
-				scope:diplomatic_play.var:play_instigator.DIPLOMACY_global_power_score > 0
-			}
-			divide = scope:diplomatic_play.var:play_instigator.DIPLOMACY_global_power_score
+		divide = {
+			value = scope:diplomatic_play.var:play_instigator.DIPLOMACY_global_power_score
+			multiply = 0.5
+			min = 1
 		}
 
 		if = {
@@ -1672,7 +1683,7 @@ AI_diplomatic_play_assess_side = {
 					THIS = scope:diplomatic_play.var:play_instigator
 				}
 			}
-			multiply = 3
+			multiply = 80
 			max = 100000
 		}
 		else_if = {
@@ -1683,7 +1694,7 @@ AI_diplomatic_play_assess_side = {
 					}
 				}
 			}
-			multiply = 3
+			multiply = 80
 			max = 100000
 		}
 
@@ -1691,7 +1702,11 @@ AI_diplomatic_play_assess_side = {
 
 	subtract = {
 		# Target
-		value = scope:diplomatic_play.var:play_target_country.DIPLOMACY_power
+		add = {
+			value = scope:diplomatic_play.var:play_instigator.DIPLOMACY_power
+			multiply = 0.01
+		}
+		min = 1
 		if = {
 			limit = {
 				opinion = { target = scope:diplomatic_play.var:play_instigator value > 30 }
@@ -1711,7 +1726,11 @@ AI_diplomatic_play_assess_side = {
 			divide = 60
 		}
 
-		divide = scope:diplomatic_play.var:play_target_country.DIPLOMACY_global_power_score
+		divide = {
+			value = scope:diplomatic_play.var:play_target_country.DIPLOMACY_global_power_score
+			multiply = 0.5
+			min = 1
+		}
 
 		
 
@@ -1719,7 +1738,7 @@ AI_diplomatic_play_assess_side = {
 			every_allied_country = {
 				add = {
 					value = DIPLOMACY_power
-					multiply = 0.1
+					multiply = 0.01
 				}
 			}
 		}
@@ -1743,13 +1762,6 @@ AI_diplomatic_play_assess_side = {
 				}
 				multiply = 2
 			}
-		}
-
-		if = {
-			limit = {
-				scope:diplomatic_play.var:play_target_country.DIPLOMACY_global_power_score > 0
-			}
-			divide = scope:diplomatic_play.var:play_target_country.DIPLOMACY_global_power_score
 		}
 
 		if = {
@@ -1787,16 +1799,75 @@ AI_diplomatic_play_assess_side = {
 					}	
 				}
 			}
-			multiply = 1000
+			multiply = 10
 			max = 100000
 		}
 
 	}
 
-	# Divide with factors making the assessor less likely to pick a side, and more likely to remain neutral
-	# Multiply with factors making the assessor more likely to intervene
+	# If the area is an interest already, add reluctance
+	if = {
+		limit = {
+			is_target_in_variable_list = {
+				name = AI_interests_list
+				target = scope:diplomatic_play.var:play_target_area
+			}
+		}
+		subtract = 1000
+	}
 
-	# Support the side opposite the side with the most diplo power - competition
+	# Ideological differences
+	# A bigger difference to target encourages support of instigator
+	add = {
+		value = scope:assessor_country.SPIRIT_traditionalism
+		subtract = scope:diplomatic_play.var:play_target_country.SPIRIT_traditionalism
+		multiply = 20
+	}
 
-	# + Support for allies
+	# A bigger difference to instigator encourages support of target
+	subtract = {
+		value = scope:assessor_country.SPIRIT_traditionalism
+		subtract = scope:diplomatic_play.var:play_instigator.SPIRIT_traditionalism
+		multiply = 20
+	}
+
+	# Religious differences
+	if = {
+		limit = {
+			scope:diplomatic_play.var:play_target_country.religion = scope:assessor_country.religion
+		}
+		subtract = {
+			value = scope:assessor_country.SPIRIT_piety
+			multiply = 20
+		}
+	}
+
+	# Less likely for a highly industrialised nation to care about a play with a low industrialisation target
+	scope:diplomatic_play.var:play_target_country.capital_scope = {
+		divide = {
+			value = {
+				scope:assessor_country.capital_scope = {
+					value = civilization_value
+				}
+			}
+			subtract = civilization_value
+			multiply = 0.5
+			min = 1
+		}
+	}
+
+	# Political situation
+	divide = {
+		value = war_exhaustion
+		multiply = war_exhaustion
+		min = 1
+	}
+
+	multiply = {
+		value = stability
+		multiply = 0.015
+		max = 1
+	}
+
+
 }

@@ -566,8 +566,20 @@ PixelShader =
 					Diffuse.rgb *= Unique.bbb;
 				#endif
 
+				#ifdef TABLE_S
+					float4 Unique = PdxTex2D( UniqueMap, UNIQUE_UV_SET );
+					float3 UniqueNormalSample = UnpackRRxGNormal( Unique );
+					Diffuse.rgb *= Unique.bbb;
+				#endif
+
 				SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse.rgb, Normal, Properties.a, Properties.g, Properties.b );
 				SLightingProperties LightingProps = GetSunLightingProperties( Input.WorldSpacePos, ShadowTexture );
+
+				#ifdef TABLE_S
+					LightingProps._ToLightDir = float3( 0.5, 0.7, -0.8);
+					LightingProps._LightIntensity = SunDiffuse * 30;
+					LightingProps._CubemapIntensity = 8.0;
+				#endif
 
 				float3 Color = CalculateSunLighting( MaterialProps, LightingProps, EnvironmentMap );
 
@@ -577,12 +589,23 @@ PixelShader =
 					Color *= float3( 0.5, 0.5, 0.5 );
 				#endif
 
+				#ifdef TABLE_S
+					// Color *= float3( 1.0, 0.8, 0.8 );
+					Color *= float3( 0.5, 0.5, 0.5 );
+				#endif
+
 				#ifdef NEWSPAPER
 					Color *= float3( 0.7, 0.7, 0.7 );
 				#endif
 
 				#ifdef MAPCOLOR
 					Color = PdxTex2D( DiffuseMap, DIFFUSE_UV_SET );
+					// Color /= float3( 0.7, 0.7, 0.7 );
+				#endif
+
+				#ifdef MAPCOLOR_S
+					// Color /= float3( 0.7, 0.7, 0.7 );
+					Color *= float3( 1.258, 1.394, 1.69 );
 				#endif
 
 				DebugReturn( Color, MaterialProps, LightingProps, EnvironmentMap );
@@ -902,6 +925,38 @@ Effect table_mapobject
 	PixelShader = "PS_map"
 
 	Defines = { "TABLE" }
+}
+
+Effect mapcolor_s
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_map"
+
+	Defines = { "MAPCOLOR" "MAPCOLOR_S" }
+}
+
+Effect mapcolor_s_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_map"
+
+	Defines = { "MAPCOLOR" "MAPCOLOR_S" }
+}
+
+Effect table_s
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_map"
+
+	Defines = { "TABLE_S" }
+}
+
+Effect table_s_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_map"
+
+	Defines = { "TABLE_S" }
 }
 
 Effect newspaper

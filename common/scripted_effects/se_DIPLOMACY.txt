@@ -214,7 +214,7 @@ DIPLOMACY_play_update_spend = {
 DIPLOMACY_test_event = {
 	# Scope: Country
 	# Function: Test a diplomatic play event in a random play in which the country is an instigator
-	save_scope_as = instigator
+	save_scope_as = test_instigator
 	random_province = {
 		limit = {
 			has_variable = play_instigator
@@ -222,50 +222,62 @@ DIPLOMACY_test_event = {
 				limit = {
 					has_variable = play_instigator
 				}
-				var:play_instigator = scope:instigator
+				var:play_instigator = scope:test_instigator
 			}
 		}
-		save_scope_as = diplomatic_play
-		# Get the foreign minister, or ruler as fallback
-		var:play_instigator = {
-			if = {
-				limit = {
-					any_character = {
-						OR = {
-							has_office = secretary_r_foreign_affairs
-							has_office = office_foreign_minister
-							has_office = office_arbitrator
-						}
-					}
-				}
-				random_character = {
-					limit = {
-						OR = {
-							has_office = secretary_r_foreign_affairs
-							has_office = office_foreign_minister
-							has_office = office_arbitrator
-						}
-					}
-					save_scope_as = foreign_minister
-				}
-			}
-			else = {
-				ruler = {
-					save_scope_as = foreign_minister
-				}
-			}
-
+		DIPLOMACY_trigger_play_event = {
+			pov = play_instigator
+			id = diplomatic_play.1
 		}
-	}
-	# TODO: Make a copy of this with the random selector for diplomatic plays
-	trigger_event = {
-		id = diplomatic_play.1
 	}
 }
 
 DIPLOMACY_trigger_play_event = {
 	# Scope: Province
-	# Function Triggers the given $event$ with all the necessary scopes for a diplomatic play event
+	# Function Triggers the given $id$ event with all the necessary scopes for a diplomatic play event
+	
+	# TODO: Extend this to select an event random-weighted based on the conditions in the play, attitude of the foreign minister or ruler, and any other factors.
+
+	save_scope_as = diplomatic_play
+	var:play_target_country = {
+		save_scope_as = play_target_country
+	}
+	var:play_instigator = {
+		save_scope_as = play_instigator
+		if = {
+			limit = {
+				any_character = {
+					OR = {
+						has_office = secretary_r_foreign_affairs
+						has_office = office_foreign_minister
+						has_office = office_arbitrator
+					}
+				}
+			}
+			random_character = {
+				limit = {
+					OR = {
+						has_office = secretary_r_foreign_affairs
+						has_office = office_foreign_minister
+						has_office = office_arbitrator
+					}
+				}
+				save_scope_as = foreign_minister
+			}
+		}
+		else = {
+			ruler = {
+				save_scope_as = foreign_minister
+			}
+		}
+	}
+
+	var:$pov$ = {
+		trigger_event = {
+			id = $id$
+		}
+	}
+	
 }
 
 DIPLOMACY_notify_player = {

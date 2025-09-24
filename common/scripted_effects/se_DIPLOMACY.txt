@@ -226,9 +226,54 @@ DIPLOMACY_test_event = {
 			}
 		}
 		save_scope_as = diplomatic_play
+		# Get the foreign minister, or ruler as fallback
+		var:play_instigator = {
+			if = {
+				limit = {
+					any_character = {
+						OR = {
+							has_office = secretary_r_foreign_affairs
+							has_office = office_foreign_minister
+							has_office = office_arbitrator
+						}
+					}
+				}
+				random_character = {
+					limit = {
+						OR = {
+							has_office = secretary_r_foreign_affairs
+							has_office = office_foreign_minister
+							has_office = office_arbitrator
+						}
+					}
+					save_scope_as = foreign_minister
+				}
+			}
+			else = {
+				ruler = {
+					save_scope_as = foreign_minister
+				}
+			}
+
+		}
 	}
 	# TODO: Make a copy of this with the random selector for diplomatic plays
 	trigger_event = {
 		id = diplomatic_play.1
+	}
+}
+
+DIPLOMACY_notify_player = {
+	# Scope: Any
+	# Function: Notify the player(s) of the event which has just occurred
+	every_country = {
+		limit = {
+			# TODO: Add to this limit so that the player is not notified of their own events
+			# This is left in for testing purposes
+			is_ai = no
+		}
+		trigger_event = {
+			id = $event$
+		}
 	}
 }

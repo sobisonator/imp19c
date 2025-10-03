@@ -1,37 +1,236 @@
 country_decisions = {
-	test1_1 = {
+	unite_federation = {
 		potential = {
-			tag = GBR
+			has_variable = member_of_federation
 		}
 		allow = {
-			treasury > 100
+			always = yes
+			# TODO: Has completed unite federation mission
 		}
 		effect = {
-			add_treasury = -100
+			hidden_effect = {
+				# TODO: Custom tooltip
+				# TODO: Trigger an event which contains the below script, as it is too laggy to calculate every frame when viewing decisions otherwise
+				save_scope_as = unifier
+
+				set_local_variable = {
+					name = combined_treasury
+					value = 0
+				}
+
+				var:member_of_federation = {
+					every_in_list = {
+						variable = list_of_members
+						limit = {
+							DIPLOMACY_power < scope:unifier.DIPLOMACY_power
+							NOT = {
+								AND = {
+									is_subject = yes
+									NOT = { overlord = scope:unifier }
+								}
+							}
+						}
+
+						every_owned_province = {
+							add_to_list = federation_unification_provinces
+						}
+						change_local_variable = {
+							name = combined_treasury
+							add = treasury
+						}
+					}
+				}
+
+				add_treasury = {
+					value = 0
+					var:member_of_federation = {
+						every_in_list = {
+							variable = list_of_members
+							limit = {
+								DIPLOMACY_power < scope:unifier.DIPLOMACY_power
+								NOT = {
+									AND = {
+										is_subject = yes
+										NOT = { overlord = scope:unifier }
+									}
+								}
+							}
+							add = treasury
+						}
+					}
+				}
+
+				# TODO: Create an annex script, which should remove trade deals, etc.
+				LAND_transfer_provinces = {
+					target_provinces = federation_unification_provinces
+					grantee = scope:unifier
+				}
+
+				if = {
+					limit = {
+						var:member_of_federation.var:federation_name = flag:GERMAN_CONFEDERATION
+					}
+					change_country_flag = GCF
+					change_country_color = epirus_yellow
+				}
+
+				if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_0 }
+					}
+					set_global_variable = {
+						name = united_federation_0
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_0
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_1 }
+					}
+					set_global_variable = {
+						name = united_federation_1
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_1
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_2 }
+					}
+					set_global_variable = {
+						name = united_federation_2
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_2
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_3 }
+					}
+					set_global_variable = {
+						name = united_federation_3
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_3
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_4 }
+					}
+					set_global_variable = {
+						name = united_federation_4
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_4
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_5 }
+					}
+					set_global_variable = {
+						name = united_federation_5
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_5
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_6 }
+					}
+					set_global_variable = {
+						name = united_federation_6
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_6
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_7 }
+					}
+					set_global_variable = {
+						name = united_federation_7
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_7
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_8 }
+					}
+					set_global_variable = {
+						name = united_federation_8
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_8
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_9 }
+					}
+					set_global_variable = {
+						name = united_federation_9
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_9
+				}
+
+				# TODO: Create a destroy federation effect
+				
+			}
+
 		}
 	}
-	test1_2 = {
+
+	form_germany = {
 		potential = {
-			tag = GBR
+			OR = {
+				primary_culture = north_german
+				primary_culture = south_german
+				primary_culture = baltic_german
+				primary_culture = austrian
+				primary_culture = swiss_german
+				primary_culture = luxembourgish
+				primary_culture = limburgish
+				primary_culture = eastern_german
+			}
 		}
+
 		allow = {
-			treasury > 150
+			any_ownable_province = {
+	            percent >= 0.70
+	            filter = {
+	                OR = {
+	                    dominant_province_culture = north_german
+	                    dominant_province_culture = south_german
+	                    dominant_province_culture = baltic_german
+	                    dominant_province_culture = austrian
+	                    dominant_province_culture = swiss_german
+	                    dominant_province_culture = luxembourgish
+	                    dominant_province_culture = limburgish
+	                    dominant_province_culture = eastern_german
+	                }
+	            }
+	            exists = owner
+	            owned_or_subject_owned  = ROOT
+	        }
 		}
+
 		effect = {
-			add_treasury = -150
+			change_country_color = CMB_dark
+			change_country_name = GER
+			if = {
+				limit = {
+					is_monarchy = yes
+				}
+				change_country_flag = GER
+			}
+			else = {
+				change_country_flag = GCF
+			}
 		}
 	}
-	test1_3 = {
-		potential = {
-			tag = GBR
-		}
-		allow = {
-			treasury > 200
-		}
-		effect = {
-			add_treasury = -200
-		}
-	}
+
 	wonder_sev_fort_build = {
 		potential = {
 			tag = RUS

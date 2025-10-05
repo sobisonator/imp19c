@@ -206,10 +206,28 @@ types Imp19c_GUI_Types
 	#IMP19C TYPES 
 	##WAR SCORE BAR
 	type fixed_size_progressbar_war_score = widget {
-		size = { 480 90 }
+		size = { 660 135 }
+		textbox = {
+			size = { 350 20 }
+			using = BaseFontM
+			using = Black_FontColor
+			datacontext = "[WarOverview]"
+			text = "WAR_WARGOAL_DETAILS"
+			tooltip = "WAR_OVERVIEW_WAR_GOAL_TOOLTIP"
+		}
+		textbox = {
+			size = { 350 20 }
+			parentanchor = right
+			align = right
+			using = BaseFontM
+			using = Black_FontColor
+			datacontext = "[WarOverview]"
+			text = "WARSCORE_DETAILS"
+			tooltip = "[WarOverview.GetTickingWarScoreTooltip]"
+		}
 		widget = {
 			size = { 100% 20 }
-			parentanchor = bottom
+			position = { 0 30 }
 			icon = {
 				using = flat_background
 				size = { 4 20 }
@@ -273,83 +291,93 @@ types Imp19c_GUI_Types
 				parentanchor = right
 				size = { 4 20 }
 			}
+			textbox = {
+				size = { 100 20 }
+				using = BaseFontL
+				using = Black_FontColor
+				parentanchor = center
+				align = hcenter
+				elide = right
+				text = "[WarOverview.GetWarScore]"
+				visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
+				tooltip = "[WarOverview.GetWarScoreTooltip]"
+			}
 		}
 		flowcontainer = {
-			direction = vertical
-			#textbox = {
-			#	size = { 220 80 }
-			#	using = BaseFontM
-			#	using = Black_FontColor
-			#	datacontext = "[WarOverview]"
-			#	text = "WAR_DATE_DETAILS"
-			#	multiline = yes
-			#}
+			margin = { 5 5 }
+			position = { 10 60 }
+			using = NoninteractableBG
 			textbox = {
-				size = { 220 60 }
-				align = bottom
-				multiline = yes
+				size = { 500 60 }
+				align = top
 				using = BaseFontM
 				using = Black_FontColor
 				datacontext = "[WarOverview]"
-				text = "WAR_WARGOAL_DETAILS"
-				tooltip = "WAR_OVERVIEW_WAR_GOAL_TOOLTIP"
+				text = "WAR_DATE_DETAILS"
+				multiline = yes
 			}
 		}
 		flowcontainer = {
 			visible = "[WarOverview.GetWar.HasTickingWarScore]"
 			parentanchor = right
-			position = { 0 10 }
-			direction = vertical
+			position = { 0 50 }
 			textbox = {
-				size = { 200 26 }
-				align = right
+				name = "Text"
+				size = { 160 36 }
+				fontsize = 24
+				align = vcenter|right
+				elide = right
 				using = BaseFontM
 				using = Black_FontColor
-				datacontext = "[WarOverview]"
-				text = "WARSCORE_DETAILS"
-				tooltip = "[WarOverview.GetTickingWarScoreTooltip]"
+				block "Text" { text = "888.88%" }
+				visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
+				tooltip = "[WarOverview.GetWarScoreTooltip]"
 			}
-			flowcontainer = {
-				textbox = {
-					name = "Text"
-					size = { 160 36 }
-					fontsize = 24
-					align = vcenter|right
-					elide = right
-					using = BaseFontM
-					using = Black_FontColor
-					block "Text" { text = "888.88%" }
-					visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
-					tooltip = "[WarOverview.GetWarScoreTooltip]"
-				}
-				icon = {
-					texture = "gfx/interface/arrows_strip.dds"
-					position = { 8 18 }
-					framesize = { 50 50 }
-					size = { 40 40 }
-					frame = "[WarOverview.GetTickingWarScoreChangeFrame]"
-					tooltip = "[WarOverview.GetTickingWarScoreChangeTooltip]"
-					visible = "[WarOverview.HasTickingWarScore]"
-				}
+			icon = {
+				texture = "gfx/interface/arrows_strip.dds"
+				position = { 8 18 }
+				framesize = { 50 50 }
+				size = { 40 40 }
+				frame = "[WarOverview.GetTickingWarScoreChangeFrame]"
+				tooltip = "[WarOverview.GetTickingWarScoreChangeTooltip]"
+				visible = "[WarOverview.HasTickingWarScore]"
 			}
 		}
-		icon = {
-			parentanchor = hcenter
-			framesize = { 50 50 }
-			size = { 60 60 }
+		flowcontainer = {
+			parentanchor = right|bottom
+			ignoreinvisible = yes
+			spacing = 4
+			icon_card = {
+				size = { 45 45 }
+				blockoverride "Icon" { texture = "gfx/interface/icons/diplomatic_status/enforce_peace.dds" }
+				visible = "[WarOverview.GetWar.IsConquestWar]"
+				enabled = "[WarOverview.GetWar.IsTickingForAutoConquest]"
+			}
+			icon_card = {
+				size = { 45 45 }
+				blockoverride "Icon" { texture = "gfx/interface/icons/diplomatic_status/truce.dds" }
+				visible = "[WarOverview.GetWar.IsConquestWar]"
+				enabled = "[WarOverview.GetWar.IsTickingForAutoWhitePeace]"
+				tooltip = "[WarOverview.GetWar.GetWhitePeaceInfo]"
+			}
+		}
+		#icon = {
+		#	parentanchor = hcenter
+		#	framesize = { 50 50 }
+		#	size = { 60 60 }
 			
-			block "Icon" { texture = "gfx/interface/icons/shared_icons/leader.dds" }
-			icon = {
-				texture = "gfx/interface/icons/shared_icons/plus.dds"
-				block "UpIndicator" { visible = no }
-				position = { -2 12 }
-			}
-			icon = {
-				texture = "gfx/interface/icons/shared_icons/minus.dds"
-				block "DownIndicator" { visible = no }
-				position = { -2 12 }
-			}
-		}
+		#	block "Icon" { texture = "gfx/interface/icons/shared_icons/leader.dds" }
+		#	icon = {
+		#		texture = "gfx/interface/icons/shared_icons/plus.dds"
+		#		block "UpIndicator" { visible = no }
+		#		position = { -2 12 }
+		#	}
+		#	icon = {
+		#		texture = "gfx/interface/icons/shared_icons/minus.dds"
+		#		block "DownIndicator" { visible = no }
+		#		position = { -2 12 }
+		#	}
+		#}
 	}
 	#Bigger size plus button
 	type button_plus_war = widget {

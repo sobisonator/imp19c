@@ -22,19 +22,265 @@ diplomatic_play.1 = {
 
     goto_location = scope:diplomatic_play.var:play_target_area
 
+    option = { # Support
+        name = diplomatic_play.1.a
+        custom_tooltip = diplomatic_play.1.a.tt
+        ai_chance = {
+            modifier = {
+                factor = 10
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value < 0
+                }
+            }
+            modifier = {
+                factor = 20
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value < -99
+                }
+            }
+            modifier = {
+                factor = 10
+                scope:foreign_minister = {
+                    martial > charisma
+                }
+            }
+            modifier = {
+                factor = 10
+                ruler = {
+                    martial > charisma
+                }
+            }
+        }
+        hidden_effect = {
+            every_character = {
+                limit = {
+                    charisma > martial
+                }
+                add_loyalty = scheme_dismissed_l
+            }           
+        }
+        add_treasury = {
+            value = var:country_unit_price_early_munitions # TODO: Factor in balance of early/late munitions
+            add = var:country_unit_price_construction_materials
+            multiply = -10
+        }
+
+    }
+
+    option = { # Super support
+        name = diplomatic_play.1.b 
+        custom_tooltip = diplomatic_play.1.b.tt
+        highlight = yes
+        ai_chance = {
+            modifier = {
+                factor = 5
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value > 0
+                }
+            }
+            modifier = {
+                factor = 10
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value > 99
+                }
+            }
+            modifier = {
+                factor = 5
+                scope:foreign_minister = {
+                    martial > charisma
+                }
+            }
+            modifier = {
+                factor = 5
+                ruler = {
+                    martial > charisma
+                }
+            }
+        }
+        
+        trigger = {
+            var:MILITARY_supplies_country > 0
+        }
+        change_variable = {
+            name = MILITARY_supplies_country
+            subtract = 10
+        }
+        add_treasury = {
+            value = var:country_unit_price_early_munitions # TODO: Factor in balance of early/late munitions
+            add = var:country_unit_price_construction_materials
+            multiply = -20
+        }
+        hidden_effect = {
+            every_character = {
+                limit = {
+                    charisma > martial
+                }
+                add_loyalty = inspired_disloyalty_other_l
+            }           
+        }
+        hidden_effect = {
+            every_character = {
+                limit = {
+                    charisma > martial
+                }
+                add_loyalty = roman_mission_eastern_campaign_triumph_modifier
+            }           
+        }
+        add_political_influence = -5
+        add_aggressive_expansion = 5
+
+        scope:diplomatic_play = {
+            # TODO: Add delay (no delay for testing purposes)
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:play_target_country
+                id = diplomatic_play.2 # Giant expedition arrives
+            }
+
+        }
+        
+    }
+
+    option = { # Deny
+        name = diplomatic_play.1.c 
+        custom_tooltip = diplomatic_play.1.c.tt
+        ai_chance = {
+            modifier = {
+                factor = 10
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value > 0
+                }
+            }
+            modifier = {
+                factor = 20
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value > 99
+                }
+            }
+            modifier = {
+                factor = 10
+                scope:foreign_minister = {
+                    charisma > martial
+                }
+            }
+            modifier = {
+                factor = 10
+                ruler = {
+                    charisma > martial
+                }
+            }
+        }
+        add_political_influence = -5
+        hidden_effect = {
+            every_character = {
+                limit = {
+                    martial > charisma
+                }
+                add_loyalty = scheme_dismissed_l
+            }            
+        }
+
+    }
+}
+
+diplomatic_play.2 = {
+    # Scope: Country, target of the play
+
+    # Major expedition arrives
+    # Follow-up from diplomatic_play.1
+
+    type = country_event
+    title = diplomatic_play.2.t
+    desc = diplomatic_play.2.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
     immediate = {
         DIPLOMACY_notify_player = {
             event = AI_notification_event.1
         }
+        ordered_owned_province = {
+            limit = {
+                area = scope:diplomatic_play.var:play_target_area.area
+                any_neighbor_province = {
+                    OR = {
+                        owner = scope:play_instigator
+                        owner.overlord = {
+                            exists = yes
+                            THIS = scope:play_instigator
+                        }
+                        is_sea = yes
+                    }
+                }
+            }
+            order_by = {
+                value = total_population
+                multiply = -1
+            }
+            save_scope_as = captured_province
+        }
+
     }
 
-    option = {
-        name = diplomatic_play.1.a # Support
+    option = { # Nothing we can do
+        name = diplomatic_play.2.a
+        custom_tooltip = diplomatic_play.2.a.tt
+        ai_chance = {
+            modifier = {
+                factor = 10
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 10
+            }
+        }
+
+        add_stability = -10
+        add_war_exhaustion = 1
+        scope:captured_province = {
+            LAND_transfer_province = {
+                grantee = scope:play_instigator
+            }
+        }
     }
-    option = {
-        name = diplomatic_play.1.b # Super support
+
+    option = { # Dispatch troops to stop them
+        name = diplomatic_play.2.b
+        custom_tooltip = diplomatic_play.2.b.tt
+        ai_chance = {
+            factor = 20
+        }
+
+        add_war_exhaustion = 1
+        add_manpower = -2
     }
-    option = {
-        name = diplomatic_play.1.c # Deny
+
+    option = { # Prepare an immediate attack
+        name = diplomatic_play.2.c
+        custom_tooltip = diplomatic_play.2.c.tt
+        ai_chance = {
+            modifier = {
+                factor = 5
+            }
+            modifier = {
+                factor = -5
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 10
+            }
+            modifier = {
+                factor = -5
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 1
+            }
+        }
+
+        add_aggressive_expansion = 1
+        add_war_exhaustion = 1
+        add_manpower = -4
     }
+
 }

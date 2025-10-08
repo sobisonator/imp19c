@@ -55,13 +55,14 @@ PixelShader =
 				UV.x *= 0.5;
 				UV.x += 1.5 - SpriteFramesTypeBlendMode[4].x;
 
-				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV, 1);
+				float2 UV2 = Input.UV0;
+				UV2.x *= 0.5;
+				UV2.x += 1.5 - SpriteFramesTypeBlendMode[4].x;
+
+				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV2, 1);
 				OutColor = float4(OutColor.rgb, AlphaColor.a);
 
-				float4 ShadowColor = SampleSpriteTexture( ModifyTexture1, UV, 1 );
-				OutColor = lerp(ShadowColor, OutColor, lerp(ShadowColor.a, OutColor.a, 1.0));
-
-				float4 StyleColor = SampleSpriteTexture( ModifyTexture2, UV, 1 );
+				float4 StyleColor = SampleSpriteTexture( ModifyTexture2, UV2, 1 );
 				OutColor = CreateStyleToFlag( OutColor, AlphaColor.a, StyleColor, Input.UV0, Input.Position, GlobalTime);
 				OutColor = float4(OutColor.rgb, AlphaColor.a);
 				
@@ -72,7 +73,7 @@ PixelShader =
 				#ifdef DISABLED
 					OutColor.rgb = DisableColor( OutColor.rgb );
 				#endif
-			    return OutColor;
+				return OutColor;
 			}
 		]]
 	}

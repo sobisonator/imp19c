@@ -42,7 +42,7 @@ PixelShader =
 
 			OutColor = Blend( OutColor, StyleColor, 0.6, AlphaColor, 2);
 			OutColor = Blend( OutColor, StyleColor, 0.4, AlphaColor, 1);
-			OutColor = Blend( OutColor, StyleColor, 0.05, AlphaColor, 4);
+			OutColor = Blend( OutColor, StyleColor, 0.5, AlphaColor, 5);
 			return OutColor;
 		}
 	]]

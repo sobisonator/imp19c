@@ -52,17 +52,15 @@ PixelShader =
 				float2 UV = Input.UV0;
 				UV *= 2.0;
 				float4 OutColor = SampleImageSprite( Texture, UV );
-				UV.x *= 0.5;
-				UV.x += 1.5 - SpriteFramesTypeBlendMode[4].x;
 
 				float2 UV2 = Input.UV0;
 				UV2.x *= 0.5;
-				UV2.x += 1.5 - SpriteFramesTypeBlendMode[4].x;
+				UV2.x += 1.5 - SpriteFramesTypeBlendMode[3].x;
 
 				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV2, 1);
 				OutColor = float4(OutColor.rgb, AlphaColor.a);
 
-				float4 StyleColor = SampleSpriteTexture( ModifyTexture2, UV2, 1 );
+				float4 StyleColor = SampleSpriteTexture( ModifyTexture1, UV2, 1 );
 				OutColor = CreateStyleToFlag( OutColor, AlphaColor.a, StyleColor, Input.UV0, Input.Position, GlobalTime);
 				OutColor = float4(OutColor.rgb, AlphaColor.a);
 				

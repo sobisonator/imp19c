@@ -22,6 +22,13 @@ diplomatic_play.1 = {
 
     goto_location = scope:diplomatic_play.var:play_target_area
 
+    trigger = {
+        scope:diplomatic_play.var:play_target_country = {
+            NOT = { tag = BAR }
+            exists = yes
+        }
+    }
+
     option = { # Support
         name = diplomatic_play.1.a
         custom_tooltip = diplomatic_play.1.a.tt
@@ -135,9 +142,31 @@ diplomatic_play.1 = {
 
         scope:diplomatic_play = {
             # TODO: Add delay (no delay for testing purposes)
+            every_in_list = {
+                variable = play_observers_undecided
+                add_to_list = all_observers
+            }
+            every_in_list = {
+                variable = play_observers_support_instigator
+                add_to_list = all_observers
+            }
+            every_in_list = {
+                variable = play_observers_support_target
+                add_to_list = all_observers
+            }
+
+            random_in_list = {
+                list = all_observers
+                limit = {
+                    NOT = { THIS = scope:diplomatic_play.var:play_instigator }
+                }
+                save_scope_as = catcher
+            }
+            debug_log = catcher
             DIPLOMACY_trigger_play_event = {
-                pov = scope:play_target_country
-                id = diplomatic_play.2 # Giant expedition arrives
+                pov = scope:catcher
+                id = diplomatic_play.3 # Catcher snags the expedition en-route
+                days = 21
             }
 
         }
@@ -248,9 +277,15 @@ diplomatic_play.2 = {
                 grantee = scope:play_instigator
             }
         }
+        add_opinion = {
+            modifier = bitter_over_occupation
+            target = scope:play_instigator
+        }
+        # Notify player of the annexation
     }
 
-    option = { # Dispatch troops to stop them
+    option = { # Send a garrison, prevent them from entering any further
+        # (They will still gain a stake in the area)
         name = diplomatic_play.2.b
         custom_tooltip = diplomatic_play.2.b.tt
         ai_chance = {
@@ -259,6 +294,11 @@ diplomatic_play.2 = {
 
         add_war_exhaustion = 1
         add_manpower = -2
+        add_opinion = {
+            modifier = diplomatic_play_escalated
+            target = scope:play_instigator
+        }
+
     }
 
     option = { # Prepare an immediate attack
@@ -281,6 +321,174 @@ diplomatic_play.2 = {
         add_aggressive_expansion = 1
         add_war_exhaustion = 1
         add_manpower = -4
+        add_opinion = {
+            modifier = diplomatic_play_escalated
+            target = scope:play_instigator
+        }
+        scope:diplomatic_play = {
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:play_instigator
+                id = diplomatic_play.4 # Expedition attacked
+                days = 0
+            }
+        }
+    }
+
+}
+
+diplomatic_play.3 = {
+    # Scope: Country, random play observer
+
+    # Expedition caught on the way to target
+    # Follow-up from diplomatic_play.1
+
+    type = country_event
+    title = diplomatic_play.3.t
+    desc = diplomatic_play.3.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
+    immediate = {
+        save_scope_as = catcher
+    }
+
+    option = { # Stop the expedition
+        name = diplomatic_play.3.a
+        custom_tooltip = diplomatic_play.3.a.tt
+
+        ai_chance = {
+
+            modifier = {
+                factor = 10
+            }
+            modifier = {
+                factor = 10 # Higher chance of a vassal not defending an incursion into its overlord
+                is_subject = yes
+                overlord = scope:diplomatic_play.var:play_target_country
+            }
+            modifier = {
+                factor = 100
+                alliance_with = scope:diplomatic_play.var:play_target_country
+            }
+            modifier = {
+                factor = 10
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value > 0
+                }
+            }
+            modifier = {
+                factor = -10
+                scope:diplomatic_play = {
+                    is_target_in_variable_list = {
+                        name = play_observers_support_instigator
+                        target = scope:catcher
+                    }
+                }
+            }
+        }
+
+        DIPLOMACY_notify_player = {
+            event = AI_notification_event.2
+        }
+
+    }
+
+    option = { # Allow the expedition to continue
+        name = diplomatic_play.3.b
+        custom_tooltip = diplomatic_play.3.b.tt
+        ai_chance = {
+            modifier = {
+                factor = 1
+            }
+            modifier = {
+                factor = 10
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_instigator
+                    value > 100
+                }
+            }
+            modifier = {
+                factor = 10
+                alliance_with = scope:diplomatic_play.var:play_target_instigator
+            }
+            modifier = {
+                factor = 100
+                is_subject = yes
+                overlord = scope:diplomatic_play.var:play_instigator
+            }
+            modifier = {
+                factor = -10
+                scope:diplomatic_play = {
+                    is_target_in_variable_list = {
+                        name = play_observers_support_target
+                        target = scope:catcher
+                    }
+                }
+            }
+        }
+
+
+        add_opinion = {
+            modifier = allowed_expedition
+            target = scope:diplomatic_play.var:play_instigator
+        }
+
+        scope:diplomatic_play = {
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:catcher
+                id = diplomatic_play.2 # Expedition arrives
+                days = 7
+            }
+        }
+
+    }
+
+}
+
+diplomatic_play.4 = {
+    # Scope: Country, Play instigator
+
+    # Expedition attacked by
+
+    type = country_event
+    title = diplomatic_play.4.t
+    desc = diplomatic_play.4.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
+    immediate = {
+        save_scope_as = catcher
+    }
+
+    option = { # Back down
+        name = diplomatic_play.4.a
+        custom_tooltip = diplomatic_play.4.a.tt
+
+        ai_chance = {
+
+            modifier = {
+                factor = 10
+            }
+        }
+
+    }
+
+    option = { # Declare war
+        name = diplomatic_play.4.b
+        custom_tooltip = diplomatic_play.4.b.tt
+        modifier = {
+            factor = 1
+        }
+
     }
 
 }

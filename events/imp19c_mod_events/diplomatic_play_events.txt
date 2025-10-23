@@ -166,7 +166,7 @@ diplomatic_play.1 = {
             DIPLOMACY_trigger_play_event = {
                 pov = scope:catcher
                 id = diplomatic_play.3 # Catcher snags the expedition en-route
-                days = 21
+                days = 0 # TODO: 21
             }
 
         }
@@ -250,10 +250,12 @@ diplomatic_play.2 = {
                         is_sea = yes
                     }
                 }
+                is_capital = no
             }
             order_by = {
                 value = total_population
                 multiply = -1
+                add = SHIPPING_province_power
             }
             save_scope_as = captured_province
         }
@@ -297,6 +299,11 @@ diplomatic_play.2 = {
         add_opinion = {
             modifier = diplomatic_play_escalated
             target = scope:play_instigator
+        }
+        scope:captured_province = {
+            DIPLOMACY_add_colonial_outpost = {
+                owner = scope:play_instigator
+            }
         }
 
     }
@@ -432,7 +439,6 @@ diplomatic_play.3 = {
             }
         }
 
-
         add_opinion = {
             modifier = allowed_expedition
             target = scope:diplomatic_play.var:play_instigator
@@ -442,7 +448,7 @@ diplomatic_play.3 = {
             DIPLOMACY_trigger_play_event = {
                 pov = scope:catcher
                 id = diplomatic_play.2 # Expedition arrives
-                days = 7
+                days = 0 # TODO: 7
             }
         }
 
@@ -453,7 +459,7 @@ diplomatic_play.3 = {
 diplomatic_play.4 = {
     # Scope: Country, Play instigator
 
-    # Expedition attacked by
+    # Expedition attacked by the target
 
     type = country_event
     title = diplomatic_play.4.t
@@ -474,7 +480,6 @@ diplomatic_play.4 = {
         custom_tooltip = diplomatic_play.4.a.tt
 
         ai_chance = {
-
             modifier = {
                 factor = 10
             }
@@ -487,6 +492,39 @@ diplomatic_play.4 = {
         custom_tooltip = diplomatic_play.4.b.tt
         modifier = {
             factor = 1
+        }
+
+    }
+
+}
+
+diplomatic_play.5 = {
+    # Scope: Country, Play instigator
+
+    # Expedition limited success, establishes outpost
+
+    type = country_event
+    title = diplomatic_play.4.t
+    desc = diplomatic_play.4.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
+    immediate = {
+        save_scope_as = catcher
+    }
+
+    option = { # Yay!
+        name = diplomatic_play.4.a
+        custom_tooltip = diplomatic_play.4.a.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+            }
         }
 
     }

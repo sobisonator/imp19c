@@ -8,9 +8,7 @@ diplomatic_play.1 = {
     # Present 3 characters with high martial to lead the expedition
 
 	# Trigger weights:
-	# Target area has much lower industrialisation than instigator
-	# war_assessment: +
-	# AI_play_attitude: ---
+	# High play balance of power
 
     type = country_event
     title = diplomatic_play.1.t
@@ -284,6 +282,17 @@ diplomatic_play.2 = {
             target = scope:play_instigator
         }
         # Notify player of the annexation
+        DIPLOMACY_notify_player = {
+            event = AI_notification_event.3
+        }
+        # Notify the aggressor of their success
+        scope:diplomatic_play = {
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:play_instigator
+                id = diplomatic_play.6 # Expedition succeeded in annexation
+                days = 0
+            }
+        }
     }
 
     option = { # Send a garrison, prevent them from entering any further
@@ -428,8 +437,17 @@ diplomatic_play.3 = {
                 is_subject = yes
                 overlord = scope:diplomatic_play.var:play_instigator
             }
+            modifier = { # Don't care enough
+                factor = 5
+                scope:diplomatic_play = {
+                    is_target_in_variable_list = {
+                        name = play_observers_undecided
+                        target = scope:catcher
+                    }
+                }
+            }
             modifier = {
-                factor = -10
+                factor = -100
                 scope:diplomatic_play = {
                     is_target_in_variable_list = {
                         name = play_observers_support_target
@@ -493,6 +511,14 @@ diplomatic_play.4 = {
         modifier = {
             factor = 1
         }
+        modifier = {
+            factor = 5
+            scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 10
+        }
+        modifier = {
+            factor = 5
+            scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 1
+        }
 
     }
 
@@ -513,9 +539,34 @@ diplomatic_play.5 = {
 
     goto_location = scope:diplomatic_play.var:play_target_area
 
-    immediate = {
-        save_scope_as = catcher
+    option = { # Yay!
+        name = diplomatic_play.4.a
+        custom_tooltip = diplomatic_play.4.a.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+            }
+        }
+
     }
+
+}
+
+diplomatic_play.6 = {
+    # Scope: Country, Play instigator
+
+    # Expedition major success, annexes a territory
+
+    type = country_event
+    title = diplomatic_play.4.t
+    desc = diplomatic_play.4.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:play_target_area
 
     option = { # Yay!
         name = diplomatic_play.4.a

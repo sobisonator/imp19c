@@ -1401,6 +1401,45 @@ AI_debug_test_war_all_diplomatic_plays = {
 	}
 }
 
+AI_diplomatic_play_check_support_change = {
+	# Scope: Diplomatic play province
+	# Function: Check if any AI observer countries want to pick a side in a diplomatic play
+
+	save_scope_as = diplomatic_play
+
+	every_in_list = {
+		variable = play_observers_undecided
+		limit = {
+			is_ai = yes
+		}
+
+		save_scope_as = assessor_country
+
+		# Value of over 100 means they will flip to support
+		if = {
+			limit = {
+				AI_diplomatic_play_assess_side > 100
+			}
+			remove_from_list = play_observers_undecided
+			add_to_variable_list = {
+				name = play_observers_support_target
+				target = scope:assessor_country
+			}
+		}
+		else_if = {
+			limit = {
+				AI_diplomacy_assess_side < -100
+			}
+			remove_from_list = play_observers_undecided
+			add_to_variable_list = {
+				name = play_observers_support_target
+				target = scope:assessor_country
+			}
+		}
+
+	}
+}
+
 ### NOTES on scoping to a war
 # Take this vanilla example
 vanilla_war_scope_sample_effect = {

@@ -71,6 +71,8 @@ types TechTypes
 	}
 
 }
+@window_width = 1385
+@window_height = 878
 
 base_window = {
 	gfxtype = windowgfx
@@ -87,7 +89,7 @@ base_window = {
 		mask = "gfx/interface/missions/arrow_alpha.dds"
 	}
 	parentanchor = top|left
-	size = { 1385 878 }
+	size = { @window_width @window_height }
 	using = main_window_template
 
 	state = {
@@ -114,48 +116,41 @@ base_window = {
 	#	name = _hide
 	#	on_start = "[PdxGuiTriggerAllAnimations('technology_view_closed')]"
 	#}
-
-	vbox = { #We will not use dynamic layout here, beyond title setup
-		using = MainWindowHeaderBox
-
-		blockoverride "Title_text" { text = "TECHNOLOGY_MENU_HEADER" }
-
-		blockoverride "White_buttons"
-		{
-			button_back = {
-				shortcut = "previous_window"
-				onclick = "[TechnologyView.OnPrevious]"
-				tooltip = "PREVIOUS_TECHNOLOGY_VIEW"
+	flowcontainer = { #We will not use dynamic layout here, beyond title setup почему???
+		widget = {
+			size = { @window_width 48 }
+			using = MainWindowHeaderBox
+			blockoverride "Title_text" { text = "TECHNOLOGY_MENU_HEADER" }
+			blockoverride "FlagOrIcon"
+			{
+				icon = {
+					texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
+					framesize = { 100 100 }
+					frame = 6
+					position = { -2 -2 }
+					size = { 32 32 }
+					modify_texture = {
+						texture = "gfx/interface/icons/menu_buttons/menu_technology.dds"
+						blend_mode = alphamultiply
+					}
+				}
 			}
+			blockoverride "White_buttons" 
+			{
+				button_back = {
+					shortcut = "previous_window"
+					onclick = "[TechnologyView.OnPrevious]"
+					tooltip = "PREVIOUS_TECHNOLOGY_VIEW"
+				}
 
-			button_close = {
-				onclick = "[TechnologyView.OnClose]"
-				tooltip = "CLOSE"
-				shortcut = "close_window"
-			}
-		}
-
-		blockoverride "FlagOrIcon"
-		{
-			icon = {
-				texture = "gfx/interface/base_parts/yellow_button_color_200fs.dds"
-				framesize = { 100 100 }
-				frame = 6
-				position = { -2 -2 }
-				size = { 32 32 }
-				modify_texture = {
-					texture = "gfx/interface/icons/menu_buttons/menu_technology.dds"
-					blend_mode = alphamultiply
+				button_close = {
+					onclick = "[TechnologyView.OnClose]"
+					tooltip = "CLOSE"
+					shortcut = "close_window"
 				}
 			}
 		}
-
-		hbox = {
-			layoutpolicy_vertical = expanding
-		}
-
 	}
-
 	margin_widget = {
 		size = { 100% 100% }
 
@@ -183,38 +178,30 @@ base_window = {
 			}
 		}
 
-
-		icon = {
-			name = "top line"
-			position = { 290 87 }
-			texture = "gfx/interface/base_parts/white_button_color_200fs.dds"
-			framesize = { 100 100 }
-			frame = 4
-			size = { 4 5 }
-		}
-
-
 		###Actual Trees
-
 		margin_widget = {
 			size = { 1098 835 } #Zoomarea doesn't like expandables
 			position = { 246 40 }
 			margin = { 18 18 }
-			icon = {
-				size = { 100% 100% }
-				texture = "gfx/interface/technology_parts/tech_pattern.dds"
-			}
-			icon = {
-				texture = "gfx/interface/technology_parts/tech_stain_1.dds"
-				parentanchor = right
-				position = { 0 94 }
-				alpha = 0.55
-			}
 			zoomarea = {
 				name = "graph_zoomarea" # Do not change this name
 				size = { 100% 92% }
 				position = { 30 30 }
-				using = NoninteractableBG
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					using = beige_background
+					alpha = 0.2
+				}
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					using = beige_background
+					alpha = 0.8
+					modify_texture = {
+						texture = "gfx/interface/technology_parts/tech_pattern.dds"
+						blend_mode = alphamultiply
+						spriteType = Corneredtiled
+					}
+				}
 				blockoverride "EdgeAlpha" {  }
 				blockoverride "Margins" {
 					margin_right = 0
@@ -644,49 +631,50 @@ base_window = {
 			item = {
 				margin_widget = {
 					size = { 284 190 }
-
 					icon = {
-						texture = "gfx/interface/base_parts/white_button_color_200fs.dds"
-						framesize = { 100 100 }
-						frame = 4
-						size = { 4 14 }
 						position = { 0 -3 }
+						using = brighten_red_background
+						size = { 2 14 }
 						parentanchor = right|top
 					}
+					#icon = {
+					#	texture = "gfx/interface/base_parts/white_button_color_200fs.dds"
+					#	framesize = { 100 100 }
+					#	frame = 4
+					#	size = { 4 14 }
+					#	position = { 0 -3 }
+					#	parentanchor = right|top
+					#}
 
 					widget = {
 						size = { 284 180 }
 						parentanchor = bottom
-
-
+						icon = {
+							position = { 0 0 }
+							using = brighten_red_background
+							size = { 2 100% }
+							parentanchor = right
+							visible = "[Not( GetVariableSystem.HasValue( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey ) )]"
+						}
 						widget = {
 							size = { 100% 100% }
-							alpha = 0.3
+							alpha = 0.75
 							icon = {
 								size = { 100% 100% }
 								texture = "gfx/interface/technology_parts/military.dds"
 								visible = "[And( EqualTo_int32( TechOfficeItem.GetIconFrame, '(int32)1' ), GetVariableSystem.HasValue( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey ) )]"
 								modify_texture = {
-									name = "Alpha"
-									texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
+									texture = "gfx/interface/base_parts/horizontal_gradient_stretch_black.dds"
 									blend_mode = alphamultiply
-									spriteType = corneredstretched
-									spriteborder = { 0 0 }
 								}
 							}
 							icon = {
-								#position = { -2 2 }
-								name = "illustration background civic"
 								size = { 100% 100% }
 								texture = "gfx/interface/technology_parts/civic.dds"
 								visible = "[And( EqualTo_int32( TechOfficeItem.GetIconFrame, '(int32)2' ), GetVariableSystem.HasValue( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey ) )]"
-								#alpha = 0.3
 								modify_texture = {
-									name = "Alpha"
-									texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
+									texture = "gfx/interface/base_parts/horizontal_gradient_stretch_black.dds"
 									blend_mode = alphamultiply
-									spriteType = corneredstretched
-									spriteborder = { 0 0 }
 								}
 							}
 							icon = {
@@ -694,11 +682,8 @@ base_window = {
 								texture = "gfx/interface/technology_parts/oratory.dds"
 								visible = "[And( EqualTo_int32( TechOfficeItem.GetIconFrame, '(int32)3' ), GetVariableSystem.HasValue( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey ) )]"
 								modify_texture = {
-									name = "Alpha"
-									texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
+									texture = "gfx/interface/base_parts/horizontal_gradient_stretch_black.dds"
 									blend_mode = alphamultiply
-									spriteType = corneredstretched
-									spriteborder = { 0 0 }
 								}
 							}
 							icon = {
@@ -706,75 +691,59 @@ base_window = {
 								texture = "gfx/interface/technology_parts/religious.dds"
 								visible = "[And( EqualTo_int32( TechOfficeItem.GetIconFrame, '(int32)4' ), GetVariableSystem.HasValue( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey ) )]"
 								modify_texture = {
-									name = "Alpha"
-									texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
+									texture = "gfx/interface/base_parts/horizontal_gradient_stretch_black.dds"
 									blend_mode = alphamultiply
-									spriteType = corneredstretched
-									spriteborder = { 0 0 }
 								}
+							}
+						}
+						margin_widget = {
+							size = { 100% 100% }
+							margin = { 5 0 }
+							visible = "[Not( GetVariableSystem.HasValue( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey ) )]"
+							widget = {
+								size = { 100% 100% }
+								using = background_widget
 							}
 						}
 						button = {
 							size = { 100% 100% }
 							onclick = "[GetVariableSystem.Set( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey )]"
-
-							tab_button_vertical = {
+							text_button_square = { #Update Button
+								position = { 0 5 }
 								parentanchor = hcenter
-								position = { 0 8 }
-								size = { 264 28 }
-								blockoverride "Icon" {
-									texture = "gfx/interface/icons/icon_skills.dds"
-									framesize = { 50 50 }
-									frame = "[TechOfficeItem.GetIconFrame]"
-								}
+								size = { 264 28 }		
+								enabled = "[Not( GetVariableSystem.HasValue( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey ) )]"
 								blockoverride "Center_text" { text = "[TechOfficeItem.GetName]" }
-								blockoverride "On_click" {
-									onclick = "[GetVariableSystem.Set( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey )]"
-									enabled = "[Not( GetVariableSystem.HasValue( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey ) )]"
-								}
+								tooltip = "GW_BUILD_BUTTON_TOOLTIP"
+								blockoverride "On_click" { onclick = "[GetVariableSystem.Set( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey )]" }
 							}
 						}
-
-						#beige borders
-						icon = {
-							position = { 0 0 }
-							texture = "gfx/interface/base_parts/white_button_color_200fs.dds"
-							framesize = { 100 100 }
-							frame = 4
-							parentanchor = left
-							size = { 4 100% }
-						}
-
-						icon = {
-							position = { 0 0 }
-							texture = "gfx/interface/base_parts/white_button_color_200fs.dds"
-							framesize = { 100 100 }
-							frame = 4
-							size = { 100% 4 }
-						}
-
-						icon = {
-							position = { 0 0 }
-							parentanchor = bottom
-							texture = "gfx/interface/base_parts/white_button_color_200fs.dds"
-							framesize = { 100 100 }
-							frame = 4
-							size = { 100% 4 }
-						}
-
-						icon = {
-							texture = "gfx/interface/base_parts/white_button_color_200fs.dds"
-							framesize = { 100 100 }
-							frame = 4
-							size = { 4 100% }
-							visible = "[Not( GetVariableSystem.HasValue( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey ) )]"
-							parentanchor = right
-						}
-						using = NoninteractableBG
-						blockoverride "EdgeAlpha" {
+						widget = {
+							size = { 100% 100% }
 							visible = "[GetVariableSystem.HasValue( 'tech_tabs', TechOfficeItem.GetTable.GetUiKey )]"
+							icon = {
+								size = { 100% 100% }
+								using = beige_background
+								alpha = 0.2
+							}
+							icon = {
+								position = { 0 0 }
+								using = brighten_red_background
+								size = { 2 100% }
+								parentanchor = left
+							}
+							icon = {
+								position = { 0 0 }
+								using = brighten_red_background
+								size = { 100% 2 }
+							}
+							icon = {
+								position = { 0 0 }
+								using = brighten_red_background
+								size = { 100% 2 }
+								parentanchor = bottom
+							}
 						}
-						blockoverride "Margins" { margin = { 0 0 } }
 					}
 				}
 			}
@@ -1098,25 +1067,6 @@ base_window = {
 				enabled = "[Not( GetVariableSystem.Exists( 'planning_mode' ) )]"
 			}
 		}
-
-		icon = {
-			position = { 290 -19 }
-			parentanchor = bottom
-			texture = "gfx/interface/base_parts/white_button_color_200fs.dds"
-			framesize = { 100 100 }
-			frame = 4
-			size = { 400 4 }
-
-			modify_texture = {
-				name = "Alpha"
-				texture = "gfx/interface/base_parts/header_s_x104bd_right_cut_alpha.dds"
-				blend_mode = alphamultiply
-				spriteborder = { 4 0 }
-				spriteType = Corneredstretched
-			}
-
-		}
-
 	}
 
 	margin_widget = {

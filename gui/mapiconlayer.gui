@@ -460,7 +460,6 @@ button = {
 widget = {
 	name = "city_widget"
 	position = { 0 -12 }
-	
 	flowcontainer = {
 		parentanchor = center
 		ignoreinvisible = yes
@@ -482,14 +481,11 @@ widget = {
 			#tooltip = "SIMPLE_PROVINCE_ICON_COUNTRY_CAPITAL_TOOLTIP"
 		}
 		
-		container = {
+		icon = {
 			visible = "[And( EqualTo_int32( CityMapIcon.GetFortFrame, '(int32)1' ), And( CityMapIcon.GetProvince.HasFort, Not(CityMapIcon.GetProvince.HasSiege) ) )]"
-			icon = {
-				alwaystransparent = no
-				texture = "gfx/interface/map/fortrank1.dds"
-				size = { @map_icon_size @map_icon_size }
-				position = { 0 -3 }
-			}
+			alwaystransparent = no
+			texture = "gfx/interface/map/fortrank1.dds"
+			size = { @map_icon_size @map_icon_size }
 		}
 		
 		icon = {
@@ -541,6 +537,98 @@ widget = {
 			visible = "[CityMapIcon.GetProvince.HasGreatWork]"
 			texture = "gfx/interface/map/greatwork.dds"
 			size = { @map_icon_size @map_icon_size }
+			framesize = { 50 50 }
+			#tooltip = "[GetGreatWorkTooltip(CityMapIcon.GetProvince, CityMapIcon.GetProvince.GetGreatWork)]"
+		}
+	}
+	flowcontainer = {
+		visible = no
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = black_background
+			alpha = 0.5
+		}
+		using = background_widget
+		margin = { 2 3 }
+		spacing = 5
+		ignoreinvisible = yes
+		widget = {
+			size = { 32 20 }
+			new_country_flag = {
+				parentanchor = vcenter
+				name = "unit_flag"
+				tooltip = "COUNTRY_FLAG_TT"
+				datacontext = "[CityMapIcon.GetProvince.GetOwner]"
+				blockoverride "Size" { size = { 32 32 } }
+				blockoverride "Flag" {
+					texture = "[Country.AccessCoatOfArms.GetTexture('(int32)32','(int32)32')]"
+					frame = "[Country.AccessCoatOfArms.GetFrame('(int32)32','(int32)32')]"
+					framesize = { 32 32 }
+				}
+			}
+		}
+		widget = {
+			parentanchor = vcenter
+			textbox = {
+				resizeparent = yes
+				max_width = 100
+				autoresize = yes
+				align = top
+				fontsize_min = 12
+				elide = right
+				using = BaseFontS
+				using = Default_FontColor
+				text = "[CityMapIcon.GetProvince.GetName]"
+			}
+		}
+		icon = {
+			visible = "[And(And( CityMapIcon.GetProvince.IsStateCapital, Not(IsMapMode('religion'))),Not(CityMapIcon.GetProvince.IsCapital))]"
+			size = { 20 20 }
+			using = icon_state_capital
+		}
+		
+		icon = {
+			visible = "[And( CityMapIcon.GetProvince.IsCapital, Not(IsMapMode('religion')))]"
+			size = { 20 20 }
+			texture = "gfx/interface/map/country_capital.dds"
+		}
+		icon = {
+			visible = "[And( EqualTo_int32( CityMapIcon.GetFortFrame, '(int32)1' ), And( CityMapIcon.GetProvince.HasFort, Not(CityMapIcon.GetProvince.HasSiege) ) )]"
+			texture = "gfx/interface/map/fortrank1.dds"
+			size = { 20 20 }
+		}
+		icon = {
+			visible = "[And( EqualTo_int32( CityMapIcon.GetFortFrame, '(int32)2' ), And( CityMapIcon.GetProvince.HasFort, Not(CityMapIcon.GetProvince.HasSiege) ) )]"
+			texture = "gfx/interface/map/fortrank2.dds"
+			size = { 20 20 }
+		}
+		icon = {
+			visible = "[And( GreaterThanOrEqualTo_int32( CityMapIcon.GetFortFrame, '(int32)3' ), And( CityMapIcon.GetProvince.HasFort, Not(CityMapIcon.GetProvince.HasSiege) ) )]"
+			texture = "gfx/interface/map/fortrank3.dds"
+			size = { 20 20 }
+		}
+		icon = {
+			visible = "[CityMapIcon.GetProvince.HasTightPassage]"
+			texture = "gfx/interface/map/combatwidth.dds"
+			size = { 20 20 }
+			framesize = { 50 50 }
+			frame = 1
+			background = {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = black_background
+				margin = { 1 1 }		
+				modify_texture = {
+					name = "Alpha"
+					texture = "gfx/interface/map/combatwidth.dds"
+					blend_mode = alphamultiply
+					spriteType = Corneredstretched
+				}
+			}
+		}
+		icon = {
+			visible = "[CityMapIcon.GetProvince.HasGreatWork]"
+			texture = "gfx/interface/map/greatwork.dds"
+			size = { 20 20 }
 			framesize = { 50 50 }
 			#tooltip = "[GetGreatWorkTooltip(CityMapIcon.GetProvince, CityMapIcon.GetProvince.GetGreatWork)]"
 		}
@@ -960,7 +1048,6 @@ widget = {
 	}
 }
 
-
 # Building Construction
 widget = {
 	name = "building_construction_widget"
@@ -1086,7 +1173,6 @@ widget = {
 	}
 }
 
-
 ### Governor Icon
 widget = {
 	name = "governor_widget"
@@ -1173,7 +1259,6 @@ widget = {
 	name = "state_capital_widget"
 	widgetanchor = center
 	size = { 32 32 }
-	
 }
 
 ### Duplicated GUI code, should be refactored to reuse unit_widget
@@ -1626,6 +1711,7 @@ widget = {
 
 	flowcontainer = {
 		resizeparent = yes
+		ignoreinvisible = yes
 		widget = {
 			size = { 50 36 }
 			visible = "[UnitMapIcon.HasSiege]"
@@ -1799,10 +1885,11 @@ widget = {
 								}
 								#Clickable Flag
 								widget = {
-									size = { 44 34 }
+									size = { 45 34 }
 									visible = "[Not( UnitItem.GetUnit.IsUnemployedMercenary )]"
 									new_country_flag = {
 										parentanchor = vcenter
+										position = { 1 0 }
 										name = "unit_flag"
 										tooltip = "COUNTRY_FLAG_TT"
 										datacontext = "[UnitItem.GetUnit.GetCountry]"
@@ -2056,8 +2143,6 @@ widget = {
 	}
 }
 
-
-
 ### Area Icon
 widget = {
 	name = "area_widget"
@@ -2175,8 +2260,6 @@ widget = {
 		}
 	}
 }
-
-
 
 ### Population widget
 widget = { #Unused, remove in code
@@ -2421,7 +2504,6 @@ widget = { #Unused, remove in code
 		}
 	}
 }
-
 
 ### Piracy Haven Icon - REPURPOSED IN IMP19C TO ACT AS TRADEZONE WIDGET
 flowcontainer = {
@@ -2914,9 +2996,7 @@ widget = {
 	}
 }
 
-
 ### Great Work
-
 container = {
 	name = "great_work_widget"
 	#using = great_work_widget

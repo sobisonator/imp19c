@@ -257,6 +257,12 @@ diplomatic_play.2 = {
             }
             save_scope_as = captured_province
         }
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = 1
+                progress = DIPLOMACY_play_progress_large
+            }
+        }
 
     }
 
@@ -293,6 +299,12 @@ diplomatic_play.2 = {
                 days = 0
             }
         }
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = 25
+                progress = DIPLOMACY_play_progress_large
+            }
+        }
     }
 
     option = { # Send a garrison, prevent them from entering any further
@@ -312,6 +324,12 @@ diplomatic_play.2 = {
         scope:captured_province = {
             DIPLOMACY_add_colonial_outpost = {
                 owner = scope:play_instigator
+            }
+        }
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = 1
+                progress = DIPLOMACY_play_progress_medium
             }
         }
 
@@ -346,6 +364,12 @@ diplomatic_play.2 = {
                 pov = scope:play_instigator
                 id = diplomatic_play.4 # Expedition attacked
                 days = 0
+            }
+        }
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = -10
+                progress = DIPLOMACY_play_progress_large
             }
         }
     }
@@ -405,6 +429,21 @@ diplomatic_play.3 = {
                         target = scope:catcher
                     }
                 }
+            }
+        }
+
+        scope:diplomatic_play = {
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:diplomatic_play.var:play_instigator
+                id = diplomatic_play.7 # Expedition is stopped by 3rd party
+                days = 0
+            }
+        }
+
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = -10
+                progress = DIPLOMACY_play_progress_large
             }
         }
 
@@ -499,7 +538,19 @@ diplomatic_play.4 = {
 
         ai_chance = {
             modifier = {
-                factor = 10
+                factor = 20
+            }
+            modifier = {
+                factor = 50
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root < 1
+            }
+        }
+
+        add_stability = -2
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = -25
+                progress = DIPLOMACY_play_progress_large
             }
         }
 
@@ -508,16 +559,52 @@ diplomatic_play.4 = {
     option = { # Declare war
         name = diplomatic_play.4.b
         custom_tooltip = diplomatic_play.4.b.tt
-        modifier = {
-            factor = 1
+        ai_chance = {
+            modifier = {
+                factor = 1
+            }
+            modifier = {
+                factor = 5
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 10
+            }
+            modifier = {
+                factor = 5
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 1
+            }
+            modifier = {
+                factor = 5
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value < -100
+                }
+            }
+            modifier = {
+                factor = 5
+                scope:foreign_minister = {
+                    martial > charisma
+                }
+            }
+            modifier = {
+                factor = 5
+                scope:diplomatic_play.var:play_instigator.ruler = {
+                    martial > charisma
+                }
+            }
         }
-        modifier = {
-            factor = 5
-            scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 10
+
+        scope:diplomatic_play.var:play_instigator = {
+
+            add_political_influence = -5
+            add_aggressive_expansion = 5
+
+            declare_war_with_wargoal = {
+                war_goal = conquer_wargoal
+                province = scope:diplomatic_play.var:play_target_area
+                target = scope:diplomatic_play.var:play_target_country
+            }
         }
-        modifier = {
-            factor = 5
-            scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 1
+        scope:diplomatic_play = {
+            AI_remove_diplomatic_play = yes
         }
 
     }

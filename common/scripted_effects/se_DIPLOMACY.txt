@@ -153,6 +153,12 @@ DIPLOMACY_finalise_cached_subject_power_tradezone = {
 	remove_variable = DIPLOMACY_power_from_subjects_$tradezone$
 }
 
+DIPLOMACY_complete_play = {
+	$diplomatic_play$ = {
+		save_scope_as = diplomatic_play
+	}
+}
+
 DIPLOMACY_get_top_global_powers = {
 	# Scope: Any country, iterate through tradezones
 	# Function: Get the top powers in the world. Every country with more than 22
@@ -320,4 +326,115 @@ DIPLOMACY_add_colonial_outpost = {
     	value = $outpost_owner$
     }
 
+}
+
+DIPLOMACY_modify_play_success = {
+	# Scope: Province (diplomatic play)
+	# Function: Modify the success rating of a diplomatic play, to a maximum of 100
+	if = {
+		limit = {
+			NOT = { $amt$ = 0 }
+		}
+		set_local_variable = {
+			name = succes_mulitplier
+			value = {
+				# Get reciprocal of balance of power
+				value = 1
+				divide = var:AI_play_power_balance_instigator_root
+				# Invert the reciprocal
+				subtract = 1
+				multiply = -1
+				# Add to 1
+				add = 1
+			}
+		}
+
+		if = {
+			limit = {
+				$amt$ > 0
+			}
+			change_variable = {
+				name = diplomatic_play_success
+				add = {
+					value = $amt$
+					multiply = local_var:success_multiplier
+				}
+			}
+			if = {
+				limit = {
+					var:diplomatic_play_success > 100
+				}
+				set_variable = {
+					name = diplomatic_play_success
+					value = 100
+				}
+			}
+		}
+		else = {
+			change_variable = {
+				name = diplomatic_play_success
+				add = {
+					value = $amt$
+					divide = local_var:success_multiplier
+				}
+			}
+			if = {
+				limit = {
+					var:diplomatic_play_success < 0
+				}
+				set_variable = {
+					name = diplomatic_play_success
+					value = 0
+				}
+			}
+		}
+	}
+	
+}
+
+DIPLOMACY_progress_play = {
+	# Scope: Province (diplomatic play)
+	# Function: Advance the progress and success rating (both optionally 0) of the play
+	DIPLOMACY_modify_play_success = {
+		amt = $success$
+	}
+	if = {
+		limit = {
+			NOT = { $progress$ = 0 }
+		}
+		change_variable = {
+			name = diplomatic_play_progression
+			add = $progress$
+		}
+	}
+}
+
+DIPLOMACY_trigger_diplomatic_play_war = {
+	# Scope: Diplomatic play province
+	# Function: Trigger a war involving all observers who have picked a side in a diplomatic play
+	save_scope_as = diplomatic_play
+	var:play_instigator = {
+		FUNC_declare_war_with_wargoal_province = {
+	        war_goal = conquer_wargoal
+	        province = scope:diplomatic_play.var:play_target_area
+	        target = scope:diplomatic_play.var:play_target_country
+	    }
+	    every_in_list = {
+	    	variable = play_observers_support_instigator
+	    	add_to_war = {
+				target = scope:current_war_scope
+				attacker = yes
+				leader = no
+			}
+	    }
+	    every_in_list = {
+	    	variable = play_observers_support_target
+	    	add_to_war = {
+				target = scope:current_war_scope
+				attacker = no
+				leader = no
+			}
+	    }
+	}
+	
 }

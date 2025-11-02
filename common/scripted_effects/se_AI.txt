@@ -1018,9 +1018,24 @@ AI_assess_adversary = {
 	}
 	scope:AI_root = { add_to_list = play_assessed_already }
 
+	every_in_list = {
+		variable = play_observers_support_target
+		add_to_list = supporters_target
+	}
+	every_in_list = {
+		variable = play_observers_support_instigator
+		add_to_list = supporters_instigator
+	}
+
 	scope:AI_root = {
 		every_allied_country = {
 			# Add less if allied with the target
+			limit = {
+				NOR = {
+					is_in_list = supporters_target
+					is_in_list = supporters_instigator
+				}
+			}
 			save_scope_as = test_ally
 			if = {
 				limit = {
@@ -1115,6 +1130,9 @@ AI_assess_adversary = {
 			variable = play_observers_support_target
 			limit = {
 				NOT = { is_in_list = play_assessed_already }
+				NOT = {
+					THIS = $diplomatic_play$.var:play_target_country
+				}
 			}
 			change_local_variable = {
 				name = AI_target_power
@@ -1125,6 +1143,9 @@ AI_assess_adversary = {
 			variable = play_observers_support_instigator
 			limit = {
 				NOT = { is_in_list = play_assessed_already }
+				NOT = {
+					THIS = $diplomatic_play$.var:play_instigator 
+				}
 			}
 			change_local_variable = {
 				name = AI_root_power
@@ -1132,7 +1153,7 @@ AI_assess_adversary = {
 			}
 		}
 
-		set_variable = {
+		set_variable = { # TESTING
 			name = AI_play_power_balance_instigator_root
 			value = {
 				value = {

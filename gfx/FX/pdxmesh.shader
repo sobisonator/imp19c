@@ -496,9 +496,6 @@ PixelShader =
 				#if !defined( UNDERWATER ) && !defined( DISABLE_FOG_OF_WAR )
 					Color = ApplyFogOfWar( Color, Input.WorldSpacePos, FogOfWarAlpha );
 					float vFogFactor = min(CalculateDistanceFogFactor( Input.WorldSpacePos ),0.6);
-					#if defined(nightLight)
-						vFogFactor *= 0.05;
-					#endif
 					Color = ApplyDistanceFog( Color, vFogFactor );
 				#endif
 

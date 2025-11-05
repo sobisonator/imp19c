@@ -1,4 +1,4 @@
-﻿## AI Behaviour scripts
+## AI Behaviour scripts
 
 # DIPLOMACY
 
@@ -450,6 +450,14 @@ AI_begin_diplomatic_play = {
 		save_scope_as = diplomatic_play
 
 		set_variable = {
+			name = diplomatic_play_progression
+			value = 0
+		}
+		set_variable = {
+			name = diplomatic_play_success
+			value = 0
+		}
+		set_variable = {
 			name = play_instigator
 			value = $play_instigator$ # Must be a country.
 		}
@@ -882,6 +890,8 @@ AI_remove_diplomatic_play = {
 	remove_variable = play_target_area
 	remove_variable = play_target_country
 	remove_variable = play_goal
+	remove_variable = diplomatic_play_progression
+	remove_variable = diplomatic_play_success
 	clear_variable_list = play_observers_support_instigator
 	clear_variable_list = play_observers_support_target
 	clear_variable_list = play_observers_undecided
@@ -950,22 +960,6 @@ AI_debug_test_begin_diplomatic_play_all = {
 	}
 }
 
-AI_reevaluate_all_plays = {
-	# Scope: Any
-	# Function: Trigger re-evaluation of diplomatic plays
-	every_province = {
-		limit = {
-			has_variable = is_diplomatic_play
-		}
-		AI_diplomatic_play_evaluate_attitude = {
-			diplomatic_play = THIS
-		}
-		AI_diplomatic_play_evaluate_war = {
-			diplomatic_play = THIS
-		}
-	}
-}
-
 AI_assess_adversary = {
 	# Scope: Country (AI_root)
 	# Function: Assess the $AI_target$ country from the perspective of AI_root
@@ -1008,9 +1002,24 @@ AI_assess_adversary = {
 	}
 	scope:AI_root = { add_to_list = play_assessed_already }
 
+	every_in_list = {
+		variable = play_observers_support_target
+		add_to_list = supporters_target
+	}
+	every_in_list = {
+		variable = play_observers_support_instigator
+		add_to_list = supporters_instigator
+	}
+
 	scope:AI_root = {
 		every_allied_country = {
 			# Add less if allied with the target
+			limit = {
+				NOR = {
+					is_in_list = supporters_target
+					is_in_list = supporters_instigator
+				}
+			}
 			save_scope_as = test_ally
 			if = {
 				limit = {
@@ -1105,6 +1114,9 @@ AI_assess_adversary = {
 			variable = play_observers_support_target
 			limit = {
 				NOT = { is_in_list = play_assessed_already }
+				NOT = {
+					THIS = $diplomatic_play$.var:play_target_country
+				}
 			}
 			change_local_variable = {
 				name = AI_target_power
@@ -1115,6 +1127,9 @@ AI_assess_adversary = {
 			variable = play_observers_support_instigator
 			limit = {
 				NOT = { is_in_list = play_assessed_already }
+				NOT = {
+					THIS = $diplomatic_play$.var:play_instigator 
+				}
 			}
 			change_local_variable = {
 				name = AI_root_power
@@ -1122,7 +1137,7 @@ AI_assess_adversary = {
 			}
 		}
 
-		set_variable = {
+		set_variable = { # TESTING
 			name = AI_play_power_balance_instigator_root
 			value = {
 				value = {
@@ -1165,19 +1180,6 @@ AI_assess_adversary = {
 	add_to_list = play_targets
 }
 
-AI_diplomatic_play_assess_sides = {
-	# Scope: Diplomatic play province
-	# Function: Have all play_observers_undecided countries assess the value of supporting either side of a play
-	every_in_list = {
-		variable = play_observers_undecided
-
-		set_variable = {
-			name = support_instigator
-			value = 0
-		}
-	}
-}
-
 ### AI Behaviour in diplomatic plays
 
 #### Regional great powers: choosing sides
@@ -1188,7 +1190,7 @@ AI_diplomatic_play_assess_sides = {
 ### Declare war
 
 AI_diplomatic_play_evaluate_attitude = {
-	# Scope: Country
+	# Scope: Any
 	# Function: Evaluate whether the AI should act in a friendly way or a hostile way towards the target
 	# Do their interests align
 	# Takes a diplomatic play province as argument
@@ -1323,8 +1325,8 @@ AI_diplomatic_play_evaluate_war = {
 						var:play_instigator = {
 							has_truce_with = scope:diplomatic_play.var:play_target_country
 						}
-						subtract = 100000
 					}
+					subtract = 100000
 				}
 			}
 		}
@@ -1399,6 +1401,105 @@ AI_debug_test_war_all_diplomatic_plays = {
 		}
 		
 	}
+}
+
+AI_diplomatic_play_do_support_change = {
+	# Scope: Diplomatic play province
+	# Function: Check if any AI observer countries want to pick a side in a diplomatic play, and move them into the appropriate list if they do pick a side
+
+	save_scope_as = diplomatic_play
+
+	every_in_list = {
+		variable = play_observers_undecided
+		limit = {
+			is_ai = yes
+		}
+
+		save_scope_as = assessor_country
+
+		# Value of over 100 means they will flip to support
+		if = {
+			limit = {
+				AI_diplomatic_play_assess_side > 100
+			}
+			scope:diplomatic_play = {
+				remove_list_variable = {
+					name = play_observers_undecided
+					target = scope:assessor_country
+				}
+				add_to_variable_list = {
+					name = play_observers_support_target
+					target = scope:assessor_country
+				}
+			}
+			
+		}
+		else_if = {
+			limit = {
+				AI_diplomatic_play_assess_side < -100
+			}
+			scope:diplomatic_play = {
+				remove_list_variable = {
+					name = play_observers_undecided
+					target = scope:assessor_country
+				}
+				add_to_variable_list = {
+					name = play_observers_support_target
+					target = scope:assessor_country
+				}
+			}
+		}
+
+	}
+}
+
+AI_update_all_diplomatic_plays = {
+	every_province = {
+		limit = {
+			has_variable = is_diplomatic_play
+		}
+		AI_diplomatic_play_update_status = yes
+	}
+}
+
+AI_diplomatic_play_update_status = {
+	# Scope: Diplomatic play province
+	# Function: All observers check their allegiance in a diplomatic play, and the play's balance of power and attitude is recalculated
+	# Called: On diplomatic play update on_action
+	# TODO: Implement on_action
+
+	save_scope_as = diplomatic_play
+
+	# Update the diplomatic play's age
+	change_variable = {
+		name = diplomatic_play_progression
+		add = 1
+	}
+	# If the diplomatic play is progressed, push it to its conculsion instead
+	if = {
+		limit = {
+			var:diplomatic_play_progression > DIPLOMACY_play_max_progression
+		}
+		DIPLOMACY_complete_play = {
+			diplomatic_play = scope:diplomatic_play
+		}
+	}
+	# Otherwise, update all values
+	else = {
+		AI_diplomatic_play_do_support_change = yes
+		AI_assess_adversary = { 
+			diplomatic_play = scope:diplomatic_play
+			AI_target = scope:diplomatic_play.var:play_target_country
+		}
+		AI_diplomatic_play_evaluate_attitude = {
+			diplomatic_play = scope:diplomatic_play
+		}
+		AI_diplomatic_play_evaluate_war = {
+			diplomatic_play = scope:diplomatic_play
+		}
+	}
+	
+
 }
 
 ### NOTES on scoping to a war

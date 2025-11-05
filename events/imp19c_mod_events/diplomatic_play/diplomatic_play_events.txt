@@ -553,6 +553,12 @@ diplomatic_play.4 = {
                 factor = 50
                 scope:diplomatic_play.var:AI_play_power_balance_instigator_root < 1
             }
+            modifier = {
+                factor = 100
+                scope:diplomatic_play = {
+                    DIPLOMACY_play_war_not_willing_trigger = yes
+                }
+            }
         }
 
         add_stability = -2
@@ -597,6 +603,12 @@ diplomatic_play.4 = {
                 factor = 5
                 scope:diplomatic_play.var:play_instigator.ruler = {
                     martial > charisma
+                }
+            }
+            modifier = {
+                factor = 100
+                scope:diplomatic_play = {
+                    DIPLOMACY_play_war_willing_trigger = yes
                 }
             }
         }
@@ -721,22 +733,42 @@ diplomatic_play.7 = {
                 factor = 1
                 DIPLOMACY_power > scope:catcher.DIPLOMACY_power
             }
+            modifier = {
+                factor = 100
+                scope:diplomatic_play = {
+                    DIPLOMACY_play_war_willing_trigger = yes
+                }
+            }
             
         }
 
         # Scenario 1: The catcher is a neutral party
         # Just declare war on the catcher
-        FUNC_declare_war_with_wargoal_province = {
-            war_goal = conquer_wargoal
-            province = scope:catcher.capital_scope
-            target = scope:catcher
+        if = {
+            limit = {
+                scope:diplomatic_play = {
+                    is_target_in_variable_list = {
+                        name = play_observers_undecided
+                        target = scope:catcher
+                    }
+                }
+            }
+            FUNC_declare_war_with_wargoal_province = {
+                war_goal = conquer_wargoal
+                province = scope:catcher.capital_scope
+                target = scope:catcher
+            }
         }
-
         # Scenario 2: The catcher is a member of the opposing side
         # Trigger a full diplomatic play war
-        scope:diplomatic_play = {
-            DIPLOMACY_trigger_diplomatic_play_war = yes
+        else = {
+            scope:diplomatic_play = {
+                DIPLOMACY_trigger_diplomatic_play_war = yes
+            }
         }
+        
+
+        
 
         remove_variable = play_expedition_catcher
 
@@ -777,6 +809,12 @@ diplomatic_play.7 = {
                     any_allied_country = scope:catcher
                 }
                 
+            }
+            modifier = {
+                factor = 100
+                scope:diplomatic_play = {
+                    DIPLOMACY_play_war_not_willing_trigger = yes
+                }
             }
             
         }

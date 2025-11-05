@@ -58,13 +58,8 @@ diplomatic_play.1 = {
                 }
             }
         }
-        hidden_effect = {
-            every_character = {
-                limit = {
-                    charisma > martial
-                }
-                add_loyalty = scheme_dismissed_l
-            }           
+        POLITICS_upset_pacifists = {
+            level = minor
         }
         add_treasury = {
             value = var:country_unit_price_early_munitions # TODO: Factor in balance of early/late munitions
@@ -110,6 +105,11 @@ diplomatic_play.1 = {
         trigger = {
             var:MILITARY_supplies_country > 0
         }
+
+        POLITICS_upset_pacifists = {
+            level = major
+        }
+
         change_variable = {
             name = MILITARY_supplies_country
             subtract = 10
@@ -119,22 +119,7 @@ diplomatic_play.1 = {
             add = var:country_unit_price_construction_materials
             multiply = -20
         }
-        hidden_effect = {
-            every_character = {
-                limit = {
-                    charisma > martial
-                }
-                add_loyalty = inspired_disloyalty_other_l
-            }           
-        }
-        hidden_effect = {
-            every_character = {
-                limit = {
-                    charisma > martial
-                }
-                add_loyalty = roman_mission_eastern_campaign_triumph_modifier
-            }           
-        }
+        
         add_political_influence = -5
         add_aggressive_expansion = 5
 
@@ -203,14 +188,9 @@ diplomatic_play.1 = {
             }
         }
         add_political_influence = -5
-        hidden_effect = {
-            every_character = {
-                limit = {
-                    martial > charisma
-                }
-                add_loyalty = scheme_dismissed_l
-            }            
-        }
+        POLITICS_upset_militarists = {
+            level = minor
+        }          
 
     }
 }
@@ -720,13 +700,70 @@ diplomatic_play.7 = {
 
     option = { # Declare war!
         name = diplomatic_play.7.a
+        custom_tooltip = diplomatic_play.7.a.tt
 
         ai_chance = {
             modifier = {
                 factor = 1
             }
+            modifier = { # more likely to declare war if it won't trigger a whole play war
+                factor = 1
+                scope:diplomatic_play = {
+                    NOT = {
+                        is_target_in_variable_list = {
+                            name = play_observers_support_target
+                            target = scope:catcher
+                        }
+                    }
+                }
+            }
+            modifier = {
+                factor = 1
+                DIPLOMACY_power > scope:catcher.DIPLOMACY_power
+            }
+            
+        }
+
+        # Scenario 1: The catcher is a neutral party
+        # Just declare war on the catcher
+        FUNC_declare_war_with_wargoal_province = {
+            war_goal = conquer_wargoal
+            province = scope:catcher.capital_scope
+            target = scope:catcher
+        }
+
+        # Scenario 2: The catcher is a member of the opposing side
+        # Trigger a full diplomatic play war
+        scope:diplomatic_play = {
+            DIPLOMACY_trigger_diplomatic_play_war = yes
+        }
+
+        remove_variable = play_expedition_catcher
+
+    }
+
+    option = { # Back down
+        name = diplomatic_play.7.a
+        custom_tooltip = diplomatic_play.7.b.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+            }
+            modifier = {
+                factor = 10
+                DIPLOMACY_power < scope:catcher.DIPLOMACY_power
+            }
+            modifier = {
+                factor = 10000
+
+                opinion = {
+                    target = scope:catcher
+                    value > 0
+                }
+            }
             modifier = { # Being stopped by an ally will not trigger war
-                factor = -10000
+                factor = 10000
 
                 OR = {
                     # Is supporter
@@ -741,22 +778,14 @@ diplomatic_play.7 = {
                 }
                 
             }
+            
         }
 
-        # Scenario 1: The catcher is a neutral party
-
-        # Scenario 2: The catcher is a member of the opposing side
-
-        remove_variable = play_expedition_catcher
-
-    }
-
-    option = { # Back down
-        name = diplomatic_play.7.a
-
-        ai_chance = {
-            modifier = {
-                factor = 10
+        add_stability = -2
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = -25
+                progress = DIPLOMACY_play_progress_large
             }
         }
 

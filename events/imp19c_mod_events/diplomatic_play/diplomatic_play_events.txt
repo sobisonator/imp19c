@@ -276,6 +276,13 @@ diplomatic_play.2 = {
             }
         }
 
+        scope:diplomatic_play.var:play_instigator = {
+            set_variable = {
+                name = diplomatic_play_captured_province
+                value = scope:captured_province
+            }
+        }
+
         add_stability = -10
         add_war_exhaustion = 1
         scope:captured_province = {
@@ -433,6 +440,19 @@ diplomatic_play.3 = {
         }
 
         scope:diplomatic_play = {
+
+            DIPLOMACY_progress_play = {
+                success = -10
+                progress = DIPLOMACY_play_progress_large
+            }
+
+            var:play_instigator = {
+                set_variable = {
+                    name = play_expedition_catcher
+                    value = scope:catcher
+                }
+            }
+
             DIPLOMACY_trigger_play_event = {
                 pov = scope:diplomatic_play.var:play_instigator
                 id = diplomatic_play.7 # Expedition is stopped by 3rd party
@@ -440,12 +460,6 @@ diplomatic_play.3 = {
             }
         }
 
-        scope:diplomatic_play = {
-            DIPLOMACY_progress_play = {
-                success = -10
-                progress = DIPLOMACY_play_progress_large
-            }
-        }
 
         add_opinion = {
             modifier = betrayed_in_play
@@ -642,7 +656,6 @@ diplomatic_play.5 = {
 
     option = { # Yay!
         name = diplomatic_play.5.a
-        custom_tooltip = diplomatic_play.5.a.tt
 
         ai_chance = {
             modifier = {
@@ -660,8 +673,8 @@ diplomatic_play.6 = {
     # Expedition major success, annexes a territory
 
     type = country_event
-    title = diplomatic_play.4.t
-    desc = diplomatic_play.4.desc
+    title = diplomatic_play.6.t
+    desc = diplomatic_play.6.desc
 
     left_portrait = scope:foreign_minister
 
@@ -671,13 +684,83 @@ diplomatic_play.6 = {
 
     option = { # Yay!
         name = diplomatic_play.6.a
-        custom_tooltip = diplomatic_play.6.a.tt
 
         ai_chance = {
             modifier = {
                 factor = 10
             }
         }
+
+        remove_variable = diplomatic_play_captured_province
+
+    }
+
+}
+
+diplomatic_play.7 = {
+    # Scope: Country, Play instigator
+
+    # Expedition stopped by a third party
+
+    type = country_event
+    title = diplomatic_play.7.t
+    desc = diplomatic_play.7.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
+    immediate = {
+        var:play_expedition_catcher = {
+            save_scope_as = catcher
+        }
+    }
+
+    option = { # Declare war!
+        name = diplomatic_play.7.a
+
+        ai_chance = {
+            modifier = {
+                factor = 1
+            }
+            modifier = { # Being stopped by an ally will not trigger war
+                factor = -10000
+
+                OR = {
+                    # Is supporter
+                    scope:diplomatic_play = {
+                        is_target_in_variable_list = {
+                            name = play_observers_support_instigator
+                            target = scope:catcher
+                        }
+                    }
+                    # Is ally
+                    any_allied_country = scope:catcher
+                }
+                
+            }
+        }
+
+        # Scenario 1: The catcher is a neutral party
+
+        # Scenario 2: The catcher is a member of the opposing side
+
+        remove_variable = play_expedition_catcher
+
+    }
+
+    option = { # Back down
+        name = diplomatic_play.7.a
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+            }
+        }
+
+        remove_variable = play_expedition_catcher
 
     }
 

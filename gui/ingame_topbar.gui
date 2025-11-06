@@ -1189,7 +1189,18 @@ vbox = {
 				ignoreinvisible = yes
 				widget = {
 					name = "Flag"
-					size = { 288 45 }
+					size = { 301 45 }
+					datacontext = "[InGameTopbar.GetPlayer]"
+					state = {
+						name = "rectangle"
+						trigger_when = "[Not(EqualTo_int32(FixedPointToInt(GuiScope.SetRoot( Country.MakeScope ).ScriptValue('DIPLOMACY_flag_shape') ), '(int32)3'))]"
+						size = { 301 45 }
+					}
+					state = {
+						name = "square"
+						trigger_when = "[EqualTo_int32(FixedPointToInt(GuiScope.SetRoot( Country.MakeScope ).ScriptValue('DIPLOMACY_flag_shape') ), '(int32)3')]"
+						size = { 251 45 }
+					}
 				}
 				icon_and_text_with_change_topbar = {
 					name = "Treasury"
@@ -1513,19 +1524,41 @@ vbox = {
 			#	blockoverride "ShowHeadOfFamily" { visible = no }
 			#	blockoverride "ShowIcons" { visible = no }
 			#}
-			widget = {
-				size = { 150 100 }
+			flowcontainer = {
+				datacontext = "[InGameTopbar.GetPlayer]"
+				tooltip = "[InGameTopbar.GetFlagDesc]"
 				parentanchor = vcenter
-				new_country_flag = {
-					blockoverride "Size" { size = { 150 150 } }
+				margin_right = 3
+				widget = {
+					size = { 150 100 }
+					state = {
+						name = "rectangle"
+						trigger_when = "[Not(EqualTo_int32(FixedPointToInt(GuiScope.SetRoot( Country.MakeScope ).ScriptValue('DIPLOMACY_flag_shape') ), '(int32)3'))]"
+						size = { 150 100 }
+					}
+					state = {
+						name = "square"
+						trigger_when = "[EqualTo_int32(FixedPointToInt(GuiScope.SetRoot( Country.MakeScope ).ScriptValue('DIPLOMACY_flag_shape') ), '(int32)3')]"
+						size = { 100 100 }
+					}
+					new_country_flag = {
+						blockoverride "Size" { size = { 150 150 } }
+						parentanchor = center
+						blockoverride "On_click" { onclick = "[ToggleGameView('overview')]" }
+						blockoverride "Flag" {
+							texture = "[Country.AccessCoatOfArms.GetTexture('(int32)155','(int32)355')]"
+							frame = "[Country.AccessCoatOfArms.GetFrame('(int32)155','(int32)355')]"
+							framesize = { 155 355 }
+						}
+					}
+				}
+				widget = {
+					size = { 10 94 }
 					parentanchor = vcenter
-					datacontext = "[InGameTopbar.GetPlayer]"
-					blockoverride "On_click" { onclick = "[ToggleGameView('overview')]" }
-					tooltip = "[InGameTopbar.GetFlagDesc]"
-					blockoverride "Flag" {
-						texture = "[Country.AccessCoatOfArms.GetTexture('(int32)155','(int32)355')]"
-						frame = "[Country.AccessCoatOfArms.GetFrame('(int32)155','(int32)355')]"
-						framesize = { 155 355 }
+					using = color_background
+					blockoverride "Color" {
+						using = red_background
+						color = "[Country.GetMapColor]"
 					}
 				}
 			}
@@ -2024,7 +2057,7 @@ vbox = {
 		}
 
 		#new_element_test_window = { } #hide
-		new_flags_test_window = { } #hide
+		#new_flags_test_window = { } #hide
 		state = {
 			name = "start"
 			on_start = "[PdxGuiTriggerAllAnimations('base_animation')]"

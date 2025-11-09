@@ -239,6 +239,15 @@ DIPLOMACY_test_event = {
 	}
 }
 
+DIPLOMACY_kickoff_play_event = {
+	# Saves 1 line in triggering play events when called in the random selection
+	DIPLOMACY_trigger_play_event = {
+		pov = $pov$
+		id = $id$
+		days = 0
+	}
+}
+
 DIPLOMACY_trigger_play_event = {
 	# Scope: Province
 	# Function Triggers the given $id$ event with all the necessary scopes for a diplomatic play event
@@ -451,6 +460,21 @@ DIPLOMACY_trigger_diplomatic_play_event = {
 		limit = {
 			var:diplomatic_play_progression < DIPLOMACY_play_progress_one_third
 		}
+		# Colonial play events
+		if = {
+			limit = {
+				scope:diplomatic_play.DIPLOMACY_play_industrialisation_diff > DIPLOMACY_play_colonial_diff
+			}
+			random_list = {
+
+			}
+		}
+		# Non-colonial play events
+		else = {
+			random_list = {
+
+			}
+		}
 	}
 	# MIDDLE EVENTS
 	else_if = {
@@ -460,12 +484,46 @@ DIPLOMACY_trigger_diplomatic_play_event = {
 				var:diplomatic_play_progression <= DIPLOMACY_play_progress_two_thirds
 			}
 		}
+		# Colonial play events
+		if = {
+			limit = {
+				scope:diplomatic_play.DIPLOMACY_play_industrialisation_diff > DIPLOMACY_play_colonial_diff
+			}
+			random_list = {
+
+			}
+		}
+		# Non-colonial play events
+		else = {
+
+		}
 	}
 	# LATE EVENTS
 	else_if = {
 		limit = {
 			var:diplomatic_play_progression > DIPLOMACY_play_progress_two_thirds
 		}
+		# Colonial play events
+		if = {
+			limit = {
+				scope:diplomatic_play.DIPLOMACY_play_industrialisation_diff > DIPLOMACY_play_colonial_diff
+			}
+			random_list = {
+				1 = { 
+					DIPLOMACY_kickoff_play_event = {
+						id = diplomatic_play.1
+						pov = var:play_instigator	
+					} # Fashoda 
+				}
+			}
+		}
+		# Non-colonial play events
+		else = {
+			random_list = {
+
+			}
+		}
+		
 	}
 }
 

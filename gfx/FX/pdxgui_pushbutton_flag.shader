@@ -81,6 +81,9 @@ PixelShader =
 				#ifdef DISABLED
 					OutColor.rgb = DisableColor( OutColor.rgb );
 				#endif
+
+				OutColor *= Input.Color;
+				
 			    return OutColor;
 			}
 		]]

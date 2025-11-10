@@ -241,11 +241,44 @@ DIPLOMACY_test_event = {
 
 DIPLOMACY_kickoff_play_event = {
 	# Saves 1 line in triggering play events when called in the random selection
-	DIPLOMACY_trigger_play_event = {
-		pov = $pov$
-		id = $id$
-		days = 0
+	if = {
+		limit = {
+			flag:$pov$ = flag:random_supporter_target
+		}
+		random_in_list = {
+			variable = play_observers_support_target
+
+			save_scope_as = pov_scope
+		}
+		DIPLOMACY_trigger_play_event = {
+			pov = scope:pov_scope
+			id = $id$
+			days = 0
+		}
 	}
+	else_if = {
+		limit = {
+			flag:$pov$ = flag:random_supporter_instigator
+		}
+		random_in_list = {
+			variable = play_observers_support_instigator
+
+			save_scope_as = pov_scope
+		}
+		DIPLOMACY_trigger_play_event = {
+			pov = scope:pov_scope
+			id = $id$
+			days = 0
+		}
+	}
+	else = {
+		DIPLOMACY_trigger_play_event = {
+			pov = $pov$
+			id = $id$
+			days = 0
+		}
+	}
+
 }
 
 DIPLOMACY_trigger_play_event = {
@@ -475,8 +508,11 @@ DIPLOMACY_trigger_diplomatic_play_event = {
 			}
 		}
 		random_list = {
-			1 = { # Tangier crisis type (rival head of state visits target to promote target sovereignty)
-
+			1 = { # Tangier crisis type (target supporter head of state visits target to promote target sovereignty)
+				DIPLOMACY_kickoff_play_event = {
+					id = agadir_crisis_type.1
+					pov = random_supporter_target
+				} 
 			}
 		}
 
@@ -490,7 +526,7 @@ DIPLOMACY_trigger_diplomatic_play_event = {
 			1 = { # Fashoda type
 				DIPLOMACY_kickoff_play_event = {
 					id = diplomatic_play.1
-					pov = var:play_instigator	
+					pov = var:play_instigator
 				} 
 			}
 			# Agadir crisis type (rival sends gunboat to demand a territorial share)

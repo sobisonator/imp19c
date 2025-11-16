@@ -1,0 +1,124 @@
+namespace = minor_border_discussion
+
+minor_border_discussion.1 = {
+
+	# Technical discussions over border such as passage of merchants and running of toll stations
+	type = country_event
+	title = minor_border_discussion.1.t
+	desc = minor_border_discussion.1.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay # TODO: Pick a better picture
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
+    trigger = {
+    	any_owned_province = {
+    		any_neighbor_province = {
+    			owner = scope:diplomatic_play.var:play_target_country
+    		}
+    	}
+    }
+
+    option = { # Push for a deal favouring us
+    	# + Large success
+    	# - No progress
+    	# + Money
+    	# + Political power
+        name = minor_border_discussion.1.a
+        custom_tooltip = diplomatic_play.1.a.tt
+        ai_chance = {
+            modifier = {
+                factor = 30
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value < 0
+                }
+            }
+            modifier = {
+                factor = 30
+                DIPLOMACY_play_attitude_friendly_trigger = no
+            }
+        }
+
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = 10
+                progress = 0
+            }
+        }
+        add_treasury = scope:diplomatic_play.DIPLOMACY_10percent_play_target_income_positive    
+
+        add_political_influence = 10
+
+        add_opinion = {
+            modifier = hindered_in_play
+            target = scope:diplomatic_play.var:play_target_country
+        }
+    }
+
+    option = { # Negotiate an equal deal
+    	# + Medium progress
+        name = minor_border_discussion.1.b
+        custom_tooltip = diplomatic_play.1.b.tt
+        ai_chance = {
+            modifier = {
+                factor = 20
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value > 0
+                }
+            }
+            modifier = {
+                factor = 30
+                DIPLOMACY_play_attitude_hostile_trigger = no
+            }
+        }
+
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = 1
+                progress = DIPLOMACY_play_progress_medium
+            }
+        }   
+    }
+
+    option = { # Cut them a good deal
+    	# + Small success
+    	# + Major progress
+    	# - Political power
+    	# - Money
+        name = minor_border_discussion.1.c
+        custom_tooltip = diplomatic_play.1.c.tt
+        ai_chance = {
+            modifier = {
+                factor = 10
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value > 0
+                }
+            }
+            modifier = {
+                factor = 10
+                DIPLOMACY_play_attitude_friendly_trigger = yes
+            }
+            modifier = {
+                factor = 20
+                treasury > scope:diplomatic_play.DIPLOMACY_10percent_play_target_income_positive
+            }
+        }
+
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = 1
+                progress = DIPLOMACY_play_progress_large
+            }
+        }
+        add_political_influence = -10
+        add_treasury = scope:diplomatic_play.DIPLOMACY_10percent_play_target_income_negative
+    }
+
+    # TODO: Add response events
+
+}

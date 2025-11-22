@@ -24,14 +24,14 @@ CURRENCY_base_starting_reserve_gold = {
 			OR = {
 				trigger_if = {
 					limit = {
-						has_variable = var:official_currency
+						has_variable = official_currency
 					}
 					OR = {
 						var:official_currency.var:backing_type = flag:silver_standard
 						var:official_currency.var:backing_type = flag:bimetallic_standard
 					}
 				}
-				NOT = { has_variable = var:official_currency }
+				NOT = { has_variable = official_currency }
 			}
 		}
 		value = country_population
@@ -43,7 +43,7 @@ CURRENCY_base_starting_reserve_gold = {
 		limit = {
 			trigger_if = {
 				limit = {
-					has_variable = var:official_currency
+					has_variable = official_currency
 				}
 				var:official_currency.var:backing_type = flag:bimetallic_standard
 			}
@@ -74,7 +74,7 @@ CURRENCY_base_starting_reserve_silver = {
 						var:official_currency.var:backing_type = flag:bimetallic_standard
 					}
 				}
-				NOT = { has_variable = var:official_currency }
+				NOT = { has_variable = official_currency }
 			}
 		}
 		value = country_population
@@ -1164,12 +1164,20 @@ CURRENCY_reserve_accumulation_rate_from_inflation_or_deflation = {
 	}
 }
 
+CURRENCY_silver_reserve_size = {
+	value = var:silver_reserve_size
+}
+
+CURRENCY_gold_reserve_size = {
+	value = var:gold_reserve_size
+}
+
 CURRENCY_gold_reserve_actual_change_with_cashout = {
 	value = var:gold_reserve_actual_change
 	if = {
 		limit = {
 			NOT = { has_variable = reserves_frozen }
-			var:gold_reserve_size > var:silver_reserve_size
+			var:gold_reserve_size > CURRENCY_silver_reserve_size
 		}
 		subtract = 	CURRENCY_inflation_precious_metal_reserve_bought
 		add = CURRENCY_deflation_money_bought_precious_metal_sold
@@ -1181,7 +1189,7 @@ CURRENCY_silver_reserve_actual_change_with_cashout = {
 	if = {
 		limit = {
 			NOT = { has_variable = reserves_frozen }
-			var:silver_reserve_size > var:gold_reserve_size
+			var:silver_reserve_size > CURRENCY_gold_reserve_size
 		}
 		subtract = 	CURRENCY_inflation_precious_metal_reserve_bought
 		add = CURRENCY_deflation_money_bought_precious_metal_sold
@@ -1487,10 +1495,11 @@ CURRENCY_power_trade_bonus = {
 					}
 					add = var:CURRENCY_power_cached
 				}
+				min = 1
 			}
 		}
 	}
-	divide = 2
+	multiply = 0.5
 }
 
 
@@ -1502,7 +1511,9 @@ CURRENCY_power_trade_bonus_cached = {
 		}
 		if = {
 			limit = {
-				var:official_currency = { has_variable = CURRENCY_power_trade_bonus_cached }
+				var:official_currency = { 
+					has_variable = CURRENCY_power_trade_bonus_cached
+				}
 			}
 			value = var:official_currency.var:CURRENCY_power_trade_bonus_cached
 		}

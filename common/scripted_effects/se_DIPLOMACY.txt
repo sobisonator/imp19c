@@ -253,7 +253,7 @@ DIPLOMACY_kickoff_play_event = {
 		DIPLOMACY_trigger_play_event = {
 			pov = scope:pov_scope
 			id = $id$
-			days = 0
+			days = { 0 28 }
 		}
 	}
 	else_if = {
@@ -268,14 +268,14 @@ DIPLOMACY_kickoff_play_event = {
 		DIPLOMACY_trigger_play_event = {
 			pov = scope:pov_scope
 			id = $id$
-			days = 0
+			days = { 0 28 }
 		}
 	}
 	else = {
 		DIPLOMACY_trigger_play_event = {
 			pov = $pov$
 			id = $id$
-			days = 0
+			days = { 0 28 }
 		}
 	}
 
@@ -323,19 +323,9 @@ DIPLOMACY_trigger_play_event = {
 
 	$pov$ = {
 		save_scope_as = actor
-		if = {
-			limit = {
-				$days$ = 0
-			}
-			trigger_event = {
-				id = $id$
-			}
-		}
-		else = {
-			trigger_event = {
-				id = $id$
-				days = $days$
-			}
+		trigger_event = {
+			id = $id$
+			days = $days$
 		}
 	}
 	
@@ -367,6 +357,56 @@ DIPLOMACY_add_colonial_outpost = {
     	name = colonial_outpost_owner
     	value = $outpost_owner$
     }
+
+}
+
+DIPLOMACY_update_all_diplomatic_plays = {
+	every_province = {
+		limit = {
+			has_variable = is_diplomatic_play
+		}
+		DIPLOMACY_trigger_diplomatic_play_event = yes
+		DIPLOMACY_diplomatic_play_update_status = yes
+	}
+}
+
+DIPLOMACY_diplomatic_play_update_status = {
+	# Scope: Diplomatic play province
+	# Function: All observers check their allegiance in a diplomatic play, and the play's balance of power and attitude is recalculated
+	# Called: On diplomatic play update on_action
+	# TODO: Implement on_action
+
+	save_scope_as = diplomatic_play
+
+	# Update the diplomatic play's age
+	change_variable = {
+		name = diplomatic_play_progression
+		add = 1
+	}
+	# If the diplomatic play is progressed, push it to its conculsion instead
+	if = {
+		limit = {
+			var:diplomatic_play_progression > DIPLOMACY_play_max_progression
+		}
+		DIPLOMACY_complete_play = {
+			diplomatic_play = scope:diplomatic_play
+		}
+	}
+	# Otherwise, update all values
+	else = {
+		AI_diplomatic_play_do_support_change = yes
+		AI_assess_adversary = { 
+			diplomatic_play = scope:diplomatic_play
+			AI_target = scope:diplomatic_play.var:play_target_country
+		}
+		AI_diplomatic_play_evaluate_attitude = {
+			diplomatic_play = scope:diplomatic_play
+		}
+		AI_diplomatic_play_evaluate_war = {
+			diplomatic_play = scope:diplomatic_play
+		}
+	}
+	
 
 }
 
@@ -589,12 +629,4 @@ DIPLOMACY_trigger_diplomatic_play_finale_event = {
 	# Instigator declares war on the target country (high likelihood of war, low infamy cost and stability cost to instigator)
 	# Royal marriage between the two countries (Friendly, both monarchies)
 	# Trade agreement between the two countries (Friendly, both AI)
-}
-
-DIPLOMACY_test_random_list = {
-	random_list = {
-		1 = { add_treasury = 1 }
-		2 = { add_treasury = 200 }
-		3 = { add_treasury = 9999 }
-	}
 }

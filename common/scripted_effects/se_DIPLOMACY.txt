@@ -371,10 +371,9 @@ DIPLOMACY_update_all_diplomatic_plays = {
 }
 
 DIPLOMACY_diplomatic_play_update_status = {
-	# Scope: Diplomatic play province
+	# Scope: Province (diplomatic play)
 	# Function: All observers check their allegiance in a diplomatic play, and the play's balance of power and attitude is recalculated
 	# Called: On diplomatic play update on_action
-	# TODO: Implement on_action
 
 	save_scope_as = diplomatic_play
 
@@ -394,16 +393,27 @@ DIPLOMACY_diplomatic_play_update_status = {
 	}
 	# Otherwise, update all values
 	else = {
-		AI_diplomatic_play_do_support_change = yes
-		AI_assess_adversary = { 
-			diplomatic_play = scope:diplomatic_play
-			AI_target = scope:diplomatic_play.var:play_target_country
-		}
-		AI_diplomatic_play_evaluate_attitude = {
-			diplomatic_play = scope:diplomatic_play
-		}
-		AI_diplomatic_play_evaluate_war = {
-			diplomatic_play = scope:diplomatic_play
+		if = {
+			limit = {
+				NOT = {
+					has_variable = diplomatic_play_reevaluated_recently
+				}
+			}
+			AI_diplomatic_play_do_support_change = yes
+			AI_assess_adversary = { 
+				diplomatic_play = scope:diplomatic_play
+				AI_target = scope:diplomatic_play.var:play_target_country
+			}
+			AI_diplomatic_play_evaluate_attitude = {
+				diplomatic_play = scope:diplomatic_play
+			}
+			AI_diplomatic_play_evaluate_war = {
+				diplomatic_play = scope:diplomatic_play
+			}
+			set_variable = {
+				name = diplomatic_play_reevaluated_recently
+				days = 365
+			}
 		}
 	}
 	

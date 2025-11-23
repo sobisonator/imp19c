@@ -17,17 +17,28 @@
 	}
 
 	# Multiply by currency power
-	if = {
-		limit = {
-			has_variable = official_currency
-		}
-		multiply = {
-			value = 1
-			add = CURRENCY_power_trade_bonus_cached
-		}
-	}
+	#if = {
+	#	limit = {
+	#		has_variable = official_currency
+	#	}
+	#	multiply = {
+	#		value = 1
+	#		add = CURRENCY_power_trade_bonus_cached
+	#	}
+	#}
+
+	multiply = DIPLOMACY_power_stability_bonus
 
 	min = 0
+}
+
+DIPLOMACY_power_stability_bonus = {
+	# Scope: Country
+	# Function: Provide a modifier from stability to diplomacy power
+	value = stability
+	subtract = 50
+	multiply = 0.001
+	add = 1
 }
 
 DIPLOMACY_power_from_subjects = {
@@ -454,4 +465,50 @@ DIPLOMACY_play_war_willing = {
 }
 DIPLOMACY_play_war_considering = {
 	value = -7000
+}
+
+DIPLOMACY_play_industrialisation_diff = {
+	# Scope: Province (diplomatc play)
+	# Function: Get the difference between capital scopes of the instigator and target area
+	# Used to determine if this is a colonial play, or a play between two industrialised areas
+
+	value = scope:play_instigator.capital_scope.civilization_value
+	subtract = scope:play_target_area.civilization_value
+}
+
+DIPLOMACY_play_colonial_diff = {
+	# Scope: Province (diplomatic play)
+	# Function: The threshold at which the DIPLOMACY_play_industrialisation_diff means that a diplomatic play is colonial in nature
+	value = 20
+}
+
+DIPLOMACY_province_wealth_value = {
+	# Scope: Province
+	# Function: Get an estimated wealth value for a province
+	value = total_population
+	add = num_of_upper_strata # Count upper strata twice
+	multiply = 2
+	add = {
+		value = num_of_used_building_slots
+		multiply = 10
+	}
+}
+
+DIPLOMACY_province_tradegood_value = {
+	if = {
+		limit = {
+			trade_goods = grain
+		}
+		value = 0 # TODO: Global price of grain
+	}
+}
+
+# Values for diplomacy events
+DIPLOMACY_10percent_play_target_income_negative = {
+    value = scope:diplomatic_play.var:play_target_country.INCOME_national_total_quarterly
+    multiply = -0.1
+}
+DIPLOMACY_10percent_play_target_income_positive = {
+    value = scope:diplomatic_play.var:play_target_country.INCOME_national_total_quarterly
+    multiply = 0.1
 }

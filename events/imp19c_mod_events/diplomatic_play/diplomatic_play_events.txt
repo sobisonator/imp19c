@@ -25,6 +25,11 @@ diplomatic_play.1 = {
             NOT = { tag = BAR }
             exists = yes
         }
+        scope:diplomatic_play = {
+            DIPLOMACY_play_attitude_friendly_trigger = no
+            DIPLOMACY_play_war_not_willing_trigger = no
+            DIPLOMACY_play_colonial_trigger = yes
+        }
     }
 
     option = { # Support
@@ -145,11 +150,11 @@ diplomatic_play.1 = {
                 }
                 save_scope_as = catcher
             }
-            debug_log = catcher
+            #debug_log = catcher
             DIPLOMACY_trigger_play_event = {
                 pov = scope:catcher
                 id = diplomatic_play.3 # Catcher snags the expedition en-route
-                days = 0 # TODO: 21
+                days = 21
             }
 
         }
@@ -300,6 +305,14 @@ diplomatic_play.2 = {
         custom_tooltip = diplomatic_play.2.b.tt
         ai_chance = {
             factor = 20
+            modifier = {
+                factor = 5
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 10
+            }
+            modifier = {
+                factor = 5
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 1
+            }
         }
 
         add_war_exhaustion = 1
@@ -329,14 +342,6 @@ diplomatic_play.2 = {
             modifier = {
                 factor = 5
             }
-            modifier = {
-                factor = -5
-                scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 10
-            }
-            modifier = {
-                factor = -5
-                scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 1
-            }
         }
 
         add_aggressive_expansion = 1
@@ -347,16 +352,14 @@ diplomatic_play.2 = {
             target = scope:play_instigator
         }
         scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = -10
+                progress = DIPLOMACY_play_progress_large
+            }
             DIPLOMACY_trigger_play_event = {
                 pov = scope:play_instigator
                 id = diplomatic_play.4 # Expedition attacked
                 days = 0
-            }
-        }
-        scope:diplomatic_play = {
-            DIPLOMACY_progress_play = {
-                success = -10
-                progress = DIPLOMACY_play_progress_large
             }
         }
     }
@@ -467,13 +470,13 @@ diplomatic_play.3 = {
             modifier = {
                 factor = 10
                 opinion = {
-                    target = scope:diplomatic_play.var:play_target_instigator
+                    target = scope:diplomatic_play.var:play_instigator
                     value > 100
                 }
             }
             modifier = {
                 factor = 10
-                alliance_with = scope:diplomatic_play.var:play_target_instigator
+                alliance_with = scope:diplomatic_play.var:play_instigator
             }
             modifier = {
                 factor = 100
@@ -512,9 +515,9 @@ diplomatic_play.3 = {
 
         scope:diplomatic_play = {
             DIPLOMACY_trigger_play_event = {
-                pov = scope:catcher
+                pov = scope:play_target_country
                 id = diplomatic_play.2 # Expedition arrives
-                days = 0 # TODO: 7
+                days = 7
             }
         }
 
@@ -618,7 +621,6 @@ diplomatic_play.4 = {
             add_political_influence = -5
             add_aggressive_expansion = 5
 
-            # TODO: Use a scripted effect to declare a diplomatic play war, adding all the supporters for both sides.
             scope:diplomatic_play = { 
                 DIPLOMACY_trigger_diplomatic_play_war = yes
             }
@@ -775,7 +777,7 @@ diplomatic_play.7 = {
     }
 
     option = { # Back down
-        name = diplomatic_play.7.a
+        name = diplomatic_play.7.b
         custom_tooltip = diplomatic_play.7.b.tt
 
         ai_chance = {

@@ -1000,73 +1000,27 @@ CURRENCY_alter_own_debt = {
 	# Scope: Country
 	# Function: Add to the national debt value, accounting for the thousands, millions and billions values that need to be displayed
 	change_variable = {
-		name = CURRENCY_national_debt_thousands
-		add = $thousands$
+		name = CURRENCY_national_debt
+		add = {
+			add = {
+				value = $thousands$
+				divide = 1000
+			}
+			add = {
+				value = $millions$
+			}
+			add = {
+				value = $billions$
+				multiply = 1000
+			}
+		}
 	}
 	if = {
 		limit = {
-			var:CURRENCY_national_debt_thousands < 0
+			var:CURRENCY_national_debt < 0
 		}
 		set_variable = {
-			name = CURRENCY_national_debt_thousands
-			value = 999
-		}
-		change_variable = {
-			name = CURRENCY_national_debt_millions
-			subtract = 1
-		}
-	}
-	while = {
-		count = 9
-		limit = {
-			var:CURRENCY_national_debt_thousands > 1000
-		}
-		change_variable = {
-			name = CURRENCY_national_debt_thousands
-			subtract = 1000
-		}
-		change_variable = {
-			name = CURRENCY_national_debt_millions
-			add = 1
-		}
-	}
-
-	change_variable = {
-		name = CURRENCY_national_debt_millions
-		add = $millions$
-	}
-	if = {
-		limit = {
-			var:CURRENCY_national_debt_millions > 1000
-		}
-		change_variable = {
-			name = CURRENCY_national_debt_millions
-			subtract = 1000
-		}
-		change_variable = {
-			name = CURRENCY_national_debt_billions
-			add = 1
-		}
-	}
-
-	change_variable = {
-		name = CURRENCY_national_debt_billions
-		add = $billions$
-	}
-	if = {
-		limit = {
-			CURRENCY_national_debt_scaled < 0
-		}
-		set_variable = {
-			name = CURRENCY_national_debt_thousands
-			value = 0
-		}
-		set_variable = {
-			name = CURRENCY_national_debt_millions
-			value = 0
-		}
-		set_variable = {
-			name = CURRENCY_national_debt_billions
+			name = CURRENCY_national_debt
 			value = 0
 		}
 	}
@@ -1344,8 +1298,6 @@ CURRENCY_set_amounts_country = {
 			value = $minting_rate$
 		}
 	}
-
-	CURRENCY_cache_power = yes
 }
 
 CURRENCY_governorship_allocate_pops_currency = {
@@ -1396,7 +1348,7 @@ CURRENCY_set_country_currency = {
 		}
 
 	}
-	CURRENCY_cache_power = yes
+	
 }
 
 CURRENCY_peg_country_currency = {
@@ -1617,10 +1569,16 @@ CURRENCY_update_purchasing_power = {
 		}
 	}
 
-	change_variable = {
-		name = purchasing_power
-		multiply = var:backing_value
+	if = {
+		limit = {
+			has_variable = backing_value
+		}
+		change_variable = {
+			name = purchasing_power
+			multiply = var:backing_value
+		}
 	}
+
 
 }
 

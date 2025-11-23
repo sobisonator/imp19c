@@ -239,6 +239,48 @@ DIPLOMACY_test_event = {
 	}
 }
 
+DIPLOMACY_kickoff_play_event = {
+	# Saves 1 line in triggering play events when called in the random selection
+	if = {
+		limit = {
+			flag:$pov$ = flag:random_supporter_target
+		}
+		random_in_list = {
+			variable = play_observers_support_target
+
+			save_scope_as = pov_scope
+		}
+		DIPLOMACY_trigger_play_event = {
+			pov = scope:pov_scope
+			id = $id$
+			days = { 0 28 }
+		}
+	}
+	else_if = {
+		limit = {
+			flag:$pov$ = flag:random_supporter_instigator
+		}
+		random_in_list = {
+			variable = play_observers_support_instigator
+
+			save_scope_as = pov_scope
+		}
+		DIPLOMACY_trigger_play_event = {
+			pov = scope:pov_scope
+			id = $id$
+			days = { 0 28 }
+		}
+	}
+	else = {
+		DIPLOMACY_trigger_play_event = {
+			pov = $pov$
+			id = $id$
+			days = { 0 28 }
+		}
+	}
+
+}
+
 DIPLOMACY_trigger_play_event = {
 	# Scope: Province
 	# Function Triggers the given $id$ event with all the necessary scopes for a diplomatic play event
@@ -281,19 +323,9 @@ DIPLOMACY_trigger_play_event = {
 
 	$pov$ = {
 		save_scope_as = actor
-		if = {
-			limit = {
-				$days$ = 0
-			}
-			trigger_event = {
-				id = $id$
-			}
-		}
-		else = {
-			trigger_event = {
-				id = $id$
-				days = $days$
-			}
+		trigger_event = {
+			id = $id$
+			days = $days$
 		}
 	}
 	
@@ -325,6 +357,66 @@ DIPLOMACY_add_colonial_outpost = {
     	name = colonial_outpost_owner
     	value = $outpost_owner$
     }
+
+}
+
+DIPLOMACY_update_all_diplomatic_plays = {
+	every_province = {
+		limit = {
+			has_variable = is_diplomatic_play
+		}
+		DIPLOMACY_trigger_diplomatic_play_event = yes
+		DIPLOMACY_diplomatic_play_update_status = yes
+	}
+}
+
+DIPLOMACY_diplomatic_play_update_status = {
+	# Scope: Province (diplomatic play)
+	# Function: All observers check their allegiance in a diplomatic play, and the play's balance of power and attitude is recalculated
+	# Called: On diplomatic play update on_action
+
+	save_scope_as = diplomatic_play
+
+	# Update the diplomatic play's age
+	change_variable = {
+		name = diplomatic_play_progression
+		add = 1
+	}
+	# If the diplomatic play is progressed, push it to its conculsion instead
+	if = {
+		limit = {
+			var:diplomatic_play_progression > DIPLOMACY_play_max_progression
+		}
+		DIPLOMACY_complete_play = {
+			diplomatic_play = scope:diplomatic_play
+		}
+	}
+	# Otherwise, update all values
+	else = {
+		if = {
+			limit = {
+				NOT = {
+					has_variable = diplomatic_play_reevaluated_recently
+				}
+			}
+			AI_diplomatic_play_do_support_change = yes
+			AI_assess_adversary = { 
+				diplomatic_play = scope:diplomatic_play
+				AI_target = scope:diplomatic_play.var:play_target_country
+			}
+			AI_diplomatic_play_evaluate_attitude = {
+				diplomatic_play = scope:diplomatic_play
+			}
+			AI_diplomatic_play_evaluate_war = {
+				diplomatic_play = scope:diplomatic_play
+			}
+			set_variable = {
+				name = diplomatic_play_reevaluated_recently
+				days = 365
+			}
+		}
+	}
+	
 
 }
 
@@ -451,6 +543,32 @@ DIPLOMACY_trigger_diplomatic_play_event = {
 		limit = {
 			var:diplomatic_play_progression < DIPLOMACY_play_progress_one_third
 		}
+		random_list = {
+			1 = { 
+				DIPLOMACY_kickoff_play_event = {
+					id = minor_border_discussion.1
+					pov = var:play_instigator
+				} 
+			}
+			1 = { 
+				DIPLOMACY_kickoff_play_event = {
+					id = agitator_sponsorship.1
+					pov = var:play_instigator
+				} 
+			}
+			1 = { 
+				DIPLOMACY_kickoff_play_event = {
+					id = send_settlers.1
+					pov = var:play_instigator
+				} 
+			}
+			1 = { # Tangier crisis type (target supporter head of state visits target to promote target sovereignty)
+				DIPLOMACY_kickoff_play_event = {
+					id = head_of_state_visit_play_area.1
+					pov = random_supporter_target
+				} 
+			}
+		}
 	}
 	# MIDDLE EVENTS
 	else_if = {
@@ -460,19 +578,65 @@ DIPLOMACY_trigger_diplomatic_play_event = {
 				var:diplomatic_play_progression <= DIPLOMACY_play_progress_two_thirds
 			}
 		}
+		random_list = {
+			1 = { # Tangier crisis type (target supporter head of state visits target to promote target sovereignty)
+				DIPLOMACY_kickoff_play_event = {
+					id = head_of_state_visit_play_area.1
+					pov = random_supporter_target
+				} 
+			}
+			1 = { 
+				DIPLOMACY_kickoff_play_event = {
+					id = agitator_sponsorship.1
+					pov = var:play_instigator
+				} 
+			}
+			1 = { 
+				DIPLOMACY_kickoff_play_event = {
+					id = send_settlers.1
+					pov = var:play_instigator
+				} 
+			}
+		}
+
 	}
 	# LATE EVENTS
 	else_if = {
 		limit = {
 			var:diplomatic_play_progression > DIPLOMACY_play_progress_two_thirds
 		}
+		random_list = {
+			1 = { # Fashoda type
+				DIPLOMACY_kickoff_play_event = {
+					id = diplomatic_play.1
+					pov = var:play_instigator
+				} 
+			}
+			1 = { 
+				DIPLOMACY_kickoff_play_event = {
+					id = agitator_sponsorship.1
+					pov = var:play_instigator
+				} 
+			}
+			1 = { # Agadir crisis type event event (a supporter of the target sends a gunboat to circle the target area)
+				DIPLOMACY_kickoff_play_event = {
+					id = agadir_crisis_type.1
+					pov = random_supporter_target
+				} 
+			}
+		}
 	}
 }
 
-DIPLOMACY_test_random_list = {
-	random_list = {
-		1 = { add_treasury = 1 }
-		2 = { add_treasury = 200 }
-		3 = { add_treasury = 9999 }
-	}
+DIPLOMACY_trigger_diplomatic_play_finale_event = {
+	# Scope: Province (diplomatic play)
+	# Function: Trigger the final event for a diplomatic play, based on the conditions of the play
+
+	# Target country turned into protectorate (major power imbalance, colonial type play)
+	# Target area ceded to instigator (moderate power imbalance, colonial type play)
+	# Instigator creates a rebellion in the target area, as protectorate of itself (major power imbalance, poor relations, low stability in the target country)
+	# Instigator creates an independent rebellion in the target area (moderate power imbalanace, poor relations, low stability in the target country)
+	# Instigator declares war on the target country (high likelihood of war, low infamy cost and stability cost to instigator)
+	# Royal marriage between the two countries (Friendly, both monarchies)
+	# Trade agreement between the two countries (Friendly, both AI)
 }

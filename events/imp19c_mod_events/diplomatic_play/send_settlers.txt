@@ -1,0 +1,318 @@
+namespace = send_settlers
+
+send_settlers.1 = {
+
+	# Send settlers to occupy an area, can result in the adding of pops
+	type = country_event
+	title = send_settlers.1.t
+	desc = send_settlers.1.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay # TODO: Pick a better picture
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
+    trigger = {
+    	any_owned_province = {
+    		any_neighbor_province = {
+    			owner = scope:diplomatic_play.var:play_target_country
+                area = scope:diplomatic_play.var:play_target_area.area
+    		}
+    	}
+    }
+
+    immediate = {
+        # Select an origin province in a neighbouring governorship
+        random_owned_province = {
+            limit = {
+                governorship = {
+                    any_governorship_state = {
+                        any_state_province = {
+                            any_neighbor_province = {
+                                owner = scope:diplomatic_play.var:play_target_country
+                            }
+                        }
+                    }
+                }
+                total_population > 1
+                any_pops_in_province = {
+                    culture.culture_group = scope:diplomatic_play.var:play_instigator.culture.culture_group # TODO: Test that this trigger works directly in explorer
+                }
+            }
+            save_scope_as = emigration_point
+        }
+
+        # Select the destination in the play target area
+        scope:diplomatic_play.var:play_target_country = {
+            random_owned_province = {
+                limit = {
+                    area = scope:diplomatic_play.var:play_target_area.area
+                }
+                save_scope_as = immigration_point
+            }
+        }
+    }
+
+    option = { # Allow settlers to go
+    	# Moderate success chance
+    	# Major progress
+    	# Trigger event for target, move pops from instigator to target area
+        name = send_settlers.1.a
+        custom_tooltip = diplomatic_play.1.a.tt
+        ai_chance = {
+            modifier = {
+                factor = 10
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value < 0
+                }
+            }
+            modifier = {
+                factor = 30
+                DIPLOMACY_play_attitude_friendly_trigger = no
+            }
+            modifier = {
+                factor = 30
+                DIPLOMACY_play_attitude_hostile_trigger = yes
+            }
+            modifier = {
+                factor = 30
+                DIPLOMACY_play_war_not_willing_trigger = no
+            }
+        }
+
+        scope:emigration_point = {
+            random_pops_in_province = {
+                limit = {
+                    culture.culture_group = scope:diplomatic_play.var:play_instigator.culture.culture_group
+                }
+                move_pop = scope:immigration_point
+            }
+        }
+        add_opinion = {
+            modifier = hindered_in_play
+            target = scope:diplomatic_play.var:play_target_country
+        }
+        add_aggressive_expansion = 5
+        scope:diplomatic_play = {
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:diplomatic_play.var:play_target_country
+                id = send_settlers.2 # Settlers arrive
+                days = 0
+            }
+            DIPLOMACY_progress_play = {
+                success = 10
+                progress = DIPLOMACY_play_progress_large
+            }
+        }
+    }
+
+    option = { # Forbid and arrest settlers
+    	# Negligible stability loss
+    	# No progress
+        name = send_settlers.1.b
+        ai_chance = {
+            modifier = {
+                factor = 30
+                opinion = {
+                    target = scope:diplomatic_play.var:play_target_country
+                    value > 0
+                }
+            }
+            modifier = {
+                factor = 30
+                DIPLOMACY_play_attitude_friendly_trigger = yes
+            }
+            modifier = {
+                factor = 30
+                DIPLOMACY_play_war_willing_trigger = no
+            }
+            modifier = {
+                factor = 100
+                DIPLOMACY_play_attitude_friendly_trigger = yes
+            }
+        } 
+        add_stability = 1
+        add_tyranny = 1 
+    }
+
+}
+
+send_settlers.2 = {
+    # Settlers from the instigator arrive in the region
+    # POV = target country
+    type = country_event
+    title = send_settlers.2.t
+    desc = send_settlers.2.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay # TODO: Pick a better picture
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
+    option = { # Send a strongly-worded letter
+        name = send_settlers.2.a
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+                scope:diplomatic_play.var:play_target_country.DIPLOMACY_power < scope:diplomatic_play.var:play_instigator.DIPLOMACY_power
+            }
+            modifier = {
+                factor = 10
+                stability < 50
+            }
+            modifier = {
+                factor = 100
+                DIPLOMACY_play_attitude_friendly_trigger = yes
+            }
+        } 
+
+        add_stability = -5
+        scope:diplomatic_play.var:play_target_area = {
+            add_state_loyalty = -20
+        }
+    }
+
+    option = { # Drive them out!
+        name = send_settlers.2.b
+        custom_tooltip = send_settlers.2.b.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+                DIPLOMACY_play_war_willing_trigger = yes
+            }
+            modifier = {
+                factor = 10
+                scope:diplomatic_play.var:play_target_country.DIPLOMACY_power > scope:diplomatic_play.var:play_instigator.DIPLOMACY_power
+            }
+            modifier = {
+                factor = 10
+                DIPLOMACY_play_war_willing_trigger = no
+            }
+        } 
+
+        add_aggressive_expansion = 1
+        add_stability = -1
+        scope:diplomatic_play = {
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:diplomatic_play.var:play_instigator
+                id = send_settlers.3 # Settlers driven out by target country
+                days = 21
+            }
+            DIPLOMACY_progress_play = {
+                success = -10
+                progress = DIPLOMACY_play_progress_large
+            }
+        }
+    }
+
+}
+
+send_settlers.3 = {
+    # Settlers driven out
+    # POV = instigator
+    type = country_event
+    title = send_settlers.3.t
+    desc = send_settlers.3.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay # TODO: Pick a better picture
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
+    option = { # Back down
+        name = send_settlers.3.a
+
+        ai_chance = {
+            modifier = {
+                factor = 100
+                DIPLOMACY_play_war_not_willing_trigger = yes
+            }
+            modifier = {
+                factor = 10
+                stability < 50
+            }
+            modifier = {
+                factor = 100
+                DIPLOMACY_play_attitude_friendly_trigger = yes
+            }
+        } 
+
+        add_stability = -1
+        add_political_influence = -2
+        add_aggressive_expansion = -1
+
+    }
+
+    option = { # Declare war
+        name = send_settlers.3.b
+        custom_tooltip = send_settlers.3.b.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+                DIPLOMACY_play_war_willing_trigger = yes
+            }
+            modifier = {
+                factor = 10
+                DIPLOMACY_play_attitude_hostile_trigger = yes
+            }
+        }
+
+        scope:diplomatic_play = { 
+            var:play_target_area.state = {
+                # Gain independence as a new country and join instigator, if loyalty is low
+                if = {
+                    limit = {
+                        state_loyalty < 50
+                    }
+                    every_state_province = {
+                        limit = {
+                            province_unrest > 0
+                            is_capital = no
+                        }
+                        add_to_list = play_independence_list
+                        save_scope_as = new_country_province
+                    }
+                    LAND_release_from_list = {
+                        releaser = scope:diplomatic_play.var:play_target_country
+                        list = play_independence_list
+                        capital_location = by_population
+                        primary_culture = scope:diplomatic_play.var:play_instigator.culture
+                        country_religion = scope:diplomatic_play.var:play_instigator.religion
+                        as_subject_type = independent
+                        government_type = revolutionary_republic
+                        give_overlord_hos = no
+                        country_flag = dynamic
+                        country_name = dynamic
+                        country_color = dynamic
+                    }
+                }
+            }
+            DIPLOMACY_trigger_diplomatic_play_war = yes
+            scope:new_country_province.owner = {
+                scope:diplomatic_play.var:play_target_area.state = {
+                    every_state_province = {
+                        add_claim = scope:new_country_province.owner
+                    }
+                }
+                add_to_war = {
+                    target = scope:current_war_scope
+                    attacker = yes
+                    leader = no
+                }
+            }
+            DIPLOMACY_notify_player = {
+                event = AI_notification_event.4
+            }
+            
+        }
+    }
+
+
+}

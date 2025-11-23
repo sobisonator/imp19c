@@ -1,0 +1,789 @@
+namespace = agadir_crisis_type
+
+# TODO: Loc pending for most of these events
+
+agadir_crisis_type.1 = {
+    # Scope: Country, supporter of the play target
+
+    # Send a gunboat to challenge a rival's influence in the area
+
+    type = country_event
+    title = agadir_crisis_type.1.t
+    desc = agadir_crisis_type.1.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
+    trigger = {
+        scope:diplomatic_play.var:play_target_country = {
+            any_owned_province = {
+                is_coastal = yes
+            }
+        }
+        any_navy = { exists = yes }
+    }
+
+    immediate = {
+        save_scope_as = observer
+        scope:diplomatic_play = {
+            set_variable = {
+                name = agadir_rival
+                value = scope:observer
+            }
+        }
+    }
+
+    option = { # Send a gunboat
+        name = agadir_crisis_type.1.a
+        custom_tooltip = agadir_crisis_type.1.a.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+            }
+            modifier = {
+                factor = 10
+                scope:foreign_minister = {
+                    martial > charisma
+                }
+            }
+            modifier = {
+                factor = 100
+                opinion = {
+                    target = scope:diplomatic_play.var:play_instigator
+                    value < 0
+                }
+            }
+            modifier = {
+                factor = 100
+                OR = {
+                    alliance_with = scope:diplomatic_play.var:play_target_country
+                    scope:diplomatic_play.var:play_target_country = {
+                        is_subject_of = scope:observer
+                    }
+                }   
+            }
+        }
+
+        add_political_influence = -5
+        POLITICS_upset_pacifists = {
+            level = minor
+        }
+
+        add_opinion = {
+            modifier = diplomatic_play_escalated
+            target = scope:play_instigator
+        }
+
+        DIPLOMACY_trigger_play_event = {
+            pov = scope:diplomatic_play.var:play_instigator
+            id = agadir_crisis_type.2 # Catcher snags the expedition en-route
+            days = 7
+        }
+
+    }
+
+    option = { # Decline to send it
+        name = agadir_crisis_type.1.b
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+            }
+            modifier = {
+                factor = 10
+                scope:foreign_minister = {
+                    charisma > martial
+                }
+            }
+            modifier = {
+                factor = 100
+                opinion = {
+                    target = scope:diplomatic_play.var:play_instigator
+                    value > 99
+                }
+            }
+            modifier = {
+                factor = 1000
+                alliance_with = scope:diplomatic_play.var:play_instigator
+            }
+        }
+
+        POLITICS_upset_militarists = {
+            level = minor
+        }
+
+    }
+
+}
+
+# Response event: Antagonist can either declare war, back down, or exchange territories
+agadir_crisis_type.2 = {
+    type = country_event
+    name = agadir_crisis_type.2.t
+    desc = agadir_crisis_type.2.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
+    immediate = {
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = -1
+                progress = DIPLOMACY_play_progress_small
+            }
+        }
+        
+        if = {
+            limit = {
+                # Must have a colony which can be swapped with the agadir rival scope
+                any_subject = {
+                    OR = {
+                        is_subject_type = autonomous_colony
+                        is_subject_type = client_colony
+                    }
+                    any_owned_province = {
+                        # Colony owns a coastal province or once that neighbours one of the rival's colonies
+                        OR = {
+                            is_coastal = yes
+                            any_neighbor_province = {
+                                owner = {
+                                    overlord = scope:diplomatic_play.var:agadir_rival
+                                }
+                            }
+                        }
+                    }
+                }
+                scope:diplomatic_play.var:agadir_rival = {
+                    any_subject = {
+                        OR = {
+                            is_subject_type = autonomous_colony
+                            is_subject_type = client_colony
+                        }
+                        any_owned_province = {
+                            # Colony owns a coastal province or once that neighbours one of the rival's colonies
+                            OR = {
+                                is_coastal = yes
+                                any_neighbor_province = {
+                                    owner = {
+                                        overlord = scope:diplomatic_play.var:play_instigator
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            # Save 2 colonial states to offer to swap
+            scope:diplomatic_play.var:agadir_rival = {
+                save_scope_as = AI_root # Set AI for AI_interest_value calculation
+            }
+            # First get the root's offered colonial state
+            ordered_subject = {
+                limit = {
+                    OR = {
+                        is_subject_type = autonomous_colony
+                        is_subject_type = client_colony
+                    }
+                    any_owned_province = {
+                        # Colony owns a coastal province or once that neighbours one of the rival's colonies
+                        OR = {
+                            is_coastal = yes
+                            any_neighbor_province = {
+                                owner = {
+                                    overlord = scope:diplomatic_play.var:agadir_rival
+                                }
+                            }
+                        }
+                    }
+                }
+                order_by = capital_scope.area.AI_interest_value
+                max = 1
+
+                save_scope_as = offered_colonial_tag
+                ordered_area = {
+                    limit = {
+                        any_area_province = {
+                            owner = scope:offered_colonial_tag
+                        }
+                    }
+                    order_by = AI_interest_value
+
+                    random_area_state = {
+                        limit = {
+                            owner = scope:offered_colonial_tag
+                        }
+                        save_scope_as = offered_colonial_state
+                    }
+                }
+            }
+            # Second get the state to demand from the gunboat-sender in return
+            scope:diplomatic_play.var:play_instigator = {
+                save_scope_as = AI_root # Set AI for AI_interest_value calculation
+            }
+            var:agadir_rival = {
+                ordered_subject = {
+                    limit = {
+                        OR = {
+                            is_subject_type = autonomous_colony
+                            is_subject_type = client_colony
+                        }
+                        any_owned_province = {
+                            # Colony owns a coastal province or once that neighbours one of the rival's colonies
+                            OR = {
+                                is_coastal = yes
+                                any_neighbor_province = {
+                                    owner = {
+                                        overlord = scope:diplomatic_play.var:play_instigator
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    order_by = capital_scope.area.AI_interest_value
+                    max = 1
+
+                    save_scope_as = demanded_colonial_tag
+                    ordered_area = {
+                        limit = {
+                            any_area_province = {
+                                owner = scope:demanded_colonial_tag
+                            }
+                        }
+                        order_by = AI_interest_value
+
+                        random_area_state = {
+                            limit = {
+                                owner = scope:demanded_colonial_tag
+                            }
+                            save_scope_as = demanded_colonial_state
+                        }
+                    }
+                }
+            }
+
+            scope:diplomatic_play = {
+                set_variable = {
+                    name = offered_colonial_state
+                    value = scope:offered_colonial_state
+                }
+                set_variable = {
+                    name = demanded_colonial_state
+                    value = scope:demanded_colonial_state
+                }
+            }
+        }
+
+
+    }
+
+    option = { # Make them leave
+        name = agadir_crisis_type.2.a
+
+        ai_chance = {
+            modifier = {
+                factor = 1
+            }
+            modifier = {
+                factor = 2
+                opinion = {
+                    target = scope:diplomatic_play.var:agadir_rival
+                    value < 0
+                }
+            }
+            modifier = {
+                factor = 10
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 2
+            }
+            modifier = {
+                factor = 10
+                scope:diplomatic_play = {
+                    DIPLOMACY_play_war_willing_trigger = yes
+                }
+            }
+        }
+
+        scope:diplomatic_play = {
+            remove_variable = agadir_rival
+        }
+
+        DIPLOMACY_trigger_play_event = {
+            pov = scope:diplomatic_play.var:agadir_rival
+            id = agadir_crisis_type.7 # War or withdraw the gunboat
+            days = 1
+        }
+    }
+
+    option = { # Back down
+        name = agadir_crisis_type.2.b
+
+        ai_chance = {
+            modifier = {
+                factor = 5
+                opinion = {
+                    target = scope:diplomatic_play.var:agadir_rival
+                    value > 100
+                }
+            }
+            modifier = {
+                factor = 2
+                opinion = {
+                    target = scope:diplomatic_play.var:agadir_rival
+                    value > 0
+                }
+            }
+            modifier = {
+                factor = 10
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root < 1
+            }
+            modifier = {
+                factor = 100
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root < 0.5
+            }
+            modifier = {
+                factor = 10
+                scope:diplomatic_play = {
+                    DIPLOMACY_play_war_not_willing_trigger = yes
+                }
+            }
+            modifier = {
+                factor = 10
+                scope:diplomatic_play = {
+                    DIPLOMACY_play_attitude_friendly_trigger = yes
+                }
+            }
+        }
+
+        add_stability = -2
+        scope:diplomatic_play = {
+            remove_variable = agadir_rival
+            DIPLOMACY_progress_play = {
+                success = -10
+                progress = DIPLOMACY_play_progress_small
+            }
+        }
+    }
+
+    option = { # Exchange territory
+        name = agadir_crisis_type.2.c
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+            }
+            modifier = {
+                factor = 10
+                opinion = {
+                    target = scope:diplomatic_play.var:agadir_rival
+                    value > 100
+                }
+            }
+            modifier = {
+                factor = 10
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root < 1
+            }
+        }
+
+        trigger = {
+            scope:diplomatic_play = {
+                has_variable = offered_colonial_state
+                has_variable = demanded_colonial_state
+            }
+        }
+
+        add_stability = 1
+        scope:diplomatic_play = {
+            remove_variable = agadir_rival
+            DIPLOMACY_progress_play = {
+                success = 5
+                progress = DIPLOMACY_play_progress_small
+            }
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:play_instigator
+                id = agadir_crisis_type.3 # Propose to exchange territories
+                days = 0
+            }
+        }
+        # Response event: agadir_rival may choose to accept the swap, or refuse altogether and declare war
+
+    }
+
+}
+
+agadir_crisis_type.3 = {
+    # Scope: Country, supporter of the play target
+
+    # Choose how to react to proposal to exchange territory
+
+    type = country_event
+    title = agadir_crisis_type.3.t
+    desc = agadir_crisis_type.3.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:offered_colonial_state
+
+    option = { # Accept the exchange
+        name = agadir_crisis_type.3.a
+        custom_tooltip = agadir_crisis_type.3.a.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+            }
+        }
+
+        scope:diplomatic_play = {
+            # Trigger events for the two colonies who are having their territory exchanged, give the player a chance to resist
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:diplomatic_play.var:instigator
+                id = agadir_crisis_type.5 # Deal accepted
+                days = 0
+            }
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:diplomatic_play.var:offered_colonial_state.owner
+                id = agadir_crisis_type.4 # Your state is being exchanged, sorry
+                days = 0
+            }
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:diplomatic_play.var:offered_colonial_state.owner
+                id = agadir_crisis_type.4 # Your state is being exchanged, sorry
+                days = 0
+            }
+        }
+
+    }
+
+    option = { # Decline
+        name = agadir_crisis_type.3.b
+        custom_tooltip = agadir_crisis_type.3.b.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 1
+            }
+        }
+
+        DIPLOMACY_trigger_play_event = {
+            pov = scope:diplomatic_play.var:instigator
+            id = agadir_crisis_type.6 # Exchange rejected - war imminent
+            days = 0
+        }
+    }
+
+}
+
+agadir_crisis_type.4 = {
+    # Scope: Country, colonial vassal of play member
+
+    type = country_event
+    title = agadir_crisis_type.4.t
+    desc = agadir_crisis_type.4.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:offered_colonial_state
+
+    immediate = {
+        save_scope_as = vassal_scope
+        if = {
+            limit = {
+                scope:diplomatic_play.var:agadir_rival = scope:vassal_scope.overlord
+            }
+            scope:diplomatic_play.var:agadir_rival = {
+                save_scope_as = overlord_scope
+            }
+        }
+        else = {
+            scope:diplomatic_play.var:play_instigator = {
+                save_scope_as = overlord_scope
+            }
+        }
+    }
+    
+
+    option = { # Accept it
+        name = agadir_crisis_type.4.a
+        ai_chance = {
+            modifier = {
+                factor = 10
+            }
+        }
+
+        # TODO: Test if there is a kind of race condition here, where if one of the colonies ceases to exist by losing all of its land in the transfer, the list is destroyed and the provinces cannot be transferred..? I don't know. Maybe it's not a problem.
+        if = {
+            limit = {
+                scope:diplomatic_play.var:agadir_rival = scope:overlord_scope
+            }
+            # Transfer the colony to the instigator
+            # TODO: Create effect/on_action to ensure that newly transferred colonial land is converted to a colony
+            scope:diplomatic_play.var:demanded_colonial_state = {
+                every_state_province = {
+                    add_to_list = colonial_transfer_agadir_rival
+                }
+                LAND_transfer_provinces = {
+                    target_provinces = colonial_transfer_agadir_rival
+                    grantee = scope:diplomatic_play.var:play_instigator
+                }
+            }
+        }
+        else = {
+            # Transfer the colony to the agadir rival tag
+            scope:diplomatic_play.var:offered_colonial_state = {
+                every_state_province = {
+                    add_to_list = colonial_transfer_instigator
+                }
+                LAND_transfer_provinces = {
+                    target_provinces = colonial_transfer_instigator
+                    grantee = scope:diplomatic_play.var:agadir_rival
+                }
+            }
+        }
+    }
+
+    option = { # Refuse (declare war of independence)
+        name = agadir_crisis_type.4.b
+        ai_chance = {
+            modifier = {
+                factor = 0
+            }
+        }
+
+        scope:overlord_scope = {
+            FUNC_declare_war_with_wargoal_province = { # TODO: Indepencence war
+                war_goal = conquer_wargoal
+                province = scope:vassal_scope.capital_scope
+                target = scope:vassal_scope
+            }
+        }
+        
+    }
+}
+
+agadir_crisis_type.5 = {
+    # Scope: Country, play instigator
+
+    # Celebrate success of colonial exchange
+
+    type = country_event
+    title = agadir_crisis_type.3.t
+    desc = agadir_crisis_type.3.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:offered_colonial_state
+
+    option = { #Yay
+        name = agadir_crisis_type.5.a
+        custom_tooltip = agadir_crisis_type.5.a.tt
+
+        DIPLOMACY_progress_play = {
+            success = 25
+            progress = DIPLOMACY_play_progress_large
+        }
+
+    }
+
+}
+
+agadir_crisis_type.6 = {
+    # Scope: Country, play instigator
+
+    # Failed negotiations
+
+    type = country_event
+    title = agadir_crisis_type.6.t
+    desc = agadir_crisis_type.6.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:offered_colonial_state
+
+    option = { # Declare war
+        name = agadir_crisis_type.6.a
+        custom_tooltip = agadir_crisis_type.6.a.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 1
+            }
+            modifier = {
+                factor = 10
+                stability < 40
+            }
+            modifier = {
+                factor = 10
+                DIPLOMACY_play_war_willing_trigger = yes
+            }
+        }
+
+        scope:diplomatic_play = {
+            DIPLOMACY_trigger_diplomatic_play_war = yes
+        }
+
+    }
+
+    option = { # Back down
+        name = agadir_crisis_type.6.b
+        custom_tooltip = agadir_crisis_type.6.b.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+            }
+            modifier = {
+                factor = 10
+                stability > 60
+            }
+            modifier = {
+                factor = 10
+                DIPLOMACY_play_war_willing_trigger = no
+            }
+            modifier = {
+                factor = 1000
+                DIPLOMACY_play_war_not_willing_trigger = yes
+            }
+        }
+
+        add_stability = -5
+        add_political_influence = -25
+        POLITICS_upset_militarists = {
+            level = major
+        }
+
+    }
+
+}
+
+agadir_crisis_type.7 = {
+    # Scope: Country, supporter of the play target
+
+    # Send a gunboat to challenge a rival's influence in the area
+
+    type = country_event
+    title = agadir_crisis_type.7.t
+    desc = agadir_crisis_type.7.desc
+
+    left_portrait = scope:foreign_minister
+
+    picture = naval_bay
+
+    goto_location = scope:diplomatic_play.var:play_target_area
+
+    trigger = {
+        scope:diplomatic_play.var:play_target_country = {
+            any_owned_province = {
+                is_coastal = yes
+            }
+        }
+        any_navy = { exists = yes }
+    }
+
+    immediate = {
+        save_scope_as = observer
+        scope:diplomatic_play = {
+            set_variable = {
+                name = agadir_rival
+                value = scope:observer
+            }
+        }
+    }
+
+    option = { # Declare war
+        name = agadir_crisis_type.7.a
+        custom_tooltip = agadir_crisis_type.7.a.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 5
+            }
+            modifier = {
+                factor = 5
+                scope:foreign_minister = {
+                    martial > charisma
+                }
+            }
+            modifier = {
+                factor = 5
+                opinion = {
+                    target = scope:diplomatic_play.var:play_instigator
+                    value < 0
+                }
+            }
+            modifier = {
+                factor = 2
+                OR = {
+                    alliance_with = scope:diplomatic_play.var:play_target_country
+                    scope:diplomatic_play.var:play_target_country = {
+                        is_subject_of = scope:observer
+                    }
+                }   
+            }
+            modifier = {
+                factor = 10
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root < 0.7
+            }
+        }
+
+        add_opinion = {
+            modifier = diplomatic_play_escalated
+            target = scope:play_instigator
+        }
+
+        scope:diplomatic_play = {
+            DIPLOMACY_trigger_diplomatic_play_war = yes
+        }
+    }
+
+    option = { # Back down
+        name = agadir_crisis_type.7.b
+        custom_tooltip = agadir_crisis_type.7.b.tt
+
+        ai_chance = {
+            modifier = {
+                factor = 10
+            }
+            modifier = {
+                factor = 10
+                scope:foreign_minister = {
+                    charisma > martial
+                }
+            }
+            modifier = {
+                factor = 10
+                scope:diplomatic_play.var:AI_play_power_balance_instigator_root > 1
+            }
+        }
+
+        POLITICS_upset_militarists = {
+            level = major
+        }
+        add_political_influence = -25
+        add_stability = -2
+
+        scope:diplomatic_play = {
+            remove_variable = agadir_rival
+            DIPLOMACY_progress_play = {
+                success = 10
+                progress = DIPLOMACY_play_progress_small
+            }
+        }
+
+    }
+
+}

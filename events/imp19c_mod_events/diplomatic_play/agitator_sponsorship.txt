@@ -1,0 +1,729 @@
+namespace = agitator_sponsorship
+
+agitator_sponsorship.1 = {
+    # Scope: Country, play instigator
+    
+    # Identify and sponsor disloyal character in target country as propaganda agitator
+    # Based on historical subversion and political agitation tactics
+    
+    type = country_event
+    title = agitator_sponsorship.1.t
+    desc = agitator_sponsorship.1.desc
+    
+    left_portrait = scope:foreign_minister
+    
+    picture = dagger_behind_back
+    
+    goto_location = scope:diplomatic_play.var:play_target_area
+    
+    trigger = {
+        scope:diplomatic_play.var:play_target_country = {
+            any_character = {
+                is_ruler = no
+                loyalty < 50
+                is_adult = yes
+                prisoner = no
+                employer = scope:diplomatic_play.var:play_target_country
+                OR = {
+                    has_any_office = yes
+                }
+            }
+        }
+    }
+    
+    immediate = {
+        save_scope_as = sponsor_power
+        
+        scope:diplomatic_play.var:play_target_country = {
+            random_character = {
+                limit = {
+                    is_ruler = no
+                    loyalty < 50
+                    is_adult = yes
+                    prisoner = no
+                    employer = scope:diplomatic_play.var:play_target_country
+                    OR = {
+                        has_any_office = yes
+                    }
+                }
+                weight = {
+                    modifier = {
+                        factor = 20
+                        loyalty < 30
+                    }
+                    modifier = {
+                        factor = 15
+                        loyalty < 40
+                    }
+                    modifier = {
+                        factor = 10
+                        prominence >= 50
+                    }
+                    modifier = {
+                        factor = 10
+                        popularity >= 50
+                    }
+                    modifier = {
+                        factor = 15
+                        has_any_office = yes
+                    }
+                    modifier = {
+                        factor = 5
+                        has_trait = ambitious
+                    }
+                    modifier = {
+                        factor = 5
+                        has_trait = cruel
+                    }
+                    modifier = {
+                        factor = 5
+                        has_trait = vengeful
+                    }
+                }
+                save_scope_as = target_agitator
+            }
+        }
+    }
+    
+    option = { # Sponsor agitator with substantial funding
+        name = agitator_sponsorship.1.a
+        custom_tooltip = agitator_sponsorship.1.a.tt
+        ai_chance = {
+            modifier = {
+                factor = 20
+                scope:diplomatic_play = {
+                    DIPLOMACY_play_attitude_hostile_trigger = yes
+                }
+            }
+            modifier = {
+                factor = 20
+                scope:diplomatic_play = {
+                    DIPLOMACY_play_attitude_friendly_trigger = no
+                }
+            }
+            modifier = {
+                factor = 30
+                treasury > 80
+            }
+        }
+        
+        add_treasury = -80
+        add_political_influence = -5
+        
+        scope:target_agitator = {
+            add_loyalty = LOYALTY_AGITATOR_SPONSORED
+            set_variable = {
+                name = sponsored_agitator
+                value = scope:sponsor_power
+                days = 1825
+            }
+            add_character_modifier = {
+                name = sponsored_agitator_well_funded
+                duration = 1825
+            }
+        }
+        
+        random_list = {
+            70 = {
+                # Sponsorship discovered
+                scope:diplomatic_play = {
+                    DIPLOMACY_trigger_play_event = {
+                        pov = scope:diplomatic_play.var:play_target_country
+                        id = agitator_sponsorship.2
+                        days = 30
+                    }
+                }
+            }
+            30 = {
+                # Sponsorship remains secret
+                scope:diplomatic_play = {
+                    DIPLOMACY_trigger_play_event = {
+                        pov = scope:diplomatic_play.var:play_target_country
+                        id = agitator_sponsorship.3
+                        days = 30
+                    }
+                    DIPLOMACY_progress_play = {
+                        success = 20
+                        progress = DIPLOMACY_play_progress_large
+                    }
+                }
+            }
+        }
+    }
+    
+    option = { # Sponsor agitator with moderate support
+        name = agitator_sponsorship.1.b
+        custom_tooltip = agitator_sponsorship.1.b.tt
+        ai_chance = {
+            modifier = {
+                factor = 30
+                treasury > 40
+            }
+            modifier = {
+                factor = 20
+                scope:diplomatic_play = {
+                    DIPLOMACY_play_attitude_friendly_trigger = no
+                }
+            }
+        }
+        
+        add_treasury = -40
+        add_political_influence = -3
+        
+        scope:target_agitator = {
+            add_loyalty = LOYALTY_AGITATOR_SPONSORED_MODERATE
+            set_variable = {
+                name = sponsored_agitator
+                value = scope:sponsor_power
+                days = 1825
+            }
+            add_character_modifier = {
+                name = sponsored_agitator_moderate
+                duration = 1825
+            }
+        }
+        
+        random_list = {
+            50 = {
+                # Sponsorship discovered
+                scope:diplomatic_play = {
+                    DIPLOMACY_trigger_play_event = {
+                        pov = scope:diplomatic_play.var:play_target_country
+                        id = agitator_sponsorship.2
+                        days = 30
+                    }
+                }
+            }
+            50 = {
+                # Sponsorship remains secret
+                scope:diplomatic_play = {
+                    DIPLOMACY_trigger_play_event = {
+                        pov = scope:diplomatic_play.var:play_target_country
+                        id = agitator_sponsorship.3
+                        days = 30
+                    }
+                    DIPLOMACY_progress_play = {
+                        success = 12
+                        progress = DIPLOMACY_play_progress_medium
+                    }
+                }
+            }
+        }
+    }
+    
+    option = { # Provide only ideological support
+        name = agitator_sponsorship.1.c
+        custom_tooltip = agitator_sponsorship.1.c.tt
+        ai_chance = {
+            modifier = {
+                factor = 15
+            }
+        }
+        
+        add_political_influence = -2
+        
+        scope:target_agitator = {
+            add_loyalty = LOYALTY_AGITATOR_IDEOLOGICAL
+            set_variable = {
+                name = sponsored_agitator
+                value = scope:sponsor_power
+                days = 1825
+            }
+            add_character_modifier = {
+                name = sponsored_agitator_ideological
+                duration = 1825
+            }
+        }
+        
+        scope:diplomatic_play = {
+            DIPLOMACY_trigger_play_event = {
+                pov = scope:diplomatic_play.var:play_target_country
+                id = agitator_sponsorship.3
+                days = 30
+            }
+            DIPLOMACY_progress_play = {
+                success = 5
+                progress = DIPLOMACY_play_progress_small
+            }
+        }
+    }
+}
+
+agitator_sponsorship.2 = {
+    # Scope: Country, play target
+    # Discovers foreign-sponsored agitator
+    
+    type = country_event
+    title = agitator_sponsorship.2.t
+    desc = agitator_sponsorship.2.desc
+    
+    left_portrait = scope:foreign_minister
+    right_portrait = scope:target_agitator
+    
+    picture = dagger_behind_back
+    
+    goto_location = scope:target_agitator
+    
+    immediate = {
+        DIPLOMACY_notify_player = {
+            event = AI_notification_event.5
+        }
+        
+        scope:target_agitator = {
+            var:sponsored_agitator = {
+                save_scope_as = discovered_sponsor
+            }
+        }
+    }
+    
+    option = { # Imprison and execute the agitator
+        name = agitator_sponsorship.2.a
+        custom_tooltip = agitator_sponsorship.2.a.tt
+        ai_chance = {
+            modifier = {
+                factor = 30
+                scope:target_agitator = {
+                    loyalty < 30
+                }
+            }
+        }
+        
+        add_aggressive_expansion = 2
+        add_tyranny = TYRANNY_MEDIUM
+        
+        scope:target_agitator = {
+            death = {
+                killer = root.current_ruler
+                death_reason = death_execution
+            }
+        }
+        
+        current_ruler = {
+            add_popularity = POPULARITY_SMALL
+        }
+        
+        add_opinion = {
+            modifier = executed_agitator
+            target = scope:discovered_sponsor
+        }
+        
+        scope:diplomatic_play = {
+            # Notify observers
+            every_in_list = {
+                variable = play_observers_undecided
+                add_to_list = all_observers
+            }
+            
+            every_in_list = {
+                list = all_observers
+                add_opinion = {
+                    modifier = hindered_in_play
+                    target = scope:discovered_sponsor
+                }
+            }
+            
+            DIPLOMACY_progress_play = {
+                success = -15
+                progress = DIPLOMACY_play_progress_large
+            }
+        }
+    }
+    
+    option = { # Imprison and banish the agitator
+        name = agitator_sponsorship.2.b
+        ai_chance = {
+            modifier = {
+                factor = 25
+            }
+        }
+        
+        add_stability = 5
+        
+        scope:target_agitator = {
+            if = {
+                limit = { wealth > 1 }
+                add_treasury = value:target_agitator.wealth
+                add_gold = {
+                    value = 0
+                    subtract = wealth
+                }
+            }
+
+            banish = scope:discovered_sponsor
+        }
+        
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = -10
+                progress = DIPLOMACY_play_progress_medium
+            }
+        }
+    }
+    
+    option = { # Strip offices and silence the agitator
+        name = agitator_sponsorship.2.c
+        ai_chance = {
+            modifier = {
+                factor = 20
+                opinion = {
+                    target = scope:discovered_sponsor
+                    value = 0
+                }
+            }
+        }
+        
+        scope:target_agitator = {
+            remove_all_offices = yes
+            add_prominence = -20
+            add_character_modifier = {
+                name = silenced_agitator
+                duration = 3650
+            }
+        }
+        
+        add_opinion = {
+            modifier = sponsored_agitator_discovered
+            target = scope:discovered_sponsor
+        }
+        
+        scope:diplomatic_play = {
+            DIPLOMACY_progress_play = {
+                success = -5
+                progress = DIPLOMACY_play_progress_small
+            }
+        }
+    }
+}
+
+agitator_sponsorship.3 = {
+    # Scope: Country, play target
+    # Agitator begins spreading propaganda (hidden sponsor)
+    
+    type = country_event
+    title = agitator_sponsorship.3.t
+    desc = agitator_sponsorship.3.desc
+    
+    left_portrait = scope:current_ruler
+    right_portrait = scope:target_agitator
+    
+    picture = senator_conversing
+    
+    goto_location = scope:target_agitator
+    
+    immediate = {
+        # Trigger agitation events based on agitator's characteristics
+        scope:target_agitator = {
+            trigger_event = {
+                id = agitator_sponsorship.4
+                days = 60
+            }
+        }
+    }
+    
+    option = { # Investigate the agitator
+        name = agitator_sponsorship.3.a
+        custom_tooltip = agitator_sponsorship.3.a.tt
+        ai_chance = {
+            modifier = {
+                factor = 25
+                treasury > 200
+            }
+        }
+        
+        trigger = {
+            treasury > 150
+        }
+        
+        add_treasury = -150
+        add_political_influence = -2
+        
+        random_list = {
+            40 = {
+                # Discover sponsor
+                custom_tooltip = agitator_sponsorship.3.a.success
+                trigger_event = {
+                    id = agitator_sponsorship.2
+                    days = 30
+                }
+            }
+            60 = {
+                # Fail to discover
+                custom_tooltip = agitator_sponsorship.3.a.fail
+            }
+        }
+    }
+    
+    option = { # Ignore the agitator for now
+        name = agitator_sponsorship.3.b
+        ai_chance = {
+            modifier = {
+                factor = 30
+            }
+        }
+        
+        custom_tooltip = agitator_sponsorship.3.b.tt
+    }
+}
+
+agitator_sponsorship.4 = {
+    # Scope: Character (agitator)
+    # Agitator spreads propaganda and agitates populace
+    
+    type = character_event
+    hidden = yes
+    
+    trigger = {
+        has_variable = sponsored_agitator
+        is_alive = yes
+        is_ruler = no
+        prisoner = no
+        employer = {
+            is_country = yes
+        }
+    }
+    
+    immediate = {
+        var:sponsored_agitator = {
+            save_scope_as = agitator_sponsor
+        }
+        employer = {
+            save_scope_as = agitator_target_country
+        }
+        
+        # Different effects based on agitator characteristics
+        if = {
+            limit = { 
+                prominence >= 50
+                has_any_office = yes
+            }
+            # High prominence with office - affects state loyalty
+            scope:agitator_sponsor = {
+                if = {
+                    limit = {
+                        exists = scope:diplomatic_play
+                        scope:diplomatic_play = {
+                            exists = var:play_target_area
+                        }
+                    }
+                    scope:diplomatic_play.var:play_target_area = {
+                        add_state_loyalty = -15
+                    }
+                    scope:diplomatic_play = {
+                        DIPLOMACY_progress_play = {
+                            success = 8
+                            progress = DIPLOMACY_play_progress_small
+                        }
+                    }
+                }
+            }
+        }
+        else_if = {
+            limit = {
+                popularity >= 50
+            }
+            # High popularity - affects national stability
+            scope:agitator_target_country = {
+                add_stability = -5
+            }
+            scope:agitator_sponsor = {
+                if = {
+                    limit = {
+                        exists = scope:diplomatic_play
+                    }
+                    scope:diplomatic_play = {
+                        DIPLOMACY_progress_play = {
+                            success = 6
+                            progress = DIPLOMACY_play_progress_small
+                        }
+                    }
+                }
+            }
+        }
+        else_if = {
+            limit = {
+                prominence >= 30
+            }
+            # Moderate prominence - affects political influence
+            scope:agitator_target_country = {
+                add_political_influence = -2
+            }
+            scope:agitator_sponsor = {
+                if = {
+                    limit = {
+                        exists = scope:diplomatic_play
+                    }
+                    scope:diplomatic_play = {
+                        DIPLOMACY_progress_play = {
+                            success = 4
+                            progress = DIPLOMACY_play_progress_small
+                        }
+                    }
+                }
+            }
+        }
+        else = {
+            # Low influence - minor effects
+            scope:agitator_target_country = {
+                add_stability = -2
+            }
+            scope:agitator_sponsor = {
+                if = {
+                    limit = {
+                        exists = scope:diplomatic_play
+                    }
+                    scope:diplomatic_play = {
+                        DIPLOMACY_progress_play = {
+                            success = 2
+                            progress = DIPLOMACY_play_progress_small
+                        }
+                    }
+                }
+            }
+        }
+        
+        # Check for player notification
+        if = {
+            limit = {
+                employer = {
+                    is_ai = no
+                }
+            }
+            employer = {
+                trigger_event = {
+                    id = agitator_sponsorship.5
+                }
+            }
+        }
+        
+        # Continue agitation cycle if still active
+        if = {
+            limit = {
+                has_variable = sponsored_agitator
+                is_alive = yes
+                prisoner = no
+            }
+            trigger_event = {
+                id = agitator_sponsorship.4
+                days = 90
+            }
+        }
+    }
+}
+
+agitator_sponsorship.5 = {
+    # Scope: Country, play target
+    # Player notification of agitator activities
+    
+    type = country_event
+    title = agitator_sponsorship.5.t
+    desc = {
+        first_valid = {
+            triggered_desc = {
+                trigger = {
+                    scope:target_agitator = {
+                        prominence >= 50
+                        has_any_office = yes
+                    }
+                }
+                desc = agitator_sponsorship.5.desc_prominent_office
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:target_agitator = {
+                        popularity >= 50
+                    }
+                }
+                desc = agitator_sponsorship.5.desc_popular
+            }
+            triggered_desc = {
+                trigger = {
+                    scope:target_agitator = {
+                        prominence >= 30
+                    }
+                }
+                desc = agitator_sponsorship.5.desc_prominent
+            }
+            triggered_desc = {
+                trigger = {
+                    always = yes
+                }
+                desc = agitator_sponsorship.5.desc_minor
+            }
+        }
+    }
+    
+    left_portrait = scope:current_ruler
+    right_portrait = scope:target_agitator
+    
+    picture = senator_conversing
+    
+    goto_location = scope:target_agitator
+    
+    option = { # Suppress the agitator's activities
+        name = agitator_sponsorship.5.a
+        ai_chance = {
+            modifier = {
+                factor = 30
+            }
+        }
+        
+        add_treasury = -100
+        add_tyranny = TYRANNY_SMALL
+        
+        scope:target_agitator = {
+            add_popularity = SUBTRACT_POPULARITY_SMALL
+            add_prominence = -10
+        }
+    }
+    
+    option = { # Counter the propaganda
+        name = agitator_sponsorship.5.b
+        ai_chance = {
+            modifier = {
+                factor = 25
+                treasury > 200
+            }
+        }
+        
+        add_treasury = -150
+        add_political_influence = -3
+        add_stability = 5
+    }
+    
+    option = { # Ignore the agitator
+        name = agitator_sponsorship.5.c
+        ai_chance = {
+            modifier = {
+                factor = 20
+            }
+        }
+        
+        custom_tooltip = agitator_sponsorship.5.c.tt
+    }
+}
+
+agitator_sponsorship.6 = {
+    # Scope: Character (agitator)
+    # Remove agitator status if conditions no longer met
+    
+    type = character_event
+    hidden = yes
+    
+    immediate = {
+        if = {
+            limit = {
+                has_variable = sponsored_agitator
+                OR = {
+                    is_alive = no
+                    is_ruler = yes
+                    prisoner = yes
+                    NOT = { exists = employer }
+                }
+            }
+            remove_variable = sponsored_agitator
+            remove_character_modifier = sponsored_agitator_well_funded
+            remove_character_modifier = sponsored_agitator_moderate
+            remove_character_modifier = sponsored_agitator_ideological
+        }
+    }
+}

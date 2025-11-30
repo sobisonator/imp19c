@@ -979,3 +979,50 @@ MILITARY_supplies_balance_country = {
 	value = MILITARY_supplies_income_country
 	add = MILITARY_supplies_country_consumed_quarterly # Negative
 }
+
+# State subsidies and social welfare
+
+# Notes: Poor law spending was about 2.5% annually of the UK's national GDP in 1815
+# Starting wealth is 25,077. Multiplied by 0.025 then divided by 4 gives a quarterly expected national spend of about £157
+
+INCOME_governorship_poor_law_spending = {
+	# Scope: Governorship
+
+	# Recipients are lower strata and proletariat
+
+	# This value is only calculated if the country has a poor law active
+	# TODO
+
+	# A proportion of the pops' quarterly income minus outgoings is granted based on social welfare funding
+
+	value = WEALTH_expenses_total_lower_strata
+	add = WEALTH_income_total_lower_strata # negative value is subtracted on add
+	add = WEALTH_expenses_total_proletariat
+	add = WEALTH_income_total_proletariat
+	# TODO: Create a WEALTH_income_total_POPTYPE for lower_strata and proletariat which includes welfare income so it can be used in the tooltips and wealth change effects!
+	
+	# TODO: Add a row for welfare in the governorship poptype wealth tooltips
+	# TODO: Add public welfare to the national income tooltip
+	
+
+	# 100% of the pops' quarterly cost of living is distributed
+	add = {
+		value = WEALTH_cost_of_living_lower_strata
+		add = WEALTH_cost_of_living_proletariat
+	}
+
+	max = 0
+
+	# TODO:
+	# multiply = owner.var:INCOME_welfare_spending_rate
+
+	multiply = -1
+}
+
+INCOME_cost_poor_law_spending = {
+	value = 0
+	every_governorships = {
+		add = INCOME_governorship_poor_law_spending
+	}
+	multiply = -1
+}

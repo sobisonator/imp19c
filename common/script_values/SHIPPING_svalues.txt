@@ -36,9 +36,17 @@ SHIPPING_percentage_in_TZ = {
 SHIPPING_total_in_TZ = {
 	# Scope: trade center province
 	value = 0
-	every_in_list = {
-		variable = shipping_power_list
-		add = var:shipping_power_total
+	if = {
+		limit = {
+			has_variable = SHIPPING_total_in_TZ
+		}
+		value = var:SHIPPING_total_in_TZ
+	}
+	else = {
+		every_in_list = {
+			variable = shipping_power_list
+			add = var:shipping_power_total
+		}	
 	}
 }
 
@@ -68,7 +76,6 @@ SHIPPING_port_bonus_per_port = {
 	value = 1.5
 	multiply = civilization_value
 	min = 5
-	multiply = 0.2
 	if = {
 		limit = {
 			OR = {
@@ -76,10 +83,21 @@ SHIPPING_port_bonus_per_port = {
 				has_variable = trade_chokepoint
 			}
 		}
-		multiply = 2
+		multiply = 3.2
 	}
-	multiply = 8
+	if = {
+		limit = {
+			NOT = {
+				OR = {
+					has_variable = major_estuary
+					has_variable = trade_chokepoint
+				}
+			}
+		}
+		multiply = 1.6
+	}
 }
+
 
 SHIPPING_industrialisation_bonus_per_port = {
 	value = 1
@@ -110,6 +128,13 @@ SHIPPING_depots_ports_river_ports_and_canals_bonus = {
 	value = num_of_INF_depot
 	add = num_of_port_building
 	add = num_of_river_port_building
+	add = num_of_INF_canal
+	multiply = civilization_value
+	multiply = 0.2
+}
+
+SHIPPING_depots_and_canals_bonus = {
+	value = num_of_INF_depot
 	add = num_of_INF_canal
 	multiply = civilization_value
 	multiply = 0.2
@@ -178,7 +203,7 @@ SHIPPING_province_power = {
 
 		add = SHIPPING_port_bonus
 		add = SHIPPING_railway_bonus
-		add = SHIPPING_depots_ports_river_ports_and_canals_bonus
+		add = SHIPPING_depots_and_canals_bonus
 		add = SHIPPING_colonial_outpost_bonus
 		multiply = SHIPPING_commerce_district_multiplier
 
@@ -1336,16 +1361,13 @@ TZ_penetration_india = {
 			has_variable = colonial_outpost_owner
 			india_tradezone = { PROVINCE = yes }
 		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
+		if = {
+			limit = {
+				var:colonial_outpost_owner = PREV
+			}
+			add = SHIPPING_province_power
 		}
-		overlord = {
-			add = THIS.var:shipping_india
-		}
+		
 	}
 	add = 0.0001
 	divide = global_var:global_india_tradezone.SHIPPING_total_in_TZ
@@ -1353,1619 +1375,1955 @@ TZ_penetration_india = {
 TZ_penetration_east_north_america = {
 	if = {
 		limit = {
-			has_variable = shipping_east_north_america
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_east_north_america
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					east_north_america_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_east_north_america > 0
 			}
-			add = var:shipping_east_north_america
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_east_north_america
+			}
+			value = var:shipping_east_north_america
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_east_north_america > 0
 				}
-				add = THIS.partial_shipping_east_north_america
+				add = var:shipping_east_north_america
+				every_subject = {
+					limit = {
+						var:shipping_east_north_america > 0
+					}
+					add = THIS.partial_shipping_east_north_america
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_east_north_america > 0
+				}
+				add = var:shipping_east_north_america
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_east_north_america > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_east_north_america
+			add = THIS.minimal_shipping_east_north_america
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_east_north_america > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_east_north_america
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				east_north_america_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_east_north_america_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			east_north_america_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_east_north_america
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_east_north_america_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_west_north_america = {
 	if = {
 		limit = {
-			has_variable = shipping_west_north_america
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_west_north_america
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					west_north_america_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_west_north_america > 0
 			}
-			add = var:shipping_west_north_america
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_west_north_america
+			}
+			value = var:shipping_west_north_america
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_west_north_america > 0
 				}
-				add = THIS.partial_shipping_west_north_america
+				add = var:shipping_west_north_america
+				every_subject = {
+					limit = {
+						var:shipping_west_north_america > 0
+					}
+					add = THIS.partial_shipping_west_north_america
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_west_north_america > 0
+				}
+				add = var:shipping_west_north_america
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_west_north_america > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_west_north_america
+			add = THIS.minimal_shipping_west_north_america
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_west_north_america > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_west_north_america
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				west_north_america_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_west_north_america_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			west_north_america_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_west_north_america
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_west_north_america_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_caribbean = {
 	if = {
 		limit = {
-			has_variable = shipping_caribbean
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_caribbean
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					caribbean_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_caribbean > 0
 			}
-			add = var:shipping_caribbean
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_caribbean
+			}
+			value = var:shipping_caribbean
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_caribbean > 0
 				}
-				add = THIS.partial_shipping_caribbean
+				add = var:shipping_caribbean
+				every_subject = {
+					limit = {
+						var:shipping_caribbean > 0
+					}
+					add = THIS.partial_shipping_caribbean
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_caribbean > 0
+				}
+				add = var:shipping_caribbean
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_caribbean > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_caribbean
+			add = THIS.minimal_shipping_caribbean
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_caribbean > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_caribbean
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				caribbean_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_caribbean_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			caribbean_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_caribbean
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_caribbean_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_west_south_america = {
 	if = {
 		limit = {
-			has_variable = shipping_west_south_america
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_west_south_america
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					west_south_america_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_west_south_america > 0
 			}
-			add = var:shipping_west_south_america
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_west_south_america
+			}
+			value = var:shipping_west_south_america
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_west_south_america > 0
 				}
-				add = THIS.partial_shipping_west_south_america
+				add = var:shipping_west_south_america
+				every_subject = {
+					limit = {
+						var:shipping_west_south_america > 0
+					}
+					add = THIS.partial_shipping_west_south_america
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_west_south_america > 0
+				}
+				add = var:shipping_west_south_america
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_west_south_america > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_west_south_america
+			add = THIS.minimal_shipping_west_south_america
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_west_south_america > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_west_south_america
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				west_south_america_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_west_south_america_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			west_south_america_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_west_south_america
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_west_south_america_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_east_south_america = {
 	if = {
 		limit = {
-			has_variable = shipping_east_south_america
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_east_south_america
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					east_south_america_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_east_south_america > 0
 			}
-			add = var:shipping_east_south_america
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_east_south_america
+			}
+			value = var:shipping_east_south_america
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_east_south_america > 0
 				}
-				add = THIS.partial_shipping_east_south_america
+				add = var:shipping_east_south_america
+				every_subject = {
+					limit = {
+						var:shipping_east_south_america > 0
+					}
+					add = THIS.partial_shipping_east_south_america
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_east_south_america > 0
+				}
+				add = var:shipping_east_south_america
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_east_south_america > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_east_south_america
+			add = THIS.minimal_shipping_east_south_america
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_east_south_america > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_east_south_america
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				east_south_america_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_east_south_america_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			east_south_america_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_east_south_america
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_east_south_america_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_south_east_asia = {
 	if = {
 		limit = {
-			has_variable = shipping_south_east_asia
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_south_east_asia
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					south_east_asia_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_south_east_asia > 0
 			}
-			add = var:shipping_south_east_asia
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_south_east_asia
+			}
+			value = var:shipping_south_east_asia
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_south_east_asia > 0
 				}
-				add = THIS.partial_shipping_south_east_asia
+				add = var:shipping_south_east_asia
+				every_subject = {
+					limit = {
+						var:shipping_south_east_asia > 0
+					}
+					add = THIS.partial_shipping_south_east_asia
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_south_east_asia > 0
+				}
+				add = var:shipping_south_east_asia
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_south_east_asia > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_south_east_asia
+			add = THIS.minimal_shipping_south_east_asia
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_south_east_asia > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_south_east_asia
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				south_east_asia_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_south_east_asia_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			south_east_asia_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_south_east_asia
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_south_east_asia_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_indo_china = {
 	if = {
 		limit = {
-			has_variable = shipping_indo_china
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_indo_china
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					indo_china_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_indo_china > 0
 			}
-			add = var:shipping_indo_china
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_indo_china
+			}
+			value = var:shipping_indo_china
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_indo_china > 0
 				}
-				add = THIS.partial_shipping_indo_china
+				add = var:shipping_indo_china
+				every_subject = {
+					limit = {
+						var:shipping_indo_china > 0
+					}
+					add = THIS.partial_shipping_indo_china
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_indo_china > 0
+				}
+				add = var:shipping_indo_china
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_indo_china > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_indo_china
+			add = THIS.minimal_shipping_indo_china
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_indo_china > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_indo_china
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				indo_china_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_indo_china_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			indo_china_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_indo_china
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_indo_china_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_yellow_sea = {
 	if = {
 		limit = {
-			has_variable = shipping_yellow_sea
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_yellow_sea
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					yellow_sea_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_yellow_sea > 0
 			}
-			add = var:shipping_yellow_sea
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_yellow_sea
+			}
+			value = var:shipping_yellow_sea
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_yellow_sea > 0
 				}
-				add = THIS.partial_shipping_yellow_sea
+				add = var:shipping_yellow_sea
+				every_subject = {
+					limit = {
+						var:shipping_yellow_sea > 0
+					}
+					add = THIS.partial_shipping_yellow_sea
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_yellow_sea > 0
+				}
+				add = var:shipping_yellow_sea
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_yellow_sea > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_yellow_sea
+			add = THIS.minimal_shipping_yellow_sea
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_yellow_sea > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_yellow_sea
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				yellow_sea_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_yellow_sea_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			yellow_sea_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_yellow_sea
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_yellow_sea_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_southern_africa = {
 	if = {
 		limit = {
-			has_variable = shipping_southern_africa
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_southern_africa
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					southern_africa_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_southern_africa > 0
 			}
-			add = var:shipping_southern_africa
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_southern_africa
+			}
+			value = var:shipping_southern_africa
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_southern_africa > 0
 				}
-				add = THIS.partial_shipping_southern_africa
+				add = var:shipping_southern_africa
+				every_subject = {
+					limit = {
+						var:shipping_southern_africa > 0
+					}
+					add = THIS.partial_shipping_southern_africa
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_southern_africa > 0
+				}
+				add = var:shipping_southern_africa
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_southern_africa > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_southern_africa
+			add = THIS.minimal_shipping_southern_africa
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_southern_africa > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_southern_africa
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				southern_africa_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_southern_africa_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			southern_africa_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_southern_africa
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_southern_africa_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_west_africa = {
 	if = {
 		limit = {
-			has_variable = shipping_west_africa
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_west_africa
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					west_africa_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_west_africa > 0
 			}
-			add = var:shipping_west_africa
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_west_africa
+			}
+			value = var:shipping_west_africa
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_west_africa > 0
 				}
-				add = THIS.partial_shipping_west_africa
+				add = var:shipping_west_africa
+				every_subject = {
+					limit = {
+						var:shipping_west_africa > 0
+					}
+					add = THIS.partial_shipping_west_africa
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_west_africa > 0
+				}
+				add = var:shipping_west_africa
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_west_africa > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_west_africa
+			add = THIS.minimal_shipping_west_africa
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_west_africa > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_west_africa
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				west_africa_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_west_africa_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			west_africa_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_west_africa
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_west_africa_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_east_africa = {
 	if = {
 		limit = {
-			has_variable = shipping_east_africa
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_east_africa
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					east_africa_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_east_africa > 0
 			}
-			add = var:shipping_east_africa
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_east_africa
+			}
+			value = var:shipping_east_africa
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_east_africa > 0
 				}
-				add = THIS.partial_shipping_east_africa
+				add = var:shipping_east_africa
+				every_subject = {
+					limit = {
+						var:shipping_east_africa > 0
+					}
+					add = THIS.partial_shipping_east_africa
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_east_africa > 0
+				}
+				add = var:shipping_east_africa
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_east_africa > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_east_africa
+			add = THIS.minimal_shipping_east_africa
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_east_africa > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_east_africa
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				east_africa_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_east_africa_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			east_africa_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_east_africa
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_east_africa_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_middle_east = {
 	if = {
 		limit = {
-			has_variable = shipping_middle_east
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_middle_east
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					middle_east_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_middle_east > 0
 			}
-			add = var:shipping_middle_east
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_middle_east
+			}
+			value = var:shipping_middle_east
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_middle_east > 0
 				}
-				add = THIS.partial_shipping_middle_east
+				add = var:shipping_middle_east
+				every_subject = {
+					limit = {
+						var:shipping_middle_east > 0
+					}
+					add = THIS.partial_shipping_middle_east
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_middle_east > 0
+				}
+				add = var:shipping_middle_east
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_middle_east > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_middle_east
+			add = THIS.minimal_shipping_middle_east
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_middle_east > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_middle_east
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				middle_east_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_middle_east_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			middle_east_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_middle_east
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_middle_east_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_western_steppe = {
 	if = {
 		limit = {
-			has_variable = shipping_western_steppe
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_western_steppe
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					western_steppe_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_western_steppe > 0
 			}
-			add = var:shipping_western_steppe
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_western_steppe
+			}
+			value = var:shipping_western_steppe
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_western_steppe > 0
 				}
-				add = THIS.partial_shipping_western_steppe
+				add = var:shipping_western_steppe
+				every_subject = {
+					limit = {
+						var:shipping_western_steppe > 0
+					}
+					add = THIS.partial_shipping_western_steppe
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_western_steppe > 0
+				}
+				add = var:shipping_western_steppe
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_western_steppe > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_western_steppe
+			add = THIS.minimal_shipping_western_steppe
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_western_steppe > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_western_steppe
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				western_steppe_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_western_steppe_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			western_steppe_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_western_steppe
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_western_steppe_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_eastern_steppe = {
 	if = {
 		limit = {
-			has_variable = shipping_eastern_steppe
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_eastern_steppe
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					eastern_steppe_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_eastern_steppe > 0
 			}
-			add = var:shipping_eastern_steppe
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_eastern_steppe
+			}
+			value = var:shipping_eastern_steppe
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_eastern_steppe > 0
 				}
-				add = THIS.partial_shipping_eastern_steppe
+				add = var:shipping_eastern_steppe
+				every_subject = {
+					limit = {
+						var:shipping_eastern_steppe > 0
+					}
+					add = THIS.partial_shipping_eastern_steppe
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_eastern_steppe > 0
+				}
+				add = var:shipping_eastern_steppe
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_eastern_steppe > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_eastern_steppe
+			add = THIS.minimal_shipping_eastern_steppe
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_eastern_steppe > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_eastern_steppe
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				eastern_steppe_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_eastern_steppe_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			eastern_steppe_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_eastern_steppe
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_eastern_steppe_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_upper_yangtzi = {
 	if = {
 		limit = {
-			has_variable = shipping_upper_yangtzi
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_upper_yangtzi
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					upper_yangtzi_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_upper_yangtzi > 0
 			}
-			add = var:shipping_upper_yangtzi
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_upper_yangtzi
+			}
+			value = var:shipping_upper_yangtzi
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_upper_yangtzi > 0
 				}
-				add = THIS.partial_shipping_upper_yangtzi
+				add = var:shipping_upper_yangtzi
+				every_subject = {
+					limit = {
+						var:shipping_upper_yangtzi > 0
+					}
+					add = THIS.partial_shipping_upper_yangtzi
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_upper_yangtzi > 0
+				}
+				add = var:shipping_upper_yangtzi
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_upper_yangtzi > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_upper_yangtzi
+			add = THIS.minimal_shipping_upper_yangtzi
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_upper_yangtzi > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_upper_yangtzi
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				upper_yangtzi_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_upper_yangtzi_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			upper_yangtzi_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_upper_yangtzi
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_upper_yangtzi_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_atlantic_seaboard = {
 	if = {
 		limit = {
-			has_variable = shipping_atlantic_seaboard
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_atlantic_seaboard
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					atlantic_seaboard_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_atlantic_seaboard > 0
 			}
-			add = var:shipping_atlantic_seaboard
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_atlantic_seaboard
+			}
+			value = var:shipping_atlantic_seaboard
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_atlantic_seaboard > 0
 				}
-				add = THIS.partial_shipping_atlantic_seaboard
+				add = var:shipping_atlantic_seaboard
+				every_subject = {
+					limit = {
+						var:shipping_atlantic_seaboard > 0
+					}
+					add = THIS.partial_shipping_atlantic_seaboard
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_atlantic_seaboard > 0
+				}
+				add = var:shipping_atlantic_seaboard
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_atlantic_seaboard > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_atlantic_seaboard
+			add = THIS.minimal_shipping_atlantic_seaboard
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_atlantic_seaboard > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_atlantic_seaboard
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				atlantic_seaboard_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_atlantic_seaboard_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			atlantic_seaboard_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_atlantic_seaboard
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_atlantic_seaboard_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_central_europe = {
 	if = {
 		limit = {
-			has_variable = shipping_central_europe
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_central_europe
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					central_europe_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_central_europe > 0
 			}
-			add = var:shipping_central_europe
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_central_europe
+			}
+			value = var:shipping_central_europe
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_central_europe > 0
 				}
-				add = THIS.partial_shipping_central_europe
+				add = var:shipping_central_europe
+				every_subject = {
+					limit = {
+						var:shipping_central_europe > 0
+					}
+					add = THIS.partial_shipping_central_europe
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_central_europe > 0
+				}
+				add = var:shipping_central_europe
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_central_europe > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_central_europe
+			add = THIS.minimal_shipping_central_europe
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_central_europe > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_central_europe
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				central_europe_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_central_europe_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			central_europe_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_central_europe
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_central_europe_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_west_mediterranean = {
 	if = {
 		limit = {
-			has_variable = shipping_west_mediterranean
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_west_mediterranean
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					west_mediterranean_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_west_mediterranean > 0
 			}
-			add = var:shipping_west_mediterranean
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_west_mediterranean
+			}
+			value = var:shipping_west_mediterranean
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_west_mediterranean > 0
 				}
-				add = THIS.partial_shipping_west_mediterranean
+				add = var:shipping_west_mediterranean
+				every_subject = {
+					limit = {
+						var:shipping_west_mediterranean > 0
+					}
+					add = THIS.partial_shipping_west_mediterranean
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_west_mediterranean > 0
+				}
+				add = var:shipping_west_mediterranean
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_west_mediterranean > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_west_mediterranean
+			add = THIS.minimal_shipping_west_mediterranean
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_west_mediterranean > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_west_mediterranean
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				west_mediterranean_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_west_mediterranean_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			west_mediterranean_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_west_mediterranean
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_west_mediterranean_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_baltic = {
 	if = {
 		limit = {
-			has_variable = shipping_baltic
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_baltic
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					baltic_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_baltic > 0
 			}
-			add = var:shipping_baltic
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_baltic
+			}
+			value = var:shipping_baltic
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_baltic > 0
 				}
-				add = THIS.partial_shipping_baltic
+				add = var:shipping_baltic
+				every_subject = {
+					limit = {
+						var:shipping_baltic > 0
+					}
+					add = THIS.partial_shipping_baltic
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_baltic > 0
+				}
+				add = var:shipping_baltic
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_baltic > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_baltic
+			add = THIS.minimal_shipping_baltic
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_baltic > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_baltic
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				baltic_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_baltic_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			baltic_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_baltic
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_baltic_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_east_europe = {
 	if = {
 		limit = {
-			has_variable = shipping_east_europe
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_east_europe
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					east_europe_tradezone = { PROVINCE = yes }
 				}
-				var:shipping_east_europe > 0
 			}
-			add = var:shipping_east_europe
-			every_subject = {
+			value = 0.25
+		}
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_variable = shipping_east_europe
+			}
+			value = var:shipping_east_europe
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_east_europe > 0
 				}
-				add = THIS.partial_shipping_east_europe
+				add = var:shipping_east_europe
+				every_subject = {
+					limit = {
+						var:shipping_east_europe > 0
+					}
+					add = THIS.partial_shipping_east_europe
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_east_europe > 0
+				}
+				add = var:shipping_east_europe
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_east_europe > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_east_europe
+			add = THIS.minimal_shipping_east_europe
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_east_europe > 0
-			NOT = {
-				is_subject_of = PREV
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
 			}
 		}
-		add = THIS.minimal_shipping_east_europe
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				east_europe_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
+		add = 0.0001
+		divide = global_var:global_east_europe_tradezone.SHIPPING_total_in_TZ
 	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			east_europe_tradezone = { PROVINCE = yes }
-		}
-		add = SHIPPING_province_power
-	}
-
-	if = {
-		limit = {
-			is_subject = yes
-		}
-		overlord = {
-			add = THIS.var:shipping_east_europe
-		}
-	}
-	add = 0.0001
-	divide = global_var:global_east_europe_tradezone.SHIPPING_total_in_TZ
 }
 TZ_penetration_east_mediterranean = {
 	if = {
 		limit = {
-			has_variable = shipping_east_mediterranean
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_east_mediterranean
-	}
-	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
+				any_owned_province = {
+					east_mediterranean_tradezone = { PROVINCE = yes }
 				}
-				THIS.var:shipping_east_mediterranean > 0
 			}
-			add = THIS.var:shipping_east_mediterranean
-			every_subject = {
-				limit = {
-					THIS.var:shipping_east_mediterranean > 0
-				}
-				add = THIS.partial_shipping_east_mediterranean
-			}
+			value = 0.25
 		}
-		else_if = {
+		else = {
+			value = 0.1
+		}
+	}
+	else = {
+		if = {
 			limit = {
-				has_variable = overlord_customs_union
-				THIS.var:shipping_east_mediterranean > 0
+				has_variable = shipping_east_mediterranean
 			}
-			add = THIS.var:shipping_east_mediterranean
+			value = var:shipping_east_mediterranean
 		}
-	}
+		else = {
+			value = 0
+		}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			THIS.var:shipping_east_mediterranean > 0
-			NOT = {
-				is_subject_of = PREV
+		every_subject = {
+			if = {
+				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
+					var:shipping_east_mediterranean > 0
+				}
+				add = var:shipping_east_mediterranean
+				every_subject = {
+					limit = {
+						var:shipping_east_mediterranean > 0
+					}
+					add = THIS.partial_shipping_east_mediterranean
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_east_mediterranean > 0
+				}
+				add = var:shipping_east_mediterranean
 			}
 		}
-		add = THIS.minimal_shipping_east_mediterranean
-	}
 
-	if = {
-		limit = {
-			has_variable = member_of_federation
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
+			limit = {
+				var:shipping_east_mediterranean > 0
+				NOT = {
+					is_subject_of = PREV
+				}
+			}
+			add = THIS.minimal_shipping_east_mediterranean
 		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
-	}
 
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			east_mediterranean_tradezone = { PROVINCE = yes }
+		if = {
+			limit = {
+				has_variable = member_of_federation
+			}
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
+			}
 		}
-		add = SHIPPING_province_power
-	}
 
-	if = {
-		limit = {
-			is_subject = yes
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				east_mediterranean_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
 		}
-		overlord = {
-			add = THIS.var:shipping_east_mediterranean
-		}
+		add = 0.0001
+		divide = global_var:global_east_mediterranean_tradezone.SHIPPING_total_in_TZ
 	}
-	add = 0.0001
-	divide = global_var:global_east_mediterranean_tradezone.SHIPPING_total_in_TZ
 }
 
 SHIPPING_global_TZ_penetration_bonus = {

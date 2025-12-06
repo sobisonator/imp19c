@@ -485,7 +485,7 @@ base_window = {
 						textbox = {
 							align = top|right
 							size = { 100 32 }
-							text = "[Player.MakeScope.GetVariable('INCOME_national_total_from_tax').GetValue|3+=] @gold!" # IMP19C INCOME: TODO change
+							text = "[Player.MakeScope.GetVariable('INCOME_national_total_from_tax_and_tariff').GetValue|3+=] @gold!"
 							using = BaseFontM
 						}
 					}
@@ -1000,7 +1000,7 @@ base_window = {
 										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
 										onrightclick = "[GetScriptedGui('CURRENCY_repay_national_debt_10k').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
 									}
-									tooltip = "REPAY_NATIONAL_DEBT_TT"
+									tooltip = "[EconomyView.GetPlayer.Custom('repay_debt_small_loc')]"
 									size = { 24 24 }
 								}
 								text_button_square = {
@@ -1012,7 +1012,7 @@ base_window = {
 										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]" 
 										onrightclick = "[GetScriptedGui('CURRENCY_repay_national_debt_1m').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
 									}
-									tooltip = "REPAY_NATIONAL_DEBT_BIG_TT" # TODO: Change this from millions to displaying plain wealth value
+									tooltip = "[EconomyView.GetPlayer.Custom('repay_debt_large_loc')]"
 									size = { 24 24 }
 								}
 							}
@@ -1121,7 +1121,7 @@ base_window = {
 						textbox = {
 							align = top|right
 							size = { 100 32 }
-							text = "#r -#![EconomyView.GetTotalExpense|-2]@gold!"
+							text = "[Player.MakeScope.GetVariable('INCOME_cost_supplies_and_welfare_country').GetValue|3+=] @gold!"
 							using = BaseFontM
 						}
 					}
@@ -1218,6 +1218,225 @@ base_window = {
                                     
                                 }
                             }
+                        }
+                        expense_policy_container = {
+                            blockoverride "text_and_tooltip"
+                            {
+                                text = "Naval supplies"
+                                tooltip = "NAVAL_SUPPLIES_EXPENSE_TT"
+                            }
+                            blockoverride "income_text"
+                            {
+                                text = "[GuiScope.SetRoot( Player.MakeScope ).ScriptValue('INCOME_cost_navy_supplies_country')|3+=]"
+                            }
+                            blockoverride "rate_text"
+                            {
+                                text = "[Player.MakeScope.GetVariable('INCOME_navy_supplies_spending_rate').GetValue|%1]"
+                            }
+                            blockoverride "buttons"
+                            {
+                                policy_button = {
+                                    tooltip = "75%"
+                                    blockoverride "On_click"
+                                    {
+                                        onclick = "[GetScriptedGui('INCOME_navy_supplies_spending_75').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+                                    }
+                                    
+                                    blockoverride "ShowDot"
+                                    {
+                                        trigger_when = "[EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_navy_supplies_spending_rate').GetValue, '(CFixedPoint)0.75')]"
+                                    } 
+                                    
+                                    blockoverride "HideDot" 
+                                    {
+                                        trigger_when = "[Not(EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_navy_supplies_spending_rate').GetValue, '(CFixedPoint)0.75'))]"
+                                    } 
+                                    
+                                }
+                                policy_button = {
+                                    tooltip = "100%"
+                                    blockoverride "On_click"
+                                    {
+                                        onclick = "[GetScriptedGui('INCOME_navy_supplies_spending_100').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+                                    }
+                                    
+                                    blockoverride "ShowDot"
+                                    {
+                                        trigger_when = "[EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_navy_supplies_spending_rate').GetValue, '(CFixedPoint)1')]"
+                                    } 
+                                    
+                                    blockoverride "HideDot" 
+                                    {
+                                        trigger_when = "[Not(EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_navy_supplies_spending_rate').GetValue, '(CFixedPoint)1'))]"
+                                    } 
+                                    
+                                }
+                                policy_button = {
+                                    tooltip = "125%"
+                                    blockoverride "On_click"
+                                    {
+                                        onclick = "[GetScriptedGui('INCOME_navy_supplies_spending_125').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+                                    }
+                                    
+                                    blockoverride "ShowDot"
+                                    {
+                                        trigger_when = "[EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_navy_supplies_spending_rate').GetValue, '(CFixedPoint)1.25')]"
+                                    } 
+                                    
+                                    blockoverride "HideDot" 
+                                    {
+                                        trigger_when = "[Not(EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_navy_supplies_spending_rate').GetValue, '(CFixedPoint)1.25'))]"
+                                    } 
+                                    
+                                } 
+                                policy_button = {
+                                    tooltip = "150%"
+                                    blockoverride "On_click"
+                                    {
+                                        onclick = "[GetScriptedGui('INCOME_navy_supplies_spending_150').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+                                    }
+                                    
+                                    blockoverride "ShowDot"
+                                    {
+                                        trigger_when = "[EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_navy_supplies_spending_rate').GetValue, '(CFixedPoint)1.5')]"
+                                    } 
+                                    
+                                    blockoverride "HideDot" 
+                                    {
+                                        trigger_when = "[Not(EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_navy_supplies_spending_rate').GetValue, '(CFixedPoint)1.5'))]"
+                                    } 
+                                    
+                                }
+                            }
+                        }
+                        expense_policy_container = {
+                            blockoverride "text_and_tooltip"
+                            {
+                                text = "Public welfare"
+                                tooltip = "PUBLIC_WELFARE_EXPENSE_TT"
+                            }
+                            blockoverride "income_text"
+                            {
+                                text = "[GuiScope.SetRoot( Player.MakeScope ).ScriptValue('INCOME_cost_poor_law_spending')|3+=]"
+                            }
+                            blockoverride "rate_text"
+                            {
+                                text = "[Player.MakeScope.GetVariable('INCOME_public_welfare_spending_rate').GetValue|%1]"
+                            }
+                            blockoverride "buttons"
+                            {
+                                policy_button = {
+                                    tooltip = "25%"
+                                    blockoverride "On_click"
+                                    {
+                                        onclick = "[GetScriptedGui('INCOME_public_welfare_spending_25').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+                                    }
+                                    
+                                    blockoverride "ShowDot"
+                                    {
+                                        trigger_when = "[EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_public_welfare_spending_rate').GetValue, '(CFixedPoint)0.25')]"
+                                    } 
+                                    
+                                    blockoverride "HideDot" 
+                                    {
+                                        trigger_when = "[Not(EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_public_welfare_spending_rate').GetValue, '(CFixedPoint)0.25'))]"
+                                    } 
+                                    
+                                }
+                                policy_button = {
+                                    tooltip = "50%"
+                                    blockoverride "On_click"
+                                    {
+                                        onclick = "[GetScriptedGui('INCOME_public_welfare_spending_50').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+                                    }
+                                    
+                                    blockoverride "ShowDot"
+                                    {
+                                        trigger_when = "[EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_public_welfare_spending_rate').GetValue, '(CFixedPoint)0.5')]"
+                                    } 
+                                    
+                                    blockoverride "HideDot" 
+                                    {
+                                        trigger_when = "[Not(EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_public_welfare_spending_rate').GetValue, '(CFixedPoint)0.5'))]"
+                                    } 
+                                    
+                                }
+                                policy_button = {
+                                    tooltip = "75%"
+                                    blockoverride "On_click"
+                                    {
+                                        onclick = "[GetScriptedGui('INCOME_public_welfare_spending_75').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+                                    }
+                                    
+                                    blockoverride "ShowDot"
+                                    {
+                                        trigger_when = "[EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_public_welfare_spending_rate').GetValue, '(CFixedPoint)0.75')]"
+                                    } 
+                                    
+                                    blockoverride "HideDot" 
+                                    {
+                                        trigger_when = "[Not(EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_public_welfare_spending_rate').GetValue, '(CFixedPoint)0.75'))]"
+                                    } 
+                                    
+                                } 
+                                policy_button = {
+                                    tooltip = "100%"
+                                    blockoverride "On_click"
+                                    {
+                                        onclick = "[GetScriptedGui('INCOME_public_welfare_spending_100').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+                                    }
+                                    
+                                    blockoverride "ShowDot"
+                                    {
+                                        trigger_when = "[EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_public_welfare_spending_rate').GetValue, '(CFixedPoint)1')]"
+                                    } 
+                                    
+                                    blockoverride "HideDot" 
+                                    {
+                                        trigger_when = "[Not(EqualTo_CFixedPoint(Player.MakeScope.GetVariable('INCOME_public_welfare_spending_rate').GetValue, '(CFixedPoint)1'))]"
+                                    } 
+                                    
+                                }
+                            }
+                        }
+                        flowcontainer = {
+                        	name = "balance_history"
+                        	visible = no # WiP
+                        	margin_top = 30
+							widget = {
+								size = { 100 160 }
+								
+								progressbar = {
+									name = "positive_income_8q_ago"
+									direction = vertical
+									#parentanchor = center
+									position = { 0% 0% }
+									size = { 20% 50% }
+									progresstexture = "gfx/interface/tiles/progressbar_green_tile_v.dds"
+									framesize = { 40 40 }
+									frame = 1
+									alpha = 1
+									block "Value"
+									{
+										value = "100"
+									}
+								}
+								progressbar = {
+									name = "negative_income_8q_ago"
+									direction = vertical
+									parentanchor = top
+									position = { 0% 50% } # Y pos needs to be dynamic to counteract Value as it "comes up" from the bottom
+									size = { 20% 50% }
+									progresstexture = "gfx/interface/tiles/progressbar_red_tile_v.dds"
+									framesize = { 40 40 }
+									frame = 1
+									alpha = 1
+									block "Value"
+									{
+										value = "100"
+									}
+								}
+							}
                         }
 					}
 				}

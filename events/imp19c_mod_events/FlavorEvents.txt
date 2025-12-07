@@ -642,17 +642,37 @@ flavor_eve.16 = {
 	desc = "flavor_eve.16.desc"
 	picture = war_council
 	left_portrait = current_ruler
+	right_portrait = scope:heir
 	
-	trigger = {						
+	trigger = {
+		is_monarchy = yes						
 	}
 	
 	immediate = {
+		random_character = {
+			limit = {
+				is_primary_heir = yes
+			}
+			save_scope_as = heir
+		}
 	}
 	
 	fire_only_once = yes
 	
 	option = {
-		name = flavor_eve.16.a 
+		name = flavor_eve.16.a
+		scope:heir= {
+			add_loyalty = loyalty_love_encouraged
+			add_prominence = 10
+		}
+		add_treasury = {
+			add = root.INCOME_national_total_quarterly
+		} 
+	}
+
+	option = {
+		name = flavor_eve.16.b
+		scope:heir = {add_loyalty = loyalty_picked_other_side}
 	}
 }
 
@@ -660,10 +680,11 @@ flavor_eve.17 = {
 	type = country_event
 	title = "flavor_eve.17.t"
 	desc = "flavor_eve.17.desc"
-	picture = war_council
+	picture = dolores
 	left_portrait = current_ruler
 	
-	trigger = {						
+	trigger = {
+		is_monarchy = yes							
 	}
 	
 	immediate = {
@@ -673,6 +694,13 @@ flavor_eve.17 = {
 	
 	option = {
 		name = flavor_eve.17.a 
+		add_stability = -3
+		capital_scope = {
+			add_province_modifier = {
+				name = local_unrest_harsh
+				duration = 365
+			}
+		}
 	}
 }
 
@@ -680,19 +708,42 @@ flavor_eve.18 = {
 	type = country_event
 	title = "flavor_eve.18.t"
 	desc = "flavor_eve.18.desc"
-	picture = war_council
+	picture = eic_start
 	left_portrait = current_ruler
+	right_portrait = scope:friendly_neighbor.current_ruler
 	
-	trigger = {						
+	trigger = {
+		any_neighbour_country = {
+			has_land = yes
+			is_subject = no
+			NOT = { alliance_with = root }
+			in_diplomatic_range = root
+		}					
 	}
 	
 	immediate = {
+		random_country = {
+			limit = {
+				has_land = yes
+				is_subject = no
+				NOT = { alliance_with = root }
+				in_diplomatic_range = root
+			}
+			save_scope_as = friendly_neighbor
+		}
 	}
 	
 	fire_only_once = yes
 	
 	option = {
-		name = flavor_eve.18.a 
+		name = flavor_eve.18.a
+		add_stability = 3 
+	}
+	option = {
+		name = flavor_eve.18.b
+		current_ruler = {
+			add_friend = scope:friendly_neighbor.current_ruler
+		} 
 	}
 }
 
@@ -700,10 +751,12 @@ flavor_eve.19 = {
 	type = country_event
 	title = "flavor_eve.19.t"
 	desc = "flavor_eve.19.desc"
-	picture = war_council
+	picture = latino_start
 	left_portrait = current_ruler
 	
-	trigger = {						
+	trigger = {
+		war = yes
+		manpower >= 100					
 	}
 	
 	immediate = {
@@ -712,7 +765,8 @@ flavor_eve.19 = {
 	fire_only_once = yes
 	
 	option = {
-		name = flavor_eve.19.a 	
+		name = flavor_eve.19.a
+		add_manpower = -15	
 	}
 }
 
@@ -720,18 +774,41 @@ flavor_eve.20 = {
 	type = country_event
 	title = "flavor_eve.20.t"
 	desc = "flavor_eve.20.desc"
-	picture = war_council
+	picture = naval_battle
 	left_portrait = current_ruler
+	right_portrait = scope:aggressive_neighbor.current_ruler
 	
-	trigger = {						
+	trigger = {
+		any_neighbour_country = {
+			has_land = yes
+			is_subject = no
+			NOT = { alliance_with = root }
+			in_diplomatic_range = root
+		}							
 	}
 	
 	immediate = {
+		random_country = {
+			limit = {
+				has_land = yes
+				is_subject = no
+				NOT = { alliance_with = root }
+				in_diplomatic_range = root
+			}
+			save_scope_as = aggressive_neighbor
+		}
 	}
 	
 	fire_only_once = yes
 	
 	option = {
-		name = flavor_eve.20.a 
+		name = flavor_eve.20.a
+		root = {
+			add_opinion = { target = scope:aggressive_neighbor modifier = overlord_diverting_trade_opmod } 
+		}
+		scope:aggressive_neighbor = {
+			add_opinion = { target = root modifier = overlord_diverting_trade_opmod } 
+		}
+		
 	}
 }

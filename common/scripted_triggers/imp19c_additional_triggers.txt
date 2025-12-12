@@ -9,3 +9,63 @@ is_colony = {
 		}
 	}
 }
+
+AI_minor_war_targetable_neighbour = {
+	# Scope: Country
+
+	NOT = {
+		THIS = scope:AI_minor_considering_war
+	}
+
+	DIPLOMACY_power <= scope:AI_minor_considering_war.DIPLOMACY_power
+
+	opinion = {
+		target = scope:AI_minor_considering_war
+		value < 0
+	}
+
+	NOT = {
+		alliance_with = scope:AI_minor_considering_war
+	}
+	trigger_if = {
+		limit = {
+			scope:AI_minor_considering_war = {
+				is_subject = yes
+			}
+		}
+		NOT = {
+			alliance_with = scope:AI_minor_considering_war.overlord
+		}
+	}
+	trigger_if = {
+		limit = {
+			is_subject = yes
+		}
+		overlord = {
+			NOT = {
+				alliance_with = scope:AI_minor_considering_war
+			}
+			DIPLOMACY_power < scope:AI_minor_considering_war.DIPLOMACY_power
+		}
+	}
+	trigger_if = {
+		limit = {
+			AND = {
+				is_subject = yes
+				scope:AI_minor_considering_war = {
+					is_subject = yes
+				}
+			}
+		}
+		overlord = {
+			NOT = {
+				alliance_with = scope:AI_minor_considering_war.overlord
+			}
+		}
+	}
+	NOT = {
+		any_allied_country = {
+			DIPLOMACY_power > scope:AI_minor_considering_war.DIPLOMACY_power
+		}
+	}
+}

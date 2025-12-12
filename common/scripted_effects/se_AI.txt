@@ -2317,6 +2317,9 @@ AI_trigger_player_news_diplomatic_play = {
 
 AI_trigger_minor_country_war = {
 
+	remove_global_variable = AI_minor_considering_war
+	remove_global_variable = AI_minor_war_target_country
+
 	random_country = {
 		limit = {
 			# is valid to declare war
@@ -2328,20 +2331,18 @@ AI_trigger_minor_country_war = {
 				}
 				NOR = {
 					is_subject_type = client_colony
+					is_subject_type = client_state
 					is_subject_type = autonomous_governorship
 					is_subject_type = semi_autonomous_governorship
 					is_subject_type = royal_union
 					is_subject_type = protectorate
+					is_subject_type = territory
 				}
 
 			}
 		}
 
 		save_scope_as = AI_minor_considering_war
-		set_global_variable = {
-			name = AI_minor_considering_war
-			value = scope:AI_minor_considering_war
-		}
 
 		if = {
 			limit = {
@@ -2350,14 +2351,14 @@ AI_trigger_minor_country_war = {
 					OR = {
 						any_neighbor_province = {
 							has_owner = yes
-							NOT = {
-								owner = scope:AI_minor_considering_war
-							}
 							owner = {
 								AI_minor_war_targetable_neighbour = yes
 							}
 						}
 						AND = {
+							scope:AI_minor_considering_war ={
+								num_of_ships > 2	
+							}  
 							any_neighbor_province = {
 								is_sea = yes
 								any_neighbor_province = {
@@ -2370,8 +2371,6 @@ AI_trigger_minor_country_war = {
 							}
 						}
 					}
-					
-					
 				}
 			}
 
@@ -2385,7 +2384,6 @@ AI_trigger_minor_country_war = {
 								owner = scope:AI_minor_considering_war
 							}
 							AND = {
-								owner = { num_of_ships > 2 }
 								any_neighbor_province = {
 									is_sea = yes
 									any_neighbor_province = {
@@ -2400,25 +2398,26 @@ AI_trigger_minor_country_war = {
 				}
 
 				save_scope_as = AI_minor_war_target_country
-				set_global_variable = {
-					name = AI_minor_war_target_country
-					value = scope:AI_minor_war_target_country
-				}
+
 			}
 
-			global_var:AI_minor_considering_war = {
+			scope:AI_minor_considering_war = {
+				add_treasury = 1
+			}
+			scope:AI_minor_war_target_country = {
+				add_treasury = 2
+			}
+			scope:AI_minor_considering_war = {
 				FUNC_declare_war_with_wargoal_province = {
 			        war_goal = conquer_wargoal
-			        province = global_var:AI_minor_war_target_country.capital_scope
-			        target = global_var:AI_minor_war_target_country
+			        province = scope:AI_minor_war_target_country.capital_scope
+			        target = scope:AI_minor_war_target_country
 			    }
 			}
 			
 		}
 
 	}
-	remove_global_variable = AI_minor_considering_war
-	remove_global_variable = AI_minor_war_target_country
 }
 
 # ECONOMY

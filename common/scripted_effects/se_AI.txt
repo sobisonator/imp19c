@@ -1497,6 +1497,9 @@ AI_make_peace_province_wishlist_p0 = {
 			}
 		}
 		ordered_war_attacker = {
+			limit = {
+				num_of_cities > 2
+			}
 			order_by = {
 				value = DIPLOMACY_power
 				multiply = -1
@@ -1545,11 +1548,6 @@ AI_make_peace_province_wishlist = {
 				divide = global_var:total_diplomacy_power
 			}
 		}
-	}
-
-	every_in_list = {
-		list = AI_peace_wishlist_stage_1
-		remove_from_list = AI_peace_wishlist_stage_1
 	}
 
 	every_war_$target$ = {
@@ -1623,6 +1621,18 @@ AI_make_peace_province_wishlist = {
 		remove_from_list = list_of_targets
 	}
 	# Create a list of tradezones in AI_root, we'll need this later
+	every_in_list = {
+		list = tradezones_in_AI_root
+		remove_from_list tradezones_in_AI_root
+	}
+	every_in_list = {
+		list = tradezones_in_target
+		remove_from_list = tradezones_in_target
+	}
+	every_in_list = {
+		list = matching_neighbouring_tradezones
+		remove_from_list = matching_neighbouring_tradezones
+	}
 	scope:AI_root = {
 		every_governorships = {
 			limit = {
@@ -1681,37 +1691,46 @@ AI_make_peace_province_wishlist = {
 			# Increase interest in gaining claims
 			if = {
 				limit = {
+					region = {
+						any_region_province = {
+							OR = {
+								AND = {
+									has_owner = yes
+									owner = scope:AI_root
+								}
+								any_neighbor_province = {
+									has_owner = yes
+									owner = scope:AI_root
+								}
+							}
+						}
+					}
+				}
+				multiply = 24
+			}
+			if = {
+				limit = {
 					is_core_of = scope:AI_root
 				}
 				multiply = 2
 				add = 999999
 			}
-			# Reduce desirability of inland provinces without a contiguous border
-			if = {
-				limit = {
-					is_coastal = no
-					any_neighbor_province = {
-						limit = {
-							has_owner = yes
-						}
-						NOT = {
-							owner = scope:AI_root
-						}
-					}
-				}
-				divide = 1 # Testing no extra impact from being inland
-			}
 			# Reduce desirability of ports without a contiguous border or nearby port
 			if = {
 				limit = {
 					any_neighbor_province = {
-						limit = {
-							has_owner = yes
+						has_owner = yes
+						trigger_if = {
+							limit = {
+								has_owner = yes
+							}
+							NOT = {
+								owner = scope:AI_root
+							}
 						}
-						owner = scope:AI_root
 					}
 				}
-				add = 10000
+				subtract = 10000
 			}
 			state = {
 				if = {
@@ -1719,10 +1738,15 @@ AI_make_peace_province_wishlist = {
 						NOT = {
 							any_state_province = {
 								any_neighbor_province = {
-									limit = {
-										has_owner = yes
+									has_owner = yes
+									trigger_if = {
+										limit = {
+											has_owner = yes
+										}
+										NOT = {
+											owner = scope:AI_root
+										}
 									}
-									owner = scope:AI_root
 								}
 							}
 						}
@@ -1736,23 +1760,20 @@ AI_make_peace_province_wishlist = {
 					limit = {
 						any_region_area = {
 							any_area_province = {
-								limit = {
-									is_coastal = yes
-								}
+								is_coastal = yes
 								any_neighbor_province = {
-									limit = {
-										is_sea = yes
-									}
+									is_sea = yes
 									any_neighbor_province = {
-										limit = { 
-											is_sea = no
-										}
+										is_sea = no
 										any_neighbor_province = {
-											limit = {
-												is_coastal = yes
-												has_owner = yes
+											is_coastal = yes
+											has_owner = yes
+											trigger_if = {
+												limit = {
+													has_owner = yes
+												}
+												owner = scope:AI_root
 											}
-											owner = scope:AI_root
 										}
 									}
 								}
@@ -1769,7 +1790,12 @@ AI_make_peace_province_wishlist = {
 						NOT = {
 							any_region_province = {
 								any_neighbor_province = {
-									owner = scope:AI_root
+									trigger_if = {
+										limit = {
+											has_owner = yes
+										}
+										owner = scope:AI_root
+									}
 								}
 							}
 						}
@@ -1798,6 +1824,20 @@ AI_make_peace_province_wishlist = {
 					NOT = {
 						governorship.var:trade_center = {
 							is_in_list = matching_neighbouring_tradezones
+						}
+						region = {
+							any_region_province = {
+								OR = {
+									AND = {
+										has_owner = yes
+										owner = scope:AI_root
+									}
+									any_neighbor_province = {
+										has_owner = yes
+										owner = scope:AI_root
+									}
+								}
+							}
 						}
 					}
 				}
@@ -1840,6 +1880,34 @@ AI_make_peace_province_wishlist = {
 		list = tradezones_in_target
 		remove_from_list = tradezones_in_target
 	}
+
+	# Reduce the list based on the infamy cost
+	set_local_variable = {
+		name = infamy_total_cost
+		value = 0
+	}
+	every_in_list = {
+		list = AI_peace_wishlist_stage_1
+		limit = {
+			NOT = {
+				is_core_of = scope:AI_root
+			}
+		}
+		if = {
+			limit = {
+				local_var:infamy_total_cost < scope:AI_root.WARSCORE_acceptable_infamy_cost
+			}
+			change_local_variable = {
+				name = infamy_total_cost
+				add = WARSCORE_province_infamy_cost_AI_root
+			}
+		}
+		else = {
+			remove_from_list = AI_peace_wishlist_stage_1
+		}
+		
+	}
+
 	# Clean up for contiguousness and reasonable borders
 	every_in_list = {
 		list = AI_peace_wishlist_stage_1
@@ -2117,7 +2185,49 @@ AI_make_peace_province_wishlist = {
 			}
 		}
 	}
-	
+
+	# Prevent the AI from taking provinces not in the same tradezone or in a neighbouring region if it has a low diplomacy power
+	if = {
+		limit = {
+			scope:AI_root.DIPLOMACY_power < AI_annex_distant_overseas_threshold
+		}
+		every_in_list = {
+			list = AI_peace_wishlist_stage_1
+			limit = {
+				NOT = {
+					#NOT = {
+						governorship.var:trade_center = {
+							is_in_list = tradezones_in_AI_root
+						}
+					#}
+					#NOT = {
+						region = {
+							any_region_province = {
+								has_owner = yes
+								owner = scope:AI_root
+							}
+						}
+					#}
+					#NOT = {
+						region = {
+							any_region_province = {
+								any_neighbor_province = {
+									region = {
+										any_region_province = {
+											has_owner = yes
+											owner = scope:AI_root
+										}
+									}
+								}
+							}
+						}
+					#}
+				}
+			}
+			remove_from_list = AI_peace_wishlist_stage_1
+		}
+	}
+
 
 	# TODO: Make the release / annex decision below into a separate scripted effect which is called here
 
@@ -2185,6 +2295,7 @@ AI_make_peace_province_wishlist = {
 				country_flag = dynamic
 				country_name = dynamic
 				country_color = dynamic
+				country_adj = dynamic
 			}
 		}
 		
@@ -2236,10 +2347,6 @@ AI_debug_peace_deal_all_wars = {
 					THIS = { is_in_list = wars_checked }
 				}
 			}
-			# TODO: Make a version which specifies the AI_root scope
-			# And then use this to go through the ordered members of a war
-			# in inverse order of diplomacy power, so the smallest contributors get to act first
-			# The warscore available to each one is scaled by diplomacy power
 			AI_make_peace_province_wishlist_p0 = {
 				target = defender
 			}
@@ -2247,6 +2354,7 @@ AI_debug_peace_deal_all_wars = {
 			add_to_list = wars_checked
 		}
 	}
+	# TODO: Make the peace province wishlist effect scale to a warscore which is passed by argument
 }
 
 AI_debug_restitute_land = {
@@ -2310,6 +2418,114 @@ AI_trigger_player_news_diplomatic_play = {
 		}
 	}
 	
+}
+
+## Minor AI country diplomacy
+### Semi-random, scripted actions
+
+AI_trigger_minor_country_war = {
+
+	remove_global_variable = AI_minor_considering_war
+	remove_global_variable = AI_minor_war_target_country
+
+	random_country = {
+		limit = {
+			# is valid to declare war
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
+			is_ai = yes
+			trigger_if = {
+				limit = {
+					is_subject = yes
+				}
+				NOR = {
+					is_subject_type = client_colony
+					is_subject_type = client_state
+					is_subject_type = autonomous_governorship
+					is_subject_type = semi_autonomous_governorship
+					is_subject_type = royal_union
+					is_subject_type = protectorate
+					is_subject_type = territory
+				}
+
+			}
+		}
+
+		save_scope_as = AI_minor_considering_war
+
+		if = {
+			limit = {
+				# has a valid target country
+				any_owned_province = {
+					OR = {
+						any_neighbor_province = {
+							has_owner = yes
+							owner = {
+								AI_minor_war_targetable_neighbour = yes
+							}
+						}
+						AND = {
+							scope:AI_minor_considering_war ={
+								num_of_ships > 2	
+							}  
+							any_neighbor_province = {
+								is_sea = yes
+								any_neighbor_province = {
+									has_owner = yes
+									owner = {
+										AI_minor_war_targetable_neighbour = yes
+									}
+									
+								}
+							}
+						}
+					}
+				}
+			}
+
+			random_country = {
+				limit = {
+					AI_minor_war_targetable_neighbour = yes
+					any_owned_province = {
+						OR = {
+							any_neighbor_province = {
+								has_owner = yes
+								owner = scope:AI_minor_considering_war
+							}
+							AND = {
+								any_neighbor_province = {
+									is_sea = yes
+									any_neighbor_province = {
+										has_owner = yes
+										owner = scope:AI_minor_considering_war
+									}
+								}
+							}
+						}
+
+					}
+				}
+
+				save_scope_as = AI_minor_war_target_country
+
+			}
+
+			scope:AI_minor_considering_war = {
+				add_treasury = 1
+			}
+			scope:AI_minor_war_target_country = {
+				add_treasury = 2
+			}
+			scope:AI_minor_considering_war = {
+				FUNC_declare_war_with_wargoal_province = {
+			        war_goal = conquer_wargoal
+			        province = scope:AI_minor_war_target_country.capital_scope
+			        target = scope:AI_minor_war_target_country
+			    }
+			}
+			
+		}
+
+	}
 }
 
 # ECONOMY

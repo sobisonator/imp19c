@@ -1497,6 +1497,9 @@ AI_make_peace_province_wishlist_p0 = {
 			}
 		}
 		ordered_war_attacker = {
+			limit = {
+				num_of_cities > 2
+			}
 			order_by = {
 				value = DIPLOMACY_power
 				multiply = -1
@@ -1623,6 +1626,18 @@ AI_make_peace_province_wishlist = {
 		remove_from_list = list_of_targets
 	}
 	# Create a list of tradezones in AI_root, we'll need this later
+	every_in_list = {
+		list = tradezones_in_AI_root
+		remove_from_list tradezones_in_AI_root
+	}
+	every_in_list = {
+		list = tradezones_in_target
+		remove_from_list = tradezones_in_target
+	}
+	every_in_list = {
+		list = matching_neighbouring_tradezones
+		remove_from_list = matching_neighbouring_tradezones
+	}
 	scope:AI_root = {
 		every_governorships = {
 			limit = {
@@ -1702,7 +1717,6 @@ AI_make_peace_province_wishlist = {
 						}
 					}
 				}
-				divide = 1 # Testing no extra impact from being inland
 			}
 			# Reduce desirability of ports without a contiguous border or nearby port
 			if = {
@@ -1790,6 +1804,7 @@ AI_make_peace_province_wishlist = {
 						}
 					}
 					multiply = scope:AI_root.AI_coastal_port_states_power_ratio
+					multiply = scope:AI_root.AI_coastal_port_states_power_ratio
 				}
 			}
 			
@@ -1803,22 +1818,6 @@ AI_make_peace_province_wishlist = {
 		}
 		max = 9999
 		check_range_bounds = no
-		# Prevent the AI from taking provinces not in a shared or neighbouring tradezone to countries with low naval power
-		if = {
-			limit = {
-				scope:AI_root.AI_coastal_port_states_power_ratio < 1
-			}
-			if = {
-				limit = {
-					NOT = {
-						governorship.var:trade_center = {
-							is_in_list = matching_neighbouring_tradezones
-						}
-					}
-				}
-				remove_from_list = AI_peace_wishlist_stage_1
-			}
-		}
 		if = {
 			limit = {
 				trigger_if = {
@@ -2132,7 +2131,76 @@ AI_make_peace_province_wishlist = {
 			}
 		}
 	}
+
+	# Prevent the AI from taking provinces not in the same tradezone or in a neighbouring region if it has a low diplomacy power
+	if = {
+		limit = {
+			scope:AI_root.DIPLOMACY_power < AI_annex_distant_overseas_threshold
+		}
+		every_in_list = {
+			list = AI_peace_wishlist_stage_1
+			limit = {
+				NOT = {
+					#NOT = {
+						governorship.var:trade_center = {
+							is_in_list = tradezones_in_AI_root
+						}
+					#}
+					#NOT = {
+						region = {
+							any_region_province = {
+								has_owner = yes
+								owner = scope:AI_root
+							}
+						}
+					#}
+					#NOT = {
+						region = {
+							any_region_province = {
+								any_neighbor_province = {
+									region = {
+										any_region_province = {
+											has_owner = yes
+											owner = scope:AI_root
+										}
+									}
+								}
+							}
+						}
+					#}
+				}
+			}
+			remove_from_list = AI_peace_wishlist_stage_1
+		}
+	}
 	
+	# Reduce the list based on the infamy cost
+	set_local_variable = {
+		name = infamy_total_cost
+		value = 0
+	}
+	every_in_list = {
+		list = AI_peace_wishlist_stage_1
+		limit = {
+			NOT = {
+				is_core_of = scope:AI_root
+			}
+		}
+		if = {
+			limit = {
+				local_var:infamy_total_cost < scope:AI_root.WARSCORE_acceptable_infamy_cost
+			}
+			change_local_variable = {
+				name = infamy_total_cost
+				add = WARSCORE_province_infamy_cost_AI_root
+			}
+		}
+		else = {
+			remove_from_list = AI_peace_wishlist_stage_1
+		}
+		
+	}
+
 
 	# TODO: Make the release / annex decision below into a separate scripted effect which is called here
 
@@ -2252,10 +2320,6 @@ AI_debug_peace_deal_all_wars = {
 					THIS = { is_in_list = wars_checked }
 				}
 			}
-			# TODO: Make a version which specifies the AI_root scope
-			# And then use this to go through the ordered members of a war
-			# in inverse order of diplomacy power, so the smallest contributors get to act first
-			# The warscore available to each one is scaled by diplomacy power
 			AI_make_peace_province_wishlist_p0 = {
 				target = defender
 			}
@@ -2263,6 +2327,7 @@ AI_debug_peace_deal_all_wars = {
 			add_to_list = wars_checked
 		}
 	}
+	# TODO: Make the peace province wishlist effect scale to a warscore which is passed by argument
 }
 
 AI_debug_restitute_land = {

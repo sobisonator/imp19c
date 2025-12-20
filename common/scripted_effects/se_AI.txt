@@ -1550,11 +1550,6 @@ AI_make_peace_province_wishlist = {
 		}
 	}
 
-	every_in_list = {
-		list = AI_peace_wishlist_stage_1
-		remove_from_list = AI_peace_wishlist_stage_1
-	}
-
 	every_war_$target$ = {
 		every_owned_province = {
 			limit = {
@@ -1696,27 +1691,29 @@ AI_make_peace_province_wishlist = {
 			# Increase interest in gaining claims
 			if = {
 				limit = {
-					is_core_of = scope:AI_root
-				}
-				multiply = 2
-				add = 999999
-			}
-			# Reduce desirability of inland provinces without a contiguous border
-			if = {
-				limit = {
-					is_coastal = no
-					any_neighbor_province = {
-						has_owner = yes
-						trigger_if = {
-							limit = {
-								has_owner = yes
-							}
-							NOT = {
-								owner = scope:AI_root
+					region = {
+						any_region_province = {
+							OR = {
+								AND = {
+									has_owner = yes
+									owner = scope:AI_root
+								}
+								any_neighbor_province = {
+									has_owner = yes
+									owner = scope:AI_root
+								}
 							}
 						}
 					}
 				}
+				multiply = 24
+			}
+			if = {
+				limit = {
+					is_core_of = scope:AI_root
+				}
+				multiply = 2
+				add = 999999
 			}
 			# Reduce desirability of ports without a contiguous border or nearby port
 			if = {
@@ -1733,7 +1730,7 @@ AI_make_peace_province_wishlist = {
 						}
 					}
 				}
-				add = 10000
+				subtract = 10000
 			}
 			state = {
 				if = {
@@ -1817,6 +1814,36 @@ AI_make_peace_province_wishlist = {
 		}
 		max = 9999
 		check_range_bounds = no
+		# Prevent the AI from taking provinces not in a shared or neighbouring tradezone to countries with low naval power
+		if = {
+			limit = {
+				scope:AI_root.AI_coastal_port_states_power_ratio < 1
+			}
+			if = {
+				limit = {
+					NOT = {
+						governorship.var:trade_center = {
+							is_in_list = matching_neighbouring_tradezones
+						}
+						region = {
+							any_region_province = {
+								OR = {
+									AND = {
+										has_owner = yes
+										owner = scope:AI_root
+									}
+									any_neighbor_province = {
+										has_owner = yes
+										owner = scope:AI_root
+									}
+								}
+							}
+						}
+					}
+				}
+				remove_from_list = AI_peace_wishlist_stage_1
+			}
+		}
 		if = {
 			limit = {
 				trigger_if = {
@@ -1853,6 +1880,34 @@ AI_make_peace_province_wishlist = {
 		list = tradezones_in_target
 		remove_from_list = tradezones_in_target
 	}
+
+	# Reduce the list based on the infamy cost
+	set_local_variable = {
+		name = infamy_total_cost
+		value = 0
+	}
+	every_in_list = {
+		list = AI_peace_wishlist_stage_1
+		limit = {
+			NOT = {
+				is_core_of = scope:AI_root
+			}
+		}
+		if = {
+			limit = {
+				local_var:infamy_total_cost < scope:AI_root.WARSCORE_acceptable_infamy_cost
+			}
+			change_local_variable = {
+				name = infamy_total_cost
+				add = WARSCORE_province_infamy_cost_AI_root
+			}
+		}
+		else = {
+			remove_from_list = AI_peace_wishlist_stage_1
+		}
+		
+	}
+
 	# Clean up for contiguousness and reasonable borders
 	every_in_list = {
 		list = AI_peace_wishlist_stage_1
@@ -2171,33 +2226,6 @@ AI_make_peace_province_wishlist = {
 			}
 			remove_from_list = AI_peace_wishlist_stage_1
 		}
-	}
-	
-	# Reduce the list based on the infamy cost
-	set_local_variable = {
-		name = infamy_total_cost
-		value = 0
-	}
-	every_in_list = {
-		list = AI_peace_wishlist_stage_1
-		limit = {
-			NOT = {
-				is_core_of = scope:AI_root
-			}
-		}
-		if = {
-			limit = {
-				local_var:infamy_total_cost < scope:AI_root.WARSCORE_acceptable_infamy_cost
-			}
-			change_local_variable = {
-				name = infamy_total_cost
-				add = WARSCORE_province_infamy_cost_AI_root
-			}
-		}
-		else = {
-			remove_from_list = AI_peace_wishlist_stage_1
-		}
-		
 	}
 
 

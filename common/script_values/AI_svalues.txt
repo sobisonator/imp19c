@@ -1940,3 +1940,82 @@ AI_annex_distant_overseas_threshold = {
 	# Function: Set a threshold of diplomacy power below which AI countries will not annex distant overseas territory in peace deals
 	value = 1500
 }
+
+AI_warscore_desirable_peace = {
+	# Scope: Country
+	# Function: Threshold for AI to sue for a favourable peace
+
+	# Start at 50, add if the AI has the resources to keep up a war and subtract if the AI is desperate to make peace at a lower warscore
+	value = 50
+
+	# Negatives, want to make peace sooner
+	subtract = has_war_exhaustion
+	if = {
+		limit = {
+			# Has negative treasury AND an income deficit
+			treasury < 0
+			var:INCOME_national_total_quarterly < 0
+		}
+		add = {
+			value = treasury
+			multiply = 0.02
+		}
+	}
+	subtract = {
+		value = CURRENCY_national_debt_interest_actual
+		multiply = 10
+	}
+	subtract = {
+		value = 0
+		every_owned_province = {
+			limit = {
+				OR = {
+					is_previous_controller = PREV # Occupied
+					province_unrest > 4
+				}
+			}
+			add = total_population
+		}
+		min = 1
+		divide = country_population
+	}
+	# Positives - keep pushing on in the war
+	add = num_of_cohorts
+	if = {
+		limit = {
+			num_of_cohorts > 1
+		}
+		add = {
+			value = num_of_ships
+			multiply = 0.1
+		}
+	}
+	every_allied_country = {
+		add = num_of_cohorts
+	}
+	if = {
+		limit = {
+			stability > 49
+		}
+		add = {
+			value = stability
+			multiply = 0.5
+		}
+	}
+	else = {
+		# If stability < 50, subtract the difference from stab to 50
+		add = {
+			value = stability
+			subtract = 50
+		}
+	}
+	add = {
+		value = manpower
+		multiply = 0.01
+	}
+
+	# No higher than 0, as this is intended only for the winner to demand peace
+	min = 0
+	# No higher than 99, so AI with 100 warscore will always sue for peace
+	max = 99
+}

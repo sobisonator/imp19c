@@ -1823,7 +1823,7 @@ AI_make_peace_province_wishlist = {
 				limit = {
 					NOT = {
 						governorship.var:trade_center = {
-							is_in_list = matching_neighbouring_tradezones
+							is_in_list = tradezones_in_AI_root
 						}
 						region = {
 							any_region_province = {
@@ -2385,9 +2385,68 @@ AI_debug_restitute_land = {
 }
 
 AI_make_peace_deal = {
-	# Scope: War
+	# Scope: Country
 	# Function: Settle a peace deal for AI countries
-	# If the other party in the war is a player, send them an offer to consider
+	# Called: Regularly (TBD)
+	# TODO: If the other party in the war is a player, send them an offer to consider
+
+	save_scope_as = AI_root
+
+	# Only called by the warleader
+	if = {
+		limit = {
+			any_current_war = {
+				is_war_leader = scope:AI_root
+			}
+		}
+		save_scope_as = peace_root # Required for PEACE_get_warscore
+
+		every_current_war = {
+			save_scope_as = this_war
+
+			# Get scope:rival_warleader
+			if = {
+				limit = {
+					any_war_attacker = scope:AI_root
+				}
+				AI_get_rival_warleader = {
+					side = defender
+				}
+			}
+			else = {
+				AI_get_rival_warleader = {
+					side = attacker
+				}
+			}
+
+			# Get local_var:war_score_from_this
+			PEACE_get_warscore = {
+				target = scope:rival_warleader
+			}
+			if = {
+				limit = {
+					local_var:war_score > AI_warscore_desirable_peace
+				}
+			}
+		}
+
+	}
+
+
+}
+
+AI_get_rival_warleader = {
+	every_war_$side$ = {
+		save_scope_as = this_war_participant
+		if = {
+			limit = {
+				scope:this_war = {
+					is_war_leader = scope:this_war_participant
+				}
+			}
+			save_scope_as = rival_warleader
+		}
+	}
 }
 
 ## Diplomatic events

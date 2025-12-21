@@ -1479,7 +1479,7 @@ AI_make_peace_province_wishlist_p0 = {
 	# Function: Trigger peace province wishlist script for every member of the war on the appropriate side
 	set_global_variable = {
 		name = total_warscore_cost_available
-		value = 100 # Debug, it should be taken from the war scope
+		value = $warscore$
 	}
 	save_scope_as = war_scope
 
@@ -2286,16 +2286,16 @@ AI_make_peace_province_wishlist = {
 			LAND_release_from_list = {
 				releaser = scope:AI_root
 				list = released_from_war
-				capital_location = by_population
-				primary_culture = as_capital # TODO: Should be dynamic
-				country_religion = as_capital # TODO: Should be dynamic
-				as_subject_type = dynamic
-				government_type = dynamic
+				capital_location = flag:by_population
+				primary_culture = flag:as_capital # TODO: Should be dynamic
+				country_religion = flag:as_capital # TODO: Should be dynamic
+				as_subject_type = flag:dynamic
+				government_type = flag:dynamic
 				give_overlord_hos = yes # TODO: Should be dynamic
-				country_flag = dynamic
-				country_name = dynamic
-				country_color = dynamic
-				country_adj = dynamic
+				country_flag = flag:dynamic
+				country_name = flag:dynamic
+				country_color = flag:dynamic
+				country_adj = flag:dynamic
 			}
 		}
 		
@@ -2349,6 +2349,7 @@ AI_debug_peace_deal_all_wars = {
 			}
 			AI_make_peace_province_wishlist_p0 = {
 				target = defender
+				warscore = 100
 			}
 
 			add_to_list = wars_checked
@@ -2384,6 +2385,15 @@ AI_debug_restitute_land = {
 	}
 }
 
+AI_check_all_peace_deals = {
+	every_country = {
+		limit = {
+			war = yes
+		}
+		AI_make_peace_deal = yes
+	}
+}
+
 AI_make_peace_deal = {
 	# Scope: Country
 	# Function: Settle a peace deal for AI countries
@@ -2399,33 +2409,71 @@ AI_make_peace_deal = {
 				is_war_leader = scope:AI_root
 			}
 		}
-		save_scope_as = peace_root # Required for PEACE_get_warscore
 
 		every_current_war = {
 			save_scope_as = this_war
+			save_scope_as = war_scope
+			save_scope_as = peace_root # Required for PEACE_get_warscore
 
 			# Get scope:rival_warleader
 			if = {
 				limit = {
-					any_war_attacker = scope:AI_root
+					any_war_attacker = {
+						THIS = scope:AI_root
+					}
 				}
 				AI_get_rival_warleader = {
 					side = defender
+				}
+				set_local_variable = {
+					name = rival_team
+					value = flag:defender
 				}
 			}
 			else = {
 				AI_get_rival_warleader = {
 					side = attacker
 				}
+				set_local_variable = {
+					name = rival_team
+					value = flag:attacker
+				}
 			}
 
-			# Get local_var:war_score_from_this
-			PEACE_get_warscore = {
-				target = scope:rival_warleader
-			}
+			# Get scope:war_scope.var:warscore_balance
+			PEACE_get_warscore_balance_warleaders = yes
 			if = {
 				limit = {
-					local_var:war_score > AI_warscore_desirable_peace
+					local_var:rival_team = flag:defender # AI_root is attacker
+
+					# Both sides must want peace
+					scope:war_scope.var:warscore_balance > scope:AI_root.AI_warscore_desirable_peace_attacker
+					scope:war_scope.var:warscore_balance < scope:rival_warleader.AI_warscore_desirable_peace_defender
+				}
+				AI_make_peace_province_wishlist_p0 = {
+					target = defender
+					warscore = scope:war_scope.var:warscore_balance
+				}
+			}
+			else_if = {
+				limit = {
+					local_var:rival_team = flag:attacker # AI_root is defender
+
+					# Both sides must want peace
+					scope:war_scope.var:warscore_balance < scope:AI_root.AI_warscore_desirable_peace_defender
+					scope:war_scope.var:warscore_balance > scope:rival_warleader.AI_warscore_desirable_peace_attacker
+				}
+				# Invert warscore as defender warscore is returned negative
+				set_local_variable = {
+					name = available_warscore
+					value = {
+						value = scope:war_scope.var:warscore_balance
+						multiply = -1
+					}
+				}
+				AI_make_peace_province_wishlist_p0 = {
+					target = attacker
+					warscore = local_var:available_warscore
 				}
 			}
 		}

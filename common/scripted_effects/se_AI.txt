@@ -2425,18 +2425,10 @@ AI_make_peace_deal = {
 				AI_get_rival_warleader = {
 					side = defender
 				}
-				set_local_variable = {
-					name = rival_team
-					value = flag:defender
-				}
 			}
 			else = {
 				AI_get_rival_warleader = {
 					side = attacker
-				}
-				set_local_variable = {
-					name = rival_team
-					value = flag:attacker
 				}
 			}
 
@@ -2444,7 +2436,11 @@ AI_make_peace_deal = {
 			PEACE_get_warscore_balance_warleaders = yes
 			if = {
 				limit = {
-					local_var:rival_team = flag:defender # AI_root is attacker
+					scope:this_war = {
+						any_war_attacker = {
+							THIS = scope:AI_root
+						}
+					}
 
 					# Both sides must want peace
 					scope:war_scope.var:warscore_balance > scope:AI_root.AI_warscore_desirable_peace_attacker
@@ -2457,7 +2453,11 @@ AI_make_peace_deal = {
 			}
 			else_if = {
 				limit = {
-					local_var:rival_team = flag:attacker # AI_root is defender
+					scope:this_war = {
+						any_war_defender = {
+							THIS = scope:AI_root
+						}
+					}
 
 					# Both sides must want peace
 					scope:war_scope.var:warscore_balance < scope:AI_root.AI_warscore_desirable_peace_defender

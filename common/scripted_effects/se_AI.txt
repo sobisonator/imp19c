@@ -1520,6 +1520,15 @@ AI_make_peace_province_wishlist_p0 = {
 			}
 		}
 		ordered_war_defender = {
+			limit = {
+				num_of_cities > 2
+			}
+			order_by = {
+				value = DIPLOMACY_power
+				multiply = -1
+			}
+			max = 999
+			check_range_bounds = no
 			save_scope_as = AI_root
 			scope:war_scope = { AI_make_peace_province_wishlist = { target = $target$ } }
 		}
@@ -1713,10 +1722,6 @@ AI_make_peace_province_wishlist = {
 		list = tradezones_in_target
 		remove_from_list = tradezones_in_target
 	}
-	every_in_list = {
-		list = matching_neighbouring_tradezones
-		remove_from_list = matching_neighbouring_tradezones
-	}
 	scope:AI_root = {
 		every_governorships = {
 			limit = {
@@ -1743,28 +1748,6 @@ AI_make_peace_province_wishlist = {
 			}
 			var:trade_center = {
 				add_to_list = tradezones_in_target
-			}
-		}
-	}
-	# Now make a list of any target tradezones which match or neighbour tradezones in AI_root
-	every_in_list = {
-		list = tradezones_in_target
-		save_scope_as = tradezone_checked
-		if = {
-			limit = {
-				is_in_list = tradezones_in_AI_root
-			}
-			add_to_list = matching_neighbouring_tradezones
-		}
-		every_in_list = {
-			variable = neighbouring_tradezones
-			if = {
-				limit = {
-					is_in_list = tradezones_in_AI_root
-				}
-				scope:tradezone_checked = {
-					add_to_list = matching_neighbouring_tradezones
-				}
 			}
 		}
 	}
@@ -1849,16 +1832,15 @@ AI_make_peace_province_wishlist = {
 									is_sea = yes
 									any_neighbor_province = {
 										is_sea = no
-										any_neighbor_province = {
-											is_coastal = yes
-											has_owner = yes
-											trigger_if = {
-												limit = {
-													has_owner = yes
-												}
-												owner = scope:AI_root
+										#any_neighbor_province = {
+										has_owner = yes
+										trigger_if = {
+											limit = {
+												has_owner = yes
 											}
+											owner = scope:AI_root
 										}
+										#}
 									}
 								}
 							}
@@ -2544,58 +2526,49 @@ AI_make_peace_deal = {
 
 			if = {
 				limit = {
-					scope:this_war = {
-						any_war_attacker = {
-							THIS = scope:AI_root
-						}
-					}
-
-					# Only a winning country should trigger this
-					scope:war_scope.var:warscore_ai_root > 0
-					# Both sides must want peace or our winner has 100 warscore
-					OR = {
-						scope:war_scope.var:warscore_ai_root >= 99
-						AND = {
-							scope:war_scope.var:warscore_ai_root >= scope:AI_root.AI_warscore_desirable_peace
-							scope:war_scope.var:warscore_rival_warleader >= scope:rival_warleader.AI_warscore_desirable_peace
-						}
-					}
-					
-				}
-				scope:war_scope = {
-					AI_make_peace_province_wishlist_p0 = {
-						target = defender
-						warscore = scope:war_scope.var:warscore_ai_root
-					}
-				}
-				
-			}
-			else_if = {
-				limit = {
-					scope:this_war = {
-						any_war_defender = {
-							THIS = scope:AI_root
-						}
-					}
-
-					# Only a winning country should trigger this
-					scope:war_scope.var:warscore_ai_root > 0
-					# Both sides must want peace or our winner has 100 warscore
-					OR = {
-						scope:war_scope.var:warscore_ai_root >= 99
-						AND = {
-							scope:war_scope.var:warscore_ai_root >= scope:AI_root.AI_warscore_desirable_peace
-							scope:war_scope.var:warscore_rival_warleader >= scope:rival_warleader.AI_warscore_desirable_peace
+					AND = {
+						# Only a winning country should trigger this
+						scope:war_scope.var:warscore_ai_root > 0
+						# Both sides must want peace or our winner has 100 warscore
+						OR = {
+							scope:war_scope.var:warscore_ai_root >= 99
+							AND = {
+								scope:war_scope.var:warscore_ai_root >= scope:AI_root.AI_warscore_desirable_peace
+								scope:war_scope.var:warscore_rival_warleader >= scope:rival_warleader.AI_warscore_desirable_peace
+							}
 						}
 					}
 				}
-				scope:war_scope = {
-					AI_make_peace_province_wishlist_p0 = {
-						target = attacker
-						warscore = scope:war_scope.var:warscore_ai_root
+				if = {
+					limit = {
+						scope:war_scope = {
+							any_war_attacker = {
+								THIS = scope:AI_root
+							}
+						}
+					}
+					scope:war_scope = {
+						AI_make_peace_province_wishlist_p0 = {
+							target = defender
+							warscore = scope:war_scope.var:warscore_ai_root
+						}
 					}
 				}
-				
+				else_if = {
+					limit = {
+						scope:war_scope = {
+							any_war_defender = {
+								THIS = scope:AI_root
+							}
+						}
+					}
+					scope:war_scope = {
+						AI_make_peace_province_wishlist_p0 = {
+							target = attacker
+							warscore = scope:war_scope.var:warscore_ai_root
+						}
+					}
+				}
 			}
 		}
 

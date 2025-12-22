@@ -1941,7 +1941,7 @@ AI_annex_distant_overseas_threshold = {
 	value = 1500
 }
 
-AI_warscore_desirable_peace_attacker = {
+AI_warscore_desirable_peace = {
 	# Scope: Country
 	# Function: Threshold for AI to sue for a favourable peace
 	# From the POV of the attacker, as PEACE_get_warscore_balance_warleaders returns a balance of warscores which is positive for the attacker and negative for the defender
@@ -1950,7 +1950,10 @@ AI_warscore_desirable_peace_attacker = {
 	value = 50
 
 	# Negatives, want to make peace sooner
-	subtract = has_war_exhaustion
+	subtract = {
+		value = has_war_exhaustion
+		multiply = 3.3
+	}
 	if = {
 		limit = {
 			# Has negative treasury AND an income deficit
@@ -1984,7 +1987,13 @@ AI_warscore_desirable_peace_attacker = {
 		}
 		min = 1
 		divide = country_population
-		multiply = 0.2
+		multiply = 10
+	}
+	if = {
+		limit = {
+			num_of_cohorts < 1
+		}
+		subtract = 50
 	}
 	# Positives - keep pushing on in the war
 	add = num_of_cohorts
@@ -2021,12 +2030,14 @@ AI_warscore_desirable_peace_attacker = {
 		multiply = 0.01
 	}
 
-	# No higher than 0, as this is intended only for the winner to demand peace
-	min = 0
 	# No higher than 99, so AI with 100 warscore will always sue for peace
 	max = 99
 }
 
+
+AI_warscore_desirable_peace_attacker = {
+	value = 1
+}
 AI_warscore_desirable_peace_defender = {
 	# Scope: Country
 	value = AI_warscore_desirable_peace_attacker

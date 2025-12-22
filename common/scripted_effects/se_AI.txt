@@ -2432,8 +2432,25 @@ AI_make_peace_deal = {
 				}
 			}
 
-			# Get scope:war_scope.var:warscore_balance
-			PEACE_get_warscore_balance_warleaders = yes
+			# Get warscore for each warleader
+			war_score_value = {
+				target = scope:rival_warleader
+				local_var = rival_warscore
+			}
+			set_variable = {
+				name = warscore_rival_warleader
+				value = local_var:rival_warscore
+			}
+
+			war_score_value = {
+				target = scope:AI_root
+				local_var = ai_root_warscore
+			}
+			set_variable = {
+				name = warscore_ai_root
+				value = local_var:ai_root_warscore
+			}
+
 			if = {
 				limit = {
 					scope:this_war = {
@@ -2442,9 +2459,12 @@ AI_make_peace_deal = {
 						}
 					}
 
-					# Both sides must want peace
-					scope:war_scope.var:warscore_balance > scope:AI_root.AI_warscore_desirable_peace_attacker
-					scope:war_scope.var:warscore_balance < scope:rival_warleader.AI_warscore_desirable_peace_defender
+					# Only a winning country should trigger this
+					scope:war_scope.var:warscore_ai_root > 0
+					# Both sides must want peace OR one side has 100 warscore
+					# TODO: Implement the OR for one side with 100
+					scope:war_scope.var:warscore_ai_root > scope:AI_root.AI_warscore_desirable_peace_attacker
+					scope:war_scope.var:warscore_rival_warleader > scope:rival_warleader.AI_warscore_desirable_peace_defender
 				}
 				AI_make_peace_province_wishlist_p0 = {
 					target = defender
@@ -2459,9 +2479,12 @@ AI_make_peace_deal = {
 						}
 					}
 
+					# Only a winning country should trigger this
+					scope:war_scope.var:warscore_ai_root > 0
 					# Both sides must want peace
-					scope:war_scope.var:warscore_balance < scope:AI_root.AI_warscore_desirable_peace_defender
-					scope:war_scope.var:warscore_balance > scope:rival_warleader.AI_warscore_desirable_peace_attacker
+					# TODO: OR one side has 100
+					scope:war_scope.var:warscore_ai_root > scope:AI_root.AI_warscore_desirable_peace_defender
+					scope:war_scope.var:warscore_rival_warleader > scope:rival_warleader.AI_warscore_desirable_peace_attacker
 				}
 				# Invert warscore as defender warscore is returned negative
 				set_local_variable = {
@@ -2632,6 +2655,30 @@ AI_trigger_minor_country_war = {
 			
 		}
 
+	}
+}
+
+AI_test_warscore = {
+	c:SPA = {
+		save_scope_as = spa_scope
+		set_variable = {
+			name = warscore_total 
+			value = 0
+		}
+		every_current_war = {
+			war_score_value = {
+				target = scope:spa_scope
+				local_var = war_score_from_this
+			}
+			scope:spa_scope = {
+				change_variable = {
+					name = warscore_total
+					add = local_var:war_score_from_this
+				}
+				add_treasury = local_var:war_score_from_this
+			}
+		}
+		#scope:spa_scope= { add_treasury = var:warscore_total }
 	}
 }
 

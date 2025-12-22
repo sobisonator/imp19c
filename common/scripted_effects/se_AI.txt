@@ -2453,6 +2453,7 @@ AI_make_peace_deal = {
 
 			scope:AI_root = {
 				add_treasury = scope:war_scope.var:warscore_ai_root
+				add_treasury = scope:war_scope.var:warscore_rival_warleader
 			}
 
 			if = {
@@ -2467,18 +2468,21 @@ AI_make_peace_deal = {
 					scope:war_scope.var:warscore_ai_root > 0
 					# Both sides must want peace or our winner has 100 warscore
 					OR = {
-						scope:war_scope.var:warscore_ai_root > 99
+						scope:war_scope.var:warscore_ai_root >= 99
 						AND = {
-							scope:war_scope.var:warscore_ai_root > scope:AI_root.AI_warscore_desirable_peace
-							scope:war_scope.var:warscore_rival_warleader > scope:rival_warleader.AI_warscore_desirable_peace
+							scope:war_scope.var:warscore_ai_root >= scope:AI_root.AI_warscore_desirable_peace
+							scope:war_scope.var:warscore_rival_warleader >= scope:rival_warleader.AI_warscore_desirable_peace
 						}
 					}
 					
 				}
-				AI_make_peace_province_wishlist_p0 = {
-					target = defender
-					warscore = scope:war_scope.var:warscore_balance
+				scope:war_scope = {
+					AI_make_peace_province_wishlist_p0 = {
+						target = defender
+						warscore = scope:war_scope.var:warscore_ai_root
+					}
 				}
+				
 			}
 			else_if = {
 				limit = {
@@ -2492,25 +2496,20 @@ AI_make_peace_deal = {
 					scope:war_scope.var:warscore_ai_root > 0
 					# Both sides must want peace or our winner has 100 warscore
 					OR = {
-						scope:war_scope.var:warscore_ai_root > 99
+						scope:war_scope.var:warscore_ai_root >= 99
 						AND = {
-							scope:war_scope.var:warscore_ai_root > scope:AI_root.AI_warscore_desirable_peace
-							scope:war_scope.var:warscore_rival_warleader > scope:rival_warleader.AI_warscore_desirable_peace
+							scope:war_scope.var:warscore_ai_root >= scope:AI_root.AI_warscore_desirable_peace
+							scope:war_scope.var:warscore_rival_warleader >= scope:rival_warleader.AI_warscore_desirable_peace
 						}
 					}
 				}
-				# Invert warscore as defender warscore is returned negative
-				set_local_variable = {
-					name = available_warscore
-					value = {
-						value = scope:war_scope.var:warscore_balance
-						multiply = -1
+				scope:war_scope = {
+					AI_make_peace_province_wishlist_p0 = {
+						target = attacker
+						warscore = scope:war_scope.var:warscore_ai_root
 					}
 				}
-				AI_make_peace_province_wishlist_p0 = {
-					target = attacker
-					warscore = local_var:available_warscore
-				}
+				
 			}
 		}
 

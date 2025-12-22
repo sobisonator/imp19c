@@ -1,0 +1,387 @@
+country_decisions = {
+	unite_federation = {
+		potential = {
+			has_variable = member_of_federation
+		}
+		allow = {
+			always = yes
+			# TODO: Has completed unite federation mission
+		}
+		effect = {
+			hidden_effect = {
+				# TODO: Custom tooltip
+				# TODO: Trigger an event which contains the below script, as it is too laggy to calculate every frame when viewing decisions otherwise
+				save_scope_as = unifier
+
+				set_local_variable = {
+					name = combined_treasury
+					value = 0
+				}
+
+				var:member_of_federation = {
+					every_in_list = {
+						variable = list_of_members
+						limit = {
+							DIPLOMACY_power < scope:unifier.DIPLOMACY_power
+							NOT = {
+								AND = {
+									is_subject = yes
+									NOT = { overlord = scope:unifier }
+								}
+							}
+						}
+
+						every_owned_province = {
+							add_to_list = federation_unification_provinces
+						}
+						change_local_variable = {
+							name = combined_treasury
+							add = treasury
+						}
+					}
+				}
+
+				add_treasury = {
+					value = 0
+					var:member_of_federation = {
+						every_in_list = {
+							variable = list_of_members
+							limit = {
+								DIPLOMACY_power < scope:unifier.DIPLOMACY_power
+								NOT = {
+									AND = {
+										is_subject = yes
+										NOT = { overlord = scope:unifier }
+									}
+								}
+							}
+							add = treasury
+						}
+					}
+				}
+
+				# TODO: Create an annex script, which should remove trade deals, etc.
+				LAND_transfer_provinces = {
+					target_provinces = federation_unification_provinces
+					grantee = scope:unifier
+				}
+
+				if = {
+					limit = {
+						var:member_of_federation.var:federation_name = flag:GERMAN_CONFEDERATION
+					}
+					change_country_flag = GCF
+					change_country_color = epirus_yellow
+				}
+
+				if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_0 }
+					}
+					set_global_variable = {
+						name = united_federation_0
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_0
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_1 }
+					}
+					set_global_variable = {
+						name = united_federation_1
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_1
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_2 }
+					}
+					set_global_variable = {
+						name = united_federation_2
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_2
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_3 }
+					}
+					set_global_variable = {
+						name = united_federation_3
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_3
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_4 }
+					}
+					set_global_variable = {
+						name = united_federation_4
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_4
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_5 }
+					}
+					set_global_variable = {
+						name = united_federation_5
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_5
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_6 }
+					}
+					set_global_variable = {
+						name = united_federation_6
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_6
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_7 }
+					}
+					set_global_variable = {
+						name = united_federation_7
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_7
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_8 }
+					}
+					set_global_variable = {
+						name = united_federation_8
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_8
+				}
+				else_if = {
+					limit = {
+						NOT = { has_global_variable = united_federation_9 }
+					}
+					set_global_variable = {
+						name = united_federation_9
+						value = var:member_of_federation
+					}
+					change_country_name = CUSTOM_FEDERATION_NAME_9
+				}
+
+				# TODO: Create a destroy federation effect
+				
+			}
+
+		}
+	}
+
+	form_germany = {
+		potential = {
+			OR = {
+				primary_culture = north_german
+				primary_culture = south_german
+				primary_culture = baltic_german
+				primary_culture = austrian
+				primary_culture = swiss_german
+				primary_culture = luxembourgish
+				primary_culture = limburgish
+				primary_culture = eastern_german
+			}
+		}
+
+		allow = {
+			any_ownable_province = {
+	            percent >= 0.70
+	            filter = {
+	                OR = {
+	                    dominant_province_culture = north_german
+	                    dominant_province_culture = south_german
+	                    dominant_province_culture = baltic_german
+	                    dominant_province_culture = austrian
+	                    dominant_province_culture = swiss_german
+	                    dominant_province_culture = luxembourgish
+	                    dominant_province_culture = limburgish
+	                    dominant_province_culture = eastern_german
+	                }
+	            }
+	            exists = owner
+	            owned_or_subject_owned  = ROOT
+	        }
+		}
+
+		effect = {
+			change_country_color = CMB_dark
+			change_country_name = GER
+			if = {
+				limit = {
+					is_monarchy = yes
+				}
+				change_country_flag = GER
+			}
+			else = {
+				change_country_flag = GCF
+			}
+		}
+	}
+
+	form_bohemia = { # Non-primary culture alternative to Czechia
+		potential = {
+			any_owned_province = {
+				is_in_region = Bohemia
+			}
+			NOT = {
+				primary_culture = czech
+			}
+		}
+		allow = {
+			any_ownable_province = {
+				percent >= 0.90
+				filter = {
+					is_in_region = Bohemia
+				}
+				exists = owner
+				owner = ROOT
+			}
+			OR = {
+				capital_scope = {
+					is_in_region = Bohemia
+				}
+				num_of_cities < 55
+			}
+			
+			
+		}
+		effect = {
+			# TODO
+		}
+	}
+
+	form_poland_lithuania = {
+		potential = {
+			OR = {
+				primary_culture = polish
+				primary_culture = lithuanian
+			}
+		}
+		allow = {
+			any_country_culture = {
+				is_integrated = yes
+				OR = {
+					culture = lithuanian
+					culture = polish
+				}
+			}
+			any_ownable_province = {
+				percent >= 0.50
+				filter = {
+					OR = {
+						is_in_region = Poland
+						is_in_region = Baltic_states
+						is_in_region = Minsk
+					}
+					
+				}
+				exists = owner
+				owner = ROOT
+			}
+			owns = p:9020 # Vilnius
+			OR = {
+				owns = p:6831 # Vilnius
+				owns = p:10092 # Krakow
+			}
+		}
+		effect = {
+			# TODO
+		}
+	}
+
+	wonder_sev_fort_build = {
+		potential = {
+			tag = RUS
+			num_of_cities >= 1
+			owns = 3348
+			#p:3348 = {
+			#	NOR = {
+			#		has_variable = built_pharos
+			#	}
+			#}
+			NOR = {
+				has_variable = sev_fort_progress
+				has_variable = sev_fort_quality
+			}
+		}
+		highlight = {
+			scope:province = {
+				province_id = 3348
+			}
+		}
+		allow = {
+			treasury >= 1000
+			stability > 50
+			p:3348 = {
+				free_building_slots >= 1
+				great_work_locator_is_free = great_work_locators
+			}
+		}
+		effect = {
+			add_treasury = -1000
+			#custom_tooltip = "dhe_pharos_tooltip"
+			hidden_effect = {
+				set_variable = {
+					name = sev_fort_progress
+					value = 1
+				}
+				set_variable = {
+					name = sev_fort_quality
+					value = 1
+				}
+				#trigger_event = {
+				#	id = "wonder_sev_fort_build_event.1"
+				#}
+				#trigger_event = {
+				#	id = "dhe_pharos_lighthouse.1"
+				#	days = { 200 400 }
+				#}
+				p:3348 = {
+					begin_great_work_construction = {
+						great_work = "wonder_sev_fort"
+						locator = great_work_locators
+						is_ancient = yes
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				factor = 0
+				war = yes
+			}
+		}
+	}
+
+	change_flag_portugal_1815 = {
+		potential = {
+			tag = POR
+		}
+		effect = {
+			change_country_flag = POR_M1
+		}
+	}
+
+	change_flag_test_1 = {
+		potential = {
+			tag = RUS
+		}
+		effect = {
+			change_country_flag = SRB_T1
+		}
+	}
+}

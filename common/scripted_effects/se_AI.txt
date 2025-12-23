@@ -1520,6 +1520,15 @@ AI_make_peace_province_wishlist_p0 = {
 			}
 		}
 		ordered_war_defender = {
+			limit = {
+				num_of_cities > 2
+			}
+			order_by = {
+				value = DIPLOMACY_power
+				multiply = -1
+			}
+			max = 999
+			check_range_bounds = no
 			save_scope_as = AI_root
 			scope:war_scope = { AI_make_peace_province_wishlist = { target = $target$ } }
 		}
@@ -1550,9 +1559,108 @@ AI_make_peace_province_wishlist = {
 		}
 	}
 
+	# Check every war target - if their DIPLOMACY_power is less than 10% of the current AI_root, then demand vassalisation first and remove their non-core provinces from the demandables list!
+	# Warscore cost for demanding vassalisation should be 1 warscore per 10 DIPLOMACY_power
+	set_local_variable = {
+		name = 10p_AI_root_DIPLOMACY_power
+		value = {
+			value = scope:AI_root.DIPLOMACY_power
+			multiply = 0.1
+		}
+	}
+	set_local_variable = {
+		name = 10x_warscore_cost_available
+		value = {
+			value = global_var:warscore_cost_available
+			multiply = 10
+		}
+	}
+	if = {
+		limit = {
+			# Insignificant countries may not attempt to vassalise
+			scope:AI_root.DIPLOMACY_power > DIPLOMACY_insignificant_threshold
+		}
+		ordered_war_$target$ = {
+			limit = {
+				local_var:10p_AI_root_DIPLOMACY_power > DIPLOMACY_power
+				local_var:10x_warscore_cost_available > DIPLOMACY_power
+				# Prevent allies from gazzumping eachother's vassals if they may take them back in a war
+				trigger_if = {
+					limit = {
+						has_variable = latest_overlord
+					}
+					NOT = {
+						var:latest_overlord = {
+							exists = yes
+							trigger_if = {
+								limit = {
+									exists = yes
+								}
+								alliance_with = scope:AI_root
+							}
+						}
+					}
+				}
+				# Neighbours the AI_root or one of their vassals, or has a coast
+				any_owned_province = {
+					OR = {
+						is_coastal = yes
+						any_neighbor_province = {
+							AND = {
+								has_owner = yes
+								OR = {
+									owner = scope:AI_root
+									owner = {
+										is_subject = yes
+										trigger_if = {
+											limit = {
+												is_subject = yes
+											}
+											overlord = scope:AI_root
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			order_by = capital_scope.AI_interest_value_province
+			max = 3
+			check_range_bounds = no
+
+			# Vassalise and set a variable in all of their provinces so they cannot be considered for peace
+			save_scope_as = demanded_subject
+			FUNC_make_subject = {
+				overlord = scope:AI_root
+				target = scope:demanded_subject
+				type = client_state # TODO: Make this dynamic
+			}
+			every_owned_province = {
+				limit = {
+					NOT = {
+						is_core_of = scope:AI_root
+					}
+				}
+				set_variable = {
+					name = do_not_consider_for_peace
+					days = 2
+				}
+				change_global_variable = {
+					name = warscore_cost_available
+					subtract = WARSCORE_province_value_AI_root_claim_discount
+				}
+			}
+		}
+	}
+	
+
 	every_war_$target$ = {
 		every_owned_province = {
 			limit = {
+				NOT = {
+					has_variable = do_not_consider_for_peace
+				}
 				OR = {
 					is_core_of = scope:AI_root
 					trigger_if = {
@@ -1579,6 +1687,9 @@ AI_make_peace_province_wishlist = {
 		every_owned_province = {
 			# Provinces in states neighbouring the AI_root
 			limit = {
+				NOT = {
+					has_variable = do_not_consider_for_peace
+				}
 				NOT = { is_in_list = AI_peace_wishlist_stage_1 }
 				OR = {
 					state = {
@@ -1610,8 +1721,14 @@ AI_make_peace_province_wishlist = {
 			area = {
 				every_area_province = {
 					limit = {
+						has_owner = yes
 						owner = { is_in_list = list_of_targets }
+						NOT = {
+							has_variable = do_not_consider_for_peace
+							is_in_list = AI_peace_wishlist_stage_1
+						}
 					}
+					add_to_list = AI_peace_wishlist_stage_1
 				}
 			}
 		}
@@ -1628,10 +1745,6 @@ AI_make_peace_province_wishlist = {
 	every_in_list = {
 		list = tradezones_in_target
 		remove_from_list = tradezones_in_target
-	}
-	every_in_list = {
-		list = matching_neighbouring_tradezones
-		remove_from_list = matching_neighbouring_tradezones
 	}
 	scope:AI_root = {
 		every_governorships = {
@@ -1659,28 +1772,6 @@ AI_make_peace_province_wishlist = {
 			}
 			var:trade_center = {
 				add_to_list = tradezones_in_target
-			}
-		}
-	}
-	# Now make a list of any target tradezones which match or neighbour tradezones in AI_root
-	every_in_list = {
-		list = tradezones_in_target
-		save_scope_as = tradezone_checked
-		if = {
-			limit = {
-				is_in_list = tradezones_in_AI_root
-			}
-			add_to_list = matching_neighbouring_tradezones
-		}
-		every_in_list = {
-			variable = neighbouring_tradezones
-			if = {
-				limit = {
-					is_in_list = tradezones_in_AI_root
-				}
-				scope:tradezone_checked = {
-					add_to_list = matching_neighbouring_tradezones
-				}
 			}
 		}
 	}
@@ -1765,16 +1856,15 @@ AI_make_peace_province_wishlist = {
 									is_sea = yes
 									any_neighbor_province = {
 										is_sea = no
-										any_neighbor_province = {
-											is_coastal = yes
-											has_owner = yes
-											trigger_if = {
-												limit = {
-													has_owner = yes
-												}
-												owner = scope:AI_root
+										#any_neighbor_province = {
+										has_owner = yes
+										trigger_if = {
+											limit = {
+												has_owner = yes
 											}
+											owner = scope:AI_root
 										}
+										#}
 									}
 								}
 							}
@@ -1935,8 +2025,8 @@ AI_make_peace_province_wishlist = {
 		# Subsume inland enemy exclaves for clean borders
 		every_neighbor_province = {
 			limit = {
-				is_coastal = no # inland
-				NOT = { is_in_list = AI_peace_wishlist_stage_1 } # not already in the list
+				is_coastal = no
+				NOT = { is_in_list = AI_peace_wishlist_stage_1 }
 				NOT = { # No neighbor province is not already in the list
 					# i.e., they are all in the list, so it is surrounded
 					any_neighbor_province = {
@@ -2011,88 +2101,70 @@ AI_make_peace_province_wishlist = {
 		}
 		set_local_variable = {
 			name = num_surrounding_hostile_provs
-			value = {
-				every_neighbor_province = {
-					limit = {
-						trigger_if = {
-							limit = {
-								has_owner = yes
-							}
-							owner = {
-								war_with = scope:AI_root
-							}
-							NOT = {
-								any_neighbor_province = {
-									trigger_if = {
-										limit = {
-											has_owner = yes
-										}
-										NOT = {
-											owner = {
-												war_with = scope:AI_root
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					if = {
-						limit = {
-							NOT = { is_in_list = AI_peace_wishlist_stage_1 }
-						}
-						add = 1
-					}
-				}
-			}
+			value = 0
 		}
 		set_local_variable = {
 			name = num_surrounding_wishlisted_provs
-			value = {
-				every_neighbor_province = {
-					limit = {
-						trigger_if = {
-							limit = {
-								has_owner = yes
-							}
-							owner = {
-								war_with = scope:AI_root
-							}
-							NOT = {
-								any_neighbor_province = {
-									trigger_if = {
-										limit = {
-											has_owner = yes
-										}
-										NOT = {
-											owner = {
-												war_with = scope:AI_root
-											}
+			value = 0
+		}
+		
+		# Get number of neighbouring hostile-owned provinces
+		every_neighbor_province = {
+			limit = {
+				has_owner = yes
+			}
+			if = {
+				limit = {
+					NOT = { is_in_list = AI_peace_wishlist_stage_1 }
+					has_owner = yes
+					trigger_if = {
+						limit = {
+							has_owner = yes
+						}
+						owner = {
+							war_with = scope:AI_root
+						}
+						NOT = {
+							any_neighbor_province = {
+								trigger_if = {
+									limit = {
+										has_owner = yes
+									}
+									NOT = {
+										owner = {
+											war_with = scope:AI_root
 										}
 									}
 								}
 							}
 						}
 					}
-					if = {
-						limit = {
-							is_in_list = AI_peace_wishlist_stage_1
-						}
-						add = 1
-					}
+				}
+				change_local_variable = {
+					name = num_surrounding_hostile_provs
+					add = 1
+				}
+			}
+			else_if = {
+				limit = {
+					is_in_list = AI_peace_wishlist_stage_1
+				}
+				change_local_variable = {
+					name = num_surrounding_wishlisted_provs
+					add = 1
 				}
 			}
 		}
+		
+		# Evaluate ratio
 		if = {
 			limit = {
-				has_local_variable = num_surrounding_hostile_provs
+				local_var:num_surrounding_wishlisted_provs > 0
+				local_var:num_surrounding_hostile_provs > 0
 			}
 			change_local_variable = {
 				name = num_surrounding_hostile_provs
-				divide = {
-					value = local_var:num_surrounding_wishlisted_provs
-					min = 1
-				}
+				divide = local_var:num_surrounding_wishlisted_provs
 			}
 			if = {
 				limit = {
@@ -2101,7 +2173,6 @@ AI_make_peace_province_wishlist = {
 				remove_from_list = AI_peace_wishlist_stage_1
 			}
 		}
-
 	}
 
 	## Now that we have this, start breaking them down into states
@@ -2115,11 +2186,6 @@ AI_make_peace_province_wishlist = {
 				}
 				every_state_province = {
 					add_to_list = AI_peace_wishlist_stage_1
-				}
-			}
-			else = {
-				every_state_province = {
-				#	remove_from_list = AI_peace_wishlist_stage_1
 				}
 			}
 		}
@@ -2389,6 +2455,23 @@ AI_check_all_peace_deals = {
 	every_country = {
 		limit = {
 			war = yes
+			NOT = {
+				has_variable = recently_checked_peace
+			}
+		}
+
+		AI_make_peace_deal = yes
+		#set_variable = {
+		#	name = recently_checked_peace
+		#	days = 90
+		#}
+	}
+}
+
+AI_check_country_peace_deals = {
+	if = {
+		limit = {
+			war = yes
 		}
 		AI_make_peace_deal = yes
 	}
@@ -2432,48 +2515,71 @@ AI_make_peace_deal = {
 				}
 			}
 
-			# Get scope:war_scope.var:warscore_balance
-			PEACE_get_warscore_balance_warleaders = yes
+			# Get warscore for each warleader
+			war_score_value = {
+				target = scope:rival_warleader
+				local_var = rival_warscore
+			}
+			set_variable = {
+				name = warscore_rival_warleader
+				value = local_var:rival_warscore
+			}
+
+			war_score_value = {
+				target = scope:AI_root
+				local_var = ai_root_warscore
+			}
+			set_variable = {
+				name = warscore_ai_root
+				value = local_var:ai_root_warscore
+			}
+
 			if = {
 				limit = {
-					scope:this_war = {
-						any_war_attacker = {
-							THIS = scope:AI_root
+					AND = {
+						# Only a winning country should trigger this
+						scope:war_scope.var:warscore_ai_root > 0
+						# Both sides must want peace or our winner has 100 warscore
+						OR = {
+							scope:war_scope.var:warscore_ai_root >= 99
+							AND = {
+								scope:war_scope.var:warscore_ai_root >= scope:AI_root.AI_warscore_desirable_peace
+								scope:war_scope.var:warscore_rival_warleader >= scope:rival_warleader.AI_warscore_desirable_peace
+							}
 						}
 					}
-
-					# Both sides must want peace
-					scope:war_scope.var:warscore_balance > scope:AI_root.AI_warscore_desirable_peace_attacker
-					scope:war_scope.var:warscore_balance < scope:rival_warleader.AI_warscore_desirable_peace_defender
 				}
-				AI_make_peace_province_wishlist_p0 = {
-					target = defender
-					warscore = scope:war_scope.var:warscore_balance
-				}
-			}
-			else_if = {
-				limit = {
-					scope:this_war = {
-						any_war_defender = {
-							THIS = scope:AI_root
+				if = {
+					limit = {
+						has_global_variable = proceed_with_peace
+						scope:war_scope = {
+							any_war_attacker = {
+								THIS = scope:AI_root
+							}
 						}
 					}
-
-					# Both sides must want peace
-					scope:war_scope.var:warscore_balance < scope:AI_root.AI_warscore_desirable_peace_defender
-					scope:war_scope.var:warscore_balance > scope:rival_warleader.AI_warscore_desirable_peace_attacker
-				}
-				# Invert warscore as defender warscore is returned negative
-				set_local_variable = {
-					name = available_warscore
-					value = {
-						value = scope:war_scope.var:warscore_balance
-						multiply = -1
+					scope:war_scope = {
+						AI_make_peace_province_wishlist_p0 = {
+							target = defender
+							warscore = scope:war_scope.var:warscore_ai_root
+						}
 					}
 				}
-				AI_make_peace_province_wishlist_p0 = {
-					target = attacker
-					warscore = local_var:available_warscore
+				else_if = {
+					limit = {
+						has_global_variable = proceed_with_peace
+						scope:war_scope = {
+							any_war_defender = {
+								THIS = scope:AI_root
+							}
+						}
+					}
+					scope:war_scope = {
+						AI_make_peace_province_wishlist_p0 = {
+							target = attacker
+							warscore = scope:war_scope.var:warscore_ai_root
+						}
+					}
 				}
 			}
 		}
@@ -2635,7 +2741,46 @@ AI_trigger_minor_country_war = {
 	}
 }
 
+AI_test_warscore = {
+	c:SPA = {
+		save_scope_as = spa_scope
+		set_variable = {
+			name = warscore_total 
+			value = 0
+		}
+		every_current_war = {
+			war_score_value = {
+				target = scope:spa_scope
+				local_var = war_score_from_this
+			}
+			scope:spa_scope = {
+				change_variable = {
+					name = warscore_total
+					add = local_var:war_score_from_this
+				}
+				add_treasury = local_var:war_score_from_this
+			}
+		}
+		#scope:spa_scope= { add_treasury = var:warscore_total }
+	}
+}
+
 # ECONOMY
+
+AI_manage_deficit = {
+	# If has national debt administration
+	## If interest rate is lower than stockpile of precious metals
+	### Take out debt
+	## If interest rate is higher than stockpile of precious metals
+	### Sell precious metals
+
+	# If not has national debt administration
+	## Sell precious metals
+
+	# If low on precious metals or has national debt administration and has high debt
+	## Reduce spending on a policy
+	### Determine which policy to spend on
+}
 
 ## CURRENCY
 ### Take out debt

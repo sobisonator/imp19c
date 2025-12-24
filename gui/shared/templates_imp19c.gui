@@ -285,9 +285,7 @@ type PeaceNegotiationBlock = margin_widget {
 			using = VerticalScrollAreaCutOff
 			scrollwidget = {
 				dynamicgridbox = {
-					block "country_list" {
-						datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
-					}
+					block "country_list" { }
 					item = {
 						flowcontainer = {
 							spacing = 4
@@ -302,11 +300,10 @@ type PeaceNegotiationBlock = margin_widget {
 									size = { 290 30 }
 									#position = { -50 5 }
 									name = "country_button_open_states"
-									block "country_item_buttoncontext" {
-										datacontext = "[GetScriptedGui('select_defender_country')]"
-									}
+									visible = "[Not(GetVariableSystem.HasValue( Scope.GetCountry.GetName, 'close' ))]"
+									block "country_item_buttoncontext" { }
 									blockoverride "Left_text" {
-										text = "@[Scope.GetCountry.GetFlag]! [Scope.GetCountry.GetName]"
+										text = "@[Scope.GetCountry.GetFlag]! [Scope.GetCountry.GetNameWithNoTooltip]"
 									}
 									blockoverride "Right_text"
 									{
@@ -329,26 +326,20 @@ type PeaceNegotiationBlock = margin_widget {
 	                				# parentanchor
 	                				# Onlick needs to use scripted GUI to toggle the script variable for states visible. GUI variable no good for this.
 	                				blockoverride "On_click" { 
-	                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.AccessParent.FindChild('state_buttons').Show]"
-	                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('country_button_open_states').Hide]"
-	                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('country_button_close_states').Show]"
+	                					onclick = "[GetVariableSystem.Set( Scope.GetCountry.GetName, 'close' )]"
 	                				}
-
-	                				 
 								}
 								diplomacy_action_button = {
 									size = { 290 30 }
-									visible = no
+									#visible = no
+									datacontext = "[Scope.GetCountry]"
+									visible = "[GetVariableSystem.HasValue( Scope.GetCountry.GetName, 'close' )]"
 									#position = { -50 5 }
 									name = "country_button_close_states"
-									block "country_list_datamodel" {
-										datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
-									}
-									block "select_country_context" {
-										datacontext = "[GetScriptedGui('select_defender_country')]"
-									}
+									block "country_list_datamodel" { }
+									block "select_country_context" { }
 									blockoverride "Left_text" {
-										text = "@[Scope.GetCountry.GetFlag]! [Scope.GetCountry.GetName]"
+										text = "@[Scope.GetCountry.GetFlag]! [Scope.GetCountry.GetNameWithNoTooltip]"
 									}
 									blockoverride "Right_text"
 									{
@@ -371,34 +362,28 @@ type PeaceNegotiationBlock = margin_widget {
 	                				# parentanchor
 	                				# Onlick needs to use scripted GUI to toggle the script variable for states visible. GUI variable no good for this.
 	                				blockoverride "On_click" { 
-	                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.AccessParent.FindChild('state_buttons').Hide]"
-	                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('country_button_close_states').Hide]"
-	                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('country_button_open_states').Show]"
+	                					onclick = "[GetVariableSystem.Set( Scope.GetCountry.GetName, 'show')]"
 	                				}
-
-	                				 
 								}
 							}
 							flowcontainer = {
 								ignoreinvisible = yes
+								visible = "[GetVariableSystem.HasValue( Scope.GetCountry.GetName, 'close' )]"
 								dynamicgridbox = {
 									name = "state_buttons"
-									block "state_list" {
-										datamodel = "[Scope.Country.MakeScope.GetList('states_available_from_defender')]"
-									}
+									block "state_list" { }
 									# visible = parent governorship has the visibility script variable = 1
-									visible = no
+									#visible = no
 									item = {
 										flowcontainer = {
 											margin_left = 20
 											ignoreinvisible = yes
-											visible = no
+											#visible = no
 											diplomacy_action_button = {
 												size = { 270 30 }
 												name = "state_button_show_provinces"
-												block "state_item_buttoncontext" {
-													datacontext = "[GetScriptedGui('select_state_from_defender')]"
-												}
+												visible = "[Not(GetVariableSystem.HasValue( Scope.State.GetShortName, 'hide' ))]"
+												block "state_item_buttoncontext" { }
 												blockoverride "Left_text" {
 													text = "[Scope.State.GetShortName]"
 												}
@@ -422,22 +407,17 @@ type PeaceNegotiationBlock = margin_widget {
 				                				tooltip = "@[Scope.Governorship.GetOwner.GetFlag]! [Scope.Governorship.GetOwner.GetAdjective] region of [Scope.Governorship.GetName] "
 				                				# parentanchor
 				                				blockoverride "On_click" { 
-				                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('province_buttons').Show]"
-				                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('state_button_show_provinces').Hide]"
-				                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('state_button_hide_provinces').Show]"
-				                					block "state_item_rightclick_script" {
-				                						onrightclick = "[GetScriptedGui('select_state_from_defender_rightclick').Execute( GuiScope.SetRoot( Scope.State.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope ).End )]"
-				                					}
+				                					onclick = "[GetVariableSystem.Set( Scope.State.GetShortName, 'hide')]"
+				                					block "state_item_rightclick_script" { }
 				                				} 
 											}
 
 											diplomacy_action_button = {
 												size = { 270 30 }
 												name = "state_button_hide_provinces"
-												visible = no
-												block "state_item_buttoncontext" {
-													datacontext = "[GetScriptedGui('select_state_from_defender')]"
-												}
+												#visible = no
+												visible = "[GetVariableSystem.HasValue( Scope.State.GetShortName, 'hide' )]"
+												block "state_item_buttoncontext" { }
 												blockoverride "Left_text" {
 													text = "[Scope.State.GetShortName]"
 												}
@@ -461,12 +441,8 @@ type PeaceNegotiationBlock = margin_widget {
 				                				tooltip = "@[Scope.Governorship.GetOwner.GetFlag]! [Scope.Governorship.GetOwner.GetAdjective] region of [Scope.Governorship.GetName] "
 				                				# parentanchor
 				                				blockoverride "On_click" { 
-				                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('province_buttons').Hide]"
-				                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('state_button_show_provinces').Show]"
-				                					onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('state_button_hide_provinces').Hide]"
-				                					block "state_item_rightclick_script" {
-				                						onrightclick = "[GetScriptedGui('select_state_from_defender_rightclick').Execute( GuiScope.SetRoot( Scope.State.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope ).End )]"
-				                					}
+				                					onclick = "[GetVariableSystem.Set( Scope.State.GetShortName, 'show')]"
+				                					block "state_item_rightclick_script" { }
 				                				} 
 											}
 											flowcontainer = {
@@ -474,12 +450,11 @@ type PeaceNegotiationBlock = margin_widget {
 												margin_left = -255
 												ignoreinvisible = yes
 												allow_outside = yes
+												visible = "[GetVariableSystem.HasValue( Scope.State.GetShortName, 'hide' )]"
 												dynamicgridbox = {
-													block "province_list" {
-														datamodel = "[Scope.GetState.MakeScope.GetList('provinces_available_from_defender')]"
-													}
+													block "province_list" { }
 													name = "province_buttons"
-													visible = no
+													#visible = no
 													item = {
 														flowcontainer = {
 															ignoreinvisible = yes
@@ -512,9 +487,7 @@ type PeaceNegotiationBlock = margin_widget {
 															diplomacy_action_button = {
 																size = { 227 30 }
 																name = "province_button_unselected"
-																block "province_item_buttoncontext" {
-																	datacontext = "[GetScriptedGui('select_province_from_defender')]"
-																}
+																block "province_item_buttoncontext" { }
 																blockoverride "Left_text" {
 																	text = "[Scope.GetProvince.Custom('peace_province_selection_loc')]"
 																}

@@ -12,7 +12,7 @@ template WarParticipants
 					datacontext = "[WarOverviewParticipant.GetCountry]"
 					parentanchor = vcenter
 					blockoverride "Size" { size = { 56 56 } }
-					blockoverride "click"
+					blockoverride "On_click"
 					{
 						onclick = "[OpenDiplomacy(WarOverviewParticipant.GetCountry)]"
 					}
@@ -649,32 +649,17 @@ widget = {
 	}
 	#Alt Peace window
 	base_window = {
-		size = { 818 712 }
+		size = { 980 712 }
 		position = { 68 0 }
 		parentanchor = bottom
+		movable = no
+		alwaystransparent = no
+		visible = "[GetVariableSystem.HasValue( 'show_alternative_peace_deals', 'yes' )]"
 		state = {
 			name = _show
-			
-			animation = {
-				alpha = 0
-			}
-			next = fadein
-		}
-		
-		state = {
-			name = fadein
-			
-			animation = {
-				alpha = 1
-			}
-			#duration = 0.25
 		}
 		state = {
 			name = _hide
-			
-			animation = {
-				alpha = 0
-			}
 			start_sound = {
 				soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
 			}
@@ -685,468 +670,421 @@ widget = {
 			on_start = "[GetVariableSystem.Clear( 'extort_population_up' )]"
 			#duration = 0.2
 		}
-		movable = no
-		alwaystransparent = no
-		visible = "[GetVariableSystem.HasValue( 'show_alternative_peace_deals', 'yes' )]"
-		vbox = {
-			using = MainWindowHeaderBoxCenteredNew
-				
-			blockoverride "Title_text" { text = "[WarOverview.GetWar.GetName]" }
-			blockoverride "White_buttons" {
-				button_close = {
-					name = "the_close"
-					datacontext = "[GetScriptedGui('remove_war_lists_button')]"
-					onclick = "[GetVariableSystem.Set( 'show_alternative_peace_deals', 'no' )]"
-					onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-					tooltip = "CLOSE"
-				}
-			}
-			vbox = {
-				layoutpolicy_vertical = expanding
-			}		
-		}
-		#Top Flags
-		country_flag = {
-			position = { 3 56 }
-			parentanchor = top|left
-			tooltip = "[WarOverview.GetWar.GetDefenderWarLeader.GetName]"
-			datacontext = "[GetScriptedGui('select_peace_recipient_country_defender')]"
-			
-			blockoverride "flag"
-			{
-				texture = "[WarOverview.GetWar.GetDefenderWarLeader.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
-				frame = "[WarOverview.GetWar.GetDefenderWarLeader.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
-				framesize = { 120 120 }
-			}
-			
-			blockoverride "size"
-			{
-				size = { 80 80 }
-			}
-			
-			blockoverride "show_as_button"
-			{
-				visible = yes
-			}
-			blockoverride "show_as_icon"
-			{
-				visible = yes
-			}
-			onmousehierarchyenter = "[SetHighlightCountry(WarOverview.GetWar.GetDefenderWarLeader.GetCountry)]"
-			onmousehierarchyleave = "[ClearHighlightColors]"
-			blockoverride "click"
-			{
-				onclick = "[GetVariableSystem.Set( 'recipient_country_defender', WarOverview.GetWar.GetDefenderWarLeader.GetTag )]"
-				onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.GetDefenderWarLeader.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
-			}
-			icon = {
-				using = black_background
-				size = { 86 86 }
-				position = { 0 3 }
-				parentanchor = right
-				visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_defender', WarOverview.GetWar.GetDefenderWarLeader.GetTag ))]"
-				modify_texture = {
-					name = "linealpha"
-					texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
-					blend_mode = alphamultiply
-				}
-			}
-		}
-		country_flag = {
-			position = { -3 56 }
-			parentanchor = top|right
-			tooltip = "[WarOverview.GetWar.GetAttackerWarLeader.GetName]"
-			datacontext = "[GetScriptedGui('select_peace_recipient_country_attacker')]"
-			
-			blockoverride "flag"
-			{
-				texture = "[WarOverview.GetWar.GetAttackerWarLeader.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
-				frame = "[WarOverview.GetWar.GetAttackerWarLeader.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
-				framesize = { 120 120 }
-			}
-			
-			blockoverride "size"
-			{
-				size = { 80 80 }
-			}
-			
-			blockoverride "show_as_button"
-			{
-				visible = yes
-			}
-			blockoverride "show_as_icon"
-			{
-				visible = yes
-			}
-			onmousehierarchyenter = "[SetHighlightCountry(WarOverview.GetWar.GetAttackerWarLeader.GetCountry)]"
-			onmousehierarchyleave = "[ClearHighlightColors]"
-			blockoverride "click"
-			{
-				onclick = "[GetVariableSystem.Set( 'recipient_country_attacker', WarOverview.GetWar.GetAttackerWarLeader.GetTag )]"
-				onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.GetAttackerWarLeader.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
-			}
-			icon = {
-				using = black_background
-				size = { 86 86 }
-				position = { 0 3 }
-				parentanchor = right
-				visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_attacker', WarOverview.GetWar.GetAttackerWarLeader.GetTag ))]"
-				modify_texture = {
-					name = "linealpha"
-					texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
-					blend_mode = alphamultiply
-				}
-			}
-		}
-		#Bottom Flags
-		scrollarea = {
-			size = { 62 550 }
-			position = { 8 138 }
-			scrollbarpolicy_horizontal = always_off
-			using = VerticalScrollAreaCutOff
-			scrollbar_vertical = {
-				using = VerticalScrollBar
-			}
-			
-			scrollwidget = {
-				dynamicgridbox = {
-					position = { 0 0 }
-					parentanchor = hcenter
-					datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
-					
-					item = {
-						country_flag = {
-							datacontext = "[GetScriptedGui('select_peace_recipient_country_defender')]"
-							tooltip = "[Scope.Country.GetName]"
-							blockoverride "flag"
-							{
-								texture = "[Scope.Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
-								frame = "[Scope.Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
-								framesize = { 56 56 }
-							}
-							
-							blockoverride "size"
-							{
-								size = { 56 56 }
-							}
-							blockoverride "show_as_button"
-							{
-								visible = yes
-							}
-							blockoverride "show_as_icon"
-							{
-								visible = yes
-							}
-							onmousehierarchyenter = "[SetHighlightCountry(Scope.GetCountry)]"
-							onmousehierarchyleave = "[ClearHighlightColors]"
-							blockoverride "click"
-							{
-								onclick = "[GetVariableSystem.Set( 'recipient_country_defender', Scope.GetCountry.GetTag )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Scope.Country.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
-							}
-	        				icon = {
-								using = black_background
-								size = { 86 86 }
-								position = { 0 0 }
-								parentanchor = right
-								visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_defender', Scope.GetCountry.GetTag ))]"
-								modify_texture = {
-									name = "linealpha"
-									texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
-									blend_mode = alphamultiply
-								}
-							}	
-						}
-					}
-				}
-			}
-		}
-
-		scrollarea = {
-			position = { -8 138 }
-			size = { 62 550 }
-			scrollbarpolicy_horizontal = always_off
-			parentanchor = top|right
-			using = VerticalScrollAreaCutOff
-			scrollbar_vertical = {
-				using = VerticalScrollBar
-			}
-			
-			scrollwidget = {
-				dynamicgridbox = {
-					datamodel = "[Player.MakeScope.GetList('war_attacker_list')]"
-					parentanchor = hcenter
-					item = {
-						country_flag = {
-							datacontext = "[GetScriptedGui('select_peace_recipient_country_attacker')]"
-							tooltip = "[Scope.Country.GetName]"
-							blockoverride "flag"
-							{
-								texture = "[Scope.Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
-								frame = "[Scope.Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
-								framesize = { 56 56 }
-							}
-							
-							blockoverride "size"
-							{
-								size = { 56 56 }
-							}
-							
-							blockoverride "show_as_button"
-							{
-								visible = yes
-							}
-							blockoverride "show_as_icon"
-							{
-								visible = yes
-							}
-							onmousehierarchyenter = "[SetHighlightCountry(Scope.GetCountry)]"
-							onmousehierarchyleave = "[ClearHighlightColors]"
-							blockoverride "click"
-							{
-								onclick = "[GetVariableSystem.Set( 'recipient_country_attacker', Scope.GetCountry.GetTag )]"
-								onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Scope.Country.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
-							}
-	        				icon = {
-								using = black_background
-								size = { 86 86 }
-								position = { 0 0 }
-								parentanchor = right
-								visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_attacker', Scope.GetCountry.GetTag ))]"
-								modify_texture = {
-									name = "linealpha"
-									texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
-									blend_mode = alphamultiply
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		#POSITIVE WARSCORE BAR
 		flowcontainer = {
-			visible = "[GreaterThan_int32( WarOverview.GetWarScore, '(int32)0' )]"
-			parentanchor = center
-			position = { 10 -220 }
-			fixed_size_progressbar_war_score = {
-				blockoverride "ProgressColor" { using = green_color }
-				blockoverride "TotalSize" { size = { 570 81 } }
-				blockoverride "Icon" { 
-					texture = "gfx/interface/icons/shared_icons/warscore_cost.dds"
-					size = { 60 60 } 
-					position = { 245 -73 }
-				}
-				blockoverride "Value" { value = "[IntToFloat( WarOverview.GetWarScore )]" }
-				blockoverride "Text" { position = { 0 -5 } text = "[WarOverview.GetWarScore]" }
-				tooltip = "[WarOverview.GetWarScoreTooltip]"
-			}
-		}
-		#NEGATIVE WARSCORE BAR
-		flowcontainer = {
-			visible = "[LessThanOrEqualTo_int32( WarOverview.GetWarScore, '(int32)0' )]"
-			parentanchor = center
-			position = { 10 -220 }
-			fixed_size_progressbar_war_score = {
-				blockoverride "ProgressColor" { using = red_color }
-				blockoverride "TotalSize" { size = { 570 81 } }
-				blockoverride "Icon" { 
-					texture = "gfx/interface/icons/shared_icons/warscore_cost.dds" size = { 60 60 } 
-					position = { 245 -73 }
-				}
-				blockoverride "Value" { 
-					value = "[IntToFloat( Abs_int32(WarOverview.GetWarScore) )]" 
-				}
-				blockoverride "Text" {
-					position = { 0 -5 }
-					text = "[WarOverview.GetWar.MakeScope.GetVariable('warscore_balance').GetValue|0]"
-				} # EGG
-				tooltip = "[WarOverview.GetWarScoreTooltip]"
-			}
-		}
-		#Peace Deal buttons
-		vbox = {
-			position = { 15 -150 }
-			layoutpolicy_vertical = expanding
-			layoutpolicy_horizontal = expanding
-			
-			
-
-		}
-
-		PeaceNegotiationBlock = {
-			blockoverride "title_text" {
-				text = "Attackers' concessions"
-			}
-			blockoverride "country_list" {
-				datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
-			}
-			blockoverride "country_item_buttoncontext" {
-				datacontext = "[GetScriptedGui('select_defender_country')]"
-			}
-			blockoverride "country_list_datamodel" {
-				datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
-			}
-			blockoverride "select_country_context" {
-				datacontext = "[GetScriptedGui('select_defender_country')]"
-			}
-			blockoverride "state_list" {
-				datamodel = "[Scope.Country.MakeScope.GetList('states_available_from_defender')]"
-			}
-			blockoverride "state_item_buttoncontext" {
-				datacontext = "[GetScriptedGui('select_state_from_defender')]"
-			}
-			blockoverride "state_item_rightclick_script" {
-				onrightclick = "[GetScriptedGui('select_state_from_defender_rightclick').Execute( GuiScope.SetRoot( Scope.State.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope ).End )]"
-			}
-			blockoverride "province_list" {
-				datamodel = "[Scope.GetState.MakeScope.GetList('provinces_available_from_defender')]"
-			}
-			blockoverride "province_item_buttoncontext" {
-				datacontext = "[GetScriptedGui('select_province_from_defender')]"
-			}
-		}
-
-		PeaceNegotiationBlock = {
-			blockoverride "position" {
-				position  = { 175 180 }
-			}
-			blockoverride "title_text" {
-				text = "Attackers' concessions"
-			}
-			blockoverride "country_list" {
-				datamodel = "[Player.MakeScope.GetList('war_attacker_list')]"
-			}
-			blockoverride "country_item_buttoncontext" {
-				datacontext = "[GetScriptedGui('select_attacker_country')]"
-			}
-			blockoverride "country_list_datamodel" {
-				datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
-			}
-			blockoverride "select_country_context" {
-				datacontext = "[GetScriptedGui('select_defender_country')]"
-			}
-			blockoverride "state_list" {
-				datamodel = "[Scope.Country.MakeScope.GetList('states_available_from_attacker')]"
-			}
-			blockoverride "state_item_buttoncontext" {
-				datacontext = "[GetScriptedGui('select_state_from_defender')]"
-			}
-			blockoverride "state_item_rightclick_script" {
-				onrightclick = "[GetScriptedGui('select_state_from_attacker_rightclick').Execute( GuiScope.SetRoot( Scope.State.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope ).End )]"
-			}
-			blockoverride "province_list" {
-				datamodel = "[Scope.GetState.MakeScope.GetList('provinces_available_from_attacker')]"
-			}
-			blockoverride "province_item_buttoncontext" {
-				datacontext = "[GetScriptedGui('select_province_from_attacker')]"
-			}
-		}
-
-		flowcontainer = {
-			position = { -15 145 }
-			spacing = 10 
-			parentanchor = center
-			icon_and_text = {
-				size = { 110 0 }
-				blockoverride "Icon" { 
-					texture = "gfx/interface/icons/shared_icons/warscore_cost.dds" 
-				}
-				blockoverride "Text" { 
-					text = "[GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).ScriptValue('WARSCORE_cost_total_attacker')|1]" # TODO: Make this Custom text that's conditional on if the viewer is attacker or defender
-					using = BaseFontL
-					using = Default_FontColor
-					visible = yes # Var is attacker > 0
-				}
-				tooltip = "WRITE_ME"
-				position = { -30 -184 }
-				parentanchor = bottom|right
-			}
-			
-			icon_and_text = {
-				size = { 110 0 }
-				blockoverride "Icon" { 
-					texture = "gfx/interface/icons/shared_icons/aggressive_expansion.dds" 
-				}
-				blockoverride "Text" { 
-					text = "[Player.MakeScope.Var('aggressive_expansion_cost').GetValue|0]" 
-					using = BaseFontL
-					using = Default_FontColor
-				}
-				tooltip = "This offer costs #Y [Player.MakeScope.Var('aggressive_expansion_cost').GetValue|1]#! aggressive expansion."
-				position = { -30 -148 }
-				parentanchor = bottom|right
-			}
-		}
-		text_button_square = {
-			parentanchor = center
-			position = { 108 205 }
-			size = { 225 24 }
-			name = "accept_button"
-			datacontext = "[GetScriptedGui('send_final_offer_button')]"
-			blockoverride "Center_text" { text = "Offer Peace" }
-			blockoverride "On_click" { 
-				onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-				onclick = "[WarOverview.OnClose]"
-				enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
-			}
-			tooltip = "[WarOverview.GetWar.MakeScope.GetVariable('war_scope_standin').GetProvince.Custom('peace_ai_acceptance_loc')]" # TODO: Put this in custom loc and break it down by the factors that make up acceptance value
-			blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_peace_minor" }
-			widgetanchor = bottom|right
-		}
-		flowcontainer = {
-			parentanchor = center
-			position = { 0 270 }
-			icon = {
-				size = { 663 100 }
-				position = { 0 457 }
-				texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
-				alpha = 0.95
-
-				
-				blockoverride "Margins"
+			direction = vertical
+			widget = {
+				size = { 980 48 }
+				using = MainWindowHeaderBoxCenteredNew
+				blockoverride "Title_text" { text = "[WarOverview.GetWar.GetName]" }
+				blockoverride "White_buttons" 
 				{
-					alpha = 0.95
+					button_close = {
+						name = "the_close"
+						datacontext = "[GetScriptedGui('remove_war_lists_button')]"
+						onclick = "[GetVariableSystem.Set( 'show_alternative_peace_deals', 'no' )]"
+						onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+						tooltip = "CLOSE"
+					}
 				}
-
-				parentanchor = hcenter
-				visible = "[Not(WarOverview.GetWar.IsCivilWar)]"
 			}
-		}
-		flowcontainer = {
-			parentanchor = center
-			position = { 0 270 }
-			scrollarea = {
-				parentanchor = hcenter
-				size = { 655 95 }
-				name = "description_scrollarea"
-				scrollbarpolicy_horizontal = always_off
-				
-				using = NoninteractableBG
-				blockoverride "Margins" { 
-					margin = { 4 7 } 
-					margin_bottom = 10
+			flowcontainer = {
+				margin = { 10 0 }
+				spacing = 10
+				widget = {
+					size = { 80 80 }
+					new_country_flag = {
+						datacontext = "[GetScriptedGui('select_peace_recipient_country_defender')]"
+						blockoverride "Size" { size = { 80 80 } }
+						tooltip = "[WarOverview.GetWar.GetDefenderWarLeader.GetName]"
+						blockoverride "On_click"
+						{
+							onclick = "[GetVariableSystem.Set( 'recipient_country_defender', WarOverview.GetWar.GetDefenderWarLeader.GetTag )]"
+							onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.GetDefenderWarLeader.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
+						}
+						blockoverride "Flag" {
+							datacontext = "[WarOverview.GetWar.GetDefenderWarLeader]"
+							texture = "[Country.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+							frame = "[Country.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+							framesize = { 120 120 }
+						}
+						blockoverride "FlagOverlord" {
+							datacontext = "[WarOverview.GetWar.GetDefenderWarLeader]"
+							texture = "[Country.GetOverlord.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+							frame = "[Countryr.GetOverlord.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+							framesize = { 120 120 }
+						}
+						onmousehierarchyenter = "[SetHighlightCountry(WarOverview.GetWar.GetDefenderWarLeader.GetCountry)]"
+						onmousehierarchyleave = "[ClearHighlightColors]"
+					}
+					icon = {
+						using = black_background
+						size = { 100% 52 }
+						parentanchor = vcenter
+						alpha = 0.5
+						visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_defender', WarOverview.GetWar.GetDefenderWarLeader.GetTag ))]"
+					}
 				}
-				scrollbar_vertical = {
-					using = VerticalScrollBar
+				flowcontainer = {
+					ignoreinvisible = yes
+					margin_top = 10
+					#POSITIVE WARSCORE BAR
+					fixed_size_progressbar_war_score = {
+
+						blockoverride "ProgressColor" { using = green_color }
+						visible = "[GreaterThan_int32( WarOverview.GetWarScore, '(int32)0' )]"
+						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/warscore_cost.dds" }
+						blockoverride "Value" { value = "[IntToFloat( WarOverview.GetWarScore )]" }
+						blockoverride "Text" {
+							position = { 0 -5 }
+							text = "[WarOverview.GetWarScore]"
+						}
+					}
+					#NEGATIVE WARSCORE BAR
+					fixed_size_progressbar_war_score = {
+						blockoverride "ProgressColor" { using = red_color }
+						visible = "[LessThanOrEqualTo_int32( WarOverview.GetWarScore, '(int32)0' )]"
+						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/warscore_cost.dds" }
+						blockoverride "Value" { value = "[IntToFloat( Abs_int32(WarOverview.GetWarScore) )]" }
+						blockoverride "Text" {
+							position = { 0 -5 }
+							text = "[WarOverview.GetWar.MakeScope.GetVariable('warscore_balance').GetValue|0]"
+						} # EGG
+					}
 				}
-				
-				scrollwidget = {
-					textbox = {
-						text = "WAR_SCORE_COST_CURRENT_TT"
-						multiline = yes
-						autoresize = yes
-						minimumsize = { 560 0 }
-						maximumsize = { 560 -1 }
-						using = BaseFontS
-						using = Default_FontColor
-						elide = right
-						fontsize = 16
-						margin = { 4 0 }
-						#parentanchor = center
+				widget = {
+					size = { 80 80 }
+					new_country_flag = {
+						datacontext = "[GetScriptedGui('select_peace_recipient_country_attacker')]"
+						blockoverride "Size" { size = { 80 80 } }
+						tooltip = "[WarOverview.GetWar.GetAttackerWarLeader.GetName]"
+						blockoverride "On_click"
+						{
+							onclick = "[GetVariableSystem.Set( 'recipient_country_defender', WarOverview.GetWar.GetDefenderWarLeader.GetTag )]"
+							onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.GetDefenderWarLeader.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
+						}
+						blockoverride "Flag" {
+							datacontext = "[WarOverview.GetWar.GetAttackerWarLeader]"
+							framesize = { 120 120 }
+							texture = "[Country.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+							frame = "[Country.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+							framesize = { 120 120 }
+						}
+						blockoverride "FlagOverlord" {
+							datacontext = "[WarOverview.GetWar.GetAttackerWarLeader]"
+							texture = "[Country.GetOverlord.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
+							frame = "[Country.GetOverlord.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
+							framesize = { 120 120 }
+						}
+						onmousehierarchyenter = "[SetHighlightCountry(WarOverview.GetWar.GetAttackerWarLeader.GetCountry)]"
+						onmousehierarchyleave = "[ClearHighlightColors]"
+					}
+					icon = {
+						using = black_background
+						size = { 100% 52 }
+						parentanchor = vcenter
+						alpha = 0.5
+						visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_attacker', WarOverview.GetWar.GetAttackerWarLeader.GetTag ))]"
+					}
+				}
+			}
+			flowcontainer = {
+				margin = { 10 0 }
+				spacing = 10
+				scrollarea = {
+					size = { 80 530 }
+					scrollbarpolicy_horizontal = always_off
+					using = VerticalScrollAreaCutOff
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+					
+					scrollwidget = {
+						dynamicgridbox = {
+							parentanchor = hcenter
+							datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
+							item = {
+								widget = {
+									size = { 56 44 }
+									new_country_flag = {
+										datacontext = "[GetScriptedGui('select_peace_recipient_country_defender')]"
+										blockoverride "Size" { size = { 56 56 } }
+										parentanchor = vcenter
+										tooltip = "[Scope.Country.GetName]"
+										blockoverride "On_click"
+										{
+											onclick = "[GetVariableSystem.Set( 'recipient_country_defender', Scope.GetCountry.GetTag )]"
+											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Scope.Country.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
+										}
+										blockoverride "Flag" {
+											datacontext = "[Scope.Country]"
+											texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+											frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+											framesize = { 56 56 }
+										}
+										blockoverride "FlagOverlord" {
+											datacontext = "[Scope.Country]"
+											texture = "[Country.GetOverlord.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+											frame = "[Countryr.GetOverlord.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+											framesize = { 56 56 }
+										}
+										onmousehierarchyenter = "[SetHighlightCountry(Scope.GetCountry)]"
+										onmousehierarchyleave = "[ClearHighlightColors]"
+									}
+									icon = {
+										using = black_background
+										size = { 100% 100% }
+										alpha = 0.5
+										visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_defender', Scope.GetCountry.GetTag ))]"
+									}
+								}
+							}
+						}
+					}
+				}
+				flowcontainer = {
+					direction = vertical
+					spacing = 10
+					flowcontainer = {
+						PeaceNegotiationBlock = {
+							blockoverride "title_text" {
+								text = "Defenders' concessions"
+							}
+							blockoverride "country_list" {
+								datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
+							}
+							blockoverride "country_item_buttoncontext" {
+								datacontext = "[GetScriptedGui('select_defender_country')]"
+							}
+							blockoverride "country_list_datamodel" {
+								datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
+							}
+							blockoverride "select_country_context" {
+								datacontext = "[GetScriptedGui('select_defender_country')]"
+							}
+							blockoverride "state_list" {
+								datamodel = "[Scope.Country.MakeScope.GetList('states_available_from_defender')]"
+							}
+							blockoverride "state_item_buttoncontext" {
+								datacontext = "[GetScriptedGui('select_state_from_defender')]"
+							}
+							blockoverride "state_item_rightclick_script" {
+								onrightclick = "[GetScriptedGui('select_state_from_defender_rightclick').Execute( GuiScope.SetRoot( Scope.State.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope ).End )]"
+							}
+							blockoverride "province_list" {
+								datamodel = "[Scope.GetState.MakeScope.GetList('provinces_available_from_defender')]"
+							}
+							blockoverride "province_item_buttoncontext" {
+								datacontext = "[GetScriptedGui('select_province_from_defender')]"
+							}
+						}
+						PeaceNegotiationBlock = {
+							blockoverride "position" {
+								position  = { 175 180 }
+							}
+							blockoverride "title_text" {
+								text = "Attackers' concessions"
+							}
+							blockoverride "country_list" {
+								datamodel = "[Player.MakeScope.GetList('war_attacker_list')]"
+							}
+							blockoverride "country_item_buttoncontext" {
+								datacontext = "[GetScriptedGui('select_attacker_country')]"
+							}
+							blockoverride "country_list_datamodel" {
+								datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
+							}
+							blockoverride "select_country_context" {
+								datacontext = "[GetScriptedGui('select_defender_country')]"
+							}
+							blockoverride "state_list" {
+								datamodel = "[Scope.Country.MakeScope.GetList('states_available_from_attacker')]"
+							}
+							blockoverride "state_item_buttoncontext" {
+								datacontext = "[GetScriptedGui('select_state_from_defender')]"
+							}
+							blockoverride "state_item_rightclick_script" {
+								onrightclick = "[GetScriptedGui('select_state_from_attacker_rightclick').Execute( GuiScope.SetRoot( Scope.State.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope ).End )]"
+							}
+							blockoverride "province_list" {
+								datamodel = "[Scope.GetState.MakeScope.GetList('provinces_available_from_attacker')]"
+							}
+							blockoverride "province_item_buttoncontext" {
+								datacontext = "[GetScriptedGui('select_province_from_attacker')]"
+							}
+						}
+					}
+					flowcontainer = {
+						spacing = 5
+						parentanchor = hcenter
+						icon_and_text = {
+							size = { 110 32 }
+							blockoverride "Icon" { 
+								texture = "gfx/interface/icons/shared_icons/warscore_cost.dds" 
+							}
+							blockoverride "Text" { 
+								text = "[GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).ScriptValue('WARSCORE_cost_total_attacker')|1]" # TODO: Make this Custom text that's conditional on if the viewer is attacker or defender
+								using = BaseFontL
+								using = Default_FontColor
+								visible = yes # Var is attacker > 0
+							}
+							tooltip = "WRITE_ME"
+							position = { -30 -184 }
+							parentanchor = bottom|right
+						}
+						
+						icon_and_text = {
+							size = { 110 32 }
+							blockoverride "Icon" { 
+								texture = "gfx/interface/icons/shared_icons/aggressive_expansion.dds" 
+							}
+							blockoverride "Text" { 
+								text = "[Player.MakeScope.Var('aggressive_expansion_cost').GetValue|0]" 
+								using = BaseFontL
+								using = Default_FontColor
+							}
+							tooltip = "This offer costs #Y [Player.MakeScope.Var('aggressive_expansion_cost').GetValue|1]#! aggressive expansion."
+							position = { -30 -148 }
+							parentanchor = bottom|right
+						}
+					}
+					text_button_square = {
+						parentanchor = hcenter
+						size = { 225 28 }
+						name = "accept_button"
+						datacontext = "[GetScriptedGui('send_final_offer_button')]"
+						blockoverride "Center_text" { text = "Offer Peace" }
+						blockoverride "On_click" { 
+							onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
+							onclick = "[WarOverview.OnClose]"
+							enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
+						}
+						tooltip = "[WarOverview.GetWar.MakeScope.GetVariable('war_scope_standin').GetProvince.Custom('peace_ai_acceptance_loc')]" # TODO: Put this in custom loc and break it down by the factors that make up acceptance value
+						blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Diplomacy/sfx_ui_diplomacy_peace_minor" }
+					}
+					scrollarea = {
+						parentanchor = hcenter
+						size = { 655 100 }
+						name = "description_scrollarea"
+						scrollbarpolicy_horizontal = always_off
+						
+						using = NoninteractableBG
+						blockoverride "Margins" { 
+							margin = { 4 7 } 
+							margin_bottom = 10
+						}
+						scrollbar_vertical = {
+							using = VerticalScrollBar
+						}
+						
+						scrollwidget = {
+							textbox = {
+								text = "WAR_SCORE_COST_CURRENT_TT"
+								multiline = yes
+								autoresize = yes
+								minimumsize = { 560 0 }
+								maximumsize = { 560 -1 }
+								using = BaseFontS
+								using = Default_FontColor
+								elide = right
+								fontsize = 16
+								margin = { 4 0 }
+								#parentanchor = center
+							}
+						}
+					}
+				}
+				scrollarea = {
+					size = { 80 530 }
+					scrollbarpolicy_horizontal = always_off
+					using = VerticalScrollAreaCutOff
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+					
+					scrollwidget = {
+						dynamicgridbox = {
+							parentanchor = hcenter
+							datamodel = "[Player.MakeScope.GetList('war_attacker_list')]"
+							item = {
+								widget = {
+									size = { 56 44 }
+									new_country_flag = {
+										datacontext = "[GetScriptedGui('select_peace_recipient_country_attacker')]"
+										blockoverride "Size" { size = { 56 56 } }
+										parentanchor = vcenter
+										tooltip = "[Scope.Country.GetName]"
+										blockoverride "On_click"
+										{
+											onclick = "[GetVariableSystem.Set( 'recipient_country_attacker', Scope.GetCountry.GetTag )]"
+											onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Scope.Country.MakeScope ).AddScope('war', WarOverview.GetWar.MakeScope).End )]"
+										}
+										blockoverride "Flag" {
+											datacontext = "[Scope.Country]"
+											texture = "[Country.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+											frame = "[Country.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+											framesize = { 56 56 }
+										}
+										blockoverride "FlagOverlord" {
+											datacontext = "[Scope.Country]"
+											texture = "[Country.GetOverlord.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
+											frame = "[Countryr.GetOverlord.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
+											framesize = { 56 56 }
+										}
+										onmousehierarchyenter = "[SetHighlightCountry(Scope.GetCountry)]"
+										onmousehierarchyleave = "[ClearHighlightColors]"
+									}
+									icon = {
+										using = black_background
+										size = { 100% 100% }
+										alpha = 0.5
+										visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_attacker', Scope.GetCountry.GetTag ))]"
+									}
+								}
+							}
+						}
 					}
 				}
 			}
 		}
+		##POSITIVE WARSCORE BAR
+		#flowcontainer = {
+		#	visible = "[GreaterThan_int32( WarOverview.GetWarScore, '(int32)0' )]"
+		#	parentanchor = center
+		#	position = { 10 -220 }
+		#	fixed_size_progressbar_war_score = {
+		#		blockoverride "ProgressColor" { using = green_color }
+		#		blockoverride "TotalSize" { size = { 570 81 } }
+		#		blockoverride "Icon" { 
+		#			texture = "gfx/interface/icons/shared_icons/warscore_cost.dds"
+		#			size = { 60 60 } 
+		#			position = { 245 -73 }
+		#		}
+		#		blockoverride "Value" { value = "[IntToFloat( WarOverview.GetWarScore )]" }
+		#		blockoverride "Text" { position = { 0 -5 } text = "[WarOverview.GetWarScore]" }
+		#		tooltip = "[WarOverview.GetWarScoreTooltip]"
+		#	}
+		#}
+		##NEGATIVE WARSCORE BAR
+		#flowcontainer = {
+		#	visible = "[LessThanOrEqualTo_int32( WarOverview.GetWarScore, '(int32)0' )]"
+		#	parentanchor = center
+		#	position = { 10 -220 }
+		#	fixed_size_progressbar_war_score = {
+		#		blockoverride "ProgressColor" { using = red_color }
+		#		blockoverride "TotalSize" { size = { 570 81 } }
+		#		blockoverride "Icon" { 
+		#			texture = "gfx/interface/icons/shared_icons/warscore_cost.dds" size = { 60 60 } 
+		#			position = { 245 -73 }
+		#		}
+		#		blockoverride "Value" { 
+		#			value = "[IntToFloat( Abs_int32(WarOverview.GetWarScore) )]" 
+		#		}
+		#		blockoverride "Text" {
+		#			position = { 0 -5 }
+		#			text = "[WarOverview.GetWar.MakeScope.GetVariable('warscore_balance').GetValue|0]"
+		#		} # EGG
+		#		tooltip = "[WarOverview.GetWarScoreTooltip]"
+		#	}
+		#}
 	}
 }

@@ -166,6 +166,10 @@ template WarBattles
 @window_width = 1160
 @window_height = 910
 @column_width = 550
+@mincategorybuttonwidth = 390
+@maxcategorybuttonwidth = 390
+@mincategorybuttonheight = 28 
+@maxcategorybuttonheight = 34
 
 #alwaystransparent = yes
 widget = {
@@ -639,6 +643,7 @@ widget = {
 				blockoverride "Center_text" { text = "Sue for peace" }
 				blockoverride "On_click" { 
 					onclick = "[GetVariableSystem.Set( 'show_alternative_peace_deals', 'yes' )]" 
+					onclick = "[GetVariableSystem.Set('peace_tabs', 'province')]"
 					onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( WarOverview.GetWar.MakeScope ).AddScope('player', Player.MakeScope).End )]"
 				}
 				tooltip = "#T Sue for peace#!"
@@ -716,13 +721,13 @@ widget = {
 						onmousehierarchyenter = "[SetHighlightCountry(WarOverview.GetWar.GetDefenderWarLeader.GetCountry)]"
 						onmousehierarchyleave = "[ClearHighlightColors]"
 					}
-					icon = {
-						using = black_background
-						size = { 100% 52 }
-						parentanchor = vcenter
-						alpha = 0.5
-						visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_defender', WarOverview.GetWar.GetDefenderWarLeader.GetTag ))]"
-					}
+					#icon = {
+					#	using = black_background
+					#	size = { 100% 52 }
+					#	parentanchor = vcenter
+					#	alpha = 0.5
+					#	visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_defender', WarOverview.GetWar.GetDefenderWarLeader.GetTag ))]"
+					#}
 				}
 				flowcontainer = {
 					ignoreinvisible = yes
@@ -778,13 +783,13 @@ widget = {
 						onmousehierarchyenter = "[SetHighlightCountry(WarOverview.GetWar.GetAttackerWarLeader.GetCountry)]"
 						onmousehierarchyleave = "[ClearHighlightColors]"
 					}
-					icon = {
-						using = black_background
-						size = { 100% 52 }
-						parentanchor = vcenter
-						alpha = 0.5
-						visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_attacker', WarOverview.GetWar.GetAttackerWarLeader.GetTag ))]"
-					}
+					#icon = {
+					#	using = black_background
+					#	size = { 100% 52 }
+					#	parentanchor = vcenter
+					#	alpha = 0.5
+					#	visible = "[Not(GetVariableSystem.HasValue( 'recipient_country_attacker', WarOverview.GetWar.GetAttackerWarLeader.GetTag ))]"
+					#}
 				}
 			}
 			flowcontainer = {
@@ -844,11 +849,93 @@ widget = {
 				flowcontainer = {
 					direction = vertical
 					spacing = 10
+					ignoreinvisible = yes
 					flowcontainer = {
-						PeaceNegotiationBlock = {
-							blockoverride "title_text" {
+						direction = vertical
+						margin_widget = {
+							size = { 780 48 }
+							icon = {
+								position = { -10 42 }
+								using = brighten_red_background
+								size = { 10 2 }
+							}
+							icon = {
+								position = { -10 42 }
+								using = brighten_red_background
+								size = { 2 498 }
+							}
+							icon = {
+								position = { 10 42 }
+								using = brighten_red_background
+								size = { 10 2 }
+								parentanchor = right
+							}
+							icon = {
+								position = { 10 42 }
+								using = brighten_red_background
+								size = { 2 498 }
+								parentanchor = right
+							}
+							hbox = { 
+								spacing = 2
+								margin_top = 4
+								category_tab = {
+									blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+									blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+									blockoverride "MinVisible" { visible = "[And( Not( GetVariableSystem.HasValue('peace_tabs', 'province')), GetVariableSystem.Exists('diplomatic_tabs'))]" }
+									blockoverride "MaxVisible" { visible = "[Or( GetVariableSystem.HasValue('peace_tabs', 'province'), Not( GetVariableSystem.Exists('diplomatic_tabs') ) )]" }
+									######## Shared Overrides
+									blockoverride "Center_text" { text = "PROVINCE" }
+									blockoverride "Icon" { visible = no }
+									######## Small Button Overrides
+									blockoverride "ClickFunction"
+									{
+										onclick = "[GetVariableSystem.Set('peace_tabs', 'province')]"
+									}
+								}  
+								category_tab = {
+									blockoverride "Enabled" { enabled = "[Not(And( Not( EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ) ), Not(DiplomaticView.GetTargetCountry.IsBarbarian) ))]" }
+									blockoverride "MinSize" { size = { @mincategorybuttonwidth @mincategorybuttonheight } }
+									blockoverride "MaxSize" { size = { @maxcategorybuttonwidth @maxcategorybuttonheight } }
+									blockoverride "MinVisible" { visible = "[Not( GetVariableSystem.HasValue('peace_tabs', 'other'))]" }
+									blockoverride "MaxVisible" { visible = "[GetVariableSystem.HasValue('peace_tabs', 'other')]" }
+									######## Shared Overrides
+									blockoverride "Center_text" { text = "OTHER" }
+									blockoverride "Icon" { visible = no }
+									######## Small Button Overrides
+									blockoverride "ClickFunction"
+									{
+										onclick = "[GetVariableSystem.Set('peace_tabs', 'other')]"
+									}
+								}
+							}
+						}
+						flowcontainer = {
+							textbox = {
+								parentanchor = hcenter
+								using = BaseFontM
+								using = Default_FontColor
+								fontsize = 20
+								size = { 390 30 }
+								align = center
 								text = "Defenders' concessions"
 							}
+							textbox = {
+								parentanchor = hcenter
+								using = BaseFontM
+								using = Default_FontColor
+								fontsize = 20
+								size = { 390 30 }
+								align = center
+								text = "Attackers' concessions"
+							}
+						}
+					}
+					flowcontainer = {
+						spacing = 10
+						margin = { 5 0 }
+						visible = "[GetVariableSystem.HasValue( 'peace_tabs', 'province' )]"
+						PeaceNegotiationBlock = {
 							blockoverride "country_list" {
 								datamodel = "[Player.MakeScope.GetList('war_defender_list')]"
 							}
@@ -878,12 +965,6 @@ widget = {
 							}
 						}
 						PeaceNegotiationBlock = {
-							blockoverride "position" {
-								position  = { 175 180 }
-							}
-							blockoverride "title_text" {
-								text = "Attackers' concessions"
-							}
 							blockoverride "country_list" {
 								datamodel = "[Player.MakeScope.GetList('war_attacker_list')]"
 							}
@@ -911,6 +992,15 @@ widget = {
 							blockoverride "province_item_buttoncontext" {
 								datacontext = "[GetScriptedGui('select_province_from_attacker')]"
 							}
+						}
+					}
+					flowcontainer = {
+						spacing = 10
+						margin = { 5 0 }
+						visible = "[GetVariableSystem.HasValue( 'peace_tabs', 'other' )]"
+						PeaceNegotiationBlockOther = {	
+						}
+						PeaceNegotiationBlockOther = {
 						}
 					}
 					flowcontainer = {
@@ -963,7 +1053,7 @@ widget = {
 					}
 					scrollarea = {
 						parentanchor = hcenter
-						size = { 655 100 }
+						size = { 760 75 }
 						name = "description_scrollarea"
 						scrollbarpolicy_horizontal = always_off
 						
@@ -981,13 +1071,13 @@ widget = {
 								text = "WAR_SCORE_COST_CURRENT_TT"
 								multiline = yes
 								autoresize = yes
-								minimumsize = { 560 0 }
-								maximumsize = { 560 -1 }
+								minimumsize = { 750 0 }
+								maximumsize = { 750 -1 }
 								using = BaseFontS
 								using = Default_FontColor
 								elide = right
 								fontsize = 16
-								margin = { 4 0 }
+								margin = { 5 0 }
 								#parentanchor = center
 							}
 						}

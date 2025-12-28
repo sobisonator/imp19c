@@ -380,10 +380,15 @@ base_window = {
 								}
 							}
 							margin_widget = {
-								size = { 132 35 }
-								margin = { 8 8 }
+								size = { 128 36 }
 								using = NoninteractableBG
-								
+								blockoverride "Margins"
+								{
+									margin_top = 2
+									margin_bottom = 8
+									margin_left = 2
+									margin_right = 2
+								}
 								overlappingitembox = {
 									datamodel = "[SingleUnitWindow.GetSelectedUnit.GetTemporaryModifiers]"
 									position = { 0 -4 }
@@ -392,18 +397,25 @@ base_window = {
 									
 									item = {
 										modifier_icon = {
+											size = { 32 32 }
 											datacontext = "[TimedModifier.GetModifier]"
 											tooltip = "[TimedModifier.GetTooltip]"
 										}
 									}
 								}
 							}
+							widget = {
+								size = { 5 36 }
+							}
 							container = {
 								position = { 251 1 }
 								using = NoninteractableBG
-								blockoverride "Margins" { 
-									margin = { 2 7 } 
-									margin_right = 5
+								blockoverride "Margins"
+								{
+									margin_top = 2
+									margin_bottom = 8
+									margin_left = 2
+									margin_right = 2
 								}
 								margin_widget = {
 									size = { 36 36 }
@@ -411,7 +423,7 @@ base_window = {
 									visible = "[SingleUnitWindow.GetSelectedUnit.HasLeader]"
 									icon = {
 										size = { 32 32 }
-										position = { 2 2 }
+										position = { 0 5 }
 										texture = "gfx/interface/icons/modifiers/loyalty_gain_chance.dds"
 										tooltip = "[SingleUnitWindow.GetSelectedUnit.GetCommander.GetLoyaltyGainToolTip]"
 									}
@@ -422,9 +434,9 @@ base_window = {
 									size = { 36 36 }
 									
 									icon = {
-										texture = "gfx/interface/icons/modifiers/enslavement_efficiency.dds"
 										size = { 32 32 }
-										position = { 2 3 }
+										position = { 0 5 }
+										texture = "gfx/interface/icons/modifiers/enslavement_efficiency.dds"
 										tooltip = "[SingleUnitWindow.GetSelectedUnit.GetCommander.GetEnslavementEffiencyTooltip]"
 									}
 								}
@@ -659,7 +671,7 @@ base_window = {
 				}
 				margin_widget = {
 					margin_top = 10
-					size = { 375 360 }
+					size = { 380 360 }
 					scrollarea = {
 						size = { 100% 100% }
 						using = VerticalScrollAreaCutOff
@@ -669,27 +681,37 @@ base_window = {
 						}
 						
 						scrollwidget = {
-							dynamicgridbox = {
+							flowcontainer = {
 								name = "subunits_grid"
-								size = { 100% 200 }
-								
 								datamodel = "[SingleUnitWindow.GetSelectedUnit.GetSubUnits]"
-								
+								direction = vertical
+								spacing = 5
 								item = {
-									widget = {
-										size = { 385 44 }
-										list_entry = {
-											size = { 100% 100% }
-										}
+									margin_widget = {
+										size = { 370 44 }
+										using = list_item
 										icon_card = {
 											size = { 36 36 }
-											parentanchor = vcenter
+											position = { 4 4 }
 											blockoverride "Icon" { texture = "[GetSubUnitIcon(SubUnit.GetType)]" }
 											tooltip = "[SubUnit.GetTypeDescription]"
 										}
-										
+										margin_widget = {
+											size = { 8 36 }
+											position = { 44 4 }
+											icon = {
+												size = { 100% 100% }
+												using = beige_background
+											}
+											progressbar = {
+												using = vertical_moralebar
+												size = { 100% 100% }
+												value = "[FixedPointToFloat(SubUnit.GetMoralePercent)]"
+												tooltip = "[SubUnit.GetMoraleInfo]"
+											}
+										}
 										textbox = {
-											position = { 40 0 }
+											position = { 56 0 }
 											parentanchor = vcenter
 											autoresize = yes
 											using = BaseFontS
@@ -697,16 +719,16 @@ base_window = {
 											text = "[SubUnit.GetName]"
 											tooltip = "[SubUnit.GetDescription]"
 											elide = right
-											max_width = 158
-											fontsize_min = 12
+											max_width = 120
+											fontsize_min = 10
 										}
 										
 										flowcontainer = {
 											position = { 0 2 }
 											parentanchor = right
 											ignoreinvisible = yes
-											spacing = 3
-
+											spacing = 5
+											margin_right = 10
 											button = {
 												using = icon_loyalty
 												visible = "[SubUnit.HasPersonalLoyalty]"
@@ -717,37 +739,23 @@ base_window = {
 												size = { 26 26 }
 												parentanchor = vcenter
 											}
-
-											icon_and_text_dark = {
-												size = { 80 0 }
-												blockoverride "Icon" { using = icon_morale }
-												blockoverride "Text" { text = "[SubUnit.GetMoralePercent|0]%" }
-												tooltip = "[SubUnit.GetMoraleInfo]"
-											}
-											
-											icon_and_text_dark = {
-												size = { 78 0 }
-												blockoverride "Icon" 
-												{ 
-													using = icon_military_experience 
-													size = { 29 29 }
-												}
-												blockoverride "Text" { text = "[SubUnit.GetExperience|0]%" }
+											#panelka_center = {
+											#	size = { 80 32 }
+											#	blockoverride "Icon" { using = icon_morale }
+											#	blockoverride "TextBox" { text = "[SubUnit.GetMoralePercent|0]%" }
+											#	tooltip = "[SubUnit.GetMoraleInfo]"
+											#}
+											panelka_center = {
+												size = { 80 32 }
+												blockoverride "Icon" { using = icon_military_experience }
+												blockoverride "TextBox" { text = "[SubUnit.GetExperience|0]%" }
 												tooltip = "[SubUnit.GetExperienceInfo]"
 											}
-											
-											icon_and_text_dark = {
-												size = { 78 0 }
+											panelka_center = {
+												size = { 100 32 }
+												blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/strength.dds" }
+												blockoverride "TextBox" { text = "[SubUnit.GetStrength]" }
 												tooltip = "[SubUnit.GetStrengthDescription]"
-												blockoverride "Icon"
-												{
-													texture = "gfx/interface/icons/shared_icons/strength.dds"
-													size = { 29 29 }
-												}
-												blockoverride "Text"
-												{
-													text = "[SubUnit.GetStrength]"
-												}
 											}
 										}
 									}

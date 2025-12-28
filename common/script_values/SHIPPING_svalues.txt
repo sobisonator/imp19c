@@ -1301,76 +1301,97 @@ minimal_shipping_east_mediterranean = {
 TZ_penetration_india = {
 	if = {
 		limit = {
-			has_variable = shipping_india
+			is_ai = yes
+			DIPLOMACY_power < DIPLOMACY_insignificant_threshold
 		}
-		value = var:shipping_india
+		if = {
+			limit = {
+				any_owned_province = {
+					india_tradezone = { PROVINCE = yes }
+				}
+			}
+			value = 0.5
+		}
+		else = {
+			value = 0.1
+		}
 	}
 	else = {
-		value = 0
-	}
-
-	every_subject = {
 		if = {
 			limit = {
-				OR = {
-					is_subject_type = client_colony
-					is_subject_type = autonomous_colony
-				}
-				var:shipping_india > 0
+				has_variable = shipping_india
 			}
-			add = var:shipping_india
-			every_subject = {
+			value = var:shipping_india
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
+		}
+		else = {
+			value = 0
+		}
+
+		every_subject = {
+			if = {
 				limit = {
+					OR = {
+						is_subject_type = client_colony
+						is_subject_type = autonomous_colony
+					}
 					var:shipping_india > 0
 				}
-				add = THIS.partial_shipping_india
+				add = var:shipping_india
+				every_subject = {
+					limit = {
+						var:shipping_india > 0
+					}
+					add = THIS.partial_shipping_india
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = overlord_customs_union
+					var:shipping_india > 0
+				}
+				add = var:shipping_india
 			}
 		}
-		else_if = {
+
+		every_in_list = {
+			variable = list_of_trade_partners_all_categories
 			limit = {
-				has_variable = overlord_customs_union
 				var:shipping_india > 0
+				NOT = {
+					is_subject_of = PREV
+				}
 			}
-			add = var:shipping_india
+			add = THIS.minimal_shipping_india
 		}
-	}
 
-	every_in_list = {
-		variable = list_of_trade_partners_all_categories
-		limit = {
-			var:shipping_india > 0
-			NOT = {
-				is_subject_of = PREV
-			}
-		}
-		add = THIS.minimal_shipping_india
-	}
-
-	if = {
-		limit = {
-			has_variable = member_of_federation
-		}
-		var:member_of_federation = {
-			# TODO: Have this get the shipping value of the governorships in the federation only
-			# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
-		}
-	}
-
-	every_ownable_province = {
-		limit = {
-			has_variable = colonial_outpost_owner
-			india_tradezone = { PROVINCE = yes }
-		}
 		if = {
 			limit = {
-				var:colonial_outpost_owner = PREV
+				has_variable = member_of_federation
 			}
-			add = SHIPPING_province_power
+			var:member_of_federation = {
+				# TODO: Have this get the shipping value of the governorships in the federation only
+				# se_SHIPPING should do this by saving the total shipping of a customs union in the federation scope
+			}
 		}
-		
+
+		every_ownable_province = {
+			limit = {
+				has_variable = colonial_outpost_owner
+				india_tradezone = { PROVINCE = yes }
+			}
+			if = {
+				limit = {
+					var:colonial_outpost_owner = PREV
+				}
+				add = SHIPPING_province_power
+			}
+			
+		}
+		add = 0.0001
+		divide = global_var:global_india_tradezone.SHIPPING_total_in_TZ		
 	}
-	add = 0.0001
-	divide = global_var:global_india_tradezone.SHIPPING_total_in_TZ
+
 }
 TZ_penetration_east_north_america = {
 	if = {
@@ -1384,7 +1405,7 @@ TZ_penetration_east_north_america = {
 					east_north_america_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -1396,6 +1417,7 @@ TZ_penetration_east_north_america = {
 				has_variable = shipping_east_north_america
 			}
 			value = var:shipping_east_north_america
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -1477,7 +1499,7 @@ TZ_penetration_west_north_america = {
 					west_north_america_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -1489,6 +1511,7 @@ TZ_penetration_west_north_america = {
 				has_variable = shipping_west_north_america
 			}
 			value = var:shipping_west_north_america
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -1570,7 +1593,7 @@ TZ_penetration_caribbean = {
 					caribbean_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -1582,6 +1605,7 @@ TZ_penetration_caribbean = {
 				has_variable = shipping_caribbean
 			}
 			value = var:shipping_caribbean
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -1663,7 +1687,7 @@ TZ_penetration_west_south_america = {
 					west_south_america_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -1675,6 +1699,7 @@ TZ_penetration_west_south_america = {
 				has_variable = shipping_west_south_america
 			}
 			value = var:shipping_west_south_america
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -1756,7 +1781,7 @@ TZ_penetration_east_south_america = {
 					east_south_america_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -1768,6 +1793,7 @@ TZ_penetration_east_south_america = {
 				has_variable = shipping_east_south_america
 			}
 			value = var:shipping_east_south_america
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -1849,7 +1875,7 @@ TZ_penetration_south_east_asia = {
 					south_east_asia_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -1861,6 +1887,7 @@ TZ_penetration_south_east_asia = {
 				has_variable = shipping_south_east_asia
 			}
 			value = var:shipping_south_east_asia
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -1942,7 +1969,7 @@ TZ_penetration_indo_china = {
 					indo_china_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -1954,6 +1981,7 @@ TZ_penetration_indo_china = {
 				has_variable = shipping_indo_china
 			}
 			value = var:shipping_indo_china
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -2035,7 +2063,7 @@ TZ_penetration_yellow_sea = {
 					yellow_sea_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -2047,6 +2075,7 @@ TZ_penetration_yellow_sea = {
 				has_variable = shipping_yellow_sea
 			}
 			value = var:shipping_yellow_sea
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -2128,7 +2157,7 @@ TZ_penetration_southern_africa = {
 					southern_africa_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -2140,6 +2169,7 @@ TZ_penetration_southern_africa = {
 				has_variable = shipping_southern_africa
 			}
 			value = var:shipping_southern_africa
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -2221,7 +2251,7 @@ TZ_penetration_west_africa = {
 					west_africa_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -2233,6 +2263,7 @@ TZ_penetration_west_africa = {
 				has_variable = shipping_west_africa
 			}
 			value = var:shipping_west_africa
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -2314,7 +2345,7 @@ TZ_penetration_east_africa = {
 					east_africa_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -2326,6 +2357,7 @@ TZ_penetration_east_africa = {
 				has_variable = shipping_east_africa
 			}
 			value = var:shipping_east_africa
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -2407,7 +2439,7 @@ TZ_penetration_middle_east = {
 					middle_east_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -2419,6 +2451,7 @@ TZ_penetration_middle_east = {
 				has_variable = shipping_middle_east
 			}
 			value = var:shipping_middle_east
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -2500,7 +2533,7 @@ TZ_penetration_western_steppe = {
 					western_steppe_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -2512,6 +2545,7 @@ TZ_penetration_western_steppe = {
 				has_variable = shipping_western_steppe
 			}
 			value = var:shipping_western_steppe
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -2593,7 +2627,7 @@ TZ_penetration_eastern_steppe = {
 					eastern_steppe_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -2605,6 +2639,7 @@ TZ_penetration_eastern_steppe = {
 				has_variable = shipping_eastern_steppe
 			}
 			value = var:shipping_eastern_steppe
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -2686,7 +2721,7 @@ TZ_penetration_upper_yangtzi = {
 					upper_yangtzi_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -2698,6 +2733,7 @@ TZ_penetration_upper_yangtzi = {
 				has_variable = shipping_upper_yangtzi
 			}
 			value = var:shipping_upper_yangtzi
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -2779,7 +2815,7 @@ TZ_penetration_atlantic_seaboard = {
 					atlantic_seaboard_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -2791,6 +2827,7 @@ TZ_penetration_atlantic_seaboard = {
 				has_variable = shipping_atlantic_seaboard
 			}
 			value = var:shipping_atlantic_seaboard
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -2872,7 +2909,7 @@ TZ_penetration_central_europe = {
 					central_europe_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -2884,6 +2921,7 @@ TZ_penetration_central_europe = {
 				has_variable = shipping_central_europe
 			}
 			value = var:shipping_central_europe
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -2965,7 +3003,7 @@ TZ_penetration_west_mediterranean = {
 					west_mediterranean_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -2977,6 +3015,7 @@ TZ_penetration_west_mediterranean = {
 				has_variable = shipping_west_mediterranean
 			}
 			value = var:shipping_west_mediterranean
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -3058,7 +3097,7 @@ TZ_penetration_baltic = {
 					baltic_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -3070,6 +3109,7 @@ TZ_penetration_baltic = {
 				has_variable = shipping_baltic
 			}
 			value = var:shipping_baltic
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -3151,7 +3191,7 @@ TZ_penetration_east_europe = {
 					east_europe_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -3163,6 +3203,7 @@ TZ_penetration_east_europe = {
 				has_variable = shipping_east_europe
 			}
 			value = var:shipping_east_europe
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0
@@ -3244,7 +3285,7 @@ TZ_penetration_east_mediterranean = {
 					east_mediterranean_tradezone = { PROVINCE = yes }
 				}
 			}
-			value = 0.25
+			value = 0.5
 		}
 		else = {
 			value = 0.1
@@ -3256,6 +3297,7 @@ TZ_penetration_east_mediterranean = {
 				has_variable = shipping_east_mediterranean
 			}
 			value = var:shipping_east_mediterranean
+			multiply = MODIFIER_tradezone_penetration_from_own_trade_power
 		}
 		else = {
 			value = 0

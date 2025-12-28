@@ -354,3 +354,47 @@ INCOME_calculate_and_distribute_military_procurement_wealth_owed = {
 		}
 	}
 }
+
+INCOME_set_tax_modifier = {
+	# Scope: Country
+	# Function: Implement the modifier from setting a tax rate
+	set_local_variable = {
+		name = INCOME_taxrate_$category$_previous
+		value = var:INCOME_taxrate_$category$
+	}
+	set_variable = {
+        name = INCOME_taxrate_$category$
+        value = $amount$
+    }   
+	add_country_modifier = {
+		name = INCOME_$category$_$amount$_modifier
+		duration = -1
+	}
+	set_local_variable = {
+		name = INCOME_taxrate_diff
+		value = {
+			value = local_var:INCOME_taxrate_$category$_previous
+			subtract = var:INCOME_taxrate_$category$
+		}
+	}
+	if = {
+		limit = {
+			local_var:INCOME_taxrate_diff < 0
+		}
+		add_country_modifier = {
+			name = INCOME_recent_tax_increase
+			duration = 365
+		}
+		remove_country_modifier = INCOME_recent_tax_decrease
+	}
+	else_if = {
+		limit = {
+			local_var:INCOME_taxrate_diff > 0
+		}
+		add_country_modifier = {
+			name = INCOME_recent_tax_decrease
+			duration = 365
+		}
+		remove_country_modifier = INCOME_recent_tax_increase
+	}
+}

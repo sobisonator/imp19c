@@ -1,0 +1,173 @@
+base_sub_window = {
+	name = "select_treasure_window"
+	size = { 612 440 }
+	position = { 706 138 } 
+	movable = yes
+	state = {
+		name = _show
+		
+		start_sound = {
+			soundeffect = "event:/SFX/UI/Religion/sfx_ui_religion_treasure_view"
+		}
+	}
+	
+	blockoverride "Title_text"
+	{
+		text = "RELIQUARY_HEADER"
+	}
+	
+	blockoverride "White_buttons"
+	{
+		spacing = 4
+		button_close = {
+			onclick = "[SelectTreasureWindow.OnClose]"
+			tooltip = "CLOSE"
+			shortcut = "close_window"
+		}
+	}
+	
+	scrollarea = {
+		position = { 12 44 }
+		size = { 280 378 }
+		scrollbarpolicy_horizontal = always_off
+		using = VerticalScrollAreaCutOff
+		scrollbar_vertical = {
+			using = VerticalScrollBar
+		}
+		
+		textbox = {
+			text = "YOU_HAVE_NO_TREASURE_SAD"
+			visible = "[IsDataModelEmpty( SelectTreasureWindow.GetItems )]"
+			parentanchor = hcenter
+			autoresize = yes
+			using = BaseFontS
+			using = Black_FontColor
+			alpha = 0.5
+		}
+		
+		scrollwidget = {
+			dynamicgridbox = {
+				datamodel = "[SelectTreasureWindow.GetItems]"
+				item = {
+					widget = {
+						size = { 270 40 }
+						list_button = {
+							size = { 100% 100% }
+							onclick = "[SelectableTreasure.OnClick]"
+							tooltip = "[SelectableTreasure.GetTreasure.GetStateModifierIconSummary]"
+							down = "[SelectTreasureWindow.IsSelected(SelectableTreasure.Self)]"
+						}
+						widget = {
+							position = { 10 0 }
+							size = { 100% 100% }
+							
+							icon = {
+								size = { 38 38 }
+								texture = "[GetTreasureIcon(SelectableTreasure.GetTreasure))]"
+							}
+							
+							textbox = {
+								text = "[SelectableTreasure.GetTreasure.GetNameWithNoTooltip]"
+								maximumsize = { 220 -1 }
+								using = BaseFontM
+								using = Black_FontColor
+								autoresize = yes
+								elide = right
+								align = left
+								position = { 46 7 }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	widget = {
+		size = { 310 384 }
+		position = { 294 40 }
+		visible = "[SelectTreasureWindow.HasSelection]"
+		datacontext = "[SelectTreasureWindow.GetSelectedItem]"
+		
+		sub_header = {
+			size = { 100% 32 }
+			blockoverride "Icon_visible" { visible = yes }
+			blockoverride "Icon" { texture = "[GetTreasureIcon(SelectableTreasure.GetTreasure)]" }
+			blockoverride "Title_text" { text = "[SelectableTreasure.GetTreasure.GetName]" }
+		}
+		
+		flowcontainer = {
+			direction = vertical
+			position = { 0 38 }
+			spacing = 2
+			scrollarea = {
+				size = { 310 120 }
+				minimumsize = { 310 46 }
+				scrollbarpolicy_horizontal = always_off
+				#using = VerticalScrollAreaCutOff
+				scrollbar_vertical = {
+					using = VerticalScrollBar
+				}
+				scrollwidget = {
+
+					textbox = {
+						text = "[SelectableTreasure.GetTreasure.GetStateModifierIconSummary]"
+						minimumsize = { 310 44 }
+						using = BaseFontS
+						using = Black_FontColor
+						autoresize = yes
+						resizeparent = yes
+						elide = right
+						align = left
+						position = { 14 2 }
+						using = NoninteractableBG
+						margin_bottom = 10
+						margin_top = 4
+						margin_left = 4
+						max_width = 274
+						fontsize_min = 12
+					}
+				}
+			}
+
+			textbox = {
+				text = "RELIQUARY_ITEM_DESCRIPTION"
+				maximumsize = { 310 200 }
+				using = BaseFontS
+				using = Black_FontColor
+				autoresize = yes
+				elide = right
+				align = left 
+				multiline = yes
+				margin = { 10 4 }
+			}
+		}
+		
+		text_button_square = {
+			size = { 274 28 }
+			parentanchor = bottom|hcenter
+			visible = "[SelectTreasureWindow.HasTarget]"
+			blockoverride "On_click"
+			{
+				onclick = "[SelectTreasureWindow.OnSelect]"
+				enabled = "[SelectTreasureWindow.HasSelection]"
+			}
+			blockoverride "ClickSound" { 
+				clicksound = "event:/SFX/UI/Religion/sfx_ui_religion_treasure_deposit" 
+				oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+			}
+			position = { 0 0 }
+			blockoverride "Center_text" { text = "DEPOSIT_BUTTON" }
+			datacontext = [SelectTreasureWindow]
+			tooltip = "DEPOSIT_BUTTON_TT"
+		}
+		
+	}
+	
+	state = { 
+		name = close_reliquary
+		
+		on_finish = "[SelectTreasureWindow.OnClose]"
+	} 
+	
+}

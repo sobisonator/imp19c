@@ -1,0 +1,72 @@
+namespace = shortage
+
+shortage.1 = { # General food shortage
+	type = country_event
+	hidden = no
+
+	trigger = {
+		any_governorships = {
+			ECON_governorship_food_shortage > 0.3
+		}
+	}
+	
+	immediate = {
+		random_governorships = {
+			limit = {
+				ECON_governorship_food_shortage > 0.3
+			}
+			random_governorship_state = {
+				limit = {
+					any_state_province = {
+						total_population > 1
+					}
+				}
+				random_state_province = {
+					limit = {
+						total_population > 1
+						NOT = {
+							has_province_modifier = recent_famine
+						}
+					}
+					add_province_modifier = {
+						name = recent_famine
+						duration = 1095
+					}
+					random_pops_in_province = {
+						weight = {
+							modifier = {
+								factor = 100
+								NOT = {
+									pop_type = upper_strata
+								}
+							}
+							modifier = {
+								factor = 75
+								NOT = {
+									pop_type = middle_strata
+								}
+							}
+						}
+						kill_pop = yes
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = "shortage.1.a"
+		add_treasury = {
+			value = 10 # TODO: Cost of food
+		}
+	}
+
+	option = {
+		name = "shortage.1.b"
+		add_province_modifier = {
+			name = recent_famine_ignored
+			duration = 1095
+		}
+	}
+
+}

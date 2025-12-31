@@ -421,3 +421,210 @@ INCOME_set_tax_modifier = {
 		
 	}
 }
+
+INCOME_mitigate_deficit = {
+	# Scope: Country
+	# Function: Sell off reserves or take out debt to get to positive treasury if the country is in deficit
+
+	if = {
+		limit = {
+			treasury < 0
+		}
+
+		# Issue national debt
+		if = {
+			limit = {
+				has_variable = public_debt_administration
+			}
+			set_local_variable = {
+				name = debt_needed_for_deficit_millions
+				value = {
+					value = treasury
+					divide = {
+						value = CURRENCY_debt_wealth_value_10k_units
+						multiply = 100
+					}
+					multiply = -1
+				}
+			}
+			add_political_influence = {
+				value = CURRENCY_debt_issue_political_influence_cost_1m
+				multiply = local_var:debt_needed_for_deficit_millions
+			}
+			CURRENCY_alter_own_debt = {
+				thousands = 0
+				millions = local_var:debt_needed_for_deficit_millions
+				billions = 0
+			}
+			add_treasury = {
+				value = treasury
+				multiply = -1
+			}
+		}
+
+		# Sell off metal reserves
+		else_if = {
+			limit = {
+				OR = {
+					var:gold_reserve_size > 0
+					var:silver_reserve_size > 0
+				}
+			}
+
+			# If the currency has a dependency on one particular reserve metal
+			if = {
+				limit = {
+					has_variable = official_currency
+					trigger_if = {
+						limit = {
+							has_variable = official_currency
+						}
+						var:official_currency = {
+							OR = {
+								NOT = {
+									var:backing_type = flag:bimetallic_standard
+								}
+								AND = {
+									var:backing_type = flag:gold_standard
+									var:silver_reserve_size > 0
+								}
+								AND = {
+									var:backing_type = flag:silver_standard
+									var:gold_reserve_size > 0
+								}
+							}
+						}
+					}
+				}
+				# Sell silver first if the currency relies on gold
+				if = {
+					limit = {
+						var:official_currency.var:backing_type = flag:gold_standard
+						var:silver_reserve_size > 0
+					}
+					# Calculate the needed amount of gold
+					set_local_variable = {
+						name = silver_needed_for_deficit
+						value = {
+							value = treasury # Amount of deficit
+							divide = global_var:global_base_import_price_silver
+							multiply = -1
+						}
+					}
+					INCOME_sell_reserves = {
+						metal = silver
+						amount = local_var:silver_needed_for_deficit
+					}
+				}
+				# Sell gold first if the currency relies on silver
+				else_if = {
+					limit = {
+						var:official_currency.var:backing_type = flag:silver_standard
+						var:gold_reserve_size > 0
+					}
+					set_local_variable = {
+						name = gold_needed_for_deficit
+						value = {
+							value = treasury # Amount of deficit
+							divide = global_var:global_base_import_price_gold
+							multiply = -1
+						}
+					}
+					INCOME_sell_reserves = {
+						metal = gold
+						amount = local_var:gold_needed_for_deficit
+					}
+				}
+				else = {
+					INCOME_sell_largest_reserve = yes
+				}
+			}
+			# Otherwise sell whichever you have the most of in terms of wealth value
+			else = {
+				INCOME_sell_largest_reserve = yes
+			}
+		}
+
+	}
+}
+
+INCOME_sell_largest_reserve = {
+	set_local_variable = {
+		name = gold_reserve_value_greater_than_silver
+		value = {
+			value = var:gold_reserve_size
+			multiply = global_var:global_base_import_price_gold
+			subtract = {
+				value = var:silver_reserve_size
+				multiply = global_var:global_base_import_price_silver
+			}
+		}
+	}
+	if = {
+		limit = {
+			local_var:gold_reserve_value_greater_than_silver > 0
+		}
+		set_local_variable = {
+			name = gold_needed_for_deficit
+			value = {
+				value = treasury # Amount of deficit
+				divide = global_var:global_base_import_price_gold
+				multiply = -1
+			}
+		}
+		INCOME_sell_reserves = {
+			metal = gold
+			amount = local_var:gold_needed_for_deficit
+		}
+	}
+	else = {
+		set_local_variable = {
+			name = silver_needed_for_deficit
+			value = {
+				value = treasury # Amount of deficit
+				divide = global_var:global_base_import_price_silver
+				multiply = -1
+			}
+		}
+		INCOME_sell_reserves = {
+			metal = silver
+			amount = local_var:silver_needed_for_deficit
+		}
+	}
+}
+
+INCOME_sell_reserves = {
+	# Scope: Country
+	# Function: Sell precious metal reserves and send the income to the treausry
+	set_local_variable = {
+		name = amount_to_sell
+		value = $amount$
+	}
+	if = {
+		limit = {
+			var:$metal$_reserve_size < $amount$
+		}
+		set_local_variable = {
+			name = amount_to_sell
+			value = var:$metal$_reserve_size
+		}
+	}
+	change_variable = {
+        name = $metal$_reserve_size
+        subtract = local_var:amount_to_sell
+    }
+    set_local_variable = {
+    	name = treasury_income_from_reserve_sale
+    	value = {
+    		value = global_var:global_base_import_price_$metal$
+    		multiply = local_var:amount_to_sell
+    	}
+    }
+    add_treasury = local_var:treasury_income_from_reserve_sale
+    capital_scope.governorship = {
+        change_variable = {
+            name = $metal$_stockpile
+            add = local_var:amount_to_sell
+        }
+    }
+}

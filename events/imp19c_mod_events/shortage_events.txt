@@ -4,13 +4,18 @@ shortage.1 = { # General food shortage
 	type = country_event
 	hidden = no
 
+	left_portrait = scope:famine_province.governorship.governor
+
+	goto_location = scope:famine_province
+
 	trigger = {
 		any_governorships = {
 			ECON_governorship_food_shortage > 0.3
 		}
 	}
-	
+
 	immediate = {
+		add_stability = -1
 		random_governorships = {
 			limit = {
 				ECON_governorship_food_shortage > 0.3
@@ -22,6 +27,7 @@ shortage.1 = { # General food shortage
 					}
 				}
 				random_state_province = {
+					save_scope_as = famine_province
 					limit = {
 						total_population > 1
 						NOT = {
@@ -51,21 +57,65 @@ shortage.1 = { # General food shortage
 					}
 				}
 			}
+			change_variable = {
+				name = upper_strata_wealth
+				subtract = {
+					value = WEALTH_governorship_per_capita
+					divide = 7
+				}
+			}
+			change_variable = {
+				name = middle_strata_wealth
+				subtract = {
+					value = WEALTH_governorship_per_capita
+					divide = 7
+				}
+			}
+			change_variable = {
+				name = lower_strata_wealth
+				subtract = {
+					value = WEALTH_governorship_per_capita
+					divide = 7
+				}
+			}
+			change_variable = {
+				name = proletariat_wealth
+				subtract = {
+					value = WEALTH_governorship_per_capita
+					divide = 7
+				}
+			}
+			change_variable = {
+				name = tribesmen_wealth
+				subtract = {
+					value = WEALTH_governorship_per_capita
+					divide = 7
+				}
+			}
 		}
 	}
 
 	option = {
 		name = "shortage.1.a"
 		add_treasury = {
-			value = 10 # TODO: Cost of food
+			value = var:country_unit_price_grain
+			add = var:country_unit_price_livestock
+			add = var:country_unit_price_vegetables
+			add = var:country_unit_price_temperate_fruit
+			add = var:country_unit_price_fish
+			multiply = scope:famine_province.total_population
+			multiply = -1
 		}
+		add_political_influence = -5
 	}
 
 	option = {
 		name = "shortage.1.b"
-		add_province_modifier = {
-			name = recent_famine_ignored
-			duration = 1095
+		scope:famine_province = {
+			add_province_modifier = {
+				name = recent_famine_ignored
+				duration = 1095
+			}
 		}
 	}
 

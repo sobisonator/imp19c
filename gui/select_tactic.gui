@@ -1,0 +1,149 @@
+base_sub_window = { 
+	name = "select_tactic_window"
+	#size = { 625 626 }
+	position = { 558 138 } 
+	movable = no
+	
+	blockoverride "Title_text" { text = "SELECT_TACTIC" }
+	blockoverride "White_buttons"
+	{
+		spacing = 4
+		button_close = {
+			onclick = "[SelectTacticWindow.OnClose]"
+			tooltip = "CLOSE"
+		}
+	}
+	
+	flowcontainer = {
+		direction = vertical
+		resizeparent = yes
+		margin_bottom = 62
+		margin_right = 26
+		position = { 12 50 }
+		
+		scrollarea = {
+			size = { 602 700 }
+			maximumsize = { 625 626 }
+			scrollbarpolicy_horizontal = always_off
+			
+			scrollbar_vertical = {
+				using = VerticalScrollBar
+				blockoverride "ScrollBar_offset"
+				{
+					size = { 0 4 }
+				}
+			}
+			
+			scrollwidget = {
+			
+				dynamicgridbox = {
+					resizeparent = yes
+					datamodel = "[SelectTacticWindow.GetTactics]"
+					
+					item = {
+						widget = {
+							tooltip = "COMBAT_TACTIC_BUTTON_LIST"
+							size = { 600 80 }
+							list_entry = {
+								size = { 100% 100% }
+							}
+							
+							container = {
+								position = { 6 0 }
+								
+								trade_good_entry = {
+									size = { 60 70 }
+									position = { 0 6 }
+									blockoverride "Icon" { 
+										texture = "[GetCombatTacticIcon(SelectTactic.GetTactic.GetIcon)]"
+										size = { 44 44 }
+									}
+									blockoverride "On_click"
+									{
+										onclick = "[SelectTactic.OnClick]"
+									}
+									blockoverride "ClickSound" { clicksound = "[SelectTactic.GetClickSound]" }
+									blockoverride "Text" { text = "[SelectTactic.GetTactic.CalculateCompositionEffectiveness(SelectTactic.GetUnit)|Y0%]" }
+									tooltip = "[SelectTactic.GetTactic.GetCompositionEffectivenessDescription(SelectTactic.GetUnit)]"
+								}
+							}
+			
+							container = {
+								position = { 70 0 }
+								textbox = {
+									text = "[SelectTactic.GetTactic.GetName]"
+									using = BaseFontM
+									using = Black_FontColor
+									position = { 0 3 }
+									autoresize = yes
+								}
+			
+								dynamicgridbox = {
+									position = { 0 36 }
+									flipdirection = yes
+									ignoreinvisible = yes
+									parentanchor = bottom
+									datamodel = "[SelectTacticWindow.GetSubUnitCounts]"
+									datamodel_wrap = 4
+			
+									item = {
+										widget = {
+											size = { 67 18 }
+			
+											datacontext = "[SelectTactic.GetTactic]"
+			
+											tooltip = "[CombatTactic.GetCompositionEffectivenessDescriptionForType(GetSubDefinitionByIndex(SubUnitCounts.GetType),SelectTactic.GetUnit)]"
+			
+											icon = {
+												size = { 18 18 }
+												texture = "[GetSubUnitIcon(SubUnitCounts.GetType)]"
+												parentanchor = left|vcenter
+											}
+			
+											textbox = {
+												position = { 20 0 }
+												autoresize = yes
+												using = BaseFontM
+												using = Black_FontColor
+												text = "[CombatTactic.CalculateCompositionEffectFrom(GetSubDefinitionByIndex(SubUnitCounts.GetType),SelectTactic.GetUnit)|+=0%]"
+												parentanchor = vcenter
+												align = left|nobaseline
+											}
+										}
+									}
+								}
+							}
+			
+							dynamicgridbox = {
+								position = { -10 8 }
+								size = { 100 68 }
+								parentanchor = top|right
+								
+								datamodel = "[SelectTactic.GetTactic.GetVersusTactics]"
+								datamodel_wrap = 2
+			
+								item = {
+									widget = {
+										size = { 85 32 }
+										tooltip = "COMBAT_TACTIC_AGAINST"
+										icon = {
+											size = { 32 32 }
+											texture = "[GetCombatTacticIcon(CombatTactic.GetIcon)]"
+										}
+										textbox = {
+											position = { 32 0 }
+											size = { 32 32 }
+											using = BaseFontM
+											align = left|nobaseline
+											text = "[SelectTactic.GetTactic.GetPowerVersusDiffWithEfficiency(CombatTactic.GetCombatTactic,SelectTactic.GetUnit)|+=0%]"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

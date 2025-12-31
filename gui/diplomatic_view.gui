@@ -8,6 +8,7 @@
 base_window = {
 	name = "diplomatic_view"
 	size = { @window_width @window_height }
+	allow_outside = yes
 	state = {
 		name = _show
 		on_start = "[GetVariableSystem.Set( 'diplomatic_windows', 'clear' )]"
@@ -1984,13 +1985,11 @@ base_window = {
 	}
 	
 	base_sub_window = {
-		gfxtype = windowgfx
 		name = "diplo_view_inherited"
-		size = { 380 900 }
+		size = { 380 @window_height }
 		visible = "[GetVariableSystem.HasValue( 'diplomatic_windows', 'opinions' )]"
 		movable = no
-		allow_outside = yes
-		position = { 700 0 }
+		position = { 698 0 }
 
 		blockoverride "Title_text"
 		{
@@ -2003,21 +2002,7 @@ base_window = {
 				tooltip = "CLOSE"
 			}
 		}
-	
-		#attachto = { 
-		#	widgetid = "right_attach" 
-		#	parentanchor = right
-		#} 
-	
-		#state = {
-		#	name = diplo_reset_size
-		
-		#	animation = {
-		#		size = { 340 740 }
-		#	}
-		
-		#}
-	
+
 		vbox = {
 			margin_top = 30
 			margin_widget = {
@@ -2255,44 +2240,41 @@ base_window = {
 		}
 	}
 	base_sub_window = {
-			layer = top
-			visible = "[DiplomaticView.IsShowStances]"
-			size = { 420 330 } 
-			position = { 700 570 }
-			name = "stance_selector"
+		name = "stance_selector"
+		visible = "[DiplomaticView.IsShowStances]"
+		size = { 420 330 } 
+		position = { 698 580 }
+		movable = no
+		blockoverride "Title_text"
+		{
+			text = SELECT_STANCE
+			using = Sub_Header_FontColor
+		}
+		blockoverride "White_buttons"
+		{
+			button_close = {
+				onclick = "[DiplomaticView.HideStances]"
+				tooltip = "CLOSE"
+			}
+		}
 
-			blockoverride "Title_text"
-			{
-				text = SELECT_STANCE
-				using = Sub_Header_FontColor
+		scrollarea = {
+			position = { 0 40 }
+			parentanchor = hcenter
+			size = { 388 274 }
+
+			scrollbarpolicy_horizontal = always_off
+						
+			scrollbar_vertical = {
+				using = VerticalScrollBar
 			}
 		
-			blockoverride "White_buttons"
-			{
-				button_close = {
-					onclick = "[DiplomaticView.HideStances]"
-					tooltip = "CLOSE"
-				}
-			}
-
-			scrollarea = {
-				position = { 0 40 }
-				parentanchor = hcenter
-				size = { 388 274 }
-
-				scrollbarpolicy_horizontal = always_off
-							
-				scrollbar_vertical = {
-					using = VerticalScrollBar
-				}
-			
-				using = VerticalScrollAreaCutOff
-			
-				scrollwidget = {
-					dynamicgridbox = {
-						datamodel = "[DiplomaticView.GetStances]"
-						item = {
-
+			using = VerticalScrollAreaCutOff
+		
+			scrollwidget = {
+				dynamicgridbox = {
+					datamodel = "[DiplomaticView.GetStances]"
+					item = {
 						margin_widget = {
 							margin_top = 5
 							size = { 388 34 }
@@ -2308,7 +2290,6 @@ base_window = {
 									size = { 32 32 }
 									texture = "[GetDiplomaticStanceIcon(DiplomaticStanceItem.GetStance)]"
 								}
-
 								text_button_square = {
 									size = { 270 28 }
 									parentanchor = vcenter
@@ -2325,8 +2306,6 @@ base_window = {
 									tooltip = "[DiplomaticStanceItem.GetClickTooltip]"
 									enabled = "[DiplomaticStanceItem.CanClick]"
 								}
-
-							
 								textbox = { 
 									size = { 70 36 }
 									autoresize = yes
@@ -2345,7 +2324,7 @@ base_window = {
 	base_sub_window = {
 		name = "subject_focus_window"
 		size = { 330 620 }
-		position = { 700 200 }
+		position = { 698 210 }
 		movable = no
 		visible = "[And(GetVariableSystem.HasValue( 'diplomatic_windows', 'show_national_interactions' ), GetVariableSystem.HasValue( 'diplomatic_tabs', 'subjects' ))]"
 		blockoverride "Title_text" { text = "subject_focus" }

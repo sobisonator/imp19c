@@ -4534,21 +4534,29 @@ TRADE_create_global_tradegood_object = {
 TRADE_order_producers = {
 	# Scope: country
 	# Function: Order the amount of production for every country, for the given tradegood
-	clear_variable_list = top_producers_$tradegood$
-	ordered_country = {
+	if = {
 		limit = {
-			GOODS_national_production_$tradegood$ > 0
+			NOT = {
+				# Gets cleared by the quartlery trade tick, as it won't change between then
+				has_global_variable = trade_ranks_sorted
+			}
 		}
-		order_by = {
-			value = GOODS_national_production_$tradegood$
-		}
-		max = 6
-		check_range_bounds = no
-		save_scope_as = producer
-		ROOT = {
-			add_to_variable_list = {
-				name = top_producers_$tradegood$
-				target = scope:producer
+		clear_variable_list = top_producers_$tradegood$
+		ordered_country = {
+			limit = {
+				GOODS_national_production_$tradegood$ > 0
+			}
+			order_by = {
+				value = GOODS_national_production_$tradegood$
+			}
+			max = 6
+			check_range_bounds = no
+			save_scope_as = producer
+			ROOT = {
+				add_to_variable_list = {
+					name = top_producers_$tradegood$
+					target = scope:producer
+				}
 			}
 		}
 	}
@@ -4557,31 +4565,48 @@ TRADE_order_producers = {
 TRADE_order_consumers = {
 	# Scope: country
 	# Function: Order the amount of production for every country, for the given tradegood
-	clear_variable_list = top_consumers_$tradegood$
-	ordered_country = {
+	if = {
 		limit = {
-			DEMAND_country_$tradegood$ > 0
+			NOT = {
+				# Gets cleared by the quartlery trade tick, as it won't change between then
+				has_global_variable = trade_ranks_sorted
+			}
 		}
-		order_by = {
-			value = DEMAND_country_$tradegood$
-		}
-		max = 6
-		check_range_bounds = no
-		save_scope_as = consumer
-		ROOT = {
-			add_to_variable_list = {
-				name = top_consumers_$tradegood$
-				target = scope:consumer
+		clear_variable_list = top_consumers_$tradegood$
+		ordered_country = {
+			limit = {
+				var:DEMAND_country_$tradegood$_display > 0
+			}
+			order_by = {
+				value = var:DEMAND_country_$tradegood$_display
+			}
+			max = 6
+			check_range_bounds = no
+			save_scope_as = consumer
+			ROOT = {
+				add_to_variable_list = {
+					name = top_consumers_$tradegood$
+					target = scope:consumer
+				}
 			}
 		}
 	}
+	
 }
 
 TRADE_cache_country_demand_tradegood = {
 	# Scope: Country
 	# Function: Scope the country demand svalue into a variable for display
-	set_variable = {
-		name = DEMAND_country_$tradegood$_display
-		value = DEMAND_country_$tradegood$
+	if = {
+		limit = {
+			NOT = {
+				has_global_variable = trade_ranks_sorted
+			}
+		}
+		set_variable = {
+			name = DEMAND_country_$tradegood$_display
+			value = DEMAND_country_$tradegood$
+		}
 	}
+	
 }

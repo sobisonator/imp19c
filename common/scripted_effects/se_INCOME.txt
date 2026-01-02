@@ -112,7 +112,7 @@ INCOME_update_treasury_country = {
 		value = {
 			value = var:INCOME_cost_military_supplies_country
 			add = var:INCOME_cost_navy_supplies_country
-			add = var:INCOME_cost_poor_law_spending
+			add = var:INCOME_cost_welfare_spending
 		}
 	}
 }
@@ -235,7 +235,22 @@ INCOME_get_wealth_owed_for_military_supplies_governorship = {
 		name = INCOME_wealth_owed_for_military_supplies
 		value = {
 			value = var:INCOME_military_supplies_demand_governorship
-			divide = owner.var:INCOME_military_supplies_demand_country
+			if = {
+				limit = {
+					owner = {
+						has_variable = INCOME_military_supplies_demand_country
+					}
+					trigger_if = {
+						limit = {
+							owner = {
+								has_variable = INCOME_military_supplies_demand_country
+							}
+						}
+						owner.var:INCOME_military_supplies_demand_country > 0
+					}
+				}
+				divide = owner.var:INCOME_military_supplies_demand_country
+			}
 			multiply = owner.var:INCOME_cost_military_supplies_country
 			multiply = -1
 		}
@@ -363,10 +378,16 @@ INCOME_calculate_and_distribute_military_procurement_wealth_owed = {
 INCOME_set_tax_modifier = {
 	# Scope: Country
 	# Function: Implement the modifier from setting a tax rate
-	set_local_variable = {
-		name = INCOME_taxrate_$category$_previous
-		value = var:INCOME_taxrate_$category$
+	if = {
+		limit = {
+			has_variable = INCOME_taxrate_$category$
+		}
+		set_local_variable = {
+			name = INCOME_taxrate_$category$_previous
+			value = var:INCOME_taxrate_$category$
+		}
 	}
+	
 	set_variable = {
         name = INCOME_taxrate_$category$
         value = $amount$
@@ -388,38 +409,43 @@ INCOME_set_tax_modifier = {
 		duration = -1
 	}
 
-
-	
-
-	set_local_variable = {
-		name = INCOME_taxrate_diff
-		value = {
-			value = local_var:INCOME_taxrate_$category$_previous
-			subtract = var:INCOME_taxrate_$category$
-		}
-	}
-	remove_country_modifier = INCOME_recent_tax_increase
-	remove_country_modifier = INCOME_recent_tax_decrease
 	if = {
 		limit = {
-			local_var:INCOME_taxrate_diff < 0
+			has_local_variable = INCOME_taxrate_$category$_previous
 		}
-		add_country_modifier = {
-			name = INCOME_recent_tax_increase
-			duration = 365
+		set_local_variable = {
+			name = INCOME_taxrate_diff
+			value = {
+				value = local_var:INCOME_taxrate_$category$_previous
+				subtract = var:INCOME_taxrate_$category$
+			}
 		}
-		
+		remove_country_modifier = INCOME_recent_tax_increase
+		remove_country_modifier = INCOME_recent_tax_decrease
+		if = {
+			limit = {
+				local_var:INCOME_taxrate_diff < 0
+			}
+			add_country_modifier = {
+				name = INCOME_recent_tax_increase
+				duration = 365
+			}
+			
+		}
+		else_if = {
+			limit = {
+				local_var:INCOME_taxrate_diff > 0
+			}
+			add_country_modifier = {
+				name = INCOME_recent_tax_decrease
+				duration = 365
+			}
+			
+		}
+		remove_local_variable = INCOME_taxrate_$category$_previous
 	}
-	else_if = {
-		limit = {
-			local_var:INCOME_taxrate_diff > 0
-		}
-		add_country_modifier = {
-			name = INCOME_recent_tax_decrease
-			duration = 365
-		}
-		
-	}
+
+	
 }
 
 INCOME_mitigate_deficit = {

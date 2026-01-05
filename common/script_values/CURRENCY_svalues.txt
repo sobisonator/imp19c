@@ -371,6 +371,7 @@ CURRENCY_reserve_ratio_impact = {
 		min = 0
 	}
 	max = 1
+	min = 0
 }
 
 CURRENCY_stability_impact_ideal_reserve_ratio = {
@@ -592,6 +593,7 @@ CURRENCY_reserve_ratio_total = {
 	}
 	#value = CURRENCY_reserve_value_in_cash_scaled
 	divide = CURRENCY_total_country_cash_scaled_for_reserve_ratio
+	min = 0
 }
 
 CURRENCY_total_country_cash_scaled_for_reserve_ratio = {
@@ -634,6 +636,7 @@ CURRENCY_essentials_buying_power = {
 		multiply = 32000
 	}
 	#divide = 1
+	max = 32000
 }
 
 CURRENCY_essentials_buying_power_unweighted = {
@@ -664,6 +667,7 @@ CURRENCY_private_cash_needed = {
 		value = CURRENCY_trade_wealth_outgoing_currency_value
 	}
 	add = CURRENCY_wealth_generated_country_as_currency_value
+	divide = 2000
 }
 
 CURRENCY_wealth_generated_country_as_currency_value = {
@@ -695,6 +699,7 @@ CURRENCY_private_cash_ratio = {
 		value = CURRENCY_private_cash_needed
 		min = 0.01
 	}
+	min = 0
 
 }
 
@@ -803,11 +808,19 @@ CURRENCY_minting_from_sister_countries = {
 CURRENCY_minting_rate_wealth_value = {
 	# Scope: Country
 	# Function: Calculates the amount of wealth created by minting coins every month
-	value = var:CURRENCY_minting_rate
-	subtract = CURRENCY_amt_circulated_scaled_1percent
-	min = 0
-	multiply = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
-	multiply = 10
+	if = {
+		limit = {
+			has_variable = CURRENCY_minting_rate
+		}
+		value = var:CURRENCY_minting_rate
+		subtract = CURRENCY_amt_circulated_scaled_1percent
+		min = 0
+		multiply = CURRENCY_wealth_value_1_unit_scaled_by_reserve_ratio
+		multiply = 10
+	}
+	else = {
+		value = 0
+	}
 }
 
 CURRENCY_minting_rate_wealth_value_per_capita = {
@@ -1294,182 +1307,188 @@ CURRENCY_power = {
 
 		add = {
 			value = 0
-			add = { 
+			if = {
+				limit = {
+					has_variable = TZ_penetration_india
+				}
+				add = { 
 			        value = var:TZ_penetration_india
 			        multiply = {
 			                value = global_var:global_india_tradezone.var:TZ_shipping
 			                max = global_var:global_india_tradezone.SHIPPING_total_in_TZ
 			                divide = CURRENCY_power_TZ_penetration_score_modifier
 			        }
+				}
+				add = { 
+				        value = var:TZ_penetration_east_north_america
+				        multiply = {
+				                value = global_var:global_east_north_america_tradezone.var:TZ_shipping
+				                max = global_var:global_east_north_america_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_west_north_america
+				        multiply = {
+				                value = global_var:global_west_north_america_tradezone.var:TZ_shipping
+				                max = global_var:global_west_north_america_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_caribbean
+				        multiply = {
+				                value = global_var:global_caribbean_tradezone.var:TZ_shipping
+				                max = global_var:global_caribbean_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_west_south_america
+				        multiply = {
+				                value = global_var:global_west_south_america_tradezone.var:TZ_shipping
+				                max = global_var:global_west_south_america_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_east_south_america
+				        multiply = {
+				                value = global_var:global_east_south_america_tradezone.var:TZ_shipping
+				                max = global_var:global_east_south_america_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_south_east_asia
+				        multiply = {
+				                value = global_var:global_south_east_asia_tradezone.var:TZ_shipping
+				                max = global_var:global_south_east_asia_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_indo_china
+				        multiply = {
+				                value = global_var:global_indo_china_tradezone.var:TZ_shipping
+				                max = global_var:global_indo_china_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_yellow_sea
+				        multiply = {
+				                value = global_var:global_yellow_sea_tradezone.var:TZ_shipping
+				                max = global_var:global_yellow_sea_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_southern_africa
+				        multiply = {
+				                value = global_var:global_southern_africa_tradezone.var:TZ_shipping
+				                max = global_var:global_southern_africa_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_west_africa
+				        multiply = {
+				                value = global_var:global_west_africa_tradezone.var:TZ_shipping
+				                max = global_var:global_west_africa_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_east_africa
+				        multiply = {
+				                value = global_var:global_east_africa_tradezone.var:TZ_shipping
+				                max = global_var:global_east_africa_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_middle_east
+				        multiply = {
+				                value = global_var:global_middle_east_tradezone.var:TZ_shipping
+				                max = global_var:global_middle_east_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_western_steppe
+				        multiply = {
+				                value = global_var:global_western_steppe_tradezone.var:TZ_shipping
+				                max = global_var:global_western_steppe_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_eastern_steppe
+				        multiply = {
+				                value = global_var:global_eastern_steppe_tradezone.var:TZ_shipping
+				                max = global_var:global_eastern_steppe_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_upper_yangtzi
+				        multiply = {
+				                value = global_var:global_upper_yangtzi_tradezone.var:TZ_shipping
+				                max = global_var:global_upper_yangtzi_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_atlantic_seaboard
+				        multiply = {
+				                value = global_var:global_atlantic_seaboard_tradezone.var:TZ_shipping
+				                max = global_var:global_atlantic_seaboard_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_central_europe
+				        multiply = {
+				                value = global_var:global_central_europe_tradezone.var:TZ_shipping
+				                max = global_var:global_central_europe_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_west_mediterranean
+				        multiply = {
+				                value = global_var:global_west_mediterranean_tradezone.var:TZ_shipping
+				                max = global_var:global_west_mediterranean_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_baltic
+				        multiply = {
+				                value = global_var:global_baltic_tradezone.var:TZ_shipping
+				                max = global_var:global_baltic_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_east_europe
+				        multiply = {
+				                value = global_var:global_east_europe_tradezone.var:TZ_shipping
+				                max = global_var:global_east_europe_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
+				add = { 
+				        value = var:TZ_penetration_east_mediterranean
+				        multiply = {
+				                value = global_var:global_east_mediterranean_tradezone.var:TZ_shipping
+				                max = global_var:global_east_mediterranean_tradezone.SHIPPING_total_in_TZ
+				                divide = CURRENCY_power_TZ_penetration_score_modifier
+				        }
+				}
 			}
-			add = { 
-			        value = var:TZ_penetration_east_north_america
-			        multiply = {
-			                value = global_var:global_east_north_america_tradezone.var:TZ_shipping
-			                max = global_var:global_east_north_america_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_west_north_america
-			        multiply = {
-			                value = global_var:global_west_north_america_tradezone.var:TZ_shipping
-			                max = global_var:global_west_north_america_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_caribbean
-			        multiply = {
-			                value = global_var:global_caribbean_tradezone.var:TZ_shipping
-			                max = global_var:global_caribbean_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_west_south_america
-			        multiply = {
-			                value = global_var:global_west_south_america_tradezone.var:TZ_shipping
-			                max = global_var:global_west_south_america_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_east_south_america
-			        multiply = {
-			                value = global_var:global_east_south_america_tradezone.var:TZ_shipping
-			                max = global_var:global_east_south_america_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_south_east_asia
-			        multiply = {
-			                value = global_var:global_south_east_asia_tradezone.var:TZ_shipping
-			                max = global_var:global_south_east_asia_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_indo_china
-			        multiply = {
-			                value = global_var:global_indo_china_tradezone.var:TZ_shipping
-			                max = global_var:global_indo_china_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_yellow_sea
-			        multiply = {
-			                value = global_var:global_yellow_sea_tradezone.var:TZ_shipping
-			                max = global_var:global_yellow_sea_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_southern_africa
-			        multiply = {
-			                value = global_var:global_southern_africa_tradezone.var:TZ_shipping
-			                max = global_var:global_southern_africa_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_west_africa
-			        multiply = {
-			                value = global_var:global_west_africa_tradezone.var:TZ_shipping
-			                max = global_var:global_west_africa_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_east_africa
-			        multiply = {
-			                value = global_var:global_east_africa_tradezone.var:TZ_shipping
-			                max = global_var:global_east_africa_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_middle_east
-			        multiply = {
-			                value = global_var:global_middle_east_tradezone.var:TZ_shipping
-			                max = global_var:global_middle_east_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_western_steppe
-			        multiply = {
-			                value = global_var:global_western_steppe_tradezone.var:TZ_shipping
-			                max = global_var:global_western_steppe_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_eastern_steppe
-			        multiply = {
-			                value = global_var:global_eastern_steppe_tradezone.var:TZ_shipping
-			                max = global_var:global_eastern_steppe_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_upper_yangtzi
-			        multiply = {
-			                value = global_var:global_upper_yangtzi_tradezone.var:TZ_shipping
-			                max = global_var:global_upper_yangtzi_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_atlantic_seaboard
-			        multiply = {
-			                value = global_var:global_atlantic_seaboard_tradezone.var:TZ_shipping
-			                max = global_var:global_atlantic_seaboard_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_central_europe
-			        multiply = {
-			                value = global_var:global_central_europe_tradezone.var:TZ_shipping
-			                max = global_var:global_central_europe_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_west_mediterranean
-			        multiply = {
-			                value = global_var:global_west_mediterranean_tradezone.var:TZ_shipping
-			                max = global_var:global_west_mediterranean_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_baltic
-			        multiply = {
-			                value = global_var:global_baltic_tradezone.var:TZ_shipping
-			                max = global_var:global_baltic_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_east_europe
-			        multiply = {
-			                value = global_var:global_east_europe_tradezone.var:TZ_shipping
-			                max = global_var:global_east_europe_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
-			add = { 
-			        value = var:TZ_penetration_east_mediterranean
-			        multiply = {
-			                value = global_var:global_east_mediterranean_tradezone.var:TZ_shipping
-			                max = global_var:global_east_mediterranean_tradezone.SHIPPING_total_in_TZ
-			                divide = CURRENCY_power_TZ_penetration_score_modifier
-			        }
-			}
+			
 			multiply = TRADE_national_income
 			#divide = var:official_currency.var:CURRENCY_num_adopters
 		}
@@ -1579,21 +1598,25 @@ CURRENCY_can_afford_debt_repayment_1m = {
 }
 
 CURRENCY_can_afford_pi_national_debt_1m = {
-	value = -100
-    subtract = CURRENCY_debt_issue_political_influence_cost_1m
+	value = political_influence
+    add = CURRENCY_debt_issue_political_influence_cost_1m
+    add = 100
 }
 
 CURRENCY_can_afford_pi_national_debt_100k = {
-	value = -100
-    subtract = CURRENCY_debt_issue_political_influence_cost_100k
+	value = political_influence
+    add = CURRENCY_debt_issue_political_influence_cost_100k
+    add = 100
 }
 
 CURRENCY_can_afford_pi_national_debt_10k = {
-	value = -100
-    subtract = CURRENCY_debt_issue_political_influence_cost_10k
+	value = political_influence
+    add = CURRENCY_debt_issue_political_influence_cost_10k
+    add = 100
 }
 
 CURRENCY_can_afford_pi_national_debt_1k = {
-	value = -100
-    subtract = CURRENCY_debt_issue_political_influence_cost_1k
+	value = political_influence
+    add = CURRENCY_debt_issue_political_influence_cost_1k
+    add = 100
 }

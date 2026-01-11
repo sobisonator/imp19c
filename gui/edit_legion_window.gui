@@ -1,0 +1,305 @@
+template ConstructionCardTemplate {
+	widget = {
+		size = { 50 74 }
+		textbox = {
+			size = { 100% 22 }
+			using = NoninteractableBG
+			using = BaseFontM
+			using = Black_FontColor
+			text = "+[SubUnitConstruction.GetCount]" 
+			align = center|nobaseline
+			alwaystransparent = yes
+			# tooltip = TODO
+			multiline = no
+			parentanchor = hcenter|bottom
+			position = { 0 0 }
+			blockoverride "Margins" { margin = { 4 4 } }
+			visible = "[GreaterThan_int32( SubUnitConstruction.GetCount, '(int32)0' )]"
+		}
+		widget = {
+			size = { 50 50 }
+			button = {
+				using = button_tiled_texture
+				framesize = { 200 200 }
+				size = { 100% 100% }
+				frame = 2
+			}
+			#background = {
+			#	texture = "gfx/interface/base_parts/horizontal_gradient_stretch.dds"
+			#	shaderfile = "gfx/FX/pdxgui_default.shader"
+			#	spritetype = corneredstretched
+			#	color = { 0.365 0.227  0.127 0.4 }
+			#	using = border_slightly_torn_alpha
+			#}
+			
+			margin_widget = {
+				size = { 100% 100% }
+				margin = { 3 3 }
+				
+				button = {
+					size = { 100% 100% }
+					using = flat_background_white
+					onclick = "[SubUnitConstruction.Increment]"
+					onrightclick = "[SubUnitConstruction.Decrement]"    
+					datacontext = "[SubUnitConstruction.GetDefinition]"
+					
+					using = border_slightly_torn_alpha
+					
+					glow = {
+						glow_radius = 2
+						color = { 0.365  0.027  0.027 0.5 }
+					}
+					
+					icon = {
+						texture = "gfx/interface/base_parts/horizontal_gradient_stretch.dds"
+						spritetype = corneredstretched
+						color = { 0.55  0.86275  1.0 0.1 }
+						size = { 100% 100% }
+						using = border_slightly_torn_alpha
+					}
+					
+					icon = {
+						texture = "[GetSubUnitIcon( SubUnitType.GetType )]"	
+						size = { 42 42 }						
+						position = { 0 0 }
+						parentanchor = center
+					} 
+				}
+			}	
+		}
+	}
+}
+
+base_sub_window = {
+	name = "edit_legion_view"
+	size = { 590 700 }
+	position = { 700 144 }
+	movable = no
+
+	blockoverride "Title_text" {
+		text = "CREATE_NEW_LEGION" 
+	}
+	blockoverride "White_buttons" {
+		button_close = {
+			onclick = "[EditLegionWindow.Close]"
+			tooltip = "CLOSE"
+		}
+	}
+
+	margin_widget = {
+		margin = { 14 0 }
+		size = { 340 40 }
+		position = { 0 38 }
+		
+		using = inputfield
+	
+		editbox = {
+			position = { 12 2 }
+			size = { 340 34 }
+			name = "edit_name"
+			using = BaseFontM
+			using = Black_FontColor
+			ontextedited = "[EditLegionWindow.OnNameChanged]"
+			focuspolicy = all
+			alwaystransparent = no
+			multiline = no
+		}
+	}
+
+	margin_widget = { 
+		size = { 500 120 }
+		position = { 12 120 }
+
+		flowcontainer = {
+			position = { 14 0 }
+			direction = horizontal
+			name = "commanders_with_add"
+			#using = NoninteractableBG
+			#blockoverride "Margins"
+			#{ 
+			#	margin = { 0 0 } 
+			#}
+
+			icon = {
+				size = { 46 46 }
+				#parentanchor = vcenter
+				texture = "gfx/interface/icons/shared_icons/commander.dds"
+			}
+			fixedgridbox = {
+				name = "commander_grid"
+				alwaystransparent = no
+				flipdirection = yes
+				addcolumn = 80
+				addrow = 106
+
+				datamodel = "[EditLegionWindow.GetCommanders]"
+				item = {
+					#flowcontainer = {
+					#	ignoreinvisible = yes
+					#	parentanchor = bottom
+					#	widget = {
+					#		size = { 64 90 }
+					#		#visible = "[Character.IsLegate]"
+					#		cpt_button = {
+					#			size = { 60 90 }
+
+					#			icon_button_square = {
+					#				name = "replace_commander_button"
+					#				size = { 34 34 }
+					#				parentanchor = bottom|right
+					#				blockoverride "On_click"
+					#				{
+					#					onclick = "[EditLegionWindow.ReplaceCommander( Character.Self )]"
+					#				}
+					#				blockoverride "Icon"
+					#				{
+					#					texture = "gfx/interface/icons/shared_icons/change.dds"
+					#					size = { 28 28 }
+					#				}
+					#			}
+					#		}	
+					#	}
+					#	widget = {
+					#		size = { 48 64 }
+							#visible = "[Character.IsTribune]"
+					#		cpt_button = {
+					#			size = { 44 64 }
+
+					#			icon_button_square = {
+					#				name = "replace_commander_button"
+					#				size = { 34 34 }
+					#				parentanchor = bottom|right
+					#				blockoverride "On_click"
+					#				{
+					#					onclick = "[EditLegionWindow.ReplaceCommander( Character.Self )]"
+					#				}
+					#				blockoverride "Icon"
+					#				{
+					#					texture = "gfx/interface/icons/shared_icons/change.dds"
+					#					size = { 28 28 }
+					#				}
+					#			}
+					#		}
+					#	}
+					#}
+
+					###### OG NO SIZE DIFFERENCE
+					cpt_button = {
+						size = { 70 106 }
+						blockoverride "ShowIcons" { visible = no }
+						parentanchor = vcenter
+
+						icon_button_square = {
+							name = "replace_commander_button"
+							size = { 34 34 }
+							parentanchor = bottom|right
+							blockoverride "On_click"
+							{
+								onclick = "[EditLegionWindow.ReplaceCommander( Character.Self )]"
+							}
+							blockoverride "Icon"
+							{
+								texture = "gfx/interface/icons/shared_icons/change.dds"
+								size = { 28 28 }
+							}
+							tooltip = "EDIT_COMPOSITION_SWAP_COMMANDER_DESC"
+						} 
+					}
+
+				}
+			}
+
+			icon_button_square = {
+				name = "add_commander_button"
+				visible = "[EditLegionWindow.CanAddCommander]"
+				blockoverride "Icon" { visible = no }
+				blockoverride "On_click" { onclick = "[EditLegionWindow.AddCommander]" }
+				size = { 70 106 }
+				parentanchor = bottom
+				tooltip = "ADD_LEGION_COMMANDER"
+
+				icon = {
+					using = button_tiled_texture
+					size = { 40 40 }
+					position = { -15 2 }
+					parentanchor = center
+					modify_texture = {
+						texture = "gfx/interface/base_parts/plus.dds"
+						blend_mode = alphamultiply
+					}
+				}
+				icon = {
+					texture = "gfx/interface/icons/shared_icons/commander.dds"
+					size = { 50 50 }
+					parentanchor = center
+					position = { 8 0 }
+				}
+			}
+		}
+	}
+	margin_widget = {
+		size = { 540 410 }
+		position = { 0 -52 }
+		parentanchor = hcenter|bottom
+		using = NoninteractableBG
+		blockoverride "Margins"
+		{
+			margin_left = 0
+			margin_right = 0
+			margin_top = 0
+			margin_bottom = 0
+		}
+		textbox = {
+			text = "EDIT_COMPOSITION"
+			position = { 12 16 }
+			using = HeaderFont
+			using = Black_FontColor
+		}
+
+		fixedgridbox = {
+			name = "unit_types_grid"
+			alwaystransparent = no
+			parentanchor = hcenter
+			position = { 0 46 }
+			flipdirection = yes
+			addcolumn = 62
+			addrow = 82
+			datamodel = "[EditLegionWindow.GetConstructions]"
+			datamodel_wrap = 5
+			size = { 100% 84 }
+			item = {
+				container = {
+					using = ConstructionCardTemplate
+					datacontext = "[SubUnitConstruction.GetDefinition]"
+					tooltip = "EDIT_COMPOSITION_SUBUNIT_DESC"
+				}
+			}
+		}
+
+		textbox = {
+			parentanchor = hcenter|bottom
+			widgetanchor = hcenter|bottom
+			position = { 0 -8 }
+			size = { 400 200 }
+			using = BaseFontS
+			using = Black_FontColor
+			text = "[EditLegionWindow.GetCreatePriceDescription]"	
+			align = bottom|hcenter
+			multiline = yes
+			autoresize = yes
+		}
+	}
+
+	text_button_square = {
+		parentanchor = hcenter|bottom
+		position = { 0 -18 }
+		size = { 300 0 }
+		blockoverride "Center_text" { text = "CREATE_LEGION" }
+		blockoverride "On_click"
+		{
+			onclick = "[EditLegionWindow.CreateLegion]"
+			enabled = "[EditLegionWindow.CanCreateLegion]"
+			tooltip = "[EditLegionWindow.GetCreateLegionDescription]"
+		}
+	}
+}

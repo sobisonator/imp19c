@@ -992,7 +992,7 @@ Effect city_building_snow
 {
 	VertexShader = "VS_standard"
 	PixelShader = "PS_standard"
-	Defines = { "ENABLE_SNOW" }
+	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "ENABLE_SNOW" }
 }
 
 Effect city_building_snowShadow

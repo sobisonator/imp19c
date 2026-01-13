@@ -212,7 +212,7 @@ PixelShader =
 
 				float2 BaseCloudUV = UV * BaseCloudTileFactor;
 				float2 BaseCloudOffset = GlobalTime * BaseCloudScrolling;
-				float2 AnimatedBaseCloudUV = BaseCloudUV + BaseCloudOffset;
+				float2 AnimatedBaseCloudUV = BaseCloudUV;
 
 				float3 ToCamera = CameraPosition - Input.WorldSpacePos;
 				float3 ToCameraDir = normalize( ToCamera );
@@ -227,8 +227,8 @@ PixelShader =
 				AnimatedBaseCloudUV += ParallaxOffset;
 
 				float3 Normal1 = CalculateNormal( CloudTexture, AnimatedBaseCloudUV, BaseCloudStrength );
-				float3 Normal2 = CalculateNormal( CloudTexture, (AnimatedBaseCloudUV + GlobalTime * Cloud1Scrolling) * Cloud1TileFactor, Cloud1Strength );
-				float3 Normal3 = CalculateNormal( CloudTexture, (AnimatedBaseCloudUV + GlobalTime * Cloud2Scrolling) * Cloud2TileFactor, Cloud2Strength );
+				float3 Normal2 = CalculateNormal( CloudTexture, AnimatedBaseCloudUV * Cloud1TileFactor, Cloud1Strength );
+				float3 Normal3 = CalculateNormal( CloudTexture, AnimatedBaseCloudUV * Cloud2TileFactor, Cloud2Strength );
 				float3 Normal = normalize( Normal1 + Normal2 + Normal3 );
 
 				float Alpha = PdxTex2D( CloudTexture, AnimatedBaseCloudUV ).r;

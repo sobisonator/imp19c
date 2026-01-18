@@ -457,10 +457,16 @@ INCOME_set_tax_modifier = {
 INCOME_mitigate_deficit = {
 	# Scope: Country
 	# Function: Sell off reserves or take out debt to get to positive treasury if the country is in deficit
+	# Triggered only if auto_fund_deficit is on
 
 	if = {
 		limit = {
-			treasury < 0
+			treasury < 0 # TODO: Check is now handled by on_action, consider removing
+		}
+
+		set_variable = {
+			name = negative_treasury
+			value = treasury
 		}
 
 		# Issue national debt
@@ -479,10 +485,14 @@ INCOME_mitigate_deficit = {
 					multiply = -1
 				}
 			}
-			add_political_influence = {
-				value = CURRENCY_debt_issue_political_influence_cost_1m
-				multiply = local_var:debt_needed_for_deficit_millions
+			set_variable = {
+				name = PI_needed_for_deficit
+				value = {
+					value = CURRENCY_debt_issue_political_influence_cost_1m
+					multiply = local_var:debt_needed_for_deficit_millions
+				}
 			}
+			add_political_influence = var:PI_needed_for_deficit
 			CURRENCY_alter_own_debt = {
 				thousands = 0
 				millions = local_var:debt_needed_for_deficit_millions

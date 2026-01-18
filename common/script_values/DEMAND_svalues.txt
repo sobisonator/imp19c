@@ -8,6 +8,30 @@
 
 # Demand levels
 
+DEMAND_elasticity_impact = {
+	# Scope: Governorship
+	# Function: If the governorship's wealth has gone down recently, get the % by which to multiply the demand for tradegoods
+	# Food tradegoods are not affected by this
+	value = 1
+	if = {
+		limit = {
+			has_variable = DEMAND_change_elasticity_impact
+			trigger_if = {
+				limit = {
+					has_variable = DEMAND_change_elasticity_impact
+				}
+				var:DEMAND_change_elasticity_impact < 0
+			}
+		}
+		add = var:DEMAND_change_elasticity_impact
+	}
+	else = {
+		add = WEALTH_percentage_change_governorship
+	}
+	max = 1	
+	min = 0.1 # Maximum 90% malus to demand of all tradegoods
+}
+
 DEMAND_tiny = {
 	value = 0.1
 }
@@ -185,6 +209,7 @@ DEMAND_glass_industry_alcohol_malus = {
 DEMAND_consumer_multiplier = {
 	value = CURRENCY_amt_circulated_deflation_demand_multiplier
 	add = CURRENCY_amt_circulated_inflation_demand_multiplier
+	multiply = DEMAND_elasticity_impact
 }
 
 DEMAND_consumer_large = {
@@ -277,6 +302,7 @@ DEMAND_furniture = { # Total
 		}
 		add = var:DEMAND_from_industry_furniture
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_pharmaceuticals = { # Total
@@ -295,6 +321,7 @@ DEMAND_pharmaceuticals = { # Total
 		}
 		add = var:DEMAND_from_industry_pharmaceuticals
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 
@@ -348,6 +375,7 @@ DEMAND_coal = { # Total
 		}
 		add = INDUSTRY_demand_alcohol_coal
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_whales = { # Total
@@ -392,6 +420,7 @@ DEMAND_glass = { # Total
 		}
 		add = INDUSTRY_demand_alcohol_glass
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_motors = { # Total
@@ -403,6 +432,7 @@ DEMAND_motors = { # Total
 		}
 		add = var:DEMAND_from_industry_motors
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_fur = { # Total
@@ -421,6 +451,7 @@ DEMAND_fur = { # Total
 		}
 		add = var:COTTAGEIND_produced_luxury_clothing
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_industrial_fibres = { # Total
@@ -446,6 +477,7 @@ DEMAND_industrial_fibres = { # Total
 			}
 		}
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_textile_fibres = { # Total
@@ -494,6 +526,7 @@ DEMAND_textile_fibres = { # Total
 		multiply = DEMAND_tiny
 		multiply = 0.25
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 
 }
@@ -511,6 +544,7 @@ DEMAND_wool = { # Total
 		}
 		add = var:DEMAND_from_industry_wool
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_silk = { # Total
@@ -527,6 +561,7 @@ DEMAND_silk = { # Total
 		}
 		add = INDUSTRY_demand_luxury_clothing_silk
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_wood = { # Total
@@ -566,6 +601,7 @@ DEMAND_wood = { # Total
 		}
 		add = INDUSTRY_demand_early_artillery_wood
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_stone = { # Total
@@ -588,6 +624,7 @@ DEMAND_stone = { # Total
 		}
 		add = INDUSTRY_demand_early_artillery_stone
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_sulphur = { # Total
@@ -611,6 +648,7 @@ DEMAND_sulphur = { # Total
 		}
 		add = INDUSTRY_demand_early_artillery_sulphur
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_peat = { # Total
@@ -628,6 +666,7 @@ DEMAND_peat = { # Total
 		}
 		add = var:DEMAND_from_industry_peat
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_tin = { # Total
@@ -646,6 +685,7 @@ DEMAND_tin = { # Total
 		}
 		add = INDUSTRY_demand_bronze_tin
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_inorganic_compounds = { # Total
@@ -663,6 +703,7 @@ DEMAND_inorganic_compounds = { # Total
 		}
 		add = var:DEMAND_from_industry_inorganic_compounds
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_copper = { # Total
@@ -713,6 +754,7 @@ DEMAND_copper = { # Total
 			}
 		}
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_iron = { # Total
@@ -758,12 +800,13 @@ DEMAND_iron = { # Total
 		}
 		add = INDUSTRY_demand_early_artillery_iron
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_gold = { # Total
 	value = 0
 	add = DEMAND_luxury_base_total
-	multiply = 0.2
+	multiply = 0.4
 	if = {
 		limit = {
 			has_variable = COTTAGEIND_produced_luxury_clothing
@@ -799,6 +842,7 @@ DEMAND_gold = { # Total
 		}
 		add = DEMAND_gold_reserve_accumulation_rate
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 
@@ -900,8 +944,9 @@ DEMAND_silver = { # Total
 				}
 			}
 		}
-		add = DEMAND_gold_reserve_accumulation_rate
+		add = DEMAND_silver_reserve_accumulation_rate
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 
@@ -995,6 +1040,7 @@ DEMAND_dye = { # Total
 		}
 		add = INDUSTRY_demand_clothing_dye
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_lead = { # Total
@@ -1035,6 +1081,7 @@ DEMAND_lead = { # Total
 		}
 		add = INDUSTRY_demand_early_artillery_lead
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_oil = { # Total
@@ -1051,6 +1098,7 @@ DEMAND_oil = { # Total
 		}
 		add = INDUSTRY_demand_machine_parts_oil
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_hardwood = { # Total
@@ -1067,6 +1115,7 @@ DEMAND_hardwood = { # Total
 		}
 		add = var:DEMAND_from_industry_hardwood
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_rubber = { # Total
@@ -1083,6 +1132,7 @@ DEMAND_rubber = { # Total
 		}
 		add = INDUSTRY_demand_machine_parts_rubber
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_salt = { # Total
@@ -1101,6 +1151,7 @@ DEMAND_salt = { # Total
 		}
 		add = var:DEMAND_from_industry_salt
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_electronics = { # Total
@@ -1117,6 +1168,7 @@ DEMAND_electronics = { # Total
 		}
 		add = INDUSTRY_demand_machine_parts_electronics
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_construction_materials = { # Total
@@ -1134,6 +1186,7 @@ DEMAND_construction_materials = { # Total
 		add = var:DEMAND_from_industry_construction_materials
 	}
 	add = DEMAND_construction_materials_military
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 
@@ -1189,6 +1242,7 @@ DEMAND_steel = { # Total
 		}
 		add = INDUSTRY_demand_early_artillery_steel
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_bronze = { # Total
@@ -1218,6 +1272,7 @@ DEMAND_bronze = { # Total
 		}
 		add = INDUSTRY_demand_early_artillery_bronze
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_machine_parts = { # Total
@@ -1235,6 +1290,7 @@ DEMAND_machine_parts = { # Total
 		}
 		add = var:DEMAND_from_industry_machine_parts
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_chemicals = { # Total
@@ -1245,6 +1301,7 @@ DEMAND_chemicals = { # Total
 		}
 		add = var:DEMAND_from_industry_chemicals
 	}
+	multiply = DEMAND_elasticity_impact
 }
 DEMAND_naval_supplies = { # Total
 	value = 0
@@ -1261,13 +1318,14 @@ DEMAND_naval_supplies = { # Total
 		add = var:DEMAND_from_industry_naval_supplies
 	}
 	add = DEMAND_naval_supplies_navy
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 
 DEMAND_naval_supplies_navy = {
 	value = owner.num_of_ships
 	multiply = FUNC_governorship_ports_ratio
-	multiply = 0.75
+	multiply = 0.5
 	multiply = DEMAND_navy_supplies_modifier
 }
 
@@ -1307,6 +1365,7 @@ DEMAND_steel_ships = { # Total
 		multiply = 0.5
 		multiply = DEMAND_navy_ratio_steel_ships
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_wooden_ships = { # Total
@@ -1319,6 +1378,7 @@ DEMAND_wooden_ships = { # Total
 			}
 		}
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 
@@ -1358,6 +1418,7 @@ DEMAND_petrochemicals = { # Total
 		}
 		add = var:DEMAND_from_industry_petrochemicals
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 
@@ -1398,6 +1459,7 @@ DEMAND_early_munitions_base = {
 
 DEMAND_early_munitions = { # Total
 	value = DEMAND_early_munitions_base
+	multiply = DEMAND_elasticity_impact
 	multiply = DEMAND_military_supplies_modifier
 	min = 0
 }
@@ -1423,6 +1485,7 @@ DEMAND_late_munitions_base = {
 DEMAND_late_munitions = { # Total
 	value = DEMAND_late_munitions_base
 	multiply = DEMAND_military_supplies_modifier
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 
@@ -1460,6 +1523,7 @@ DEMAND_early_artillery = { # Total
 	value = DEMAND_early_artillery_base
 	multiply = DEMAND_military_supplies_modifier
 	# TODO: Add demand from navy
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 DEMAND_late_artillery = { # Total
@@ -1474,6 +1538,7 @@ DEMAND_late_artillery = { # Total
 	#}
 	#multiply = FUNC_governorship_ratio_national_forts
 	#multiply = 0 # TODO: Should be num_of_unit_type artillery, once created. Remove this multiplier
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 
@@ -1485,6 +1550,7 @@ DEMAND_rare_alloys = { # Total
 		}
 		add = INDUSTRY_demand_machine_parts_rare_alloys
 	}
+	multiply = DEMAND_elasticity_impact
 	min = 0
 }
 

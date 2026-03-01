@@ -387,18 +387,17 @@ RasterizerState ShadowRasterizerState
 	# MOD
 	# DepthBias = 40000
 	# SlopeScaleDepthBias = 2
-	DepthBias = 0
-	SlopeScaleDepthBias = 7
+	DepthBias = 2000
+	SlopeScaleDepthBias = 2
 	# END MOD
 }
-# MOD
-# DepthStencilState DepthStencilState
-# {
-# 	StencilEnable = no
-# 	FrontStencilPassOp = replace
-# 	StencilRef = 1
-# }
-# END MOD
+
+DepthStencilState DepthStencilState
+{
+	StencilEnable = yes
+	FrontStencilPassOp = replace
+	StencilRef = 1
+}
 
 Effect tree
 {

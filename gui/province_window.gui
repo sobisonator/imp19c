@@ -478,7 +478,10 @@ window = {
 									blend_mode = alphamultiply
 								}
 							}
-							blockoverride "ClickFunction" { onclick = "[GetVariableSystem.Set('state_up_tabs', 'diplomacy')]" }
+							blockoverride "ClickFunction" { 
+								onclick = "[GetVariableSystem.Set('state_up_tabs', 'diplomacy')]"
+								onclick = "[GetScriptedGui('DIPLO_make_local_diplomatic_play_list').Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
+							}
 						}
 						category_tab_vertical = {
 							visible = "[Or( ProvinceWindow.GetProvince.HasGreatWork, ProvinceWindow.GetProvince.HasSecondaryGreatWork )]"
@@ -4581,16 +4584,16 @@ window = {
 						direction = vertical
 						spacing = 10
 						flowcontainer = {
-							parentanchor = hcenter
-							spacing = 5
+							#parentanchor = hcenter
+							spacing = 100
 							text_button_square_highlighted = {
 								size = { 180 28 }
-								blockoverride "Center_text" { text = "province_diplomatic_play" }
+								blockoverride "Center_text" { text = "start_province_diplomatic_play" }
 								blockoverride "On_click"
 								{
 									#onclick = ""
 									enabled = yes
-									tooltip = "province_diplomatic_play_tt"
+									tooltip = "start_province_diplomatic_play_tt"
 								}
 							}
 							text_button_square_highlighted = {
@@ -4606,14 +4609,35 @@ window = {
 						}
 						flowcontainer = {
 							spacing = 10
+							direction = horizontal
 							sub_header_v = {
-								size = { 190 520 }
-								enabled = no
-								blockoverride "Title_text" { text = "province_diplomatic_play" }
+								size = { 470 520 }
+								enabled = yes
+								blockoverride "Title_text" { text = "province_diplomatic_play_list" }
+								scrollarea = {
+									size = { 100% 582 }
+									position = { 0 38 }
+									scrollbar_vertical = {
+										using = VerticalScrollBar
+									}
+									scrollbarpolicy_horizontal = always_off
+									scrollwidget = {
+										flowcontainer = {
+											spacing = 5
+											direction = vertical
+											datamodel = "[Player.MakeScope.GetList('local_area_diplomatic_plays')]"
+											item = {
+												diplomatic_play_item = { }
+											}
+										}
+									}
+								}
 							}
 							sub_header_v = {
 								size = { 280 520 }
 								enabled = no
+								visible = no # Should appear on a separate tab
+								# Should default to visible if the selected province is unowned
 								blockoverride "Title_text" { text = "province_colonization" }
 								flowcontainer = {
 									position = { 0 32 }

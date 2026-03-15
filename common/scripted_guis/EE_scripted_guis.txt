@@ -1285,15 +1285,20 @@ DIPLO_begin_or_end_play = {
     # Scopes: player
     scope = province
 
+    is_valid = {
+        NOT = { scope:player = scope:player.var:selected_province.owner }
+    }
+
     effect = {
 
         if = {
-            limit = { # If player has a diplomatic play active here
+            limit = { # If player has a diplomatic play active in this area and country
                 scope:player = {
                     any_in_list = {
                         variable = local_area_diplomatic_plays
 
                         var:play_instigator = scope:player
+                        var:play_target_country = scope:player.var:selected_province.owner
                     }
                 }
             }
@@ -1301,12 +1306,39 @@ DIPLO_begin_or_end_play = {
             # Costs political power
             scope:player = {
                 pay_price = end_diplomatic_play_price
+
+                random_in_list = {
+                    variable = local_area_diplomatic_plays
+                    limit = {
+                        var:play_instigator = scope:player
+                        var:play_target_country = scope:player.var:selected_province.owner
+                    }
+                    save_scope_as = diplomatic_play_to_remove
+                }
+
+                scope:diplomatic_play_to_remove = {
+                    AI_remove_diplomatic_play = yes
+                }
+                
             }
         }
 
         else = { # Otherwise, begin a diplomatic play
             scope:player = {
+                # TODO: Make the price of beginning a diplomatic play sensitive to your diplomatic influence in an area
+                # TODO: Make it impossible to begin a diplomatic play if PI would go negative
                 pay_price = begin_diplomatic_play_price
+
+                scope:player.var:selected_province.owner = {
+                    save_scope_as = target_country
+                }
+                AI_begin_diplomatic_play = {
+                    play_instigator = scope:player
+                    play_target_area = scope:player.var:selected_province
+                    play_target_country = scope:target_country
+                    play_goal = flag:get_territory
+                }
+                # TODO: Trigger an AI attitude assessment immediately
             }   
         }
 

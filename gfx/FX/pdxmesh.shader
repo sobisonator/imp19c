@@ -4,10 +4,12 @@ Includes = {
 	"cw/shadow.fxh"
 	"cw/camera.fxh"
 	"cw/heightmap.fxh"
+	"cw/pdxterrain.fxh"
 	"jomini/jomini_fog.fxh"
 	"jomini/jomini_lighting.fxh"
 	"fog_of_war.fxh"
 	"jomini/jomini_water.fxh"
+	"jomini/jomini_gradient_borders.fxh"
 	"jomini/jomini_mapobject.fxh"
 	"constants.fxh"
 	"standardfuncsgfx.fxh"
@@ -136,45 +138,12 @@ PixelShader =
 		SampleModeU = "Wrap"
 		SampleModeV = "Wrap"
 	}
-	TextureSampler TerrainDiffuseArray
-	{
-		Ref = PdxTerrainTextures0
-		MagFilter = "Linear"
-		MinFilter = "Linear"
-		MipFilter = "Linear"
-		SampleModeU = "Wrap"
-		SampleModeV = "Wrap"
-		type = "2darray"
-	}
-	TextureSampler TerrainNormalsArray
-	{
-		Ref = PdxTerrainTextures1
-		MagFilter = "Linear"
-		MinFilter = "Linear"
-		MipFilter = "Linear"
-		SampleModeU = "Wrap"
-		SampleModeV = "Wrap"
-		type = "2darray"
-	}
-	TextureSampler TerrainMaterialArray
-	{
-		Ref = PdxTerrainTextures2
-		MagFilter = "Linear"
-		MinFilter = "Linear"
-		MipFilter = "Linear"
-		SampleModeU = "Wrap"
-		SampleModeV = "Wrap"
-		type = "2darray"
-	}
-	TextureSampler TerrainColorMapTexture
-	{
-		Ref = PdxTerrainColorMap
-		MagFilter = "Linear"
-		MinFilter = "Linear"
-		MipFilter = "Linear"
-		SampleModeU = "Clamp"
-		SampleModeV = "Clamp"
-	}
+
+	#TerrainDiffuseArray = DetailTextures
+	#TerrainNormalsArray = NormalTextures
+	#TerrainMaterialArray = MaterialTextures
+	#TerrainColorMapTexture = ColorTexture
+	
 	TextureSampler FlagTexture
 	{
 		Ref = PdxMeshCustomTexture0
@@ -445,6 +414,14 @@ PixelShader =
 					float3 NormalSample = UnpackRRxGNormal( NormalPacked );
 				#endif
 
+				float3 BorderColor;
+				float BorderPreLightingBlend;
+				float BorderPostLightingBlend;
+				#ifdef BORDER_COLOR
+					GetBorderColorAndBlend( Input.WorldSpacePos.xz * WorldSpaceToTerrain0To1, BorderColor, BorderPreLightingBlend, BorderPostLightingBlend );
+					Diffuse.rgb = lerp( Diffuse.rgb, BorderColor, BorderPreLightingBlend );
+				#endif
+
 				#ifdef UNIQUE
 					float4 Unique = PdxTex2D( UniqueMap, UNIQUE_UV_SET );
 					Diffuse.rgb *= Unique.bbb;
@@ -485,7 +462,7 @@ PixelShader =
 				Diffuse.rgb *= UserColor;
 
 				#if defined( ENABLE_SNOW )
-					ApplySnowMesh( Diffuse.rgb, Normal, Properties, Input.WorldSpacePos, TerrainColorMapTexture, WinterMap, TerrainDiffuseArray, TerrainNormalsArray, TerrainMaterialArray );
+					ApplySnowMesh( Diffuse.rgb, Normal, Properties, Input.WorldSpacePos, ColorTexture, WinterMap, DetailTextures, NormalTextures, MaterialTextures );
 				#endif
 
 				SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse.rgb, Normal, Properties.a, Properties.g, Properties.b );
@@ -1011,6 +988,21 @@ Effect separate_building_snow
 }
 
 Effect separate_building_snow_snowShadow
+{
+	VertexShader = "VertexPdxMeshStandardShadow"
+	PixelShader = "PixelPdxMeshStandardShadow"
+
+	RasterizerState = ShadowRasterizerState
+}
+
+Effect separate_building_bordercolor_snow
+{
+	VertexShader = "VS_standard"
+	PixelShader = "PS_standard"
+	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "UNIQUE" "BORDER_COLOR" "ENABLE_SNOW" }
+}
+
+Effect separate_building_bordercolor_snowShadow
 {
 	VertexShader = "VertexPdxMeshStandardShadow"
 	PixelShader = "PixelPdxMeshStandardShadow"

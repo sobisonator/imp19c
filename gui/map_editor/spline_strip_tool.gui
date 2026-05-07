@@ -1,0 +1,181 @@
+hbox = {
+	name = "spline_strip_tool_widget"
+	margin = { 2 2 }
+	spacing = 4
+
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+
+	
+	tooloptions_checkbutton = {
+		name = "mode_anchor_selection"
+		
+		checked = "[SplineStripTool.IsAnchorSelectionSelected]"
+		onclick = "[SplineStripTool.SelectAnchorSelection]"
+		
+		tooltip = "Select and modify anchors"
+		shortcut = "tooloption_1"
+		size = { 32 32 }
+		toolbox_icon = {
+			texture = "gfx/editor_spline_network/select_anchor.png"
+			size = { 24 24 }
+		}
+	}
+	
+	tooloptions_checkbutton = {
+		name = "mode_anchor_creation"
+		
+		checked = "[SplineStripTool.IsAnchorCreationSelected]"
+		onclick = "[SplineStripTool.SelectAnchorCreation]"
+
+		tooltip = "Create new anchors"
+		shortcut = "tooloption_2"
+		size = { 32 32 }
+		toolbox_icon = {
+			texture = "gfx/editor_spline_network/create_anchor.png"
+			size = { 24 24 }
+		}
+	}
+	
+	tooloptions_checkbutton = {
+		name = "mode_strip_selection"
+		
+		checked = "[SplineStripTool.IsStripSelectionSelected]"
+		onclick = "[SplineStripTool.SelectStripSelection]"
+
+		tooltip = "Select and modify strips"
+		shortcut = "tooloption_3"
+		size = { 32 32 }
+		toolbox_icon = {
+			texture = "gfx/editor_spline_network/select_strip.png"
+			size = { 24 24 }
+		}
+	}
+	
+	tooloptions_checkbutton = {
+		name = "mode_strip_creation"
+		
+		checked = "[SplineStripTool.IsStripCreationSelected]"
+		onclick = "[SplineStripTool.SelectStripCreation]"
+
+		tooltip = "Create a strip between two anchors"
+		shortcut = "tooloption_4"
+		size = { 32 32 }
+		toolbox_icon = {
+			texture = "gfx/editor_spline_network/create_strip.png"
+			size = { 24 24 }
+		}
+	}
+		
+	toolbox_checkbutton = {
+		name = "mode_select_map_content"
+		visible = "[SplineStripTool.HasMapContent]"
+		
+		checked = "[SplineStripTool.IsMapContentSelectionSelected]"
+		onclick = "[SplineStripTool.SelectMapContentSelection]"
+		
+		tooltip = "Territory selection mode."
+		shortcut = "tooloption_5"
+		size = { 32 32 }
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/select_map_content.dds"
+			size = { 24 24 }
+		}
+	}
+	
+	tooloptions_divider = {
+	}
+
+	toolbox_button = {
+		enabled = "[SplineStripTool.CanDeleteSelection]"
+		visible = "[Or(SplineStripTool.IsAnchorSelectionSelected, SplineStripTool.IsStripSelectionSelected)]"
+		onclick = "[SplineStripTool.DeleteSelected]"
+		tooltip = "Delete selected strips or anchors"
+		
+		shortcut = "mapobjects_tool_delete"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/delete_objects.dds"
+			size = { 24 24 }
+		}
+	}
+	
+	editor_toolbar_button = {
+		widgetid = "spline_type_to_create_button"
+		visible = "[SplineStripTool.IsStripCreationSelected]"
+		tooltip = "Select spline type to create"
+		text = "Spline Type"
+		onclick = "[SplineTypeSelectionDropdown.Toggle]"
+		size = { 88 32 }
+	}
+	
+	
+	tooloptions_divider = {
+	}
+
+	toolbox_checkbutton = {
+		checked = "[SplineStripTool.IsNavMeshVisible]"
+		onclick = "[SplineStripTool.ToggleNavMeshVisibility]"
+		tooltip = "Show or hide the navigation mesh that splines are placed on"
+
+		toolbox_icon = {
+			texture = "gfx/editor_spline_network/navmesh.png"
+			size = { 24 24 }
+		}
+	}
+	
+	toolbox_button = {
+		widgetid = "spline_visibility_button"
+		onclick = "[SplineVisibilityDropdown.Toggle]"
+		tooltip = "Determine which splines should be visible"
+		text = "Visible Splines"
+		size = { 88 32 }
+	}
+	
+	
+	
+	widget = {
+		layoutpolicy_horizontal = expanding
+	}
+}
+
+tooloptions_dropdown = {
+	name = "spline_types_dropdown"
+	visible = no
+		
+	attachto = {
+		widgetid = "spline_type_to_create_button"
+		parentanchor = bottom|left
+		widgetanchor = top|left
+		inherit_visibility = no
+	}
+	
+	blockoverride "content" {
+		fixedgridbox = {
+			datamodel = "[SplineTypeSelectionDropdown.SplineTypes]"
+			name = "spline_type_list"
+			addcolumn = 96
+			addrow = 24
+		
+			item = {
+				tooloptions_checkbutton = {
+					size = { 96 20 }
+					tooltip = "Select this spline type for creation"		
+					text = "[SplineTypeItem.GetName()]"
+					checked = "[SplineTypeSelectionDropdown.IsSplineTypeSelected(SplineTypeItem.GetId())]"
+					onclick = "[SplineTypeSelectionDropdown.SelectSplineType(SplineTypeItem.GetId())]"
+				}
+			}
+		}
+	}
+}
+
+toolbox_checkbutton = {
+	name = "spline_strip_tool_toolbox_button"
+	shortcut = "spline_strip_tool"
+	tooltip = "Spline Network Strip Tool"
+	checked = "[SplineStripToolMode.IsSelected]"
+	
+	toolbox_icon = {
+		texture = "gfx/tools/material/network.png"
+	}
+}

@@ -1,0 +1,108 @@
+types SplineInspector 
+{
+	type anchoritem_collapsed = hbox {
+		name = "Collapsed anchoritem entry"
+		
+		checkbutton = {
+			name = "item_locked"
+			using = terraineditor_base
+			size = { 16 16 }
+
+			gfxtype = checkbuttongfx
+			shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+			texture = "gfx/editor_terrain/padlock.png"
+			framesize = { 16 16 }
+
+			checked = "[AnchorItem.IsLocked]"
+			onclick = "[AnchorItem.ToggleLock]"
+
+			tooltip = "Lock/unlock this anchor, preventing/enabling further modification"
+		}
+		
+		dockable_button = {
+			name = "strips_list_item_select"
+			size = { 300 75 }
+			layoutpolicy_horizontal = expanding
+			tooltip = "[AnchorItem.GetTooltip]"
+			text = "[AnchorItem.GetDisplayString]"
+			onclick = "[AnchorItem.ToggleExpanded]"
+		}
+	}
+	
+	type anchor_id_edit = hbox {
+		name = "Anchor ID edit box"
+		editor_textbox = {
+			layoutpolicy_horizontal = expanding
+			autoresize = yes
+			text = "Anchor ID: "
+			using = terraineditor_label
+		}
+		editbox = {
+			using = terraineditor_eb
+			text = "[AnchorItem.GetAnchorIdAsString]"
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			autoresize = yes
+			min_width = 75
+			margin_left = 8
+			align = left
+			oneditingfinished = "[AnchorItem.SetAnchorIdCallback]"
+			text_validator = "[AnchorItem.GetIdValidator]"
+		} 
+	}
+	
+	type anchoritem_expandbox = vbox { 
+		name = "AnchorItem expandbox"
+		visible = "[AnchorItem.IsExpanded]"
+		margin_top = 2
+		anchor_id_edit = {}
+		margin_bottom = 10
+	}
+}
+
+vbox = {
+	name = "spline_inspector_dockable"  # This name is used in code, do not change
+	layoutpolicy_vertical = expanding
+
+	scrollarea = {
+		scrollbarpolicy_vertical = always_on
+		scrollbarpolicy_horizontal = always_off
+		layoutpolicy_vertical = expanding
+		layoutpolicy_horizontal = preferred
+		autoresizeviewport = yes
+		
+		viewportwidget = {
+			widget = {
+				scissor = yes
+			}
+		}
+		
+		scrollwidget = {
+			dynamicgridbox = {
+				parentanchor = top|hcenter
+				datamodel = "[InspectorPanel.GetAnchorItems]"
+				name = "selected_anchors"
+				
+				item = {
+					widget = {
+						vbox = {
+							set_parent_size_to_minimum = yes
+							name = "anchoritem"
+							anchoritem_collapsed = {}
+							anchoritem_expandbox = {}
+						}
+					}
+					
+				}
+			}
+		}
+		
+		scrollbar_vertical = {
+			using = editor_vertical_scrollbar
+		}
+		
+		scrollbar_horizontal = {
+			using = editor_horizontal_scrollbar
+		}
+	}
+}

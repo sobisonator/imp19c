@@ -1,0 +1,276 @@
+types EntityViewer
+{
+	type entity_viewer_widget = cameracontrolwidget
+	{
+		gfxtype = entity_viewer_gfx
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+		effectname = "PdxGuiDefaultNoAlpha"
+	}
+}
+
+template animation_control_icon
+{
+	parentanchor = vcenter|hcenter
+	tooltipwidget = {
+		using = editor_tooltip
+	}
+	using = editor_tooltip_properties
+}
+
+vbox = {
+	name = "animation_event_tool" #Don't change, used in code.
+	visible = [EntityViewer.HasEntities]
+	layoutpolicy_vertical = expanding
+	margin = { 4 4 }
+	spacing = 8
+
+	minimumsize = { 900 900 }
+
+	#These two buttons are a workaround to make undo/redo outside the map editor
+	editor_toolbar_button = { #
+		size = { 0 0 }
+		onclick = "[EntityViewer.Undo]"
+		shortcut = "entity_viewer_undo"
+	}
+
+	editor_toolbar_button = {
+		size = { 0 0 }
+		onclick = "[EntityViewer.Redo]"
+		shortcut = "entity_viewer_redo"
+	}
+
+	hbox = {
+		layoutpolicy_horizontal = expanding
+		vbox = {
+			layoutpolicy_vertical = expanding
+			layoutpolicy_horizontal = expanding
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = shrinking
+				
+				vbox = {
+					spacing = 20
+					layoutpolicy_horizontal = preferred
+					
+					editor_textbox = {
+						margin_top = 8
+						text = "aet_entity"
+						autoresize = no
+					}
+
+					dropDown = {
+						using = EditorTextDropdown
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = preferred
+						size = { 64 32 }
+						blockoverride "dropdown_list_position" {
+							position = { 2 100% }
+						}
+						blockoverride "dropdown_item_size" {
+							size = { 256 20 }
+						}
+						blockoverride "dropdown_item_text" {
+							text = "[Entity.Name]"
+							tooltip = ""
+							fontsize = 13
+						}
+						blockoverride "dropdown_gridbox_size" {
+							addcolumn = 256
+							addrow = 32
+						}
+						onselectionchanged = "[EntityViewer.SetSelectedIndex]"
+						selectedindex = "[EntityViewer.SelectedIndex]"
+						datamodel = "[EntityViewer.Entities]"
+						focuspolicy = all
+					}
+				}
+
+				hbox = {
+					editor_toolbar_button = {
+						text = "aet_fit_camera_entity"
+						size = { 105 25 }
+						onclick = "[EntityViewer.FitCamera]"
+					}
+				}
+			}
+
+			editor_textbox = {
+				text = "aet_use_scroll"
+				autoresize = yes
+			}
+		}
+	}
+
+	entity_viewer_widget = {
+		name = "entity_viewer_widget" #Don't change, used in code.
+		layoutpolicy_vertical = expanding
+		layoutpolicy_horizontal = expanding
+		minimumsize = { 800 600 }
+
+		background = {
+			gfxtype = icongfx
+			texture = "gfx/editor_gui/editor_transparent.dds"
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			spriteType = CorneredTiled
+			tintcolor = { 0.3 0.3 0.3 1 }
+		}
+
+		camera_fov_y_degrees = 60
+		camera_zoom_limits = { 0.1 2000 }
+		camera_near_far = { 0.1 2200 }
+		camera_position = { 0.0 0.0 6.75 }
+	}
+
+	editor_frame = {
+		visible = "[And(EntityViewer.HasEntity, EntityViewer.Entity.HasStates)]"
+		using = tools_spacing
+		layoutpolicy_horizontal = expanding
+		layoutpolicy_vertical = expanding
+		
+		blockoverride "label" { text = "aet_animation_controls" }
+		blockoverride "content" {
+		    layoutpolicy_horizontal = expanding
+		    layoutpolicy_vertical = expanding
+			vbox = {
+				using = tools_spacing
+				layoutpolicy_horizontal = expanding
+		    	layoutpolicy_vertical = expanding
+				dropDown = {
+					name = "animation_dropdown" #Don't change. Used in code.
+					using = EditorTextDropdown
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = preferred
+					size = { 64 25 }
+					blockoverride "dropdown_list_position" {
+						position = { 2 20 }
+					}
+					blockoverride "dropdown_item_size" {
+						size = { 220 20 }
+					}
+					blockoverride "dropdown_item_text" {
+						text = "[EntityState.Name]"
+						fontsize = 13
+					}
+					blockoverride "dropdown_gridbox_size" {
+						addcolumn = 256
+						addrow = 32
+					}
+					onselectionchanged = "[EntityViewer.SetSelectedStateIndex]"
+					selectedindex = "[EntityViewer.Entity.SelectedIndex]"
+					focuspolicy = all
+				}
+				editor_frame = {
+					visible = "[EntityViewer.Entity.State.HasAnimation]"
+					name = "animation_controls"
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					
+					blockoverride "label" { text = "" }
+					blockoverride "content" {
+						hbox = {
+							using = tools_spacing
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = expanding
+							hbox = {
+								layoutpolicy_horizontal = shrinking
+								vbox = {
+									hbox = {
+										editor_textbox = {
+											text = "aet_frames"
+											size = {120 16}
+											margin = {1 5}
+											align = left|nobaseline
+										}
+									}
+									
+									hbox = {
+										editor_textbox = {
+											text = "aet_time"
+											size = {120 16}
+											margin = {1 5}
+											align = left|nobaseline
+										}
+									}
+								}
+
+								hbox = {
+									spacing = 4
+									
+									editor_button = {
+										icon = {
+											using = animation_control_icon
+											texture = "gfx/editor_gui/loop.dds"
+											tooltip = "aet_toggle_loop_a"
+											alpha = "[Select_float(EntityViewer.Entity.IsLooping, '(float)1.0', '(float)0.3')]"
+											
+										}
+										size = { 30 28 }
+										onclick = [EntityViewer.Entity.ToggleLooping]
+										shortcut = "entity_viewer_loop"
+									}
+
+									editor_button = {
+										icon = {
+											using = animation_control_icon
+											texture = "gfx/editor_gui/rollback.dds"
+											tooltip = "aet_rollback_a"
+											
+										}
+										size = { 30 28 }
+										onclick = [EntityViewer.Entity.Rollback]
+										shortcut = "entity_viewer_rollback"
+									}
+
+									editor_button = {
+										icon = {
+											using = animation_control_icon
+											visible = [EntityViewer.Entity.IsPlaying]
+											texture = "gfx/editor_gui/pause.dds"
+											tooltip = "aet_pause_a"
+										}
+
+										icon = {
+											using = animation_control_icon
+											visible = "[Not(EntityViewer.Entity.IsPlaying)]"
+											texture = "gfx/editor_gui/play.dds"
+											tooltip = "aet_resume_a"
+										}
+
+										size = { 28 28 }
+										onclick = "[EntityViewer.Entity.TogglePausePlay]"
+										shortcut = "entity_viewer_play_pause"
+									}
+								}
+							}
+
+							hbox = {
+								margin_left = 5
+								layoutpolicy_horizontal = expanding
+								layoutpolicy_vertical = expanding
+								editor_player = {
+									layoutpolicy_horizontal = growing
+									layoutpolicy_vertical = fixed
+									min = 0
+									max = 1
+									size = { 350 15 }
+									step = 0.001
+									wheelstep = 0
+									blockoverride "slider"
+									{
+										name = "animation_needle" #Don't change, used in code
+										size = { 2 100% }
+										texture = "gfx/editor_gui/timeline_needle.dds"
+									}
+									onchangestart = "[PdxGuiWidget.EnableUserScrubbing]" #Adds logic so we make sure an user interaction is moving the player
+									onvaluechanged = "[EntityViewer.ScrubPlayer( PdxGuiWidget.AccessSelf )]"
+									onchangefinish = "[EntityViewer.DisableUserScrubbing( PdxGuiWidget.AccessSelf )]" #Cleanup
+									value = "[EntityViewer.Entity.AnimationProgress]"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

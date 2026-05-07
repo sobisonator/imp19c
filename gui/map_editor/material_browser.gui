@@ -1,0 +1,135 @@
+
+editor_window = {
+	name = "material_browser"
+	size = { 1112 600 }
+	position = { 0 0 }
+	parentanchor = center
+
+	blockoverride "title" {
+		text = "#BOLD;COLOR:{1.0,1.0,1.0} Material Browser #!"
+	}
+
+	blockoverride "content" {
+
+		layoutpolicy_horizontal = preferred
+		layoutpolicy_vertical = preferred
+		editor_textinput = {
+			size = { 0 32 }
+			name = "search_field"
+			layoutpolicy_horizontal = preferred
+			layoutpolicy_vertical = fixed
+			fontsize = 14
+			text = "[MaterialBrowser.GetSearchFilter]"
+			ontextchanged = "[MaterialBrowser.SetSearchFilter]"
+			align = hcenter|nobaseline
+			tooltip = "Enter keywords (separated by space) to filter the search results. Search is case insensitive."
+			tooltipwidget = { using = dockable_tooltip }
+		}
+
+		hbox = {
+			scrollarea = {
+				scrollbarpolicy_vertical = always_on
+				scrollbarpolicy_horizontal = always_off
+				size = { 600 600 }
+				layoutpolicy_vertical = preferred
+				layoutpolicy_horizontal = preferred
+				autoresizeviewport = yes
+				viewportwidget = {
+					widget = {
+						scissor = yes
+					}
+				}
+				scrollbar_vertical = {
+					using = editor_vertical_scrollbar
+				}
+				scrollbar_horizontal = {
+					using = editor_horizontal_scrollbar
+				}
+				
+				scrollwidget = {
+					fixedgridbox = {
+						addcolumn = 200
+						addrow = 50
+						setitemsizefromcell = yes
+						datamodel_wrap = 3
+						flipdirection = yes
+						datamodel = "[MaterialBrowser.GetCurrentMaterialsList]"
+						item = {
+							checkbutton = {
+								using = terraineditor_listitem
+								name = "material_checkbox"
+								texture = "gfx/editor_gui/editor_layout_button.png"
+								enabled = "[Not(MaterialBrowser.IsMaterialDisabled( Material.Self ))]"
+								checked = "[MaterialBrowser.IsMaterialSelected( Material.Self )]"
+								onclick = "[MaterialBrowser.ToggleMaterialSelected( Material.Self )]"
+
+								hbox = {
+									size = { 0 0 }
+									widget = { size = { 2 0 } }
+									icon = {
+										size = { 46 46 }
+										layoutpolicy_horizontal = fixed
+										layoutpolicy_vertical = fixed
+										texture = "[Material.GetDiffuseTexture]"
+										shaderfile = "gfx/FX/pdxgui_noblend.shader"
+									}
+									textbox = {
+										size = { 0 0 }
+										layoutpolicy_horizontal = preferred
+										layoutpolicy_vertical = preferred
+										text = "[Material.GetName]"
+										using = terraineditor_font
+										align = center|nobaseline
+										multiline = yes
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			widget = {
+				size = { 512 512 }
+				layoutpolicy_horizontal = fixed
+				layoutpolicy_vertical = fixed
+				icon = {
+					size = { 512 512 }
+					visible = "[MaterialBrowser.IsAnyMaterialSelected]"
+					texture = "[MaterialBrowser.GetCurrentMaterial.GetDiffuseTexture]"
+					shaderfile = "gfx/FX/pdxgui_noblend.shader"
+				}
+			}
+		}
+		hbox = {
+			size = { 0 0 }
+			layoutpolicy_horizontal = preferred
+			layoutpolicy_vertical = preferred
+
+			editor_button = {
+				text = "Apply"
+				size = { 100 30 }
+				layoutpolicy_horizontal = preferred
+				layoutpolicy_vertical = fixed
+				font = "standard_cw_font"
+				align = center|nobaseline
+				fontsize = 20
+				fontcolor = { 1 1 1 1 }
+				shortcut = "material_browser_apply"
+				onclick = "[MaterialBrowser.Apply]"
+				enabled = "[MaterialBrowser.IsAnyMaterialSelected]"
+			}
+			editor_button = {
+				text = "Cancel"
+				size = { 100 30 }
+				layoutpolicy_horizontal = preferred
+				layoutpolicy_vertical = fixed
+				font = "standard_cw_font"
+				align = center|nobaseline
+				fontsize = 20
+				fontcolor = { 1 1 1 1 }
+				shortcut = "material_browser_close"
+				onclick = "[MaterialBrowser.Cancel]"
+			}
+		}
+	}
+}

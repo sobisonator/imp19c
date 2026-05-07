@@ -1,0 +1,318 @@
+types MapEditorTypes
+{
+	type brush_widget = tooloptions_button {
+		size = { 32 32 }
+	}
+
+	type pixelsnap_checkbutton = toolbox_checkbutton {
+		name = "pixelsnap"
+		shortcut = "brush_toggle_pixel_snap"
+		datacontext = "[BrushSettingsDropdown.Settings]"
+		tooltip = "bsw_toggle_pixel"
+		checked = "[BrushSettings.PixelSnap.Get]"
+		onclick = "[BrushSettings.PixelSnap.Toggle]"
+		toolbox_icon = {
+			size = { 32 32 }
+			texture = "gfx/tools/pixel_snap_icon.dds"
+		}
+	}
+}
+
+tooloptions_dropdown = {
+	name = "brush_settings_dropdown"
+	visible = no
+
+	size = { 440 160 }
+	datacontext = [BrushSettingsDropdown.Settings]
+
+	blockoverride "content"
+	{
+		spacing = 8
+	
+		vbox = {
+			layoutpolicy_horizontal = preferred
+			layoutpolicy_vertical = preferred
+
+			# Brush settings
+			hbox = {
+				layoutpolicy_horizontal = preferred
+				layoutpolicy_vertical = preferred
+
+				widget = {
+					name = "brush_preview"
+					size = { 72 72 }
+					minimumsize = { 72 72 }
+					layoutpolicy_vertical = fixed
+					layoutpolicy_horizontal = fixed
+					
+					background = {
+						texture = "gfx/editor_gui/editor_checkbox.dds"
+						spriteType = corneredstretched
+						spriteborder = { 4 4 }
+						framesize = { 16 16 }
+						shaderfile = "gfx/FX/pdxgui_default.shader"
+					}
+					
+					icon = {
+						texture = "[BrushSettingsDropdown.Thumbnail]"
+						size = { 100% 100% }
+						maximumsize = { 62 62 }
+						parentanchor = vcenter|hcenter
+					}
+				}
+				
+				vbox = {
+					name = "brush_settings_controls"
+					layoutpolicy_vertical = preferred
+					layoutpolicy_horizontal = expanding
+					margin_left = 8
+					
+					hbox = {
+						layoutpolicy_vertical = fixed
+						layoutpolicy_horizontal = preferred
+						
+						editbox = {
+							using = terraineditor_label
+							size = { 60 30 }
+							text = "bsw_amount"
+							align = left|nobaseline
+							layoutpolicy_horizontal = fixed
+						}
+						
+						scrollbar = {
+							name = "brush_amount_scrollbar"
+							direction = horizontal
+							
+							datacontext = [BrushSettings.Amount]
+							min = [BrushFloat.Min]
+							max = [BrushFloat.Max]
+							step = [BrushFloat.SmallStepSize]
+							wheelstep = [BrushFloat.StepSize]
+							value = [BrushFloat.Value]
+
+							onchangestart = "[PdxGuiWidget.EnableValueUpdate]"
+							onvaluechanged = "[BrushFloat.SetValueFromWidget( PdxGuiWidget.AccessSelf )]"
+							onchangefinish = "[PdxGuiWidget.DisableValueUpdate]"
+
+							layoutpolicy_vertical = fixed
+							layoutpolicy_horizontal = growing
+							
+							track = {
+								using = editor_scrollbar_track
+							}
+							
+							slider = {
+								using = editor_scrollbar_slider
+							}
+							
+							dec_button = {
+								button = {
+									using = editor_scrollbar_button
+									upframe = 9
+									downframe = 10
+									overframe = 11
+									disableframe = 12
+								}
+							}
+							
+							inc_button = {
+								button = {
+									using = editor_scrollbar_button
+									upframe = 13
+									downframe = 14
+									overframe = 15
+									disableframe = 16
+								}
+							}
+						}
+						
+						editor_editbox = {
+							using = terraineditor_eb
+							name = "brush_amount_value"
+							size = { 50 20 }
+							text = "[BrushSettings.Amount.Value]"
+							oneditingfinished = "[BrushSettings.SetAmount]"
+							layoutpolicy_vertical = fixed
+							layoutpolicy_horizontal = fixed
+						}
+					}
+					
+					hbox = {
+						layoutpolicy_vertical = fixed
+						layoutpolicy_horizontal = preferred
+						
+						editor_textbox = {
+							using = terraineditor_label
+							size = { 60 30 }
+							text = "bsw_size"
+							align = left|nobaseline
+							layoutpolicy_horizontal = fixed
+						}
+						
+						scrollbar = {
+							name = "brush_diameter_scrollbar"
+							direction = horizontal
+
+							datacontext = [BrushSettings.Radius]
+							value = [BrushFloat.Value]
+							min = [BrushFloat.Min]
+							max = [BrushFloat.Max]
+							step = [BrushFloat.StepSize]
+							wheelstep = [BrushFloat.StepSize]
+
+							onchangestart = "[PdxGuiWidget.EnableValueUpdate]"
+							onvaluechanged = "[BrushFloat.SetValueFromWidget( PdxGuiWidget.AccessSelf )]"
+							onchangefinish = "[PdxGuiWidget.DisableValueUpdate]"
+
+							layoutpolicy_vertical = fixed
+							layoutpolicy_horizontal = growing
+							
+							track = {
+								using = editor_scrollbar_track
+							}
+							
+							slider = {
+								using = editor_scrollbar_slider
+							}
+							
+							dec_button = {
+								button = {
+									using = editor_scrollbar_button
+									upframe = 9
+									downframe = 10
+									overframe = 11
+									disableframe = 12
+								}
+							}
+							
+							inc_button = {
+								button = {
+									using = editor_scrollbar_button
+									upframe = 13
+									downframe = 14
+									overframe = 15
+									disableframe = 16
+								}
+							}
+						}
+						
+						editor_editbox = {
+							using = terraineditor_eb
+							name = "brush_diameter_value"
+							size = { 50 20 }
+							text = "[BrushSettings.Diameter]"
+							oneditingfinished = "[BrushSettings.SetDiameter]"
+							layoutpolicy_vertical = fixed
+							layoutpolicy_horizontal = fixed
+						}
+					}
+					
+					hbox = {
+						layoutpolicy_vertical = fixed
+						layoutpolicy_horizontal = preferred
+						
+						editbox = {
+							using = terraineditor_label
+							size = { 60 30 }
+							text = "bsw_hardness"
+							align = left|nobaseline
+							layoutpolicy_horizontal = fixed
+						}
+						
+						scrollbar = {
+							name = "brush_hardness_scrollbar"
+							direction = horizontal
+							
+							datacontext = [BrushSettings.Hardness]
+							min = [BrushFloat.Min]
+							max = [BrushFloat.Max]
+							step = [BrushFloat.SmallStepSize]
+							wheelstep = [BrushFloat.StepSize]
+							value = [BrushFloat.Value]
+
+							onchangestart = "[PdxGuiWidget.EnableValueUpdate]"
+							onvaluechanged = "[BrushFloat.SetValueFromWidget( PdxGuiWidget.AccessSelf )]"
+							onchangefinish = "[PdxGuiWidget.DisableValueUpdate]"
+
+							layoutpolicy_vertical = fixed
+							layoutpolicy_horizontal = growing
+							
+							track = {
+								using = editor_scrollbar_track
+							}
+							
+							slider = {
+								using = editor_scrollbar_slider
+							}
+							
+							dec_button = {
+								button = {
+									using = editor_scrollbar_button
+									upframe = 9
+									downframe = 10
+									overframe = 11
+									disableframe = 12
+								}
+							}
+							
+							inc_button = {
+								button = {
+									using = editor_scrollbar_button
+									upframe = 13
+									downframe = 14
+									overframe = 15
+									disableframe = 16
+								}
+							}
+						}
+						
+						editor_editbox = {
+							using = terraineditor_eb
+							name = "brush_hardness_value"
+							size = { 50 20 }
+							text = "[BrushSettings.Hardness.Value]"
+							oneditingfinished = "[BrushSettings.SetHardness]"
+							layoutpolicy_vertical = fixed
+							layoutpolicy_horizontal = fixed
+						}
+					}
+				}
+			}
+
+			# Global Brush settings
+			hbox = {
+				layoutpolicy_horizontal = preferred
+				layoutpolicy_vertical = preferred
+
+				editbox = {
+					using = terraineditor_label
+					size = { 120 30 }
+					text = "bsw_display_amount"
+					align = center|nobaseline
+					layoutpolicy_horizontal = fixed
+				}
+
+				fixedgridbox = {
+					datamodel = "[BrushSettingsGlobal.GetDisplayAmountNames]"
+					setitemsizefromcell = yes
+					addcolumn = 100
+					addrow = 30
+					flipdirection = yes
+					
+					item = {
+						toolbox_checkbutton = {
+							margin = { 2 2 }
+							text = "[CString.GetString]"
+							using = terraineditor_label
+							align = center|nobaseline
+							tooltip = "bsw_click_to"
+							tooltipwidget = { using = dockable_tooltip }
+							checked = "[BrushSettingsGlobal.IsDisplayAmountActive( CString.GetString )]"
+							onclick = "[BrushSettingsGlobal.SetIsDisplayAmountFromString( CString.GetString )]"
+						}
+					}
+				}
+			}
+		}
+	}
+}

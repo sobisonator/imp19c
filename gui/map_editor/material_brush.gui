@@ -1,0 +1,188 @@
+types "MaterialBrushTypes" {
+
+	type material_blur_slider = vbox {
+		editbox = {
+			using = terraineditor_label
+			size = { 100 10 }
+			text = "Blur Threshold"
+			align = hcenter|nobaseline
+			layoutpolicy_horizontal = fixed
+		}
+		hbox = {
+			layoutpolicy_vertical = fixed
+			layoutpolicy_horizontal = preferred
+			
+			scrollbar = {
+				using = editor_scrollbar
+				direction = horizontal
+				size = { 100 14 }
+				layoutpolicy_vertical = fixed
+				layoutpolicy_horizontal = fixed
+				min = 4.0
+				max = 20.0
+				step = 2.0
+				wheelstep = -2.0
+				value = "[BlurThreshold.GetValue]"
+				onvaluechanged = "[BlurThreshold.SetValue]"
+			}		
+			editor_editbox = {
+				using = terraineditor_eb
+				size = { 30 20 }
+				text = "[BlurThreshold.GetValue]"
+				oneditingfinished = "[BlurThreshold.SetValueStr]"
+				layoutpolicy_vertical = fixed
+				layoutpolicy_horizontal = fixed
+			}
+			widget = {
+				layoutpolicy_horizontal = growing
+			}
+		}
+	}
+}
+
+hbox = {
+	name = "material_brush_options"
+
+	spacing = 4
+
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+
+	toolbox_checkbutton = {
+		name = "material_painter_toolbox_button"
+		shortcut = "material_painter_brush_tool"
+		tooltip = "Material Paint Brush"
+		checked = "[MaterialPaintingMode.IsPainterSelected]"
+		onclick = "[MaterialPaintingMode.SelectPainter]"
+		
+		toolbox_icon = {
+			texture = "gfx/tools/material/brush.png"
+		}
+	}
+
+	toolbox_checkbutton = {
+		name = "material_eraser_toolbox_button"
+		shortcut = "material_painter_eraser_tool"
+		tooltip = "Material Eraser"
+		checked = "[MaterialPaintingMode.IsEraserSelected]"
+		onclick = "[MaterialPaintingMode.SelectEraser]"
+		
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/eraser.png"
+		}
+	}
+
+	toolbox_checkbutton = {
+		name = "material_trimmer_toolbox_button"
+		shortcut = "material_painter_trimmer_tool"
+		tooltip = "Material Trimmer is erasing all materials that exceed the given limit."
+		checked = "[MaterialPaintingMode.IsTrimmerSelected]"
+		onclick = "[MaterialPaintingMode.SelectTrimmer]"
+		
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/trimmer.png"
+			size = { 32 32 }
+		}
+	}
+
+	toolbox_checkbutton = {
+		name = "material_blur_toolbox_button"
+		shortcut = "material_painter_blur_tool"
+		tooltip = "Blur all materials within the brush radius."
+		checked = "[MaterialPaintingMode.IsBlurSelected]"
+		onclick = "[MaterialPaintingMode.SelectBlur]"
+		
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/blur.png"
+			size = { 32 32 }
+		}
+	}
+
+	material_blur_slider = { 
+		datacontext = "[MaterialPaintingMode.AccessBlurThresholdCtx]"
+		visible = "[MaterialPaintingMode.IsBlurSelected]" 
+	}
+
+	tooloptions_divider = {
+	}
+
+	brush_widget = {
+		widgetid = "material_brush_settings"
+		onclick = "[BrushSettingsDropdown.Toggle]"
+		shortcut = "tooloption_1"
+		tooltip = "Brush Settings"
+
+		toolbox_icon = {
+			texture = "[BrushSettingsDropdown.Thumbnail]"
+		}
+	}
+
+	pixelsnap_checkbutton = {
+	}
+	
+	tooloptions_divider = {
+	}
+
+	toolbox_button = {
+		shortcut = "material_painter_error_focus"
+		onclick = "[MaterialPaintingMode.FocusCameraOnError]"
+		tooltip = "Focus camera on material error."
+		toolbox_icon = {
+			texture = "gfx/tools/focus_view_icon.dds"
+			size = { 32 32 }
+			visible = "[Not(MaterialPaintingMode.IsSearchingForError)]"
+		}
+		tooloptions_progress_spinner = {
+			size = { 32 32 }
+			visible = "[MaterialPaintingMode.IsSearchingForError]"
+		}
+	}
+
+	widget = {
+		name = "spacer"
+		layoutpolicy_horizontal = expanding
+	}
+}
+
+toolbox_checkbutton = {
+	name = "material_brush_toolbox_button"
+	shortcut = "brush_tool"
+	tooltip = "Material Brush"
+	checked = "[MaterialPaintingMode.IsSelected]"
+	
+	toolbox_icon = {
+		texture = "gfx/tools/material/brush.png"
+	}
+}
+
+widget = {
+	alwaystransparent = no
+	size = { 100% 100% }
+	name = "material_painter_viewport"
+	
+	tooltip_type = mouse
+	tooltip_widgetanchor = bottom|left
+	
+	tooltipwidget = {
+
+		flowcontainer = {
+
+			margin = { 8 4 }
+			
+			background = {
+				texture = "gfx/editor_gui/editor_layout_window.png"
+				spriteType = CorneredStretched
+				spriteborder = { 5 5 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				framesize = { 16 16 }
+			}
+
+			# Warning to user explaining why you can't paint right now.
+			tooloptions_textbox = {
+				visible = "[Not(MaterialPaintingMode.IsPaintingAllowed)]"
+				text = "#COLOR:{1,0,0} Select material first!#!"
+				autoresize = yes
+			}
+		}
+	}
+}

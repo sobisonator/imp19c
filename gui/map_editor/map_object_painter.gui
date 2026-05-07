@@ -1,0 +1,341 @@
+hbox = {
+	name = "map_object_painter_widget"
+	margin = { 2 2 }
+	spacing = 4
+
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+
+	################################################
+	## Brush
+	################################################
+	brush_widget = {
+		widgetid = "map_object_painter_settings"
+		onclick = "[BrushSettingsDropdown.Toggle]"
+		shortcut = "tooloption_1" 
+		tooltip = "Brush Settings"
+
+		toolbox_icon = {
+			texture = "[BrushSettingsDropdown.Thumbnail]"
+		}
+	}
+	
+	################################################
+	## Blend modes
+	################################################
+	tooloptions_divider = {}
+	tooloptions_checkbutton = {
+		text = "Add"
+		tooltip = "Additive blend mode"
+		onclick = "[MapObjectPainterOptions.SetBlendMode('Add')]"
+		checked = "[MapObjectPainterOptions.IsCurrentBlendMode('Add')]"
+		shortcut = "tool_mode_positive"
+	}
+	tooloptions_checkbutton = {
+		text = "Sub"
+		tooltip = "Subtractive blend mode"
+		onclick = "[MapObjectPainterOptions.SetBlendMode('Sub')]"
+		checked = "[MapObjectPainterOptions.IsCurrentBlendMode('Sub')]"
+		shortcut = "tool_mode_negative"
+	}
+	tooloptions_divider = {}
+	tooloptions_checkbutton = {
+		text = "Set"
+		tooltip = "Set blend mode"
+		onclick = "[MapObjectPainterOptions.SetBlendMode('Set')]"
+		checked = "[MapObjectPainterOptions.IsCurrentBlendMode('Set')]"
+		shortcut = "tooloption_4"
+	}
+	vbox = {
+		visible = "[MapObjectPainterOptions.IsCurrentBlendMode('Set')]"
+		editbox = {
+			using = terraineditor_label
+			size = { 100 10 }
+			text = "Value"
+			align = hcenter|nobaseline
+			layoutpolicy_horizontal = fixed
+		}
+		hbox = {
+			layoutpolicy_vertical = fixed
+			layoutpolicy_horizontal = preferred
+			
+			scrollbar = {
+				name = "set_blendmode_value_scrollbar"
+				direction = horizontal
+				size = { 100 14 }
+				min = 0.0
+				max = 1.0
+				step = 0.1
+				wheelstep = -0.1
+							
+				value = [MapObjectPainterOptions.GetPaintValue]
+				onvaluechanged = [MapObjectPainterOptions.SetPaintValue]
+		
+				layoutpolicy_vertical = fixed
+				layoutpolicy_horizontal = fixed
+				
+				track = {
+					using = editor_scrollbar_track
+				}
+				
+				slider = {
+					using = editor_scrollbar_slider
+				}
+				
+				dec_button = {
+					button = {
+						using = editor_scrollbar_button
+						upframe = 9
+						downframe = 10
+						overframe = 11
+						disableframe = 12
+					}
+				}
+				
+				inc_button = {
+					button = {
+						using = editor_scrollbar_button
+						upframe = 13
+						downframe = 14
+						overframe = 15
+						disableframe = 16
+					}
+				}
+			}		
+			editor_editbox = {
+				using = terraineditor_eb
+				name = "set_blendmode_value"
+				size = { 30 20 }
+				text = "[MapObjectPainterOptions.GetPaintValue]"
+				oneditingfinished = "[MapObjectPainterOptions.SetPaintValueStr]"
+				layoutpolicy_vertical = fixed
+				layoutpolicy_horizontal = fixed
+			}
+			widget = {
+				layoutpolicy_horizontal = growing
+			}
+		}
+	}
+	
+	################################################
+	## Mask opacity
+	################################################
+	tooloptions_divider = {}
+	preview_mask_opacity_slider = {}
+				
+	tooloptions_divider = {}
+
+	toolbox_button_big = {
+		text = "Full"
+		tooltip = "Full tree set"
+		onclick = "[GetVariableSystem.Set('tree_set', 'full')]"
+	}
+
+	toolbox_button_big = {
+		text = "Europe"
+		tooltip = "Europe tree set"
+		onclick = "[GetVariableSystem.Set('tree_set', 'europe')]"
+	}
+
+	widget = {
+		name = "spacer"
+		layoutpolicy_horizontal = expanding
+	}
+}
+
+toolbox_checkbutton = {
+	name = "map_object_painter_toolbox_button"
+	shortcut = "map_object_painter"
+	tooltip = "Map Object Painter"
+
+	checked = "[MapObjectPainterMode.IsSelected]"
+	
+	toolbox_icon = {
+		texture = "gfx/editor_terrain/map_object_painter.png"
+	}
+}
+
+widget = {
+	name = "masks_dockable"
+
+    layoutpolicy_vertical = expanding
+    layoutpolicy_horizontal = expanding
+
+	vbox = {
+		scrollarea = {
+			scrollbarpolicy_vertical = always_on
+			scrollbarpolicy_horizontal = always_off
+			layoutpolicy_vertical = expanding
+			layoutpolicy_horizontal = preferred
+			autoresizeviewport = yes
+			viewportwidget = {
+				widget = {
+					scissor = yes
+				}
+			}
+			scrollwidget = {
+				flowcontainer = {
+					datamodel = "[MapObjectPainter.MaskList]"
+					name = "mask_list"
+					direction = vertical
+					item = {
+						container = {
+							name = "mask_list_item"
+							container = {
+								name = "materials_list_item_select"
+								ignoreinvisible = yes
+								checkbutton = {
+									#visible = "[EqualTo_string(MapObjectMask.GetName, Localize('tree_pine_mask'))]"
+									#visible = "[GetVariableSystem.HasValue('tree_set', 'europe')]"
+									#visible = "[And(GetVariableSystem.HasValue('tree_set', 'europe'), Or(EqualTo_string(MapObjectMask.GetName, Localize('tree_pine_mask'), EqualTo_string(MapObjectMask.GetName, Localize('tree_oak_mask'))))]"
+									visible = "[And( GetVariableSystem.HasValue('tree_set', 'europe'), Or( EqualTo_string(MapObjectMask.GetName, Localize('tree_cypress_mask') ), Or( EqualTo_string(MapObjectMask.GetName, Localize('tree_pine_mask') ), EqualTo_string( MapObjectMask.GetName, Localize('tree_oak_mask') ) ) ) )]"
+
+									using = terraineditor_listitem
+									size = { 370 59 }
+									tooltip = "[MapObjectMask.GetName]"
+									layoutpolicy_horizontal = expanding
+									texture = "gfx/editor_gui/editor_layout_button.png"
+									
+									checked = "[MapObjectMask.IsSelected]"
+									onclick = "[MapObjectMask.SetSelected]"
+									
+									focuspolicy = click
+									
+									hbox = {
+										margin = { 8 8 }
+										spacing = 4
+
+										icon = {
+											size = { 95 45 }
+											texture = "gfx/editor_gui/black_bg.dds"
+										
+											icon = {
+												size = { 100% 100% }
+												texture = "[MapObjectMask.GetThumbnail]"
+												mirror = vertical
+											}
+										}
+
+										editbox = {
+											using = terraineditor_eb
+											text = "[MapObjectMask.GetName]"
+											layoutpolicy_horizontal = growing
+											size = { -1 20 }
+											margin_left = 8
+											align = left
+											oneditingfinished = "[MapObjectMask.SetName]"
+											text_validator = "[MapObjectMask.GetTextValidator]"
+										}
+									}
+								}
+								checkbutton = {
+									#name = "materials_list_item_select"
+									#visible = "[EqualTo_string(MapObjectMask.GetName, Localize('tree_pine_mask'))]"
+									visible = "[GetVariableSystem.HasValue('tree_set', 'full')]"
+									using = terraineditor_listitem
+									size = { 370 59 }
+									tooltip = "[MapObjectMask.GetName]"
+									layoutpolicy_horizontal = expanding
+									texture = "gfx/editor_gui/editor_layout_button.png"
+									
+									checked = "[MapObjectMask.IsSelected]"
+									onclick = "[MapObjectMask.SetSelected]"
+									
+									focuspolicy = click
+									
+									hbox = {
+										margin = { 8 8 }
+										spacing = 4
+
+										icon = {
+											size = { 95 45 }
+											texture = "gfx/editor_gui/black_bg.dds"
+										
+											icon = {
+												size = { 100% 100% }
+												texture = "[MapObjectMask.GetThumbnail]"
+												mirror = vertical
+											}
+										}
+
+										editbox = {
+											using = terraineditor_eb
+											text = "[MapObjectMask.GetName]"
+											layoutpolicy_horizontal = growing
+											size = { -1 20 }
+											margin_left = 8
+											align = left
+											oneditingfinished = "[MapObjectMask.SetName]"
+											text_validator = "[MapObjectMask.GetTextValidator]"
+										}
+									}
+								}
+							}
+							#checkbutton = {
+							#	using = terraineditor_listitem
+							#	size = { 370 59 }
+							#	tooltip = "[MapObjectMask.GetName]"
+							#	layoutpolicy_horizontal = expanding
+							#	texture = "gfx/editor_gui/editor_layout_button.png"
+								
+							#	checked = "[MapObjectMask.IsSelected]"
+							#	onclick = "[MapObjectMask.SetSelected]"
+								
+							#	focuspolicy = click
+								
+							#	hbox = {
+							#		margin = { 8 8 }
+							#		spacing = 4
+
+							#		icon = {
+							#			size = { 95 45 }
+							#			texture = "gfx/editor_gui/black_bg.dds"
+									
+							#			icon = {
+							#				size = { 100% 100% }
+							#				texture = "[MapObjectMask.GetThumbnail]"
+							#				mirror = vertical
+							#			}
+							#		}
+
+							#		editbox = {
+							#			using = terraineditor_eb
+							#			text = "[MapObjectMask.GetName]"
+							#			layoutpolicy_horizontal = growing
+							#			size = { -1 20 }
+							#			margin_left = 8
+							#			align = left
+							#			oneditingfinished = "[MapObjectMask.SetName]"
+							#			text_validator = "[MapObjectMask.GetTextValidator]"
+							#		}
+							#	}
+							#}
+						}
+					}
+				}
+			}
+			
+			scrollbar_vertical = {
+				using = editor_vertical_scrollbar
+			}
+			
+			scrollbar_horizontal = {
+				using = editor_horizontal_scrollbar
+			}
+		}
+	}
+}
+
+widget = {
+	name = "generator_list_dockable"
+
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+}
+
+widget = {
+	name = "generator_config_dockable"
+
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+}

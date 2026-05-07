@@ -1,0 +1,321 @@
+
+types "MaskPainterTypes" {
+
+	type mask_painter_entry = widget {
+		name = "mask_painter_entry"
+		size = { 100% 32 }
+
+		hbox = {
+			layoutpolicy_horizontal = preferred
+			layoutpolicy_vertical = fixed
+
+			tools_checkbutton = {
+				blockoverride "button" {
+					texture = "gfx/tools/lock_checkbox.dds"
+					framesize = { 64 64 }
+					tooltip = "Locking this mask will forbid doing any changes on the map to this layer."
+					checked = "[MaskManagerEntry.IsLocked]"
+					onclick = "[MaskManagerEntry.SetLocked( Not( MaskManagerEntry.IsLocked ) )]"
+				}
+			}
+
+			toolbox_checkbutton = {
+				margin = { 8 4 }
+				size = { 0 32 }
+				fontsize = 12
+				align = left|nobaseline
+				layoutpolicy_horizontal = preferred
+				layoutpolicy_vertical = fixed
+				text = "[MaskManagerEntry.GetKey]"
+				checked = "[MaskManagerEntry.IsSelected]"
+				onclick = "[MaskManagerEntry.SetSelected( Not( MaskManagerEntry.IsSelected ) )]"
+			}
+		}
+	}
+
+}
+
+hbox = {
+	name = "mask_painter_options"
+
+	margin = { 2 2 }
+	spacing = 4
+
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+
+	toolbox_checkbutton = {
+		shortcut = "mask_painter_select_map_content"
+		tooltip = "Territory selection mode."
+		checked = "[MaskPainterTool.IsMapContentSelectionMode]"
+		onclick = "[MaskPainterTool.SetMapContentSelectionMode( '(bool)yes' )]"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/select_map_content.dds"
+			size = { 24 24 }
+		}
+	}
+
+	toolbox_checkbutton = {
+		shortcut = "mask_painter_brush_tool"
+		tooltip = "Mask painting mode."
+		checked = "[MaskPainterTool.IsPaintMode]"
+		onclick = "[MaskPainterTool.SetPaintMode]"
+		toolbox_icon = {
+			texture = "gfx/tools/material/brush.png"
+		}
+	}
+
+	toolbox_checkbutton = {
+		name = "mask_painter_eraser_toolbox_button"
+		shortcut = "mask_painter_eraser_tool"
+		tooltip = "Mask erasing mode."
+		checked = "[MaskPainterTool.IsEraserMode]"
+		onclick = "[MaskPainterTool.SetEraserMode]"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/eraser.png"
+		}
+	}
+
+	tooloptions_divider = {}
+
+	brush_widget = {
+		widgetid = "mask_painter_brush_settings"
+		onclick = "[BrushSettingsDropdown.Toggle]"
+		visible = "[Not(MaskPainterTool.IsMapContentSelectionMode)]"
+		shortcut = "tooloption_1"
+		tooltip = "Brush Settings"
+		toolbox_icon = {
+			texture = "[BrushSettingsDropdown.Thumbnail]"
+		}
+	}
+
+	pixelsnap_checkbutton = { 
+		visible = "[Not(MaskPainterTool.IsMapContentSelectionMode)]" 
+	}
+
+	tooloptions_divider = { 
+		visible = "[Not(MaskPainterTool.IsMapContentSelectionMode)]"
+	}
+
+	preview_mask_opacity_slider = {}
+
+	tooloptions_divider = { }
+
+	widget = {
+		name = "spacer"
+		layoutpolicy_horizontal = expanding
+	}
+}
+
+toolbox_checkbutton = {
+	name = "mask_painter_toolbox_button"
+	shortcut = "mask_painter_tool"
+	tooltip = "Mask Painter Tool"
+	checked = "[MaskPainterMode.IsSelected]"
+	toolbox_icon = {
+		texture = "gfx/editor_terrain/mask_painting_tool_icon.dds"
+		size = { 26 26 }
+	}
+}
+
+
+widget = {
+	alwaystransparent = no
+	size = { 100% 100% }
+	name = "mask_painter_viewport"
+ 
+	map_editor_viewport_tooltip = {
+		datacontext = "[MaskPainterViewport.GetTooltip]"
+	}
+}
+
+vbox = {
+	name = "mask_painter_manager"
+
+	using = tools_spacing
+
+	layoutpolicy_horizontal = preferred
+	layoutpolicy_vertical = expanding
+
+	editor_frame = {
+		blockoverride "label" { text = "Actions:" }
+		blockoverride "content" {
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				using = tools_spacing
+
+				tools_button = {
+					blockoverride "button" {
+						tooltip = "Add new mask."
+						onclick = "[MaskPainterManager.OnNew]"
+						shortcut = "mask_painter_new"
+					}
+					blockoverride "icon" { texture = "gfx/editor_terrain/mask_add_icon.dds" }
+				}
+				tools_button = {
+					blockoverride "button" {
+						tooltip = "Clone selected mask."
+						enabled = "[MaskPainterManager.IsAnyMaskSelected]"
+						onclick = "[MaskPainterManager.OnClone]"
+						shortcut = "mask_painter_clone"
+					}
+					blockoverride "icon" { texture = "gfx/editor_terrain/mask_clone_icon.dds" }
+				}
+				tools_button = {
+					blockoverride "button" {
+						tooltip = "Rename selected mask."
+						enabled = "[MaskPainterManager.CanModify]"
+						onclick = "[MaskPainterManager.OnRename]"
+						shortcut = "mask_painter_rename"
+					}
+					blockoverride "icon" { texture = "gfx/editor_terrain/mask_rename_icon.dds" }
+				}
+				tools_button = {
+					blockoverride "button" {
+						tooltip = "Clear the selected mask."
+						enabled = "[MaskPainterManager.CanModify]"
+						onclick = "[MaskPainterManager.OnClear]"
+						shortcut = "mask_painter_clear"
+					}
+					blockoverride "icon" { texture = "gfx/editor_terrain/mask_clear_icon.dds" }
+				}
+				tools_button = {
+					blockoverride "button" {
+						tooltip = "Delete selected mask."
+						enabled = "[MaskPainterManager.IsAnyMaskSelected]"
+						onclick = "[MaskPainterManager.OnDelete]"
+						shortcut = "mask_painter_delete"
+					}
+					blockoverride "icon" { texture = "gfx/editor_terrain/mask_delete_icon.dds" }
+				}
+				editbox = {
+					margin = { 4 2 }
+					using = terraineditor_label
+					size = { 60 24 }
+					text = "Filters:"
+					fontsize = 12
+					align = right|nobaseline
+					layoutpolicy_horizontal = fixed
+					layoutpolicy_vertical = fixed
+					tooltipwidget = { using = dockable_tooltip }
+				}
+				editor_textinput = {
+					size = { 0 24 }
+					layoutpolicy_horizontal = preferred
+					layoutpolicy_vertical = fixed
+					fontsize = 12
+					text = "[MaskPainterManager.GetFilter]"
+					oneditingfinished = "[MaskPainterManager.SetFilter]"
+					align = left|nobaseline
+					tooltip = "Search filter. Use | sign to separate multiple search keys."
+					tooltipwidget = { using = dockable_tooltip }
+				}
+				tooloptions_button = {
+					text = "X"
+					fontsize = 18
+					size = { 24 24 }
+					tooltip = "Clear filter."
+					tooltipwidget = { using = dockable_tooltip }
+					onclick = "[MaskPainterManager.ClearFilter]"
+				}
+			}
+
+			#hbox = {
+			#	layoutpolicy_horizontal = expanding
+			#	tooloptions_button = {
+			#		text = "Rename"
+			#		size = { 32 32 }
+			#		tooltip = "Rename currently selected mask."
+			#		tooltipwidget = { using = dockable_tooltip }
+			#		enabled = "[MaskPainterManager.IsAnyMaskSelected]"
+			#		onclick = "[MaskPainterManager.OnRename]"
+			#	}
+			#	dummy_fill_up = {}
+			#}
+		}
+	}
+
+	scrollarea = {
+		name = "scrollarea_entries"
+		scrollbarpolicy_vertical = always_on
+		scrollbarpolicy_horizontal = always_off
+
+		size = { 0 200 }
+		layoutpolicy_vertical = expanding
+		layoutpolicy_horizontal = preferred
+
+		autoresizeviewport = yes
+
+		viewportwidget = {
+			widget = {
+				scissor = yes
+			}
+		}
+		
+		scrollbar_vertical = {
+			using = editor_vertical_scrollbar
+		}
+		
+		scrollbar_horizontal = {
+			using = editor_horizontal_scrollbar
+		}
+		
+		scrollwidget = {
+			fixedgridbox = {
+				name = "mask_entries_gridbox"
+				alwaystransparent = no
+				layoutpolicy_horizontal = expanding
+				addcolumn = 100%
+				addrow = 34
+			}
+		}
+	}
+
+	vbox = {
+		visible = "[MaskPainterManager.IsAnyMaskSelected]"
+		layoutpolicy_horizontal = expanding
+		editor_frame = {
+			blockoverride "label" { text = "Mask Settings:" }
+			blockoverride "content" {
+				using = tools_spacing
+				hbox = {
+					margin_left = 8
+					checkbutton = {
+						margin = { 4 4 }
+						using = editor_checkbutton
+						checked = "[MaskPainterManager.IsSelectedMaskUser]"
+						onclick = "[MaskPainterManager.ToggleIsMaskUser]"
+						tooltip = "User Masks are saved in the User Folder and are not shared."
+					}
+					editor_textbox = {
+						align = top
+						fontsize = 12
+						autoresize = yes
+						margin = { 8 4 }
+						text = "User Mask"
+						layoutpolicy_horizontal = fixed
+						layoutpolicy_vertical = preferred
+					}
+				}
+			}
+		}
+
+		editor_frame = {
+			blockoverride "label" { text = "Notes:" }
+			blockoverride "content" {
+				using = tools_spacing
+				editor_editbox = {
+					margin_left = 8
+					using = terraineditor_eb
+					align = left|top
+					size = { 0 120 }
+					multiline = yes
+					layoutpolicy_vertical = fixed
+					layoutpolicy_horizontal = preferred
+					text = "[MaskPainterManager.GetSelectedMaskDesc]"
+					oneditingfinished = "[MaskPainterManager.SetSelectedMaskDesc]"
+				}
+			}
+		}
+	}
+}

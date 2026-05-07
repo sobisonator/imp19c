@@ -1,0 +1,195 @@
+
+types "MapObjectsMapContent" {
+
+	type map_objects_map_content_list = map_content_list {
+
+		# Nudger specific toolbar buttons
+		blockoverride "toolbar" {
+			tooloptions_button = {
+				size = { 32 32 }
+				tooltip = "Automatically place all objects for currently selected territories. Only territories that are not marked as #COLOR:{1.0,1.0,0.6} complete#! will be affected."
+				tooltipwidget = { using = dockable_tooltip }
+				onclick = "[NudgerMapContentGui.AutoNudgeSelection]"
+				enabled = "[And( NudgerMapContentGui.IsAutoNudgingSupported, And( GreaterThan_int32( MapContentSelectorGui.GetSelectedEntriesCount,'(int32)0'), NudgerMapContentGui.IsAutoNudgingReady ) )]"
+				toolbox_icon = {
+					visible = "[NudgerMapContentGui.IsAutoNudgingReady]"
+					texture = "gfx/editor_terrain/randomize.dds"
+					size = { 32 32 }
+				}
+				tooloptions_progress_spinner = {
+					visible = "[And( NudgerMapContentGui.IsAutoNudgingSupported, Not( NudgerMapContentGui.IsAutoNudgingReady ) )]"
+					size = { 32 32 }
+					tooltipwidget = { using = dockable_tooltip }
+					tooltip = "Auto nudging is not available yet, please wait... #COLOR:{1.0,1.0,0.6} [NudgerMapContentGui.GetAutoNudgingReadyProgress]% #!"
+				}
+				shortcut = "mapobjects_tool_auto_nudge"
+			}
+
+			toolbox_checkbutton = {
+				size = { 32 32 }
+				tooltip = "Visualize the random placement mask for currently selected map objects."
+				tooltipwidget = { using = dockable_tooltip }
+				checked = "[NudgerMapContentGui.IsAutoNudgePreviewEnabled]"
+				onclick = "[NudgerMapContentGui.SetAutoNudgePreviewEnabled(Not(NudgerMapContentGui.IsAutoNudgePreviewEnabled))]"
+				toolbox_icon = {
+					texture = "gfx/editor_terrain/randomize_show.dds"
+					size = { 32 32 }
+				}
+			}
+
+			toolbox_checkbutton = {
+				size = { 32 32 }
+				tooltip = "Toggle visibility of auto nudging game specific settings."
+				tooltipwidget = { using = dockable_tooltip }
+				checked = "[NudgerMapContentGui.IsAutoNudgingSettingsOpen]"
+				onclick = "[NudgerMapContentGui.SetAutoNudgingSettingsOpen(Not(NudgerMapContentGui.IsAutoNudgingSettingsOpen))]"
+				toolbox_icon = {
+					texture = "gfx/editor_terrain/settings.dds"
+					size = { 32 32 }
+				}
+			}
+		}
+
+		blockoverride "list_extension" {
+			editor_frame = {
+				name = "mapobjects_propertylist"
+				visible = "[NudgerMapContentGui.IsAutoNudgingSettingsOpen]" 
+				blockoverride "label" { text = "Game specific properties:" }
+				blockoverride "content" {
+					scrollarea = {
+						name = "scrollarea_selected"
+						scrollbarpolicy_vertical = always_on
+						scrollbarpolicy_horizontal = always_off
+						size = { 0 180 }
+						layoutpolicy_vertical = expanding
+						layoutpolicy_horizontal = preferred
+						autoresizeviewport = yes
+						viewportwidget = {
+							widget = {
+								scissor = yes
+							}
+						}
+						scrollbar_vertical = {
+							using = editor_vertical_scrollbar
+						}
+						scrollbar_horizontal = {
+							using = editor_horizontal_scrollbar
+						}
+						scrollwidget = {
+							vbox = {
+								name = "list"
+							}
+						}
+					}
+				}
+			}
+
+			scrollarea = {
+				name = "scrollarea_selected"
+				scrollbarpolicy_vertical = always_on
+				scrollbarpolicy_horizontal = always_off
+
+				size = { 0 0 }
+				layoutpolicy_vertical = expanding
+				layoutpolicy_horizontal = preferred
+
+				autoresizeviewport = yes
+
+				viewportwidget = {
+					widget = {
+						scissor = yes
+					}
+				}
+				
+				scrollbar_vertical = {
+					using = editor_vertical_scrollbar
+				}
+				
+				scrollbar_horizontal = {
+					using = editor_horizontal_scrollbar
+				}
+				
+				scrollwidget = {
+					fixedgridbox = {
+						name = "layer_selected_entries_gridbox"
+						alwaystransparent = no
+						layoutpolicy_horizontal = expanding
+						addcolumn = 100%
+						addrow = 28
+					}
+				}
+			}
+		}
+	}
+
+	type map_objects_map_content_entry = map_content_entry_widget {
+		name = "map_objects_map_content_entry"
+		blockoverride "checkbutton" { 
+			toolbox_icon = { 
+				parentanchor = right|top
+				texture = "gfx/editor_terrain/progress_error.dds"
+				size = { 24 24 }
+				visible = "[MapContentEntryDesc.ContainsErrors]"
+				tooltip = "Failed to auto-spawn some objects in this territory bounds."
+				tooltipwidget = { using = dockable_tooltip }
+			}
+		}
+	}
+
+
+	type map_objects_entry_related_object = widget {
+		name = "map_objects_entry_related_object"
+		layoutpolicy_horizontal = preferred
+		layoutpolicy_vertical = fixed
+		size = { 100% 24 }
+
+		hbox = {
+			layoutpolicy_horizontal = preferred
+			layoutpolicy_vertical = fixed
+			size = { 0 24 }
+
+			checkbutton = {
+				using = terraineditor_base
+				size = { 24 24 }
+				layoutpolicy_horizontal = fixed
+				layoutpolicy_vertical = fixed
+				gfxtype = checkbuttongfx
+				shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+				texture = "gfx/editor_terrain/padlock.png"
+				framesize = { 16 16 }
+				checked = "[NudgerLayerEntryMapObjectDesc.IsLocked]"
+				onclick = "[NudgerLayerEntryMapObjectDesc.SetLocked(Not(NudgerLayerEntryMapObjectDesc.IsLocked))]"
+				tooltip = "Lock ability of moving this object."
+			}
+
+			toolbox_checkbutton = {
+				margin = { 8 4 }
+				size = { 0 24 }
+				layoutpolicy_horizontal = preferred
+				layoutpolicy_vertical = fixed
+				fontsize = 12
+				align = left|nobaseline
+				text = "[NudgerLayerEntryMapObjectDesc.GetName]"
+				checked = "[NudgerLayerEntryMapObjectDesc.IsSelected]"
+				onclick = "[NudgerLayerEntryMapObjectDesc.Select]"
+
+				toolbox_icon = { 
+					parentanchor = right|top
+					texture = "gfx/editor_terrain/progress_error.dds"
+					size = { 24 24 }
+					visible = "[NudgerLayerEntryMapObjectDesc.IsAutoNudgingError]"
+					tooltip = "Failed to auto-spawn this object. Probably insufficient free surface."
+					tooltipwidget = { using = dockable_tooltip }
+				}
+			}
+		}
+	}
+
+}
+
+vbox = {
+	name = "mapobjects_mapcontent"
+	layoutpolicy_horizontal = preferred
+	layoutpolicy_vertical = expanding
+	map_objects_map_content_list = {}
+}

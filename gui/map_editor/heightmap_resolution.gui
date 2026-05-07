@@ -1,0 +1,370 @@
+hbox = {
+	name = "heightmap_resolution_widget"
+	margin = { 2 2 }
+	spacing = 4
+
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+
+	tooloptions_textbox = {
+		text = "hr_resolution"
+	}
+
+	tooloptions_button = {
+		text = "+"
+		tooltip = "hr_increase_resolution_tt"
+		onclick = "[HeightmapResolution.Increase]"
+		shortcut = "heightmap_resolution_tool_increase"
+	}
+
+	tooloptions_button = {
+		text = "-"
+		tooltip = "hr_decrease_resolution_tt"
+		onclick = "[HeightmapResolution.Decrease]"
+		shortcut = "heightmap_resolution_tool_decrease"
+	}
+
+	tooloptions_divider = { }
+
+	tooloptions_textbox = {
+		text = "hr_selection"
+	}
+
+	tooloptions_button = {
+		text = "hr_all"
+		tooltip = "hr_select_all_tt"
+		onclick = "[HeightmapResolution.SelectAll]"
+		shortcut = "selection_all"
+	}
+
+	tooloptions_button = {
+		text = "hr_clr"
+		tooltip = "hr_clear_selection_tt"
+		onclick = "[HeightmapResolution.ClearSelection]"
+		shortcut = "selection_clear"
+	}
+
+	tooloptions_button = {
+		text = "hr_inv"
+		tooltip = "hr_invert_selection_tt"
+		onclick = "[HeightmapResolution.InvertSelection]"
+		shortcut = "selection_invert"
+	}
+
+	tooloptions_button = {
+		text = "hr_par"
+		tooltip = "hr_parametric_selection_tt"
+		name = "parametric_select_button"
+		widgetid = "parametric_select_button"
+		onclick = "[ParametricSelect.Toggle]"
+	}
+
+	editor_checkbutton = {
+		blockoverride "checkbutton" {
+			name = "rectangle_select_cb"
+			checked = "[HeightmapResolution.GetRectangleSelect]"
+		}
+
+		blockoverride "label" {
+			using = tooloptions_font
+			text = "hr_rectangle_select"
+		}
+	}
+	
+	tooloptions_divider = {
+	}
+
+	tooloptions_textbox = {
+		text = "hr_heightmap_bit_depth"
+	}
+
+	tooloptions_checkbutton = {
+		text = "8"
+		tooltip = "hr_store_as_8_bit_heightmap_tt"
+		name = "heightmap_8_bit_button"
+		onclick = "[HeightmapResolution.Set8Bit]"
+		checked = "[HeightmapResolution.Is8Bit]"
+	}
+	
+	tooloptions_checkbutton = {
+		text = "16"
+		tooltip = "hr_store_as_16_bit_heightmap_tt"
+		name = "heightmap_16_bit_button"
+		onclick = "[HeightmapResolution.Set16Bit]"
+		checked = "[HeightmapResolution.Is16Bit]"
+	}
+	
+	tooloptions_divider = {
+	}
+
+	tooloptions_button = {
+		text = "hr_repack"
+		widgetid = "repack_button"
+		tooltip = "hr_repack_heightmap_tt"
+		onclick = "[RepackWindow.Toggle]"
+	}
+
+	tooloptions_divider = {
+	}
+
+	toolbox_button = {
+		shortcut = "reload_heightmap"
+		onclick = "[HeightmapResolution.ReloadHeightmap]"
+		tooltip = "hr_reload_heightmap_tt"
+
+		shortcut = "reload_heightmap"
+
+		toolbox_icon = {
+			texture = "gfx/tools/material/reload_heightmap.png"
+		}
+	}
+
+	widget = {
+		name = "spacer"
+		layoutpolicy_horizontal = expanding
+	}
+
+	tooloptions_textbox = {
+		text = "hr_selected_count"
+		layoutpolicy_horizontal = growing
+	}
+	
+	tooloptions_divider = {
+	}
+
+	tooloptions_textbox = {
+		text = "hr_texture_memory_required"
+		layoutpolicy_horizontal = growing
+	}
+}
+
+tooloptions_dropdown = {
+	name = "parametric_select_window"
+	visible = no
+
+	size = { 320 120 }
+
+	attachto = {
+		widgetid = "parametric_select_button"
+		parentanchor = bottom|left
+		widgetanchor = top|left
+		inherit_visibility = no
+	}
+
+	blockoverride "content"
+	{
+		spacing = 8
+
+		hbox = {
+			spacing = 8
+
+			layoutpolicy_horizontal = expanding
+
+			editor_checkbutton = {
+				blockoverride "checkbutton" {
+					name = "height_range_cb"
+					checked = "[ParametricSelect.IsHeightRangeEnabled]"
+				}
+
+				blockoverride "label" {
+					text = "hr_height_range"
+					using = tooloptions_font
+				}
+			}
+
+			widget = {
+				name = "spacer"
+				layoutpolicy_horizontal = expanding
+			}
+
+			tooloptions_textinput = {
+				text = "0"
+				size = { 50 24 }
+				enabled = "[ParametricSelect.IsHeightRangeEnabled]"
+				ontextchanged = "[ParametricSelect.SetHeightRangeMin]"
+			}
+
+			tooloptions_textbox = {
+				text = "-"
+				autoresize = yes
+				layoutpolicy_vertical = fixed
+				layoutpolicy_horizontal = fixed
+			}
+
+			tooloptions_textinput = {
+				text = "255"
+				size = { 50 24 }
+				enabled = "[ParametricSelect.IsHeightRangeEnabled]"
+				ontextchanged = "[ParametricSelect.SetHeightRangeMax]"
+			}
+		}			
+
+		hbox = {
+			spacing = 8
+			layoutpolicy_horizontal = expanding
+
+			editor_checkbutton = {
+				blockoverride "checkbutton" {
+					name = "height_delta_cb"
+					checked = "[ParametricSelect.IsHeightDeltaEnabled]"
+				}
+
+				blockoverride "label" {
+					text = "hr_height_delta"
+					using = tooloptions_font
+				}
+			}
+
+			widget = {
+				name = "spacer"
+				layoutpolicy_horizontal = expanding
+			}
+
+			tooloptions_textinput = {
+				text = "-1"
+				size = { 50 24 }
+				enabled = "[ParametricSelect.IsHeightDeltaEnabled]"
+				ontextchanged = "[ParametricSelect.SetHeightDeltaMin]"
+			}
+
+			tooloptions_textbox = {
+				text = "-"
+				autoresize = yes
+				layoutpolicy_vertical = fixed
+				layoutpolicy_horizontal = fixed
+			}
+
+			tooloptions_textinput = {
+				text = "-1"
+				size = { 50 24 }
+				enabled = "[ParametricSelect.IsHeightDeltaEnabled]"
+				ontextchanged = "[ParametricSelect.SetHeightDeltaMax]"
+			}
+		}
+
+		tooloptions_button = {
+			text = "Select"
+			size = { 0 32 }
+			layoutpolicy_vertical = fixed
+			layoutpolicy_horizontal = expanding
+			enabled = "[Or(ParametricSelect.IsHeightRangeEnabled, ParametricSelect.IsHeightDeltaEnabled)]"
+			onclick = "[ParametricSelect.Select]"
+		}
+	}
+}
+
+tooloptions_dropdown = {
+	name = "repack_window"
+	visible = no
+	size = { 220 172 }
+
+	attachto = {
+		widgetid = "repack_button"
+		parentanchor = bottom|left
+		widgetanchor = top|left
+		inherit_visibility = no
+	}
+
+	blockoverride "content" {
+		spacing = 8
+
+		tooloptions_textbox = {
+			text = "hr_tile_size"
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = fixed
+		}
+
+		hbox = {
+			spacing = 15
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = fixed
+			alwaystransparent = no
+
+			editor_checkbutton = {
+				blockoverride "checkbutton" {
+					name = "resolution_0"
+					onclick = "[RepackWindow.SetTileSize('33')]"
+					checked = yes
+				}
+
+				blockoverride "label" {
+					text = "33x33"
+					using = tooloptions_font
+				}
+			}
+
+			editor_checkbutton = {
+				blockoverride "checkbutton" {
+					name = "resolution_1"
+					onclick = "[RepackWindow.SetTileSize('65')]"
+
+				}
+
+				blockoverride "label" {
+					text = "65x65"
+					using = tooloptions_font
+				}
+			}
+
+			editor_checkbutton = {
+				blockoverride "checkbutton" {
+					name = "resolution_2"
+					onclick = "[RepackWindow.SetTileSize('129')]"
+				}
+
+				blockoverride "label" {
+					text = "129x129"
+					using = tooloptions_font
+				}
+			}
+			widget = { layoutpolicy_horizontal = expanding }
+		}
+		
+		hbox = {
+			spacing = 8
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = fixed
+			
+			editor_checkbutton = {
+				blockoverride "checkbutton" {
+					name = "resolution_0"
+					onclick = "[RepackWindow.ToggleShouldWrapX]"
+					checked = "[RepackWindow.ShouldWrapX]"
+				}
+			
+				blockoverride "label" {
+					text = "hr_wrap_x"
+					using = tooloptions_font
+				}
+			}
+			widget = { layoutpolicy_horizontal = expanding }
+		}
+
+		tooloptions_textbox = {
+			text = "hr_warning_repacking"
+			multiline = yes
+			autoresize = yes
+			maximumsize = { 220 -1 }
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = fixed
+		}
+
+		tooloptions_button = {
+			size = { 128 32 }
+			text = "hr_repack"
+			onclick = "[RepackWindow.Repack]"
+			layoutpolicy_horizontal = expanding
+		}
+	}
+}
+
+toolbox_checkbutton = {
+	name = "heightmap_resolution_toolbox_button"
+	shortcut = "heightmap_resolution_tool"
+	tooltip = "hr_heightmap_resolution"
+	checked = "[TerrainToolButton.IsSelected]"
+	
+	toolbox_icon = {
+		texture = "gfx/tools/material/grid.png"
+	}
+}

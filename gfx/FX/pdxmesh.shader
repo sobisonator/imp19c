@@ -980,20 +980,34 @@ Effect city_building_snowShadow
 	RasterizerState = ShadowRasterizerState
 }
 
+### separate_building_snow ###
 Effect separate_building_snow
 {
 	VertexShader = "VS_standard"
 	PixelShader = "PS_standard"
 	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "UNIQUE" "ENABLE_SNOW" }
 }
-
-Effect separate_building_snow_snowShadow
+Effect separate_building_snowShadow
 {
 	VertexShader = "VertexPdxMeshStandardShadow"
 	PixelShader = "PixelPdxMeshStandardShadow"
 
 	RasterizerState = ShadowRasterizerState
 }
+Effect separate_building_snow_mapobject
+{
+	VertexShader = "VS_mapobject"
+	PixelShader = "PS_standard"
+	Defines = { "PDX_MESH_SNAP_VERTICES_TO_TERRAIN" "UNIQUE" "ENABLE_SNOW" }
+}
+Effect separate_building_snowShadow_mapobject
+{
+	VertexShader = "VS_jomini_mapobject_shadow"
+	PixelShader = "PS_jomini_mapobject_shadow"
+
+	RasterizerState = ShadowRasterizerState
+}
+
 
 Effect separate_building_bordercolor_snow
 {

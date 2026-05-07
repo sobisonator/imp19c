@@ -1,0 +1,348 @@
+template terraineditor_base
+{
+	tooltipwidget = {
+		using = editor_tooltip
+	}
+}
+
+template terraineditor_font
+{
+	font = "standard_cw_font"
+	fontsize = 12
+	fontcolor = { 1 1 1 1 }
+}
+
+template terraineditor_button
+{
+	using = editor_button
+	using = terraineditor_font
+	size = { 0 30 }
+}
+
+template terraineditor_label
+{
+	using = terraineditor_font
+	align = left
+	size = { 0 30 }
+	layoutpolicy_vertical = fixed
+	layoutpolicy_horizontal = preferred
+}
+
+template terraineditor_windowtitle
+{
+	using = terraineditor_label
+	autoresize = no
+	size = { 0 30 }
+	align = left|nobaseline
+	fontsize = 12
+}
+
+template terraineditor_checkbutton
+{
+	using = terraineditor_font
+	gfxtype = checkbuttongfx
+	shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+	texture = "gfx/editor_gui/editor_button.dds"
+	framesize = { 16 16 }
+	spriteType = CorneredStretched
+	spriteborder = { 4 4 }
+}
+
+template terraineditor_listitem
+{
+	using = terraineditor_checkbutton
+	using = terraineditor_base
+}
+
+template terraineditor_toolbutton
+{
+	using = terraineditor_base
+	size = { 32 32 }
+	layoutpolicy_horizontal = fixed
+}
+
+template menu_icon
+{
+	size = { 18 18 }
+	parentanchor = vcenter|hcenter
+}
+
+template terraineditor_eb
+{
+	using = terraineditor_font
+	alwaystransparent = no
+	align = right|nobaseline
+	margin = { 0 4 }
+	margin_left = 4
+	margin_right = 4
+	
+	background = {
+		margin = { 0 0 }
+		margin_left = -4
+		margin_top = 0
+		texture = "gfx/editor_gui/editor_field.dds"
+		spriteType = CorneredStretched
+		spriteborder = { 4 4 }
+		shaderfile = "gfx/FX/pdxgui_default.shader"
+	}
+}
+
+template tools_spacing {
+	margin_left = 8
+	margin_right = 8
+	margin_top = 8
+	margin_bottom = 8
+}
+
+# All rectangle buttons should follow this standard
+
+types "MapEditorStandardTypes" {
+
+	type tools_button = editor_toolbar_button {
+		size = { 32 32 }
+		block "button" {}
+		toolbox_icon = {
+			block "icon" {}
+			size = { 26 26 }
+		}
+	}
+
+	type tools_checkbutton = toolbox_checkbutton {
+		size = { 32 32 }
+		gfxtype = checkbuttongfx
+		shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+		block "button" {}
+		#tooltipwidget = { using = dockable_tooltip }
+	}
+
+	type map_editor_viewport_tooltip = widget {
+		size = { 100% 100% }
+		tooltip_enabled = "[GuiEditorTooltip.IsVisible]"
+		tooltip_type = mouse
+		tooltip_widgetanchor = bottom|left
+		tooltipwidget = {
+			flowcontainer = {
+				direction = vertical
+				spacing = 4
+				margin = { 4 4 }
+				background = {
+					texture = "gfx/editor_gui/editor_layout_window.png"
+					spriteType = CorneredStretched
+					spriteborder = { 5 5 }
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					framesize = { 16 16 }
+				}
+				tooloptions_textbox = {
+					visible = "[GuiEditorTooltip.HasTitle]"
+					text = "me_title"
+				}
+				tooloptions_textbox = {
+					visible = "[GuiEditorTooltip.HasDescription]"
+					text = "[GuiEditorTooltip.GetDescription]"
+				}
+			}
+		}
+ 	}
+
+ 	type terrain_options_toolbar = widget {
+
+		layoutpolicy_vertical = expanding
+		layoutpolicy_horizontal = expanding
+
+		hbox = {
+			spacing = 4
+
+			layoutpolicy_vertical = preferred
+			layoutpolicy_horizontal = expanding
+
+	        toolbox_checkbutton = {
+	            tooltip = "me_camera_limits"
+	            shortcut = "camera_toggle_limits"
+	            checked = "[IsCameraRestrictionsEnabled]"
+	            onclick = "[SetCameraRestrictionsEnabled(Not(IsCameraRestrictionsEnabled))]"
+	            toolbox_icon = {
+	                texture = "gfx/tools/camera_limits_icon.dds"
+	                size = { 32 32 }
+	            }
+	        }
+
+	        toolbox_checkbutton = {
+	            tooltip = "me_toggle_colormap"
+	            shortcut = "terrain_toggle_colormap"
+	            checked = "[MapEditor.GetTerrainColorMapVisibility]"
+	            onclick = "[MapEditor.ToggleTerrainColorMapVisibility()]"
+	            toolbox_icon = {
+	                texture = "gfx/tools/material/terrain_colormap_overlay.png"
+	                size = { 32 32 }
+	            }
+	        }
+
+			block "tools" {}
+
+			widget = {
+				name = "spacer"
+
+				layoutpolicy_vertical = expanding
+				layoutpolicy_horizontal = expanding
+			}
+		}
+	}
+}
+
+hbox = {
+	name = "editor_inputthief"
+}
+
+widget = {
+	name = "menu_widget"
+
+	layoutpolicy_vertical = expanding
+	layoutpolicy_horizontal = expanding
+
+	hbox = {
+		spacing = 4
+	
+		layoutpolicy_vertical = preferred
+		layoutpolicy_horizontal = expanding
+
+		toolbox_button = {
+			name = "save_btn"
+			shortcut = "save"
+			enabled = "[MapEditor.IsSavable]"
+			onclick = "[MapEditor.Save]"
+			tooltip = "me_save_tt"
+			
+			toolbox_icon = {
+				texture = "gfx/tools/material/save.png"
+			}
+		}
+
+		toolbox_button = {
+			shortcut = "save_as"
+			onclick = "[MapEditor.SaveAs]"
+			tooltip = "me_save_as_tt"
+			
+			toolbox_icon = {
+				texture = "gfx/tools/material/save_as.png"
+			}
+		}
+
+		toolbox_button = {
+            shortcut = "save_all"
+            onclick = "[MapEditor.SaveAll]"
+            tooltip = "me_save_all_tt"
+
+            toolbox_icon = {
+                texture = "gfx/tools/material/save_all.png"
+            }
+        }
+		
+		toolbox_button = {
+			shortcut = "export_workspace"
+			onclick = "[MapEditor.ExportTool]"
+			tooltip = "me_open_export_tool_tt"
+			
+			toolbox_icon = {
+				texture = "gfx/tools/material/export_btn.dds"
+			}
+		}
+
+		toolbox_button = {
+			shortcut = "import_workspace"
+			onclick = "[MapEditor.ImportTool]"
+			tooltip = "me_open_import_tool_tt"
+			
+			toolbox_icon = {
+				texture = "gfx/tools/material/import_btn.dds"
+			}
+		}
+
+		#toolbox_button = {
+		#	shortcut = "import_heightmap"
+		#	onclick = "[MapEditor.ImportHeightmap]"
+		#	tooltip = "me_import_heightmap_tt"
+
+		#	toolbox_icon = {
+		#		texture = "gfx/tools/material/terrain_import.png"
+		#	}
+		#}
+
+		#toolbox_button = {
+		#	shortcut = "import_detail_mask"
+		#	onclick = "[MapEditor.ImportDetailMaks]"
+		#	tooltip = "me_import_material_masks_tt"
+
+		#	toolbox_icon = {
+		#		texture = "gfx/tools/material/mask_import.png"
+		#	}
+		#}
+
+		toolbox_button = {
+			name = "settings_btn"
+			onclick = "[ExecuteConsoleCommand('settings')]"
+			tooltip = "me_settings_tt"
+			
+			toolbox_icon = {
+				texture = "gfx/tools/material/settings.png"
+			}
+		}
+
+		toolbox_button = { }
+
+		toolbox_button = {
+			name = "undo_btn"
+			shortcut = "undo"
+			onclick = "[MapEditor.Undo]"
+			enabled = "[MapEditor.IsUndoable]"
+			tooltip = "me_undo_tt"
+			
+			toolbox_icon = {
+				texture = "gfx/tools/material/undo.png"
+			}
+		}
+		
+		toolbox_button = {
+			name = "redo_btn"
+			shortcut = "redo"
+			onclick = "[MapEditor.Redo]"
+			enabled = "[MapEditor.IsRedoable]"
+			tooltip = "me_redo_tt"
+			
+			toolbox_icon = {
+				texture = "gfx/tools/material/redo.png"
+			}
+		}
+
+		toolbox_button = {
+			name = "exit_btn"
+			shortcut = "map_editor"
+			onclick = "[MapEditor.Exit]"
+			tooltip = "me_exit_map_editor_tt"
+			
+			toolbox_icon = {
+				texture = "gfx/tools/exit_icon.dds"
+			}
+		}
+
+		widget = {
+			name = "spacer"
+			
+			layoutpolicy_vertical = expanding
+			layoutpolicy_horizontal = expanding
+		}
+	}
+}
+
+
+terrain_options_toolbar = {
+	name = "terrain_options_widget"
+}
+	
+vbox = {
+	name = "brush_settings_widget"
+}
+
+widget = {
+	name = "terrain_editor_gui"
+	size = { 0 0 }
+}

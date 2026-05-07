@@ -1,0 +1,180 @@
+types EyeDropper
+{
+	# expected contexts:
+	#  MaterialsSample
+	type sample_info = flowcontainer {
+		direction = vertical
+		spacing = 4
+		margin = { 4 0 }
+		
+		background = {
+			texture = "gfx/editor_gui/editor_layout_window.png"
+			spriteType = CorneredStretched
+			spriteborder = { 5 5 }
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			framesize = { 16 16 }
+		}
+		
+		tooloptions_textbox = {
+			text = "[MaterialsSample.GetX]x[MaterialsSample.GetY]"
+		}
+		
+		dynamicgridbox = {
+			name = "samples"
+			datamodel = "[MaterialsSample.Entries]"
+			
+			item = {
+				flowcontainer = {
+					visible = "[MaterialEntry.IsVisible]"
+					spacing = 4
+					margin_bottom = 4
+					
+					icon = {
+						size = { 20 20 }
+						texture = "[MaterialEntry.GetMaterial.GetDiffuseTexture]"
+						shaderfile = "gfx/FX/pdxgui_noblend.shader"
+					}
+					
+					tooloptions_textbox = {
+						autoresize = yes
+						text = "[MaterialEntry.GetMaterial.GetName] ([MaterialEntry.GetValue]%)"
+					}
+				}
+			}
+		}
+	}
+	
+	type packed_samples = hbox {
+		layoutpolicy_horizontal = preferred
+		spacing = 4
+		
+		tooloptions_textbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = preferred
+			block "title" { }
+		}
+		
+		dynamicgridbox = {
+			name = "packed_samples"
+			layoutpolicy_horizontal = preferred
+			layoutpolicy_vertical = expanding
+			
+			block "datamodel" { }
+			
+			maxverticalslots = 1
+			flipdirection = yes
+			
+			item = {
+				widget = {
+					size = { 180 100% }
+					
+					hbox = {
+						datacontext = "[EyeDropperPackedSample.GetSample]"
+						spacing = 4
+						margin_right = 8
+						
+						layoutpolicy_horizontal = fixed
+						layoutpolicy_vertical = expanding
+						
+						tooloptions_textbox = {
+							autoresize = yes
+							text = "[EyeDropperPackedSample.GetChannel]:"
+							
+							layoutpolicy_horizontal = fixed
+							layoutpolicy_vertical = fixed
+						}
+						
+						icon = {
+							size = { 20 20 }
+							texture = "[MaterialEntry.GetMaterial.GetDiffuseTexture]"
+							shaderfile = "gfx/FX/pdxgui_noblend.shader"
+							
+							layoutpolicy_horizontal = fixed
+							layoutpolicy_vertical = fixed
+						}
+						
+						tooloptions_textbox = {
+							autoresize = yes
+							text = "[MaterialEntry.GetMaterial.GetName]"
+							
+							elide = right
+							
+							layoutpolicy_horizontal = shrinking
+							layoutpolicy_vertical = fixed
+						}
+						
+						tooloptions_textbox = {
+							text = "([MaterialEntry.GetRawValue])"
+							fontcolor = { 1 1 0 1 }
+							layoutpolicy_horizontal = preferred
+							layoutpolicy_vertical = fixed
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+widget = {
+	datacontext = "[EyeDropper.GetHoverSample]"
+	alwaystransparent = no
+	size = { 100% 100% }
+	name = "eyedropper_tooltip"
+	
+	tooltip_type = mouse
+	tooltip_widgetanchor = bottom|left
+	
+	tooltipwidget = {
+		sample_info = {}
+	}
+}
+
+hbox = {
+	name = "eyedropper_widget"
+	spacing = 4
+	
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+	
+	tooloptions_textbox = {
+		datacontext = "[EyeDropper.GetHoverSample]"
+		text = "ed_position"
+		size = { 100 10 }
+		layoutpolicy_horizontal = fixed
+		layoutpolicy_vertical = expanding
+		autoresize = no
+	}
+	
+	tooloptions_divider = {
+	}
+	
+	vbox = {
+		layoutpolicy_horizontal = preferred
+		layoutpolicy_vertical = preferred
+		
+		packed_samples = {
+			blockoverride "title" { text = "ed_packed_values" }
+			blockoverride "datamodel" { datamodel = [EyeDropper.PackedSamples] }
+		}
+		packed_samples = {
+			blockoverride "title" { text = "ed_packed_dynamic" }
+			blockoverride "datamodel" { datamodel = [EyeDropper.PackedSamplesDynamic] }
+		}
+	}
+	
+	widget = {
+		layoutpolicy_horizontal = expanding
+	}
+}
+
+toolbox_checkbutton = {
+	name = "eyedropper_toolbox_button"
+	shortcut = "eyedropper_tool"
+	tooltip = "ed_eye_dropper"
+	checked = "[EyedropperMode.IsSelected]"
+	
+	toolbox_icon = {
+		texture = "gfx/tools/material/eye_dropper.png"
+	}
+}

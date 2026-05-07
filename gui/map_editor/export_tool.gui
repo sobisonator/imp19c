@@ -1,0 +1,216 @@
+widget = {
+	name = "export_menu"
+	minimumsize = { 300 300 }
+
+	layoutpolicy_horizontal = expanding
+    layoutpolicy_vertical = expanding
+	scissor = yes
+
+	editor_frame = {
+		using = tools_spacing
+		layoutpolicy_horizontal = expanding
+		layoutpolicy_vertical = expanding
+
+		blockoverride "label" { visible = no }
+		blockoverride "content" {
+			vbox = {
+				visible = "[ExportTool.HasMasks]"
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+
+				hbox = {
+					margin = {2 2}
+					layoutpolicy_horizontal = expanding
+					vbox = {
+						layoutpolicy_horizontal = preferred
+						layoutpolicy_vertical = expanding
+						minimumsize = { 300 30 }
+						editor_textbox = {
+							text = "et_select_workspace_am"
+							autoresize = yes
+							layoutpolicy_horizontal = preferred
+							layoutpolicy_vertical = preferred
+							fontsize = 14
+							margin = { 2 5 }
+						}
+
+						dropDown = {
+							name = "masks_dropdown"
+							tooltip = "et_masks_dropdown"
+							using = EditorTextDropdown
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = preferred
+							size = { 0 32 }
+							blockoverride "dropdown_list_position" {
+								position = { 2 100% }
+							}
+							blockoverride "dropdown_item_size" {
+								size = { 224 20 }
+							}
+							blockoverride "dropdown_item_text" {
+								text = "[MaskEntry.GetKey]"
+								tooltip = ""
+								fontsize = 13
+							}
+							blockoverride "dropdown_gridbox_size" {
+								addcolumn = 256
+								addrow = 32
+							}
+							onselectionchanged = "[ExportTool.SetSelectedMaskIndex]"
+							selectedindex = "[ExportTool.GetSelectedMaskIndex]"
+							focuspolicy = all
+						}
+
+						widget = {
+						    layoutpolicy_vertical = expanding
+						}
+					}
+
+					editor_frame = {
+						blockoverride "label" { text = "Export Notes:" }
+						blockoverride "content" {
+							using = tools_spacing
+							editor_editbox = {
+								margin_left = 8
+								using = terraineditor_eb
+								align = left|top
+								size = { 0 60 }
+								multiline = yes
+								layoutpolicy_vertical = fixed
+								layoutpolicy_horizontal = preferred
+								text = "[ExportTool.GetNotes]"
+								oneditingfinished = "[ExportTool.SetExportNotes]"
+							}
+						}
+					}
+				}
+
+                editor_frame = {
+                    layoutpolicy_vertical = expanding
+                    layoutpolicy_horizontal = expanding
+
+                    blockoverride "label" { text = "et_workspace_area" }
+                    blockoverride "content" {
+                        zoomarea = {
+                            state = {
+                                name = "_zoom_changed"
+                                duration = 0.2
+                            }
+                            zoom = 1
+                            zoom_step = 2.0
+                            zoom_min = 1.0
+                            zoom_max = 20.0
+                            pan_position = { 0 0 }
+
+                            layoutpolicy_horizontal = expanding
+                            layoutpolicy_vertical = expanding
+
+                            scissor = yes
+
+                            viewportwidget = {
+                                icon = {
+                                    name = "node_graph_viewport"
+                                    scissor = yes
+                                    alwaystransparent = no
+                                    allow_outside = yes
+                                    texture = "gfx/editor_gui/editor_transparent.dds"
+                                    spriteType = CorneredTiled
+                                    tintcolor = { 0.3 0.3 0.3 1 }
+                                    widget = {
+                                        size = { 800 400 }
+                                        name = "pin_connections"
+                                    }
+                                }
+                            }
+
+                            zoomwidget = {
+                                container = {
+                                    focuspolicy = click
+                                    icon = {
+                                        name = "heightmap"
+                                        size = { 800 400 }
+                                        texture = [ExportTool.GetHeightmapTexture]
+                                        shaderfile = "gfx/FX/pdxgui_transparent_greyscale.shader"
+                                    }
+
+                                    icon = {
+                                        name = "texture"
+                                        size = { 800 400 }
+                                        texture = [ExportTool.GetTexture]
+                                        effect = [ExportTool.GetMaskEffect]
+                                        shaderfile = "" #is set in code
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+				vbox = {
+					spacing = 10
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = preferred
+					
+					editor_textbox = {
+						visible = [ExportTool.IsExporting]
+						text = [ExportTool.CurrentProgressDesc]
+						autoresize = yes
+						fontsize = 14
+					}
+
+					editor_textbox = {
+                        visible = "[Not(ExportTool.IsExporting)]"
+                        text = "et_use_scroll"
+                        autoresize = yes
+                        fontsize = 14
+                    }
+
+					dockable_progressbar = {
+					    visible = [ExportTool.IsExporting]
+						layoutpolicy_horizontal = expanding
+						min = 0
+						max = [ExportTool.MaxProgress]
+						value = [ExportTool.CurrentProgress]
+					}
+
+					hbox = {
+						using = tools_spacing
+						spacing = 10
+						tooloptions_button = {
+							text = "et_export"
+							enabled = [ExportTool.CanExport]
+							onclick = [ExportTool.Export]
+							tooltip = "et_create_an"
+							fontsize = 14
+							size = { 150 25 }
+						}
+						tooloptions_button = {
+							enabled = "[Not(ExportTool.IsExporting)]"
+							text = "et_cancel"
+							fontsize = 14
+							size = { 150 25 }
+							onclick = [ExportTool.Cancel]
+						}
+					}
+				}
+			}
+
+			hbox = {
+				visible = "[Not( ExportTool.HasMasks )]"
+				icon = {
+					texture = "gfx/editor_terrain/progress_error.dds"
+					size = { 32 32 }
+				}
+
+				editor_textbox = {
+					margin_left = 6
+					margin_bottom = 3
+					text = "et_there_are"
+					align = center
+					autoresize = yes
+					fontsize = 18
+				}
+			}
+		}
+	}
+}

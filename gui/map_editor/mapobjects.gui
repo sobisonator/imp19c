@@ -1,0 +1,498 @@
+types MapEditor
+{
+	type mapobject_item = widget {
+		hbox = {
+			margin_right = 5
+			size = { 100% 100% }
+
+			hbox = {
+                tooloptions_checkbutton = {
+                    size = { 16 16 }
+                    checked = "[LayerTreeItem.IsHidden]"
+                    onclick = "[LayerTreeItem.ToggleLayerHidden]"
+                    onrightclick = "[LayerTreeItem.ToggleExclusiveLayerHidden]"
+                    button_ignore = none
+                    texture = "gfx/editor_terrain/hidden.png"
+                    framesize = { 16 16 }
+                    tooltip = "Hide this layer and map objects (Right-click to hide all but this)"
+                    visible = "[LayerTreeItem.IsLayer]"
+                }
+                # Spacer widget when there is no hide checkbox
+                widget = {
+                    size = { 16 16 }
+                    visible = "[Not(LayerTreeItem.IsLayer)]"
+                }
+
+				tooloptions_checkbutton = {
+					size = { 16 16 }
+					checked = "[LayerTreeItem.IsLocked]"
+					onclick = "[LayerTreeItem.ToggleLock]"
+					onrightclick = "[LayerTreeItem.ToggleExclusiveLock]"
+					button_ignore = none
+					texture = "gfx/editor_terrain/padlock.png"
+					framesize = { 16 16 }
+					tooltip = "Lock these map objects (Right-click for exclusive lock)"
+				}
+			}
+
+			checkbutton = {
+				name = "checkbutton"
+				texture = "gfx/editor_gui/editor_layout_button.png"
+				framesize = { 16 16 }
+				spriteType = CorneredStretched
+				spriteborder = { 4 4 }
+
+				checked = "[LayerTreeItem.IsSelected]"
+				onreleased = "[LayerTreeItem.SelectItem]"
+
+				layoutpolicy_horizontal = preferred
+				layoutpolicy_vertical = preferred
+				
+				editor_textbox = {
+					text = "#BOLD;COLOR:{1.0,1.0,0.6} [LayerTreeItem.GetInstanceCount] #!"
+					autoresize = yes
+					parentanchor = vcenter|right
+					position = { -5 0 }
+					fontsize = 10
+				}
+				
+				hbox = {
+					margin = { 5 5 }
+
+					vbox = {
+					margin = { 0 0  }
+						layoutpolicy_horizontal = expanding
+						spacing = 4
+						block "content"
+						{
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+widget = {
+	alwaystransparent = no
+	size = { 100% 100% }
+	name = "nudger_viewport"
+
+	map_editor_viewport_tooltip = {
+		datacontext = "[MapObjectTool.GetTooltip]"
+	}
+}
+
+widget = {
+	name = "mapobjects"
+}
+
+mapobject_item = {
+	name = "types_list_item_layer"
+
+	blockoverride "content"
+	{
+		hbox = {
+			layoutpolicy_horizontal = preferred
+			editbox = {
+				using = terraineditor_label
+				size = { 24 14 }
+				fontsize = 18
+				text = "#BOLD  + #! "
+				align = left
+				visible = "[Not(LayerTreeItem.IsExpanded)]"
+				layoutpolicy_horizontal = fixed
+				layoutpolicy_vertical = fixed
+			}
+			editbox = {
+				using = terraineditor_label
+				size = { 24 14 }
+				fontsize = 9
+				text = "#BOLD   — #! "
+				align = left
+				visible = "[LayerTreeItem.IsExpanded]"
+				layoutpolicy_horizontal = fixed
+				layoutpolicy_vertical = fixed
+			}
+			editor_textbox = {
+				text = "#BOLD [LayerTreeItem.GetLayer]#!"
+				elide = right
+				autoresize = yes
+				layoutpolicy_horizontal = preferred
+				layoutpolicy_vertical = preferred
+			}
+		}
+	}
+}
+
+mapobject_item = {
+	name = "types_list_item_mesh"
+	
+	blockoverride "content"
+	{
+		margin_left = 24
+		editor_textbox = {
+			text = "#BOLD;COLOR:{0.6,0.3,0.2} Mesh: #! [LayerTreeItem.GetEntry.GetKey]"
+			elide = right
+			autoresize = yes
+			layoutpolicy_horizontal = preferred
+		}
+	}
+}
+
+mapobject_item = {
+	name = "types_list_item_entity"
+	
+	blockoverride "content"
+	{
+		margin_left = 24
+		editor_textbox = {
+			text = "#BOLD;COLOR:{0.2,0.6,0.3} Entity: #! [LayerTreeItem.GetEntry.GetKey]"
+			elide = right
+			autoresize = yes
+			layoutpolicy_horizontal = preferred
+		}
+	}
+}
+
+mapobject_item = {
+	name = "types_list_item_locator"
+	
+	blockoverride "content"
+	{
+		margin_left = 24
+		editor_textbox = {
+			text = "#BOLD;COLOR:{0.2,0.6,0.9} Locator: #! [LayerTreeItem.GetEntry.GetKey]"
+			elide = right
+			autoresize = yes
+			layoutpolicy_horizontal = preferred
+		}
+	}
+}
+
+vbox = {
+	name = "mapobjects_menu"
+	layoutpolicy_vertical = expanding
+	
+	hbox = {
+		layoutpolicy_horizontal = growing
+		margin_left = 0
+		margin_bottom = 5
+
+		editor_toolbar_button = {
+			layoutpolicy_horizontal = shrinking
+			size = { 75 20 }
+
+			text = "Un/lock All"
+			tooltip = "Unlocks/locks all entries"
+			onclick = "[Nudger.SetAllMapObjectsLocked(Not(Nudger.IsAnyMapObjectLocked))]"
+		}
+
+		editor_toolbar_button = {
+            layoutpolicy_horizontal = shrinking
+            size = { 75 20 }
+
+            text = "Un/expand All"
+            tooltip = "Expands/collapses all entries"
+            onclick = "[Nudger.SetAllMapObjectsExpanded(Not(Nudger.IsAnyMapObjectExpanded))]"
+        }
+
+		editor_toolbar_button = {
+            layoutpolicy_horizontal = shrinking
+            size = { 75 20 }
+
+            text = "Un/hide All"
+            tooltip = "Hides/unhides all entries"
+            onclick = "[Nudger.SetAllMapObjectsHidden(Not(Nudger.IsAnyMapObjectHidden))]"
+        }
+
+		widget = {
+			layoutpolicy_horizontal = expanding
+		}
+
+		editor_toolbar_button = {
+			layoutpolicy_horizontal = shrinking
+			size = { 85 20 }
+
+			text = "Create new"
+			tooltip = "Create a new Global Map Object type"
+			onclick = "[Nudger.CreateNewBlankMapObjectType()]"
+		}
+
+	}
+
+	scrollarea = {
+		scrollbarpolicy_vertical = always_on
+		scrollbarpolicy_horizontal = always_off
+		layoutpolicy_horizontal = expanding
+		layoutpolicy_vertical = expanding
+		autoresizeviewport = yes
+
+		viewportwidget = {
+			widget = {
+				scissor = yes
+			}
+		}
+
+		scrollwidget = {
+			fixedgridbox = {
+				name = "types_list"
+				addcolumn = 100%
+				addrow = 30
+				setitemsizefromcell = yes
+				layoutpolicy_horizontal = preferred
+				layoutpolicy_vertical = expanding
+			}
+		}
+		
+		scrollbar_vertical = {
+			using = editor_vertical_scrollbar
+		}
+		
+		scrollbar_horizontal = {
+			using = editor_horizontal_scrollbar
+		}
+	}
+}
+
+hbox = {
+	name = "mapobjects_options"
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+	spacing = 4
+
+	toolbox_checkbutton = {
+		shortcut = "mapobjects_tool_add_objects"
+		checked = "[MapObjectTool.IsCreateTool]"
+		onclick = "[MapObjectTool.SetCreateTool]"
+		tooltip = "Spawning global objects mode."
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/add_object.dds"
+			size = { 24 24 }
+		}
+	}
+
+	toolbox_checkbutton = {
+		shortcut = "mapobjects_tool_select_map_content"
+		tooltip = "Territory selection mode."
+		checked = "[MapObjectTool.IsSelectionModeMapContent]"
+		onclick = "[MapObjectTool.SetSelectionModeMapContent]"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/select_map_content.dds"
+			size = { 24 24 }
+		}
+	}
+	
+	toolbox_checkbutton = {
+		shortcut = "mapobjects_tool_select_objects"
+		tooltip = "Objects selection mode."
+		checked = "[MapObjectTool.IsSelectionModeObjects]"
+		onclick = "[MapObjectTool.SetSelectionModeObjects]"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/select_objects.dds"
+			size = { 24 24 }
+		}
+	}
+
+	tooloptions_divider = {
+	}
+
+	toolbox_checkbutton = {
+		shortcut = "mapobjects_tool_move_objects"
+		tooltip = "Move selected objects around."
+		checked = "[MapObjectTool.IsMovingObjects]"
+		onclick = "[MapObjectTool.SetMovingObjects]"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/move_objects.dds"
+			size = { 24 24 }
+		}
+	}
+
+	toolbox_checkbutton = {
+		shortcut = "mapobjects_tool_rotate_objects"
+		tooltip = "Rotate selected objects."
+		checked = "[MapObjectTool.IsRotatingObjects]"
+		onclick = "[MapObjectTool.SetRotatingObjects]"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/rotate_objects.dds"
+			size = { 24 24 }
+		}
+	}
+
+	toolbox_checkbutton = {
+		shortcut = "mapobjects_tool_scale_objects"
+		tooltip = "Scale selected objects."
+		checked = "[MapObjectTool.IsScalingObjects]"
+		onclick = "[MapObjectTool.SetScalingObjects]"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/scale_objects.dds"
+			size = { 24 24 }
+		}
+	}
+
+	tooloptions_divider = {
+	}
+
+	toolbox_checkbutton = {
+		shortcut = "mapobjects_tool_objects_render_underwater"
+		tooltip = "Toggle 'render underwater' for selected objects."
+		enabled = "[Nudger.IsAnyObjectSelected]"
+		onclick = "[Nudger.ToggleInstancesRenderUnderwater]"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/render_underwater.png"
+			size = { 24 24 }
+		}
+	}
+
+	toolbox_checkbutton = {
+		shortcut = "mapobjects_tool_objects_clamp_to_water_level"
+		tooltip = "Toggle 'clamp to water level' for selected objects."
+		enabled = "[Nudger.IsAnyObjectSelected]"
+		onclick = "[Nudger.ToggleInstancesClampToWaterLevel]"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/clamp_to_water.png"
+			size = { 24 24 }
+		}
+	}
+
+	tooloptions_divider = {
+	}
+
+	toolbox_button = {
+		shortcut = "mapobjects_tool_delete"
+		onclick = "[Nudger.DeleteSelected]"
+		enabled = "[Nudger.IsAnySelectedMapObjectDynamicType]"
+		tooltip = "Delete selected map objects."
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/delete_objects.dds"
+			size = { 24 24 }
+		}
+	}
+
+	toolbox_button = {
+		shortcut = "mapobjects_tool_deselect"
+		onclick = "[Nudger.Deselect]"
+		enabled = "[Nudger.IsAnyObjectSelected]"
+		tooltip = "Deselect map objects if any are selected."
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/deselect_objects.dds"
+			size = { 24 24 }
+		}
+	}
+
+	toolbox_button = {
+		shortcut = "mapobjects_tool_select_all"
+		onclick = "[Nudger.SelectAll]"
+		enabled = "[Nudger.IsAnyObjectEntrySelected]"
+		tooltip = "Select all map objects of selected type(s)."
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/select_all_objects.dds"
+			size = { 24 24 }
+		}
+	}
+
+	toolbox_checkbutton = {
+		tooltip = "Hide the selection graphics"
+		shortcut = "mapobjects_tool_hide_selection"
+		checked = "[MapObjectTool.SelectTool.IsHideSelection]"
+		onclick = "[MapObjectTool.SelectTool.SetHideSelection(Not(MapObjectTool.SelectTool.IsHideSelection))]"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/hide_selection.dds"
+			size = { 24 24 }
+		}
+	}
+	
+	toolbox_checkbutton = {
+		tooltip = "Toggle ability of spawning multiple global object types at once."
+		checked = "[Nudger.IsMultiSpawnEnabled]"
+		onclick = "[Nudger.SetMultiSpawnEnabled(Not(Nudger.IsMultiSpawnEnabled))]"
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/add_objects_multiple.dds"
+			size = { 24 24 }
+		}
+	}
+
+	toolbox_button = {
+		shortcut = "mapobjects_tool_rotate_random"
+		onclick = "[MapObjectTool.RotateRandom]"
+		enabled = "[Nudger.IsAnyObjectSelected]"
+		tooltip = "Randomly rotate selected map objects."
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/random_rotate_objects.dds"
+			size = { 32 32 }
+		}
+	}
+
+	tooloptions_divider = {
+	}
+
+	toolbox_button = {
+		shortcut = "mapobjects_tool_focus_view"
+		onclick = "[Nudger.FocusCameraOnSelection]"
+		tooltip = "Focus camera on currently selected objects or territories."
+		toolbox_icon = {
+			texture = "gfx/tools/focus_view_icon.dds"
+			size = { 32 32 }
+		}
+	}
+
+	toolbox_checkbutton = {
+		tooltip = "Toggle camera limits."
+		checked = "[IsCameraRestrictionsEnabled]"
+		onclick = "[SetCameraRestrictionsEnabled(Not(IsCameraRestrictionsEnabled))]"
+		toolbox_icon = {
+			texture = "gfx/tools/camera_limits_icon.dds"
+			size = { 32 32 }
+		}
+	}
+
+	widget = {
+		layoutpolicy_horizontal = preferred
+	}
+}
+
+toolbox_checkbutton = {
+	name = "mapobjects_toolbox_button"
+	shortcut = "mapobjects_tool"
+	tooltip = "Map Objects Editor"
+	checked = "[NudgerMode.IsSelected]"
+	
+	toolbox_icon = {
+		texture = "gfx/tools/material/nudger.png"
+	}
+}
+
+widget = {
+	name = "type_property_list"
+
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+
+	vbox = {
+		editor_frame = {
+			blockoverride "label"
+			{
+				text = "Properties"
+			}
+
+			blockoverride "content"
+			{
+				tools_properties_dialog = {
+					name = "properties"
+				}
+			}
+		}
+		editor_toolbar_button = {
+			layoutpolicy_horizontal = shrinking
+			size = { 120 20 }
+
+			text = "Delete Object Type"
+			tooltip = "Remove this Map Object type (only committed if saved)"
+			onclick = "[NudgerMapObjectPropertyListDockable.Delete()]"
+		}
+		widget = {
+			layoutpolicy_horizontal = preferred
+			layoutpolicy_vertical = preferred
+		}
+	}
+}

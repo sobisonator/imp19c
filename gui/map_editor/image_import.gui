@@ -1,0 +1,198 @@
+editor_selection = {
+	name = "selection"
+	position = { 0 0 }
+	size = { 0 0 }
+}
+
+widget = {
+	name = "image_import"
+	size = { 1280 720 }
+
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+
+	flowcontainer = {
+		visible = "[ImageImport.HasErrors]"
+		datamodel = "[ImageImport.GetErrors]"
+		direction = vertical
+		item = {
+			flowcontainer = {
+				margin = { 6 6 }
+				direction = horizontal
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				icon = {
+					texture = "gfx/editor_terrain/progress_error.dds"
+					size = { 25 25 }
+				}
+
+				editor_textbox = {
+					margin_left = 6
+					text = "[CString.GetString]"
+					align = center
+					fontsize = 14
+					autoresize = yes
+				}
+			}
+		}
+	}
+
+	vbox = {
+		visible = "[Not(ImageImport.HasErrors)]"
+		spacing = 8
+
+		restrictparent_min = yes
+		alwaystransparent = yes
+
+		layoutpolicy_horizontal = expanding
+		layoutpolicy_vertical = expanding
+
+		vbox = {
+			visible = "[And( Not( ImageImport.IsLoaded ), Not( ImageImport.HasErrors ) )]"
+
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+
+			spacing = 8
+
+			editor_textbox = {
+				margin_left = 1
+				margin_top = 4
+
+				text = "ii_loading"
+				autoresize = yes
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = preferred
+			}
+
+			dockable_progressbar = {
+				size = { 1 8 }
+				layoutpolicy_horizontal = expanding
+
+				loopinterval = 0
+
+				min = 0
+				max = [ImageImport.LoadSteps]
+				value = [ImageImport.LoadStep]
+			}
+
+			widget = {
+				layoutpolicy_vertical = expanding
+			}
+		}
+
+		vbox = {
+			visible = "[And( ImageImport.IsLoaded, Not( ImageImport.HasErrors ) )]"
+
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+
+			spacing = 4
+
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = preferred
+
+				spacing = 4
+
+				tooloptions_button = {
+					text = "ii_fit"
+					tooltip = "ii_fit_tt"
+					size = { 32 25 }
+					onclick = "[ImageImport.Fit]"
+				}
+
+				tooloptions_button = {
+					text = "100%"
+					tooltip = "ii_set_zoom_tt"
+					size = { 32 25 }
+					onclick = "[ImageImport.Zoom('(int32)100')]"
+				}
+
+				tooloptions_checkbutton = {
+					text = "ii_differences"
+					tooltip = "ii_differences_tt"
+					size = { 96 25 }
+					enabled = [ImageImport.IsValid]
+					checked = [ImageImport.IsDeltaVisible]
+					onclick = [ImageImport.ToggleDeltaVisible]
+				}
+
+				widget = {
+					layoutpolicy_horizontal = expanding
+				}
+
+				tooloptions_button = {
+					text = "ii_accept_selection"
+					tooltip = "ii_accept_selection_tt"
+					size = { 96 25 }
+					enabled = [ImageImport.IsValid]
+					onclick = "[ImageImport.AcceptSelection]"
+					shortcut = "image_import_accept"
+				}
+
+				tooloptions_button = {
+					text = "ii_apply"
+					tooltip = "ii_apply_tt"
+					size = { 64 25 }
+					visible = [ImageImport.IsCommitable]
+					onclick = [ImageImport.Commit]
+				}
+
+				tooloptions_button = {
+					text = "ii_skip"
+					tooltip = "ii_skip_tt"
+					size = { 64 25 }
+					visible = "[Not(ImageImport.IsCommitable)]"
+					onclick = [ImageImport.Skip]
+				}
+			}
+
+			zoomarea = {
+				name = "zoomarea"
+
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				
+				alwaystransparent = no
+
+				viewportwidget = {
+					icon = {
+						scissor = yes
+
+						texture = "gfx/editor_gui/editor_transparent.dds"
+						spriteType = CorneredTiled
+						tintcolor = { 0.3 0.3 0.3 1 }
+					}
+				}
+
+				zoomwidget = {
+					widget = {
+						name = "texture"
+						size = [ImageImport.Size]
+
+						icon = {
+							name = "output"
+							position = { 0 0 }
+							size = [ImageImport.Size]
+							shaderfile = "gfx/FX/pdxgui_import_image.shader"
+							texture = [ImageImport.OutputTexture]
+						}
+
+						icon = {
+							name = "delta"
+							visible = [ImageImport.IsDeltaVisible]
+
+							position = { 0 0 }
+							size = [ImageImport.Size]
+							shaderfile = "gfx/FX/pdxgui_import_image.shader"
+							texture = [ImageImport.DeltaTexture]
+
+							effectname = "ImageImportDelta"
+						}
+					}
+				}
+			}
+		}
+	}
+}

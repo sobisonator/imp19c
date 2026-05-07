@@ -1,0 +1,403 @@
+types MaterialSetter
+{
+	# expected contexts:
+	#  MaterialMix
+	local_type material_setter_info = flowcontainer {
+		direction = vertical
+		spacing = 4
+		margin = { 4 0 }
+
+		background = {
+			texture = "gfx/editor_gui/editor_layout_window.png"
+			spriteType = CorneredStretched
+			spriteborder = { 5 5 }
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			framesize = { 16 16 }
+		}
+
+		tooloptions_textbox = {
+			text = "[MaterialMix.GetName]"
+		}
+
+		dynamicgridbox = {
+			name = "samples"
+			datamodel = "[MaterialMix.GetMaterials]"
+
+			item = {
+				flowcontainer = {
+					spacing = 4
+					margin_bottom = 4
+
+					icon = {
+						size = { 20 20 }
+						texture = "[MaterialMixEntry.GetMaterial.GetDiffuseTexture]"
+						shaderfile = "gfx/FX/pdxgui_noblend.shader"
+					}
+
+					tooloptions_textbox = {
+						autoresize = yes
+						text = "[MaterialMixEntry.GetMaterial.GetName] ([MaterialMixEntry.GetPercentageValue]%)"
+					}
+				}
+			}
+		}
+	}
+
+	local_type material_setter_option_buttons = flowcontainer {
+		spacing = 2
+
+		checkbutton = {
+			name = "persistence_checkbox"
+			using = terraineditor_base
+			
+			size = { 16 16 }
+			texture = "gfx/tools/checkbox_background.dds"
+			framesize = { 20 20 }
+			
+			checked = "[MaterialMix.IsPersistent]"
+			onclick = "[MaterialMixBrush.ToggleSamplePersistence(MaterialMix.Self)]"
+			
+			tooltip = "Toggle persistence, only persistent samples will be saved"
+			icon = {
+                texture = "gfx/tools/save_icon.dds"
+                size = { 16 16 }
+                shaderfile = "gfx/FX/pdxgui_default.shader"
+                parentanchor = center|vcenter
+                alpha = "[Select_float(MaterialMix.IsPersistent, '(float)1.0', '(float)0.1')]"
+            }
+		}
+
+		editor_button = {
+			onclick = "[MaterialMixBrush.RenameSample(MaterialMix.Self)]"
+			tooltip = "Rename Sample"
+			size = { 16 16 }
+			using = terraineditor_base
+
+			icon = {
+				texture = "gfx/tools/rename_icon.dds"
+				size = { 16 16 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				parentanchor = center|vcenter
+			}
+		}
+
+		editor_button = {
+			using = terraineditor_base
+			name = "delete_button"
+			size = { 16 16 }
+			onclick = "[MaterialMixBrush.Delete(MaterialMix.Self)]"
+			tooltip = "Delete"
+			
+			icon = {
+				texture = "gfx/editor_gui/16px/close.png"
+				size = { 16 16 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				parentanchor = center|vcenter
+			}
+		}
+	}
+
+	type material_mix_entry = widget {
+		size = { 0 30 }
+		hbox = {
+			spacing = 5
+			margin_left = 5
+			margin_right = 5
+
+			checkbutton = {
+				name = "materials_list_item_locked"
+				using = terraineditor_base
+				size = { 16 16 }
+				gfxtype = checkbuttongfx
+				shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+				texture = "gfx/editor_terrain/padlock.png"
+				framesize = { 16 16 }
+				checked = "[MaterialMixEntry.GetMaterial.IsLocked]"
+				block "lock_button" {}
+				tooltip = "Locking this material will forbid doing any changes on the map to this layer."
+			}
+
+			icon = {
+				size = { 20 20 }
+				texture = "[MaterialMixEntry.GetMaterial.GetDiffuseTexture]"
+				shaderfile = "gfx/FX/pdxgui_noblend.shader"
+				tooltip = "[MaterialMixEntry.GetMaterial.GetName]"
+				tooltipwidget = {
+					using = dockable_tooltip
+				}
+			}
+
+			editor_textbox = {
+				layoutpolicy_horizontal = fixed
+				layoutpolicy_vertical = growing
+				size = { 60 0 }
+				fontsize = 10
+				text = "[MaterialMixEntry.GetMaterial.GetName]"
+				tooltip = "[MaterialMixEntry.GetMaterial.GetName]" #If the name is too long to fit in the textbox, let the tooltip display it's full name.
+				align = vcenter|left
+				tooltipwidget = {
+					using = dockable_tooltip
+				}
+			}
+
+			editor_slider = {
+				layoutpolicy_horizontal = growing
+				layoutpolicy_vertical = fixed
+				min = 0
+				max = 256
+				step = 1
+				wheelstep = 15
+				value = "[MaterialMixEntry.GetValue]"
+				onvaluechanged = "[MaterialMix.SetValue(MaterialMixEntry.Self)]"
+				block "slider" {}
+				enabled = "[And( Not(MaterialMixEntry.IsLocked), NotEqualTo_int32(MaterialMix.GetMaterialsCount, '(int32)1') )]"
+			}
+
+			editor_textinput = {
+				layoutpolicy_vertical = fixed
+				layoutpolicy_horizontal = fixed
+				size = { 50 20 }
+				align = vcenter|left
+				text = "[MaterialMixEntry.GetValueAsText]"
+				block "textinput" {}
+				enabled = "[Not(MaterialMixEntry.IsLocked)]"
+			}
+
+			checkbutton = {
+				using = terraineditor_base
+				
+				size = { 16 16 }
+				texture = "gfx/tools/checkbox_background.dds"
+				framesize = { 20 20 }
+				
+				checked = "[MaterialMixEntry.IsLocked]"
+				block "mix_lock_button" {}
+				
+				tooltip = "Lock the percentage of this material."
+				icon = {
+					texture = "gfx/tools/padlock_icon.dds"
+					size = { 14 14 }
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					parentanchor = center|vcenter
+					alpha = "[Select_float(MaterialMixEntry.IsLocked, '(float)1.0', '(float)0.1')]"
+				}
+			}
+
+			block "extra_content" {}
+		}
+	}
+
+	local_type material_mix_header = checkbutton {
+		using = terraineditor_listitem
+		size = { 0 26 }
+		layoutpolicy_horizontal = growing
+		texture = "gfx/editor_gui/editor_layout_button.png"
+
+		checked = "[MaterialMixBrush.IsSelected(MaterialMix.Self)]"
+		onclick = "[MaterialMixBrush.ToggleSelected(MaterialMix.Self)]"
+
+		tooltipwidget = {
+			material_setter_info = { }
+		}
+
+		hbox = {
+			size = { 100% 100% }
+			spacing = 4
+			margin_left = 2
+			margin_right = 4
+
+			editor_foldout_checkbutton = {
+				layoutpolicy_vertical = growing
+			}
+
+			widget = {
+				layoutpolicy_horizontal = fixed
+				size = { 92 -1 }
+
+				flowcontainer = {
+					datamodel = "[MaterialMix.AccessMaterials]"
+					parentanchor = vcenter|left
+					spacing = 2
+
+					item = {
+						icon = {
+							size = { 20 20 }
+							texture = "[MaterialMixEntry.GetMaterial.GetDiffuseTexture]"
+							shaderfile = "gfx/FX/pdxgui_noblend.shader"
+							tooltip = "[MaterialMixEntry.GetMaterial.GetName] ([MaterialMixEntry.GetPercentageValue]%)"
+							tooltipwidget = {
+								using = dockable_tooltip
+							}
+						}
+					}
+				}
+			}
+			
+			editor_textbox = {
+				layoutpolicy_horizontal = growing
+				margin_left = 4
+				text = "[MaterialMix.GetName]"
+				align = vcenter|left
+			}
+
+			material_setter_option_buttons = {
+				layoutpolicy_horizontal = fixed
+			}
+		}
+	}
+
+	local_type material_mix = vbox {
+		oncreate = "[BindFoldOutContext]"
+		oncreate = "[PdxGuiFoldOut.Unfold]"
+
+		material_mix_header = {}
+
+		vbox = {
+			layoutpolicy_vertical = preferred
+			layoutpolicy_horizontal = growing
+
+			background = {
+				texture = "gfx/editor_gui/editor_white_pixel.png"
+				spriteType = CorneredStretched
+				spriteborder = { 4 4 }
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				color = { 1 1 1 .05 }
+			}
+
+			visible = "[Not(PdxGuiFoldOut.IsUnfolded)]"
+			datamodel = "[MaterialMix.AccessMaterials]"
+			item = {
+				material_mix_entry = {
+					layoutpolicy_horizontal = growing
+					blockoverride "lock_button" {
+						onclick = "[MaterialMixEntry.AccessMaterial.ToggleLocked]"
+					}
+					blockoverride "slider" {
+						onchangestart = "[MaterialMixBrush.StartSampleCompositionEdit(MaterialMix.Self)]"
+						onchangefinish = "[MaterialMixBrush.EndSampleCompositionEdit(MaterialMix.Self)]"
+					}
+					blockoverride "textinput" {
+						oneditingfinished = "[MaterialMixBrush.ChangeSampleEntryComposition(MaterialMix.AccessSelf,MaterialMixEntry.Self)]"
+					}
+					blockoverride "mix_lock_button" {
+						onclick = "[MaterialMixBrush.ToggleSampleEntryLock(MaterialMix.Self, MaterialMixEntry.Self)]"
+					}
+				}	
+			}
+		}
+	}
+}
+
+toolbox_checkbutton = {
+	name = "materialsetter_toolbox_button"
+	shortcut = "materialsetter_tool"
+	tooltip = "Mix Brush"
+
+	checked = "[MixBrushMode.IsSelected]"
+	
+	toolbox_icon = {
+		texture = "gfx/tools/material/setter.png"
+	}
+}
+
+widget = {
+	alwaystransparent = no
+	size = { 100% 100% }
+	name = "materialsetter_tooltip"
+
+	widget = {
+		visible = "[MaterialMixBrush.IsSampling]"
+		datacontext = "[MaterialMixBrush.GetHoverSample]"
+		size = { 100% 100% }
+
+		tooltip_type = mouse
+		tooltip_widgetanchor = bottom|left
+
+		tooltipwidget = {
+			sample_info = {}
+		}
+	}
+	
+}
+
+hbox = {
+	name = "brush_options"
+
+	margin = { 2 2 }
+	spacing = 4
+
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+
+	brush_widget = {
+		widgetid = "material_setter_brush_settings"
+		onclick = "[BrushSettingsDropdown.Toggle]"
+		shortcut = "tooloption_1"
+		tooltip = "Brush Settings"
+
+		toolbox_icon = {
+			texture = "[BrushSettingsDropdown.Thumbnail]"
+		}
+	}
+
+	pixelsnap_checkbutton = {
+	}
+	
+	tooloptions_divider = {
+	}
+
+	tooloptions_textbox = {
+		text = "#BOLD;COLOR:{1.0,1.0,0.0} Alt+LMB: #!Sampler"
+	}
+
+	widget = {
+		layoutpolicy_horizontal = preferred
+	}
+
+}
+
+vbox = {
+	name = "samples_list_dockable"
+	layoutpolicy_vertical = expanding
+	
+	scrollarea = {
+		scrollbarpolicy_vertical = always_on
+		scrollbarpolicy_horizontal = always_off
+		layoutpolicy_vertical = expanding
+		layoutpolicy_horizontal = preferred
+		autoresizeviewport = yes
+		
+		viewportwidget = {
+			widget = {
+				scissor = yes
+			}
+		}
+		
+		scrollwidget = {
+			vbox = {
+
+				vbox = {
+					datamodel = "[MaterialMixBrush.AccessSamples]"
+
+					layoutpolicy_horizontal = growing
+					layoutpolicy_vertical = preferred
+					margin_left = 4
+					margin_right = 4
+					spacing = 6
+
+					item = {
+						material_mix = {
+							layoutpolicy_horizontal = growing
+						}
+					}
+				}
+				widget = {
+					layoutpolicy_vertical = expanding
+				}
+			}
+		}
+		scrollbar_vertical = {
+			using = editor_vertical_scrollbar
+		}
+	}
+}

@@ -1,0 +1,399 @@
+widget = {
+	name = "import_menu"
+	minimumsize = { 400 300 }
+
+	layoutpolicy_horizontal = expanding
+    layoutpolicy_vertical = expanding
+	scissor = yes
+
+	editor_frame = {
+		enabled = "[Not(ImportTool.IsImporting)]"
+		using = tools_spacing
+		layoutpolicy_horizontal = expanding
+		layoutpolicy_vertical = expanding
+		
+		blockoverride "label" { visible = no }
+		blockoverride "content" {
+		    layoutpolicy_horizontal = expanding
+		    layoutpolicy_vertical = expanding
+
+			tooloptions_progress_spinner = {
+				size = { 32 32 }
+				visible = "[Not( ImportTool.IsZipLoaded )]"
+			}
+			
+			hbox = {
+				visible = [ImportTool.IsZipLoaded]
+				using = tools_spacing
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				spacing = 10
+				
+				vbox = {
+					layoutpolicy_vertical = expanding
+					layoutpolicy_horizontal = expanding
+
+                    editor_frame = {
+						layoutpolicy_vertical = expanding
+                        layoutpolicy_horizontal = expanding
+
+						blockoverride "label" { text = "it_workspace_area" }
+						blockoverride "content" {
+							using = tools_spacing
+						    layoutpolicy_vertical = expanding
+                            layoutpolicy_horizontal = expanding
+
+							vbox = {
+							    layoutpolicy_vertical = expanding
+                                layoutpolicy_horizontal = expanding
+
+							    zoomarea = {
+                                    state = {
+                                        name = "_zoom_changed"
+                                        duration = 0.2
+                                    }
+                                    zoom = 1
+                                    zoom_step = 2.0
+                                    zoom_min = 1.0
+                                    zoom_max = 20.0
+                                    pan_position = { 0 0 }
+
+                                    layoutpolicy_horizontal = expanding
+                                    layoutpolicy_vertical = expanding
+
+                                    scissor = yes
+
+                                    viewportwidget = {
+                                        icon = {
+                                            name = "node_graph_viewport"
+                                            scissor = yes
+                                            alwaystransparent = no
+                                            allow_outside = yes
+                                            texture = "gfx/editor_gui/editor_transparent.dds"
+                                            spriteType = CorneredTiled
+                                            tintcolor = { 0.3 0.3 0.3 1 }
+                                            widget = {
+                                                size = { 800 400 }
+                                                name = "pin_connections"
+                                            }
+                                        }
+                                    }
+
+                                    zoomwidget = {
+                                        container = {
+                                            focuspolicy = click
+                                            icon = {
+                                                name = "heightmap"
+                                                size = { 800 400 }
+                                                texture = "[ImportTool.GetHeightmapTexture]"
+                                                shaderfile = "gfx/FX/pdxgui_transparent_greyscale.shader"
+                                            }
+
+                                            icon = {
+                                                name = "texture"
+                                                size = { 800 400 }
+                                                texture = "[ImportTool.GetExportMaskTexture]"
+                                                effect = "[ImportTool.GetMaskEffect]"
+                                                shaderfile = "" #is set in code
+                                            }
+                                        }
+                                    }
+                                }
+
+								editor_frame = {
+									visible = [ImportTool.HasExportNotes]
+									blockoverride "label" { text = "it_notes" }
+									blockoverride "content" {
+										using = tools_spacing
+										editor_textbox = {
+											margin = { 5 5 }
+											text = "[ImportTool.GetExportNotes]"
+											layoutpolicy_horizontal = expanding
+											autoresize = yes
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				vbox = {
+					layoutpolicy_horizontal = preferred
+					layoutpolicy_vertical = expanding
+					minimumsize = { 300 -1 }
+
+					hbox = {
+						layoutpolicy_horizontal = expanding
+						widget = {
+							size = { 20 32 }
+
+							checkbutton = {
+								using = editor_checkbutton
+								parentanchor = left|vcenter
+
+								inherit_visual_state = no
+								checked = "[ImportTool.AreAllSelected]"
+								onclick = "[ImportTool.ToggleAllSelected]"
+
+								icon = {
+									visible = "[ImportTool.IsSelectedIndeterminable]"
+									position = { 0 1 }
+									parentanchor = vcenter|hcenter
+									size = { 14 14 }
+									texture = "gfx/editor_gui/editor_icon_removeproperty.dds"
+								}
+
+								tooltip = "it_import_all_tt"
+								tooltipwidget = {
+									using = editor_tooltip
+								}
+							}
+						}
+
+						editor_textbox = {
+							size = { 250 28 }
+							align = nobaseline
+							text = "it_check_uncheck"
+							elide = right
+							fontweight = bold
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = preferred
+						}
+					}
+
+					vbox = {
+						name = "ImportableGroups"
+						layoutpolicy_horizontal = expanding
+						# Datamodel is set by code
+						spacing = 8
+
+						item = {
+							vbox = {
+								visible = "[GreaterThan_int32( ImportableGroup.GetImportableCount, '(int32)0' )]"
+								margin = { 8 8 }
+
+								background = {
+									margin_bottom = 6
+									margin_right = 6
+									texture = "gfx/editor_gui/editor_dropdown_list.dds"
+									spriteType = CorneredStretched
+									spriteborder = { 6 6 }
+									spriteborder_right = 8
+									spriteborder_bottom = 8
+									shaderfile = "gfx/FX/pdxgui_default.shader"
+								}
+
+								layoutpolicy_horizontal = expanding
+								layoutpolicy_vertical = expanding
+
+								hbox = {
+									spacing = 4
+
+									minimumsize = { 0 32 }
+									maximumsize = { -1 32 }
+
+									layoutpolicy_horizontal = expanding
+									layoutpolicy_vertical = preferred
+
+									button = {
+										size = { -1 28 }
+										onclick = "[ImportableGroup.ToggleCollapsed]"
+
+										layoutpolicy_horizontal = expanding
+										layoutpolicy_vertical = preferred
+
+										hbox = {
+											spacing = 4
+
+											layoutpolicy_horizontal = expanding
+											layoutpolicy_vertical = preferred
+
+											widget = {
+												layoutpolicy_horizontal = fixed
+                                                size = { 16 32 }
+
+												checkbutton = {
+													parentanchor = hcenter|vcenter
+													gfxtype = checkbuttongfx
+													shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+													texture = "gfx/tools/expand_icon.dds"
+													framesize = { 16 16 }
+													size = { 8 8 }
+													checked = "[Not(ImportableGroup.IsCollapsed)]"
+													onclick = "[ImportableGroup.ToggleCollapsed]"
+													layoutpolicy_horizontal = preferred
+													layoutpolicy_vertical = preferred
+												}
+											}
+
+											widget = {
+												layoutpolicy_horizontal = fixed
+                                                size = { 20 32 }
+
+												checkbutton = {
+													using = editor_checkbutton
+													parentanchor = left|vcenter
+
+													inherit_visual_state = no
+													checked = "[ImportableGroup.AreAllSelected]"
+													onclick = "[ImportableGroup.ToggleAllSelected]"
+
+													icon = {
+														visible = "[ImportableGroup.IsSelectedIndeterminable]"
+														position = { 0 1 }
+														parentanchor = vcenter|hcenter
+														size = { 14 14 }
+														texture = "gfx/editor_gui/editor_icon_removeproperty.dds"
+													}
+
+													tooltip = "it_import_all"
+													tooltipwidget = {
+														using = editor_tooltip
+													}
+												}
+											}
+
+											editor_textbox = {
+												layoutpolicy_horizontal = expanding
+												layoutpolicy_vertical = preferred
+												align = nobaseline
+												text = "[ImportableGroup.GetTitle]"
+												elide = right
+												fontweight = bold
+											}
+
+											tooloptions_button = {
+												visible = "[ImportableGroup.HasDiffTool]"
+												layoutpolicy_horizontal = fixed
+												text = "it_show_diff"
+												onclick = "[ImportableGroup.LaunchDiffTool]"
+												tooltip = "it_show_diff_tt"
+												fontsize = 14
+												size = { 75 25 }
+											}
+										}
+									}
+								} 
+
+								scrollarea = {
+									visible = "[Not( ImportableGroup.IsCollapsed )]"
+
+									layoutpolicy_horizontal = expanding
+									layoutpolicy_vertical = expanding
+									autoresizescrollarea = yes
+
+									scrollbarpolicy_horizontal = always_off
+
+									maximumsize = { -1 300 }
+
+									scrollbar_vertical = {
+										using = editor_vertical_scrollbar
+									}
+
+									scrollbar_horizontal = {
+										using = editor_horizontal_scrollbar
+									}
+
+									scrollbaralign_vertical = right
+
+									viewportwidget = {
+										widget = {
+											size = { 100% 100% }
+										}
+									}
+
+									scrollwidget = {
+										vbox = {
+											margin_top = 4
+
+											datamodel = "[ImportableGroup.GetImportables]"
+
+											layoutpolicy_horizontal = expanding
+											layoutpolicy_vertical = preferred
+
+											spacing = 4
+
+											item = {
+												hbox = {
+													spacing = 4
+
+													minimumsize = { 0 32 }
+													maximumsize = { -1 32 }
+													layoutpolicy_horizontal = expanding
+													layoutpolicy_vertical = preferred
+
+													widget = {
+														size = { 20 32 }
+
+														checkbutton = {
+															parentanchor = left|vcenter
+															using = editor_checkbutton
+															checked = "[Importable.IsSelected]"
+															onclick = "[Importable.SetSelected(Not(Importable.IsSelected))]"
+															tooltip = "it_select_tt"
+
+															tooltipwidget = {
+																using = editor_tooltip
+															}
+														}
+													}
+
+													editor_textinput = {
+													    layoutpolicy_horizontal = expanding
+                                                        text = "[Importable.GetName]"
+												    	enabled = no
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+                    widget = {
+                        name = "spacer"
+                        layoutpolicy_horizontal = expanding
+                        layoutpolicy_vertical = expanding
+                    }
+				}
+			}
+
+			editor_textbox = {
+				visible = "[ImportTool.IsZipLoaded]"
+				text = "it_is_zip_loaded01"
+				autoresize = yes
+				fontsize = 12
+			}
+			editor_textbox = {
+                margin_bottom = 5
+                visible = "[ImportTool.IsZipLoaded]"
+                text = "it_is_zip_loaded02"
+                autoresize = yes
+                fontsize = 12
+            }
+
+			hbox = {
+				visible = [ImportTool.IsZipLoaded]
+				using = tools_spacing
+				spacing = 10
+				tooloptions_button = {
+					text = "it_import"
+					enabled = "[Not(ImportTool.IsImporting)]"
+					onclick = "[ImportTool.Import]"
+					tooltip = "it_import_tt"
+					fontsize = 14
+					size = { 150 25 }
+				}
+				tooloptions_button = {
+					enabled = "[Not(ImportTool.IsImporting)]"
+					text = "it_cancel"
+					fontsize = 14
+					size = { 150 25 }
+					onclick = "[ImportTool.Cancel]"
+				}
+			}
+		}
+	}
+}

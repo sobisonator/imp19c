@@ -396,7 +396,7 @@ DepthStencilState DepthStencilState
 {
 	StencilEnable = yes
 	FrontStencilPassOp = replace
-	StencilRef = 1
+	StencilRef = 0
 }
 
 Effect tree

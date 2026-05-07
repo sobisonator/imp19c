@@ -1,0 +1,1143 @@
+hbox = {
+	name = "smart_brush_options"
+
+	margin = { 2 2 }
+	spacing = 4
+
+	layoutpolicy_horizontal = expanding
+	layoutpolicy_vertical = expanding
+
+	brush_widget = {
+		widgetid = "material_brush_settings"
+		onclick = "[BrushSettingsDropdown.Toggle]"
+		shortcut = "tooloption_1"
+		tooltip = "Brush Settings"
+
+		toolbox_icon = {
+			texture = "[BrushSettingsDropdown.Thumbnail]"
+		}
+	}
+
+	toolbox_checkbutton = {
+		name = "material_eraser_toolbox_button"
+		shortcut = "eraser_tool"
+		tooltip = "Material Eraser"
+		checked = "[SmartMaterialPaintingMode.IsEraserSelected]"
+		onclick = "[SmartMaterialPaintingMode.ToggleEraser]"
+		
+		toolbox_icon = {
+			texture = "gfx/editor_terrain/eraser.png"
+		}
+	}
+
+	pixelsnap_checkbutton = { }
+
+	toolbox_checkbutton = {
+		name = "terrain_topology_picker_tool"
+		shortcut = "terrain_topology_picker_tool"
+		tooltip = "Toggle terrain topology picker mode."
+		checked = "[SmartMaterialPaintingMode.IsTopologyPickerEnabled]"
+		onclick = "[SmartMaterialPaintingMode.ToggleTopologyPicker]"
+		toolbox_icon = {
+			size = { 32 32 }
+			texture = "gfx/tools/terrain_picker_icon.dds"
+			framesize = { 64 64 }
+		}
+	}
+
+	tooloptions_divider = { }
+
+	editor_button = {
+		name = "apply"
+		layoutpolicy_horizontal = fixed
+		size = { 128 32 }
+		text = "Apply Changes"
+		font = "standard_cw_font"
+		align = center|nobaseline
+		fontsize = 12
+		fontcolor = { 1 1 1 1 }
+		onclick = [SmartMaterialPaintingMode.ApplyChanges]
+		enabled = [SmartMaterialPaintingMode.CanApplyChanges]
+		shortcut = "smart_brush_apply_changes"
+		tooltip = "Apply materials that are visible in the preview mask, and clear the mask."
+		tooltipwidget = { using = dockable_tooltip }
+	}
+
+	editor_button = {
+		name = "discard"
+		layoutpolicy_horizontal = fixed
+		size = { 128 32 }
+		text = "Discard Changes"
+		font = "standard_cw_font"
+		align = center|nobaseline
+		fontsize = 12
+		fontcolor = { 1 1 1 1 }
+		onclick = [SmartMaterialPaintingMode.DiscardChanges]
+		enabled = [SmartMaterialPaintingMode.CanApplyChanges]
+		shortcut = "smart_brush_discard_changes"
+		tooltip = "Discard the preview mask."
+		tooltipwidget = { using = dockable_tooltip }
+	}
+
+	preview_mask_opacity_slider = {}
+
+	tooloptions_divider = { }
+
+	tooloptions_progress_spinner = {
+		visible = "[SmartMaterialPaintingMode.IsBackgroundProcessing]"
+		tooltip = "[SmartMaterialPaintingMode.GetBackgroundProcessingDesc]"
+		tooltipwidget = { using = dockable_tooltip }
+	}
+
+	widget = {
+		name = "spacer"
+		layoutpolicy_horizontal = expanding
+	}
+}
+
+toolbox_checkbutton = {
+	name = "smart_material_brush_toolbox_button"
+	shortcut = "smart_tool"
+	tooltip = "Smart Material Brush"
+	checked = "[SmartMaterialPaintingMode.IsSelected]"
+	
+	toolbox_icon = {
+		texture = "gfx/tools/material/smart_brush.png"
+	}
+}
+
+types "SmartBrushTypes" {
+	type smart_brush_button = editor_button {
+		size = { 75 32 }
+		font = "standard_cw_font"
+		align = center|nobaseline
+		fontsize = 12
+		fontcolor = { 1 1 1 1 }
+	}
+
+	type smart_brush_label_and_editbox = hbox {
+		size = { 0 0 }
+		layoutpolicy_horizontal = preferred
+		layoutpolicy_vertical = preferred
+
+		editbox = {
+			using = terraineditor_label
+			size = { 0 20 }
+			block "title" {}
+			align = right|nobaseline
+			layoutpolicy_horizontal = preferred
+			block "tooltip" {}
+			tooltipwidget = { using = dockable_tooltip }
+		}
+		editor_button = {
+			size = { 20 20 }
+			layoutpolicy_horizontal = fixed
+			name = "button_left"
+			block "button_left" {}
+			toolbox_icon = {
+				texture = "gfx/tools/left_arrow_icon.dds"
+			}
+		}
+		editor_editbox = {
+			using = terraineditor_eb
+			size = { 40 20 }
+			block "editbox" {}
+			layoutpolicy_vertical = fixed
+			layoutpolicy_horizontal = fixed
+		}
+		editor_button = {
+			size = { 20 20 }
+			layoutpolicy_horizontal = fixed
+			name = "button_right"
+			block "button_right" {}
+			toolbox_icon = {
+				texture = "gfx/tools/right_arrow_icon.dds"
+			}
+		}
+	}
+
+	type smart_brush_checkbox = hbox {
+		layoutpolicy_horizontal = shrinking
+		layoutpolicy_vertical = preferred
+		checkbutton = {
+			size = { 16 16 }
+			gfxtype = checkbuttongfx
+			shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+			texture = "gfx/editor_gui/editor_checkbox.dds"
+			framesize = { 16 16 }
+			block "checkbutton" {}
+		}
+		widget = {
+			size = { 4 0 }
+			layoutpolicy_horizontal = fixed
+		}
+		editor_textbox = {
+			autoresize = yes
+			align = top
+			block "textbox" {}
+			using = tooloptions_font
+			fontsize = 12
+		}
+		block "tooltip" {}
+		tooltipwidget = { using = dockable_tooltip }
+	}
+
+	type smart_brush_property_curve = vbox {
+        size = { 0 0 }
+        layoutpolicy_horizontal = expanding
+        layoutpolicy_vertical = expanding
+        icon = {
+            name = "preview"
+            texture = "[ToolPropertyCurve.GetPreviewTexture( '(int32)400', '(int32)80', '(hex)66272A33', '(hex)FFA1A1A1' )]" # Use 2x bigger preview icon in compare to the widget size, for Super Sampling effect. 3rd and 4th args is ColorA and ColorB in ARGB format.
+            size = { 0 40 }
+            layoutpolicy_horizontal = preferred
+            layoutpolicy_vertical = expanding
+        }
+        hbox = {
+            margin_left = 4
+            margin_right = 4
+            margin_top = 6
+            margin_bottom = 4
+            size = { 0 32 }
+            layoutpolicy_horizontal = preferred
+            layoutpolicy_vertical = fixed
+            checkbutton = {
+                name = "EditCurve"
+                size = { 32 32 }
+                gfxtype = checkbuttongfx
+                shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+                texture = "gfx/tools/curve_editor_icon.dds"
+                framesize = { 64 64 }
+                checked = "[Not(ToolPropertyCurve.HasCurveEditor)]"
+                onclick = "[ToolPropertyCurve.ToggleCurveEditor]"
+                tooltip = "Click to open/close the curve editor."
+                tooltipwidget = { using = dockable_tooltip }
+            }
+            widget = { size = { 4 0 } layoutpolicy_horizontal = fixed }
+            editor_toolbar_button = {
+                icon = {
+                    name = "ResetCurve"
+                    texture = "gfx/tools/reset_icon.dds"
+                    size = { 32 32 }
+                }
+                size = { 32 32 }
+                onclick = "[ToolPropertyCurve.ResetCurve]"
+                tooltip = "Click to reset curve to default."
+            }
+            widget = { size = { 4 0 } layoutpolicy_horizontal = fixed }
+            editor_toolbar_button = {
+                icon = {
+                    name = "Copy"
+                    texture = "gfx/tools/copy_icon.dds"
+                    size = { 32 32 }
+                }
+                size = { 32 32 }
+                onclick = "[SmartMaterialPaintingMode.CopyCurveToClipboard( ToolPropertyCurve.Self )]"
+                tooltip = "Click to copy the curve to the independent clipboard. Then click on Paste button on any other curve."
+            }
+            widget = { size = { 4 0 } layoutpolicy_horizontal = fixed }
+            editor_toolbar_button = {
+                icon = {
+                    name = "Paste"
+                    texture = "gfx/tools/paste_icon.dds"
+                    size = { 32 32 }
+                }
+                size = { 32 32 }
+                enabled = "[SmartMaterialPaintingMode.IsCurveClipboardEmpty]"
+                onclick = "[ToolPropertyCurve.SetCurve( SmartMaterialPaintingMode.GetCurveFromClipboard )]"
+                tooltip = "Click to paste curve from the clipboard."
+            }
+            dummy_fill_up = {}
+        }
+	}
+
+	#TODO: If we want more properties we should define them here as "smart_brush_property_XXX" where XXX is all other supported types.
+
+	type smart_brush_pattern_entry = widget {
+		name = "smart_brush_pattern_entry"
+		datacontext = "[SmartBrushHeightRange.AccessPattern]"
+		size = { 508 545 }
+		layoutpolicy_vertical = fixed
+
+		widget = {
+			name = "height_range_bg"
+			size = { 508 545 }
+			layoutpolicy_vertical = fixed
+			background = {
+				margin = { 2 2 }
+				margin_bottom = 6
+				margin_right = 6
+				texture = "gfx/editor_gui/editor_dropdown_list.dds"
+				spriteType = CorneredStretched
+				spriteborder = { 6 6 }
+				spriteborder_right = 8
+				spriteborder_bottom = 8
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+			}
+
+			vbox = {
+				spacing = 0
+				scissor = yes
+				margin = { 4 4 }
+
+				# Name of the pattern (height range)
+				hbox = {
+					size = { 0 30 }
+					layoutpolicy_horizontal = preferred
+					layoutpolicy_vertical = fixed
+					checkbutton = {
+						name = "toggle_visibility"
+						size = { 32 32 }
+						gfxtype = checkbuttongfx
+						shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+						texture = "gfx/tools/visibility_icon.dds"
+						framesize = { 32 32 }
+						checked = "[SmartMaterialPaintingMode.IsHeightRangeVisible( SmartBrushHeightRange.Self )]"
+						onclick = "[SmartMaterialPaintingMode.ToggleHeightRangeVisible( SmartBrushHeightRange.Self )]"
+						tooltip = "Toggle visibility of this pattern."
+						tooltipwidget = { using = dockable_tooltip }
+					}
+					checkbutton = {
+						name = "toggle_debug"
+						size = { 32 32 }
+						gfxtype = checkbuttongfx
+						shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+						texture = "gfx/tools/debug_icon.dds"
+						framesize = { 32 32 }
+						checked = "[SmartMaterialPaintingMode.IsDebugActiveFor( SmartBrushHeightRange.Self )]"
+						onclick = "[SmartMaterialPaintingMode.ToggleDebugActiveFor( SmartBrushHeightRange.AccessSelf )]"
+						tooltip = "Toggle visual debugging of this pattern."
+						tooltipwidget = { using = dockable_tooltip }
+					}
+					editor_textinput = {
+						size = { 0 30 }
+						layoutpolicy_horizontal = preferred
+						layoutpolicy_vertical = fixed
+						fontsize = 14
+						text = "[SmartBrushHeightRange.GetName]"
+						oneditingfinished = "[SmartMaterialPaintingMode.SetHeightRangeName( SmartBrushHeightRange.Self )]"
+						align = hcenter|nobaseline
+						tooltip = "Name this pattern as you wish. It doesn't have to be unique."
+						tooltipwidget = { using = dockable_tooltip }
+					}
+					editor_button = {
+						size = { 32 32 }
+						name = "move_range_up_button"
+						tooltip = "Move this pattern entry Up."
+						tooltipwidget = { using = dockable_tooltip }
+						enabled = "[SmartMaterialPaintingMode.CanReorderRangeToPrev( SmartBrushHeightRange.Self )]"
+						onclick = "[SmartMaterialPaintingMode.ReorderRangeToPrev( SmartBrushHeightRange.AccessSelf )]"
+						toolbox_icon = {
+							texture = "gfx/tools/up_arrow_icon.dds"
+						}
+					}
+					editor_button = {
+						size = { 32 32 }
+						name = "move_range_down_button"
+						tooltip = "Move this pattern entry Down."
+						tooltipwidget = { using = dockable_tooltip }
+						enabled = "[SmartMaterialPaintingMode.CanReorderRangeToNext( SmartBrushHeightRange.Self )]"
+						onclick = "[SmartMaterialPaintingMode.ReorderRangeToNext( SmartBrushHeightRange.AccessSelf )]"
+						toolbox_icon = {
+							texture = "gfx/tools/down_arrow_icon.dds"
+						}
+					}
+					editor_button = {
+						size = { 32 32 }
+						name = "delete_range_button"
+						tooltip = "Delete this pattern entry."
+						tooltipwidget = { using = dockable_tooltip }
+						onclick = "[SmartMaterialPaintingMode.DeleteRange( SmartBrushHeightRange.AccessSelf )]"
+						toolbox_icon = {
+							texture = "gfx/tools/delete_icon.dds"
+						}
+					}
+				}
+
+				editor_frame = {
+					blockoverride "label" { text = "Pattern Setup:" }
+					blockoverride "content" {
+						using = tools_spacing
+
+						hbox = {
+							using = tools_spacing
+							size = { 0 0 }
+							layoutpolicy_horizontal = preferred
+							layoutpolicy_vertical = preferred
+
+							editor_frame = {
+								name = "opacity_curve"
+								size = { 240 0 }
+								layoutpolicy_horizontal = fixed
+								layoutpolicy_vertical = preferred
+								blockoverride "label" { 
+									text = "[ToolProperty.GetLabel]"
+								}
+								blockoverride "content" {
+									smart_brush_property_curve = { }
+								}
+							}
+
+							editor_frame = {
+								blockoverride "label" { text = "Opacity Mask:" }
+								blockoverride "content" {
+									name = "opacity_mask"
+									
+									vbox = {
+										size = { 0 0 }
+										layoutpolicy_horizontal = preferred
+										layoutpolicy_vertical = preferred
+
+										hbox = {
+											size = { 0 0 }
+											layoutpolicy_horizontal = preferred
+											layoutpolicy_vertical = preferred
+
+											# PREVIEW ICON
+											icon = {
+												size = { 82 82 }
+												layoutpolicy_horizontal = fixed
+												layoutpolicy_vertical = fixed
+ 
+												visible = "[SmartMaterialPaintingMode.HasOpacityMaskTexture( SmartBrushHeightRange.Self )]"
+												texture = "[SmartMaterialPaintingMode.AccessOpacityMaskTexturePreview( SmartBrushHeightRange.Self )]"
+												shaderfile = "gfx/FX/pdxgui_noblend.shader"
+												tooloptions_progress_spinner = {
+													visible = "[SmartMaterialPaintingMode.IsOpacityMaskTextureLoading( SmartBrushHeightRange.Self )]"
+												}
+											}
+
+											vbox = {
+												size = { 0 0 }
+												layoutpolicy_horizontal = preferred
+												layoutpolicy_vertical = preferred
+
+												# Opacity mask - OFFSET X
+												smart_brush_label_and_editbox = {
+													blockoverride "tooltip" { tooltip = "Opacity mask offset X value (range 0.0 to 1.0)." }
+													blockoverride "title" { text = "Offset X:" }
+													blockoverride "editbox" {
+														text = "[SmartMaterialPaintingMode.GetOpacityMaskOffset( '(bool)yes', SmartBrushHeightRange.Self )]"
+														oneditingfinished = "[SmartMaterialPaintingMode.SetOpacityMaskOffsetAsString( '(bool)yes', SmartBrushHeightRange.Self )]"
+													}
+													blockoverride "button_left" {
+														onclick = "[SmartMaterialPaintingMode.AddOpacityMaskOffset( '(bool)yes', SmartBrushHeightRange.Self, '(float)-0.01' )]"
+													}
+													blockoverride "button_right" {
+														onclick = "[SmartMaterialPaintingMode.AddOpacityMaskOffset( '(bool)yes', SmartBrushHeightRange.Self, '(float)0.01' )]"
+													}
+												}
+												# Opacity mask - OFFSET Y
+												smart_brush_label_and_editbox = {
+													blockoverride "tooltip" { tooltip = "Opacity mask offset Y value (range 0.0 to 1.0)." }
+													blockoverride "title" { text = "Offset Y:" }
+													blockoverride "editbox" {
+														text = "[SmartMaterialPaintingMode.GetOpacityMaskOffset( '(bool)no', SmartBrushHeightRange.Self )]"
+														oneditingfinished = "[SmartMaterialPaintingMode.SetOpacityMaskOffsetAsString( '(bool)no', SmartBrushHeightRange.Self )]"
+													}
+													blockoverride "button_left" {
+														onclick = "[SmartMaterialPaintingMode.AddOpacityMaskOffset( '(bool)no', SmartBrushHeightRange.Self, '(float)-0.01' )]"
+													}
+													blockoverride "button_right" {
+														onclick = "[SmartMaterialPaintingMode.AddOpacityMaskOffset( '(bool)no', SmartBrushHeightRange.Self, '(float)0.01' )]"
+													}
+												}
+												# Opacity mask - SCALE X
+												smart_brush_label_and_editbox = {
+													blockoverride "tooltip" { tooltip = "Opacity mask scale X value." }
+													blockoverride "title" { text = "Scale X:" }
+													blockoverride "editbox" {
+														text = "[SmartMaterialPaintingMode.GetOpacityMaskScale( '(bool)yes', SmartBrushHeightRange.Self )]"
+														oneditingfinished = "[SmartMaterialPaintingMode.SetOpacityMaskScaleAsString( '(bool)yes', SmartBrushHeightRange.Self )]"
+													}
+													blockoverride "button_left" {
+														onclick = "[SmartMaterialPaintingMode.AddOpacityMaskScale( '(bool)yes', SmartBrushHeightRange.Self, '(float)-0.01' )]"
+													}
+													blockoverride "button_right" {
+														onclick = "[SmartMaterialPaintingMode.AddOpacityMaskScale( '(bool)yes', SmartBrushHeightRange.Self, '(float)0.01' )]"
+													}
+												}
+												# Opacity mask - SCALE Y
+												smart_brush_label_and_editbox = {
+													blockoverride "tooltip" { tooltip = "Opacity mask scale Y value." }
+													blockoverride "title" { text = "Scale Y:" }
+													blockoverride "editbox" {
+														text = "[SmartMaterialPaintingMode.GetOpacityMaskScale( '(bool)no', SmartBrushHeightRange.Self )]"
+														oneditingfinished = "[SmartMaterialPaintingMode.SetOpacityMaskScaleAsString( '(bool)no', SmartBrushHeightRange.Self )]"
+													}
+													blockoverride "button_left" {
+														onclick = "[SmartMaterialPaintingMode.AddOpacityMaskScale( '(bool)no', SmartBrushHeightRange.Self, '(float)-0.01' )]"
+													}
+													blockoverride "button_right" {
+														onclick = "[SmartMaterialPaintingMode.AddOpacityMaskScale( '(bool)no', SmartBrushHeightRange.Self, '(float)0.01' )]"
+													}
+												}
+												# Opacity mask - ROTATION
+												smart_brush_label_and_editbox = {
+													blockoverride "tooltip" { tooltip = "Opacity mask rotation value." }
+													blockoverride "title" { text = "Rotation:" }
+													blockoverride "editbox" {
+														text = "[SmartMaterialPaintingMode.GetOpacityMaskRotation( SmartBrushHeightRange.Self )]"
+														oneditingfinished = "[SmartMaterialPaintingMode.SetOpacityMaskRotationAsString( SmartBrushHeightRange.Self )]"
+													}
+													blockoverride "button_left" {
+														onclick = "[SmartMaterialPaintingMode.AddOpacityMaskRotation( SmartBrushHeightRange.Self, '(float)-1.0' )]"
+													}
+													blockoverride "button_right" {
+														onclick = "[SmartMaterialPaintingMode.AddOpacityMaskRotation( SmartBrushHeightRange.Self, '(float)1.0' )]"
+													}
+												}
+											}
+										}
+										hbox = {
+											size = { 0 0 }
+											layoutpolicy_horizontal = preferred
+											layoutpolicy_vertical = preferred
+
+											editor_toolbar_button = {
+												using = tools_spacing
+												size = { 0 24 }
+												layoutpolicy_horizontal = preferred
+												layoutpolicy_vertical = fixed
+												elide = middle
+												text = "[SmartBrushHeightRange.GetOpacityMaskTexturePath]"
+												onclick = "[ToolPropertySearchList.OpenSearchList]"
+												tooltip = "[SmartBrushHeightRange.GetOpacityMaskTexturePath]"
+												tooltipwidget = { using = dockable_tooltip }
+											}
+											tooloptions_button = {
+												text = "X"
+												fontsize = 18
+												size = { 24 24 }
+												tooltip = "Clear assigned texture mask."
+												tooltipwidget = { using = dockable_tooltip }
+												enabled = "[SmartMaterialPaintingMode.HasOpacityMaskTexture( SmartBrushHeightRange.Self )]"
+												onclick = "[SmartMaterialPaintingMode.ClearOpacityMaskTexture( SmartBrushHeightRange.Self )]"
+											}
+										}
+									}
+								}
+							}
+							dummy_fill_up = {}
+						}
+
+						hbox = {
+							size = { 0 0 }
+							using = tools_spacing
+							layoutpolicy_horizontal = preferred
+							layoutpolicy_vertical = preferred
+
+							vbox = {
+								name = "pattern_types"
+								size = { 0 0 }
+								layoutpolicy_horizontal = preferred
+								layoutpolicy_vertical = preferred
+
+								hbox = {
+									size = { 0 0 }
+									layoutpolicy_horizontal = preferred
+									layoutpolicy_vertical = preferred
+
+									# Icon for the current pattern type
+									icon = {
+										texture = "[SmartMaterialPaintingMode.AccessPatternTypeTexture( SmartBrushHeightRange.AccessPattern.Self )]"
+										size = { 32 32 }
+									}
+
+									widget = {
+										size = { 4 0 }
+										layoutpolicy_horizontal = fixed
+									}
+
+									# Dropdown with list of pattern types
+									dropDown = {
+										name = "patterns_dropdown"
+										using = EditorTextDropdown
+										datamodel = "[GetSmartBrushPatternNames]"
+										layoutpolicy_horizontal = fixed
+										size = { 100 22 }
+										blockoverride "dropdown_list_position" {
+											position = { 2 100% }
+										}
+										blockoverride "dropdown_item_size" {
+											size = { 100% 20 }
+										}
+										blockoverride "dropdown_item_text" {
+											text = "[CString.GetString]"
+										}
+										blockoverride "dropdown_gridbox_size" {
+											addcolumn = 256
+											addrow = 20
+										}
+										onselectionchanged = "[SmartMaterialPaintingMode.SetPatternIndex( SmartBrushPattern.Self, '(bool)yes' )]" # 2nd argument to apply defaults while changing type
+										selectedindex = "[SmartBrushPattern.GetPatternIndex]"
+										focuspolicy = all
+									}
+								}
+
+								#widget = {
+								#	size = { 0 16 }
+								#	layoutpolicy_vertical = fixed
+								#}
+
+								hbox = {
+									size = { 0 0 }
+									layoutpolicy_horizontal = preferred
+									layoutpolicy_vertical = preferred
+
+									# Icon for the current curve
+									icon = {
+										texture = "[SmartMaterialPaintingMode.AccessPatternCurveTexture( SmartBrushHeightRange.AccessPattern.Self )]"
+										size = { 32 32 }
+									}
+
+									widget = {
+										size = { 4 0 }
+										layoutpolicy_horizontal = fixed
+									}
+
+									# Dropdown with list of curve types
+									dropDown = {
+										name = "interpolations_dropdown"
+										using = EditorTextDropdown
+										datamodel = "[GetSmartBrushInterpolationNames]"
+										layoutpolicy_horizontal = fixed
+										size = { 100 22 }
+										blockoverride "dropdown_list_position" {
+											position = { 2 100% }
+										}
+										blockoverride "dropdown_item_size" {
+											size = { 100% 20 }
+										}
+										blockoverride "dropdown_item_text" {
+											text = "[CString.GetString]"
+										}
+										blockoverride "dropdown_gridbox_size" {
+											addcolumn = 256
+											addrow = 20
+										}
+										onselectionchanged = "[SmartMaterialPaintingMode.SetInterpolationIndex( SmartBrushPattern.Self )]"
+										selectedindex = "[SmartBrushPattern.GetInterpolationIndex]"
+										focuspolicy = all
+									}
+								}
+								dummy_fill_up = {}
+							}
+
+							widget = {
+								size = { 16 0 }
+								layoutpolicy_horizontal = fixed
+							}
+
+							# Modes
+							vbox = {
+								name = "modes"
+								size = { 0 0 }
+								layoutpolicy_horizontal = expanding
+								layoutpolicy_vertical = preferred
+
+								toolbox_checkbutton = {
+									size = { 110 0 }
+									layoutpolicy_horizontal = growing
+									layoutpolicy_vertical = preferred
+									text = "By Average"
+									tooltip = "Method that calculates the opacity from the aspect of #COLOR:{1.0,1.0,0.6} all#! surrounding points (within the bleeding range) that match the pattern. #COLOR:{0.8,0.8,0.8};ITALIC Use visual debugging for better understanding of how each method is working."
+									checked = "[EqualTo_int32(SmartBrushPattern.GetModeIndex, '(int32)0')]"
+									onclick = "[SmartMaterialPaintingMode.SetPatternMode( SmartBrushHeightRange.Self, '(int32)0' )]"
+								}
+
+								toolbox_checkbutton = {
+									size = { 110 0 }
+									layoutpolicy_horizontal = growing
+									layoutpolicy_vertical = preferred
+									text = "By Average Min"
+									tooltip = "Method that calculates the opacity from the aspect of the points #COLOR:{1.0,1.0,0.6} laying on a single ray#! (within the bleeding range) that match the pattern. Only the ray with the #COLOR:{1.0,1.0,0.6} lowest amount#! of points is considered. #COLOR:{0.8,0.8,0.8};ITALIC Use visual debugging for better understanding of how each method is working."
+									checked = "[EqualTo_int32(SmartBrushPattern.GetModeIndex, '(int32)1')]"
+									onclick = "[SmartMaterialPaintingMode.SetPatternMode( SmartBrushHeightRange.Self, '(int32)1' )]"
+								}
+
+								toolbox_checkbutton = {
+									size = { 110 0 }
+									layoutpolicy_horizontal = growing
+									layoutpolicy_vertical = preferred
+									text = "By Average Max"
+									tooltip = "Method that calculates the opacity from the aspect of the points #COLOR:{1.0,1.0,0.6} laying on a single ray#! (within the bleeding range) that match the pattern. Only the ray with the #COLOR:{1.0,1.0,0.6} highest amount#! of points is considered. #COLOR:{0.8,0.8,0.8};ITALIC Use visual debugging for better understanding of how each method is working."
+									checked = "[EqualTo_int32(SmartBrushPattern.GetModeIndex, '(int32)2')]"
+									onclick = "[SmartMaterialPaintingMode.SetPatternMode( SmartBrushHeightRange.Self, '(int32)2' )]"
+								}
+
+								toolbox_checkbutton = {
+									size = { 110 0 }
+									layoutpolicy_horizontal = growing
+									layoutpolicy_vertical = preferred
+									text = "By Nearest Distance"
+									tooltip = "Method that calculates the opacity by the distance to the nearest point (within the bleeding range) that matches the pattern. #COLOR:{0.8,0.8,0.8};ITALIC Use visual debugging for better understanding of how each method is working."
+									checked = "[EqualTo_int32(SmartBrushPattern.GetModeIndex, '(int32)3')]"
+									onclick = "[SmartMaterialPaintingMode.SetPatternMode( SmartBrushHeightRange.Self, '(int32)3' )]"
+								}
+
+								#dummy_fill_up = {}
+							}
+
+							vbox = {
+								name = "settings"
+								size = { 0 0 }
+								layoutpolicy_horizontal = expanding
+								layoutpolicy_vertical = preferred
+
+								smart_brush_label_and_editbox = {
+									blockoverride "tooltip" { tooltip = "Angular range that behaviour depends on currently selected the pattern." }
+									blockoverride "title" { text = "Angle L:" }
+									blockoverride "editbox" {
+										text = "[SmartBrushPattern.GetAngleL]"
+										oneditingfinished = "[SmartMaterialPaintingMode.SetAngleAsString( '(bool)yes', SmartBrushPattern.Self )]"
+									}
+									blockoverride "button_left" {
+										onclick = "[SmartMaterialPaintingMode.AddAngle( SmartBrushPattern.Self, '(bool)yes', '(float)-1.0' )]"
+									}
+									blockoverride "button_right" {
+										onclick = "[SmartMaterialPaintingMode.AddAngle( SmartBrushPattern.Self, '(bool)yes', '(float)1.0' )]"
+									}
+								}
+								smart_brush_label_and_editbox = {
+									blockoverride "tooltip" { tooltip = "Angular range that behaviour depends on currently selected the pattern." }
+									blockoverride "title" { text = "Angle R:" }
+									blockoverride "editbox" {
+										text = "[SmartBrushPattern.GetAngleR]"
+										oneditingfinished = "[SmartMaterialPaintingMode.SetAngleAsString( '(bool)no', SmartBrushPattern.Self )]"
+									}
+									blockoverride "button_left" {
+										onclick = "[SmartMaterialPaintingMode.AddAngle( SmartBrushPattern.Self, '(bool)no', '(float)-1.0' )]"
+									}
+									blockoverride "button_right" {
+										onclick = "[SmartMaterialPaintingMode.AddAngle( SmartBrushPattern.Self, '(bool)no', '(float)1.0' )]"
+									}
+								}
+								smart_brush_label_and_editbox = {
+									blockoverride "tooltip" { tooltip = "Bleeding is a range (in a size of pixels corresponding to the heightmap resolution), within which the geometry patterns are being averaged. Smaller value = sharp results. Bigger value = blurry results." }
+									blockoverride "title" { text = "Bleeding:" }
+									blockoverride "editbox" {
+										text = "[SmartBrushPattern.GetBleeding]"
+										oneditingfinished = "[SmartMaterialPaintingMode.SetBleedingAsString( SmartBrushPattern.Self )]"
+									}
+									blockoverride "button_left" {
+										onclick = "[SmartMaterialPaintingMode.AddBleeding( SmartBrushPattern.Self, '(int32)-1' )]"
+									}
+									blockoverride "button_right" {
+										onclick = "[SmartMaterialPaintingMode.AddBleeding( SmartBrushPattern.Self, '(int32)1' )]"
+									}
+								}
+								smart_brush_label_and_editbox = {
+									blockoverride "tooltip" { tooltip = "Sharpness is a range in which each geometry detection point calculates the average angles. The smaller value, the sharper average angles are." }
+									blockoverride "title" { text = "Sharpness:" }
+									blockoverride "editbox" {
+										text = "[SmartBrushPattern.GetSharpness]"
+										oneditingfinished = "[SmartMaterialPaintingMode.SetSharpnessAsString( SmartBrushPattern.Self )]"
+									}
+									blockoverride "button_left" {
+										onclick = "[SmartMaterialPaintingMode.AddSharpness( SmartBrushPattern.Self, '(int32)-1' )]"
+									}
+									blockoverride "button_right" {
+										onclick = "[SmartMaterialPaintingMode.AddSharpness( SmartBrushPattern.Self, '(int32)1' )]"
+									}
+								}
+								smart_brush_label_and_editbox = {
+									blockoverride "tooltip" { tooltip = "Density specifies the amount of rays used to do the surrounding geometry analisis. The more the better precision, but slower performance when painting." }
+									blockoverride "title" { text = "Density:" }
+									blockoverride "editbox" {
+										text = "[SmartBrushPattern.GetDensity]"
+										oneditingfinished = "[SmartMaterialPaintingMode.SetDensityAsString( SmartBrushPattern.Self )]"
+									}
+									blockoverride "button_left" {
+										onclick = "[SmartMaterialPaintingMode.AddDensity( SmartBrushPattern.Self, '(int32)-1' )]"
+									}
+									blockoverride "button_right" {
+										onclick = "[SmartMaterialPaintingMode.AddDensity( SmartBrushPattern.Self, '(int32)1' )]"
+									}
+								}
+							}
+						}
+					}
+				}
+
+
+				editor_frame = {
+					blockoverride "label" { text = "Material Mix:" }
+					blockoverride "content" {
+						hbox = {
+							size = { 0 0 }
+							layoutpolicy_horizontal = preferred
+							layoutpolicy_vertical = preferred
+							margin = { 4 4 }
+
+							fixedgridbox = {
+								addcolumn = 98
+								addrow = 130
+								flipdirection = yes
+								datacontext = "[SmartBrushHeightRange.AccessPattern.AccessMaterialMix]"
+								datamodel = "[MaterialMix.AccessMaterials]"
+								item = {
+									widget = {
+										size = { 90 130 }
+										background = {
+											texture = "gfx/editor_gui/editor_layout_window.png"
+											spriteType = CorneredStretched
+											spriteborder = { 5 5 }
+											shaderfile = "gfx/FX/pdxgui_default.shader"
+											framesize = { 16 16 }
+										}
+										vbox = {
+											container = {
+												tooloptions_button = {
+													size = { 90 90 }
+													tooltip = "#BOLD;COLOR:{0.0,1.0,0.0} Click#! to change #BOLD;COLOR:{1.0,1.0,0.0} [MaterialMixEntry.GetMaterial.GetName]#! material to different one."
+													tooltipwidget = { using = dockable_tooltip }
+													onclick = "[SmartMaterialPaintingMode.ShowMaterialBrowserAndSetEntryInCurrentPattern( SmartBrushHeightRange.AccessPattern, MaterialMixEntry.AccessSelf )]"
+													toolbox_icon = {
+														size = { 86 86 }
+														texture = "[MaterialMixEntry.GetMaterial.GetDiffuseTexture]"
+														shaderfile = "gfx/FX/pdxgui_noblend.shader"
+													}
+												}
+												editor_button = {
+													size = { 24 24 }
+													parentanchor = top|right
+													tooltip = "Remove this material from the mix."
+													tooltipwidget = { using = dockable_tooltip }
+													onclick = "[SmartMaterialPaintingMode.RemoveMaterialEntry( MaterialMix.AccessSelf, MaterialMixEntry.Self )]"
+													toolbox_icon = {
+														texture = "gfx/tools/delete_icon.dds"
+													}
+												}
+												checkbutton = {
+													size = { 20 20 }
+													gfxtype = checkbuttongfx
+													shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+													texture = "gfx/tools/padlock_checkbutton.dds"
+													framesize = { 16 16 }
+													tooltip = "Locking this material will forbid doing any changes on the map to this layer."
+													tooltipwidget = { using = dockable_tooltip }
+													checked = "[MaterialMixEntry.GetMaterial.IsLocked]"
+													onclick = "[SmartMaterialPaintingMode.ToggleMaterialLock( MaterialMixEntry.GetMaterial.Self )]"
+												}
+											}
+											editor_slider = {
+												layoutpolicy_horizontal = growing
+												layoutpolicy_vertical = fixed
+												min = 0
+												max = 256
+												step = 1
+												wheelstep = 15
+												value = "[MaterialMixEntry.GetValue]"
+												onvaluechanged = "[MaterialMix.SetValue(MaterialMixEntry.Self)]"
+												onchangestart = "[SmartMaterialPaintingMode.StartSampleCompositionEdit( MaterialMix.Self )]"
+												onchangefinish = "[SmartMaterialPaintingMode.EndSampleCompositionEdit( MaterialMix.Self, SmartBrushHeightRange.Self, SmartMaterialPaintingMode.GetCurrentPreset )]"
+												enabled = "[And( Not(MaterialMixEntry.IsLocked), NotEqualTo_int32(MaterialMix.GetMaterialsCount, '(int32)1') )]"
+											}
+											hbox = {
+												size = { 0 20 }
+												layoutpolicy_horizontal = preferred
+												layoutpolicy_vertical = fixed
+												checkbutton = {
+													size = { 20 20 }
+													gfxtype = checkbuttongfx
+													shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
+													texture = "gfx/tools/padlock_checkbutton.dds"
+													framesize = { 16 16 }
+													parentanchor = left
+													tooltip = "Lock the percentage of this material."
+													tooltipwidget = { using = dockable_tooltip }
+													checked = "[MaterialMixEntry.IsLocked]"
+													onclick = "[SmartMaterialPaintingMode.ToggleSampleEntryLock( MaterialMix.Self, MaterialMixEntry.Self, SmartBrushHeightRange.Self, SmartMaterialPaintingMode.GetCurrentPreset )]"
+												}
+												editor_textinput = {
+													layoutpolicy_horizontal = growing
+													layoutpolicy_vertical = fixed
+													size = { 40 20 }
+													align = vcenter|center
+													text = "[MaterialMixEntry.GetValueAsText]"
+													oneditingfinished = "[SmartMaterialPaintingMode.ChangeSampleEntryComposition( MaterialMix.AccessSelf, MaterialMixEntry.Self, SmartBrushHeightRange.Self, SmartMaterialPaintingMode.GetCurrentPreset )]"
+													enabled = "[Not(MaterialMixEntry.IsLocked)]"
+												}
+											}
+										}
+									}
+								}
+							}
+							tooloptions_button = {
+								size = { 90 130 }
+								text = "+"
+								fontsize = 32
+								tooltip = "Add material entry to the mix."
+								tooltipwidget = { using = dockable_tooltip }
+								visible = "[SmartBrushHeightRange.AccessPattern.AccessMaterialMix.CanAddMaterialEntry]"
+								onclick = "[SmartMaterialPaintingMode.ShowMaterialBrowserAndAddToCurrentPattern( SmartBrushHeightRange.AccessPattern )]"
+							}
+							dummy_fill_up = {}
+						}
+					}
+				}
+
+
+				dummy_fill_up = {}
+			}
+		}
+	}
+}
+
+
+widget = {
+	alwaystransparent = no
+	size = { 100% 100% }
+	name = "smart_brush_viewport"
+ 
+ 	# Tooltip for visual debugging
+ 	widget = {
+		size = { 100% 100% }
+		tooltip_enabled = "[And( Not( SmartMaterialPaintingMode.IsTopologyPickerEnabled ), And( SmartMaterialPaintingMode.IsDebugTooltipVisible, SmartMaterialPaintingMode.IsDebugActive ) ) ]"
+		tooltip_type = mouse
+		tooltip_widgetanchor = bottom|left
+		tooltipwidget = {
+			flowcontainer = {
+				direction = vertical
+				spacing = 4
+				margin = { 4 4 }
+				background = {
+					texture = "gfx/editor_gui/editor_layout_window.png"
+					spriteType = CorneredStretched
+					spriteborder = { 5 5 }
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					framesize = { 16 16 }
+				}
+				tooloptions_textbox = {
+					text = "#BOLD;COLOR:{1.0,1.0,0.6} Debug:#!"
+				}
+				tooloptions_textbox = {
+					text = "[SmartMaterialPaintingMode.GetDebugDesc]"
+				}
+				widget = { 
+					size = { 0 6 }
+					layoutpolicy_horizontal = fixed
+					layoutpolicy_vertical = fixed
+				}
+				tooloptions_textbox = {
+					text = "[SmartMaterialPaintingMode.GetDebugUIHint]"
+				}
+			}
+		}
+ 	}
+
+ 	# Tooltip for topology picker
+ 	widget = {
+		size = { 100% 100% }
+		tooltip_enabled = "[SmartMaterialPaintingMode.IsTopologyPickerEnabled]"
+		tooltip_type = mouse
+		tooltip_widgetanchor = bottom|left
+		tooltipwidget = {
+			flowcontainer = {
+				direction = vertical
+				spacing = 4
+				margin = { 4 4 }
+				background = {
+					texture = "gfx/editor_gui/editor_layout_window.png"
+					spriteType = CorneredStretched
+					spriteborder = { 5 5 }
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					framesize = { 16 16 }
+				}
+				tooloptions_textbox = {
+					text = "#BOLD;COLOR:{1.0,1.0,0.6} Topology Picker:#!"
+				}
+				tooloptions_textbox = {
+					text = "[SmartMaterialPaintingMode.GetTopologyPickerDesc]"
+				}
+			}
+		}
+ 	}
+
+ 	# Tooltip for painting forbidden reason
+ 	widget = {
+		size = { 100% 100% }
+		tooltip_enabled = "[And( SmartMaterialPaintingMode.IsPaintingForbidden, Not( Or( SmartMaterialPaintingMode.IsTopologyPickerEnabled, SmartMaterialPaintingMode.IsDebugActive ) ) )]"#   And( And( Not( SmartMaterialPaintingMode.IsTopologyPickerEnabled ), Not( SmartMaterialPaintingMode.IsDebugActive ) ), SmartMaterialPaintingMode.IsPaintingForbidden ) ]"
+		tooltip_type = mouse
+		tooltip_widgetanchor = bottom|left
+		tooltipwidget = {
+			flowcontainer = {
+				direction = vertical
+				spacing = 4
+				margin = { 4 4 }
+				background = {
+					texture = "gfx/editor_gui/editor_layout_window.png"
+					spriteType = CorneredStretched
+					spriteborder = { 5 5 }
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					framesize = { 16 16 }
+				}
+				tooloptions_textbox = {
+					text = "[SmartMaterialPaintingMode.GetPaintingForbiddenDesc]"
+				}
+			}
+		}
+ 	}
+}
+
+
+vbox = {
+	name = "smart_brush_presets"
+
+	margin = { 2 2 }
+	spacing = 8
+
+	layoutpolicy_horizontal = preferred
+	layoutpolicy_vertical = expanding
+
+	# Preset persistence
+	hbox = {
+		layoutpolicy_horizontal = expanding
+		name = "hbox_persistence"
+		editor_button = {
+			size = { 32 32 }
+			name = "reload_presets"
+			tooltip = "Reload all presets and patterns. This action can be undone - just hit undo."
+			tooltipwidget = { using = dockable_tooltip }
+			tooltip_widgetanchor = bottom|left
+			onclick = "[SmartMaterialPaintingMode.ReloadPresets]"
+			toolbox_icon = {
+				texture = "gfx/tools/reload_icon.dds"
+			}
+		}
+		editor_button = {
+			size = { 32 32 }
+			name = "save_presets"
+			tooltip = "Save all presets and patterns."
+			tooltipwidget = { using = dockable_tooltip }
+			tooltip_widgetanchor = bottom|left
+			enabled = "[SmartMaterialPaintingMode.HasDoneAnyChangesToPresets]"
+			onclick = "[SmartMaterialPaintingMode.SavePresets]"
+			toolbox_icon = {
+				texture = "gfx/tools/save_icon.dds"
+			}
+		}
+
+		smart_brush_checkbox = {
+			blockoverride "checkbutton" {
+				checked = "[SmartMaterialPaintingMode.IsAutosave]"
+				onclick = "[SmartMaterialPaintingMode.ToggleAutosave]"
+			}
+			blockoverride "textbox" {
+				text = "Autosave"
+			}
+			blockoverride "tooltip" {
+				tooltip = "Automatically save all changes done to the presets and patterns, when closing the map editor."
+			}
+		}
+		dummy_fill_up = {}
+	}
+
+	editor_frame = {
+		blockoverride "label" { text = "Preset:" }
+		blockoverride "content" {
+			# Preset action buttons
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				name = "hbox_preset_actions"
+				smart_brush_button = {
+					text = "New"
+					onclick = [SmartMaterialPaintingMode.CreateNewPreset]
+				}
+				smart_brush_button = {
+					text = "Rename"
+					onclick = [SmartMaterialPaintingMode.RenamePreset]
+					enabled = [SmartMaterialPaintingMode.IsCurrentPresetValid]
+				}
+				smart_brush_button = {
+					text = "Clone"
+					onclick = [SmartMaterialPaintingMode.ClonePreset]
+					enabled = [SmartMaterialPaintingMode.IsCurrentPresetValid]
+				}
+				smart_brush_button = {
+					text = "Delete"
+					onclick = [SmartMaterialPaintingMode.DeletePreset]
+					enabled = [SmartMaterialPaintingMode.IsCurrentPresetValid]
+				}
+				# Dropdown with list of presets
+				dropDown = {
+					name = "presets_dropdown"
+					using = EditorTextDropdown
+					layoutpolicy_horizontal = preferred
+					size = { 0 32 }
+					blockoverride "dropdown_list_position" {
+						position = { 2 100% }
+					}
+					blockoverride "dropdown_item_size" {
+						size = { 100% 32 }
+						#align = center|nobaseline
+					}
+					blockoverride "dropdown_item_text" {
+						text = "[CString.GetString]"
+					}
+					blockoverride "dropdown_gridbox_size" {
+						addcolumn = 256
+						addrow = 32
+					}
+					onselectionchanged = "[SmartMaterialPaintingMode.SetPresetIndex]"
+					selectedindex = "[SmartMaterialPaintingMode.GetPresetIndex]"
+					focuspolicy = all
+				}
+			}
+		}
+	}
+
+	editor_button = {
+		text = "Add new pattern"
+		onclick = [SmartMaterialPaintingMode.CreateNewRange]
+		enabled = [SmartMaterialPaintingMode.IsCurrentPresetValid]
+		size = { 0 32 }
+		layoutpolicy_horizontal = preferred
+		font = "standard_cw_font"
+		align = center|nobaseline
+		fontsize = 12
+		fontcolor = { 1 1 1 1 }
+	}
+
+	widget = {
+		size = { 0 6 }
+		layoutpolicy_horizontal = expanding
+	}
+
+	scrollarea = {
+		scrollbarpolicy_vertical = always_on
+		scrollbarpolicy_horizontal = always_off
+
+		size = { 0 0 }
+		layoutpolicy_vertical = expanding
+		layoutpolicy_horizontal = preferred
+
+		autoresizeviewport = yes
+
+		viewportwidget = {
+			widget = {
+				scissor = yes
+			}
+		}
+		
+		scrollbar_vertical = {
+			using = editor_vertical_scrollbar
+		}
+		
+		scrollbar_horizontal = {
+			using = editor_horizontal_scrollbar
+		}
+		
+		scrollwidget = {
+			fixedgridbox = {
+				name = "presets_gridbox"
+				alwaystransparent = no
+				layoutpolicy_horizontal = expanding
+				addcolumn = 100%
+				addrow = 560
+
+			}
+		}
+	}
+}

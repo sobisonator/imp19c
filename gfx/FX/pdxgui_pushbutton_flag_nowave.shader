@@ -40,6 +40,7 @@ PixelShader =
 		SampleModeU = "Clamp"
 		SampleModeV = "Clamp"
 	}
+	
 	MainCode PixelShader
 	{
 		Input = "VS_OUTPUT_PDX_GUI"

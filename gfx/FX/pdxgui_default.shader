@@ -112,9 +112,9 @@ PixelShader =
 				float4 OutColor = SampleImageSprite( Texture, Input.UV0 );
 				OutColor *= Input.Color;
 
-#ifdef DISABLED
-				OutColor.rgb = DisableColor( OutColor.rgb );
-#endif
+				#ifdef DISABLED
+					OutColor.rgb = DisableColor( OutColor.rgb );
+				#endif
 
 			    return OutColor;
 			}

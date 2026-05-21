@@ -49,30 +49,22 @@ PixelShader =
 		[[
 			PDX_MAIN
 			{
-				// https://www.shadertoy.com/view/4tlczB
-			    // UV.y -= sin((Time * 0.1) * WaveSize) * 0.03;
-			    // wave animation
+				float Wave = CreateWave(Input.UV0, GlobalTime);
+				float2 UV1 = SettingsUV0ToFlag( Input.UV0 );
+				UV1 = CreateWaveUV( UV1, Wave );
+				float2 UV2 = SettingsUV1ToFlag( Input.UV0 );
+				UV2 = CreateWaveUV( UV2, Wave );
 
-			    float Time = GlobalTime * -1 * 0.5;
-			    float WaveSize = 12.0;
-				float2 UV = SettingsUV0ToFlag( Input.UV0 );
-			    UV.y*=1.1;
-			    UV.y-= 0.05;
-			    float2 Wave = sin((UV.x + Time * 0.1) * WaveSize) * 0.03;
-				float4 OutColor = SampleSpriteTexture( Texture, float3(UV.x, UV.y + Wave), 0 );
-				float2 UV1 = SettingsUV1ToFlag( Input.UV0 );
+				float4 OutColor = SampleSpriteTexture( Texture, UV1, 0 );
 
-			    UV1.y*=1.1;
-			    UV1.y-= 0.05;
-
-				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, float3(UV1.x, UV1.y + Wave), 1);
+				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV2, 1 );
 				OutColor = float4(OutColor.rgb, AlphaColor.a);
 
-				float4 ShadowColor = SampleSpriteTexture( ModifyTexture1, float3(UV1.x, UV1.y + Wave), 1 );
+				float4 ShadowColor = SampleSpriteTexture( ModifyTexture1, UV2, 1 );
 				OutColor = lerp(ShadowColor, OutColor, lerp(ShadowColor.a, OutColor.a, 1.0));
 
-				float4 StyleColor = SampleSpriteTexture( ModifyTexture2, float3(UV1.x, UV1.y + Wave), 1 );
-				OutColor = CreateStyleToFlag( OutColor, AlphaColor.a, StyleColor, Input.UV0, Input.Position, GlobalTime);
+				float4 StyleColor = SampleSpriteTexture( ModifyTexture2, UV2, 1 );
+				OutColor = CreateStyleToFlag( OutColor, AlphaColor.a, StyleColor, Input.UV0, Wave);
 
 				#ifndef NO_HIGHLIGHT
 					OutColor.rgb += HighlightColor;
@@ -84,7 +76,7 @@ PixelShader =
 
 				OutColor *= Input.Color;
 				
-			    return OutColor;
+				return OutColor;
 			}
 		]]
 	}

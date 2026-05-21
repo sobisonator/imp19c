@@ -49,27 +49,22 @@ PixelShader =
 		[[
 			PDX_MAIN
 			{
-				float Time = GlobalTime * -1 * 0.5;
-				float WaveSize = 12.0;
-				float2 UV = Input.UV0;
-
-				UV *= 2.0;
-				UV.y-= 0.05;
-				float2 Wave = sin((Input.UV0.x + Time * 0.1) * WaveSize) * 0.03 * 2;
-				float4 OutColor = SampleSpriteTexture( Texture, float3(UV.x, UV.y + Wave), 0 );
-
+				float Wave = CreateWave(Input.UV0, GlobalTime);
+				float2 UV1 = Input.UV0;
+				UV1 = CreateWaveUV( UV1, Wave );
+				UV1 *= 2.0;
 				float2 UV2 = Input.UV0;
+				UV2 = CreateWaveUV( UV2, Wave );
 				UV2.x *= 0.5;
 				UV2.x += 1.5 - SpriteFramesTypeBlendMode[3].x;
-				UV2.y*=1.1;
-				UV2.y-= 0.05;
-				Wave = sin((Input.UV0.x + Time * 0.1) * WaveSize) * 0.03;
 
-				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, float3(UV2.x, UV2.y + Wave), 1);
+				float4 OutColor = SampleSpriteTexture( Texture, UV1, 0 );
+
+				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV2, 1 );
 				OutColor = float4(OutColor.rgb, AlphaColor.a);
 
-				float4 StyleColor = SampleSpriteTexture( ModifyTexture1, float3(UV2.x, UV2.y + Wave), 1 );
-				OutColor = CreateStyleToFlag( OutColor, AlphaColor.a, StyleColor, Input.UV0, Input.Position, GlobalTime);
+				float4 StyleColor = SampleSpriteTexture( ModifyTexture1, UV2, 1 );
+				OutColor = CreateStyleToFlag( OutColor, AlphaColor.a, StyleColor, Input.UV0, Wave);
 				OutColor = float4(OutColor.rgb, AlphaColor.a);
 
 				#ifndef NO_HIGHLIGHT

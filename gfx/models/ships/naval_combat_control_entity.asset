@@ -1,0 +1,35 @@
+pdxmesh = {
+	name = "naval_combat_control_mesh"
+	file = "naval_combat_control.mesh"
+}
+
+
+entity = {
+	name = "naval_combat_control_entity"
+	pdxmesh = "naval_combat_control_mesh"
+	
+	default_state = "chill"
+
+	# This entity will have two attachments from code, called dude_1 and dude_2, that will be attached to loc_1 and loc_2 respectively
+	# When adding new animations, make sure to make them loop correctly in Maya in 30fps, then subract 0.05 seconds from the corresponding state_time for them. This will make them loop and they won't go into a different state between states.
+	state = { name = "chill" state_time = 0.01 looping = no next_state = "loop" propagate_state = "idle" }
+	
+	# Hit animations
+	# 1 attack - 2 hit
+	state = { name = "loop" chance = 0.7 state_time = 10 looping = no next_state = "loop"
+		propagate_state = { dude_1 = "combat_fire" }
+		start_event = { sound = { soundeffect = "event:/SFX/Gameplay/Combat/sfx_gameplay_combat_screen_sea" } }
+		propagate_state = { dude_2 = "combat_nofire" }
+	}
+	state = { name = "loop" chance = 0.7 state_time = 10 looping = no next_state = "loop"
+		propagate_state = { dude_1 = "combat_nofire" }
+		start_event = { sound = { soundeffect = "event:/SFX/Gameplay/Combat/sfx_gameplay_combat_screen_sea" } }
+		propagate_state = { dude_2 = "combat_fire" }
+	}
+#	# 2 attack - 1 hit
+#	state = { name = "loop" chance = 0.3 state_time = 3.58 looping = no next_state = "loop"
+#		propagate_state = { dude_1 = "defensive_hit" }
+#		event = { sound = { soundeffect = "event:/SFX/Gameplay/Combat/sfx_gameplay_combat_screen_sea" stop_on_state_change = no } }
+#		propagate_state = { dude_2 = "offensive_successful" }
+#	}
+}

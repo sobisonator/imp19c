@@ -40,6 +40,7 @@ PixelShader =
 		SampleModeU = "Clamp"
 		SampleModeV = "Clamp"
 	}
+	
 	MainCode PixelShader
 	{
 		Input = "VS_OUTPUT_PDX_GUI"
@@ -48,18 +49,20 @@ PixelShader =
 		[[
 			PDX_MAIN
 			{
-				float2 UV = SettingsUV0ToFlag( Input.UV0 );
-				float4 OutColor = SampleSpriteTexture( Texture, UV, 0 );
-				float2 UV1 = SettingsUV1ToFlag( Input.UV0 );
+				float Wave = CreateWave(Input.UV0, GlobalTime);
+				float2 UV1 = SettingsUV0ToFlag( Input.UV0 );
+				float2 UV2 = SettingsUV1ToFlag( Input.UV0 );
 
-				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV1, 1);
+				float4 OutColor = SampleSpriteTexture( Texture, UV1, 0 );
+
+				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV2, 1);
 				OutColor = float4(OutColor.rgb, AlphaColor.a);
 
-				float4 ShadowColor = SampleSpriteTexture( ModifyTexture1, UV1, 1 );
+				float4 ShadowColor = SampleSpriteTexture( ModifyTexture1, UV2, 1 );
 				OutColor = lerp(ShadowColor, OutColor, lerp(ShadowColor.a, OutColor.a, 1.0));
 
-				float4 StyleColor = SampleSpriteTexture( ModifyTexture2, UV1, 1 );
-				OutColor = CreateStyleToFlag( OutColor, AlphaColor.a, StyleColor, Input.UV0, Input.Position, GlobalTime);
+				float4 StyleColor = SampleSpriteTexture( ModifyTexture2, UV2, 1 );
+				OutColor = CreateStyleToFlag( OutColor, AlphaColor.a, StyleColor, Input.UV0, Wave);
 
 				#ifndef NO_HIGHLIGHT
 					OutColor.rgb += HighlightColor;

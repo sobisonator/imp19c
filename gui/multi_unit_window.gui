@@ -1,0 +1,225 @@
+base_sub_window = {
+	name = "multi_unit_window"
+	parentanchor = top|left
+	size = { 548 768 }
+	using = main_window_template
+	
+	blockoverride "Title_text" { text = "[MultiUnitWindow.GetInfo]" }
+	blockoverride "White_buttons"
+	{
+		button_close = {
+			onclick = "[MultiUnitWindow.OnClose]"
+			tooltip = "CLOSE"
+		}
+	}
+	icon_button_square = {
+		name = "merge_button"
+		size = { 42 42 }
+		blockoverride "Icon"
+		{
+			texture = "gfx/interface/icons/unit_actions/merge_unit.dds"
+			size = { 80% 80% }
+		}
+		blockoverride "On_click"
+		{
+			onclick = "[MultiUnitWindow.OnMerge]"
+			shortcut = "merge_units"
+		}
+		enabled = "[MultiUnitWindow.CanMerge]"
+		tooltip = "[MultiUnitWindow.BuildMergeTooltip]"
+		position = { 14 38 }
+	}
+	icon_button_square = {
+		name = "reorg_button"
+		size = { 42 42 }
+		blockoverride "Icon"
+		{
+			texture = "gfx/interface/icons/unit_actions/reorganise_units.dds"
+			size = { 80% 80% }
+		}
+		blockoverride "On_click"
+		{
+			onclick = "[MultiUnitWindow.OnReorg]"
+			shortcut = "reorg_units"
+		}
+		enabled = "[MultiUnitWindow.CanReorg]"
+		tooltip = "[MultiUnitWindow.BuildReorgTooltip]"
+		position = { 58 38 }
+	}
+	icon_button_square = {
+		name = "objective_button"
+		size = { 42 42 }
+		blockoverride "Icon"
+		{
+			texture = "gfx/interface/icons/unit_actions/select_objective.dds"
+			size = { 80% 80% }
+		}
+		blockoverride "On_click"
+		{
+			onclick = "[MultiUnitWindow.OnSelectObjective]"
+		}
+		enabled = "[MultiUnitWindow.CanSelectObjective]"
+		tooltip = "[MultiUnitWindow.BuildSelectObjectiveTooltip]"
+		position = { 102 38 }
+	}
+	
+	icon_and_text = {
+		size = { 140 0 }
+		visible = "[MultiUnitWindow.IsArmy]"
+		tooltip = "[MultiUnitWindow.GetTotalUnitStrengthTooltip]"
+		blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/land_combat.dds" }
+		blockoverride "Text" { text = "[MultiUnitWindow.GetTotalUnitStrength]" }
+		position = { 149 41 }
+	}
+	icon_and_text = {
+		size = { 140 0 }
+		visible = "[Not(MultiUnitWindow.IsArmy)]"
+		tooltip = "[MultiUnitWindow.GetTotalUnitStrengthTooltip]"
+		blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/naval_combat.dds" }
+		blockoverride "Text" { text = "[MultiUnitWindow.GetTotalUnitStrength]" }
+		position = { 149 41 }
+	}
+	
+	
+	###########################################################
+	# Different Units in the list.
+	###########################################################
+	widget = {
+		position = { 14 84 }
+		size = { 518 662 }
+		
+		scrollarea = {
+			position = { 2 1 }
+			size = { 510 660 }
+			scrollbarpolicy_horizontal = always_off
+			
+			scrollbar_vertical = {
+				using = VerticalScrollBar
+			}
+			
+			scrollwidget = {
+				
+				dynamicgridbox = {
+					name = "selected_units_grid"
+					size = { 380 150 }
+					datamodel = "[MultiUnitWindow.GetUnits]"
+					
+					item = {
+						widget = {
+							size = { 520 184 }
+							list_entry = { size = { 100% 100% } }
+							sub_header = {
+								position = { 0 0 }
+								size = { 510 32 }
+								
+								blockoverride "Title_text"
+								{
+									text = "[Unit.GetName]"
+								}
+								blockoverride "AdditionalIcons"
+								{
+									icon = {
+										texture = "gfx/interface/unit_view/army_hidden_icon.dds"
+										visible = "[Not(Unit.IsVisibleToAi)]"
+										tooltip = "[Unit.GetIsVisibleToAiTooltip]"
+									}
+									icon = {
+										texture = "gfx/interface/unit_view/army_visible_icon.dds"
+										visible = "[Unit.IsVisibleToAi]"
+										tooltip = "[Unit.GetIsVisibleToAiTooltip]"
+									}
+								}
+								#textbox = {
+								#	position = { -10 8 }
+								#	widgetanchor = top|right
+								#	parentanchor = top|right
+								#	autoresize = yes
+								#	align = right
+								#	using = BlackMarbleFont
+								#	text = "[Unit.GetLocation.GetName]"
+								#	tooltip = UNIT_LOCATION_TT
+								#}
+							}
+							
+							text_button_square = {
+								position = { 215 36 }
+								blockoverride "Center_text" { text = "DESELECT_ARMY" }
+								blockoverride "On_click" { onclick = "[DeselectUnit(Unit.GetUnit)]" }
+								size = { 140 28 }
+							}
+							
+							text_button_square = {
+								position = { 358 36 }
+								blockoverride "Center_text" { text = "SELECT_ARMY" }
+								blockoverride "On_click" { onclick = "[SelectUnit(Unit.GetUnit)]" }
+								size = { 140 28 }
+							}
+							flowcontainer = {
+								position = { 0 33 }
+								ignoreinvisible = yes
+								spacing = 8
+								icon_and_text = {
+									size = { 104 0 } 
+									visible = "[Unit.IsArmy]"
+									blockoverride "Text" { text = "[Unit.GetVisualStrength]" }
+									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/land_combat.dds" }
+									tooltip = "[Unit.GetStrengthTooltip]"
+								}
+								icon_and_text = {
+									size = { 104 0 } 
+									visible = "[Unit.IsNavy]"
+									blockoverride "Text" { text = "[Unit.GetVisualStrength]" }
+									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/naval_combat.dds" }
+									tooltip = TOTAL_STRENGTH_NAVAL
+								}
+								icon_and_text = {
+									size = { 92 0 } 
+									blockoverride "Text" { text = "[Unit.GetAttrition|1]%" }
+									blockoverride "Icon" { using = icon_attrition }
+									tooltip = "[Unit.GetAttritionTooltip]"
+								}
+							}
+							
+							fixed_size_progressbar = {
+								size = { 496 12 }
+								parentanchor = left|bottom
+								position = { 4 -4 }
+								blockoverride "Value" { value = "[FixedPointToFloat(Unit.GetMoralePercent)]" }
+								tooltip = [Unit.GetMoraleTooltip]
+							}
+							
+							overlappingitembox = {
+								using = UnitCardsSmall
+								name = "unit_types_grid"
+								position = { 76 76 }
+								size = { 520 102 }
+								datamodel = "[Unit.GetSubUnitCounts]"
+								scale = 0.82
+								list_entry = { 
+									size = { 100% 90% } 
+									parentanchor = vcenter
+								}
+								item = {
+									unit_card = {
+										blockoverride "Size" { size = { 68 102 } }
+										tooltip = "[SubUnitCounts.GetTooltip]"
+										alwaystransparent = no
+										filter_mouse = all
+										visible = "[GreaterThan_int32(SubUnitCounts.GetCount,'(int32)0')]"
+									}
+								}
+							}
+							
+							cpt_button = {
+								datacontext = "[Unit.GetCommander]"
+								parentanchor = top|left
+								size = { 60 90 }
+								position = { 4 72 }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,43 +1,9 @@
-template offices_1
-{
-	visible = "[EqualTo_string(OfficeHolderItem.GetName, Localize('secretary_r_interior'))]"
-}
-template offices_2
-{
-	visible = "[EqualTo_string(OfficeHolderItem.GetName, Localize('secretary_r_foreign_affairs'))]"
-}
-template offices_3
-{
-	visible = "[EqualTo_string(OfficeHolderItem.GetName, Localize('secretary_r_army'))]"
-}
-template offices_4
-{
-	visible = "[EqualTo_string(OfficeHolderItem.GetName, Localize('secretary_r_culture'))]"
-}
-template offices_5
-{
-	visible = "[EqualTo_string(OfficeHolderItem.GetName, Localize('secretary_r_finance'))]"
-}
-template offices_6
-{
-	visible = "[EqualTo_string(OfficeHolderItem.GetName, Localize('office_r_attorney_general'))]"
-}
-template offices_7
-{
-	visible = "[EqualTo_string(OfficeHolderItem.GetName, Localize('secretary_r_industry'))]"
-}
-template offices_8
-{
-	visible = "[EqualTo_string(OfficeHolderItem.GetName, Localize('secretary_r_health'))]"
-}
-
 @mincategorybuttonwidth = 181
 @maxcategorybuttonwidth = 181
 @mincategorybuttonheight = 42
 @maxcategorybuttonheight = 42
-@window_width = 970
+@window_width = 990
 @window_height = 900
-@line_size = 965
 
 base_window = {
 	name = "government_view"
@@ -160,7 +126,7 @@ base_window = {
 			direction = vertical
 			visible = "[GovernmentView.IsShowGovernment]"
 			widget = {
-				size = { @window_width 285 }
+				size = { @window_width 290 }
 				widget = {
 					size = { 800 256 }
 					position = { 0 30 }
@@ -170,11 +136,11 @@ base_window = {
 						shaderfile = "gfx/FX/pdxgui_default.shader"
 						texture = "[GetCharacterBackgroundIconHuge( Character.Self, Character.GetLocation.GetTerrain )]"
 						modify_texture = {
-							texture = "gfx/interface/base_parts/gradient_black_invert.dds"
+							texture = "gfx/interface/base_parts/gradient_black_flip.dds"
 							blend_mode = alphamultiply
 						}
 						modify_texture = {
-							texture = "gfx/interface/base_parts/horizontal_gradient_black.dds"
+							texture = "gfx/interface/base_parts/horizontal_gradient_stretch_black_double.dds"
 							blend_mode = alphamultiply
 						}
 					}
@@ -182,8 +148,9 @@ base_window = {
 				flowcontainer = {
 					direction = vertical
 					margin = { 10 0 }
+					spacing = 5
 					widget = {
-						size = { 950 50 }
+						size = { 970 50 }
 						using = background_widget
 						blockoverride "Margin" { margin = { 2 2 } }
 						flowcontainer = {
@@ -208,7 +175,7 @@ base_window = {
 							}
 							icon_card = {
 								name = "Government Overview Header"
-								size = { 270 40 }
+								size = { 290 40 }
 								visible = "[GovernmentView.GetPlayer.GetGovernment.IsMonarchy]"
 								blockoverride "Icon" { }
 								textbox = {
@@ -223,7 +190,7 @@ base_window = {
 							}
 							icon_card = {
 								name = "Government Overview Header Republic"
-								size = { 270 40 }
+								size = { 290 40 }
 								visible = "[And( GovernmentView.GetPlayer.GetGovernment.IsRepublic, GovernmentView.GetPlayer.GetCoRuler.IsValid )]"
 								blockoverride "Icon" { }
 								textbox = {
@@ -238,7 +205,7 @@ base_window = {
 							}
 							icon_card = {
 								name = "Government Overview Header Republic No CoRuler"
-								size = { 270 40 }
+								size = { 290 40 }
 								visible = "[And( GovernmentView.GetPlayer.GetGovernment.IsRepublic, Not( GovernmentView.GetPlayer.GetCoRuler.IsValid ) )]"
 								blockoverride "Icon" { }
 								textbox = {
@@ -253,7 +220,7 @@ base_window = {
 							}
 							icon_card = {
 								name = "Government Overview Header Tribal"
-								size = { 270 40 }
+								size = { 290 40 }
 								visible = "[GovernmentView.GetPlayer.GetGovernment.IsTribal]"
 								blockoverride "Icon" { }
 								textbox = {
@@ -385,6 +352,7 @@ base_window = {
 							flowcontainer = {
 								direction = vertical
 								flowcontainer = {
+									datacontext = "[GovernmentView.GetPlayer.GetRuler]"
 									direction = vertical
 									margin = { 5 5 }
 									spacing = 10
@@ -393,16 +361,16 @@ base_window = {
 										name = "Popularity"
 										size = { 120 32 }
 										blockoverride "Icon" { using = icon_popularity }
-										blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetRuler.GetPopularity|/0]" }
-										tooltip = "[GovernmentView.GetPlayer.GetRuler.GetPopularityToolTip]"
+										blockoverride "Text" { text = "[Character.GetPopularity|/0]" }
+										tooltip = "[Character.GetPopularityToolTip]"
 									}
 									icon_and_text = {
 										name = "Corruption"
-										alpha = "[TransparentIfZero(GovernmentView.GetPlayer.GetRuler.GetCorruption)]"
+										alpha = "[TransparentIfZero(Character.GetCorruption)]"
 										size = { 120 32 }
 										blockoverride "Icon" { using = icon_corruption }
-										blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetRuler.GetCorruption|/0]" }
-										tooltip = "[GovernmentView.GetPlayer.GetRuler.GetCorruptionToolTip]"
+										blockoverride "Text" { text = "[Character.GetCorruption|/0]" }
+										tooltip = "[Character.GetCorruptionToolTip]"
 									}
 								}
 								margin_widget = {
@@ -418,25 +386,26 @@ base_window = {
 									}
 								}
 								flowcontainer = {
+									datacontext = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir]"
+									visible = "[Character.IsValid]"
 									margin = { 5 5 }
 									spacing = 5
 									cpt_button = {
 										size = { 60 90 }
-										blockoverride "Context" { datacontext = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir]" }
 									}
 									flowcontainer = {
 										direction = vertical
 										spacing = 10
 										icon_card = {
 											size = { 110 40 }
-											tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetSuccessionScoreInfo]"
+											tooltip = "[Character.GetSuccessionScoreInfo]"
 											blockoverride "Icon" { 
 												size = { 32 32 }
 												parentanchor = left
 												texture = "[GetPartyIcon(GovernmentView.GetNextParty)]"
 											}
 											textbox = {
-												text = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetSuccessionScore|0]"
+												text = "[Character.GetSuccessionScore|0]"
 												autoresize = yes
 												align = right
 												parentanchor = right|vcenter
@@ -449,8 +418,8 @@ base_window = {
 											size = { 110 32 }
 											parentanchor = hcenter
 											blockoverride "Icon" { using = icon_power_base }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetPowerBase|/0]" }
-											tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetPowerBaseInfo]"
+											blockoverride "Text" { text = "[Character.GetPowerBase|/0]" }
+											tooltip = "[Character.GetPowerBaseInfo]"
 										}
 									}
 								}
@@ -470,20 +439,21 @@ base_window = {
 									spacing = 10
 									parentanchor = hcenter
 									flowcontainer = {
+										datacontext = "[GovernmentView.GetPlayer.GetRuler]"
 										spacing = 10
 										icon_and_text = {
 											name = "Corruption"
-											alpha = "[TransparentIfZero(GovernmentView.GetPlayer.GetRuler.GetCorruption)]"
+											alpha = "[TransparentIfZero(Character.GetCorruption)]"
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_corruption }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetRuler.GetCorruption|/0]" }
-											tooltip = "[GovernmentView.GetPlayer.GetRuler.GetCorruptionToolTip]"
+											blockoverride "Text" { text = "[Character.GetCorruption|/0]" }
+											tooltip = "[Character.GetCorruptionToolTip]"
 										}
 										icon_and_text = {
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_power_base }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetRuler.GetPowerBase|/0]" }
-											tooltip = "[GovernmentView.GetPlayer.GetRuler.GetPowerBaseInfo]"
+											blockoverride "Text" { text = "[Character.GetPowerBase|/0]" }
+											tooltip = "[Character.GetPowerBaseInfo]"
 										}
 									}
 								}
@@ -500,25 +470,26 @@ base_window = {
 									}
 								}
 								flowcontainer = {
+									datacontext = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir]"
+									visible = "[Character.IsValid]"
 									margin = { 5 5 }
 									spacing = 5
 									cpt_button = {
 										size = { 60 90 }
-										blockoverride "Context" { datacontext = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir]" }
 									}
 									flowcontainer = {
 										direction = vertical
 										spacing = 10
 										icon_card = {
 											size = { 110 40 }
-											tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetSuccessionScoreInfo]"
+											tooltip = "[Character.GetSuccessionScoreInfo]"
 											blockoverride "Icon" { 
 												size = { 32 32 }
 												parentanchor = left
 												texture = "gfx/interface/icons/shared_icons/leader.dds"
 											}
 											textbox = {
-												text = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetSuccessionScore|0]"
+												text = "[Character.GetSuccessionScore|0]"
 												autoresize = yes
 												align = right
 												parentanchor = right|vcenter
@@ -531,15 +502,15 @@ base_window = {
 											size = { 110 32 }
 											parentanchor = hcenter
 											blockoverride "Icon" { using = icon_loyalty }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetLoyalty|0]" }
-											tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetLoyaltyToolTip]"
+											blockoverride "Text" { text = "[Character.GetLoyalty|0]" }
+											tooltip = "[Character.GetLoyaltyToolTip]"
 										}
 										icon_and_text = {
 											size = { 110 32 }
 											parentanchor = hcenter
 											blockoverride "Icon" { texture = "gfx/interface/icons/modifiers/max_friends.dds" }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetNumOfSupportsAsHeir]" }
-											tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetHeirSupportInformation]"
+											blockoverride "Text" { text = "[Character.GetNumOfSupportsAsHeir]" }
+											tooltip = "[Character.GetHeirSupportInformation]"
 										}
 									}
 								}
@@ -554,17 +525,18 @@ base_window = {
 							flowcontainer = {
 								direction = vertical
 								flowcontainer = {
+									datacontext = "[GovernmentView.GetPlayer.GetRuler]"
 									direction = vertical
 									margin = { 5 5 }
 									spacing = 10
 									parentanchor = hcenter
 									icon_and_text = {
 										name = "Corruption"
-										alpha = "[TransparentIfZero(GovernmentView.GetPlayer.GetRuler.GetCorruption)]"
+										alpha = "[TransparentIfZero(Character.GetCorruption)]"
 										size = { 120 32 }
 										blockoverride "Icon" { using = icon_corruption }
-										blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetRuler.GetCorruption|/0]" }
-										tooltip = "[GovernmentView.GetPlayer.GetRuler.GetCorruptionToolTip]"
+										blockoverride "Text" { text = "[Character.GetCorruption|/0]" }
+										tooltip = "[Character.GetCorruptionToolTip]"
 									}
 								}
 								margin_widget = {
@@ -580,25 +552,26 @@ base_window = {
 									}
 								}
 								flowcontainer = {
+									datacontext = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir]"
+									visible = "[Character.IsValid]"
 									margin = { 5 5 }
 									spacing = 5
 									cpt_button = {
 										size = { 60 90 }
-										blockoverride "Context" { datacontext = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir]" }
 									}
 									flowcontainer = {
 										direction = vertical
 										spacing = 10
 										icon_card = {
 											size = { 110 40 }
-											tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetSuccessionScoreInfo`]"
+											tooltip = "[Character.GetSuccessionScoreInfo]"
 											blockoverride "Icon" { 
 												size = { 32 32 }
 												parentanchor = left
 												texture = "gfx/interface/icons/shared_icons/leader.dds"
 											}
 											textbox = {
-												text = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetSuccessionScore|0]"
+												text = "[Character.GetSuccessionScore|0]"
 												autoresize = yes
 												align = right
 												parentanchor = right|vcenter
@@ -611,8 +584,8 @@ base_window = {
 											size = { 110 32 }
 											parentanchor = hcenter
 											blockoverride "Icon" { using = icon_loyalty }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetLoyalty|0]" }
-											tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetPrimaryHeir.GetLoyaltyToolTip]"
+											blockoverride "Text" { text = "[Character.GetLoyalty|0]" }
+											tooltip = "[Character.GetLoyaltyToolTip]"
 										}
 									}
 								}
@@ -620,6 +593,7 @@ base_window = {
 						}
 						widget = {
 							size = { 220 232 }
+							datacontext = "[GovernmentView.GetPlayer.GetRuler]"
 							using = background_widget
 							blockoverride "Margin" { margin = { 2 2 } }
 							flowcontainer = {
@@ -642,7 +616,6 @@ base_window = {
 										size = { 130 195 }
 										using = pt_button_large
 										pop_out = yes
-										datacontext = "[GovernmentView.GetPlayer.GetRuler]"
 										portrait_texture = "[Character.GetPortrait('default', 'looking_right')]"
 									}
 									flowcontainer = {
@@ -650,31 +623,35 @@ base_window = {
 										spacing = 10
 										margin_top = 15
 										icon_and_text = { #military
-											visible = "[GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetRuler.GetMartial, GovernmentView.GetPlayer.GetCoRuler.GetMartial )]"
+											#visible = "[GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetRuler.GetMartial, GovernmentView.GetPlayer.GetCoRuler.GetMartial )]"
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_military }
-											blockoverride "Text" { text = "[Select_int32( GovernmentView.GetPlayer.UseCoRuler, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetCoRuler.GetMartial, GovernmentView.GetPlayer.GetRuler.GetMartial ), GovernmentView.GetPlayer.GetCoRuler.GetMartial, GovernmentView.GetPlayer.GetRuler.GetMartial ), Select_int32( GovernmentView.GetPlayer.UseConsort, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetConsort.GetMartial, GovernmentView.GetPlayer.GetRuler.GetMartial ), GovernmentView.GetPlayer.GetConsort.GetMartial, GovernmentView.GetPlayer.GetRuler.GetMartial ), GovernmentView.GetPlayer.GetRuler.GetMartial))]" }
+											blockoverride "Text" { text = "[Character.GetMartial]" }
+											#blockoverride "Text" { text = "[Select_int32( GovernmentView.GetPlayer.UseCoRuler, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetCoRuler.GetMartial, GovernmentView.GetPlayer.GetRuler.GetMartial ), GovernmentView.GetPlayer.GetCoRuler.GetMartial, GovernmentView.GetPlayer.GetRuler.GetMartial ), Select_int32( GovernmentView.GetPlayer.UseConsort, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetConsort.GetMartial, GovernmentView.GetPlayer.GetRuler.GetMartial ), GovernmentView.GetPlayer.GetConsort.GetMartial, GovernmentView.GetPlayer.GetRuler.GetMartial ), GovernmentView.GetPlayer.GetRuler.GetMartial))]" }
 											tooltip = "[GovernmentView.GetMartialTooltip]"
 										}
 										icon_and_text = { #civic
-											visible = "[GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetRuler.GetFinesse, GovernmentView.GetPlayer.GetCoRuler.GetFinesse )]"
+											#visible = "[GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetRuler.GetFinesse, GovernmentView.GetPlayer.GetCoRuler.GetFinesse )]"
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_civic }
-											blockoverride "Text" { text = "[Select_int32( GovernmentView.GetPlayer.UseCoRuler, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetCoRuler.GetFinesse, GovernmentView.GetPlayer.GetRuler.GetFinesse ), GovernmentView.GetPlayer.GetCoRuler.GetFinesse, GovernmentView.GetPlayer.GetRuler.GetFinesse ), Select_int32( GovernmentView.GetPlayer.UseConsort, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetConsort.GetFinesse, GovernmentView.GetPlayer.GetRuler.GetFinesse ), GovernmentView.GetPlayer.GetConsort.GetFinesse, GovernmentView.GetPlayer.GetRuler.GetFinesse ), GovernmentView.GetPlayer.GetRuler.GetFinesse))]" }
+											blockoverride "Text" { text = "[Character.GetFinesse]" }
+											#blockoverride "Text" { text = "[Select_int32( GovernmentView.GetPlayer.UseCoRuler, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetCoRuler.GetFinesse, GovernmentView.GetPlayer.GetRuler.GetFinesse ), GovernmentView.GetPlayer.GetCoRuler.GetFinesse, GovernmentView.GetPlayer.GetRuler.GetFinesse ), Select_int32( GovernmentView.GetPlayer.UseConsort, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetConsort.GetFinesse, GovernmentView.GetPlayer.GetRuler.GetFinesse ), GovernmentView.GetPlayer.GetConsort.GetFinesse, GovernmentView.GetPlayer.GetRuler.GetFinesse ), GovernmentView.GetPlayer.GetRuler.GetFinesse))]" }
 											tooltip = "[GovernmentView.GetFinesseTooltip]"
 										}
 										icon_and_text = { #oratory
-											visible = "[GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetRuler.GetCharisma, GovernmentView.GetPlayer.GetCoRuler.GetCharisma )]"
+											#visible = "[GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetRuler.GetCharisma, GovernmentView.GetPlayer.GetCoRuler.GetCharisma )]"
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_oratory }
-											blockoverride "Text" { text = "[Select_int32( GovernmentView.GetPlayer.UseCoRuler, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetCoRuler.GetCharisma, GovernmentView.GetPlayer.GetRuler.GetCharisma ), GovernmentView.GetPlayer.GetCoRuler.GetCharisma, GovernmentView.GetPlayer.GetRuler.GetCharisma ), Select_int32( GovernmentView.GetPlayer.UseConsort, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetConsort.GetCharisma, GovernmentView.GetPlayer.GetRuler.GetCharisma ), GovernmentView.GetPlayer.GetConsort.GetCharisma, GovernmentView.GetPlayer.GetRuler.GetCharisma ), GovernmentView.GetPlayer.GetRuler.GetCharisma))]" }
+											blockoverride "Text" { text = "[Character.GetCharisma]" }
+											#blockoverride "Text" { text = "[Select_int32( GovernmentView.GetPlayer.UseCoRuler, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetCoRuler.GetCharisma, GovernmentView.GetPlayer.GetRuler.GetCharisma ), GovernmentView.GetPlayer.GetCoRuler.GetCharisma, GovernmentView.GetPlayer.GetRuler.GetCharisma ), Select_int32( GovernmentView.GetPlayer.UseConsort, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetConsort.GetCharisma, GovernmentView.GetPlayer.GetRuler.GetCharisma ), GovernmentView.GetPlayer.GetConsort.GetCharisma, GovernmentView.GetPlayer.GetRuler.GetCharisma ), GovernmentView.GetPlayer.GetRuler.GetCharisma))]" }
 											tooltip = "[GovernmentView.GetCharismaTooltip]"
 										}
 										icon_and_text = { #religious
-											visible = "[GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetRuler.GetZeal, GovernmentView.GetPlayer.GetCoRuler.GetZeal )]"
+											#visible = "[GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetRuler.GetZeal, GovernmentView.GetPlayer.GetCoRuler.GetZeal )]"
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_religious }
-											blockoverride "Text" { text = "[Select_int32( GovernmentView.GetPlayer.UseCoRuler, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetCoRuler.GetZeal, GovernmentView.GetPlayer.GetRuler.GetZeal ), GovernmentView.GetPlayer.GetCoRuler.GetZeal, GovernmentView.GetPlayer.GetRuler.GetZeal ), Select_int32( GovernmentView.GetPlayer.UseConsort, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetConsort.GetZeal, GovernmentView.GetPlayer.GetRuler.GetZeal ), GovernmentView.GetPlayer.GetConsort.GetZeal, GovernmentView.GetPlayer.GetRuler.GetZeal ), GovernmentView.GetPlayer.GetRuler.GetZeal))]" }
+											blockoverride "Text" { text = "[Character.GetZeal]" }
+											#blockoverride "Text" { text = "[Select_int32( GovernmentView.GetPlayer.UseCoRuler, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetCoRuler.GetZeal, GovernmentView.GetPlayer.GetRuler.GetZeal ), GovernmentView.GetPlayer.GetCoRuler.GetZeal, GovernmentView.GetPlayer.GetRuler.GetZeal ), Select_int32( GovernmentView.GetPlayer.UseConsort, Select_int32( GreaterThanOrEqualTo_int32( GovernmentView.GetPlayer.GetConsort.GetZeal, GovernmentView.GetPlayer.GetRuler.GetZeal ), GovernmentView.GetPlayer.GetConsort.GetZeal, GovernmentView.GetPlayer.GetRuler.GetZeal ), GovernmentView.GetPlayer.GetRuler.GetZeal))]" }
 											tooltip = "[GovernmentView.GetZealTooltip]"
 										}
 									}
@@ -683,7 +660,8 @@ base_window = {
 						}
 						widget = { #Monarch
 							size = { 130 232 }
-							visible = "[And(GovernmentView.GetPlayer.MakeScope.Var('monarch_character').IsSet,Not(And(GovernmentView.GetPlayer.MakeScope.Var('monarch_character').GetCharacter.IsRuler,EqualTo_string(GovernmentView.GetPlayer.MakeScope.Var('monarch_character').GetCharacter.GetEmployer.GetTag,GovernmentView.GetPlayer.GetTag))))]"
+							datacontext = "[GovernmentView.GetPlayer.MakeScope.Var('monarch_character').GetCharacter]"
+							visible = "[And(GovernmentView.GetPlayer.MakeScope.Var('monarch_character').IsSet,Not(And(Character.IsRuler, EqualTo_string(Character.GetEmployer.GetTag, GovernmentView.GetPlayer.GetTag))))]"
 							using = background_widget
 							blockoverride "Margin" { margin = { 2 2 } }
 							flowcontainer = {
@@ -705,7 +683,6 @@ base_window = {
 										size = { 130 195 }
 										using = pt_button_large
 										pop_out = yes
-										datacontext = "[GovernmentView.GetPlayer.MakeScope.Var('monarch_character').GetCharacter]"
 										portrait_texture = "[Character.GetPortrait('default', 'looking_left')]"
 									}
 								}
@@ -713,6 +690,7 @@ base_window = {
 						}
 						widget = { #Republic CoRuler
 							size = { 220 232 }
+							datacontext = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir]"
 							visible = "[And( GovernmentView.GetPlayer.GetGovernment.IsRepublic, GovernmentView.GetPlayer.UseCoRuler)]"
 							using = background_widget
 							blockoverride "Margin" { margin = { 2 2 } }
@@ -739,26 +717,26 @@ base_window = {
 										icon_and_text = { #military
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_military }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetMartial]" }
-											tooltip = "[GovernmentView.GetMartialTooltip]"
+											blockoverride "Text" { text = "[Character.GetMartial]" }
+											#tooltip = "[GovernmentView.GetMartialTooltip]"
 										}
 										icon_and_text = { #civic
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_civic }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetFinesse]" }
-											tooltip = "[GovernmentView.GetFinesseTooltip]"
+											blockoverride "Text" { text = "[Character.GetFinesse]" }
+											#tooltip = "[GovernmentView.GetFinesseTooltip]"
 										}
 										icon_and_text = { #oratory
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_oratory }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetCharisma]" }
-											tooltip = "[GovernmentView.GetCharismaTooltip]"
+											blockoverride "Text" { text = "[Character.GetCharisma]" }
+											#tooltip = "[GovernmentView.GetCharismaTooltip]"
 										}
 										icon_and_text = { #religious
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_religious }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetZeal]" }
-											tooltip = "[GovernmentView.GetZealTooltip]"
+											blockoverride "Text" { text = "[Character.GetZeal]" }
+											#tooltip = "[GovernmentView.GetZealTooltip]"
 										}
 									}
 									portrait_button = {
@@ -766,15 +744,15 @@ base_window = {
 										size = { 130 195 }
 										using = pt_button_large
 										pop_out = yes
-										datacontext = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir]"
-										portrait_texture = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetPortrait('default', 'looking_left')]"
+										portrait_texture = "[Character.GetPortrait('default', 'looking_left')]"
 									}
 								}
 							}
 						}
 						widget = { #Monarchy Consort
 							size = { 220 232 }
-							visible = "[GovernmentView.GetPlayer.UseConsort]"
+							datacontext = "[GovernmentView.GetPlayer.GetConsort]"
+							visible = "[And(GovernmentView.GetPlayer.UseConsort, Character.IsValid)]"
 							using = background_widget
 							blockoverride "Margin" { margin = { 2 2 } }
 							flowcontainer = {
@@ -800,25 +778,25 @@ base_window = {
 										icon_and_text = { #military
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_military }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetConsort.GetMartial]" }
+											blockoverride "Text" { text = "[Character.GetMartial]" }
 											#tooltip = "[GovernmentView.GetMartialTooltip]"
 										}
 										icon_and_text = { #civic
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_civic }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetConsort.GetFinesse]" }
+											blockoverride "Text" { text = "[Character.GetFinesse]" }
 											#tooltip = "[GovernmentView.GetFinesseTooltip]"
 										}
 										icon_and_text = { #oratory
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_oratory }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetConsort.GetCharisma]" }
+											blockoverride "Text" { text = "[Character.GetCharisma]" }
 											#tooltip = "[GovernmentView.GetCharismaTooltip]"
 										}
 										icon_and_text = { #religious
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_religious }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetConsort.GetZeal]" }
+											blockoverride "Text" { text = "[Character.GetZeal]" }
 											#tooltip = "[GovernmentView.GetZealTooltip]"
 										}
 									}
@@ -827,8 +805,8 @@ base_window = {
 										size = { 130 195 }
 										using = pt_button_large
 										pop_out = yes
-										datacontext = "[GovernmentView.GetPlayer.GetConsort]"
-										portrait_texture = "[GovernmentView.GetPlayer.GetConsort.GetPortrait('default', 'looking_left')]"
+										#datacontext = "[GovernmentView.GetPlayer.GetConsort]"
+										portrait_texture = "[Character.GetPortrait('default', 'looking_left')]"
 									}
 								}
 							}
@@ -842,6 +820,7 @@ base_window = {
 							flowcontainer = {
 								direction = vertical
 								flowcontainer = {
+									datacontext = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir]"
 									direction = vertical
 									margin = { 5 5 }
 									spacing = 10
@@ -852,26 +831,26 @@ base_window = {
 											name = "Popularity"
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_popularity }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetPopularity|/0]" }
-											tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetPopularityToolTip]"
+											blockoverride "Text" { text = "[Character.GetPopularity|/0]" }
+											tooltip = "[Character.GetPopularityToolTip]"
 										}
 										icon_and_text = {
 											name = "CoRulerLoyalty"
-											alpha = "[TransparentIfZero(GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetLoyalty)]"
+											alpha = "[TransparentIfZero(Character.GetLoyalty)]"
 											size = { 80 32 }
 											blockoverride "Icon" { using = icon_loyalty }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetLoyalty|/0]" }
-											tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetLoyaltyToolTip]"
+											blockoverride "Text" { text = "[Character.GetLoyalty|/0]" }
+											tooltip = "[Character.GetLoyaltyToolTip]"
 										}
 									}
 									icon_and_text = {
 										name = "Corruption"
-										alpha = "[TransparentIfZero(GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetCorruption)]"
+										alpha = "[TransparentIfZero(Character.GetCorruption)]"
 										size = { 120 32 }
 										parentanchor = hcenter
 										blockoverride "Icon" { using = icon_corruption }
-										blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetCorruption|/0]" }
-										tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetCorruptionToolTip]"
+										blockoverride "Text" { text = "[Character.GetCorruption|/0]" }
+										tooltip = "[Character.GetCorruptionToolTip]"
 									}
 								}
 								margin_widget = {
@@ -887,11 +866,12 @@ base_window = {
 									}
 								}
 								flowcontainer = {
+									datacontext = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir]"
+									visible = "[Character.IsValid]"
 									margin = { 5 5 }
 									spacing = 5
 									cpt_button = {
 										size = { 60 90 }
-										blockoverride "Context" { datacontext = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir]" }
 									}
 									flowcontainer = {
 										direction = vertical
@@ -902,10 +882,10 @@ base_window = {
 											blockoverride "Icon" { 
 												size = { 32 32 }
 												parentanchor = left
-												texture = "[GetPartyIcon(GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetParty)]"
+												texture = "[GetPartyIcon(Character.GetParty)]"
 											}
 											textbox = {
-												text = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetSuccessionScore|0]"
+												text = "[Character.GetSuccessionScore|0]"
 												autoresize = yes
 												align = right
 												parentanchor = right|vcenter
@@ -918,8 +898,8 @@ base_window = {
 											size = { 110 32 }
 											parentanchor = hcenter
 											blockoverride "Icon" { using = icon_power_base }
-											blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetPowerBase|/0]" }
-											tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetPowerBaseInfo]"
+											blockoverride "Text" { text = "[Character.GetPowerBase|/0]" }
+											tooltip = "[Character.GetPowerBaseInfo]"
 										}
 									}
 								}
@@ -928,7 +908,8 @@ base_window = {
 						widget = { #Monarchy Consort
 							size = { 190 130 }
 							parentanchor = bottom
-							visible = "[GovernmentView.GetPlayer.UseConsort]"
+							datacontext = "[GovernmentView.GetPlayer.GetConsort]"
+							visible = "[And(GovernmentView.GetPlayer.UseConsort, Character.IsValid)]"
 							using = background_widget
 							blockoverride "Margin" { margin = { 2 2 } }
 							flowcontainer = {
@@ -940,30 +921,30 @@ base_window = {
 									parentanchor = hcenter
 									icon_and_text = {
 										name = "ConsortLoyalty"
-										alpha = "[TransparentIfZero(GovernmentView.GetPlayer.GetConsort.GetLoyalty)]"
+										alpha = "[TransparentIfZero(Character.GetLoyalty)]"
 										size = { 120 32 }
 										parentanchor = hcenter
 										blockoverride "Icon" { using = icon_loyalty }
-										blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetConsort.GetLoyalty|/0]" }
-										tooltip = "[GovernmentView.GetPlayer.GetConsort.GetLoyaltyToolTip]"
+										blockoverride "Text" { text = "[Character.GetLoyalty|/0]" }
+										tooltip = "[Character.GetLoyaltyToolTip]"
 									}
 									icon_and_text = {
 										name = "ConsortPowerBase"
-										alpha = "[TransparentIfZero(GovernmentView.GetPlayer.GetConsort.GetLoyalty)]"
+										alpha = "[TransparentIfZero(Character.GetLoyalty)]"
 										size = { 120 32 }
 										parentanchor = hcenter
 										blockoverride "Icon" { using = icon_power_base }
-										blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetConsort.GetPowerBase|/0]" }
-										tooltip = "[GovernmentView.GetPlayer.GetConsort.GetPowerBaseInfo]"
+										blockoverride "Text" { text = "[Character.GetPowerBase|/0]" }
+										tooltip = "[Character.GetPowerBaseInfo]"
 									}
 									icon_and_text = {
 										name = "Corruption"
-										alpha = "[TransparentIfZero(GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetCorruption)]"
+										alpha = "[TransparentIfZero(Character.GetCorruption)]"
 										size = { 120 32 }
 										parentanchor = hcenter
 										blockoverride "Icon" { using = icon_corruption }
-										blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetCorruption|/0]" }
-										tooltip = "[GovernmentView.GetPlayer.GetSuccession.GetSecondaryHeir.GetCorruptionToolTip]"
+										blockoverride "Text" { text = "[Character.GetCorruption|/0]" }
+										tooltip = "[Character.GetCorruptionToolTip]"
 									}
 								}
 								margin_widget = {
@@ -993,148 +974,7 @@ base_window = {
 				icon = {
 					position = { 2 0 }
 					using = brighten_red_background
-					size = { @line_size 2 }
-				}
-			}
-			margin_widget = { #Unique Mechanics for gov archetypes
-				size = { @window_width 168 }
-				visible = [GovernmentView.GetPlayer.GetGovernment.IsTribal]
-				margin_widget = {
-					size = { 100% 100% }
-					margin = { 2 5 }
-					icon = {
-						size = { @window_width 300 }
-						using = shadow_background
-						position = { -2 -2 }
-						modify_texture = {
-							texture = "gfx/interface/base_parts/gradient_black.dds"
-							blend_mode = alphamultiply
-						}
-						modify_texture = {
-							texture = "gfx/interface/base_parts/background_x60bd_alpha_two_corner.dds"
-							blend_mode = alphamultiply
-							spriteType = Corneredtiled
-							spriteborder = { 60 60 }
-						}
-					}
-					icon = {
-						using = brighten_red_background
-						spriteType = Corneredtiled
-						size = { @line_size 2 }
-					}
-					margin_widget = {
-						size = { 100% 100% }
-						margin = { 8 5 }
-						flowcontainer = {
-							direction = vertical
-							spacing = 5
-							sub_header = {
-								size = { 730 32 }
-								blockoverride "Title_text" { text = "CENTRALIZATION" }
-							}
-							flowcontainer = {
-								spacing = 10
-								flowcontainer = {
-									tooltip = "[GovernmentView.GetPlayer.GetCentralizationTooltip]"
-									icon_and_text = {
-										size = { 150 32 }
-										blockoverride "Icon" { using = icon_centralization }
-										blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetCentralization|2]%" }
-									}
-									icon = {
-										texture = "gfx/interface/arrows_strip.dds"
-										framesize = { 50 50 }
-										size = { 34 34 }
-										frame = "[GovernmentView.GetCentralizationChangeFrame]"
-										parentanchor = vcenter
-									}
-								}
-								widget = {
-									position = { 215 39 }
-									tooltip = "GOV_SCREN_CENT_EFF"
-									using = NoninteractableBG
-									blockoverride "Margins"
-									{
-										margin = { 4 4 }
-										margin_left = 6
-										margin_top = 0
-									}
-									textbox = {
-										resizeparent = yes
-										autoresize = yes
-										position = { 10 0 }
-										maximumsize = { 244 208 }
-										multiline = yes
-										using = BaseFontXS
-										using = Default_FontColor
-										text = "[GovernmentView.GetCentralizationEffectInfo]"
-										margin_right = 4
-										minimumsize = { 244 112 }
-									}
-								}
-							}
-						}
-						flowcontainer = {
-							parentanchor = right
-							direction = vertical
-							spacing = 5
-							sub_header = {
-								size = { 215 32 }
-								blockoverride "Title_text" { text = "TRIBAL_INTERACTIONS" }
-							}
-							flowcontainer = {
-								spacing = 6
-								icon_button_square = {
-									datacontext = "[GetScriptedGui('assemble_war_council_button')]"
-									visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
-									blockoverride "On_click"
-									{
-										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-									}
-									tooltip = "ASSEMBLE_WAR_COUNCIL_BUTTON_TOOLTIP"
-									blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
-									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/war_council.dds" }
-								}
-								icon_button_square = {
-									datacontext = "[GetScriptedGui('assemble_raiding_party_button')]"
-									visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
-									blockoverride "On_click"
-									{
-										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-									}
-									tooltip = "ASSEMBLE_RAIDING_PART_BUTTON_TOOLTIP"
-									blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
-									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/raiding_parties.dds" }
-								}
-								icon_button_square = {
-									datacontext = "[GetScriptedGui('hold_games_button')]"
-									visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
-									blockoverride "On_click"
-									{
-										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-									}
-									tooltip = "HOLD_GAMES_BUTTON_TOOLTIP"
-									blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
-									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/hold_games.dds" }
-								}
-								icon_button_square = {
-									datacontext = "[GetScriptedGui('decentralize_realm_button')]"
-									visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
-									blockoverride "On_click"
-									{
-										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
-										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
-									}
-									tooltip = "DECENTRALIZE_REALM_BUTTON_TOOLTIP"
-									blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
-									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/tribal_migration.dds" }
-								}
-							}
-						}
-					}
+					size = { 985 2 }
 				}
 			}
 			margin_widget = { #Monarchy mechanics
@@ -1149,7 +989,7 @@ base_window = {
 					position = { 0 -5 }
 					parentanchor = top|hcenter
 					modify_texture = {
-						texture = "gfx/interface/base_parts/horizontal_gradient_black.dds"
+						texture = "gfx/interface/base_parts/horizontal_gradient_stretch_black_double.dds"
 						blend_mode = alphamultiply
 					}
 					modify_texture = {
@@ -1266,9 +1106,9 @@ base_window = {
 					flowcontainer = {
 						direction = vertical
 						spacing = 5
-						widget = { size = { 510 150 } }
+						widget = { size = { 530 150 } }
 						sub_header = {
-							size = { 510 32 } 
+							size = { 530 32 } 
 							blockoverride "Title_text" { text = "SUCCESSION_AND_PRETENDERS" }
 						}
 						dynamicgridbox = {
@@ -1292,7 +1132,7 @@ base_window = {
 													parentanchor = bottom
 													using = shadow_background
 													modify_texture = {
-														texture = "gfx/interface/base_parts/gradient_black_invert.dds"
+														texture = "gfx/interface/base_parts/gradient_black_flip.dds"
 														blend_mode = alphamultiply
 													}
 												}
@@ -1399,7 +1239,7 @@ base_window = {
 					position = { 0 -5 }
 					parentanchor = top|hcenter
 					modify_texture = {
-						texture = "gfx/interface/base_parts/horizontal_gradient_black.dds"
+						texture = "gfx/interface/base_parts/horizontal_gradient_stretch_black_double.dds"
 						blend_mode = alphamultiply
 					}
 					modify_texture = {
@@ -1409,6 +1249,7 @@ base_window = {
 				}
 				flowcontainer = {
 					spacing = 10
+					parentanchor = hcenter
 					flowcontainer = {
 						direction = vertical
 						spacing = 5
@@ -1459,7 +1300,7 @@ base_window = {
 						ignoreinvisible = yes
 						spacing = 5
 						sub_header = {
-							size = { 590 32 }
+							size = { 610 32 }
 							blockoverride "Title_text" { text = "THE_SENATE_TITLE" }
 							allow_outside = yes
 							flowcontainer = {
@@ -1497,7 +1338,7 @@ base_window = {
 								#tooltip = "[GovernmentView.GetRulingParty.GetAgenda.GetDescription]"
 							}
 						}
-						widget = { size = { 590 120 } }
+						widget = { size = { 610 120 } }
 						textbox = {
 							name = "election_term"
 							size = { 590 28 }
@@ -1511,6 +1352,7 @@ base_window = {
 						}
 						dynamicgridbox = {
 							datamodel = "[GovernmentView.GetParties]"
+							parentanchor = hcenter
 							item = {
 								margin_widget = {
 									size = { 590 110 }
@@ -1683,6 +1525,141 @@ base_window = {
 					}
 				}
 			}
+			margin_widget = { #Unique Mechanics for gov archetypes || Tribal mechanics
+				size = { @window_width 168 }
+				visible = "[GovernmentView.GetPlayer.GetGovernment.IsTribal]"
+				margin_widget = {
+					size = { 100% 100% }
+					icon = {
+						size = { @window_width 300 }
+						using = shadow_background
+						position = { -2 -2 }
+						modify_texture = {
+							texture = "gfx/interface/base_parts/gradient_black.dds"
+							blend_mode = alphamultiply
+						}
+						modify_texture = {
+							texture = "gfx/interface/base_parts/background_x60bd_alpha_two_corner.dds"
+							blend_mode = alphamultiply
+							spriteType = Corneredtiled
+							spriteborder = { 60 60 }
+						}
+					}
+					margin_widget = {
+						size = { 100% 100% }
+						margin = { 8 5 }
+						flowcontainer = {
+							direction = vertical
+							spacing = 5
+							sub_header = {
+								size = { 755 32 }
+								blockoverride "Title_text" { text = "CENTRALIZATION" }
+							}
+							flowcontainer = {
+								spacing = 10
+								flowcontainer = {
+									tooltip = "[GovernmentView.GetPlayer.GetCentralizationTooltip]"
+									icon_and_text = {
+										size = { 150 32 }
+										blockoverride "Icon" { using = icon_centralization }
+										blockoverride "Text" { text = "[GovernmentView.GetPlayer.GetCentralization|2]%" }
+									}
+									icon = {
+										texture = "gfx/interface/arrows_strip.dds"
+										framesize = { 50 50 }
+										size = { 34 34 }
+										frame = "[GovernmentView.GetCentralizationChangeFrame]"
+										parentanchor = vcenter
+									}
+								}
+								widget = {
+									position = { 215 39 }
+									tooltip = "GOV_SCREN_CENT_EFF"
+									using = NoninteractableBG
+									blockoverride "Margins"
+									{
+										margin = { 4 4 }
+										margin_left = 6
+										margin_top = 0
+									}
+									textbox = {
+										resizeparent = yes
+										autoresize = yes
+										position = { 10 0 }
+										maximumsize = { 244 208 }
+										multiline = yes
+										using = BaseFontXS
+										using = Default_FontColor
+										text = "[GovernmentView.GetCentralizationEffectInfo]"
+										margin_right = 4
+										minimumsize = { 244 112 }
+									}
+								}
+							}
+						}
+						flowcontainer = {
+							parentanchor = right
+							direction = vertical
+							spacing = 5
+							sub_header = {
+								size = { 215 32 }
+								blockoverride "Title_text" { text = "TRIBAL_INTERACTIONS" }
+							}
+							flowcontainer = {
+								spacing = 6
+								icon_button_square = {
+									datacontext = "[GetScriptedGui('assemble_war_council_button')]"
+									visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									blockoverride "On_click"
+									{
+										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
+										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									}
+									tooltip = "ASSEMBLE_WAR_COUNCIL_BUTTON_TOOLTIP"
+									blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
+									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/war_council.dds" }
+								}
+								icon_button_square = {
+									datacontext = "[GetScriptedGui('assemble_raiding_party_button')]"
+									visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									blockoverride "On_click"
+									{
+										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
+										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									}
+									tooltip = "ASSEMBLE_RAIDING_PART_BUTTON_TOOLTIP"
+									blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
+									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/raiding_parties.dds" }
+								}
+								icon_button_square = {
+									datacontext = "[GetScriptedGui('hold_games_button')]"
+									visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									blockoverride "On_click"
+									{
+										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
+										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									}
+									tooltip = "HOLD_GAMES_BUTTON_TOOLTIP"
+									blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
+									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/hold_games.dds" }
+								}
+								icon_button_square = {
+									datacontext = "[GetScriptedGui('decentralize_realm_button')]"
+									visible = "[ScriptedGui.IsShown( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									blockoverride "On_click"
+									{
+										enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).End )]"
+										onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+									}
+									tooltip = "DECENTRALIZE_REALM_BUTTON_TOOLTIP"
+									blockoverride "ClickSound" { clicksound = "event:/SFX/UI/Actions/sfx_ui_action_goverment_interactions" }
+									blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/tribal_migration.dds" }
+								}
+							}
+						}
+					}
+				}
+			}
 			margin_widget = { #Tribal mechanics
 				size = { @window_width 360 }
 				margin = { 10 0 }
@@ -1716,43 +1693,40 @@ base_window = {
 					flowcontainer = {
 						parentanchor = hcenter
 						datamodel = "[GovernmentView.GetClanLeaders]"
-						
+						spacing = 5
 						item = {
-							flowcontainer = {
-								margin = { 10 0 }
+							margin_widget = {
 								datacontext = "[ClanLeaderItem.GetCharacter]"
-								margin_widget = {
-									size = { 130 255 } 
-									margin = { 5 5 }
-									using = background_widget
-									blockoverride "Icon" {}
-									flowcontainer = {
-										direction = vertical
-										spacing = 5
-										cpt_button = {
-											parentanchor = hcenter
-											size = { 90 135 }
+								size = { 130 255 } 
+								margin = { 5 5 }
+								using = background_widget
+								blockoverride "Icon" {}
+								flowcontainer = {
+									direction = vertical
+									spacing = 5
+									cpt_button = {
+										parentanchor = hcenter
+										size = { 90 135 }
+									}
+									icon_and_text = {
+										size = { 120 24 }
+										blockoverride "Icon" { using = icon_loyalty }
+										blockoverride "Text" { text = "[Character.GetLoyalty|0]" }
+										tooltipwidget = { 
+											using = character_loyalty_tooltip 
 										}
-										icon_and_text = {
-											size = { 120 24 }
-											blockoverride "Icon" { using = icon_loyalty }
-											blockoverride "Text" { text = "[Character.GetLoyalty|0]" }
-											tooltipwidget = { 
-												using = character_loyalty_tooltip 
-											}
-										}
-										icon_and_text = {
-											size = { 120 24 } 
-											blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/clan_retinue.dds" }
-											blockoverride "Text" { text = "[ClanLeaderItem.GetCharacter.GetNumberOfLoyalCohorts]" }
-											tooltip = "LOYAL_COHORTS"
-										}
-										icon_and_text = {
-											size = { 120 24 }
-											blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/election_term.dds" }
-											blockoverride "Text" { text = "[ClanLeaderItem.GetCharacter.GetSuccessionScore|0]" }
-											tooltip = "[ClanLeaderItem.GetCharacter.GetSuccessionScoreInfo]"
-										}
+									}
+									icon_and_text = {
+										size = { 120 24 } 
+										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/clan_retinue.dds" }
+										blockoverride "Text" { text = "[ClanLeaderItem.GetCharacter.GetNumberOfLoyalCohorts]" }
+										tooltip = "LOYAL_COHORTS"
+									}
+									icon_and_text = {
+										size = { 120 24 }
+										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/election_term.dds" }
+										blockoverride "Text" { text = "[ClanLeaderItem.GetCharacter.GetSuccessionScore|0]" }
+										tooltip = "[ClanLeaderItem.GetCharacter.GetSuccessionScoreInfo]"
 									}
 								}
 							}
@@ -1767,7 +1741,7 @@ base_window = {
 			visible = "[GovernmentView.IsShowOffices]"
 
 			scrollarea = {
-				size = { 950 800 }
+				size = { 970 780 }
 				scrollbarpolicy_horizontal = always_off
 				scrollbar_vertical = {
 					using = VerticalScrollBar
@@ -1784,36 +1758,12 @@ base_window = {
 								margin = { 5 5 }
 								datacontext = "[OfficeHolderItem.GetCharacter]"
 								offices_color_background = {
-									blockoverride "Color" { using = orange_color }
-									using = offices_1
+									blockoverride "Color" { using = gold_background }
+									visible = "[OfficeHolderItem.GetCharacter.IsValid]"
 								}
 								offices_color_background = {
-									blockoverride "Color" { using = green_color }
-									using = offices_2
-								}
-								offices_color_background = {
-									blockoverride "Color" { using = red_color }
-									using = offices_3
-								}
-								offices_color_background = {
-									blockoverride "Color" { using = cyan_color }
-									using = offices_4
-								}
-								offices_color_background = {
-									blockoverride "Color" { using = yellow_orange_color }
-									using = offices_5
-								}
-								offices_color_background = {
-									blockoverride "Color" { using = violet_color }
-									using = offices_6
-								}
-								offices_color_background = {
-									blockoverride "Color" { using = beige_color }
-									using = offices_7
-								}
-								offices_color_background = {
-									blockoverride "Color" { using = salad_color }
-									using = offices_8
+									blockoverride "Color" { using = red_background }
+									visible = "[Not( OfficeHolderItem.GetCharacter.IsValid )]"
 								}
 								flowcontainer = {
 									direction = vertical
@@ -1823,36 +1773,12 @@ base_window = {
 										ignoreinvisible = yes
 										spacing = 5
 										offices_color_background_widget = {
-											blockoverride "Color" { using = orange_color }
-											using = offices_1
+											blockoverride "Color" { using = green_background }
+											visible = "[OfficeHolderItem.GetCharacter.IsValid]"
 										}
 										offices_color_background_widget = {
-											blockoverride "Color" { using = green_color }
-											using = offices_2
-										}
-										offices_color_background_widget = {
-											blockoverride "Color" { using = red_color }
-											using = offices_3
-										}
-										offices_color_background_widget = {
-											blockoverride "Color" { using = cyan_color }
-											using = offices_4
-										}
-										offices_color_background_widget = {
-											blockoverride "Color" { using = yellow_orange_color }
-											using = offices_5
-										}
-										offices_color_background_widget = {
-											blockoverride "Color" { using = violet_color }
-											using = offices_6
-										}
-										offices_color_background_widget = {
-											blockoverride "Color" { using = beige_color }
-											using = offices_7
-										}
-										offices_color_background_widget = {
-											blockoverride "Color" { using = salad_color }
-											using = offices_8
+											blockoverride "Color" { using = red_background }
+											visible = "[Not( OfficeHolderItem.GetCharacter.IsValid )]"
 										}
 										sub_header = {
 											size = { 407 32 }
@@ -2033,7 +1959,7 @@ base_window = {
 				}
 			}
 			scrollarea = {
-				size = { 955 780 }
+				size = { 970 780 }
 				scrollbarpolicy_horizontal = always_off
 				#using = VerticalScrollAreaCutOff
 				scrollbar_vertical = {

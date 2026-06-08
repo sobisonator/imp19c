@@ -69,7 +69,6 @@ base_window = {
 			margin = { 10 10 }
 			flowcontainer = {
 				direction = vertical
-				spacing = 5
 				widget = {
 					size = { 735 252 }
 					widget = {
@@ -181,6 +180,7 @@ base_window = {
 				flowcontainer = {
 					#visible = "yes" # TODO: Change to only be visible when there are states to be shown
 				    alwaystransparent = no
+				    margin_top = 5
 				    spacing = 5
 					textbox = {
 						size = { 82 30 }
@@ -249,9 +249,22 @@ base_window = {
 					#		fontsize_min = 12
 					#	}
 					#}
+					icon_button_square = {
+						size = { 42 42 }
+						blockoverride "On_click" { onclick = "[GetVariableSystem.Set('character_family_tree', 'open')]" }
+						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/family_size.dds" }
+						visible = "[Not(GetVariableSystem.HasValue('character_family_tree', 'open'))]"
+						tooltip = "character_family_tree_open"
+					}
+					icon_button_square = {
+						size = { 42 42 }
+						blockoverride "On_click" { onclick = "[GetVariableSystem.Set('character_family_tree', 'close')]" }
+						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/family_size.dds" }
+						visible = "[GetVariableSystem.HasValue('character_family_tree', 'open')]"
+						tooltip = "character_family_tree_close"
+					}
 					icon_and_text_progress = {
 						parentanchor = bottom
-						position = { 0 0 }
 						blockoverride "Icon" { using = icon_health }
 						blockoverride "Value" { value = "[FixedPointToFloat( CharacterWindow.GetCharacter.GetHealth )]" }
 						blockoverride "Text" { text = "[FixedPointToFloat( CharacterWindow.GetCharacter.GetHealth )]%" }
@@ -259,6 +272,7 @@ base_window = {
 					}
 					icon_and_text = {
 						size = { 128 0 }
+						parentanchor = bottom
 						blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/leader.dds" }
 						blockoverride "Text" { text = "[CharacterWindow.GetCharacter.GetSuccessionScore]" }
 						tooltip = "[CharacterWindow.GetCharacter.GetSuccessionScoreInfo]"
@@ -266,6 +280,7 @@ base_window = {
 					}
 					icon_and_text = {
 						size = { 90 0 }
+						parentanchor = bottom
 						blockoverride "Icon" 
 						{ 
 							texture = "gfx/interface/icons/shared_icons/senate_seat.dds" 
@@ -277,6 +292,7 @@ base_window = {
 					}
 
 					dynamicgridbox = {
+						parentanchor = bottom
 						datamodel = "[CharacterWindow.GetConvictions]"
 						visible = "[CharacterWindow.GetCharacter.GetEmployer.GetGovernment.IsRepublic]"
 						flipdirection = yes
@@ -307,6 +323,7 @@ base_window = {
 					}
 
 					icon_and_text_progress = {
+						parentanchor = bottom
 						blockoverride "Icon" { using = icon_statesmanship }
 						blockoverride "Value" { value = "[FixedPointToFloat( CharacterWindow.GetCharacter.GetExperience )]" }
 						blockoverride "Text" { text = "[CharacterWindow.GetCharacter.GetExperience|1]%" }
@@ -318,283 +335,280 @@ base_window = {
 				spacing = 5
 				flowcontainer = {
 					direction = vertical
-					container = {
+					ignoreinvisible = yes
+					margin_top = 10
+					sub_header_v = {
 						name = "Family and Relationships"
-						sub_header_v = {
-							size = { 478 100% }
-							position = { -2 0 }
-							blockoverride "Title_text" { text = "FAMILY" }
-						}
-						
-						margin_widget = {
-							size = { 478 106 }
-							position = { 0 32 }
-							margin_top = 6
+						visible = "[Not(GetVariableSystem.HasValue('character_family_tree', 'open'))]"
+						size = { 478 365 }
+						blockoverride "Title_text" { text = "FAMILY" }
+						flowcontainer = {
+							direction = vertical
+							position = { 0 38 }
+							spacing = 5
 							@immediate_family_width = 50
 							@immediate_family_height = 76
-							icon = {
-								name = "background_banner_spouse"
-								size = { 148 106 }
-								texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
-								alpha = @categoryBGalpha
-								modify_texture = {
-									texture = "gfx/interface/character_banners/character_spouse.dds"
-									blend_mode = alphamultiply
-									spriteType = Corneredtiled
-									spriteborder = { 90 0 }
-								}
-								using = border_slightly_torn_alpha
-							}
-
-							textbox = {
-								position = { 6 -2 }
-								size = { 82 30 }
-								autoresize = yes
-								text = "FAM_SPOUSE"
-								font = HeaderFont
-								fontsize = 20
-								using = Default_FontColor
-								alpha = 0.8
-							}
-
-							cpt_button = {
-								position = { 16 24 }
-								name = "Spouse"
-								blockoverride "ShowIcons" { visible = no }
-								size = { @immediate_family_width @immediate_family_height }
-								blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetSpouse]" }
-								visible = "[Character.IsValid]"
-							}
-							icon = {
-								name = "background_banner_children"
-								position { 158 0 }
-								size = { 304 106 }
-								texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
-								alpha = @categoryBGalpha
-								modify_texture = {
-									texture = "gfx/interface/character_banners/character_kid.dds"
-									blend_mode = alphamultiply
-									spriteType = Corneredtiled
-									spriteborder = { 90 0 }
-								}
-								using = border_slightly_torn_alpha
-							}
-
-							textbox = {
-								size = { 82 30 }
-								position = { 164 -2 }
-								autoresize = yes
-								text = "CHILDREN"
-								font = HeaderFont
-								fontsize = 20
-								using = Default_FontColor
-								alpha = 0.8
-							}
-
-							overlappingitembox = {
-								margin_top = 6
-								name = "Children"
-								position = { 170 18 }
-								datamodel = "[CharacterWindow.GetCharacter.GetChildren]"
-								size = { 285 80 }
-								spacing = 6
-								
-								item = {
-									cpt_button = {
-										name = "Child"
-										size = { @immediate_family_width @immediate_family_height }
-										blockoverride "ShowIcons" { visible = no }
-									}
-								}
-							}
-						}
-						margin_widget = {
-							size = { 478 106 }
-							position = { 0 144 }
-							margin_top = 6
 							@extended_family_width = 50
 							@extended_family_height = 76
-							icon = {
-								name = "background_banner_parents"
-								size = { 212 106 }
-								texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
-								alpha = @categoryBGalpha
-								modify_texture = {
-									texture = "gfx/interface/character_banners/character_parents.dds"
-									blend_mode = alphamultiply
-									#spriteType = Corneredtiled
-									#spriteborder = { 90 0 }
-								}
-								using = border_slightly_torn_alpha
-							}
-
-							textbox = {
-								size = { 82 30 }
-								position = { 6 -2 }
-								autoresize = yes
-								text = "PARENTS_LABEL"
-								font = HeaderFont
-								fontsize = 20
-								using = Default_FontColor
-								alpha = 0.8
-							}
-
-							flowcontainer = {
-								spacing = 6
-								position = { 10 24 }
-								cpt_button = {
-									name = "Father"
-									blockoverride "ShowIcons" { visible = no }
-									size = { @extended_family_width @extended_family_height }
-									blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetFather]" }
-									visible = "[Character.IsValid]"
-								}
-								cpt_button = {
-									name = "Mother"
-									blockoverride "ShowIcons" { visible = no }
-									size = { @extended_family_width @extended_family_height }
-									blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetMother]" }
-									visible = "[Character.IsValid]"
-								}
-							}
-							icon = {
-								name = "background_banner_siblings"
-								position = { 222 0 }
-								size = { 240 106 }
-								texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
-								alpha = @categoryBGalpha
-								modify_texture = {
-									texture = "gfx/interface/character_banners/character_siblings.dds"
-									blend_mode = alphamultiply
-									spriteType = Corneredtiled
-									spriteborder = { 90 0 }
-								}
-								using = border_slightly_torn_alpha
-							}
-
-							textbox = {
-								size = { 82 30 }
-								position = { 228 -2 }
-								autoresize = yes
-								text = "SIBLINGS"
-								font = HeaderFont
-								fontsize = 20
-								using = Default_FontColor
-								alpha = 0.8
-							}
-
-							overlappingitembox = {
-								name = "Siblings"
-								position = { 230 24 }
-								datamodel = "[CharacterWindow.GetSiblings]"
-								size = { 225 80 }
-								spacing = 6
-								
-								item = {
-									cpt_button = {
-										blockoverride "ShowIcons" { visible = no }
-										name = "Sibling"
-										size = { @extended_family_width @extended_family_height }
-									}
-								}
-							}
-							
-						}
-						margin_widget = {
-							size = { 478 106 }
-							position = { 0 262 }
 							@rival_portrait_width = 54
 							@rival_portrait_height = 80
-							icon = {
-								name = "background_banner_friends"
-								size = { 228 106 }
-								texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
-								alpha = @categoryBGalpha
-								modify_texture = {
-									texture = "gfx/interface/character_banners/character_friends.dds"
-									blend_mode = alphamultiply
-									spriteType = Corneredtiled
-									spriteborder = { 90 0 }
-								}
-								using = border_slightly_torn_alpha
-							}
 
-							textbox = {
-								size = { 82 30 }
-								position = { 6 -2 }
-								autoresize = yes
-								text = "FRIENDS_LABEL"
-								tooltip = "FRIENDS_TOOLTIP"
-								font = HeaderFont
-								fontsize = 20
-								using = Default_FontColor
-								alpha = 0.8
-							}
-
-							overlappingitembox = {
-								size = { 146 86 }
-								position = { 76 23 }
-								
-								datamodel = "[CharacterWindow.GetCharacter.GetFriends]"
-								
-								item = {
+							flowcontainer = {
+								margin_left = 2
+								spacing = 5
+								widget = {
+									size = { 148 106 }
+									icon = {
+										name = "background_banner_spouse"
+										size = { 100% 100% }
+										texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+										alpha = @categoryBGalpha
+										modify_texture = {
+											texture = "gfx/interface/character_banners/character_spouse.dds"
+											blend_mode = alphamultiply
+											spriteType = Corneredtiled
+											spriteborder = { 90 0 }
+										}
+										using = border_slightly_torn_alpha
+									}
+									textbox = {
+										position = { 6 -2 }
+										size = { 82 30 }
+										autoresize = yes
+										text = "FAM_SPOUSE"
+										font = HeaderFont
+										fontsize = 20
+										using = Default_FontColor
+										alpha = 0.8
+									}
 									cpt_button = {
-										size = { @rival_portrait_width @rival_portrait_height }
+										position = { 8 24 }
+										name = "Spouse"
 										blockoverride "ShowIcons" { visible = no }
+										size = { @immediate_family_width @immediate_family_height }
+										blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetSpouse]" }
+										visible = "[Character.IsValid]"
+									}
+								}
+								widget = {
+									size = { 314 106 }
+									icon = {
+										name = "background_banner_children"
+										size = { 100% 100% }
+										texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+										alpha = @categoryBGalpha
+										modify_texture = {
+											texture = "gfx/interface/character_banners/character_kid.dds"
+											blend_mode = alphamultiply
+											spriteType = Corneredtiled
+											spriteborder = { 90 0 }
+										}
+										using = border_slightly_torn_alpha
+									}
+									textbox = {
+										size = { 82 30 }
+										position = { 6 -2 }
+										autoresize = yes
+										text = "CHILDREN"
+										font = HeaderFont
+										fontsize = 20
+										using = Default_FontColor
+										alpha = 0.8
+									}
+									overlappingitembox = {
+										name = "Children"
+										position = { 8 24 }
+										datamodel = "[CharacterWindow.GetCharacter.GetChildren]"
+										size = { 298 80 }
+										spacing = 6
+										
+										item = {
+											cpt_button = {
+												name = "Child"
+												size = { @immediate_family_width @immediate_family_height }
+												blockoverride "ShowIcons" { visible = no }
+											}
+										}
 									}
 								}
 							}
-
-							icon = {
-								name = "background_banner_rivals"
-								position = { 238 0 }
-								size = { 224 100% }
-								texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
-								alpha = @categoryBGalpha
-								modify_texture = {
-									texture = "gfx/interface/character_banners/character_rival.dds"
-									blend_mode = alphamultiply
-									spriteType = Corneredtiled
-									spriteborder = { 88 0 }
+							flowcontainer = {
+								spacing = 5
+								widget = {
+									size = { 212 106 }
+									icon = {
+										name = "background_banner_parents"
+										size = { 100% 100% }
+										texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+										alpha = @categoryBGalpha
+										modify_texture = {
+											texture = "gfx/interface/character_banners/character_parents.dds"
+											blend_mode = alphamultiply
+											#spriteType = Corneredtiled
+											#spriteborder = { 90 0 }
+										}
+										using = border_slightly_torn_alpha
+									}
+									textbox = {
+										size = { 82 30 }
+										position = { 6 -2 }
+										autoresize = yes
+										text = "PARENTS_LABEL"
+										font = HeaderFont
+										fontsize = 20
+										using = Default_FontColor
+										alpha = 0.8
+									}
+									flowcontainer = {
+										spacing = 6
+										position = { 8 24 }
+										cpt_button = {
+											name = "Father"
+											blockoverride "ShowIcons" { visible = no }
+											size = { @extended_family_width @extended_family_height }
+											blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetFather]" }
+											visible = "[Character.IsValid]"
+										}
+										cpt_button = {
+											name = "Mother"
+											blockoverride "ShowIcons" { visible = no }
+											size = { @extended_family_width @extended_family_height }
+											blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetMother]" }
+											visible = "[Character.IsValid]"
+										}
+									}
 								}
-								using = border_slightly_torn_alpha
-							}
-
-							textbox = {
-								size = { 82 30 }
-								position = { 244 -2 }
-								tooltip = "RIVALS_TOOLTIP"
-								autoresize = yes
-								datacontext = "[CharacterWindow]"
-								text = "RIVALS_LABEL"
-								font = HeaderFont
-								fontsize = 20
-								using = Default_FontColor
-								alpha = 0.8
-							}
-
-							overlappingitembox = {
-								size = { 150 86 }
-								position = { 306 23 }
-								spacing = 6
-								datamodel = "[CharacterWindow.GetCharacter.GetRivals]"
-								
-								item = {
-									cpt_button = {
-										size = { @rival_portrait_width @rival_portrait_height }
-										blockoverride "ShowIcons" { visible = no }
+								widget = {
+									size = { 250 106 }
+									icon = {
+										name = "background_banner_siblings"
+										size = { 100% 100% }
+										texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+										alpha = @categoryBGalpha
+										modify_texture = {
+											texture = "gfx/interface/character_banners/character_siblings.dds"
+											blend_mode = alphamultiply
+											spriteType = Corneredtiled
+											spriteborder = { 90 0 }
+										}
+										using = border_slightly_torn_alpha
+									}
+									textbox = {
+										size = { 82 30 }
+										position = { 6 -2 }
+										autoresize = yes
+										text = "SIBLINGS"
+										font = HeaderFont
+										fontsize = 20
+										using = Default_FontColor
+										alpha = 0.8
+									}
+									overlappingitembox = {
+										name = "Siblings"
+										position = { 8 24 }
+										datamodel = "[CharacterWindow.GetSiblings]"
+										size = { 234 80 }
+										spacing = 6
+										
+										item = {
+											cpt_button = {
+												blockoverride "ShowIcons" { visible = no }
+												name = "Sibling"
+												size = { @extended_family_width @extended_family_height }
+											}
+										}
 									}
 								}
 							}
-							
+							flowcontainer = {
+								spacing = 5
+								widget = {
+									size = { 228 106 }
+									icon = {
+										name = "background_banner_friends"
+										size = { 100% 100% }
+										texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+										alpha = @categoryBGalpha
+										modify_texture = {
+											texture = "gfx/interface/character_banners/character_friends.dds"
+											blend_mode = alphamultiply
+											spriteType = Corneredtiled
+											spriteborder = { 90 0 }
+										}
+										using = border_slightly_torn_alpha
+									}
+									textbox = {
+										size = { 82 30 }
+										position = { 6 -2 }
+										autoresize = yes
+										text = "FRIENDS_LABEL"
+										tooltip = "FRIENDS_TOOLTIP"
+										font = HeaderFont
+										fontsize = 20
+										using = Default_FontColor
+										alpha = 0.8
+									}
+									overlappingitembox = {
+										size = { 212 86 }
+										position = { 8 23 }
+										datamodel = "[CharacterWindow.GetCharacter.GetFriends]"
+										
+										item = {
+											cpt_button = {
+												size = { @rival_portrait_width @rival_portrait_height }
+												blockoverride "ShowIcons" { visible = no }
+											}
+										}
+									}
+								}
+								widget = {
+									size = { 234 106 }
+									icon = {
+										name = "background_banner_rivals"
+										size = { 100% 100% }
+										texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
+										alpha = @categoryBGalpha
+										modify_texture = {
+											texture = "gfx/interface/character_banners/character_rival.dds"
+											blend_mode = alphamultiply
+											spriteType = Corneredtiled
+											spriteborder = { 88 0 }
+										}
+										using = border_slightly_torn_alpha
+									}
+									textbox = {
+										size = { 82 30 }
+										position = { 6 -2 }
+										tooltip = "RIVALS_TOOLTIP"
+										autoresize = yes
+										datacontext = "[CharacterWindow]"
+										text = "RIVALS_LABEL"
+										font = HeaderFont
+										fontsize = 20
+										using = Default_FontColor
+										alpha = 0.8
+									}
+									overlappingitembox = {
+										size = { 218 86 }
+										position = { 8 23 }
+										spacing = 6
+										datamodel = "[CharacterWindow.GetCharacter.GetRivals]"
+										
+										item = {
+											cpt_button = {
+												size = { @rival_portrait_width @rival_portrait_height }
+												blockoverride "ShowIcons" { visible = no }
+											}
+										}
+									}
+								}
+							}
 						}
 					}
 					margin_widget = {
+						visible = "[Not(GetVariableSystem.HasValue('character_family_tree', 'open'))]"
 						size = { 478 160 }
-						#parentanchor = bottom
 						margin_top = 6
-						#margin_left = 10
-						
 						sub_header_v = {
 							size = { 100% 100% }
 							position = { -2 0 }
@@ -717,17 +731,183 @@ base_window = {
 							}
 						}
 					}
+					flowcontainer = {
+						visible = "[GetVariableSystem.HasValue('character_family_tree', 'open')]"
+						widget = {
+							size = { 218 330 }
+							using = background_widget
+							flowcontainer = {
+								direction = vertical
+								margin = { 10 5 }
+								flowcontainer = {
+									direction = vertical
+									spacing = 5
+									textbox = {
+										size = { 82 30 }
+										autoresize = yes
+										text = "FRIENDS_LABEL"
+										tooltip = "FRIENDS_TOOLTIP"
+										font = HeaderFont
+										fontsize = 20
+										using = Default_FontColor
+										alpha = 0.8
+									}
+									overlappingitembox = {
+										datamodel = "[CharacterWindow.GetCharacter.GetFriends]"
+										size = { 190 80 }
+										spacing = 6
+										item = {
+											tree_widget = { }
+										}
+									}
+								}
+								flowcontainer = {
+									direction = vertical
+									spacing = 5
+									textbox = {
+										size = { 82 30 }
+										autoresize = yes
+										text = "RIVALS_LABEL"
+										tooltip = "RIVALS_TOOLTIP"
+										font = HeaderFont
+										fontsize = 20
+										using = Default_FontColor
+										alpha = 0.8
+									}
+									overlappingitembox = {
+										datamodel = "[CharacterWindow.GetCharacter.GetRivals]"
+										size = { 190 80 }
+										spacing = 6
+										item = {
+											tree_widget = { }
+										}
+									}
+								}
+								flowcontainer = {
+									direction = vertical
+									spacing = 5
+									textbox = {
+										size = { 82 30 }
+										autoresize = yes
+										text = "SIBLINGS"
+										font = HeaderFont
+										fontsize = 20
+										using = Default_FontColor
+										alpha = 0.8
+									}
+									overlappingitembox = {
+										name = "Siblings"
+										datamodel = "[CharacterWindow.GetSiblings]"
+										size = { 190 80 }
+										spacing = 6
+										item = {
+											tree_widget = {
+												name = "Sibling"
+											}
+										}
+									}
+								}
+							}
+						}
+						flowcontainer = {
+							direction = vertical
+							margin_left = 10
+							spacing = 5
+							flowcontainer = {
+								parentanchor = hcenter
+								tree_block = {
+									direction = vertical
+									parentanchor = hcenter
+									spacing = 5
+									flowcontainer = {
+										spacing = 5
+										tree_widget = {
+											name = "FatherFather"
+											blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetFather.GetFather]" }
+										}
+										tree_widget = {
+											name = "FatherMother"
+											blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetFather.GetMother]" }
+										}
+									}
+									tree_widget_arrow = { }
+									tree_widget = {
+										name = "Father"
+										parentanchor = hcenter
+										blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetFather]" }
+									}
+								}
+								widget = {
+									size = { 15 0 }
+								}
+								tree_block = {
+									direction = vertical
+									parentanchor = hcenter
+									spacing = 5
+									flowcontainer = {
+										spacing = 5
+										tree_widget = {
+											name = "MotherFather"
+											blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetMother.GetFather]" }
+										}
+										tree_widget = {
+											name = "MotherMother"
+											blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetMother.GetMother]" }
+										}
+									}
+									tree_widget_arrow = { }
+									tree_widget = {
+										name = "Mother"
+										parentanchor = hcenter
+										blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetMother]" }
+									}
+								}
+							}
+							tree_widget_arrow = {
+								margin = { 25 0 }
+							}
+							tree_block = {
+								spacing = 5
+								ignoreinvisible = yes
+								parentanchor = hcenter
+								tree_widget = {
+									blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter]" }
+								}
+								tree_widget = {
+									blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetSpouse]" }
+								}
+							}
+							tree_widget_arrow = {
+								margin = { 90 0 }
+							}
+							tree_block = {
+								overlappingitembox = {
+									name = "Children"
+									datamodel = "[CharacterWindow.GetCharacter.GetChildren]"
+									size = { 240 80 }
+									spacing = 5
+									parentanchor = hcenter
+									item = {
+										tree_widget = {
+											name = "Child"
+										}
+									}
+								}
+							}
+						}
+					}
 				}
 				flowcontainer = {
 					direction = vertical
+					margin_top = 10
 					sub_header_v = {
-						size = { 250 490 }
+						size = { 250 480 }
 						blockoverride "Title_text" 
 						{
 							text = CHARACTER_INTERACTIONS_SUBTITLE
 						}
 						margin_widget = { 
-							size = { 256 462 }
+							size = { 256 452 }
 							parentanchor = left
 							position = { 0 30 }
 							
@@ -761,15 +941,8 @@ base_window = {
 					margin_widget = {
 						size = { 222 34 }
 						parentanchor = hcenter
-						background = {
-							name = "background_banner_tempmodifiers"
-							shaderfile = "gfx/FX/pdxgui_default.shader"
-							size = { 100% 100% }
-							texture = "gfx/interface/base_parts/background_noninteractable_texture.dds"
-							alpha = @categoryBGalpha
-							using = border_slightly_torn_alpha
-							margin = { 10 4 }
-						}
+						using = NoninteractableBG
+						blockoverride "Margins" { margin = { 12 6 } margin_top = 8 }
 						
 						overlappingitembox = {
 							size = { 100% 100% }
@@ -785,172 +958,6 @@ base_window = {
 									
 									tooltip = "[TimedModifier.GetTooltip]"
 								}
-							}
-						}
-					}
-				}
-			}
-		}
-		flowcontainer = {
-			margin = { 20 20 }
-			visible = no
-			widget = {
-				size = { 260 330 }
-				using = background_widget
-				flowcontainer = {
-					direction = vertical
-					margin = { 10 5 }
-					flowcontainer = {
-						direction = vertical
-						spacing = 5
-						textbox = {
-							size = { 82 30 }
-							autoresize = yes
-							text = "FRIENDS_LABEL"
-							tooltip = "FRIENDS_TOOLTIP"
-							font = HeaderFont
-							fontsize = 20
-							using = Default_FontColor
-							alpha = 0.8
-						}
-						overlappingitembox = {
-							datamodel = "[CharacterWindow.GetCharacter.GetFriends]"
-							size = { 240 80 }
-							spacing = 6
-							item = {
-								tree_widget = { }
-							}
-						}
-					}
-					flowcontainer = {
-						direction = vertical
-						spacing = 5
-						textbox = {
-							size = { 82 30 }
-							autoresize = yes
-							text = "RIVALS_LABEL"
-							tooltip = "RIVALS_TOOLTIP"
-							font = HeaderFont
-							fontsize = 20
-							using = Default_FontColor
-							alpha = 0.8
-						}
-						overlappingitembox = {
-							datamodel = "[CharacterWindow.GetCharacter.GetRivals]"
-							size = { 240 80 }
-							spacing = 6
-							item = {
-								tree_widget = { }
-							}
-						}
-					}
-					flowcontainer = {
-						direction = vertical
-						spacing = 5
-						textbox = {
-							size = { 82 30 }
-							autoresize = yes
-							text = "SIBLINGS"
-							font = HeaderFont
-							fontsize = 20
-							using = Default_FontColor
-							alpha = 0.8
-						}
-						overlappingitembox = {
-							name = "Siblings"
-							datamodel = "[CharacterWindow.GetSiblings]"
-							size = { 240 80 }
-							spacing = 6
-							item = {
-								tree_widget = {
-									name = "Sibling"
-								}
-							}
-						}
-					}
-				}
-			}
-			flowcontainer = {
-				direction = vertical
-				margin = { 20 0 }
-				spacing = 5
-				flowcontainer = {
-					parentanchor = hcenter
-					tree_block = {
-						direction = vertical
-						parentanchor = hcenter
-						spacing = 5
-						flowcontainer = {
-							spacing = 5
-							tree_widget = {
-								name = "FatherFather"
-								blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetFather.GetFather]" }
-							}
-							tree_widget = {
-								name = "FatherMother"
-								blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetFather.GetMother]" }
-							}
-						}
-						tree_widget_arrow = { }
-						tree_widget = {
-							name = "Father"
-							parentanchor = hcenter
-							blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetFather]" }
-						}
-					}
-					widget = {
-						size = { 15 0 }
-					}
-					tree_block = {
-						direction = vertical
-						parentanchor = hcenter
-						spacing = 5
-						flowcontainer = {
-							spacing = 5
-							tree_widget = {
-								name = "MotherFather"
-								blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetMother.GetFather]" }
-							}
-							tree_widget = {
-								name = "MotherMother"
-								blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetMother.GetMother]" }
-							}
-						}
-						tree_widget_arrow = { }
-						tree_widget = {
-							name = "Mother"
-							parentanchor = hcenter
-							blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetMother]" }
-						}
-					}
-				}
-				tree_widget_arrow = {
-					margin = { 25 0 }
-				}
-				tree_block = {
-					spacing = 5
-					ignoreinvisible = yes
-					parentanchor = hcenter
-					tree_widget = {
-						blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter]" }
-					}
-					tree_widget = {
-						blockoverride "Context" { datacontext = "[CharacterWindow.GetCharacter.GetSpouse]" }
-					}
-				}
-				tree_widget_arrow = {
-					margin = { 90 0 }
-				}
-				tree_block = {
-					overlappingitembox = {
-						name = "Children"
-						datamodel = "[CharacterWindow.GetCharacter.GetChildren]"
-						size = { 240 80 }
-						spacing = 5
-						parentanchor = hcenter
-						item = {
-							tree_widget = {
-								name = "Child"
 							}
 						}
 					}

@@ -44,20 +44,120 @@
 
 # ----------
 
-# Upper strata
+## REACTIONARY
+# TODO: Add a way to get split election results for a province with multiple seats
+# Cities have 4 seats, Metropolises have 8 seats
+# This is for FPTP
 
-POLITICS_upper_strata_radical_province = {
+POLITICS_province_reactionary = {
+	value = 0
+	# From upper strata
+	add = POLITICS_province_reactionary_from_upper_strata
+	# For others: Only add if allowed to vote
+}
+
+POLITICS_province_reactionary_from_upper_strata = {
+	value = num_of_upper_strata
+	add = 1
+	subtract = num_of_URB_commerce_district
+	multiply = {
+		value = num_of_IND_resource_gathering_operation
+		subtract = num_of_IND_industrial_estate
+	}
+	multiply = {
+		value = 0.5
+		add = province_rural_percentage
+	}
+	multiply = {
+		value = 1
+		subtract = {
+			value = owner.stability
+			multiply = 0.01
+		}
+	}
+	if = {
+		limit = {
+			NOT = { 
+				dominant_province_religion = owner.religion
+			}
+		}
+		multiply = 0.5
+	}
+	min = 0
+}
+
+## CONSERVATIVE
+
+POLITICS_province_conservative = {
+	value = 0
+	add = POLITICS_province_conservative_from_upper_strata
+}
+
+POLITICS_province_conservative_from_upper_strata = {
+	value = num_of_upper_strata
+	add = 1
+	add = num_of_URB_cultural_district
+	add = num_of_URB_administration_district
+	multiply = {
+		value = 1 
+		add = governorship.EDU_t1_governorship_percentage
+	}
+	multiply = 2
+	# For others: Only add if allowed to vote
+	min = 0
 
 }
-POLITICS_upper_strata_liberal_province = {
 
-}
-POLITICS_upper_strata_conservative_province = {
+## LIBERAL
 
+POLITICS_province_liberal = {
+	value = 0
+	add = POLITICS_province_liberal_from_upper_strata
 }
-POLITICS_upper_strata_reactionary_province = {
 
+POLITICS_province_liberal_from_upper_strata = {
+	value = num_of_upper_strata
+	add = num_of_URB_commerce_district
+	multiply = {
+		value = 1
+		add = num_of_IND_industrial_estate
+	}
+	add = governorship.INDUSTRY_governorship_total_industry_slots
+	multiply = {
+		value = 1 
+		add = governorship.EDU_t2_governorship_percentage
+	}
+	multiply = {
+		value = 1
+		add = {
+			value = civilization_value
+			divide = 60
+		}
+		add = province_urban_percentage
+	}
+	add = {
+		value = SHIPPING_province_power
+		multiply = 0.07
+	}
+	# For others: Only add if allowed to vote
+	min = 0
 }
+
+## RADICAL
+
+POLITICS_province_radical = {
+	value = 0
+}
+
+POLITICS_province_radical_from_upper_strata = {
+	value = num_of_upper_strata
+	multiply = num_of_EDU_university
+	# For others: Only add if allowed to vote
+}
+
+##
+
+# TODO: Move "SPIRIT" (below) into a different file
 
 # "National spirit" svalues, representing the values of a country according to its government
 # All scopes are Country

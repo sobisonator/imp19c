@@ -1,7 +1,161 @@
-POLITICS_calculate_election = {
+POLITICS_test_election = {
     # Scope: Country
-    # Function: Get the political support for every political bloc across the country
+    # Function: Test counting up a variable based on every pop in the country
+    set_local_variable = {
+        name = country_reactionary_support
+        value = 0
+    }
+
+    save_scope_as = country_scope
+
+    ################
+    # GOVERNORSHIP
+    ################
+    every_governorships = {
+        limit = {
+            # Election viability rules
+            always = yes
+        }
+
+        set_local_variable = {
+            name = governorship_reactionary_support
+            value = 0
+        }
+
+        ###########
+        # STATE
+        ###########
+        every_governorship_state = {
+            limit = {
+                # Election viability rules
+                always = yes
+            }
+
+            set_local_variable = {
+                name = state_reactionary_support
+                value = 0
+            }
+
+            ############
+            # PROVINCE
+            ############
+            every_state_province = {
+                limit = {
+                    # Election viability rules
+                    always = yes
+                }
+
+                set_local_variable = {
+                    name = province_reactionary_support
+                    value = 0
+                }
+
+                every_pops_in_province = {
+                    limit = {
+                        # Filter by eligibility to vote
+                        pop_type = upper_strata
+                    }
+
+                    set_local_variable = {
+                        name = pop_reactionary_support
+                        value = {
+                            value = 1
+                            if = {
+                                limit = {
+                                    pop_religion = scope:country_scope.religion
+                                }
+                                add = 1
+                            }
+                            if = {
+                                limit = {
+                                    pop_culture = scope:country_scope.primary_culture
+                                }
+                                change_local_variable = {
+                                    name = pop_reactionary_support
+                                    add = 1
+                                }
+                            }
+                        }
+                    }
+
+                    # Add the pop's highest rated party to the province votes
+                    if = {
+                        limit = {
+                            local_var:pop_reactionary_support > 0 # TODO: Compare all choices
+                        }
+                        change_local_variable = {
+                            name = province_reactionary_support
+                            add = 1
+                        }
+                    }
+                    
+                }
+
+                # If the law is province-by-province first past the post, we add this way
+                set_variable = {
+                    name = province_reactionary_support
+                    value = local_var:province_reactionary_support
+                }
+                change_local_variable = {
+                    name = country_reactionary_support
+                    add = var:province_reactionary_support
+                }
+
+            # END PROVINCE
+            }
+
+        # END STATE
+        }
+
+    # END GOVERNORSHIP
+    }
+
+    set_variable = {
+        name = country_reactionary_support
+        value = local_var:country_reactionary_support
+    }
 }
+
+POLITICS_reset_country_support = {
+    # Scope: Country
+    # Function: Reset the support for political blocs in the country
+    set_variable = {
+        name = reactionary_support
+        value = 0
+    }
+    set_variable = {
+        name = conservative_support
+        value = 0
+    }
+    set_variable = {
+        name = liberal_support
+        value = 0
+    }
+    set_variable = {
+        name = radical_support
+        value = 0
+    }
+}
+
+POLITICS_add_proportional_support = {
+    # Scope: Any
+    # Function: Add support to the bloc at $level$ = country, governorship, state or province
+    change_variable = {
+        name = $level$_$bloc$_support
+        add = POLITICS_province_$bloc$
+    }
+}
+
+POLITICS_add_amt_support = {
+    # Scope: Any
+    # Function: Add support to the bloc at $level$ = country, governorship, state or province
+    change_variable = {
+        name = $level$_$bloc$_support
+        add = $amt$
+    }
+}
+
+#############
 
 POLITICS_upset_pacifists = {
 	# Scope: Country

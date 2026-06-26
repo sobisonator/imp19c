@@ -1,6 +1,7 @@
 POLITICS_test_election = {
     # Scope: Country
     # Function: Test counting up a variable based on every pop in the country
+    # TODO: Add Radical support to these patterns
     set_local_variable = {
         name = country_reactionary_support
         value = 0
@@ -9,14 +10,20 @@ POLITICS_test_election = {
         name = country_conservative_support
         value = 0
     }
+    set_local_variable = {
+        name = country_liberal_support
+        value = 0
+    }
 
     save_scope_as = country_scope
 
     set_local_variable = {
-        name = country_stability_percent
+        name = country_low_stability_modifier
         value = {
             value = stability
             divide = 100
+            subtract = 1
+            multiply = -2
         }
     }
 
@@ -32,6 +39,14 @@ POLITICS_test_election = {
         set_local_variable = {
             name = governorship_reactionary_support
             value = 0
+        }
+
+        set_local_variable = {
+            name = governorship_t2_education_modifier
+            value = {
+                value = EDU_t2_governorship_percentage
+                multiply = 20
+            }
         }
 
         save_scope_as = governorship
@@ -67,14 +82,66 @@ POLITICS_test_election = {
                     name = province_conservative_support
                     value = 0
                 }
+                set_local_variable = {
+                    name = province_liberal_support
+                    value = 0
+                }
 
                 save_scope_as = province
 
                 set_local_variable = {
-                    name = province_industrialisation_percent
+                    name = province_industrialisation_percent_modifier
                     value = {
                         value = civilization_value
+                        min = 0.001
+                        divide = 50
+                        add = 1
+                    }
+                }
+                set_local_variable = {
+                    name = province_factory_modifier
+                    value = {
+                        value = num_of_IND_industrial_estate
+                        min = 0.001
+                        divide = 7
+                    }
+                }
+                set_local_variable = {
+                    name = province_RGO_modifier
+                    value = {
+                        value = num_of_IND_resource_gathering_operation
+                        min = 0.001
+                        divide = 40
+                    }
+                }
+                set_local_variable = {
+                    name = province_shipping_power_modifier
+                    value = {
+                        value = SHIPPING_province_power
+                        min = 0.001
                         divide = 100
+                    }
+                }
+                set_local_variable = {
+                    name = province_rural_modifier
+                    value = {
+                        value = 0.3
+                        add = province_rural_percentage
+                    }
+                }
+                set_local_variable = {
+                    name = province_urban_modifier
+                    value = {
+                        value = 0.5
+                        add = province_urban_percentage
+                    }
+                }
+                set_local_variable = {
+                    name = province_slaves_and_indentured_modifier
+                    value = {
+                        value = num_of_slaves
+                        add = num_of_indentured
+                        multiply = 0.5
                     }
                 }
 
@@ -116,16 +183,17 @@ POLITICS_test_election = {
                                     add = 1
                                 }
                             }
-                            add = {
-                                value = 1
-                                subtract = local_var:country_stability
-                            }
+                            # Lower stability gives more votes to reactionary
+                            add = local_var:country_low_stability_modifier
+                            # Lower happiness gives more votes to reactionary
                             add = {
                                 value = 1
                                 subtract = {
                                     value = scope:province.upper_strata_happyness
                                 }
                             }
+                            multiply = local_var:province_rural_modifier
+                            add = local_var:province_slaves_and_indentured_modifier
                         }
                     }
 
@@ -135,7 +203,7 @@ POLITICS_test_election = {
                     set_local_variable = {
                         name = pop_conservative_support
                         value = {
-                            value = 2
+                            value = 2.8
                             if = {
                                 limit = {
                                     pop_religion = scope:country_scope.religion
@@ -152,12 +220,15 @@ POLITICS_test_election = {
                     set_local_variable = {
                         name = pop_liberal_support
                         value = {
-                            value = 0.5
-                            add = {
-                                value = scope:governorship.EDU_t2_governorship_percentage
-                                multiply = 10
-                            }
-                            add = province_industrialisation_percent
+                            value = 1.5
+                            
+                            add = local_var:province_shipping_power_modifier
+                            multiply = local_var:province_industrialisation_percent_modifier
+                            add = local_var:province_factory_modifier
+                            multiply = local_var:province_urban_modifier
+                            subtract = local_var:province_slaves_modifier
+                            add = local_var:governorship_t2_education_modifier
+                            
                         }
                     }
 
@@ -185,8 +256,8 @@ POLITICS_test_election = {
                     }
                     else_if = {
                         limit = {
-                            local_var:pop_conservative_support > pop_reactionary_support
-                            local_var:pop_conservative_support > pop_conservative_support
+                            local_var:pop_liberal_support > pop_reactionary_support
+                            local_var:pop_liberal_support > pop_conservative_support
                         }
                         change_local_variable = {
                             name = province_liberal_support
@@ -217,6 +288,14 @@ POLITICS_test_election = {
                     name = country_reactionary_support
                     add = var:province_reactionary_support
                 }
+                change_local_variable = {
+                    name = country_conservative_support
+                    add = var:province_conservative_support
+                }
+                change_local_variable = {
+                    name = country_liberal_support
+                    add = var:province_liberal_support
+                }
 
             # END PROVINCE
             }
@@ -227,6 +306,7 @@ POLITICS_test_election = {
     # END GOVERNORSHIP
     }
 
+    # TODO: Profile the performance of the local var method vs just adding to the scope from provinces/states/governorships directly
     set_variable = {
         name = country_reactionary_support
         value = local_var:country_reactionary_support

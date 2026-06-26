@@ -5,8 +5,20 @@ POLITICS_test_election = {
         name = country_reactionary_support
         value = 0
     }
+    set_local_variable = {
+        name = country_conservative_support
+        value = 0
+    }
 
     save_scope_as = country_scope
+
+    set_local_variable = {
+        name = country_stability_percent
+        value = {
+            value = stability
+            divide = 100
+        }
+    }
 
     ################
     # GOVERNORSHIP
@@ -21,6 +33,8 @@ POLITICS_test_election = {
             name = governorship_reactionary_support
             value = 0
         }
+
+        save_scope_as = governorship
 
         ###########
         # STATE
@@ -49,13 +63,40 @@ POLITICS_test_election = {
                     name = province_reactionary_support
                     value = 0
                 }
+                set_local_variable = {
+                    name = province_conservative_support
+                    value = 0
+                }
+
+                save_scope_as = province
+
+                set_local_variable = {
+                    name = province_industrialisation_percent
+                    value = {
+                        value = civilization_value
+                        divide = 100
+                    }
+                }
+
+                # TODO: Profile performance of using local vars vs saved scope like so in this loop
+
+                #set_local_variable = {
+                #    name = province_upper_strata_happiness
+                #    value = local_upper_strata_happyness
+                #}
 
                 every_pops_in_province = {
+                    # TODO: Change this to a switch instead, and have all the cases for each pop type in the same loop?
+                    # Potentially better for performance
+                    # And cleaner
                     limit = {
                         # Filter by eligibility to vote
                         pop_type = upper_strata
                     }
 
+                    #############
+                    # REACTIONARY
+                    #############
                     set_local_variable = {
                         name = pop_reactionary_support
                         value = {
@@ -75,27 +116,103 @@ POLITICS_test_election = {
                                     add = 1
                                 }
                             }
+                            add = {
+                                value = 1
+                                subtract = local_var:country_stability
+                            }
+                            add = {
+                                value = 1
+                                subtract = {
+                                    value = scope:province.upper_strata_happyness
+                                }
+                            }
+                        }
+                    }
+
+                    ##############
+                    # CONSERVATIVE
+                    ##############
+                    set_local_variable = {
+                        name = pop_conservative_support
+                        value = {
+                            value = 2
+                            if = {
+                                limit = {
+                                    pop_religion = scope:country_scope.religion
+                                }
+                                add = 1
+                            }
+                            add = scope:governorship.EDU_t1_governorship_percentage
+                        }
+                    }
+
+                    ##############
+                    # LIBERAL
+                    ##############
+                    set_local_variable = {
+                        name = pop_liberal_support
+                        value = {
+                            value = 0.5
+                            add = {
+                                value = scope:governorship.EDU_t2_governorship_percentage
+                                multiply = 10
+                            }
+                            add = province_industrialisation_percent
                         }
                     }
 
                     # Add the pop's highest rated party to the province votes
+                    # TODO: Order these in terms of most likely for each pop type (?is the performance boost worth it?)
                     if = {
                         limit = {
-                            local_var:pop_reactionary_support > 0 # TODO: Compare all choices
+                            local_var:pop_reactionary_support > pop_conservative_support
+                            local_var:pop_reactionary_support > pop_liberal_support
                         }
                         change_local_variable = {
                             name = province_reactionary_support
                             add = 1
                         }
                     }
+                    else_if = {
+                        limit = {
+                            local_var:pop_conservative_support > pop_reactionary_support
+                            local_var:pop_conservative_support > pop_liberal_support
+                        }
+                        change_local_variable = {
+                            name = province_conservative_support
+                            add = 1
+                        }
+                    }
+                    else_if = {
+                        limit = {
+                            local_var:pop_conservative_support > pop_reactionary_support
+                            local_var:pop_conservative_support > pop_conservative_support
+                        }
+                        change_local_variable = {
+                            name = province_liberal_support
+                            add = 1
+                        }
+                    }
                     
                 }
 
-                # If the law is province-by-province first past the post, we add this way
+                # If the law is province-by-province proportional representation, we add this way
+                # TODO: Develop a way to abstract this so that we can pass the total values into separate effects to process them based on whatever voting system
+                # TODO: Probably de-duplicate these as we are already referencing the province scope above, if that's not too bad for performance we can just save straight to the variable rather than passing one var to the other here
                 set_variable = {
                     name = province_reactionary_support
                     value = local_var:province_reactionary_support
                 }
+                set_variable = {
+                    name = province_conservative_support
+                    value = local_var:province_conservative_support
+                }
+                set_variable = {
+                    name = province_liberal_support
+                    value = local_var:province_liberal_support
+                }
+                # TODO: In first-past-the-post with 1-vote-per-province, each province would only supply its highest vote to the country support
+                # But this also may be done at State level instead of province level
                 change_local_variable = {
                     name = country_reactionary_support
                     add = var:province_reactionary_support
@@ -113,6 +230,14 @@ POLITICS_test_election = {
     set_variable = {
         name = country_reactionary_support
         value = local_var:country_reactionary_support
+    }
+    set_variable = {
+        name = country_conservative_support
+        value = local_var:country_conservative_support
+    }
+    set_variable = {
+        name = country_liberal_support
+        value = local_var:country_liberal_support
     }
 }
 

@@ -569,7 +569,7 @@ flavor_eve.14 = {
 	left_portrait = current_ruler
 	
 	trigger = {
-        NOT = { has_variable = industrial_building_cooldown }
+        NOT = { has_variable = cultural_district_cooldown }
     	any_owned_province = {
     		URB_cultural_district >= 1
     	}
@@ -577,7 +577,7 @@ flavor_eve.14 = {
 
     immediate = {
         set_variable = {
-            name = industrial_building_cooldown
+            name = cultural_district_cooldown
             days = 3650
         }
         random_owned_province = {
@@ -597,7 +597,8 @@ flavor_eve.14 = {
 				name = renowned_cultural_district_modifier
 				duration = -1
 			}
-		} 
+		}
+		add_stability = 1 
 	}
 }
 
@@ -609,40 +610,47 @@ flavor_eve.15 = {
 	left_portrait = current_ruler
 	
 	trigger = {
-        NOT = { has_variable = industrial_building_cooldown }
+        NOT = { has_variable = peoples_committee_cooldown }
     	any_owned_province = {
-    		URB_cultural_district >= 1
+        	OR = {
+        		IND_resource_gathering_operation >= 1
+        		IND_industrial_estate >= 1
+        	}
     	}
     }
 
     immediate = {
         set_variable = {
-            name = industrial_building_cooldown
-            days = 3650
+            name = peoples_committee_cooldown
+            days = 365
         }
         random_owned_province = {
             limit = {
-                URB_cultural_district >= 1
+            	OR = {
+            		IND_resource_gathering_operation >= 1
+            		IND_industrial_estate >= 1
+            	}
             }
-            save_scope_as = building_province
+            save_scope_as = peoples_committee_province
         }
     }
 	
-	fire_only_once = yes
-	
 	option = {
 		name = flavor_eve.15.a
-		scope:building_province = {
+		scope:peoples_committee_province = {
 			add_province_modifier = {
 				name = local_unrest_mild
 				duration = 730
 			}
-		} 
+		}
+		add_stability = -3
+		# TODO: Create a character who represents the ringleader
 	}
 
 	option = {
 		name = flavor_eve.15.b 
 		add_tyranny = 3
+		# TODO: Create a character who represents the ringleader, and imprison them
 	}
 }
 
@@ -678,7 +686,8 @@ flavor_eve.16 = {
 		add_treasury = {
 			value = root.INCOME_national_total_quarterly
 			multiply = -1
-		} 
+		}
+		add_tyranny = 1 
 	}
 
 	option = {
@@ -695,13 +704,22 @@ flavor_eve.17 = {
 	left_portrait = current_ruler
 	
 	trigger = {
-		is_monarchy = yes							
+		is_monarchy = yes
+		OR = {
+			stability < 50
+			tyranny > 10
+			AND = {
+				current_ruler = {
+					popularity < 50
+				}
+				stability < 75
+			}
+		}					
 	}
 	
 	immediate = {
 	}
 	
-	fire_only_once = yes
 	
 	option = {
 		name = flavor_eve.17.a 
@@ -773,11 +791,10 @@ flavor_eve.19 = {
 	immediate = {
 	}
 	
-	fire_only_once = yes
-	
 	option = {
 		name = flavor_eve.19.a
-		add_manpower = -15	
+		add_manpower = -15
+		add_war_exhaustion = 1	
 	}
 }
 
@@ -795,6 +812,9 @@ flavor_eve.20 = {
 			is_subject = no
 			NOT = { alliance_with = root }
 			in_diplomatic_range = root
+		}
+		NOT = {
+			has_variable = aggressive_neighbor_cooldown
 		}							
 	}
 	
@@ -808,18 +828,25 @@ flavor_eve.20 = {
 			}
 			save_scope_as = aggressive_neighbor
 		}
+		set_variable = {
+			name = aggressive_neighbor_cooldown
+			days = 3650
+		}
 	}
-	
-	fire_only_once = yes
 	
 	option = {
 		name = flavor_eve.20.a
 		root = {
-			add_opinion = { target = scope:aggressive_neighbor modifier = overlord_diverting_trade_opmod } 
+			add_opinion = { 
+				target = scope:aggressive_neighbor 
+				modifier = bad_relations_opmod 
+			} 
 		}
 		scope:aggressive_neighbor = {
-			add_opinion = { target = root modifier = overlord_diverting_trade_opmod } 
+			add_opinion = { 
+				target = root 
+				modifier = bad_relations_opmod 
+			} 
 		}
-		
 	}
 }

@@ -665,3 +665,127 @@ DIPLOMACY_trigger_diplomatic_play_finale_event = {
 	# Royal marriage between the two countries (Friendly, both monarchies)
 	# Trade agreement between the two countries (Friendly, both AI)
 }
+
+DIPLOMACY_add_state_foreign_influence = {
+	# Scope: State
+	# Function: Add influence from $influencer$ to the given state
+	save_scope_as = target_state
+	random_province = {
+		limit = {
+			NOT = {
+				has_variable = is_state_influence_object
+			}
+		}
+		save_scope_as = state_influence_scope
+
+		set_variable = is_state_influence_object
+		set_variable = {
+			name = target_state
+			value = scope:target_state
+		}
+		set_variable = {
+			name = influencer
+			value = $influencer$
+		}
+		set_variable = {
+			name = target_country
+			value = scope:target_state.owner
+		}
+		set_variable = {
+			name = percent_country_influence
+			value = {
+				value = 0
+				scope:target_state = {
+					every_state_province = {
+						every_pops_in_province = {
+							if = {
+								limit = {
+									pop_type = upper_strata
+								}
+								add = 5
+							}
+							else = {
+								add = 1
+							}
+						}
+					}
+				}
+				divide = {
+					value = scope:target_state.owner.country_population
+				}
+			}
+
+		}
+	}
+
+	set_variable = {
+		name = state_foreign_influence
+		value = scope:state_influence_scope
+	}
+	owner = {
+		add_to_variable_list = {
+			name = incoming_foreign_influence_list
+			target = scope:state_influence_scope
+		}
+	}
+	$influencer$ = {
+		add_to_variable_list = {
+			name = outgoing_foreign_influence_list
+			target = scope:state_influence_scope
+		}
+	}
+
+	# TODO: Trigger event explaining influence has been added
+	# TODO: Show in UI
+}
+
+DIPLOMACY_remove_state_foreign_influence = {
+	# Scope: State
+	# Function: Remove a foreign influence from the state
+	if = {
+		limit = {
+			has_variable = state_foreign_influence
+		}
+		var:state_foreign_influence = {
+			save_scope_as = influence_to_remove
+
+			var:target_country = {
+				remove_list_variable = {
+					name = incoming_foreign_influence_list
+					target = scope:influence_to_remove
+				}
+			}
+			var:influencer = {
+				remove_list_variable = {
+					name = outgoing_foreign_influence_list
+					target = scope:influence_to_remove
+				}
+			}
+
+			remove_variable = is_state_influence_object
+			remove_variable = target_state
+			remove_variable = target_country
+			remove_variable = influencer
+			remove_variable = percent_country_influence
+		}
+		remove_variable = state_foreign_influence
+	}
+}
+
+DIPLOMACY_test_influence_barcelona = {
+	# Run as Spain
+	random_owned_province = {
+		limit = {
+			province_id = 3572
+		}
+
+		state = {
+			DIPLOMACY_remove_state_foreign_influence = yes
+
+			DIPLOMACY_add_state_foreign_influence = {
+				influencer = c:FRA
+			}
+		}
+		
+	}
+}

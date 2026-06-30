@@ -1,0 +1,245 @@
+﻿namespace = cost_of_living
+
+cost_of_living.1 = { # Proletariat cost of living too high
+	type = country_event
+	title = "cost_of_living.1.t"
+    desc = "cost_of_living.1.desc"
+    picture = looting
+	hidden = no
+
+	left_portrait = scope:cost_of_living_province.governorship.governor
+
+	goto_location = scope:cost_of_living_province
+
+	trigger = {
+		any_governorships = {
+			any_governorship_state = {
+				any_state_province = {
+					any_pops_in_province = {
+						pop_type = proletariat
+					}
+					NOT = {
+						has_province_modifier = cost_of_living_excessive_proletariat
+					}
+				}
+			}
+			WEALTH_cost_of_living_proletariat < WEALTH_governorship_proletariat_per_capita_negative
+		}
+	}
+
+	immediate = {
+		random_owned_province = {
+			limit = {
+				governorship.WEALTH_cost_of_living_proletariat < governorship.WEALTH_governorship_proletariat_per_capita_negative
+
+				any_pops_in_province = {
+					pop_type = proletariat
+				}
+			}
+			save_scope_as = cost_of_living_province
+
+			add_province_modifier = {
+				name = cost_of_living_excessive_proletariat
+				duration = 365
+			}
+			trigger_event = {
+				id = cost_of_living.4
+				days = 363
+			}
+		}
+
+		add_stability = -1
+	}
+
+	option = {
+		name = "cost_of_living.1.a"
+	}
+
+	option = {
+		name = "cost_of_living.1.b"
+	}
+
+}
+
+cost_of_living.2 = { # Lower strata cost of living too high
+	type = country_event
+	title = "cost_of_living.2.t"
+    desc = "cost_of_living.2.desc"
+    picture = looting
+	hidden = no
+
+	left_portrait = scope:cost_of_living_province.governorship.governor
+
+	goto_location = scope:cost_of_living_province
+
+	trigger = {
+		any_governorships = {
+			any_governorship_state = {
+				any_state_province = {
+					any_pops_in_province = {
+						pop_type = lower_strata
+					}
+					NOT = {
+						has_province_modifier = cost_of_living_excessive_lower_strata
+					}
+				}
+			}
+			WEALTH_cost_of_living_lower_strata < WEALTH_governorship_lower_strata_per_capita_negative
+		}
+	}
+
+	immediate = {
+		random_owned_province = {
+			limit = {
+				governorship.WEALTH_cost_of_living_lower_strata < governorship.WEALTH_governorship_middle_lower_strata_per_capita_negative
+
+				any_pops_in_province = {
+					pop_type = lower_strata
+				}
+			}
+			save_scope_as = cost_of_living_province
+
+			add_province_modifier = {
+				name = cost_of_living_excessive_lower_strata
+				duration = 365
+			}
+			trigger_event = {
+				id = cost_of_living.4
+				days = 363
+			}
+		}
+
+		add_stability = -1
+	}
+
+	option = {
+		name = "cost_of_living.2.a"
+	}
+
+	option = {
+		name = "cost_of_living.2.b"
+	}
+
+}
+
+cost_of_living.3 = { # Middle strata cost of living too high
+	type = country_event
+	title = "cost_of_living.3.t"
+    desc = "cost_of_living.3.desc"
+    picture = looting
+	hidden = no
+
+	left_portrait = scope:cost_of_living_province.governorship.governor
+
+	goto_location = scope:cost_of_living_province
+
+	trigger = {
+		any_governorships = {
+			any_governorship_state = {
+				any_state_province = {
+					any_pops_in_province = {
+						pop_type = middle_strata
+					}
+					NOT = {
+						has_province_modifier = cost_of_living_excessive_middle_strata
+					}
+				}
+			}
+			WEALTH_cost_of_living_middle_strata < WEALTH_governorship_middle_strata_per_capita_negative
+		}
+	}
+
+	immediate = {
+		random_owned_province = {
+			limit = {
+				governorship.WEALTH_cost_of_living_middle_strata < governorship.WEALTH_governorship_middle_strata_per_capita_negative
+
+				any_pops_in_province = {
+					pop_type = middle_strata
+				}
+			}
+			save_scope_as = cost_of_living_province
+
+			add_province_modifier = {
+				name = cost_of_living_excessive_middle_strata
+				duration = 365
+			}
+			trigger_event = {
+				id = cost_of_living.4
+				days = 363
+			}
+		}
+
+		add_stability = -1
+	}
+
+	option = {
+		name = "cost_of_living.3.a"
+	}
+
+	option = {
+		name = "cost_of_living.3.b"
+	}
+
+}
+
+cost_of_living.4 = { # Deepening cost of living crisis
+	# Triggered if the cost of living is still untenable after a year
+	type = province_event
+	title = "cost_of_living.4.t"
+    desc = "cost_of_living.4.desc"
+    picture = looting
+	hidden = no
+
+	left_portrait = scope:cost_of_living_province.governorship.governor
+
+	goto_location = scope:cost_of_living_province
+
+	trigger = {
+		OR = {
+			governorship.WEALTH_cost_of_living_middle_strata < governorship.WEALTH_governorship_middle_strata_per_capita_negative
+
+			governorship.WEALTH_cost_of_living_lower_strata < governorship.WEALTH_governorship_lower_strata_per_capita_negative
+
+			governorship.WEALTH_cost_of_living_proletariat < governorship.WEALTH_governorship_proletariat_per_capita_negative
+		}
+		
+	}
+
+	immediate = {
+		save_scope_as = cost_of_living_province
+
+		if = {
+			limit = {
+				has_province_modifier = cost_of_living_excessive_middle_strata
+			}
+			# TODO: Add a special "worsening" modifier
+			add_province_modifier = cost_of_living_excessive_middle_strata 
+		}
+		else_if = {
+			limit = {
+				has_province_modifier = cost_of_living_excessive_lower_strata
+			}
+			# TODO: Add a special "worsening" modifier
+			add_province_modifier = cost_of_living_excessive_lower_strata 
+		}
+		else_if = {
+			limit = {
+				has_province_modifier = cost_of_living_excessive_proletariat
+			}
+			# TODO: Add a special "worsening" modifier
+			add_province_modifier = cost_of_living_excessive_proletariat
+		}
+
+		add_stability = -2
+	}
+
+	option = {
+		name = "cost_of_living.4.a"
+	}
+
+	option = {
+		name = "cost_of_living.4.b"
+	}
+
+}

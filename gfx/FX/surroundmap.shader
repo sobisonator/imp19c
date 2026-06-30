@@ -250,6 +250,7 @@ PixelShader =
 				float FinalAlpha = smoothstep( MinCloudAlpha, MaxCloudAlpha, Alpha );
 				FinalAlpha = lerp( FinalAlpha, ZoomedOut.a, FlatMapLerp ) * Mask;
 				return float4( Color, saturate( FinalAlpha ) );
+				// return float4( Color, 0.0 );
 			}
 		]]
 	}
@@ -266,6 +267,7 @@ PixelShader =
 				float Mask = PdxTex2D( SurroundMask, UV ).r;
 
 				return float4( ShadowColor, Mask * ( 1.0 - saturate( FlatMapLerp * 2.0 - 1.0 ) ) );
+				// return float4( ShadowColor, 0.0 );
 			}
 		]]
 	}

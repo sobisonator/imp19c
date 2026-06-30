@@ -1028,7 +1028,7 @@ Effect flag_ship
 {
 	VertexShader = "VS_standard"
 	PixelShader = "PS_standard"
-	// BlendState = "alpha_to_coverage"
+	# BlendState = "alpha_to_coverage"
 	
 	Defines = { "USER_FLAG_SHIP" }
 }

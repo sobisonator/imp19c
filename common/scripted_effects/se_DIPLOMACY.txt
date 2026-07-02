@@ -1,4 +1,4 @@
-﻿DIPLOMACY_cache_diplomatic_power_country_every_TZ = {
+DIPLOMACY_cache_diplomatic_power_country_every_TZ = {
 	# Scope: Country
 	# Function: Cache this country's diplomatic power in every TZ
 
@@ -670,73 +670,81 @@ DIPLOMACY_add_state_foreign_influence = {
 	# Scope: State
 	# Function: Add influence from $influencer$ to the given state
 	save_scope_as = target_state
-	random_province = {
-		limit = {
-			NOT = {
-				has_variable = is_state_influence_object
-			}
-		}
-		save_scope_as = state_influence_scope
-
-		set_variable = is_state_influence_object
-		set_variable = {
-			name = target_state
-			value = scope:target_state
-		}
-		set_variable = {
-			name = influencer
-			value = $influencer$
-		}
-		set_variable = {
-			name = target_country
-			value = scope:target_state.owner
-		}
-		set_variable = {
-			name = percent_country_influence
-			value = {
-				value = 0
-				scope:target_state = {
-					every_state_province = {
-						every_pops_in_province = {
-							if = {
-								limit = {
-									pop_type = upper_strata
-								}
-								add = 5
-							}
-							else = {
-								add = 1
-							}
-						}
-					}
-				}
-				divide = {
-					value = scope:target_state.owner.country_population
-				}
-			}
-
-		}
-	}
 
 	set_variable = {
-		name = state_foreign_influence
-		value = scope:state_influence_scope
+		name = DIPLOMACY_influenced_by
+		value = $influencer$
 	}
-	owner = {
-		add_to_variable_list = {
-			name = incoming_foreign_influence_list
-			target = scope:state_influence_scope
+	set_variable = {
+		name = DIPLOMACY_state_influence_percent_of_country
+		value = {
+			every_state_province = {
+				add = total_population
+				add = {
+					value = num_of_upper_strata
+					multiply = 5
+				}
+			}
+			divide = {
+				value = owner.country_population
+				owner = {
+					add = {
+						value = 0
+						every_owned_province = {
+							add = num_of_upper_strata
+						}
+						multiply = 5
+					}
+				}
+			}
 		}
 	}
+
 	$influencer$ = {
 		add_to_variable_list = {
-			name = outgoing_foreign_influence_list
-			target = scope:state_influence_scope
+			name = DIPLOMACY_list_of_outgoing_state_influence
+
+			target = scope:target_state
+		}
+		# Add target country to list of countries influenced by the influencer
+		# Usage: Poll this list to get the total influence in each country
+		if = {
+			limit = {
+				NOT = {
+					is_target_in_variable_list = {
+						name = DIPLOMACY_list_of_outgoing_influenced_countries
+						target = scope:target_state.owner
+					}
+				}
+			}
+			add_to_variable_list = {
+				name = DIPLOMACY_list_of_outgoing_influenced_countries
+
+				target = scope:target_state.owner
+			}
+		}
+	}
+
+	# Add foreign influencer country to owner country's list of foreign influencers
+	# Usage: Poll this list to get the total amount of influence from each foreign influencer
+	owner = {
+		if = {
+			limit = {
+				NOT = {
+					is_target_in_variable_list = {
+						name = DIPLOMACY_list_of_incoming_influencers
+						target = $influencer$
+					}
+				}
+			}
+			add_to_variable_list = {
+				name = DIPLOMACY_list_of_incoming_influencers
+				target = $influencer$
+			}
 		}
 	}
 
 	# TODO: Trigger event explaining influence has been added
-	# TODO: Show in UI
 }
 
 DIPLOMACY_remove_state_foreign_influence = {
@@ -744,32 +752,46 @@ DIPLOMACY_remove_state_foreign_influence = {
 	# Function: Remove a foreign influence from the state
 	if = {
 		limit = {
-			has_variable = state_foreign_influence
+			has_variable = DIPLOMACY_influenced_by
 		}
-		var:state_foreign_influence = {
-			save_scope_as = influence_to_remove
-
-			var:target_country = {
-				remove_list_variable = {
-					name = incoming_foreign_influence_list
-					target = scope:influence_to_remove
+		var:DIPLOMACY_influenced_by = {
+			save_scope_as = influencer
+		}
+		# Remove the influencer from the country's list of foreign influencers if this is the only state it's influencing in the country
+		# And vice versa
+		owner = {
+			save_scope_as = influenced_country
+			set_local_variable = {
+				name = count_influenced_by
+				value = {
+					value = 0
+					every_in_list = {
+						variable = DIPLOMACY_list_of_incoming_influencers
+						add = 1
+					}
 				}
 			}
-			var:influencer = {
+			if = {
+				limit = {
+					local_var:count_influenced_by = 1
+				}
 				remove_list_variable = {
-					name = outgoing_foreign_influence_list
-					target = scope:influence_to_remove
+					name = DIPLOMACY_list_of_incoming_influencers
+					target = scope:influencer
+				}
+				scope:influencer = {
+					remove_list_variable = {
+						name = DIPLOMACY_list_of_outgoing_influenced_countries
+						target = scope:influenced_country
+					}
 				}
 			}
-
-			remove_variable = is_state_influence_object
-			remove_variable = target_state
-			remove_variable = target_country
-			remove_variable = influencer
-			remove_variable = percent_country_influence
 		}
-		remove_variable = state_foreign_influence
+
+		remove_variable = DIPLOMACY_influenced_by
+		remove_variable = DIPLOMACY_state_influence_percent_of_country
 	}
+	
 }
 
 DIPLOMACY_test_influence_barcelona = {

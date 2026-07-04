@@ -366,7 +366,63 @@ LAND_transfer_provinces = {
 
 	# Give the provinces to the grantee
 
-	# But first, select a random province that can be referenced by scope to act as a handler scope for all values during the transfer
+	# Remove foreign influence from state and relevant countries, if an entire state would be given away
+	# Otherwise, recalculate state influence % rating after all the provinces have been transferred
+	if = {
+		limit = {
+			any_in_list = {
+				list = $target_provinces$
+				state = {
+					has_variable = DIPLOMACY_influenced_by
+				}
+			}
+		}
+		every_in_list = {
+			list = $target_provinces$
+			limit = {
+				state = {
+					has_variable = DIPLOMACY_influenced_by
+				}
+			}
+			state = {
+				if = {
+					limit = {
+						NOT = {
+							is_in_list = {
+								list = states_to_recalculate_influence
+							}
+						}
+					}
+					add_to_list = states_to_recalculate_influence
+				}
+			}
+		}
+		every_in_list = {
+			list = states_to_recalculate_influence
+			set_local_variable = {
+				name = state_transfer_provinces
+				value = {
+					value = 0
+					every_state_province = {
+						limit = {
+							is_in_list = $target_provinces$
+						}
+						add = 1
+					}
+				}
+			}
+			# If the entire state is to be traded away, then remove foreign influence
+			if = {
+				limit = {
+					local_var:state_transfer_provinces = FUNC_num_provinces_in_state
+				}
+				DIPLOMACY_remove_state_foreign_influence = yes
+				remove_from_list = states_to_recalculate_influence
+			}
+		}
+	}
+
+	# Select a random province that can be referenced by scope to act as a handler scope for all values during the transfer
 
 	random_province = {
 		limit = {
@@ -403,6 +459,17 @@ LAND_transfer_provinces = {
 	every_in_list = {
 		list = governorship_vars_updated
 		remove_from_list = governorship_vars_updated
+	}
+	# Recalculate foreign influence in changed states
+	every_in_list = {
+		list = states_to_recalculate_influence
+		var:DIPLOMACY_influenced_by = {
+			save_scope_as = influenced_by
+		}
+		DIPLOMACY_remove_state_foreign_influence = yes
+		DIPLOMACY_add_state_foreign_influence = {
+			influencer = scope:influenced_by
+		}
 	}
 }
 

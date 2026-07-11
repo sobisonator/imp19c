@@ -368,57 +368,66 @@ LAND_transfer_provinces = {
 
 	# Remove foreign influence from state and relevant countries, if an entire state would be given away
 	# Otherwise, recalculate state influence % rating after all the provinces have been transferred
-	if = {
+	# [#348 diplo_play_fix] REMOVED a broken guard here. The block below (recalculate / strip foreign
+	# influence on transferred states) was wrapped in `if = { limit = { any_in_list = { list =
+	# $target_provinces$  state = { has_variable = DIPLOMACY_influenced_by } } } ... }`. That guard was
+	# added in the recent upstream refactor 554d8875 ("Refactored add and remove state influence, also
+	# accounting for land transfer") and shipped BROKEN: the any_in_list TRIGGER does not accept a
+	# MACRO-substituted `list = $target_provinces$` (Clausewitz resolves trigger list-args at parse
+	# time, before macro expansion) -> "Unknown trigger type: list" x38, one per call site, breaking
+	# EVERY land transfer (all diplo-play resolutions, AI peace deals, Qing subject absorption).
+	# PROVEN: no any_in_list+macro form works anywhere in the repo or the Invictus oracle; the sibling
+	# every_in_list = { list = $target_provinces$ } (used just below + at the transfer loops further
+	# down) takes the SAME macro fine, because effect-iterators resolve their list at runtime.
+	#
+	# FIX = drop the guard, run the body UNCONDITIONALLY. Behaviour-IDENTICAL: the guard was a pure
+	# short-circuit and the body is already self-limiting -- the first every_in_list filters on
+	# state.has_variable = DIPLOMACY_influenced_by (adds nothing when no province is influenced), the
+	# second iterates states_to_recalculate_influence (a no-op while that list stays empty), and the
+	# final recalc loop further down likewise no-ops on the empty list. With no influenced province the
+	# body does nothing (exactly what the guard produced); with influenced provinces it does the same
+	# work the guarded body did. No LOG marker (core hot path). See [[imp19c-proven-code-rule]].
+	every_in_list = {
+		list = $target_provinces$
 		limit = {
-			any_in_list = {
-				list = $target_provinces$
-				state = {
-					has_variable = DIPLOMACY_influenced_by
-				}
-			}
-		}
-		every_in_list = {
-			list = $target_provinces$
-			limit = {
-				state = {
-					has_variable = DIPLOMACY_influenced_by
-				}
-			}
 			state = {
-				if = {
-					limit = {
-						NOT = {
-							is_in_list = {
-								list = states_to_recalculate_influence
-							}
-						}
-					}
-					add_to_list = states_to_recalculate_influence
-				}
+				has_variable = DIPLOMACY_influenced_by
 			}
 		}
-		every_in_list = {
-			list = states_to_recalculate_influence
-			set_local_variable = {
-				name = state_transfer_provinces
-				value = {
-					value = 0
-					every_state_province = {
-						limit = {
-							is_in_list = $target_provinces$
-						}
-						add = 1
-					}
-				}
-			}
-			# If the entire state is to be traded away, then remove foreign influence
+		state = {
 			if = {
 				limit = {
-					local_var:state_transfer_provinces = FUNC_num_provinces_in_state
+					NOT = {
+						is_in_list = {
+							list = states_to_recalculate_influence
+						}
+					}
 				}
-				DIPLOMACY_remove_state_foreign_influence = yes
-				remove_from_list = states_to_recalculate_influence
+				add_to_list = states_to_recalculate_influence
 			}
+		}
+	}
+	every_in_list = {
+		list = states_to_recalculate_influence
+		set_local_variable = {
+			name = state_transfer_provinces
+			value = {
+				value = 0
+				every_state_province = {
+					limit = {
+						is_in_list = $target_provinces$
+					}
+					add = 1
+				}
+			}
+		}
+		# If the entire state is to be traded away, then remove foreign influence
+		if = {
+			limit = {
+				local_var:state_transfer_provinces = FUNC_num_provinces_in_state
+			}
+			DIPLOMACY_remove_state_foreign_influence = yes
+			remove_from_list = states_to_recalculate_influence
 		}
 	}
 

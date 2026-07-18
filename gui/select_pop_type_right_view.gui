@@ -1,0 +1,83 @@
+base_sub_window = {
+	name = "select_pop_type_right_window"
+	parentanchor = top|left
+	minimumsize = { 324 200 }
+	position = { 786 460 }
+	widgetanchor = top|left
+	movable = yes
+	
+	state = {
+		name = "culture_view_closed"
+		on_start = "[SelectPopTypeRightView.OnClose]" 
+	}
+	
+	blockoverride "Title_text" { text = "SELECT_CIVIC_RIGHT_HEADER" }
+	blockoverride "White_buttons"
+	{
+		button_close = {
+			onclick = "[SelectPopTypeRightView.OnClose]"
+			tooltip = "CLOSE"
+		}
+	}
+	flowcontainer = {
+		direction = vertical
+		margin_bottom = 52
+		margin_right = 26
+		position = { 12 34 }
+		resizeparent = yes
+		
+		scrollarea = {
+			maximumsize = { 624 626 }
+			scrollbarpolicy_horizontal = always_off
+			
+			scrollbar_vertical = {
+				using = VerticalScrollBar
+			}
+			
+			scrollwidget = {
+			
+				dynamicgridbox = {
+					datamodel = "[SelectPopTypeRightView.GetPopTypes]"
+					resizeparent = yes
+					
+					item = {
+						widget = {	
+							size = { 290 50 }
+							list_button = {
+								onclick = "[SelectablePopType.OnClick]"
+								size = { 100% 48 }
+								parentanchor = vcenter
+								tooltip = "[SelectablePopType.GetTooltip]"
+								enabled = "[Not( EqualTo_string( SelectPopTypeRightView.GetCivicRight.GetName, SelectablePopType.GetPopType.GetName ) )]" #TODO Pwn - let's not use CString here in future.
+							}							
+							
+							flowcontainer = {
+								parentanchor = vcenter
+								position = { 10 0 }
+								direction = horizontal
+								spacing = 6
+
+								icon = {
+									name = "pop_type_icon"
+									parentanchor = vcenter
+									size = { 40 40 }
+									texture = "[SelectablePopType.GetIconTexture]"
+								}
+
+								textbox = {
+									autoresize = yes
+									using = BaseFontM
+									using = Black_FontColor
+									align = left
+									margin_bottom = 2
+									text = "[SelectablePopType.GetPopType.GetName]"
+									parentanchor = vcenter
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

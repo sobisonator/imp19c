@@ -487,13 +487,14 @@ AI_begin_diplomatic_play = {
 		set_variable = {
 			name = play_goal # The goal that the AI_root wants to achieve with this diplomatic play
 			value = $play_goal$ # Available options below
-			# flag:annex_territory
-			# flag:annex_nation
-			# flag:subjugate_nation
-			# flag:liberate
-			# flag:colonise
-			# flag:influence
-			# flag:purchase
+			# 0 = annex state - AI will only pick if has claims. High AE cost.
+			# 1 = annex country - only available if diplomatic power is >100x. AI will only pick if has claims. Highest AE cost.
+			# 2 = subjugate country - only available if diplomatic power is >100x. Mid-high AE cost
+			# 3 = liberate state culture (including surrounding states where provinces share same majority culture) - only available if owner is not same primary culture as majority of state majority provinces - Low AE cost
+			# 3.5 = liberate state religious (including surrounding states where provinces share same majority religion) - only available if owner is not same religion as majority of state majority provinces - Low AE cost
+			# 4 = colonise area (set up a colonial subject country in the State or Area if unclaimed) - available if the average industrialisation of the province is 1/5 of your capital's. Low AE cost
+			# 5 = influence state. No AE cost
+			# 6 = purchase state. No AE cost
 		}
 		set_variable = {
 			name = play_infamy_cost_war # How much infamy (AE) is gained from declaring war. Represents the international disapproval of resolving the play militarily. This is a starting value which is modified by events and play actions
@@ -614,10 +615,13 @@ AI_begin_diplomatic_play = {
 
 		# Now add this diplomatic play to the list of diplomatic plays in progress in the instigator
 		# And assess the targets
-		add_to_variable_list = {
-			name = list_of_diplomatic_plays_instigated
-			target = scope:diplomatic_play
+		$play_instigator$ = {
+			add_to_variable_list = {
+				name = list_of_diplomatic_plays_instigated
+				target = scope:diplomatic_play
+			}
 		}
+		
 		add_to_global_variable_list = {
 			name = global_all_diplomatic_plays
 			target = scope:diplomatic_play

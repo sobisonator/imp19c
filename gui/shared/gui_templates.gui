@@ -1207,6 +1207,89 @@ types NEW_GUI {
 			}
 		}
 	}
+	type tab_button = margin_widget {
+		size = { 320 36 }
+		margin = { 0 2 }
+		widget = {
+			size = { 100% 100% }
+			using = background_widget
+		}
+		button = {
+			size = { 100% 100% }
+			block "Visible_close" { visible = no }
+			block "On_click_open" { }
+			using = beige_background
+			alpha = 0.15
+		}
+		button = {
+			size = { 100% 100% }
+			block "Visible_open" { visible = yes }
+			block "On_click_close" { }
+			using = beige_background
+			alpha = 0.15
+		}
+		widget = {
+			size = { 100% 100% }
+			alpha = 0.9
+			icon = {
+				size = { 8 11 }
+				position = { 8 0 }
+				parentanchor = vcenter
+				using = gold_background
+				block "Visible_open" { visible = no }
+				modify_texture = {
+					texture = "gfx/interface/base_parts/arrow_right.dds"
+					blend_mode = alphamultiply
+				}
+			}
+			icon = {
+				size = { 11 8 }
+				position = { 8 0 }
+				parentanchor = vcenter
+				using = gold_background
+				block "Visible_close" { visible = yes }
+				modify_texture = {
+					texture = "gfx/interface/base_parts/arrow.dds"
+					blend_mode = alphamultiply
+				}
+			}
+			textbox = {
+				position = { 24 0 }
+				parentanchor = vcenter				
+				autoresize = yes
+				using = BaseFontS
+				using = Highlight_FontColor
+				block "Title_text" { text = "none" }
+				max_width = 230
+				fontsize_min = 11
+				elide = right
+			}
+			margin_widget = {
+				size = { 100% 1 }
+				margin = { 5 0 }
+				position = { 0 -3 }
+				parentanchor = bottom
+				icon = {
+					size = { 100% 100% }
+					using = gold_background
+				}
+			}
+		}
+	}
+	type action_tab_custom = flowcontainer {
+		direction = vertical
+		tab_button = { }
+		flowcontainer = {
+			direction = vertical
+			visible = "[DiplomaticActionCategory.IsExpanded]"
+			flowcontainer = {
+				direction = vertical
+				ignoreinvisible = yes
+				spacing = 4
+				block "Content" { }
+			}
+		}
+	}
 	type action_tab = flowcontainer {
 		direction = vertical
 		ignoreinvisible = yes
@@ -1218,66 +1301,12 @@ types NEW_GUI {
 				flowcontainer = {
 					direction = vertical
 					ignoreinvisible = yes
-					margin_widget = {
-						size = { 320 36 }
-						margin = { 0 2 }
-						widget = {
-							size = { 100% 100% }
-							using = background_widget
-						}
-						button = {
-							size = { 100% 100% }
-							onclick = "[DiplomaticActionCategory.OnClick]"
-							using = beige_background
-							alpha = 0.15
-						}
-						widget = {
-							size = { 100% 100% }
-							alpha = 0.9
-							icon = {
-								size = { 8 11 }
-								position = { 8 0 }
-								parentanchor = vcenter
-								using = gold_background
-								visible = "[DiplomaticActionCategory.IsExpanded]"
-								modify_texture = {
-									texture = "gfx/interface/base_parts/arrow_right.dds"
-									blend_mode = alphamultiply
-								}
-							}
-							icon = {
-								size = { 11 8 }
-								position = { 8 0 }
-								parentanchor = vcenter
-								using = gold_background
-								visible = "[Not(DiplomaticActionCategory.IsExpanded)]"
-								modify_texture = {
-									texture = "gfx/interface/base_parts/arrow.dds"
-									blend_mode = alphamultiply
-								}
-							}
-							textbox = {
-								position = { 24 0 }
-								parentanchor = vcenter				
-								autoresize = yes
-								using = BaseFontS
-								using = Highlight_FontColor
-								text = "[DiplomaticActionCategory.GetName]"
-								max_width = 230
-								fontsize_min = 11
-								elide = right
-							}
-							margin_widget = {
-								size = { 100% 1 }
-								margin = { 5 0 }
-								position = { 0 -3 }
-								parentanchor = bottom
-								icon = {
-									size = { 100% 100% }
-									using = gold_background
-								}
-							}
-						}
+					tab_button = {
+						blockoverride "Visible_open" { visible = "[DiplomaticActionCategory.IsExpanded]" }
+						blockoverride "On_click_close" { onclick = "[DiplomaticActionCategory.OnClick]" }
+						blockoverride "Visible_close" { visible = "[Not(DiplomaticActionCategory.IsExpanded)]" }
+						blockoverride "On_click_open" { onclick = "[DiplomaticActionCategory.OnClick]" }
+						blockoverride "Title_text" { text = "[DiplomaticActionCategory.GetName]" }
 					}
 					flowcontainer = {
 						direction = vertical

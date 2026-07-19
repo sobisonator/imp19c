@@ -1282,7 +1282,6 @@ base_window = {
 									}
 								}
 							}
-
 							scrollarea = {
 								size = { 332 428 }
 								position = { 0 80 }
@@ -1291,13 +1290,12 @@ base_window = {
 								scrollbar_vertical = {
 									using = VerticalScrollBar
 								}
-
 								scrollwidget = {
-
 									vbox = {
-
+										### ???? ###
 										vbox = {
-											visible = "[DiplomaticView.HasDiplomaticPending]"
+											visible = no
+											#visible = "[DiplomaticView.HasDiplomaticPending]"
 											layoutpolicy_horizontal = expanding
 											layoutpolicy_vertical = fixed
 											using = NoninteractableBG
@@ -1316,89 +1314,52 @@ base_window = {
 											}
 											tooltip = "[DiplomaticView.GetDiplomaticPendingTooltip]"
 										}
+										### ???? ###
 										vbox = {
-											layoutpolicy_horizontal = expanding
-											layoutpolicy_vertical = preferred
-											margin_left = 8
-											margin_right = 10
-											#margin_top = -35
-											datacontext = "[DiplomaticView.GetDefaultActionCategory]"
-											using = diplomatic_actions_v2
-										}
-
-										vbox = {
-											name = "actions_grid"
-											layoutpolicy_vertical = shrinking
-											datamodel = "[DiplomaticView.GetActions]"
-											layoutpolicy_horizontal = expanding
-											margin_left = 8
-											margin_right = 10
-				
-											item = {
-												vbox = {	
-													layoutpolicy_horizontal = expanding
-													vbox = {
-														visible = "[Not(IsDataModelEmpty(DiplomaticView.GetActions))]"
-														margin_left = 0
-														margin_right = 4
-														layoutpolicy_horizontal = expanding
-
-														category_drop = {
-															layoutpolicy_horizontal = expanding
-															size = { 0 32 }
-															blockoverride "Text_alignment" 
-															{ 
-																parentanchor = left|vcenter 
-																align = left
-																position = { 16 -2 }
-																max_width = 310
-															}
-															blockoverride "Text" 
-															{
-																text = "[DiplomaticActionCategory.GetName]" 
-															}
-															blockoverride "On_click" { onclick = "[DiplomaticActionCategory.OnClick]" }
-															blockoverride "Down" { visible = yes }
-															blockoverride "Right" { visible = no }
-															blockoverride "RightArrowVisible" { visible = no }
-															visible = "[DiplomaticActionCategory.IsExpanded]"
-														}
-
-														category_drop = {
-															name = "close_button_dip"
-															layoutpolicy_horizontal = expanding
-															size = { 0 32 }
-															blockoverride "Text_alignment" 
-															{ 
-																parentanchor = left|vcenter 
-																align = left
-																position = { 16 -2 }
-																max_width = 310
-															}
-															blockoverride "Text" { text = "[DiplomaticActionCategory.GetName]" }
-															blockoverride "On_click" { onclick = "[DiplomaticActionCategory.OnClick]" }
-															blockoverride "Down" { visible = no }
-															blockoverride "Right" { visible = yes }
-															blockoverride "RightArrowVisible" { visible = yes }
-														
-															visible = "[Not(DiplomaticActionCategory.IsExpanded)]" 
-														}
-													}
-												
-													vbox = {
-														using = diplomatic_actions_v2
-														layoutpolicy_horizontal = expanding
-													}
+											solo_action_button = { blockoverride "Visible" { visible = "[EqualTo_string(DiplomaticActionItem.GetTitle, Localize('WARTITLE'))]" }
+											}
+											solo_action_button = {
+												blockoverride "Visible" { visible = "[EqualTo_string(DiplomaticActionItem.GetTitle, Localize('PEACETITLE'))]" }
+												blockoverride "Click" {
+													datacontext = "[GetScriptedGui('imp19c_diplo_peace_button')]"
+													enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( DiplomaticView.GetPlayer.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+													# First onclick: Set a variable in the player scope to store the war in question
+													onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( DiplomaticView.GetPlayer.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End )]"
+													# Second onclick: Set up the war values needed
+													onclick = "[GetScriptedGui('alt_peace_button').Execute( GuiScope.SetRoot( DiplomaticView.GetPlayer.MakeScope.Var('peace_window_active_war').War.MakeScope ).AddScope('player', DiplomaticView.GetPlayer.MakeScope ).End )]"
+													# Third onclick: Open the peace window, with the war in that variable as the root
+													onclick = "[GetVariableSystem.Set( 'alternative_peace_window', 'open' )]"
 												}
 											}
+											solo_action_button = { blockoverride "Visible" { visible = "[EqualTo_string(DiplomaticActionItem.GetTitle, Localize('DEMAND_ACCESSTITLE'))]" }
+											}
+											solo_action_button = { blockoverride "Visible" { visible = "[EqualTo_string(DiplomaticActionItem.GetTitle, Localize('OFFER_royal_unionTITLE'))]" }
+											}
 										}
+										action_tab = {
+											blockoverride "Visible" { visible = "[EqualTo_string(DiplomaticActionCategory.GetName, Localize('ALLIANCE_CATEGORY'))]" }
+										}
+										action_tab = {
+											blockoverride "Visible" { visible = "[EqualTo_string(DiplomaticActionCategory.GetName, Localize('MILACC_CATEGORY'))]" }
+										}
+										action_tab = {
+											blockoverride "Visible" { visible = "[EqualTo_string(DiplomaticActionCategory.GetName, Localize('SELLPROV_CATEGORY'))]" }
+										}
+										action_tab = {
+											blockoverride "Visible" { visible = "[EqualTo_string(DiplomaticActionCategory.GetName, Localize('SUPPORTREBSTOP_CATEGORY'))]" }
+										}
+										action_tab = {
+											blockoverride "Visible" { visible = "[EqualTo_string(DiplomaticActionCategory.GetName, Localize('IMPROVE_RELATION_CATEGORY'))]" }
+										}
+										### ???? ###
 										margin_widget = {
+											visible = no
 											size = { 0 28 }
 											layoutpolicy_horizontal = expanding
 											margin = { 7 0 }
 											margin_right = 0
 
-											allow_outside = yesw
+											allow_outside = yes
 											text_button_square = {
 												size = { 300 22 }
 												layoutpolicy_horizontal = expanding
@@ -1481,11 +1442,10 @@ base_window = {
 													visible = "[Not( GetVariableSystem.HasValue( 'trade_actions_open', 'yes' ) )]"
 												}
 											}
-
 										}
-
 										vbox = {
-											visible = "[And(GetVariableSystem.HasValue( 'trade_actions_open', 'yes' ), And(Not(DiplomaticView.GetTargetCountry.IsBarbarian), Not(EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ))))]"
+											visible = no
+											#visible = "[And(GetVariableSystem.HasValue( 'trade_actions_open', 'yes' ), And(Not(DiplomaticView.GetTargetCountry.IsBarbarian), Not(EqualTo_int32( DiplomaticView.GetTargetCountry.GetId, Player.GetId ))))]"
 											margin_left = -2
 											margin_right = 32
 											margin_top = 10
@@ -1538,8 +1498,7 @@ base_window = {
 
 											#widget = { size = { 0 4 } } # Adds spacing between diplo buttons
 										}
-
-
+										### ???? ###
 										vbox = {
 											layoutpolicy_vertical = expanding
 										}

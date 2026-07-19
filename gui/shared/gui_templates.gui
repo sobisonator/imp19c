@@ -1014,6 +1014,7 @@ types NEW_GUI {
 			economy_expense_item_base = { visible = "[EqualTo_string(ExpenseItem.GetName, Localize('EXPENSEWAGES'))]" }
 		}
 	}
+
 	type diplomatic_category_icon = margin_widget {
 		size = { 40 40 }
 		margin = { 2 2 }
@@ -1138,6 +1139,155 @@ types NEW_GUI {
 							blockoverride "hover_leave"
 							{
 								onmousehierarchyleave = "[DiplomaticView.ResetHighlight]"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	type action_button = margin_widget {
+		block "Visible" { }
+		size = { 320 36 }
+		margin = { 0 2 }
+		diplomacy_action_button = { 
+			size = { 100% 100% }
+			parentanchor = hcenter
+			visible = "[Or( DiplomaticActionItem.RequireAcceptance, DiplomaticActionItem.HasPrice )]"
+			layoutpolicy_horizontal = expanding
+			blockoverride "On_click" { block "Click" { onclick = "[DiplomaticActionItem.OnClick]" } }
+			blockoverride "Button_text" 
+			{ 
+				text = "[DiplomaticActionItem.GetTitle]"
+			}
+			blockoverride "Left_text"
+			{
+				margin_left = 28
+				text = "[DiplomaticActionItem.GetTitle]"
+			}
+			blockoverride "Right_text"
+			{
+				text = "[DiplomaticActionItem.GetPrice]"
+				using = Negative_FontColor 
+				tooltip = "[DiplomaticActionItem.GetPriceInfo]"
+				visible = "[DiplomaticActionItem.HasPrice]"
+			}	
+			blockoverride "Icon" 
+			{
+				framesize = { 46 46 }
+				visible = "[DiplomaticActionItem.RequireAcceptance]"
+				texture = "gfx/interface/base_parts/accept_decline_flat.dds"
+				frame = "[DiplomaticActionItem.GetAcceptanceFrame]"
+				tooltip = "[DiplomaticActionItem.GetAcceptanceTooltip]"
+			}	
+			enabled = "[DiplomaticActionItem.IsEnabled]"
+			tooltip = "[DiplomaticActionItem.GetTooltip]"
+		}
+		text_button_square = {
+			size = { 100% 100% }
+			visible = "[Not( Or( DiplomaticActionItem.RequireAcceptance, DiplomaticActionItem.HasPrice) )]"
+			parentanchor = hcenter
+			layoutpolicy_horizontal = expanding
+			blockoverride "On_click" { block "Click" { onclick = "[DiplomaticActionItem.OnClick]" } }
+			blockoverride "Center_text" 
+			{ 
+				text = "[DiplomaticActionItem.GetTitle]"
+			}
+			enabled = "[DiplomaticActionItem.IsEnabled]"
+			tooltip = "[DiplomaticActionItem.GetTooltip]"
+		}
+	}
+	type solo_action_button = vbox {
+		datacontext = "[DiplomaticView.GetDefaultActionCategory]"
+		vbox = {
+			datamodel = "[DiplomaticActionCategory.GetActions]"
+			item = {
+				action_button = { }
+			}
+		}
+	}
+	type action_tab = flowcontainer {
+		direction = vertical
+		ignoreinvisible = yes
+		datamodel = "[DiplomaticView.GetActions]"
+		item = {
+			flowcontainer = {
+				direction = vertical
+				block "Visible" { }
+				flowcontainer = {
+					direction = vertical
+					ignoreinvisible = yes
+					margin_widget = {
+						size = { 320 36 }
+						margin = { 0 2 }
+						widget = {
+							size = { 100% 100% }
+							using = background_widget
+						}
+						button = {
+							size = { 100% 100% }
+							onclick = "[DiplomaticActionCategory.OnClick]"
+							using = beige_background
+							alpha = 0.15
+						}
+						widget = {
+							size = { 100% 100% }
+							alpha = 0.9
+							icon = {
+								size = { 8 11 }
+								position = { 8 0 }
+								parentanchor = vcenter
+								using = gold_background
+								visible = "[DiplomaticActionCategory.IsExpanded]"
+								modify_texture = {
+									texture = "gfx/interface/base_parts/arrow_right.dds"
+									blend_mode = alphamultiply
+								}
+							}
+							icon = {
+								size = { 11 8 }
+								position = { 8 0 }
+								parentanchor = vcenter
+								using = gold_background
+								visible = "[Not(DiplomaticActionCategory.IsExpanded)]"
+								modify_texture = {
+									texture = "gfx/interface/base_parts/arrow.dds"
+									blend_mode = alphamultiply
+								}
+							}
+							textbox = {
+								position = { 24 0 }
+								parentanchor = vcenter				
+								autoresize = yes
+								using = BaseFontS
+								using = Highlight_FontColor
+								text = "[DiplomaticActionCategory.GetName]"
+								max_width = 230
+								fontsize_min = 11
+								elide = right
+							}
+							margin_widget = {
+								size = { 100% 1 }
+								margin = { 5 0 }
+								position = { 0 -3 }
+								parentanchor = bottom
+								icon = {
+									size = { 100% 100% }
+									using = gold_background
+								}
+							}
+						}
+					}
+					flowcontainer = {
+						direction = vertical
+						visible = "[DiplomaticActionCategory.IsExpanded]"
+						flowcontainer = {
+							direction = vertical
+							ignoreinvisible = yes
+							datamodel = "[DiplomaticActionCategory.GetActions]"
+							item = {
+								action_button = { }
 							}
 						}
 					}

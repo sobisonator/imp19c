@@ -14,6 +14,7 @@ base_window = {
 		on_start = "[GetVariableSystem.Set( 'diplomatic_windows', 'clear' )]"
 		on_start = "[GetVariableSystem.Set( 'diplomatic_tabs', 'diplomatic' )]"
 		on_start = "[GetVariableSystem.Set( 'relation_subjects', 'close' )]"
+		on_start = "[GetScriptedGui('save_selected_tag').Execute( GuiScope.SetRoot( DiplomaticView.GetTargetCountry.MakeScope ).AddScope('player', Player.MakeScope ).End )]"
 		start_sound = {
 			soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_tab_close"
 		}
@@ -27,6 +28,7 @@ base_window = {
 		}
 		on_start = "[GetVariableSystem.Set( 'diplomatic_tabs', 'diplomatic' )]"
 		on_start = "[GetScriptedGui('remove_player_subjects_variables_button').Execute( GuiScope.SetRoot( Player.MakeScope ).End )]"
+
 	}
 	flowcontainer = {
 		direction = vertical
@@ -1407,16 +1409,18 @@ base_window = {
 												datacontext = "[GetScriptedGui('imp19c_diplo_peace_button')]"
 												parentanchor = hcenter
 
-												visible = "[ScriptedGui.IsShown(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+												visible = "[ScriptedGui.IsShown(GuiScope.SetRoot( DiplomaticView.GetPlayer.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
 
-												enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( Player.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
+												enabled = "[ScriptedGui.IsValid(GuiScope.SetRoot( DiplomaticView.GetPlayer.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope ).End)]"
 
 												blockoverride "On_click"
 												{
 													enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', Country.MakeScope).End )]"
 													# First onclick: Set a variable in the player scope to store the war in question
-													onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( Player.MakeScope ).AddScope('target', Country.MakeScope).End )]"
-													# Second onclick: Open the peace window, with the war in that variable as the root
+													onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( DiplomaticView.GetPlayer.MakeScope ).AddScope('target', DiplomaticView.GetTargetCountry.MakeScope).End )]"
+													# Second onclick: Set up the war values needed
+													onclick = "[GetScriptedGui('alt_peace_button').Execute( GuiScope.SetRoot( DiplomaticView.GetPlayer.MakeScope.Var('peace_window_active_war').War.MakeScope ).AddScope('player', DiplomaticView.GetPlayer.MakeScope ).End )]"
+													# Third onclick: Open the peace window, with the war in that variable as the root
 													onclick = "[GetVariableSystem.Set( 'alternative_peace_window', 'open' )]"
 												}
 

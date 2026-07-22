@@ -668,71 +668,85 @@ window = {
 											#direction = vertical
 											ignoreinvisible = yes
 											margin_left = 2
+											### Transfer Occupation ###
 						                    button = {
+						                    	name = "Transfer_Occupation_Button"
 						                    	size = { 40 40 }
 						                        visible = "[ProvinceWindow.CanTransferOccupation]"
-						                        blockoverride "Icon" { texture = "gfx/interface/province/transfer_occupation.dds" }
+						                        texture = "gfx/interface/province/transfer_occupation.dds"
 						                        enabled = "[ProvinceWindow.CanTransferOccupation]"
 						                        onclick = "[ProvinceWindow.TransferOccupation]"
 						                        tooltip = "[ProvinceWindow.GetTransferOccupationTooltip]" 
 						                    }
-						                    
-						                    button= {
+						                    ### Migrate ###
+						                    button = {
+						                    	name = "MigrateButton"
 						                        size = { 40 40 }
-						                        margin = { 5 5 }
-						                        name = "MigrateButton"
 						                        visible = "[ProvinceWindow.ShowMigrateButton]"
 						                        enabled = "[ProvinceWindow.CanMigrate]"
 						                        onclick = "[ProvinceWindow.Migrate]"
 						                        texture = "gfx/interface/icons/shared_icons/migrate.dds"
 						                        tooltip = "[ProvinceWindow.GetMigrateTooltip]"
 						                    }
-						                    
+						                    ### Holy Site ###
+						                    button = {
+						                    	name = "Holy_Site_Button"
+						                        size = { 40 40 }
+						                        visible = no
+						                        #visible = "[And( Not( ProvinceWindow.GetProvince.IsHolySite ), ProvinceWindow.IsPlayerProvince )]"
+						                    	enabled = "[ProvinceWindow.CanEnactHolySite]"
+						                        onclick = "[ProvinceWindow.ToggleSelectHolySiteWindow]"
+						                        texture = "gfx/interface/icons/shared_icons/holy_site_any.dds" 
+						                        tooltip = "[ProvinceWindow.GetEnactHolySiteTooltip]"
+						                    }
 						                    icon = {
+						                    	name = "Holy_Site_Card"
 						                        size = { 40 40 }
 						                        visible = "[ProvinceWindow.GetProvince.IsHolySite]"
 						                        texture = "[GetHolySiteRankIcon( ProvinceWindow.GetProvince.GetRank )]"
 						                        tooltip = "[ProvinceWindow.GetHolySiteTooltip]"
 						                    }
-						                    
+						                    ### Country Capital ###
+						                    button = {
+						                    	name = "Country_Capital_Button"
+						                        size = { 40 40 }
+						                    	visible = "[And( ProvinceWindow.IsPlayerProvince, Not( ProvinceWindow.GetProvince.IsCapital ) )]"
+						                        datacontext = "[GetScriptedGui('move_capital_button')]" 
+						                    	enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
+						                        onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
+						                        texture = "gfx/interface/icons/shared_icons/country_capital.dds"
+						                        tooltip = "MOVE_CAPITAL_BUTTON_TOOLTIP"
+						                    }
 						                    icon = {
+						                    	name = "Country_Capital_Card"
 						                        size = { 40 40 }
 						                        visible = "[ProvinceWindow.GetProvince.IsCapital]"
 						                        texture = "gfx/interface/icons/shared_icons/country_capital.dds"
-						                        tooltip = "CAPITAL"
+						                    	tooltip = "IS_CAPITAL_HERE_TT"
 						                    }
-						                    
+						                    ### Clonize ###
 						                    button = {
+						                    	name = "ColonizeButton"
 						                        size = { 40 40 }
-						                        name = "ColonizeButton"
 						                        visible = "[Not( ProvinceWindow.GetProvince.HasOwner )]"
 						                        enabled = "[ProvinceWindow.CanBeColonized]"
 						                        onclick = "[ProvinceWindow.QuickColonize]"
 						                        texture = "gfx/interface/icons/shared_icons/alert_colonize_province.dds"
 						                        tooltip = "[ProvinceWindow.GetColonizeTooltip]"
-						                    }
-						                    
+						                    }			
+						                    ### State Capital ###		                    
 						                    button = {
-						                        size = { 40 40 }
-						                        datacontext = "[GetScriptedGui('move_capital_button')]" 
-						                        visible = "[And( ProvinceWindow.IsPlayerProvince, Not( ProvinceWindow.GetProvince.IsCapital ) )]"
-						                        enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
-						                        onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
-						                        tooltip = "MOVE_CAPITAL_BUTTON_TOOLTIP"
-						                        texture = "gfx/interface/icons/shared_icons/country_capital.dds"
-						                    }
-						                    
-						                    button = {
+						                    	name = "State_Capital_Button"
 						                        size = { 40 40 }
 						                        datacontext = "[GetScriptedGui('move_province_capital_button')]" 
 						                        visible = "[And( ProvinceWindow.IsPlayerProvince, Not( ProvinceWindow.GetProvince.IsStateCapital ) )]"
 						                        enabled = "[ScriptedGui.IsValid( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
 						                        onclick = "[ScriptedGui.Execute( GuiScope.SetRoot( ProvinceWindow.GetProvince.MakeScope ).End )]"
-						                        tooltip = "MOVE_CAPITAL_BUTTON_TOOLTIP"
-						                       	texture = "gfx/interface/icons/shared_icons/state_capital.dds"
+						                        tooltip = "MOVE_PROVINCE_CAPITAL_BUTTON_TOOLTIP"
+						                    	texture = "gfx/interface/icons/shared_icons/state_capital.dds"
 						                    }
-						                    
 						                    icon = {
+						                    	name = "State_Capital_Card"
 						                        size = { 40 40 }
 						                        visible = "[And(ProvinceWindow.GetProvince.IsStateCapital, Not(ProvinceWindow.GetProvince.IsCapital))]"
 						                        texture = "gfx/interface/icons/shared_icons/state_capital.dds"
@@ -4568,19 +4582,62 @@ window = {
 									}
 								}
 								flowcontainer = {
-									margin = { 5 5 }
-									spacing = 5
-									text_button_square_highlighted = {
-										size = { 200 0 }
-										blockoverride "On_click" { onclick = "[ProvinceWindow.ShowPopDetails('slaves')]" }
-										blockoverride "Center_text" 
-										{ 
-											text = "POP_SCREEN" 
-											max_width = 162
+									spacing = 10
+									direction = vertical
+									widget = {
+										size = { 157 20 }
+										tag = {
+											using = BaseFontS
+											using = Black_FontColor
+											alpha = 0.55
+											text = "HOLDING_OWNER_TEXT"
+											align = center
+											max_width = 124
+											parentanchor = hcenter
+											visible = "[Not(ProvinceWindow.GetHoldingsOwners.IsValid)]"
 										}
-										tooltip = "OPEN_POPS_VIEW_TT"
+										tag = {
+											using = BaseFontS
+											using = Black_FontColor
+											text = "HOLDING_OWNER_TEXT"
+											align = center
+											max_width = 124
+											parentanchor = hcenter
+											visible = "[ProvinceWindow.GetHoldingsOwners.IsValid]"
+										}
+									}
+									cpt_button = {
+										size = { 64 94 }
+										parentanchor = hcenter
+										#visible = "[ProvinceWindow.GetHoldingsOwners.IsValid]"
+										datacontext = "[ProvinceWindow.GetHoldingsOwners]"
 									}
 								}
+							}
+							flowcontainer = {
+								margin = { 5 5 }
+								spacing = 5
+								parentanchor = hcenter
+								text_button_square_highlighted = {
+									size = { 200 0 }
+									blockoverride "On_click" { onclick = "[ProvinceWindow.ShowPopDetails('slaves')]" }
+									blockoverride "Center_text" 
+									{ 
+										text = "POP_SCREEN" 
+										max_width = 162
+									}
+									tooltip = "OPEN_POPS_VIEW_TT"
+								}
+								#text_button_square_highlighted = {
+								#	size = { 200 0 }
+								#	blockoverride "On_click" { onclick = "[ProvinceWindow.OpenMovePopsWindow]" }
+								#	blockoverride "Center_text" 
+								#	{ 
+								#		text = "MOVE_SLAVES" 
+								#		max_width = 162
+								#	}
+								#	visible = "[ProvinceWindow.IsPlayerProvince]"
+								#}
 							}
 						}
 					}

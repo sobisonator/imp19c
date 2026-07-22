@@ -310,7 +310,12 @@ NCombat = {
 	TACTICS_DEFAULT_EFFECTIVENESS = 0.5			# If subunit not defined this is the effectiveness constribution it will get
 	TACTICS_START_EFFECTIVENESS = 0.0			# The base line effectiveness the algorithm starts calculating with
 	TACTICS_EFFECTIVENESS_MIN_CAP = 0.0			# Will cap to this in the end of calculation
-	TACTICS_EFFECTIVENESS_MAX_CAP = 1.0			
+	TACTICS_EFFECTIVENESS_MAX_CAP = 1.0
+
+	OVERRUN_FACTOR_FOR_INITIAL_CHECK = 10		# The divider for calculating if the combat resulted in an overrun or not. Only used once at combat start
+
+	OVERRUN_RETREAT_AVAILABLE = 10				# The divider for calculating if the combat resulted in an overrun or not
+	OVERRUN_RETREAT_UNAVAILABLE = 2				# Similar as above, but used in the case where an enemy unit already lost within 'DAYS_PER_PHASE' days
 }
 
 NHorde = {
@@ -405,7 +410,7 @@ NUnit = {
 }
 
 NPolitics = {
-	SENATE_SIZE = 100
+	SENATE_SIZE = 106
 	PARTY_DEFAULT_APPROVAL = 50
 	SENATE_REQUIRED_APPROVAL = 0.30
 	SENATE_REQUIRED_APPROVAL_WITHOUT_PENALTIES = 0.51
@@ -592,7 +597,6 @@ NCharacter = {
 	
 	INHERIT_RECESSIVE_GENE_CHANCE = 0.25
 	
-	TOO_DISLOYAL_THRESHOLD = 33
 	LOYAL_COHORT_INHERITANCE_CHARISMA_CHECK = 8 # A random number modulo this define to check if the primary heir inherits loyal cohorts. Basically if the heir's charisma is equal to this number, it will never fail this check
 	
 	COURT_SIZE_AGE_FILL = { 16 60 } #when filling the initial court, characters get created using this age range
@@ -625,6 +629,31 @@ NCharacter = {
 	CULTURE_HAPPINESS_LOWER_THRESHOLD = 0.3 #Lower threshold for culture happiness. If Culture happiness < CULTURE_HAPPINESS_LOWER_THRESHOLD - CULTURE_HAPPINESS_THRESHOLD , character loyalty will be negatively affected
 	CULTURE_HAPPINESS_FACTOR = 3 #Scale culture happiness to loyalty after exceeding threshold
 	CULTURE_HAPPINESS_LOYALTY_MAX = 12 #Max/min values that culture happiness can have on loyalty
+
+	CIV_WAR_LEADER_SAME_CULTURE = 1 #If a disloyal character has the same culture as the origin country, add this score
+	CIV_WAR_LEADER_PROMINENCE_DIVIDER = 10 #If a disloyal character has any prominence, divide it by this number and add it to the score
+	CIV_WAR_LEADER_GOVERNOR_JOB = 10 #If a disloyal character is a governor, add this to the score
+	CIV_WAR_LEADER_GENERAL_UNITS_MULT = 1 #Note that civ war leaders also take into account the units they are commanding, so disloyal generals are very likely to become the war leader. NumUnits * this number = impact on score
+		
+	#The following numbers are to calculate a loyalty score (all characters start with their current loyalty)
+	#If the loyalty score is above BONUS_LOYALITY_CIVIL_WAR_CUTOFF, BONUS_LOYALITY_CIVIL_WAR_ADD gets added to the loyalty score
+	#Then a random number between 0 and 100 gets picked, if that number is larger than the loyalty score, the character + it's family (spouse and all children that are not adults) will be a dissenter and join the rebelion
+	#Note that characters that are a governor or a general/admiral that are disloyal will always join
+	CIV_WAR_LOYALTY_FRIEND_TO_REBEL = -50	
+	CIV_WAR_LOYALTY_RIVAL_TO_REBEL = 25
+	
+	CIV_WAR_LOYALTY_SAME_FAMILY_AS_REBEL_BUT_NOT_HEIR = -30
+	CIV_WAR_LOYALTY_SAME_FAMILY_AS_RULER_BUT_NOT_HEIR = 10
+	
+	CIV_WAR_LOYALTY_RIVAL_TO_RULER = -35
+	CIV_WAR_LOYALTY_FRIEND_TO_RULER = 25
+	
+	CIV_WAR_LOYALTY_REBEL_NOT_HEIR_RIVAL_TO_HEIR = -25 #If the rebel leader is not the heir, these numbers get applied
+	CIV_WAR_LOYALTY_REBEL_NOT_HEIR_FRIEND_TO_HEIR = 25 #If the rebel leader is not the heir, these numbers get applied
+	
+	TOO_DISLOYAL_THRESHOLD = 33
+	BONUS_LOYALITY_CIVIL_WAR_CUTOFF = 50 #Characters with loyality above this value will receive additional 'bonus' loyality. Recommend to keep between 40 & 90
+	BONUS_LOYALITY_CIVIL_WAR_ADD = 30 #The bonus loyality added. This is mainly used to defeat the disloyality check. Can be used to balance civil war sizes. Recommend to keep between 0 & 50
 }
 
 NFamily = {

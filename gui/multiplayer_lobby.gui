@@ -1,2539 +1,1409 @@
-#template LobbyViewBackground
-#{
-#	texture = "gfx/interface/tiles/marble_tile_l.dds"
-#	spriteType = Corneredtiled
-#	spriteborder = { 0 0 }
-#	margin = { -6 -6 }
-#	shaderfile = "gfx/FX/pdxgui_default.shader"
-#}
+@windowwidth = 1920
+@windowheight = 1080
 
-template LobbyViewModuleBackground
-{
-	block "modulebackgroundstyle"
-	{
-		shaderfile = "gfx/FX/pdxgui_default.shader"
-		texture = "gfx/editor_gui/editor_field.dds"
-		spriteType = CorneredStretched
-		spriteborder = { 6 6 }
-	}
-}
+widget = {
+	name = "lobbyview"
+	size = { 100% 100% }
 
-types MultiplayerLobby
-{
-	type LobbyViewTitle = textbox {
-		size = { 100% 24 }
-		using = BaseFontM
-		using = Default_FontColor
-		position = { 0 10 }
-		align = center
-	}
-	
-	type PlayerlistWrapper = widget {
-		layoutpolicy_vertical = expanding
-		layoutpolicy_horizontal = expanding
-		filter_mouse = left|right
-		
-		widget = {
-			visible = "[LobbyView.HasServerInfo]"
-			size = { 100% 100% }
-		}
-	}
-	
-	type LobbyViewSelectionWidget = part_sharp_base_window {
-		layoutpolicy_vertical = expanding
-		layoutpolicy_horizontal = expanding
-		filter_mouse = left|right
-		alwaystransparent = no
-		blockoverride "GradientAlpha" { 
-			alpha = 0.35
-			size = { 100% 100% }
-		}
-		size = { 432 100% }
-		movable = no
-		flowcontainer = {
-			direction = vertical
-			ignoreinvisible = yes
-			widget = {
-				size = { 432 48 }
-				using = MainWindowHeaderBox
-				visible = "[LobbyView.HasSelectedPlayable]"
-				blockoverride "Title_text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetName]" }
-				blockoverride "FlagOrIcon" { }
-				blockoverride "White_buttons" { }
-			}
-			widget = {
-				size = { 432 48 }
-				using = MainWindowHeaderBox
-				visible = "[Not(LobbyView.HasSelectedPlayable)]"
-				blockoverride "Title_text" { text = "SELECT_TITLE_SULLA_V" }
-				blockoverride "FlagOrIcon" { }
-				blockoverride "White_buttons" { }
-			}
-			flowcontainer = {
-				direction = vertical
-				margin = { 10 0 }
-				spacing = 5
-				visible = "[LobbyView.HasSelectedPlayable]"
-				flowcontainer = {
-					margin = { 20 0 }
-					margin_top = 20
-					spacing = 50
-					modifier_icon = {
-						datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetHeritage.GetModifier]"
-						size = { 62 62 }
-						parentanchor = vcenter
-						tooltipwidget = { 
-							heritage_pop_out = {
-								datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetHeritage]"
-							}
-						}
-					}
-					widget = {
-						size = { 150 100 }
-						new_country_banner = {
-							datacontext = "[LobbyView.GetSelectedPlayable.GetCountry]"
-							tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRankInformation]"
-							blockoverride "Size" { size = { 150 150 } }
-							parentanchor = vcenter
-							blockoverride "Flag" {
-								texture = "[Country.AccessCoatOfArms.GetTexture('(int32)155','(int32)355')]"
-								frame = "[Country.AccessCoatOfArms.GetFrame('(int32)155','(int32)355')]"
-								framesize = { 155 355 }
-							}
-						}
-					}
-					religion = {
-						blockoverride "size" { size = { 62 62 } }
-						blockoverride "datacontext" { datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetReligion]" }
-						parentanchor = vcenter
-						tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetReligion.GetTooltip]"
-					}
-				}
-				flowcontainer = {
-					direction = vertical
-					margin = { 15 0 }
-					icon_and_text = {
-						size = { 396 0 }
-						blockoverride "Icon" { 
-							textbox = {
-								text = "GOVERNMENT"
-								using = BaseFontS
-								using = Default_FontColor
-								position = { 0 17 }
-							}
-						}
-						blockoverride "Text" { 
-							text = "[LobbyView.GetSelectedPlayable.GetCountry.GetGovernment.GetName]"
-							using = BaseFontS
-							using = Default_FontColor
-						}
-					}
-					icon_and_text = {
-						size = { 396 0 }
-						blockoverride "Icon" {
-							textbox = {
-								text = "RELIGION"
-								using = BaseFontS
-								using = Default_FontColor
-								position = { 0 17 }
-							}
-						}
-						blockoverride "Text" { 
-							text = "[LobbyView.GetSelectedPlayable.GetCountry.GetReligion.GetName]"
-							using = BaseFontS
-							using = Default_FontColor
-						}
-					}
-					icon_and_text = {
-						size = { 396 0 }
-						blockoverride "Icon" {
-							textbox = {
-								text = "CULTURE"
-								using = BaseFontS
-								using = Default_FontColor
-								position = { 0 17 }
-							}
-						}
-						blockoverride "Text" { 
-							text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPrimaryCulture.GetName]"
-							using = BaseFontS
-							using = Default_FontColor
-						}
-					}
-				}
-				flowcontainer = {
-					direction = vertical
-					spacing = 5
-					sub_header = {
-						size = { 412 32 }
-						blockoverride "Title_text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRulerTitle]" }
-						tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetHeaderToolTip]"
-					}
-					flowcontainer = {
-						spacing = 10
-						cpt_button = {
-							blockoverride "Context" { datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler]" }
-							tooltipwidget = Character_tooltip	
-							blockoverride "portrait_button_template_onclick" {}
-							blockoverride "portrait_button_template_onrightclick" {}
-							blockoverride "portrait_button_template_tooltip" {}
-						}
-						flowcontainer = {
-							direction = vertical
-							margin_top = 10
-							using = NoninteractableBG
-							blockoverride "Margins" { 
-								margin_top = 3
-								margin_bottom = 12
-								margin_left =8
-								margin_right = 14
-							}
-							widget = {
-								size = { 288 0 }
-							}
-							textbox = {
-								using = BaseFontS
-								using = Default_FontColor
-								text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetNameWithNoTooltip]"
-								maximumsize = { 288 62 }
-								autoresize = yes
-								multiline = yes
-								align = left
-								parentanchor = left
-								elide = right
-							}
-							flowcontainer = {
-								margin_top = 20
-								spacing = 10
-								flowcontainer = {
-									direction = vertical
-									spacing = 10
-									icon_and_text = {
-										size = { 80 0 }
-										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/military.dds" }
-										blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetMartial]" }
-										tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetMartialToolTip]"
-									}
-									icon_and_text = {
-										size = { 80 0 }
-										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/oratory.dds" }
-										blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetCharisma]" }
-										tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetCharismaToolTip]"
-									}
-								}
-								flowcontainer = {
-									direction = vertical
-									spacing = 10
-									icon_and_text = {
-										size = { 80 0 }
-										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/civic.dds" }
-										blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetFinesse]" }
-										tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetFinesseToolTip]"
-									}
-									icon_and_text = {
-										size = { 80 0 }
-										blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/religious.dds" }
-										blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetZeal]" }
-										tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetZealToolTip]"
-									}
-								}
-							}
-						}
-					}
-				}
-				flowcontainer = {
-					scrollarea = {
-						size = { 412 580 }
-						layoutpolicy_horizontal = expanding
-						layoutpolicy_vertical = expanding
-						scrollbarpolicy_horizontal = always_off
-						scrollbar_vertical = {
-							using = VerticalScrollBar
-						}
-						
-						scrollwidget = {
-							flowcontainer = {
-								ignoreinvisible = yes
-								direction = vertical
-								spacing = 5
-								flowcontainer = {
-									name = "coruler_details"
-									direction = vertical
-									spacing = 5
-									visible = "[LobbyView.GetSelectedPlayable.GetCountry.UseCoRuler]"
-									sub_header = {
-										size = { 412 32 }
-										blockoverride "Title_text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRulerTitle]" }
-										tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRuler.GetHeaderToolTip]"
-									}
-									flowcontainer = {
-										spacing = 10
-										cpt_button = {
-											blockoverride "Context" { datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRuler]" }
-											tooltipwidget = Character_tooltip	
-											blockoverride "portrait_button_template_onclick" {}
-											blockoverride "portrait_button_template_onrightclick" {}
-											blockoverride "portrait_button_template_tooltip" {}
-										}
-										flowcontainer = {
-											direction = vertical
-											margin_top = 10
-											using = NoninteractableBG
-											blockoverride "Margins" { 
-												margin_top = 3
-												margin_bottom = 12
-												margin_left =8
-												margin_right = 14
-											}
-											widget = {
-												size = { 288 0 }
-											}
-											textbox = {
-												using = BaseFontS
-												using = Default_FontColor
-												text = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRuler.GetNameWithNoTooltip]"
-												maximumsize = { 288 62 }
-												autoresize = yes
-												multiline = yes
-												align = left
-												parentanchor = left
-												elide = right
-											}
-											flowcontainer = {
-												margin_top = 20
-												spacing = 10
-												flowcontainer = {
-													direction = vertical
-													spacing = 10
-													icon_and_text = {
-														size = { 80 0 }
-														blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/military.dds" }
-														blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRuler.GetMartial]" }
-														tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRuler.GetMartialToolTip]"
-													}
-													icon_and_text = {
-														size = { 80 0 }
-														blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/oratory.dds" }
-														blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRuler.GetCharisma]" }
-														tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRuler.GetCharismaToolTip]"
-													}
-												}
-												flowcontainer = {
-													direction = vertical
-													spacing = 10
-													icon_and_text = {
-														size = { 80 0 }
-														blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/civic.dds" }
-														blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRuler.GetFinesse]" }
-														tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRuler.GetFinesseToolTip]"
-													}
-													icon_and_text = {
-														size = { 80 0 }
-														blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/religious.dds" }
-														blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRuler.GetZeal]" }
-														tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetCoRuler.GetZealToolTip]"
-													}
-												}
-											}
-										}
-									}
-								}
-								flowcontainer = {
-									direction = vertical
-									sub_header = {
-										size = { 412 32 }
-										blockoverride "Title_text" { text = "LOBBY_LABEL_POPULATION" }
-										tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulationHeaderToolTip]"
-									}
-									flowcontainer = {
-										spacing = 5
-										margin = { 5 0 }
-										margin_top = 10
-										widget = {
-											size = { 40 62 }
-											using = NoninteractableBG
-											blockoverride "Margins" {
-												margin_left = 4
-												margin_right = 4
-												margin_top = 6
-												margin_bottom = 4
-											}
-											tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetOwnedProvinceTooltip]"
-											icon = {
-												position = { 2 0 }
-												using = icon_local
-												size = { 34 34 }
-											}
-											textbox = {
-												position = { 0 37 }
-												autoresize = yes
-												using = BaseFontS
-												using = Default_FontColor
-												text = "[LobbyView.GetSelectedPlayable.GetCountry.GetOwnedProvinceCount]"
-												widgetanchor = top|hcenter
-												parentanchor = hcenter
-												align = center
-											}
-										}
-										
-										widget = {
-											size = { 44 62 }
-											tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildTotalPopulationToolTip]"
-											using = NoninteractableBG
-											blockoverride "Margins" {
-												margin_left = 4
-												margin_right = 4
-												margin_top = 6
-												margin_bottom = 4
-											}
-											icon = {
-												position = { 2 0 }
-												using = icon_population
-												size = { 34 34 }
-											}
-											textbox = {
-												position = { 0 37 }
-												autoresize = yes
-												using = BaseFontS
-												using = Default_FontColor
-												text = "[LobbyView.GetSelectedPlayable.GetCountry.GetTotalPopulation]"
-												widgetanchor = top|hcenter
-												parentanchor = hcenter
-												align = center
-											}
-										}
-
-										widget = { size = { 8 0 } }
-
-										widget = {
-											size = { 38 62 }
-											using = NoninteractableBG
-											blockoverride "Margins" {
-												margin_left = 4
-												margin_right = 4
-												margin_top = 6
-												margin_bottom = 4
-											}
-											icon = {
-												using = icon_pop_upper_strata
-												position = { 4 0 }
-												size = { 32 32 }
-											}
-											textbox = {
-												position = { 0 37 }
-												autoresize = yes
-												using = BaseFontS
-												using = Default_FontColor
-												text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('upper_strata')]"
-												widgetanchor = top|hcenter
-												parentanchor = hcenter
-												align = center
-											}
-											tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('upper_strata')]"
-										}
-										
-										widget = {
-											size = { 38 62 }
-											using = NoninteractableBG
-											blockoverride "Margins" {
-												margin_left = 4
-												margin_right = 4
-												margin_top = 6
-												margin_bottom = 4
-											}
-											icon = {
-												using = icon_pop_middle_strata
-												position = { 4 0 }
-												size = { 32 32 }
-											}
-											textbox = {
-												position = { 0 37 }
-												autoresize = yes
-												using = BaseFontS
-												using = Default_FontColor
-												text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('middle_strata')]"
-												widgetanchor = top|hcenter
-												parentanchor = hcenter
-												align = center
-											}
-											tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('middle_strata')]"
-										}
-										
-										widget = {
-											size = { 38 62 }
-											using = NoninteractableBG
-											blockoverride "Margins" {
-												margin_left = 4
-												margin_right = 4
-												margin_top = 6
-												margin_bottom = 4
-											}
-											icon = {
-												using = icon_pop_proletariat
-												position = { 4 0 }
-												size = { 32 32 }
-											}
-											textbox = {
-												position = { 0 37 }
-												autoresize = yes
-												using = BaseFontS
-												using = Default_FontColor
-												text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('proletariat')]"
-												widgetanchor = top|hcenter
-												parentanchor = hcenter
-												align = center
-											}
-											tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('proletariat')]"
-										}
-									
-										widget = {
-											size = { 38 62 }
-											using = NoninteractableBG
-											blockoverride "Margins" {
-												margin_left = 4
-												margin_right = 4
-												margin_top = 6
-												margin_bottom = 4
-											}
-											icon = {
-												using = icon_pop_lower_strata
-												position = { 4 0 }
-												size = { 32 32 }
-											}
-											textbox = {
-												position = { 0 37 }
-												autoresize = yes
-												using = BaseFontS
-												using = Default_FontColor
-												text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('lower_strata')]"
-												widgetanchor = top|hcenter
-												parentanchor = hcenter
-												align = center
-											}
-											tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('lower_strata')]"
-										}
-
-										widget = {
-											size = { 38 62 }
-											using = NoninteractableBG
-											blockoverride "Margins" {
-												margin_left = 4
-												margin_right = 4
-												margin_top = 6
-												margin_bottom = 4
-											}
-											icon = {
-												using = icon_pop_indentured
-												position = { 4 0 }
-												size = { 32 32 }
-											}
-											textbox = {
-												position = { 0 37 }
-												autoresize = yes
-												using = BaseFontS
-												using = Default_FontColor
-												text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('indentured')]"
-												widgetanchor = top|hcenter
-												parentanchor = hcenter
-												align = center
-											}
-											tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('indentured')]"
-										}
-										widget = {
-											size = { 38 62 }
-											using = NoninteractableBG
-											blockoverride "Margins" {
-												margin_left = 4
-												margin_right = 4
-												margin_top = 6
-												margin_bottom = 4
-											}
-											icon = {
-												using = icon_pop_tribal
-												position = { 4 0 }
-												size = { 32 32 }
-											}
-											textbox = {
-												position = { 0 37 }
-												autoresize = yes
-												using = BaseFontS
-												using = Default_FontColor
-												text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('tribesmen')]"
-												widgetanchor = top|hcenter
-												parentanchor = hcenter
-												align = center
-											}
-											tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('tribesmen')]"
-										}
-										
-										widget = {
-											size = { 38 62 }
-											using = NoninteractableBG
-											blockoverride "Margins" {
-												margin_left = 4
-												margin_right = 4
-												margin_top = 6
-												margin_bottom = 4
-											}
-											icon = {
-												using = icon_pop_slaves
-												position = { 4 0 }
-												size = { 32 32 }
-											}
-											textbox = {
-												position = { 0 37 }
-												autoresize = yes
-												using = BaseFontS
-												using = Default_FontColor
-												text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('slaves')]"
-												widgetanchor = top|hcenter
-												parentanchor = hcenter
-												align = center
-											}
-											tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('slaves')]"
-										}
-									}
-								}
-								flowcontainer = {
-									direction = vertical
-									sub_header = {
-										size = { 412 32 }
-										blockoverride "Title_text" { text = "LOBBY_LABEL_DIPLOMACY" }
-										tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetDiplomacyHeaderToolTip]"
-									}
-									# DIPLOMATIC RELATIONS
-									scrollarea = {
-										size = { 412 120 }
-										parentanchor = hcenter
-										
-										scrollbar_vertical = {
-											using = VerticalScrollBar
-										}
-										scrollbarpolicy_horizontal = always_off
-										
-										scrollwidget = {
-											fixedgridbox = {
-												name = "diplomatic_relations"
-												size = { 100% 120 }
-												addrow = 45
-												addcolumn = 300
-												
-												item = {
-													flowcontainer = {
-														spacing = 5
-														
-														widget = {
-															size = { 40 40 }
-															icon = {
-																texture = "[RelationTypeItem.AccessIcon]"
-																tooltip = "[RelationTypeItem.GetToolTip]"
-																size = { 30 30 }
-																parentanchor = center
-															}
-														}
-														
-														overlappingitembox = {
-															datamodel = "[RelationTypeItem.GetRelations]"
-															size = { 245 40 }
-															spacing = 5
-															
-															item = {
-																margin_widget = {
-																	size = { 35 35 }
-																	margin = { 8 5 }
-
-																	country_flag = {
-																		tooltip = "[RelationDescItem.GetToolTip]"
-																		datacontext = "[RelationDescItem.GetCountry]"
-																		
-																		blockoverride "flag"
-																		{
-																			texture = "[RelationDescItem.AccessFlagIcon]"
-																			frame = "[RelationDescItem.GetFlagFrame]"
-																			framesize = { 56 56 }
-																		}
-																		
-																		blockoverride "size"
-																		{
-																			size = { 30 30 }
-																		}
-																		
-																		blockoverride "click"
-																		{
-																			onclick = "[RelationDescItem.OnClick]"
-																		}
-																	}
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		state = {
-			name = "jomini_preselected_changed"
-			# Can be used for showing a fancy animation when changing country selection in the lobby
-			
-			animation = {
-				alpha = 0
-			}
-			
-			next = backin
-			
-		}
-		
-		state = {
-			name = "backin"
-			# Can be used for showing a fancy animation when changing country selection in the lobby
-			
-			animation = {
-				alpha = 1
-			}
-			
-			duration = 0.15
-			
-		}
-		
-	}
-
-	type LobbyViewSpaceWidget = widget {
-		size = { 0 160 }
-		layoutpolicy_horizontal = expanding
-		visible = yes
-	}
-
-	
-	type LobbyViewGameInfoPanel = vbox {
-		layoutpolicy_horizontal = expanding
-		background = {
-			using = LobbyViewModuleBackground
-		}
-		block "game_info"
-		{
-		}
-	}
-	
-	type LobbyViewButtons = widget {
-		size = { 432 60 }
-		base_window = {
-			size = { 332 65 }
-			position = { 100 -5 }
-			blockoverride "GradientAlpha" { 
-				alpha = 0
-				size = { 100% 100% }
-			}
-		}
-		margin_widget = {
-			size = { 332 60 }
-			position = { 100 0 }
-			alwaystransparent = no
-			filter_mouse = all
-			margin_left = 12
-			margin_right = 12
-			flowcontainer = {
-				ignoreinvisible = yes
-				position = { 0 12 }
-				spacing = 12
-				#widget = { #Leave for reference
-				#	size = { 138 41 }
-				#	container = {
-				#		position = { 14 5 }
-				#		button = {
-				#			texture = "gfx/interface/buttons/checkbox.dds"
-				#			framesize = { 36 36 }
-				#			frame = "[Select_int32(LobbyView.IsObserver,'(int32)2','(int32)1'))]"
-				#			onclick = "[LobbyView.ToggleObserve]"
-				#			using = tooltip_ne
-				#			tooltip = "JOMINI_MULTIPLAYER_GUI_OBSERVE_TOOLTIP"
-				#		}
-				#		textbox = {
-				#			using = MarbleButtonFont
-				#			text = "JOMINI_MULTIPLAYER_GUI_OBSERVE"
-				#			tooltip = "JOMINI_MULTIPLAYER_GUI_OBSERVE_TOOLTIP"
-				#			align = nobaseline
-				#			using = tooltip_ne
-				#			autoresize = yes
-				#			position = { 38 5 }
-				#			maximumsize = { 75 -1 }
-				#			elide = right
-				#		}
-				#	}
-				#}
-				
-				text_button_square = {
-					size = { 148 0 }
-					blockoverride "On_click" { onclick = "[LobbyView.ToggleObserve]" }
-					blockoverride "Center_text" { text = "[SelectLocalization(LobbyView.IsObserver, 'JOMINI_MULTIPLAYER_GUI_DISABLE_OBSERVE', 'JOMINI_MULTIPLAYER_GUI_OBSERVE')]" }
-					tooltip = "JOMINI_MULTIPLAYER_GUI_OBSERVE_TOOLTIP"
-				}
-				
-				text_button_square = {
-					size = { 148 0 }
-					blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_START" }
-					using = tooltip_ne
-					blockoverride "On_click" { 
-						onclick = "[LobbyView.Start]"
-						#onclick = "[GetVariableSystem.Set('mp_start_screen', 'start')]"
-						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_start"
-					}
-					enabled = "[LobbyView.CanStart]"
-					tooltip = "[LobbyView.StartToolTip]"
-					visible = "[And(PlayerIsHost, And(GameIsMultiplayer,IsPreparationLobby))]"
-					
-				}
-				
-				text_button_square = {
-					size = { 148 0 }
-					blockoverride "Center_text" { text = "JOMINI_MULTIPLAYER_GUI_START" }
-					using = tooltip_ne
-					blockoverride "On_click" { 
-						#onclick = "[GameLobby.StartGame]"
-						#onclick = "[LobbyView.Ready]"
-						onclick = "[GetVariableSystem.Set('mp_start_screen', 'start')]"
-						clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_game_start"
-					}
-					enabled = "[LobbyView.CanControlSelected]"
-					tooltip = "[LobbyView.GetControlToolTip]"
-					visible = "[And(PlayerIsHost,And(Or(Not(GameIsMultiplayer),Not(IsPreparationLobby)),Or(LobbyView.HasSelectedPlayable,LobbyView.IsObserver)))]"		
-				}
-
-				####### PLAYER READY CHECKBOX
-				widget = {
-					size = { 130 30 }
-					visible = "[And(IsPreparationLobby, Not(PlayerIsHost))]"
-					hbox = {
-					
-						check_box_button = {
-							size = { 30 30 }
-							blockoverride "Frame" { frame = "[BoolTo1And2( LobbyView.IsReady )]" }
-							enabled = "[LobbyView.CanReady]"
-							tooltip = "[LobbyView.GetReadyToolTip]"
-							blockoverride "On_click" { onclick = "[LobbyView.Ready]" }
-							visible = "[Not( LobbyView.IsReady )]"
-						}
-
-						check_box_button = {
-							size = { 30 30 }
-							blockoverride "Frame" { frame = "[BoolTo1And2( LobbyView.IsReady )]" }
-							blockoverride "On_click" { onclick = "[LobbyView.UnReady]" }
-							visible = "[LobbyView.IsReady]"
-						}
-
-						textbox = {
-							using = BaseFontM
-							using = Default_FontColor
-							text = "JOMINI_MULTIPLAYER_GUI_READY"
-							tooltip = "[LobbyView.GetReadyToolTip]"
-							align = left
-							autoresize = yes
-							using = tooltip_ne
-						}
-					}
-				}
-			}
-		}
-		
-		widget = {# Spacer
-			size = { 1 10 }
-		}
-	}
-	
-	type LobbyViewBackgroundBorders = icon {
-		#texture = "gfx/interface/tiles/small_window_frame_corners.dds"
-		spriteType = Corneredtiled	
+	widget = {
 		size = { 100% 100% }
-		spriteborder = { 32 24 }
-		shaderfile = "gfx/FX/pdxgui_default.shader"
-		parentanchor = top|right
-		widgetanchor = top|right
-	}
-
-	type LobbyViewPlayerList = margin_widget {
-		#layoutpolicy_vertical = expanding
-		layoutpolicy_horizontal = expanding
-		size = { 0 410 }
+		filter_mouse = left|wheel|right
 		alwaystransparent = no
-		visible = "[GameIsMultiplayer]"
-		
-		widget = {
-			size = { 100% 100% }
-			visible = "[And(Not(LobbyView.HasServerInfo), GameIsMultiplayer)]"
-		}
-
-		sub_header = {
-			visible = "[GameIsMultiplayer]"
-			size = { 322 32 }
-			parentanchor = hcenter
-			
-			blockoverride "Title_text"
-			{
-				text = "JOMINI_MULTIPLAYER_GUI_PLAYER_LIST_LABEL"
-			}
-		}
-		
-		scrollarea = {
-			position = { 0 40 }
-			parentanchor = hcenter
-			size = { 300 376 }
-			visible = "[GameIsMultiplayer]"
-			scrollbar_vertical = {
-				using = VerticalScrollBar
-			}
-			using = VerticalScrollAreaCutOff
-			scrollbaralign_vertical = right
-			scrollbarpolicy_horizontal = always_off
-			scrollwidget = {
-				fixedgridbox = {
-					addcolumn = 300
-					addrow = 60
-					setitemsizefromcell = yes
-					datamodel = "[LobbyView.Players]"
-					item = {
-						JominiLobbyViewPlayerItem = {
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	type TROLLBOX = vbox {  
-		name = "mp_info"
-		layoutpolicy_horizontal = expanding
-		layoutpolicy_vertical = expanding
-
-		visible = "[LobbyView.HasServerInfo]"
-		alwaystransparent = no
-		filter_mouse = left|right
-
-		block "mp_info_properties" {
-			margin = { 10 10 }
-			spacing = 10
-			
-			background = {
-				using = JominiLobbyViewModuleBackground
-			}
-		}
-
-		margin_widget = {
-			size = { 0 60 }
-			layoutpolicy_horizontal = expanding
-			layoutpolicy_vertical = fixed
-			flowcontainer = {
-				direction = vertical
-				spacing = 8
-				radial_button_entry = {
-					name = "mpconfig_private"
-					blockoverride "EnabledState"
-					{
-						enabled = "[CanEditSettingsAfterHost]"
-					}
-					blockoverride "Text"
-					{
-						text = "JOMINI_MULTIPLAYER_GUI_PRIVATE"
-					}
-					blockoverride "On_click" 
-					{
-						onclick = "[LobbyView.ToggleVisibility]"
-						inherit_visual_state = no
-						#checked = "[LobbyView.GetServerInfo.IsInvite]"
-					}
-					blockoverride "ShowDot"
-					{
-						trigger_when = "[LobbyView.GetServerInfo.IsInvite]"
-					} 
-					
-					blockoverride "HideDot" 
-					{
-						trigger_when = "[Not( LobbyView.GetServerInfo.IsInvite )]"
-					} 
-				}
-
-				radial_button_entry = {
-					name = "mpconfig_public"
-					blockoverride "EnabledState"
-					{
-						enabled = "[CanEditSettingsAfterHost]"
-					}
-					blockoverride "Text"
-					{
-						text = "JOMINI_MULTIPLAYER_GUI_PUBLIC"
-					}
-					blockoverride "On_click" 
-					{
-						onclick = "[LobbyView.ToggleVisibility]"
-						inherit_visual_state = no
-						#checked = "[LobbyView.GetServerInfo.IsPublic]"
-					}
-					blockoverride "ShowDot"
-					{
-						trigger_when = "[Not( LobbyView.GetServerInfo.IsInvite )]"
-					} 
-					
-					blockoverride "HideDot" 
-					{
-						trigger_when = "[LobbyView.GetServerInfo.IsInvite]"
-					} 
-				}
-			}
-		}
-
-		margin_widget = {
-			size = { 0 80 }
-			layoutpolicy_horizontal = expanding
-			layoutpolicy_vertical = fixed
-			vbox = {
-				spacing = 4
-				layoutpolicy_horizontal = expanding
-				restrictparent_min = yes
-				block "setup_hbox_height" {}
-
-				hbox = {
-					layoutpolicy_horizontal = expanding
-
-					textbox = {
-						text = "JOMINI_MULTIPLAYER_GUI_SERVER_NAME"
-						using = BaseFontM
-						using = Default_FontColor
-						minimumsize = { 90 0 }
-						maximumsize = { 90 0 }
-					}
-					
-					margin_widget = {
-						size = { 160 40 }
-						layoutpolicy_horizontal = expanding
-						using = inputfield
-						name = "multiplayer_server_name_field"
-						editbox = {
-							position = { 12 0 }
-							size = { 100% 34 }
-							name = "find_text"
-							text = "[LobbyView.GetServerInfo.GetServerName]"
-							using = BaseFontM 
-							using = Default_FontColor
-							fontsize = 18
-							focuspolicy = all
-							alwaystransparent = no
-							multiline = no
-							maxcharacters = 58
-							onreturnpressed = "[LobbyView.SetName]"
-							ontextedited = "[LobbyView.OnNameEdit]"
-							enabled = "[CanEditSettingsAfterHost]"
-							#enabled = no
-							tooltip = "JOMINI_MULTIPLAYER_GUI_SERVER_NAME"
-						}
-						#icon = {
-						#	using = black_background
-						#	spriteType = Corneredtiled
-						#	shaderfile = "gfx/FX/pdxgui_default.shader"
-						#	size = { 100% 2 }
-						#	parentanchor = bottom
-						#	position = { 0 -2 }	
-						#	visible = "[LobbyView.Not(PlayerIsHost)]"
-						#	visible = "[CannotEditSettingsAfterHost]"
-						#	visible = no
-						#}
-
-					}
-					widget = { size = { 8 1 } }
-					icon_button_square = {
-						size = { 32 32 }
-						visible = "[CanEditSettingsAfterHost]"
-						blockoverride "On_click"
-						{
-							onclick = "[LobbyView.SetName]"
-							enabled = "[CanEditSettingsAfterHost]"
-						}
-						blockoverride "Icon"
-						{
-							texture = "gfx/interface/icons/shared_icons/change.dds"
-							size = { 28 28 }
-						}
-						tooltip = "JOMINI_MULTIPLAYER_GUI_CHANGE_SERVER_NAME"
-					}
-				}
-
-				hbox = {
-					layoutpolicy_horizontal = expanding
-					visible = "[JominiIsHostOrLocal]"
-					
-					textbox = {
-						text = "JOMINI_MULTIPLAYER_GUI_SERVER_PASSWORD"
-						using = BaseFontM
-						using = Default_FontColor
-						minimumsize = { 90 0 }
-						maximumsize = { 90 0 }
-					}
-					
-					margin_widget = {
-						size = { 160 40 }
-						layoutpolicy_horizontal = expanding
-						using = inputfield
-						name = "multiplayer_set_password_field"
-						editbox = {
-							position = { 8 0 }
-							size = { 100% 34 }
-							name = "find_text"
-							text = ""
-							using = BaseFontM
-							using = Default_FontColor
-							fontsize = 18
-							focuspolicy = all
-							alwaystransparent = no
-							multiline = no
-							onreturnpressed = "[LobbyView.SetPassword]"
-							ontextedited = "[LobbyView.OnPasswordEdit]"
-							enabled = "[CanEditSettingsAfterHost]"
-							tooltip = "JOMINI_MULTIPLAYER_GUI_SERVER_PASSWORD"
-						}
-					}
-					widget = { size = { 8 1 } }
-					icon_button_square = {
-						size = { 32 32 }
-						visible = "[CanEditSettingsAfterHost]"
-						blockoverride "On_click"
-						{
-							onclick = "[LobbyView.SetPassword]"
-							enabled = "[CanEditSettingsAfterHost]"
-						}
-						blockoverride "Icon"
-						{
-							texture = "gfx/interface/icons/shared_icons/change.dds"
-							size = { 28 28 }
-						}
-						tooltip = "JOMINI_MULTIPLAYER_GUI_CHANGE_SERVER_PASSWORD"
-					}
-				}
-
-				hbox = {
-					block "game_options_left" {}
-					block "game_options_right" {}
-				}
-			}
-		}
-
-		margin_widget = {
-			size = { 0 46 }
-			layoutpolicy_horizontal = expanding
-			checkbox_entry = {
-				size = { 300 34 }
-				blockoverride "Frame"
-				{
-					frame = "[BoolTo1And2( LobbyView.IsAutoAccept )]"
-				}
-				blockoverride "On_click" 
-				{ 
-					onclick = "[LobbyView.ToggleAutoAccept]"
-					enabled = "[CanEditSettingsAfterHost]"
-				}
-				
-				blockoverride "Text" 
-				{ 
-					text = "JOMINI_MULTIPLAYER_GUI_AUTO_ACCEPT"
-					margin_right = 8
-				}
-				tooltip = "JOMINI_MULTIPLAYER_GUI_AUTO_ACCEPT_TT"
-			}
-		}
-		vbox = {
-			layoutpolicy_horizontal = expanding
-			spacing = 5
-
-			block "mp_info_header" {}
-
-			block "mp_info_left_info" {}
-
-			flowcontainer = {
-				direction = vertical
-				spacing = 12
-				JominiLobbyViewServerInfoEntry = {
-					visible = "[LobbyView.GetServerInfo.HasServerID]"
-					text = "JOMINI_MULTIPLAYER_GUI_SERVER_ID"
-					tooltip = "JOMINI_MULTIPLAYER_GUI_SERVER_ID_TOOLTIP"
-					onclick = "[LobbyView.CopyServerID]"
-					elide = right
-					align = left
-					using = BaseFontS
-					#using = Default_FontColor
-					fontcolor = { 0.004  0.34  0.42 1 }
-					blockoverride "server_info_entry_styling"
-					{
-						using = NoninteractableBG
-					}
-				}
-
-				JominiLobbyViewServerInfoEntry = {
-					text = "JOMINI_MULTIPLAYER_GUI_GAME_VERSION"
-					tooltip = "JOMINI_MULTIPLAYER_GUI_GAME_VERSION_TOOLTIP"
-					elide = right
-					using = BaseFontS
-					using = Default_FontColor
-					align = left
-					blockoverride "server_info_entry_styling"
-					{
-						using = NoninteractableBG
-					}
-				}
-			}
-		}
-
-		vbox = {
-			layoutpolicy_horizontal = expanding
-			layoutpolicy_vertical = preferred 
-
-			################################
-			##### ENABLED DLCs
-			################################
-
-			hbox = {
-				layoutpolicy_horizontal = expanding
-				layoutpolicy_vertical = preferred
-				spacing = 10
-				block "mp_info_margin" {}
-
-				tag = {
-					size = { 250 28 }
-					minimumsize = { 250 28 }
-					#layoutpolicy_horizontal = expanding
-					text = "JOMINI_MULTIPLAYER_GUI_ENABLED_DLCS"
-					align = left
-					blockoverride "jomini_standard_textbox" 
-					{
-						using = HeaderFont
-					}
-				}
-
-				JominiLobbyCollapseButton = {
-					enabled = "[LobbyView.HasEnabledDLCs]"
-					onclick = "[LobbyView.ToggleShowEnabledDLCs]"
-					visible = "[LobbyView.ShouldShowEnabledDLCs]"
-				}
-
-				JominiLobbyExpandButton = {
-					enabled = "[LobbyView.HasEnabledDLCs]"
-					onclick = "[LobbyView.ToggleShowEnabledDLCs]"
-					visible = "[Not(LobbyView.ShouldShowEnabledDLCs)]"
-				}
-			}
-
-			vbox = {
-				layoutpolicy_horizontal = expanding
-				block "mp_info_margin" {}
-				visible = "[LobbyView.ShouldShowEnabledDLCs]"
-				datamodel = "[LobbyView.GetEnabledDLCs]"
-				block "mp_info_item_spacing" {}
-				using = NoninteractableBG
-				blockoverride "Margins" { margin = { 8 2 } }
-				margin_bottom = 8
-				margin_top = 4
-				item = {
-					textbox = {
-						layoutpolicy_horizontal = expanding
-						text = "- [CString.GetString]"
-						autoresize = yes
-						using = BaseFontS
-						using = Default_FontColor
-					}
-				}
-			}
-
-			################################
-			##### ENABLED MODS
-			################################
-
-			hbox = {
-				layoutpolicy_horizontal = expanding
-				layoutpolicy_vertical = preferred 
-				spacing = 10
-				block "mp_info_margin" {}
-
-				tag = {
-					size = { 250 28 }
-					minimumsize = { 250 28 }
-					#layoutpolicy_horizontal = expanding
-					text = "JOMINI_MULTIPLAYER_GUI_ENABLED_MODS"
-					align = left
-					blockoverride "jomini_standard_textbox" 
-					{
-					using = HeaderFont
-					}
-				}
-
-				JominiLobbyCollapseButton = {
-					enabled = "[LobbyView.HasEnabledMods]"
-					onclick = "[LobbyView.ToggleShowEnabledMods]"
-					visible = "[LobbyView.ShouldShowEnabledMods]"
-				}
-
-				JominiLobbyExpandButton = {
-					enabled = "[LobbyView.HasEnabledMods]"
-					onclick = "[LobbyView.ToggleShowEnabledMods]"
-					visible = "[Not(LobbyView.ShouldShowEnabledMods)]"
-				}
-			}
-
-			vbox = {
-				layoutpolicy_horizontal = expanding
-				datamodel = "[LobbyView.GetEnabledMods]"
-				visible = "[LobbyView.ShouldShowEnabledMods]"
-				block "mp_info_item_spacing" {}
-				block "mp_info_margin" {}
-				using = NoninteractableBG
-				blockoverride "Margins" { margin = { 8 0 } }
-				margin_bottom = 12
-				margin_top = 4
-				item = {
-					textbox = {
-						layoutpolicy_horizontal = expanding
-						text = "- [CString.GetString]"
-						autoresize = yes
-						using = BaseFontS
-						using = Default_FontColor						
-					}
-				}
-			}
-		}
-
-		widget = {
-			layoutpolicy_vertical = growing
-			layoutpolicy_horizontal = growing
-		}
-	}
-	
-	type LobbyViewGameConfiguration = vbox {
-		layoutpolicy_horizontal = expanding
-		
-		text_button_square = {
-			blockoverride "Text"
-			{
-				text = "JOMINI_MULTIPLAYER_GUI_GAME_CONFIGURATION"
-			}
-			blockoverride "OnClick"
-			{
-				onclick = "[LobbyView.OpenGameConfigurationWindow]"
-			}
-			
-			visible = no# Window opened automatically by the game
-		}
-		widget = {
-			filter_mouse = left|right
-			alwaystransparent = no
-			
-			#LobbyViewBackgroundBorders = {
-			#	size = { 100% 120% }
-			#	position = { 0 -12}
-			#}
-
-			size = { 0 60 }
-			layoutpolicy_horizontal = expanding
-			text_button_square = {
-				size = { 210 28 }
-				parentanchor = vcenter|hcenter
-				
-				blockoverride "Center_text" 
-				{
-					text = "BACK"	
-				}
-				
-				enabled = "[LobbyView.CanGoBack]"
-				tooltip = "[LobbyView.GetGoBackToolTip]"
-				blockoverride "On_click"
-				{
-					onclick = "[SetPreparationLobby('(bool)no')]"
-					onclick = "[LobbyView.GoBack]"
-				}
-			}
-		}
-	}
-
-	type SullaLobbyViewHost = widget {
-		size = { 332 72 }
-		visible = "[And(Not(HasHostError),Not(GameIsMultiplayer))]"
-		alwaystransparent = no
-		filter_mouse = left|right
-		
-		block "host_background" {
-			background = {
-				using = JominiLobbyViewModuleBackground
-			}
-		}
-		text_button_square_highlighted = {
-			size = { 298 28 }
-			parentanchor = center
-			tooltip = "[LobbyView.GetOpenMultiplayerToolTip]"
-			blockoverride "Center_text"
-			{
-				text = "JOMINI_MULTIPLAYER_GUI_HOST_BUTTON"
-			}
-			blockoverride "On_click" {
-				onclick = "[GameLobby.OnOpenMultiplayer]"
-				enabled = "[And(JominiIsMultiplayerAccessible, JominiIsHostOrLocal)]"
-			}
-		}
-	}
-}
-
-JominiMultiplayerLobby = {
-	#layer = top
-	blockoverride "window_background" {
-		texture = "gfx/interface/tiles/small_window_frame_corners_copy.dds"
-		spriteType = Corneredtiled
-		spriteborder = { 32 24 }
-		margin = { 0 0 }
-		shaderfile = "gfx/FX/pdxgui_default.shader"	
-	}
-	blockoverride "observer_button" 
-	{
-
-	}
-	icon = {
-		name = "cloud_save_indicator"
-		position = { -330 2 }
-		parentanchor = top|right
-		texture = "gfx/interface/cloud_uplink.dds"
-		shaderfile = "gfx/FX/pdxgui_glow_game.shader"
-		tooltip = "CLOUD_SAVE_IN_PROGRESS_TOOLTIP"
-		visible = "[GameIsCloudStorageOperationInProgress]"
-	}
-
-
-	blockoverride "collapse_button_properties" {
-		texture = "gfx/interface/base_parts/button_square_expanded.dds"
-		size = { 22 22 }
-	}
-
-	blockoverride "expand_button_properties" {
-		texture = "gfx/interface/base_parts/button_square_collapsed.dds"
-		size = { 22 22 }
-	}
-
-	blockoverride "text_edit_button"
-	{
-		texture = "gfx/interface/base_parts/button_square_collapsed.dds"
-		size = { 22 22 }
-	}
-
-	blockoverride "buttonstyle" {
-		gfxtype = buttongfx
-		shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
-		clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_click"
-		texture = "gfx/interface/tiles/marble_button_s.dds"
-		spriteType = Corneredtiled
-		spriteborder = { 60 0 }
-		size = { 240 38 }
-		
-		buttonText = {
-			textbox = {
-				parentanchor = bottom|hcenter
-				using = BaseFontM
-				using = Default_FontColor
-				autoresize = yes
-				position = { 0 -12 }
-			}
-		}
-	}
-
-	blockoverride "host_modify_button" {}
-
-	#blockoverride "remove_player_button_style" {
-	#	texture = "gfx/interface/icons/font_icons/font_icon_electronics_cross.dds"
-	#	gfxtype = framedbuttongfx
-	#	effectname = "NoHighlight"
-	#	framesize = { 16 16 }
-	#	upframe = 1
-	#	downframe = 2
-	#	overframe = 2
-	#}
-	
-
-	blockoverride "jomini_standard_textbox" {
-		using = BaseFontS
-		using = Default_FontColor
-	}
-
-	blockoverride "host_button" {
-		texture = "gfx/interface/tiles/text_button_tiles.dds"
-		spriteType = Corneredtiled
-		spriteborder = { 80 0 }
-		size = { 298 46 }
-		text = "JOMINI_MULTIPLAYER_GUI_HOST_BUTTON"
-	}
-
-	blockoverride "lobbyview_button_size" {
-		size = { 200 38 }
-		layoutpolicy_horizontal = fixed
-	}
-
-	blockoverride "host_background" {
-		# No need for a background here
-	}
-	
-	blockoverride "error_bottom_margin" {
-		margin_bottom = 12
-	}
-
-	blockoverride "player_item_styling"
-	{
-		list_entry = { 
-			size = { 100% 100% }
-		}
-
-		# OLD LIST ENTRY 
-		#icon = {
-		#	shaderfile = "gfx/FX/pdxgui_default.shader"
-		#	texture = "gfx/interface/tiles/entry_button_tiles.dds"
-		#	spriteType = Corneredtiled
-		#	spriteborder = { 40 8 }
-		#	size = { 298 62 }
-		#}
-	}
-
-	blockoverride "playerlist_item_content" {
-		widget = {
-			layoutpolicy_horizontal = expanding
-			layoutpolicy_vertical = expanding
-
-			JominiLobbyRemovePlayer = {
-				position = { -10 8 }
-				parentanchor = top|right
-				widgetanchor = top|right
-			}
-
-			widget = {
-				size = { 236 60 }
-				parentanchor = top|right
-				widgetanchor = top|right
-
-				tag_dark = {
-					size = { 140 20 }
-					position = { -2 -2 }
-					text = "[LobbyPlayer.GetName]"
-				}
-
-				widget = {
-					size = { 110 60 }
-					position = { -5 0 }
-					parentanchor = top|right
-					widgetanchor = top|right
-					
-					block "player_loading_progress"
-					{
-						textbox = {
-							text = "[LobbyPlayer.GetTransferProgress]"
-							visible = "[LobbyPlayer.IsHotjoining]"
-						}
-					}
-					
-					#Readyness
-					container = {
-						parentanchor = right
-						position = { -18 0 }
-						visible = "[LobbyPlayer.ShowReadyStatus]"
-						block "readyness" {
-							flowcontainer = {
-								direction = vertical
-								ignoreinvisible = yes
-								spacing = 0
-								textbox = {
-									text = "JOMINI_MULTIPLAYER_GUI_OBSERVER"
-									visible = "[LobbyPlayer.IsObserver]"
-									using = BaseFontS
-									using = Default_FontColor
-									align = right
-									autoresize = yes
-									parentanchor = right
-								}
-								textbox = {
-									text = "JOMINI_MULTIPLAYER_GUI_READY"
-									visible = "[LobbyPlayer.IsReady]"
-									using = BaseFontS
-									using = Default_FontColor
-									align = right
-									autoresize = yes
-									parentanchor = right
-								}
-
-								textbox = {
-									text = "JOMINI_MULTIPLAYER_GUI_NOT_READY"
-									visible = "[Not(LobbyPlayer.IsReady)]"
-									using = BaseFontS
-									using = Negative_FontColor
-									align = right
-									autoresize = yes
-									parentanchor = right
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	blockoverride "playerlist_playable"
-	{
-		container = {
-			visible = "[LobbyPlayer.HasPlayable]"
-
-			country_flag = {
-				position = { 4 1 }
-
-				blockoverride "flag"
-				{
-					#alwaystransparent = yes
-					texture = "[LobbyPlayer.GetPlayable.GetCountry.AccessCoatOfArms.GetTexture('(int32)56','(int32)56')]"
-					frame = "[LobbyPlayer.GetPlayable.GetCountry.AccessCoatOfArms.GetFrame('(int32)56','(int32)56')]"
-					framesize = { 56 56 }
-				}
-
-				blockoverride "size"
-				{
-					size = { 54 54 }
-				}
-
-				blockoverride "click"
-				{
-					onclick = "[PanToCountry(GetCountry( LobbyPlayer.GetPlayable.GetCountry.GetTag ).Self)]"
-				}
-
-				blockoverride "hover" { }
-			}
-
-			textbox = {
-				text = "[LobbyPlayer.GetPlayable.GetCountry.GetName]"
-				align = left
-				autoresize = yes
-				using = BaseFontS
-				using = Default_FontColor
-				position = { 62 28 }
-			}
-		}
-	}
-
-	blockoverride "marble_scrollbar" {
-		scrollbar_vertical = {
-			using = VerticalScrollBar
-		}
-	}
-
-	blockoverride "mp_info_properties" {
-		margin = { 20 0 }
-		margin_top = 12
-		spacing = 10
-		visible = "[And(LobbyView.HasServerInfo, GameIsMultiplayer)]"
-	}
-
-	blockoverride "server_info_entry_styling"
-	{
-		alwaystransparent = no
-		using = BaseFontS
-		using = Default_FontColor
-		margin_bottom = 2
-		margin_left = 10
-		margin_right = 4
-		align = left
-		elide = right
-
-		icon = {
-			name = "frame"
-			texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-			spriteType = Corneredtiled
-			spriteborder = { 12 12 }
-			size = { 296 28 }
-		}
-	}
-
-	blockoverride "server_info_entry_size"
-	{
-		size = { 290 28 }
-	}
-
-	block "servermode_text" {
-		text = "JOMINI_MULTIPLAYER_GUI_SESSION_SERVER_MODE"
-	}
-
-	blockoverride "mp_info_margin" {
-		#margin_left = 18
-	}
-
-	blockoverride "mp_info_item_spacing" {
-		spacing = 3
-		margin_top = 8
-	}
-
-	blockoverride "mp_info_item_background" {
-		using = BaseFontS
-		using = Default_FontColor
-		margin_top = 4
-		margin_bottom = 4
-		margin_left = 10
-
-		icon = {
-			texture = "gfx/interface/tiles/list_slot_corner_tiles.dds"
-			spriteType = Corneredtiled
-			spriteborder = { 12 12 }
-			size = { 296 28 }
-		}
-	}
-	blockoverride "observer_button" {}
-	blockoverride "left_panel_content"
-	{
-		base_window = {
-			layoutpolicy_horizontal = expanding
-			layoutpolicy_vertical = expanding
-			blockoverride "GradientAlpha" { 
-				alpha = 0.35
-				size = { 100% 100% }
-			}
-			vbox = {
-				using = MainWindowHeaderBox
-				
-				blockoverride "Title_text"
-				{
-					text = "JOMINI_MULTIPLAYER_GUI_SESSION_HEADER"
-				}
-
-				blockoverride "White_buttons"
-				{
-					visible = no
-				}
-
-				JominiLobbyViewHostError = {}
-				JominiLobbyViewHostingStatus = {}
-				SullaLobbyViewHost = {}
-
-				PlayerlistWrapper = {
-				
-					vbox = { 
-						TROLLBOX = {}
-						LobbyViewPlayerList = {}
-					} 
-				}
-				LobbyViewGameConfiguration = {}
-			}
-
-		}
-		#widget = {
-		#	size = { 0 64 }
-		#	layoutpolicy_horizontal = expanding
-		#	layoutpolicy_vertical = fixed
-
-		#	icon = {
-		#		texture = "gfx/interface/tiles/small_window_title_header_corners.dds"
-		#		spriteType = Corneredtiled
-		#		size = { 332 51 }
-		#		spriteborder = { 16 0 }
-		#		shaderfile = "gfx/FX/pdxgui_default.shader"
-		#	}
-
-		#	textbox = {
-		#		using = HeaderFont
-		#		using = Default_FontColor
-		#		text = "JOMINI_MULTIPLAYER_GUI_SESSION_HEADER"
-		#		autoresize = yes
-		#		align = center
-		#	}
-		#}
-
-	}
-
-	blockoverride "player_loading_progress"
-	{
-		textbox = {
-			text = "[LobbyPlayer.GetLoadingString]"
-			size = { 50 34 }
-			parentanchor = bottom|right
-			visible = "[LobbyPlayer.IsHotjoining]"
-			using = BaseFontS
-			using = Default_FontColor
-			align = right
-		}
-	}
-	
-	blockoverride "left_panel_properties"
-	{
-		size = { 332 100% }
-		position = { 1 0 }
-		alwaystransparent = no
-	}
-	
-	
-	blockoverride "right_panel_properties"
-	{
-		size = { 432 100% }
-		#position = { 50 0 }
-		alwaystransparent = no
-		#parentanchor = top|right
-		#widgetanchor = top|right
-	}
-	
-	blockoverride "right_panel_content"
-	{
-		LobbyViewGameInfoPanel = {}
-		LobbyViewSelectionWidget = {}
-		#LobbyViewSpaceWidget = {}
-		LobbyViewButtons = {}
-	}
-
-	blockoverride "setup_editbox"
-	{
-		using = MarbleButtonFontS
-		fontsize = 15
-		fontcolor = { 1 1 1 1 }
-		cursorcolor = { 1 1 0.5 1 }
-
 		background = {
-			margin_left = 5
-			margin_top = 0
-			texture = "gfx/editor_gui/editor_field.dds"
-			spriteType = CorneredStretched
-			spriteborder = { 4 4 }
 			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = black_background
 		}
-	}
-
-	blockoverride "setup_textbox"
-	{
-		using = MarbleButtonFontS
-	}
-
-	blockoverride "setup_checkbutton"
-	{
-		texture = "gfx/interface/buttons/checkbox.dds"
-		framesize = { 36 36 }
-	}
-
-	textbox = {
-		visible = "[Not(IsLiveBuild)]"
-		parentanchor = bottom|right
-		widgetanchor = bottom|right
-		position = { -340 6 }
-		name = "version_label"
-		text = "[GetCompleteVersionInfoString]"
-		size = { 400 120 }
-		using = BaseFontS
-		using = Default_FontColor
-		multiline = yes
-		align = right
-		
-	}
-
-	base_window = {
-		size = { 520 106 }
-		parentanchor = top|hcenter
-		filter_mouse = left|right
-		alwaystransparent = no
-		movable = no
-		blockoverride "BackgroundGradient" { visible = no }
-		state = {
-			name = hide_mp_window
-			on_start = "[PdxGuiWidget.Show]"
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = pattern_black_background_layer_01
+			modify_texture = {
+				texture = "gfx/interface/base_parts/background_x60bd_alpha_two_corner.dds"
+				blend_mode = alphamultiply
+				spriteType = Corneredtiled
+				spriteborder = { 60 60 }
+			}
+		}
+		background = {
+			shaderfile = "gfx/FX/pdxgui_default.shader"
+			using = pattern_black_background_layer_02
+			modify_texture = {
+				texture = "gfx/interface/base_parts/background_x60bd_alpha_two_corner.dds"
+				blend_mode = alphamultiply
+				spriteType = Corneredtiled
+				spriteborder = { 60 60 }
+			}
 		}
 		state = {
 			name = show_mp_window
+			on_start = "[PdxGuiWidget.Show]"
+		}
+		state = {
+			name = hide_mp_window
 			on_start = "[PdxGuiWidget.Hide]"
 		}
-		vbox = {
-			widget = {
-				size = { 0 40 }
-				layoutpolicy_horizontal = expanding
-				using = MainWindowHeaderBoxCenteredNew
-				visible = "[Not(IsLocalPlayerReplayingCommands)]"
-				blockoverride "Title_text" { text = "CURRENT_DATE" }
-				blockoverride "White_buttons" { visible = no }
-				tooltip = "THE_WORLD_TOOLTIP"
+		widget = {
+			size = { 100% 100% }
+			mp_select_tab = {
+				visible = "[GetVariableSystem.HasValue('mp_select_tab', 'europe')]"
+				blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/europe.png" }
+				blockoverride "countries" {
+					mp_select_country_map = {
+						datacontext = "[GetCountry('GBR')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/GBR.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('PRU')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/PRU.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('RUS')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/RUS.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('FRA')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/FRA.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('NED')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/NED.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('AUS')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/AUS.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('SAR')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/SAR.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('SPA')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/SPA.png" }
+					}
+				}
+			}
+			mp_select_tab = {
+				visible = "[GetVariableSystem.HasValue('mp_select_tab', 'middle_east')]"
+				blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/middle_east.png" }
+				blockoverride "countries" {
+					mp_select_country_map = {
+						datacontext = "[GetCountry('TUR')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/TUR.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('EGY')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/EGY.png" }
+					}
+				}
+			}
+			mp_select_tab = {
+				visible = "[GetVariableSystem.HasValue('mp_select_tab', 'south_asia')]"
+				blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/south_asia.png" }
+				blockoverride "countries" {
+					mp_select_country_map = {
+						datacontext = "[GetCountry('EIC')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/EIC.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('KHL')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/KHL.png" }
+					}
+				}
+			}
+			mp_select_tab = {
+				visible = "[GetVariableSystem.HasValue('mp_select_tab', 'east_asia')]"
+				blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/east_asia.png" }
+				blockoverride "countries" {
+					mp_select_country_map = {
+						datacontext = "[GetCountry('CHI')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/CHI.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('TKG')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/TKG.png" }
+					}
+				}
+			}
+			mp_select_tab = {
+				visible = "[GetVariableSystem.HasValue('mp_select_tab', 'south_america')]"
+				blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/south_america.png" }
+				blockoverride "countries" {
+					mp_select_country_map = {
+						datacontext = "[GetCountry('LFP')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/LFP.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('AR1 ')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/AR1.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('BRZ ')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/BRZ.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('PR1')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/PR1.png" }
+					}
+				}
+			}
+			mp_select_tab = {
+				visible = "[GetVariableSystem.HasValue('mp_select_tab', 'central_america')]"
+				blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/central_america.png" }
+				blockoverride "countries" {
+					mp_select_country_map = {
+						datacontext = "[GetCountry('VNZ')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/VNZ.png" }
+					}
+					mp_select_country_map = {
+						datacontext = "[GetCountry('MEX')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/MEX.png" }
+					}
+				}
+			}
+			mp_select_tab = {
+				visible = "[GetVariableSystem.HasValue('mp_select_tab', 'north_america')]"
+				blockoverride "map_texture" { texture = "gfx/interface/images/mp_select/maps/north_america.png" }
+				blockoverride "countries" {
+					mp_select_country_map = {
+						datacontext = "[GetCountry('USA')]"
+						blockoverride "texture" { texture = "gfx/interface/images/mp_select/countries/USA.png" }
+					}
+				}
 			}
 			widget = {
-				size = { 0 40 }
-				layoutpolicy_horizontal = expanding
-				using = MainWindowHeaderBoxCenteredNew
-				visible = "[IsLocalPlayerReplayingCommands]"
-				blockoverride "Title_text" { text = "THE_WORLD_CATCHING_UP" }
-				blockoverride "White_buttons" { visible = no }
-				tooltip = "THE_WORLD_TOOLTIP"
+				name = "3Dmodel"
+				size = { @windowwidth @windowheight }
+				parentanchor = center
+				frame_select_window = {
+					size = { 100% 100% }
+				}
 			}
-			
-			vbox = {
-				layoutpolicy_vertical = expanding
-				layoutpolicy_horizontal = expanding
-				margin_widget = {
-					layoutpolicy_horizontal = expanding
-					size = { 0 100 }
-					margin_left = 14
-					margin_top = 20
-					flowcontainer = {
-						spacing = 4
-						button = {
-							shortcut = "map_mode_1"
-							using = droptargetbutton
-							blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/terrain.dds" } 
-							onclick = "[SetMapMode('terrain')]"
-							tooltip = "MAPMODE_TERRAIN"
-						}
-						
-						button = {
-							shortcut = "map_mode_2"
-							using = droptargetbutton
-							blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/simple_terrain.dds" } 
-							onclick = "[SetMapMode('simple_terrain')]"
-							tooltip = "simple_terrain_MAPMODE_DESC"
-						}
-						
-						button = {
-							shortcut = "map_mode_3"
-							using = droptargetbutton
-							blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/political.dds" } 
-							onclick = "[SetMapMode('political')]"
-							tooltip = "MAPMODE_POLITICAL"
-						}
-						
-						button = {
-							shortcut = "map_mode_4"
-							using = droptargetbutton
-							blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/culture.dds" } 
-							onclick = "[SetMapMode('culture')]"
-							tooltip = "culture_MAPMODE_DESC"
-						}
-						
-						button = {
-							shortcut = "map_mode_5"
-							using = droptargetbutton
-							blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/religion.dds" } 
-							onclick = "[SetMapMode('religion')]"
-							tooltip = "religion_MAPMODE_DESC"
-						}
-						
-						button = {
-							shortcut = "map_mode_6"
-							using = droptargetbutton
-							blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/tradegoods.dds" } 
-							onclick = "[SetMapMode('tradegoods')]"
-							tooltip = "tradegoods_MAPMODE_DESC"
-						}
-						
-						button = {
-							shortcut = "map_mode_7"
-							using = droptargetbutton
-							blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/civilization.dds" } 
-							onclick = "[SetMapMode('civilization')]"
-							tooltip = "civilization_MAPMODE_DESC"
-						}
-						
-						button = {
-							shortcut = "map_mode_8"
-							using = droptargetbutton
-							blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/government.dds" } 
-							onclick = "[SetMapMode('government')]"
-							tooltip = "government_MAPMODE_DESC"
-						}
-						
-						#button = {
-						#	shortcut = "map_mode_9"
-						#	using = droptargetbutton
-						#	blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/players.dds" } 
-						#	onclick = "[SetMapMode('allplayers')]"
-						#	tooltip = "MAPMODE_PLAYERS"
-						#}
-
-						button = {
-							shortcut = "map_mode_9"
-							using = droptargetbutton
-							blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/climate.dds" } 
-							onclick = "[SetMapMode('climate')]"
-							tooltip = "climate_MAPMODE"
-						}
-
-						button = {
-							shortcut = "map_mode_10"
-							using = droptargetbutton
-							blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/population.dds" } 
-							onclick = "[SetMapMode('population')]"
-							tooltip = "population_MAPMODE_DESC"
-						}
-
-						button = {
-							shortcut = "map_mode_11"
-							using = droptargetbutton
-							blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/diplomacy.dds" } 
-							onclick = "[SetMapMode('diplomacy')]"
-							tooltip = "diplomacy_MAPMODE_DESC"
-						}
-						
-					}
-
-					button_round_inverted = {
-						name = "find_province"
-						size = { 40 40 }
-						parentanchor = right
-						position = { -10 -4 } 
-						tooltip = "MAPACTION_FIND_PROVINCE"
-						blockoverride "Icon"
-						{ 
-							texture = "gfx/interface/base_parts/find.dds"
-						}
-						blockoverride "On_click"
-						{ 
-							onclick = "[OnFindProvince]"
-							shortcut = "find_province"
-						}													
-					}
+		}
+		mp_select_tab_top = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'europe')]"
+			blockoverride "countries" {
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('GBR')]"
+					blockoverride "position" { position = { 480 240 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/GBR.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('PRU')]"
+					blockoverride "position" { position = { 810 275 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/PRU.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('RUS')]"
+					blockoverride "position" { position = { 1200 200 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/RUS.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('FRA')]"
+					blockoverride "position" { position = { 580 405 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/FRA.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('NED')]"
+					blockoverride "position" { position = { 630 300 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/NED.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('AUS')]"
+					blockoverride "position" { position = { 810 400 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/AUS.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('SAR')]"
+					blockoverride "position" { position = { 675 490 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/SAR.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('SPA')]"
+					blockoverride "position" { position = { 460 610 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/SPA.dds" }
+				}
+			}
+		}
+		mp_select_tab_top = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'middle_east')]"
+			blockoverride "countries" {
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('TUR')]"
+					blockoverride "position" { position = { 550 100 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/TUR.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('EGY')]"
+					blockoverride "position" { position = { 570 330 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/TUR.dds" }
+				}
+			}
+		}
+		mp_select_tab_top = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'south_asia')]"
+			blockoverride "countries" {
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('EIC')]"
+					blockoverride "position" { position = { 450 420 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/EIC.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('KHL')]"
+					blockoverride "position" { position = { 390 80 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/KHL.dds" }
+				}
+			}
+		}
+		mp_select_tab_top = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'east_asia')]"
+			blockoverride "countries" {
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('CHI')]"
+					blockoverride "position" { position = { 700 220 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/CHI.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('TKG')]"
+					blockoverride "position" { position = { 1120 310 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/TKG.dds" }
+				}
+			}
+		}
+		mp_select_tab_top = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'south_america')]"
+			blockoverride "countries" {
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('LFP')]"
+					blockoverride "position" { position = { 885 665 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/LFP.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('AR1')]"
+					blockoverride "position" { position = { 730 580 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/AR1 .dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('BRZ')]"
+					blockoverride "position" { position = { 1050 220 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/BRZ .dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('PR1')]"
+					blockoverride "position" { position = { 600 200 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/PR1.dds" }
+				}
+			}
+		}
+		mp_select_tab_top = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'central_america')]"
+			blockoverride "countries" {
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('VNZ')]"
+					blockoverride "position" { position = { 1070 505 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/VNZ.dds" }
+				}
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('MEX')]"
+					blockoverride "position" { position = { 450 280 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/MEX.dds" }
+				}
+			}
+		}
+		mp_select_tab_top = {
+			visible = "[GetVariableSystem.HasValue('mp_select_tab', 'north_america')]"
+			blockoverride "countries" {
+				mp_select_country_map_coa = {
+					datacontext = "[GetCountry('USA')]"
+					blockoverride "position" { position = { 850 330 } }
+					blockoverride "texture_coa" { texture = "gfx/interface/images/mp_select/coa/USA.dds" }
 				}
 			}
 		}
 	}
-	
-	window = {
-		position = { 340 16 }
-		
+	sharp_base_window_clear = {
+		size = { 300 100% }
+		movable = no
+		parentanchor = left
+		visible = "[Not(GetVariableSystem.HasValue('mp_start_screen', 'start'))]"
+		state = {
+			name = "show_mp_left_panel"
+			animation = { position = { 0 0 } }
+			bezier = { 0.44 1.11 0.74 0.91 }
+			trigger_when = "[GetVariableSystem.HasValue('mp_left_panel', 'show')]"
+			duration = 0.2
+		}
+		state = {
+			name = "hide_mp_left_panel"
+			animation = { position = { -300 0 } }
+			bezier = { 0.44 0.2 0.74 0.91 }
+			trigger_when = "[GetVariableSystem.HasValue('mp_left_panel', 'hide')]"
+			duration = 0.2
+		}
+		textbox = {
+			text = "JOMINI_MULTIPLAYER_GUI_GAME_VERSION"
+			tooltip = "JOMINI_MULTIPLAYER_GUI_GAME_VERSION_TOOLTIP"
+			autoresize = yes
+			using = BaseFontS
+			using = Default_FontColor
+			position = { 5 3 }
+			alpha = 0.5
+		}
 		flowcontainer = {
-			ignoreinvisible = yes
-			visible = "[Not(IsSaveGame)]"
-			spacing = 4
+			margin = { 10 0 }
 			direction = vertical
-			resizeparent = yes
+			margin_top = 20
+			textbox = {
+				size = { 280 40 }
+				align = center
+				elide = right
+				using = HeaderFont
+				using = Highlight_FontColor
+				fontsize_min = 14
+				text = "SELECT_TITLE_SULLA_V"
+			}
+			flowcontainer = {
+				ignoreinvisible = yes
+				direction = vertical
+				spacing = 5
+				mp_any_country_button = {
+					blockoverride "Text" { text = "mp_recommended_countries" }
+					visible = no
+					state = {
+						name = show_mp_window
+						on_start = "[PdxGuiWidget.Hide]"
+					}
+					state = {
+						name = hide_mp_window
+						on_start = "[PdxGuiWidget.Show]"
+					}
+					blockoverride "On_click" {
+						onclick = "[PdxGuiTriggerAllAnimations('show_mp_window')]"
+					}
+				}
+				mp_any_country_button = {
+					blockoverride "Text" { text = "mp_any_country" }
+					state = {
+						name = show_mp_window
+						on_start = "[PdxGuiWidget.Show]"
+					}
+					state = {
+						name = hide_mp_window
+						on_start = "[PdxGuiWidget.Hide]"
+					}
+					blockoverride "On_click" {
+						onclick = "[PdxGuiTriggerAllAnimations('hide_mp_window')]"
+						onclick = "[PanToCountry(LobbyView.GetSelectedPlayable.GetCountry.Self)]"
+						#onclick = "[PanToCountry(GetCountry('GBR').Self)]"
+					}
+				}
+				widget = { size = { 280 30 } }
+				category_drop = {
+					size = { 280 32 }
+					blockoverride "Text" { text = "mp_select_tab_europe" }
+					blockoverride "On_click" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'europe')]" }
+					blockoverride "Right" { visible = "[GetVariableSystem.HasValue('mp_select_tab', 'europe')]" }
+					blockoverride "Down" { visible = "[Not(GetVariableSystem.HasValue('mp_select_tab', 'europe'))]" }
+				}
+				flowcontainer = {
+					visible = "[GetVariableSystem.HasValue('mp_select_tab', 'europe')]"
+					direction = vertical
+					spacing = 5
+					mp_select_button = {
+						datacontext = "[GetCountry('GBR')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('PRU')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('RUS')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('FRA')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('NED')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('AUS')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('SAR')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('SPA')]"
+					}
+				}
+				category_drop = {
+					size = { 280 32 }
+					blockoverride "Text" { text = "mp_select_tab_middle_east" }
+					blockoverride "On_click" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'middle_east')]" }
+					blockoverride "Right" { visible = "[GetVariableSystem.HasValue('mp_select_tab', 'middle_east')]" }
+					blockoverride "Down" { visible = "[Not(GetVariableSystem.HasValue('mp_select_tab', 'middle_east'))]" }
+				}
+				flowcontainer = {
+					visible = "[GetVariableSystem.HasValue('mp_select_tab', 'middle_east')]"
+					direction = vertical
+					spacing = 5
+					mp_select_button = {
+						datacontext = "[GetCountry('TUR')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('EGY')]"
+					}
+				}
+				category_drop = {
+					size = { 280 32 }
+					blockoverride "Text" { text = "mp_select_tab_south_asia" }
+					blockoverride "On_click" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'south_asia')]" }
+					blockoverride "Right" { visible = "[GetVariableSystem.HasValue('mp_select_tab', 'south_asia')]" }
+					blockoverride "Down" { visible = "[Not(GetVariableSystem.HasValue('mp_select_tab', 'south_asia'))]" }
+				}
+				flowcontainer = {
+					visible = "[GetVariableSystem.HasValue('mp_select_tab', 'south_asia')]"
+					direction = vertical
+					spacing = 5
+					mp_select_button = {
+						datacontext = "[GetCountry('EIC')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('KHL')]"
+					}
+				}
+				category_drop = {
+					size = { 280 32 }
+					blockoverride "Text" { text = "mp_select_tab_east_asia" }
+					blockoverride "On_click" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'east_asia')]" }
+					blockoverride "Right" { visible = "[GetVariableSystem.HasValue('mp_select_tab', 'east_asia')]" }
+					blockoverride "Down" { visible = "[Not(GetVariableSystem.HasValue('mp_select_tab', 'east_asia'))]" }
+				}
+				flowcontainer = {
+					visible = "[GetVariableSystem.HasValue('mp_select_tab', 'east_asia')]"
+					direction = vertical
+					spacing = 5
+					mp_select_button = {
+						datacontext = "[GetCountry('CHI')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('TKG')]"
+					}
+				}
+				category_drop = {
+					size = { 280 32 }
+					blockoverride "Text" { text = "mp_select_tab_south_america" }
+					blockoverride "On_click" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'south_america')]" }
+					blockoverride "Right" { visible = "[GetVariableSystem.HasValue('mp_select_tab', 'south_america')]" }
+					blockoverride "Down" { visible = "[Not(GetVariableSystem.HasValue('mp_select_tab', 'south_america'))]" }
+				}
+				flowcontainer = {
+					visible = "[GetVariableSystem.HasValue('mp_select_tab', 'south_america')]"
+					direction = vertical
+					spacing = 5
+					mp_select_button = {
+						datacontext = "[GetCountry('LFP')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('AR1')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('BRZ')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('PR1')]"
+					}
+				}
+				category_drop = {
+					size = { 280 32 }
+					blockoverride "Text" { text = "mp_select_tab_central_america" }
+					blockoverride "On_click" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'central_america')]" }
+					blockoverride "Right" { visible = "[GetVariableSystem.HasValue('mp_select_tab', 'central_america')]" }
+					blockoverride "Down" { visible = "[Not(GetVariableSystem.HasValue('mp_select_tab', 'central_america'))]" }
+				}
+				flowcontainer = {
+					visible = "[GetVariableSystem.HasValue('mp_select_tab', 'central_america')]"
+					direction = vertical
+					spacing = 5
+					mp_select_button = {
+						datacontext = "[GetCountry('VNZ')]"
+					}
+					mp_select_button = {
+						datacontext = "[GetCountry('MEX')]"
+					}
+				}
+				category_drop = {
+					size = { 280 32 }
+					blockoverride "Text" { text = "mp_select_tab_north_america" }
+					blockoverride "On_click" { onclick = "[GetVariableSystem.Set('mp_select_tab', 'north_america')]" }
+					blockoverride "Right" { visible = "[GetVariableSystem.HasValue('mp_select_tab', 'north_america')]" }
+					blockoverride "Down" { visible = "[Not(GetVariableSystem.HasValue('mp_select_tab', 'north_america'))]" }
+				}
+				flowcontainer = {
+					visible = "[GetVariableSystem.HasValue('mp_select_tab', 'north_america')]"
+					direction = vertical
+					spacing = 5
+					mp_select_button = {
+						datacontext = "[GetCountry('USA')]"
+					}	
+				}
+			}
+		}
+		margin_widget = {
+			size = { 280 44 }
+			parentanchor = hcenter|bottom
+			position = { 0 -12 }
+			enabled = "[LobbyView.CanGoBack]"
+			tooltip = "[LobbyView.GetGoBackToolTip]"
+			frontend_button = {
+				size = { 100% 100% }
+				blockoverride "Text" { text = "BACK" }
+				blockoverride "On_click" { 
+					onclick = "[SetPreparationLobby('(bool)no')]"
+					onclick = "[LobbyView.GoBack]"
+					shortcut = "close_window"
+				}
+			}
 		}
 	}
-	
-	base_window = {
-		size = { 520 148 }
-		parentanchor = bottom|hcenter
-		filter_mouse = left|right
-		alwaystransparent = no
-		blockoverride "BackgroundGradient" { visible = no }
-		visible = "[And(IsSaveGame, HasMigratingNations)]"
-		vbox = {
-			margin_top = 8
-			top_window_header_for_layout_centered = {   
-				layoutpolicy_horizontal = expanding
-				blockoverride "Title_text" { text = "MIGRATORY_NATIONS" }
-				blockoverride "White_buttons" {}
+	flowcontainer = {
+		position = { 300 0 }
+		margin = { 5 5 }
+		direction = vertical
+		ignoreinvisible = yes
+		spacing = 5
+		state = {
+			name = "show_mp_left_panel"
+			animation = { position = { 300 0 } }
+			bezier = { 0.44 1.11 0.74 0.91 }
+			trigger_when = "[GetVariableSystem.HasValue('mp_left_panel', 'show')]"
+			duration = 0.2
+		}
+		state = {
+			name = "hide_mp_left_panel"
+			animation = { position = { 0 0 } }
+			bezier = { 0.44 0.2 0.74 0.91 }
+			trigger_when = "[GetVariableSystem.HasValue('mp_left_panel', 'hide')]"
+			duration = 0.2
+		}
+		icon_button_square = {
+			size = { 44 44 }
+			visible = "[Not(GetVariableSystem.HasValue('mp_left_panel', 'hide'))]"
+			tooltip = "hide_mp_left_panel"
+			using = tooltip_se
+			blockoverride "On_click" 
+			{ 
+				onclick = "[GetVariableSystem.Set( 'mp_left_panel', 'hide' )]"
 			}
-			vbox = {
-				layoutpolicy_vertical = expanding
-				layoutpolicy_horizontal = expanding
-				margin_widget = {
-					layoutpolicy_horizontal = expanding
-					size = { 0 130 }
-					margin_top = 10
+			blockoverride "Icon"
+			{
+				size = { 28 28 }
+				using = white_background
+				modify_texture = {
+					texture = "gfx/interface/base_parts/left_arrow.dds"
+					blend_mode = alphamultiply   
+				}
+			}
+		}
+		icon_button_square = {
+			size = { 44 44 }
+			visible = "[GetVariableSystem.HasValue('mp_left_panel', 'hide')]"
+			tooltip = "show_mp_left_panel"
+			using = tooltip_se
+			blockoverride "On_click" 
+			{ 
+				onclick = "[GetVariableSystem.Set( 'mp_left_panel', 'show' )]"
+			}
+			blockoverride "Icon"
+			{
+				size = { 28 28 }
+				using = white_background
+				modify_texture = {
+					texture = "gfx/interface/base_parts/right_arrow.dds"
+					blend_mode = alphamultiply   
+				}
+			}
+		}
+		window = {
+			movable = no
+			visible = no
+			using = mp_base_animation
+			state = {
+				name = show_mp_window
+				on_start = "[PdxGuiWidget.Hide]"
+			}
+			state = {
+				name = hide_mp_window
+				on_start = "[PdxGuiWidget.Show]"
+			}
+			background = {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = shadow_background
+				margin = { 5 5 }
+				alpha = 0.5
+				modify_texture = {
+					texture = "gfx/interface/base_parts/button_square_dropshadow_x16y16bd.dds"
+					blend_mode = alphamultiply
+					spriteType = corneredtiled
+					spriteborder = { 8 8 }
+				}
+			}
+			background = {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = black_background
+				#margin = { -3 -3 }
+			}
+			flowcontainer = {
+				margin = { 3 3 }
+				direction = vertical
+				spacing = 2
+				resizeparent = yes
+				button = {
+					shortcut = "map_mode_1"
+					using = droptargetbutton
+					blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/terrain.dds" } 
+					onclick = "[SetMapMode('terrain')]"
+					tooltip = "MAPMODE_TERRAIN"
+				}
+				button = {
+					shortcut = "map_mode_2"
+					using = droptargetbutton
+					blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/simple_terrain.dds" } 
+					onclick = "[SetMapMode('simple_terrain')]"
+					tooltip = "simple_terrain_MAPMODE_DESC"
+				}
+				button = {
+					shortcut = "map_mode_3"
+					using = droptargetbutton
+					blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/political.dds" } 
+					onclick = "[SetMapMode('political')]"
+					tooltip = "MAPMODE_POLITICAL"
+				}
+				button = {
+					shortcut = "map_mode_4"
+					using = droptargetbutton
+					blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/culture.dds" } 
+					onclick = "[SetMapMode('culture')]"
+					tooltip = "culture_MAPMODE_DESC"
+				}
+				button = {
+					shortcut = "map_mode_5"
+					using = droptargetbutton
+					blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/religion.dds" } 
+					onclick = "[SetMapMode('religion')]"
+					tooltip = "religion_MAPMODE_DESC"
+				}
+				button = {
+					shortcut = "map_mode_6"
+					using = droptargetbutton
+					blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/tradegoods.dds" } 
+					onclick = "[SetMapMode('tradegoods')]"
+					tooltip = "tradegoods_MAPMODE_DESC"
+				}
+				button = {
+					shortcut = "map_mode_7"
+					using = droptargetbutton
+					blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/civilization.dds" } 
+					onclick = "[SetMapMode('civilization')]"
+					tooltip = "civilization_MAPMODE_DESC"
+				}
+				button = {
+					shortcut = "map_mode_8"
+					using = droptargetbutton
+					blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/government.dds" } 
+					onclick = "[SetMapMode('government')]"
+					tooltip = "government_MAPMODE_DESC"
+				}
+				#button = {
+				#	shortcut = "map_mode_9"
+				#	using = droptargetbutton
+				#	blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/players.dds" } 
+				#	onclick = "[SetMapMode('allplayers')]"
+				#	tooltip = "MAPMODE_PLAYERS"
+				#}
+				button = {
+					shortcut = "map_mode_9"
+					using = droptargetbutton
+					blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/climate.dds" } 
+					onclick = "[SetMapMode('climate')]"
+					tooltip = "climate_MAPMODE"
+				}
+				button = {
+					shortcut = "map_mode_10"
+					using = droptargetbutton
+					blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/population.dds" } 
+					onclick = "[SetMapMode('population')]"
+					tooltip = "population_MAPMODE_DESC"
+				}
+				button = {
+					shortcut = "map_mode_11"
+					using = droptargetbutton
+					blockoverride "IconTexture" { texture = "gfx/interface/icons/minimap/diplomacy.dds" } 
+					onclick = "[SetMapMode('diplomacy')]"
+					tooltip = "diplomacy_MAPMODE_DESC"
+				}
+				widget = { size = { 37 3 } }
+				button_round_inverted = {
+					name = "find_province"
+					size = { 37 37 }
+					tooltip = "MAPACTION_FIND_PROVINCE"
+					blockoverride "Icon"
+					{ 
+						texture = "gfx/interface/base_parts/find.dds"
+					}
+					blockoverride "On_click"
+					{ 
+						onclick = "[OnFindProvince]"
+						shortcut = "find_province"
+					}													
+				}
+			}
+		}
+	}
+	flowcontainer = {
+		parentanchor = bottom
+		position = { 300 0 }
+		margin = { 5 5 }
+		direction = vertical
+		ignoreinvisible = yes
+		state = {
+			name = "show_mp_left_panel"
+			animation = { position = { 300 0 } }
+			bezier = { 0.44 1.11 0.74 0.91 }
+			trigger_when = "[GetVariableSystem.HasValue('mp_left_panel', 'show')]"
+			duration = 0.2
+		}
+		state = {
+			name = "hide_mp_left_panel"
+			animation = { position = { 0 0 } }
+			bezier = { 0.44 0.2 0.74 0.91 }
+			trigger_when = "[GetVariableSystem.HasValue('mp_left_panel', 'hide')]"
+			duration = 0.2
+		}
+		icon_button_square = {
+			size = { 32 32 }
+			visible = "[LobbyView.ShouldShowEnabledDLCs]"
+			tooltip = "JOMINI_MULTIPLAYER_GUI_ENABLED_DLCS"
+			using = tooltip_se
+			blockoverride "On_click" 
+			{ 
+				enabled = "[LobbyView.HasEnabledDLCs]"
+				onclick = "[LobbyView.ToggleShowEnabledDLCs]"
+			}
+			blockoverride "Icon"
+			{
+				size = { 24 24 }
+				texture = "gfx/interface/icons/shared_icons/missing_dlc.dds"
+			}
+		}
+		icon_button_square = {
+			size = { 32 32 }
+			visible = "[Not(LobbyView.ShouldShowEnabledDLCs)]"
+			tooltip = "JOMINI_MULTIPLAYER_GUI_ENABLED_DLCS"
+			using = tooltip_se
+			blockoverride "On_click" 
+			{ 
+				enabled = "[LobbyView.HasEnabledDLCs]"
+				onclick = "[LobbyView.ToggleShowEnabledDLCs]"
+			}
+			blockoverride "Icon"
+			{
+				size = { 24 24 }
+				using = white_background
+				texture = "gfx/interface/icons/shared_icons/missing_dlc.dds"
+			}
+		}
+		widget = { size = { 32 5 } }
+		icon_button_square = {
+			size = { 32 32 }
+			visible = "[LobbyView.ShouldShowEnabledMods]"
+			tooltip = "JOMINI_MULTIPLAYER_GUI_ENABLED_MODS"
+			using = tooltip_se
+			blockoverride "On_click" 
+			{ 
+				enabled = "[LobbyView.HasEnabledMods]"
+				onclick = "[LobbyView.ToggleShowEnabledMods]"
+			}
+			blockoverride "Icon"
+			{
+				size = { 24 24 }
+				using = white_background
+				texture = "gfx/interface/icons/shared_icons/military_experience.dds"
+			}
+		}
+		icon_button_square = {
+			size = { 32 32 }
+			visible = "[Not(LobbyView.ShouldShowEnabledMods)]"
+			tooltip = "JOMINI_MULTIPLAYER_GUI_ENABLED_MODS"
+			using = tooltip_se
+			blockoverride "On_click" 
+			{ 
+				enabled = "[LobbyView.HasEnabledMods]"
+				onclick = "[LobbyView.ToggleShowEnabledMods]"
+			}
+			blockoverride "Icon"
+			{
+				size = { 24 24 }
+				using = white_background
+				texture = "gfx/interface/icons/shared_icons/military_experience.dds"
+			}
+		}
+	}
+	flowcontainer = {
+		parentanchor = bottom
+		position = { 340 0 }
+		ignoreinvisible = yes
+		direction = vertical
+		state = {
+			name = "show_mp_left_panel"
+			animation = { position = { 340 0 } }
+			bezier = { 0.44 1.11 0.74 0.91 }
+			trigger_when = "[GetVariableSystem.HasValue('mp_left_panel', 'show')]"
+			duration = 0.2
+		}
+		state = {
+			name = "hide_mp_left_panel"
+			animation = { position = { 40 0 } }
+			bezier = { 0.44 0.2 0.74 0.91 }
+			trigger_when = "[GetVariableSystem.HasValue('mp_left_panel', 'hide')]"
+			duration = 0.2
+		}
+		sharp_base_window = {
+			size = { 200 145 }
+			visible = "[LobbyView.ShouldShowEnabledDLCs]"
+			blockoverride "BackgroundGradient" { visible = no }
+			using = mp_base_animation
+			flowcontainer = {
+				margin = { 5 5 }
+				direction = vertical
+				spacing = 3
+				sub_header = {
+					size = { 190 32 }
+					blockoverride "Title_text" { text = "JOMINI_MULTIPLAYER_GUI_ENABLED_DLCS" }
+				}
+				scrollarea = {
+					size = { 185 100 }
+					scrollbarpolicy_horizontal = always_off
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
 					
-					dynamicgridbox = {
-						parentanchor = hcenter
-						position = { 0 6 }
-						size = { 300 300 }
-						flipdirection = yes
-						visible = "[And(IsSaveGame, HasMigratingNations)]"
-						datamodel = "[GetMigratingNations]"
-						
-						item = {
-							country_flag = {
-								tooltip = "[Country.GetName]"
-								
-								blockoverride "flag"
-								{
-									texture = "[Country.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
-									frame = "[Country.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
-									framesize = { 120 120 }
-								}
-								
-								blockoverride "size"
-								{
-									size = { 76 76 }
-								}
-								
-								blockoverride "click"
-								{
-									onclick = "[SetLobbyCountry(Country.GetCountry)]"
-									clicksound = "event:/SFX/UI/Province/sfx_ui_province_select"
-									oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
+					scrollwidget = {
+						flowcontainer = {
+							datamodel = "[LobbyView.GetEnabledDLCs]"
+							direction = vertical
+							margin = { 3 0 }
+							item = {
+								textbox = {
+									text = "[CString.GetString]"
+									autoresize = yes
+									using = BaseFontS
+									using = Default_FontColor
 								}
 							}
-						}	
+						}
+					}
+				}
+			}
+		}
+		sharp_base_window = {
+			size = { 200 145 }
+			visible = "[LobbyView.ShouldShowEnabledMods]"
+			blockoverride "BackgroundGradient" { visible = no }
+			using = mp_base_animation
+			flowcontainer = {
+				margin = { 5 5 }
+				direction = vertical
+				spacing = 3
+				sub_header = {
+					size = { 190 32 }
+					blockoverride "Title_text" { text = "JOMINI_MULTIPLAYER_GUI_ENABLED_MODS" }
+				}
+				scrollarea = {
+					size = { 185 100 }
+					scrollbarpolicy_horizontal = always_off
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+					
+					scrollwidget = {
+						flowcontainer = {
+							datamodel = "[LobbyView.GetEnabledMods]"
+							direction = vertical
+							margin = { 3 0 }
+							item = {
+								textbox = {
+									text = "[CString.GetString]"
+									autoresize = yes
+									using = BaseFontS
+									using = Default_FontColor
+								}
+							}
+						}
 					}
 				}
 			}
 		}
 	}
-	button = {
-		size = { 50 50 }
-		parentanchor = bottom
-		position = { 10 -10 }
-		tooltip = "show"
-		using = red_background
-		onclick = "[PdxGuiTriggerAllAnimations('show_mp_window')]"
-		visible = "[Not(GameIsMultiplayer)]"
+	widget = {
+		size = { 400 40 }
+		parentanchor = hcenter
+		using = MainWindowHeaderBoxCenteredNew
+		blockoverride "LineVisibility" { }
+		blockoverride "Title_text" { text = "CURRENT_DATE" }
+		blockoverride "White_buttons" { visible = no }
+		tooltip = "THE_WORLD_TOOLTIP"
 	}
-
-	mp_window_select = {
-		visible = "[Not(GameIsMultiplayer)]"
+	sharp_base_window = {
+		size = { 400 100% }
+		movable = no
+		parentanchor = right
+		using = mp_base_animation
+		visible = "[And( LobbyView.HasSelectedPlayable, Not(GetVariableSystem.HasValue('mp_start_screen', 'start')) )]"
+		datacontext = "[LobbyView.GetSelectedPlayable.GetCountry]"
+		widget = {
+			size = { 100% 150 }
+			background = {
+				shaderfile = "gfx/FX/pdxgui_default.shader"
+				using = black_background
+				alpha = 0.95
+				modify_texture = {
+					texture = "gfx/interface/base_parts/gradient_black.dds"
+					blend_mode = alphamultiply
+				}
+				modify_texture = {
+					texture = "gfx/interface/base_parts/background_x60bd_alpha_hard.dds"
+					blend_mode = alphamultiply
+					spriteType = Corneredtiled
+					spriteborder = { 60 60 }
+				}
+			}
+		}
+		flowcontainer = {
+			margin = { 10 10 }
+			direction = vertical
+			textbox = {
+				size = { 380 140 }
+				fontsize = 50
+				align = center
+				#font = NewHeaderFont
+				font = HeaderFont
+				using = Highlight_FontColor
+				text = "[LobbyView.GetSelectedPlayable.GetCountry.GetNameWithNoTooltip]"
+				multiline = yes
+			}
+			flowcontainer = {
+				parentanchor = hcenter
+				margin_bottom = 10
+				new_country_banner = {
+					parentanchor = vcenter
+					blockoverride "Size" { size = { 192 192 } }
+					blockoverride "On_click" { onclick = "[PanToCountry(Country.Self)]" }
+					blockoverride "Flag" {
+						texture = "[Country.AccessCoatOfArms.GetTexture('(int32)192','(int32)192')]"
+						frame = "[Country.AccessCoatOfArms.GetFrame('(int32)192','(int32)192')]"
+						framesize = { 192 192 }
+					}
+				}
+				flowcontainer = {
+					datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler]"
+					margin_right = 15
+					background = {
+						shaderfile = "gfx/FX/pdxgui_default.shader"
+						texture = "[GetCharacterBackgroundIconHuge( Character.Self, Character.GetLocation.GetTerrain )]"
+						spriteType = Corneredtiled
+						margin_top = 30
+						#margin_bottom = 5
+						modify_texture = {
+							texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
+							blend_mode = alphamultiply
+						}
+						modify_texture = {
+							texture = "gfx/interface/base_parts/gradient_black_flip.dds"
+							blend_mode = alphamultiply
+						}
+					}
+					widget = {
+						size = { 135 195 }
+						datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler]"
+						portrait_button = {
+							name = "monarchpic"
+							size = { 154 232 }
+							position = { 3 -18 }
+							#parentanchor = bottom|left
+							using = pt_button_large
+							pop_out = yes
+							#visible="[GovernmentView.GetPlayer.MakeScope.Var('monarch_character').IsSet]"
+							portrait_texture = "[Character.GetPortrait('default', 'looking_left')]"
+						}
+						widget = {
+							size = { 135 195 }
+							position = { 15 2 }
+							parentanchor = bottom|right
+							background = {
+								shaderfile = "gfx/FX/pdxgui_default.shader"
+								using = shadow_background
+								modify_texture = {
+									texture = "gfx/interface/base_parts/horizontal_gradient_stretch_inverted.dds"
+									blend_mode = alphamultiply
+								}
+								modify_texture = {
+									texture = "gfx/interface/base_parts/gradient_black_flip.dds"
+									blend_mode = alphamultiply
+								}
+							}
+						}
+						flowcontainer = {
+							parentanchor = bottom|right
+							position = { 15 2 }
+							ignoreinvisible = yes
+							spacing = 5
+							religion = {
+								blockoverride "size" { size = { 50 50 } }
+								blockoverride "datacontext" { datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetReligion]" }
+								tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetReligion.GetTooltip]"
+							}
+							modifier_icon = {
+								datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetHeritage.GetModifier]"
+								size = { 50 50 }
+								tooltipwidget = { 
+									heritage_pop_out = {
+										datacontext = "[LobbyView.GetSelectedPlayable.GetCountry.GetHeritage]"
+									}
+								}
+							}
+							icon_card = {
+								visible = "[GovernmentView.GetPlayer.GetGovernment.IsRepublic]"
+								size = { 40 40 }
+								parentanchor = bottom
+								blockoverride "Icon"
+								{
+									texture = "[GetPartyIcon( Character.GetParty )]"
+								}
+								block "PartyIconVisibility" 
+								{
+									visible = "[Character.ShowParty]"
+								}
+								tooltip = "[Character.GetPartyTooltip]"
+							}
+						}
+					}
+				}
+			}
+			textbox = {
+				align = top|right
+				size = { 380 40 }
+				using = HeaderFont
+				fontsize_min = 14
+				using = Default_FontColor
+				text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetNameWithNoTooltip]"
+				multiline = yes
+				elide = right
+			}
+			#sub_header = {
+			#	size = { 290 32 }
+			#	blockoverride "Title_text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRulerTitle]" }
+			#}
+			flowcontainer = {
+				parentanchor = hcenter
+				margin_top = 10
+				spacing = 5
+				icon_and_text = {
+					size = { 85 32 }
+					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/military.dds" }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetMartial]" }
+					tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetMartialToolTip]"
+				}
+				icon_and_text = {
+					size = { 85 32 }
+					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/civic.dds" }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetFinesse]" }
+					tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetFinesseToolTip]"
+				}
+				icon_and_text = {
+					size = { 85 32 }
+					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/oratory.dds" }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetCharisma]" }
+					tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetCharismaToolTip]"
+				}
+				icon_and_text = {
+					size = { 85 32 }
+					blockoverride "Icon" { texture = "gfx/interface/icons/shared_icons/religious.dds" }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetZeal]" }
+					tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetRuler.GetZealToolTip]"
+				}
+			}
+			flowcontainer = {
+				margin_top = 5
+				ignoreinvisible = yes
+				widget = { size = { 5 76 } } 
+				card_easy = { visible = "[EqualTo_CFixedPoint(GuiScope.SetRoot(Country.MakeScope).ScriptValue('MP_card_easy'), '(CFixedPoint)1')]" }
+				card_medium = { visible = "[EqualTo_CFixedPoint(GuiScope.SetRoot(Country.MakeScope).ScriptValue('MP_card_medium'), '(CFixedPoint)1')]" }
+				card_hard = { visible = "[EqualTo_CFixedPoint(GuiScope.SetRoot(Country.MakeScope).ScriptValue('MP_card_hard'), '(CFixedPoint)1')]" }
+				card_the_concert_of_europe = { visible = "[EqualTo_CFixedPoint(GuiScope.SetRoot(Country.MakeScope).ScriptValue('MP_card_concert_of_europe'), '(CFixedPoint)1')]" }
+				card_islamic_empires = { visible = "[EqualTo_CFixedPoint(GuiScope.SetRoot(Country.MakeScope).ScriptValue('MP_card_islamic_empires'), '(CFixedPoint)1')]" }
+				card_sphere_of_china = { visible = "[EqualTo_CFixedPoint(GuiScope.SetRoot(Country.MakeScope).ScriptValue('MP_card_sphere_of_china'), '(CFixedPoint)1')]" }
+				card_revolutionary_states = { visible = "[EqualTo_CFixedPoint(GuiScope.SetRoot(Country.MakeScope).ScriptValue('MP_card_revolutionary_states'), '(CFixedPoint)1')]" }
+				card_independence_movements = { visible = "[EqualTo_CFixedPoint(GuiScope.SetRoot(Country.MakeScope).ScriptValue('MP_card_independence_movements'), '(CFixedPoint)1')]" }
+			}
+			widget = {
+				size = { 380 32 }
+				sub_header = {
+					size = { 100% 32 }
+					blockoverride "Title_text" { text = "LOBBY_LABEL_POPULATION" }
+					tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulationHeaderToolTip]"
+				}
+			}
+			flowcontainer = {
+				spacing = 5
+				margin = { 5 0 }
+				margin_top = 10
+				mp_population_widget = {
+					blockoverride "Tooltip" { tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetOwnedProvinceTooltip]" }
+					blockoverride "Icon" { using = icon_local }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetOwnedProvinceCount]" }
+				}
+				mp_population_widget = {
+					blockoverride "Tooltip" { tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildTotalPopulationToolTip]" }
+					blockoverride "Icon" { using = icon_population }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetTotalPopulation]" }
+				}
+				mp_population_widget = {
+					blockoverride "Tooltip" { tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('upper_strata')]" }
+					blockoverride "Icon" { using = icon_pop_upper_strata }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('upper_strata')]" }
+				}
+				mp_population_widget = {
+					blockoverride "Tooltip" { tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('middle_strata')]" }
+					blockoverride "Icon" { using = icon_pop_middle_strata }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('middle_strata')]" }
+				}
+				mp_population_widget = {
+					blockoverride "Tooltip" { tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('proletariat')]" }
+					blockoverride "Icon" { using = icon_pop_proletariat }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('proletariat')]" }
+				}
+				mp_population_widget = {
+					blockoverride "Tooltip" { tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('lower_strata')]" }
+					blockoverride "Icon" { using = icon_pop_lower_strata }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('lower_strata')]" }
+				}
+				mp_population_widget = {
+					blockoverride "Tooltip" { tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('indentured')]" }
+					blockoverride "Icon" { using = icon_pop_indentured }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('indentured')]" }
+				}
+				mp_population_widget = {
+					blockoverride "Tooltip" { tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('tribesmen')]" }
+					blockoverride "Icon" { using = icon_pop_tribal }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('tribesmen')]" }
+				}
+				mp_population_widget = {
+					blockoverride "Tooltip" { tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.BuildPopulationToolTip('slaves')]" }
+					blockoverride "Icon" { using = icon_pop_slaves }
+					blockoverride "Text" { text = "[LobbyView.GetSelectedPlayable.GetCountry.GetPopulation('slaves')]" }
+				}				
+			}
+			textbox = {
+				size = { 380 40 }
+				align = hcenter
+				elide = right
+				using = HeaderFont
+				using = Highlight_FontColor
+				fontsize_min = 14
+				text = "mp_description"
+			}
+			scrollarea = {
+				size = { 380 180 }
+				scrollbarpolicy_horizontal = always_off
+				scrollbar_vertical = {
+					using = VerticalScrollBar
+				}
+				
+				scrollwidget = {
+					textbox = {
+						size = { 100% 100% }
+						using = BaseFontS
+						using = Default_FontColor
+						parentanchor = top|left
+						autoresize = yes
+						align = hcenter|top
+						multiline = yes
+						minimumsize = { 380 -1 }
+						maximumsize = { 380 -1 }
+						text = "[Country.Custom('mp_custom_desc_loc')]"
+					}
+				}
+			}
+			sub_header_v = {   
+				size = { 380 180 }
+				blockoverride "Title_text" { text = "LOBBY_LABEL_DIPLOMACY" }
+				blockoverride "Max_text_width" { max_width = 230 }
+				widget = {
+					size = { 100% 32 }
+					tooltip = "[LobbyView.GetSelectedPlayable.GetCountry.GetDiplomacyHeaderToolTip]"
+				}
+				scrollarea = {
+					size = { 100% 136 }
+					position = { 0 38 }
+					using = VerticalScrollAreaCutOff
+					scrollbar_vertical = {
+						using = VerticalScrollBar
+					}
+					scrollbarpolicy_horizontal = always_off
+					scrollwidget = {
+						fixedgridbox = {
+							name = "diplomatic_relations"
+							size = { 100% 100% }
+							addrow = 45
+							addcolumn = 300
+							
+							item = {
+								flowcontainer = {
+									spacing = 5
+									
+									widget = {
+										size = { 40 40 }
+										icon = {
+											texture = "[RelationTypeItem.AccessIcon]"
+											tooltip = "[RelationTypeItem.GetToolTip]"
+											size = { 30 30 }
+											parentanchor = center
+										}
+									}
+									
+									overlappingitembox = {
+										datamodel = "[RelationTypeItem.GetRelations]"
+										size = { 300 40 }
+										spacing = 5
+										
+										item = {
+											margin_widget = {
+												size = { 35 35 }
+												margin = { 8 5 }
+												new_country_flag = {
+													tooltip = "[RelationDescItem.GetToolTip]"
+													datacontext = "[RelationDescItem.GetCountry]"
+													blockoverride "Size" { size = { 30 30 } }
+													blockoverride "On_click"
+													{
+														onclick = "[RelationDescItem.OnClick]"
+													}
+													blockoverride "Flag" {
+														texture = "[Country.AccessCoatOfArms.GetTexture('(int32)32','(int32)32')]"
+														frame = "[Country.AccessCoatOfArms.GetFrame('(int32)32','(int32)32')]"
+														framesize = { 32 32 }
+													}
+													blockoverride "FlagOverlord" {
+														texture = "[Country.GetOverlord.AccessCoatOfArms.GetTexture('(int32)32','(int32)32')]"
+														frame = "[Country.GetOverlord.AccessCoatOfArms.GetFrame('(int32)32','(int32)32')]"
+														framesize = { 32 32 }
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		flowcontainer = {
+			margin = { 10 10 }
+			parentanchor = bottom
+			position = { 0 -2 }
+			icon_button_square = {
+				size = { 44 44 }
+				tooltip = "JOMINI_MULTIPLAYER_GUI_OBSERVE_TOOLTIP"
+				using = tooltip_se
+				blockoverride "On_click" 
+				{ 
+					onclick = "[LobbyView.ToggleObserve]"
+				}
+				blockoverride "Icon"
+				{
+					size = { 28 28 }
+					texture = "gfx/interface/icons/diplomatic_stances/trading_stance.dds"
+				}
+			}
+			margin_widget = {
+				size = { 336 44 }
+				enabled = "[LobbyView.CanGoBack]"
+				tooltip = "[LobbyView.GetGoBackToolTip]"
+				frontend_button = {
+					size = { 100% 100% }
+					blockoverride "Text" { text = "JOMINI_MULTIPLAYER_GUI_START" }
+					blockoverride "On_click" { 
+						onclick = "[GetVariableSystem.Set('mp_start_screen', 'start')]"
+					}
+				}
+			}
+		}
+	}
+	flowcontainer = {
+		position = { -398 0 }
+		parentanchor = right|bottom
+		margin = { 5 5 }
+		direction = vertical
+		ignoreinvisible = yes
+		icon_button_square = {
+			size = { 44 44 }
+			visible = "[Not(GetVariableSystem.HasValue('mp_game_configuration_panel', 'show'))]"
+			tooltip = "show_mp_game_configuration_panel"
+			using = tooltip_se
+			blockoverride "On_click" 
+			{ 
+				onclick = "[GetVariableSystem.Set( 'mp_game_configuration_panel', 'show' )]"
+			}
+			blockoverride "Icon"
+			{
+				size = { 28 28 }
+				using = white_background
+				modify_texture = {
+					texture = "gfx/interface/base_parts/settings.dds"
+					blend_mode = alphamultiply   
+				}
+			}
+		}
+		icon_button_square = {
+			size = { 44 44 }
+			visible = "[GetVariableSystem.HasValue('mp_game_configuration_panel', 'show')]"
+			tooltip = "hide_mp_game_configuration_panel"
+			using = tooltip_se
+			blockoverride "On_click" 
+			{ 
+				onclick = "[GetVariableSystem.Set( 'mp_game_configuration_panel', 'hide' )]"
+			}
+			blockoverride "Icon"
+			{
+				size = { 28 28 }
+				using = white_background
+				modify_texture = {
+					texture = "gfx/interface/base_parts/settings.dds"
+					blend_mode = alphamultiply   
+				}
+			}
+		}
 	}
 	widget = {
 		size = { 100% 100% }
 		visible = "[Not(GameIsMultiplayer)]"
-		mp_start_screen = {
-		}
+		mp_start_screen = { }
 	}
 }
 
-JominiLobbyViewEndPreparationConfirmation = {
-	blockoverride "properties"
-	{
-		modal = yes
-		modality = all
-		
-		size = { 300 200 }
-		parentanchor = center
-		widgetanchor = center
-	}
-	
-	blockoverride "content"
-	{
-		textbox = {
-			name = "info"
-			size = { 100% 50% }
-			multiline = yes
-			align = center|center
-			text = "JOMINI_MULTIPLAYER_GUI_CONFIRMATION"
-		}
-		
-		JominiLobbyViewButton = {
-			onclick = "[EndPrepConfirm.Cancel]"
-			text = "JOMINI_MULTIPLAYER_GUI_CANCEL"
+widget = {
+	name = "JominiMultiplayerEndPreparationConfirmation"
 
-			blockoverride "buttonstyle" {
-				size = { 50% 19.999998% }
-				parentanchor = bottom|left
-				widgetanchor = bottom|left
-				texture = "gfx/editor_gui/editor_button.dds"
-				gfxtype = framedbuttongfx
-				spriteType = CorneredStretched
-				spriteborder = { 4 4 }
-				effectname = "NoHighlight"
-				framesize = { 16 16 }
-				upframe = 1
-				downframe = 2
-				overframe = 3
-				disableframe = 4
-				intersectionmask = yes
-			}
-		}
-		
-		JominiLobbyViewButton = {
-			onclick = "[EndPrepConfirm.Confirm]"
-			text = "JOMINI_MULTIPLAYER_GUI_CONFIRM"
 
-			blockoverride "buttonstyle" {
-				size = { 50% 19.999998% }
-				parentanchor = bottom|right
-				widgetanchor = bottom|right
-				texture = "gfx/editor_gui/editor_button.dds"
-				gfxtype = framedbuttongfx
-				spriteType = CorneredStretched
-				spriteborder = { 4 4 }
-				effectname = "NoHighlight"
-				framesize = { 16 16 }
-				upframe = 1
-				downframe = 2
-				overframe = 3
-				disableframe = 4
-				intersectionmask = yes
-			}
-		}
-	}
 }
 
-JominiMultiplayerJoinRequest = {
-	blockoverride "joinrequest_background" {
-		minimumsize = { 300 300 }
+widget = {
+	name = "multiplayer_join_request_dialog"
 
-		background = {
-			using = flat_background_white
-			using = border_medium_torn_alpha
-			shaderfile = "gfx/FX/pdxgui_default.shader"
-			margin = { 6 10 }
-		}
 
-		#background = {
-		#	texture = "gfx/interface/tiles/marble_tile_l.dds"
-		#	spriteType = Corneredtiled
-		#	spriteborder = { 0 0 }
-		#	margin = { -6 -6 }
-		#	shaderfile = "gfx/FX/pdxgui_default.shader"
-		#}
-	}
-
-	blockoverride "buttonstyle" {
-		text = "Words.."
-		#gfxtype = buttongfx
-		#shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
-		
-		#clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_click"
-		#texture = "gfx/interface/tiles/marble_button_s.dds"
-		#spriteType = Corneredtiled
-		#spriteborder = { 60 0 }
-		#size = { 124 38 }
-		
-		#buttonText = {
-		#	textbox = {
-		#		parentanchor = bottom|hcenter
-		#		using = BaseFontM
-		#		using = Default_FontColor
-		#		autoresize = yes
-		#		position = { 0 -12 }
-		#	}
-		#}
-
-		size = { 124 28 }
-		using = DropShadow
-		using = button_tiled_texture
-		spriteType = Corneredtiled
-		spriteborder = { 200 200 }
-		gfxtype = framedbuttongfx
-		framesize = { 200 200 }
-		upframe = 1
-		overframe = 2
-		downframe = 3
-		disableframe = 4
-		#block "On_click" { }
-		maximumsize = { 999 28 }
-		clicksound = "event:/SFX/UI/Generic/2.0/sfx_ui_button_primary"
-		widget = {
-			name = "Decorations"
-			size = { 100% 100% }
-			background = {
-				spriteType = Corneredtiled
-				texture = "gfx/interface/base_parts/button_lines_brown.dds"
-				shaderfile = "gfx/FX/pdxgui_default.shader"
-				alpha = 0.5
-				spriteborder = { 22 0 }
-
-				modify_texture = {
-					name = "Decay"
-					texture = "gfx/interface/base_parts/button_lines_alpha.dds"
-					blend_mode = alphamultiply
-					spriteType = Corneredtiled
-					alpha = 0.4
-				}					
-			}
-			background = {
-				name = "side_pattern"
-				texture = "gfx/interface/base_parts/button_pattern.dds"
-				shaderfile = "gfx/FX/pdxgui_default.shader"
-				spriteType = Corneredtiled
-				spriteborder = { 24 0 }
-			}				
-		}
-		buttonText = {
-			textbox = {
-				parentanchor = bottom|hcenter
-				using = BaseFontM
-				autoresize = yes
-				position = { 0 -5 }
-			}
-		}
-	}
-
-	blockoverride "joinrequest_playername" {
-		margin_bottom = 8
-		size = { 180 20 }
-		text = "[PlayerJoinRequest.GetPlayerName]"
-		multiline = yes
-		#autoresize = yes
-		#layoutpolicy_horizontal = expanding
-		#layoutpolicy_vertical = expanding
-		using = BaseFontS
-		using = Default_FontColor
-	}
-
-	blockoverride "joinrequest_margins" {
-		margin_top = 32
-		margin_left = 32
-		margin_right = 32
-	}
-
-	blockoverride "joinrequest_font" {
-		using = BaseFontM
-		using = Default_FontColor
-	}
-
-	blockoverride "joinrequest_scrollarea_size" {
-		size = { 500 0 }
-	}
-
-	blockoverride "joinrequest_scrollbar" {
-		using = VerticalScrollBar
-	}
-
-	blockoverride "joinrequest_addrow" {
-		addrow = 40
-	}
 }
 
-JominiMultiplayerOosMessage = {
-	blockoverride "oos_background" {
-		minimumsize = { 400 300 }
+widget = {
+	name = "multiplayer_oos_message"
 
-		background = {
-			using = flat_background_white
-			using = border_medium_torn_alpha
-			shaderfile = "gfx/FX/pdxgui_default.shader"
-			margin = { 6 10 }
-		}
-	}
 
-	blockoverride "oos_item" {
-		layoutpolicy_horizontal = expanding
-
-		hbox = {
-			datacontext = "[OosData.GetPlayable.GetCountry]"
-			layoutpolicy_horizontal = expanding
-			spacing = 6
-
-			widget = {
-				size = { 100 110 }
-
-				country_flag = {
-					visible = "[Not( OosData.IsObserver )]"
-
-					blockoverride "flag" {
-						texture = "[Country.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
-						frame = "[Country.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
-						framesize = { 120 120 }
-						size = { 100 100 }
-					}
-
-					blockoverride "size"
-					{
-						size = { 100 100 }
-					}
-				}
-			}
-
-			vbox = {
-				layoutpolicy_horizontal = expanding
-				margin = { 6 2 }
-
-				textbox = {
-					text = "[Country.GetName]"
-					visible = "[Not( OosData.IsObserver )]"
-					autoresize = yes
-					layoutpolicy_horizontal = expanding
-					using = BaseFontS
-					using = Default_FontColor
-				}
-	
-				textbox = {
-					text = "JOMINI_MULTIPLAYER_GUI_OBSERVER"
-					visible = "[OosData.IsObserver]"
-					autoresize = yes
-					layoutpolicy_horizontal = expanding
-					using = BaseFontS
-					using = Default_FontColor
-				}
-
-				textbox = {
-					text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_PLAYER_NAME"
-					max_width = 490
-					autoresize = yes
-					layoutpolicy_horizontal = expanding
-					using = BaseFontS
-					using = Default_FontColor
-				}
-
-				textbox = {
-					text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_TYPE"
-					max_width = 490
-					autoresize = yes
-					layoutpolicy_horizontal = expanding
-					using = BaseFontS
-					using = Default_FontColor
-				}
-
-				textbox = {
-					text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_FOLDER"
-					max_width = 490
-					autoresize = yes
-					layoutpolicy_horizontal = expanding
-					using = BaseFontS
-					using = Default_FontColor
-					multiline = yes
-				}
-			}
-		}
-	}
-
-	blockoverride "oos_textbox" {
-		using = BaseFontS
-		using = Default_FontColor
-	}
-
-	blockoverride "oos_button" {
-		text = "Words.."
-		#gfxtype = buttongfx
-		#texture = "gfx/interface/tiles/text_button_tiles.dds"
-		#spriteType = Corneredtiled
-		#spriteborder = { 80 0 }
-		size = { 300 28 }
-		using = DropShadow
-		using = button_tiled_texture
-		spriteType = Corneredtiled
-		spriteborder = { 200 200 }
-		gfxtype = framedbuttongfx
-		framesize = { 200 200 }
-		upframe = 1
-		overframe = 2
-		downframe = 3
-		disableframe = 4
-		#block "On_click" { }
-		maximumsize = { 999 28 }
-		clicksound = "event:/SFX/UI/Generic/2.0/sfx_ui_button_primary"
-		widget = {
-			name = "Decorations"
-			size = { 100% 100% }
-			background = {
-				spriteType = Corneredtiled
-				texture = "gfx/interface/base_parts/button_lines_brown.dds"
-				shaderfile = "gfx/FX/pdxgui_default.shader"
-				alpha = 0.5
-				spriteborder = { 22 0 }
-
-				modify_texture = {
-					name = "Decay"
-					texture = "gfx/interface/base_parts/button_lines_alpha.dds"
-					blend_mode = alphamultiply
-					spriteType = Corneredtiled
-					alpha = 0.4
-				}					
-			}
-			background = {
-				name = "side_pattern"
-				texture = "gfx/interface/base_parts/button_pattern.dds"
-				shaderfile = "gfx/FX/pdxgui_default.shader"
-				spriteType = Corneredtiled
-				spriteborder = { 24 0 }
-			}				
-		}
-		buttonText = {
-			textbox = {
-				parentanchor = bottom|hcenter
-				using = BaseFontM
-				autoresize = yes
-				position = { 0 -5 }
-			}
-		}
-	}
-
-	########################################
-	###### OLD, KEEP FOR REFERENCE
-	########################################
-	#	background = {
-	#		texture = "gfx/interface/tiles/marble_tile_l.dds"
-	#		spriteType = Corneredtiled
-	#		spriteborder = { 0 0 }
-	#		margin = { -6 -6 }
-	#		shaderfile = "gfx/FX/pdxgui_default.shader"
-	#	}
-	#}
-
-	#blockoverride "oos_item" {
-	#	layoutpolicy_horizontal = expanding
-
-	#	hbox = {
-	#		datacontext = "[OosData.GetPlayable.GetCountry]"
-	#		layoutpolicy_horizontal = expanding
-
-	#		widget = {
-	#			size = { 120 120 }
-
-	#			country_flag = {
-	#				visible = "[Not( OosData.IsObserver )]"
-
-	#				blockoverride "flag" {
-	#					texture = "[Country.AccessCoatOfArms.GetTexture('(int32)120','(int32)120')]"
-	#					frame = "[Country.AccessCoatOfArms.GetFrame('(int32)120','(int32)120')]"
-	#					framesize = { 120 120 }
-	#				}
-	#			}
-	#		}
-
-	#		vbox = {
-	#			layoutpolicy_horizontal = expanding
-	#			margin = { 5 0 }
-
-	#			textbox = {
-	#				text = "[Country.GetName]"
-	#				visible = "[Not( OosData.IsObserver )]"
-	#				autoresize = yes
-	#					layoutpolicy_horizontal = expanding
-	#					using = MarbleButtonFontS
-	#				}
-	#
-	#			textbox = {
-	#				text = "JOMINI_MULTIPLAYER_GUI_OBSERVER"
-	#				visible = "[OosData.IsObserver]"
-	#				autoresize = yes
-	#				layoutpolicy_horizontal = expanding
-	#				using = MarbleButtonFontS
-	#			}
-
-	#			textbox = {
-	#				text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_PLAYER_NAME"
-	#				max_width = 490
-	#				autoresize = yes
-	#				layoutpolicy_horizontal = expanding
-	#				using = MarbleButtonFontS
-	#			}
-
-	#			textbox = {
-	#				text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_TYPE"
-	#				max_width = 490
-	#				autoresize = yes
-	#				layoutpolicy_horizontal = expanding
-	#				using = MarbleButtonFontS
-	#			}
-
-	#			textbox = {
-	#				text = "JOMINI_MULTIPLAYER_GUI_OOS_MESSAGE_FOLDER"
-	#				max_width = 490
-	#				autoresize = yes
-	#				layoutpolicy_horizontal = expanding
-	#				using = MarbleButtonFontS
-	#				multiline = yes
-	#			}
-	#		}
-	#	}
-	#}
-
-	#blockoverride "oos_textbox" {
-	#	using = MarbleButtonFontS
-	#}
-
-	#blockoverride "oos_button" {
-	#	text = "Words.."
-	#	gfxtype = buttongfx
-	#	shaderfile = "gfx/FX/pdxgui_pushbutton.shader"
-	#	oversound = "event:/SFX/UI/Generic/sfx_ui_generic_mouse_over"
-	#	clicksound = "event:/SFX/UI/Generic/sfx_ui_generic_click"
-	#	texture = "gfx/interface/tiles/text_button_tiles.dds"
-	#	spriteType = Corneredtiled
-	#	spriteborder = { 80 0 }
-	#	size = { 300 46 }
-
-	#	buttonText = {
-	#		textbox = {
-	#			parentanchor = bottom|hcenter
-	#			using = MarbleButtonFont
-	#			autoresize = yes
-	#			position = { 0 -16 }
-	#		}
-	#	}
-	#}
 }

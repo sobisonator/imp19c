@@ -1,4 +1,4 @@
-save_selected_province = {
+﻿save_selected_province = {
     # Save the selected province as a variable in the player scope to allow scoping to it from province-specific objects with data types unable to reference province, such as buildings 
     scope = province
     effect = {
@@ -1258,24 +1258,31 @@ DIPLO_make_local_diplomatic_play_list = {
             clear_variable_list = local_area_diplomatic_plays
         }
 
-        every_in_global_list = {
-            variable = global_all_diplomatic_plays
+        if = {
             limit = {
-                # Target area province is in the same area as the given province
-                var:play_target_area = {
-                    area = scope:player.var:selected_province.area
+                scope:player = {
+                    has_variable = selected_province
                 }
             }
-
-            save_scope_as = diplomatic_play_to_add
-
-            scope:player = {
-                add_to_variable_list = {
-                    name = local_area_diplomatic_plays
-                    target = scope:diplomatic_play_to_add
+            every_in_global_list = {
+                variable = global_all_diplomatic_plays
+                limit = {
+                    # Target area province is in the same area as the given province
+                    var:play_target_area = {
+                        area = scope:player.var:selected_province.area
+                    }
                 }
-            }
 
+                save_scope_as = diplomatic_play_to_add
+
+                scope:player = {
+                    add_to_variable_list = {
+                        name = local_area_diplomatic_plays
+                        target = scope:diplomatic_play_to_add
+                    }
+                }
+
+            }
         }
 
     }
@@ -1353,4 +1360,28 @@ DIPLO_begin_or_end_play = {
 
     }
     
+}
+
+DIPLOMACY_state_has_influence = {
+    scope = state
+
+    is_shown = {
+            has_variable = DIPLOMACY_influenced_by
+    }
+}
+
+save_selected_tag = {
+    scope = country
+    saved_scopes = {
+        player
+    }
+
+    effect = {
+        scope:player = {
+            set_variable = {
+                name = selected_tag
+                value = ROOT
+            }
+        }
+    }
 }

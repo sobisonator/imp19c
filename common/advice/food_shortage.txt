@@ -1,0 +1,277 @@
+﻿starving_pops = {
+	max_advice = 3
+	title = "ADVICE_STARVING_POPS_TITLE"
+	description = "ADVICE_STARVING_POPS_SUMMARY"
+	icon = "gfx/interface/icons/shared_icons/population.dds"
+	background = "gfx/interface/advice/alert_icon_bg_yellow_.dds"
+
+	item = {
+		title = "ADVICE_STARVING_POPS_FALLBACK_TITLE"
+		description = "ADVICE_STARVING_POPS_FALLBACK"
+		icon = "gfx/interface/icons/advice/advice_nothing.dds"
+		fallback = yes
+	}
+
+	item = {
+		description = "ADVICE_OCCUPIED_PROVINCE"
+		title = "ADVICE_OCCUPIED_PROVINCE_TITLE"
+		icon = "gfx/interface/icons/advice/advice_army.dds"
+
+		effect = {
+			if = {
+				limit = {
+					scope:target = {
+						OR = {
+							is_previous_controller = root # Occupied
+							has_siege = yes
+						}
+					}
+				}
+				scope:target = { save_scope_as = result }
+			}
+		}
+	}
+
+	item = {
+		initial_view = single_unit
+		description = "ADVICE_LOW_FOOD_MOVEARMY"
+		title = "ADVICE_MOVEARMY_TITLE"
+		button_text = "ADVICE_MOVEARMY_BTN"
+		icon = "gfx/interface/icons/advice/advice_army.dds"
+
+		effect = {
+			if = {
+				limit = {
+					scope:target = {
+						NOT = {
+							is_previous_controller = root # Occupied
+							has_siege = yes
+						}
+					}
+				}
+				scope:target = {
+					random_unit_in_province = {
+						limit = {
+							unit_owner = prev.owner
+							is_navy = no
+							OR = {
+								AND = {
+									exists = commander
+									commander.loyalty > 33
+								}
+								NOT = {
+									exists = commander
+								}
+							}
+						}
+						save_scope_as = result
+					}
+				}
+			}
+		}
+	}
+
+	item = {
+		initial_view = province
+		highlight_elements = { btn_province_import vegetables fish grain cattle salt }
+		chain_length = 2
+		description = "ADVICE_IMPORT_FOOD"
+		title = "ADVICE_IMPORT_FOOD_TITLE"
+		button_text = "ADVICE_IMPORT_BTN"
+		icon = "gfx/interface/icons/advice/advice_currency.dds"
+
+		effect = {
+			if = {
+				limit = {
+					scope:target = {
+						NOT = {
+							is_previous_controller = root # Occupied
+							has_siege = yes
+						}
+					}
+					scope:target.state = {
+						OR = {
+							can_import_trade_good = vegetables
+							can_import_trade_good = fish
+							can_import_trade_good = grain
+							can_import_trade_good = cattle
+							can_import_trade_good = salt
+						}
+					}
+				}
+				scope:target = { save_scope_as = result }
+			}
+		}
+	}
+
+	item = {
+		initial_view = province
+		highlight_elements = {
+			btn_province_build
+			build_basic_settlement_infratructure_building
+		}
+		description = "ADVICE_LOW_FOOD_FARM"
+		title = "ADVICE_LOW_FOOD_FARM_TITLE"
+		button_text = "ADVICE_FARM_BTN"
+		icon = "gfx/interface/icons/advice/advice_build.dds"
+
+		effect = {
+			if = {
+				limit = {
+					scope:target = {
+						NOT = {
+							is_previous_controller = root # Occupied
+							has_siege = yes
+						}
+
+						can_build_building = basic_settlement_infratructure_building
+						NOT = { has_specific_construction = basic_settlement_infratructure_building }
+					}
+				}
+				scope:target = { save_scope_as = result }
+			}
+		}
+	}
+
+	item = {
+		initial_view = religion
+		highlight_elements = { activate_deity }
+		description = "ADVICE_LOW_FOOD_OMEN"
+		title = "ADVICE_OMEN_TITLE"
+		button_text = "ADVICE_OMEN_BTN"
+		icon = "gfx/interface/icons/advice/advice_omen.dds"
+
+		effect = {
+			scope:actor = {
+				random_pantheon_deity = {
+					limit = {
+						scope:actor = { can_activate = PREV }
+						has_active_modifier = global_monthly_food_modifier
+					}
+					save_scope_as = result
+				}
+			}
+		}
+	}
+
+	item = {
+		initial_view = religion
+		highlight_elements = { replace_deity }
+		chain_length = 2
+		description = "ADVICE_LOW_FOOD_PASSIVE_OMEN"
+		title = "ADVICE_PASSIVE_OMEN_TITLE"
+		button_text = "ADVICE_PASSIVE_OMEN_BTN"
+		icon = "gfx/interface/icons/advice/advice_omen.dds"
+
+		effect = {
+			if = {
+				limit = {
+					scope:target = {
+						NOT = {
+							is_previous_controller = root # Occupied
+							has_siege = yes
+						}
+					}
+				}
+				scope:actor = {
+					if = {
+						limit = {
+							any_pantheon_deity = {
+								OR = {
+									has_passive_modifier = global_monthly_food_modifier
+									has_passive_modifier = global_population_growth
+								}
+							}
+						}
+					}
+					else = {
+						random_available_deity = {
+							limit = {
+								has_passive_modifier = global_monthly_food_modifier
+							}
+							save_scope_as = result
+						}
+					}
+				}
+			}
+		}
+	}
+
+	item = {
+		initial_view = province
+		highlight_elements = {
+			btn_province_change_governor_policy
+			encourage_trade
+		}
+		description = "ADVICE_LOW_FOOD_POLICY"
+		title = "ADVICE_LOW_FOOD_POLICY_TITLE"
+		button_text = "ADVICE_POLICY_BTN"
+		icon = "gfx/interface/icons/advice/advice_policy.dds"
+
+		effect = {
+			if = {
+				limit = {
+					scope:target = {
+						NOT = {
+							is_previous_controller = root # Occupied
+							has_siege = yes
+						}
+					}
+					scope:target.state = {
+						can_change_governor_policy = encourage_trade
+					}
+				}
+				scope:target = { save_scope_as = result }
+			}
+		}
+	}
+
+	item = {
+		initial_view = province
+		highlight_elements = {
+			btn_province_build
+			build_population_building
+		}
+		description = "ADVICE_STARVING_POPS_GRANARY"
+		title = "ADVICE_STARVING_POPS_GRANARY_TITLE"
+		button_text = "ADVICE_STARVING_POPS_GRANARY_BTN"
+		icon = "gfx/interface/icons/advice/advice_build.dds"
+
+		effect = {
+			if = {
+				limit = {
+					scope:target = {
+						NOT = {
+							is_previous_controller = root # Occupied
+							has_siege = yes
+						}
+
+						can_build_building = population_building
+						NOT = { has_specific_construction = population_building }
+					}
+				}
+				scope:target = { save_scope_as = result }
+			}
+		}
+	}
+
+	item = {
+		description = "ADVICE_STARVING_POPS_DONOTHING"
+		title = "ADVICE_STARVING_POPS_DONOTHING_TITLE"
+		icon = "gfx/interface/icons/advice/advice_nothing.dds"
+
+		effect = {
+			if = {
+				limit = {
+					scope:target = {
+						NOT = {
+							is_previous_controller = root # Occupied
+							has_siege = yes
+						}
+					}
+				}
+				scope:target = { save_scope_as = result }
+			}
+		}
+	}
+}

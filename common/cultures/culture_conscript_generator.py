@@ -47,12 +47,12 @@ def write_conscripts(culture_files):
     levy_template = levy_conscripts\n\
 \n\
     primary = conscripts\n\
-    secondary = conscripts\n\
+    second = conscripts\n\
     flank = conscripts\n\
 \n\
-    primary_navy = tetrere\n\
-    secondary_navy = octere\n\
-    flank_navy = liburnian\n\
+    primary_navy = brig\n\
+    secondary_navy = brig\n\
+    flank_navy = brig\n\
     male_names")
             f.close()
         with open(file, "w", encoding="utf-8") as f:

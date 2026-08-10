@@ -7,6 +7,8 @@ Includes = {
 	"jomini/jomini_fog.fxh"
 	"jomini/jomini_lighting.fxh"
 	"fog_of_war.fxh"
+	"standardfuncsgfx.fxh"
+	"clouds.fxh"
 	#"winter.fxh"
 }
 
@@ -191,7 +193,10 @@ PixelShader =
 			SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse, Normal, Properties.a, Properties.g, Properties.b );
 			SLightingProperties LightingProps = GetSunLightingProperties( WorldSpacePos, ShadowTexture );
 			
-			float3 Color = CalculateSunLighting( MaterialProps, LightingProps, EnvironmentMap );
+			float FogOfWarAlphaValue = 1.0;
+			float CloudMask = GetCloudShadowMask( WorldSpacePos.xz, FogOfWarAlphaValue );
+
+			float3 Color = CalculateTerrainDualScenarioLighting( MaterialProps, LightingProps, CloudMask, EnvironmentMap );
 
 			Color = ApplyFogOfWar( Color, WorldSpacePos, FogOfWarAlpha );
 			Color = ApplyDistanceFog( Color, WorldSpacePos );

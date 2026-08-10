@@ -102,6 +102,42 @@ PixelShader =
 			return CalculateTerrainSunnyLighting( MaterialProps, LightingProps, EnvironmentMap );
 		}
 
+		float3 CalculateMapObjectsSunnyLighting( SMaterialProperties MaterialProps, SLightingProperties LightingProps, PdxTextureSamplerCube EnvironmentMap )
+		{
+			LightingProps._ToLightDir = ToSunDir;
+			LightingProps._LightIntensity = MAP_OBJECTS_SUNNY_SUN_COLOR * MAP_OBJECTS_SUNNY_SUN_INTENSITY;
+			LightingProps._CubemapIntensity = CubemapIntensity * MAP_OBJECTS_SUNNY_IBL_SCALE;
+			return CalculateMapLighting( MaterialProps, LightingProps, EnvironmentMap, MAP_OBJECTS_SUNNY_SPECULAR_FACTOR );
+		}
+		float3 CalculateMapObjectsShadowLighting( SMaterialProperties MaterialProps, SLightingProperties LightingProps, PdxTextureSamplerCube EnvironmentMap )
+		{
+			LightingProps._ToLightDir = ToSunDir;
+			LightingProps._LightIntensity = MAP_OBJECTS_OVERCAST_SUN_COLOR * MAP_OBJECTS_OVERCAST_SUN_INTENSITY;
+			LightingProps._CubemapIntensity = CubemapIntensity * MAP_OBJECTS_OVERCAST_IBL_SCALE;
+			return CalculateMapLighting( MaterialProps, LightingProps, EnvironmentMap, MAP_OBJECTS_OVERCAST_SPECULAR_FACTOR );
+		}
+		// Map objects dual scenario lighting - uses IBL for both sunny and shadow scenarios
+		float3 CalculateMapObjectsDualScenarioLighting( SMaterialProperties MaterialProps, SLightingProperties LightingProps, float ShadowMask, PdxTextureSamplerCube EnvironmentMap )
+		{
+			if ( ShadowMask > 0.99f )
+			{
+				return CalculateMapObjectsShadowLighting( MaterialProps, LightingProps, EnvironmentMap );
+			}
+			if ( ShadowMask > 0.0f )
+			{
+				// Calculate both lighting scenarios
+				float3 SunnyLighting = CalculateMapObjectsSunnyLighting( MaterialProps, LightingProps, EnvironmentMap );
+				float3 ShadowLighting = CalculateMapObjectsShadowLighting( MaterialProps, LightingProps, EnvironmentMap );
+
+				// Blend between scenarios based on shadow masks
+				return lerp( SunnyLighting, ShadowLighting, ShadowMask );
+			}
+
+			return CalculateMapObjectsSunnyLighting( MaterialProps, LightingProps, EnvironmentMap );
+		}
+
+
+
 		//-------------------------------
 		// Debugging --------------------
 		//-------------------------------

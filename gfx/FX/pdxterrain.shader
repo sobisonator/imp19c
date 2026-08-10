@@ -205,7 +205,6 @@ PixelShader =
 			// float FogOfWarAlphaValue = PdxTex2D( FogOfWarAlpha, Input.WorldSpacePos.xz * WorldSpaceToTerrain0To1 ).r;
 			float FogOfWarAlphaValue = 1.0;
 			float CloudMask = GetCloudShadowMask( Input.WorldSpacePos.xz, FogOfWarAlphaValue );
-			float ColorDarken = 1.0f;
 
 			float3 FinalColor = CalculateTerrainDualScenarioLighting( MaterialProps, LightingProps, CloudMask, EnvironmentMap );
 

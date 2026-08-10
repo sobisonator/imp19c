@@ -56,7 +56,7 @@ Code
 
 	// Map objects shadow scenario lighting parameters
 	#define MAP_OBJECTS_OVERCAST_SPECULAR_FACTOR     1.0f
-	#define MAP_OBJECTS_OVERCAST_SUN_COLOR           float3( 0.4f, 0.4f, 0.7f )
+	#define MAP_OBJECTS_OVERCAST_SUN_COLOR           SunDiffuse
 	#define MAP_OBJECTS_OVERCAST_SUN_INTENSITY       SunIntensity * 0.5f
 	#define MAP_OBJECTS_OVERCAST_IBL_SCALE           1.2f
 

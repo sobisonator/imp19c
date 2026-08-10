@@ -14,6 +14,7 @@ Includes = {
 	"constants.fxh"
 	"standardfuncsgfx.fxh"
 	"winter.fxh"
+	"clouds.fxh"
 }
 
 PixelShader =
@@ -185,36 +186,6 @@ VertexShader =
 			Out.WorldSpacePos = In.WorldSpacePos;
 			return Out;
 		}
-		// void CalculateSineAnimation( float2 UV, inout float3 Position, inout float3 Normal, inout float4 Tangent )
-		// {
-		// 	float AnimSeed = UV.x;
-		// 	float SmallWaveScale = 0.5f;
-		// 	float WaveScale = 0.5f;
-		// 	float AnimationSpeed = 2.0f;
-
-		// 	float Time = GlobalTime * AnimationSpeed;
-
-		// 	float SmallWaveV = Time - AnimSeed * SmallWaveScale;
-		// 	float SmallWaveD = -( AnimSeed * SmallWaveScale );
-		// 	float SmallWave = sin( SmallWaveV );
-		// 	float CombinedWave = SmallWave;
-
-		// 	// Wave
-		// 	float3 AnimationDir = float3( 0, 1, -1 );
-		// 	float Wave = WaveScale * smoothstep( 0.0, 0.12, AnimSeed ) * CombinedWave;
-		// 	float Derivative = ( WaveScale * 1.0f) * AnimSeed * -( SmallWave + cos( SmallWaveV ) * SmallWaveD );
-
-		// 	// Vertex position
-		// 	Position += AnimationDir * Wave;
-
-		// 	// Normals
-		// 	float2 WaveTangent = normalize( float2( 1.0f, Derivative ) );
-		// 	float3 WaveNormal = normalize( float3( WaveTangent.y, 0.0f, -WaveTangent.x ));
-
-		// 	float WaveNormalStrength = 1.0f;
-
-		// 	Normal = normalize( lerp( Normal, WaveNormal, 0.65f ) ); // Wave normal strength
-		// }
 	]]
 
 	MainCode VS_standard
@@ -225,10 +196,6 @@ VertexShader =
 		[[
 			PDX_MAIN
 			{
-				// #ifdef USER_FLAG_SHIP
-				// 	float2 AnimUV = saturate( Input.Position.xy / float2( 9.0f, 6.0f ) + vec2( 0.5f ) );
-				// 	CalculateSineAnimation( AnimUV, Input.Position, Input.Normal, Input.Tangent );
-				// #endif
 				VS_OUTPUT Out = ConvertOutput( PdxMeshVertexShaderStandard( Input ) );
 				Out.InstanceIndex = Input.InstanceIndices.y;
 				return Out;
@@ -389,8 +356,6 @@ PixelShader =
 
 				float3 UserColor = float3( 1.0f, 1.0f, 1.0f );
 
-				//float3 UserColor = GetUserData( Input.InstanceIndex, USER_DATA_PRIMARY_COLOR ).rgb;
-
 				#if defined( ATLAS )
 					float4 NormalPacked = PdxTex2D( NormalMap_2, NORMAL_UV_SET2 + UvAnimationAdd );
 					float3 NormalSample = UnpackRRxGNormal( NormalPacked );
@@ -468,7 +433,14 @@ PixelShader =
 				SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse.rgb, Normal, Properties.a, Properties.g, Properties.b );
 				SLightingProperties LightingProps = GetSunLightingProperties( Input.WorldSpacePos, ShadowTexture );
 
-				float3 Color = CalculateSunLighting( MaterialProps, LightingProps, EnvironmentMap );
+				float FogOfWarAlphaValue = 1.0;
+
+				// LightingProps._LightIntensity *= lerp( 0.3f, 1.0f, FogOfWarAlphaValue );
+				// LightingProps._CubemapIntensity *= lerp( 0.2f, 1.0f, FogOfWarAlphaValue );
+
+				float CloudMask = GetCloudShadowMask( Input.WorldSpacePos.xz, FogOfWarAlphaValue );
+
+				float3 Color = CalculateMapObjectsDualScenarioLighting( MaterialProps, LightingProps, CloudMask, EnvironmentMap );
 
 				#if !defined( UNDERWATER ) && !defined( DISABLE_FOG_OF_WAR )
 					Color = ApplyFogOfWar( Color, Input.WorldSpacePos, FogOfWarAlpha );
@@ -564,7 +536,6 @@ PixelShader =
 				#endif
 
 				#ifdef TABLE_S
-					// Color *= float3( 1.0, 0.8, 0.8 );
 					Color *= float3( 0.5, 0.5, 0.5 );
 				#endif
 
@@ -574,11 +545,9 @@ PixelShader =
 
 				#ifdef MAPCOLOR
 					Color = PdxTex2D( DiffuseMap, DIFFUSE_UV_SET );
-					// Color /= float3( 0.7, 0.7, 0.7 );
 				#endif
 
 				#ifdef MAPCOLOR_S
-					// Color /= float3( 0.7, 0.7, 0.7 );
 					Color *= float3( 1.258, 1.394, 1.69 );
 				#endif
 

@@ -4,6 +4,11 @@ Includes = {
 	"fog_of_war.fxh"
 }
 
+ConstantBuffer( PdxTerrainConstants )
+{
+	float2		WorldSpaceToTerrain0To1;
+}
+
 PixelShader =
 {	
 	TextureSampler FogOfWarAlpha
@@ -15,7 +20,7 @@ PixelShader =
 		SampleModeU = "Wrap"
 		SampleModeV = "Wrap"
 	}
-	
+
 	MainCode PS_surface
 	{
 		Input = "VS_OUTPUT"

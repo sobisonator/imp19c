@@ -5,6 +5,7 @@ Includes = {
 	"jomini/jomini_fog.fxh"
 	"jomini/jomini_lighting.fxh"
 	"jomini/jomini_water.fxh"
+	"clouds.fxh"
 }
 
 Code
@@ -344,13 +345,13 @@ PixelShader =
 			return Refraction;
 		}
 		
-		float3 CalcReflection( float3 Normal, float3 ToCameraDir )
+		float3 CalcReflection( float3 Normal, float3 ToCameraDir, float CloudShadowMask )
 		{
 			float3 ReflectionNormal = Normal;
 			ReflectionNormal.y += WaterReflectionNormalFlatten; // TODO, decay with distance?
 			ReflectionNormal = normalize( ReflectionNormal );
 			float3 ReflectionVector = reflect( -ToCameraDir, ReflectionNormal );
-			float3 Reflection = PdxTexCube( ReflectionCubeMap, ReflectionVector ).rgb * WaterCubemapIntensity;
+			float3 Reflection = PdxTexCube( ReflectionCubeMap, ReflectionVector ).rgb * GetWaterCubemapIntensity( CloudShadowMask );
 			
 			return Reflection;
 		}
@@ -438,13 +439,13 @@ PixelShader =
 			DiffuseLightOut = LightColor * NdotL;
 			SpecularLightOut = specColor * LightColor * NdotL;
 		}
-		
-		void CalculateSunLight( SWaterLightingProperties Properties, float ShadowTerm, float3 ToSunDirection, out float3 DiffuseLightOut, out float3 SpecularLightOut )
+
+		void CalculateSunLight( SWaterLightingProperties Properties, float ShadowTerm, float3 ToSunDirection, float WaterSunIntensity, out float3 DiffuseLightOut, out float3 SpecularLightOut )
 		{
 			float3 sunIntensity = SunDiffuse * SunIntensity * ShadowTerm;
 			ImprovedBlinnPhong( sunIntensity, ToSunDirection, Properties, DiffuseLightOut, SpecularLightOut );
 		}
-		
+
 		float3 AmbientLight( float3 WorldNormal, float3 AmbientColors[6] )
 		{
 			// add more of bottom ambient below objects
@@ -475,7 +476,7 @@ PixelShader =
 		{
 			float3 diffuse = ((AmbientLight + DiffuseLight) * Properties._Diffuse);
 			float3 specular = SpecularLight;
-			
+
 			return diffuse + specular;
 		}
 		
@@ -514,7 +515,13 @@ PixelShader =
 			float Facing = 1.0 - max( dot( Normal, ToCameraDir ), 0 );
 			float3 WaterDiffuse = lerp( WaterColorDeep, WaterColorShallow, Facing );
 			WaterDiffuse *= WaterDiffuseMultiplier;
-			
+
+			float ShadowTerm = 1.0f;
+			// float FogOfWarAlphaValue = PdxTex2D( FogOfWarAlpha, Input._WorldSpacePos.xz * WorldSpaceToTerrain0To1 ).r;
+			float FogOfWarAlphaValue = 1.0;
+			float CloudShadowMask = GetCloudShadowMask( Input._WorldSpacePos.xz, FogOfWarAlphaValue );
+			CloudShadowMask = max( 1.0f - ShadowTerm, CloudShadowMask );
+
 			SWaterLightingProperties lightingProperties;
 			lightingProperties._WorldSpacePos = Input._WorldSpacePos;
 			lightingProperties._ToCameraDir = ToCameraDir;
@@ -522,25 +529,27 @@ PixelShader =
 			lightingProperties._Diffuse = WaterDiffuse + FoamFactor;
 			lightingProperties._Glossiness = lerp( WaterGlossBase, GlossMap, WaterZoomedInZoomedOutFactor );
 			lightingProperties._SpecularColor = vec3(WaterSpecular);
-			lightingProperties._NonLinearGlossiness = GetNonLinearGlossiness( lightingProperties._Glossiness ) * WaterGlossScale;
+			lightingProperties._NonLinearGlossiness = GetNonLinearGlossiness( lightingProperties._Glossiness ) * GetWaterGlossScale( CloudShadowMask );
 			
 			float3 DiffuseLight = vec3(0.0);
 			float3 SpecularLight = vec3(0.0);
-
-			CalculateSunLight( lightingProperties, 1.0, WaterToSunDir, DiffuseLight, SpecularLight );
+			float3 WaterToSunDir = GetWaterToSunDirection( CloudShadowMask );
+			float WaterSunIntensity = GetWaterSunIntensity( CloudShadowMask );
+			float SunIntensityMask = smoothstep( 0.05f, 0.1f, GlossMap ); // We use very dark values in the gloss map to simular occlusion
+			CalculateSunLight( lightingProperties, 1.0, WaterToSunDir, WaterSunIntensity * SunIntensityMask, DiffuseLight, SpecularLight );
 			
-			float3 FinalColor = ComposeLight( lightingProperties, 1.0, WaterToSunDir, DiffuseLight, SpecularLight * WaterSpecularFactor );
+			float3 FinalColor = ComposeLight( lightingProperties, 1.0, WaterToSunDir, DiffuseLight, SpecularLight * GetWaterSpecularFactor( CloudShadowMask ) );
 
 			float3 Refraction = CalcRefraction( Input._WorldSpacePos, Normal, Input._ScreenSpacePos.xy, WaterColorAndSpec.rgb, Input._Depth );
 		
-			float3 Reflection = CalcReflection( Normal, ToCameraDir );
+			float3 Reflection = CalcReflection( Normal, ToCameraDir, CloudShadowMask );
 			
 			float FresnelFactor = Fresnel( abs( dot( lightingProperties._ToCameraDir, Normal ) ), WaterFresnelBias, WaterFresnelPow );
-			
+
 			FinalColor += lerp( Refraction, Reflection, FresnelFactor );
-			
+
 			float WaterFade = 1.0 - saturate( (WaterFadeShoreMaskDepth - Input._Depth) * WaterFadeShoreMaskSharpness );
-			
+
 			#ifdef JOMINIWATER_BORDER_LERP
 				float ExtraFade = 1.0 - (Input._WorldUV.x - 1.0) / JOMINIWATER_BorderLerpSize;
 				WaterFade *= ExtraFade;

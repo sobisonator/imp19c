@@ -435,10 +435,6 @@ PixelShader =
 				SLightingProperties LightingProps = GetSunLightingProperties( Input.WorldSpacePos, ShadowTexture );
 
 				float FogOfWarAlphaValue = 1.0;
-
-				// LightingProps._LightIntensity *= lerp( 0.3f, 1.0f, FogOfWarAlphaValue );
-				// LightingProps._CubemapIntensity *= lerp( 0.2f, 1.0f, FogOfWarAlphaValue );
-
 				float CloudMask = GetCloudShadowMask( Input.WorldSpacePos.xz, FogOfWarAlphaValue );
 				float3 TerrainNormal = CalculateNormal( Input.WorldSpacePos.xz );
 				float2 ColorMapCoords = Input.WorldSpacePos.xz *  WorldSpaceToTerrain0To1;

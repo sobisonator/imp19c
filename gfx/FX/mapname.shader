@@ -54,7 +54,7 @@ PixelShader =
 				float Alpha = CalcAlphaDistanceField( FontAtlas, Input.TexCoord );
 				float3 Color = float3( 0.0f, 0.0f, 0.0f );
 				Color = ApplyFogOfWar( Color, Input.WorldSpacePos, FogOfWarAlpha );
-				Color = ApplyDistanceFog( Color, Input.WorldSpacePos );
+				// Color = ApplyDistanceFog( Color, Input.WorldSpacePos );
 
 				return float4( Color, Alpha * 0.93 );
 			}

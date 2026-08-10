@@ -13,10 +13,6 @@ ConstantBuffer( JominiFogOfWar )
 {
 	float2	InverseWorldSize;
 }
-ConstantBuffer( PdxTerrainConstants )
-{
-	float2		WorldSpaceToTerrain0To1;
-}
 
 PixelShader =
 {		

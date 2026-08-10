@@ -12,6 +12,7 @@ Includes = {
 	"fog_of_war.fxh"
 	"winter.fxh"
 	"clouds.fxh"
+	"fxhs/terrain_tint.fxh"
 }
 
 VertexStruct VS_OUTPUT_PDX_TERRAIN
@@ -202,11 +203,11 @@ PixelShader =
 			SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse, ReorientedNormal, DetailMaterial.a, DetailMaterial.g, DetailMaterial.b );
 			SLightingProperties LightingProps = GetSunLightingProperties( Input.WorldSpacePos, ShadowTerm );
 
-			// float FogOfWarAlphaValue = PdxTex2D( FogOfWarAlpha, Input.WorldSpacePos.xz * WorldSpaceToTerrain0To1 ).r;
 			float FogOfWarAlphaValue = 1.0;
 			float CloudMask = GetCloudShadowMask( Input.WorldSpacePos.xz, FogOfWarAlphaValue );
 
 			float3 FinalColor = CalculateTerrainDualScenarioLighting( MaterialProps, LightingProps, CloudMask, EnvironmentMap );
+			FinalColor = ApplyTerrainShadowTintWithClouds( FinalColor, Input.WorldSpacePos.xz, CloudMask, ShadowTerm, ReorientedNormal, Normal );
 
 			#ifdef TERRAIN_COLOR_OVERLAY
 				FinalColor = lerp( FinalColor, BorderColor, BorderPostLightingBlend );

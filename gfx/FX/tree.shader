@@ -15,6 +15,7 @@ Includes = {
 	"fog_of_war.fxh" #2 cb (includes jomini_fog_of_war.fxh which as 1 cb)
 	"winter.fxh" #1 cb
 	"clouds.fxh"
+	"fxhs/terrain_tint.fxh"
 }
 
 PixelShader =
@@ -351,8 +352,23 @@ PixelShader =
 				float FogOfWarAlphaValue = 1.0;
 				float CloudMask = GetCloudShadowMask( Input.WorldSpacePos.xz, FogOfWarAlphaValue );
 
+				float3 ReorientedNormal = Normal;
+				float ShadowTerm = 1.0f;
+				
+				#ifdef SHADOWS_ENABLED
+					ShadowTerm = CalculateShadow( Input.ShadowProj, ShadowMap );
+				#endif
+
+				float2 MapCoords = Input.WorldSpacePos.xz * WorldSpaceToTerrain0To1;
+				SShadowTintData ShadowTintData = GetShadowTintData( MapCoords );
+				float3 TerrainNormal = CalculateNormal( Input.WorldSpacePos.xz );
+				float TerrainShadowTerm = GetTerrainShadowTintMask( ShadowTintData, LightingProps._ToLightDir, LightingProps._ShadowTerm, TerrainNormal );
+
+				LightingProps._ShadowTerm = LightingProps._ShadowTerm * ( 1.0f - TerrainShadowTerm );
+
 				float3 Color = CalculateTerrainDualScenarioLighting( MaterialProps, LightingProps, CloudMask, EnvironmentMap );
-			
+				Color = ApplyTreeShadowTintWithClouds( Color, ShadowTintData, CloudMask, ShadowTerm, Normal, TerrainNormal );
+
 				Color = lerp( Color, BorderColor, BorderPostLightingBlend );
 				
 				Color = ApplyFogOfWar( Color, Input.WorldSpacePos, FogOfWarAlpha ); // included :jomini/jomini_fog_of_war.fxh

@@ -103,18 +103,65 @@ Code
 
 		return Cloud * CloudOpacity * FogOfWarAlphaValue * ZoomFadeFactor;
 	}
-	// float GetCloudShadowMask( in float2 Coordinate )
-	// {
-	// 	#ifdef LOW_SPEC_SHADERS
-	// 		return 0.0f;
-	// 	#endif
 
-	// 	if ( HasCloudShadowEnabled != 1 )
-	// 	{
-	// 		return 0.0f;
-	// 	}
-	// 	// Get fog of war alpha value
-	// 	float FogOfWarAlphaValue = PdxTex2D( FogOfWarAlpha, Coordinate * WorldSpaceToTerrain0To1 ).r;
-	// 	return GetCloudShadowMask( Coordinate, FogOfWarAlphaValue );
-	// }
+
+	float3 ApplyOvercastContrast( float3 Color, float BlendAmount )
+	{
+		if ( BlendAmount < 0.0001f )
+		{
+			return Color;
+		}
+		float CurrentLuminance = dot( Color, float3( 0.299f, 0.587f, 0.114f ) );
+		float MinLuminance = 0.008f; // Minimum brightness floor to prevent clipping
+
+		// Soft toe using power curve - asymptotically approaches minimum
+		float LuminanceRange = CurrentLuminance - MinLuminance;
+		float DarkenedRange = LuminanceRange * ( 1.0f - BlendAmount );
+		float TargetLuminance = MinLuminance + DarkenedRange;
+
+		// Scale RGB proportionally to achieve target luminance (preserves hue/saturation)
+		return Color * ( TargetLuminance / max( CurrentLuminance, 0.001f ) );
+	}
+
+
+	struct SShadowTintData
+	{
+		float2 _NoiseUV;
+		float4 _TintColor;
+		float _MapSadowTintStrengthValue;
+	};
+
+	SShadowTintData GetShadowTintData( float2 Coordinate )
+	{
+		SShadowTintData ShadowTintData;
+		ShadowTintData._NoiseUV = Coordinate * MapSadowTintNoiseUVTiling;
+		ShadowTintData._TintColor = PdxTex2D( ShadowNoiseTexture, ShadowTintData._NoiseUV );
+		ShadowTintData._MapSadowTintStrengthValue = MapSadowTintStrength * ShadowTintData._TintColor.a;
+		return ShadowTintData;
+	}
+	float GetTerrainShadowTintMask( SShadowTintData ShadowTintData, float3 ToLightDir, float ShadowTerm, float3 TerrainNormal )
+	{
+		float TerrainNdotL = saturate( dot( TerrainNormal, ToLightDir ) ) + 1e-5;
+		float TerrainShadowTerm = smoothstep( MapSadowTintThresholdMin, MapSadowTintThresholdMax, TerrainNdotL );
+		float FinalShadowTerm = saturate( 2 - TerrainShadowTerm - ShadowTerm );
+		return ShadowTintData._MapSadowTintStrengthValue * FinalShadowTerm;
+	}
+	float3 ApplySunnyShadowTintWithClouds( float3 Color, float3 ShadowTintColor, float CloudMask, float ShadowTintMask, float SunnyMultiplier )
+	{
+		// Apply shadow tint
+		float ShadowOutsideClouds = saturate( ShadowTintMask - CloudMask );
+		Color = lerp( Color, ShadowTintColor, ShadowOutsideClouds * SunnyMultiplier );
+		return Color;
+	}
+
+	float GetShadowTintMask( SShadowTintData ShadowTintData, float3 ToLightDir, float ShadowTerm, float3 TerrainNormal, float3 Normal )
+	{
+		float TerrainNdotL = saturate( dot( TerrainNormal, ToLightDir ) ) + 1e-5;
+		float NdotL = saturate( dot( Normal, ToLightDir ) ) + 1e-5;
+
+		float TerrainShadowTerm = smoothstep( MapSadowTintThresholdMin, MapSadowTintThresholdMax, TerrainNdotL );
+		float ObjectShadowTerm = NdotL;
+		float FinalShadowTerm = saturate( 3 - TerrainShadowTerm - ShadowTerm - ObjectShadowTerm);
+		return ShadowTintData._MapSadowTintStrengthValue * FinalShadowTerm;
+	}
 ]]

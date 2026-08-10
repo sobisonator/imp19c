@@ -1,3 +1,15 @@
+TextureSampler ShadowNoiseTexture
+{
+	Index = 12
+	MagFilter = "Linear"
+	MinFilter = "Linear"
+	MipFilter = "Linear" 
+	SampleModeU = "Wrap"
+	SampleModeV = "Wrap"
+	File = "gfx/map/textures/shadow_color.dds"
+	sRGB = yes
+}
+
 Code
 [[
 	#define AdjustedTime			GlobalTime * 0.01f
@@ -74,4 +86,9 @@ Code
 
 	#define ToWaterSunnySunDir                 		ToSunDir
 	#define ToWaterOvercastSunDir                	ToSunDir
+
+	#define MapSadowTintNoiseUVTiling				500
+	#define MapSadowTintStrength					0.5f
+	#define MapSadowTintThresholdMin				0.1f
+	#define MapSadowTintThresholdMax				0.4f
 ]]

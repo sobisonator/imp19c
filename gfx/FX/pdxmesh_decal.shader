@@ -9,6 +9,7 @@ Includes = {
 	"fog_of_war.fxh"
 	"standardfuncsgfx.fxh"
 	"clouds.fxh"
+	"fxhs/terrain_tint.fxh"
 	#"winter.fxh"
 }
 
@@ -195,8 +196,10 @@ PixelShader =
 			
 			float FogOfWarAlphaValue = 1.0;
 			float CloudMask = GetCloudShadowMask( WorldSpacePos.xz, FogOfWarAlphaValue );
+			float3 TerrainNormal = CalculateNormal( WorldSpacePos.xz );
 
 			float3 Color = CalculateTerrainDualScenarioLighting( MaterialProps, LightingProps, CloudMask, EnvironmentMap );
+			Color = ApplyTerrainShadowTintWithClouds( Color, WorldSpacePos.xz, CloudMask, LightingProps._ShadowTerm, Normal, TerrainNormal );
 
 			Color = ApplyFogOfWar( Color, WorldSpacePos, FogOfWarAlpha );
 			Color = ApplyDistanceFog( Color, WorldSpacePos );

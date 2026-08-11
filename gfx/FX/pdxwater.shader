@@ -6,7 +6,7 @@ Includes = {
 	"standardfuncsgfx.fxh"
 	"winter.fxh"
 	"terrain.fxh"
-	"clouds.fxh"
+	"fxhs/clouds.fxh"
 }
 
 ConstantBuffer( PdxTerrainConstants )

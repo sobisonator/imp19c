@@ -12,10 +12,10 @@ Includes = {
 	"jomini/jomini_lighting.fxh" #0 cb ( 1 from jomini.fxh, discarded )
 	"jomini/jomini_gradient_borders.fxh" #2 cb's (1 from jomini/jomini_colormap_constants.fxh)
 	"jomini/jomini_mapobject.fxh" #0 cb
-	"fog_of_war.fxh" #2 cb (includes jomini_fog_of_war.fxh which as 1 cb)
 	"winter.fxh" #1 cb
-	"clouds.fxh"
+	"fxhs/clouds.fxh"
 	"fxhs/terrain_tint.fxh"
+	"fxhs/gh_atmospheric.fxh"
 }
 
 PixelShader =
@@ -370,8 +370,8 @@ PixelShader =
 				Color = ApplyTreeShadowTintWithClouds( Color, ShadowTintData, CloudMask, ShadowTerm, Normal, TerrainNormal );
 
 				Color = lerp( Color, BorderColor, BorderPostLightingBlend );
-				
-				Color = ApplyFogOfWar( Color, Input.WorldSpacePos, FogOfWarAlpha ); // included :jomini/jomini_fog_of_war.fxh
+
+				Color = GH_ApplyAtmosphericEffects( Color, Input.WorldSpacePos, FogOfWarAlpha );
 
 				float vFogFactor = min(CalculateDistanceFogFactor( Input.WorldSpacePos ),0.6);
 				Color = ApplyDistanceFog( Color, vFogFactor );

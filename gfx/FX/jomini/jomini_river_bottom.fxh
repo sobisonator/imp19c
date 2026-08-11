@@ -1,7 +1,7 @@
 Includes = {
 	"jomini/jomini_river.fxh"
 	"cw/pdxterrain.fxh"
-	"clouds.fxh"
+	"fxhs/clouds.fxh"
 	"fxhs/terrain_tint.fxh"
 }
 

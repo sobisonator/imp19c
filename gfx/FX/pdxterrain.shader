@@ -9,10 +9,10 @@ Includes = {
 	"jomini/jomini_water.fxh"
 	"standardfuncsgfx.fxh"
 	"terrain.fxh"
-	"fog_of_war.fxh"
 	"winter.fxh"
-	"clouds.fxh"
+	"fxhs/clouds.fxh"
 	"fxhs/terrain_tint.fxh"
+	"fxhs/gh_atmospheric.fxh"
 }
 
 VertexStruct VS_OUTPUT_PDX_TERRAIN
@@ -214,7 +214,7 @@ PixelShader =
 			#endif
 			
 			#ifndef TERRAIN_UNDERWATER
-				FinalColor = ApplyFogOfWar( FinalColor, Input.WorldSpacePos, FogOfWarAlpha );
+				FinalColor = GH_ApplyAtmosphericEffects( FinalColor, Input.WorldSpacePos, FogOfWarAlpha );
 				float vFogFactor = min(CalculateDistanceFogFactor( Input.WorldSpacePos ),0.6);
 				FinalColor = ApplyDistanceFog( FinalColor, vFogFactor );
 			#endif

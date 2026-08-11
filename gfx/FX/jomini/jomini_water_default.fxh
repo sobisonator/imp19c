@@ -5,7 +5,7 @@ Includes = {
 	"jomini/jomini_fog.fxh"
 	"jomini/jomini_lighting.fxh"
 	"jomini/jomini_water.fxh"
-	"clouds.fxh"
+	"fxhs/clouds.fxh"
 }
 
 Code

@@ -1,12 +1,7 @@
 Includes = {
 	"jomini/jomini_river_surface.fxh"
 	"standardfuncsgfx.fxh"
-	"fog_of_war.fxh"
-}
-
-ConstantBuffer( PdxTerrainConstants )
-{
-	float2		WorldSpaceToTerrain0To1;
+	"fxhs/gh_atmospheric.fxh"
 }
 
 PixelShader =
@@ -14,6 +9,15 @@ PixelShader =
 	TextureSampler FogOfWarAlpha
 	{
 		Ref = JominiFogOfWar
+		MagFilter = "Linear"
+		MinFilter = "Linear"
+		MipFilter = "Linear"
+		SampleModeU = "Wrap"
+		SampleModeV = "Wrap"
+	}
+	TextureSampler WinterMap
+	{
+		Ref = WinterMap
 		MagFilter = "Linear"
 		MinFilter = "Linear"
 		MipFilter = "Linear"
@@ -31,7 +35,8 @@ PixelShader =
 			{		
 				float4 Color = CalcRiverSurface( Input );
 				
-				Color.rgb = ApplyFogOfWar( Color.rgb, Input.WorldSpacePos, FogOfWarAlpha );
+				// Color.rgb = ApplyFogOfWar( Color.rgb, Input.WorldSpacePos, FogOfWarAlpha );
+				Color.rgb = GH_ApplyAtmosphericEffects( Color.rgb, Input.WorldSpacePos, FogOfWarAlpha );
 
 				float vFogFactor = min(CalculateDistanceFogFactor( Input.WorldSpacePos ),0.6);
 				Color.rgb = ApplyDistanceFog( Color.rgb, vFogFactor );

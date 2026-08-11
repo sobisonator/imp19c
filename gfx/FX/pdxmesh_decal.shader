@@ -6,11 +6,11 @@ Includes = {
 	"cw/pdxterrain.fxh"
 	"jomini/jomini_fog.fxh"
 	"jomini/jomini_lighting.fxh"
-	"fog_of_war.fxh"
 	"standardfuncsgfx.fxh"
-	"clouds.fxh"
+	"fxhs/clouds.fxh"
 	"fxhs/terrain_tint.fxh"
-	#"winter.fxh"
+	"fxhs/gh_atmospheric.fxh"
+	"winter.fxh"
 }
 
 PixelShader =
@@ -72,45 +72,45 @@ PixelShader =
 		SampleModeU = "Wrap"
 		SampleModeV = "Wrap"
 	}
-	#TextureSampler WinterMap
-	#{
-	#	Ref = WinterMap
-	#	MagFilter = "Linear"
-	#	MinFilter = "Linear"
-	#	MipFilter = "Linear"
-	#	SampleModeU = "Wrap"
-	#	SampleModeV = "Wrap"
-	#}
-	#TextureSampler TerrainDiffuseArray
-	#{
-	#	Ref = TerrainTextureArrays0
-	#	MagFilter = "Linear"
-	#	MinFilter = "Linear"
-	#	MipFilter = "Linear"
-	#	SampleModeU = "Wrap"
-	#	SampleModeV = "Wrap"
-	#	type = "2darray"
-	#}
-	#TextureSampler TerrainNormalsArray
-	#{
-	#	Ref = TerrainTextureArrays1
-	#	MagFilter = "Linear"
-	#	MinFilter = "Linear"
-	#	MipFilter = "Linear"
-	#	SampleModeU = "Wrap"
-	#	SampleModeV = "Wrap"
-	#	type = "2darray"
-	#}
-	#TextureSampler TerrainMaterialArray
-	#{
-	#	Ref = TerrainTextureArrays2
-	#	MagFilter = "Linear"
-	#	MinFilter = "Linear"
-	#	MipFilter = "Linear"
-	#	SampleModeU = "Wrap"
-	#	SampleModeV = "Wrap"
-	#	type = "2darray"
-	#}
+	TextureSampler WinterMap
+	{
+		Ref = WinterMap
+		MagFilter = "Linear"
+		MinFilter = "Linear"
+		MipFilter = "Linear"
+		SampleModeU = "Wrap"
+		SampleModeV = "Wrap"
+	}
+	TextureSampler TerrainDiffuseArray
+	{
+		Ref = TerrainTextureArrays0
+		MagFilter = "Linear"
+		MinFilter = "Linear"
+		MipFilter = "Linear"
+		SampleModeU = "Wrap"
+		SampleModeV = "Wrap"
+		type = "2darray"
+	}
+	TextureSampler TerrainNormalsArray
+	{
+		Ref = TerrainTextureArrays1
+		MagFilter = "Linear"
+		MinFilter = "Linear"
+		MipFilter = "Linear"
+		SampleModeU = "Wrap"
+		SampleModeV = "Wrap"
+		type = "2darray"
+	}
+	TextureSampler TerrainMaterialArray
+	{
+		Ref = TerrainTextureArrays2
+		MagFilter = "Linear"
+		MinFilter = "Linear"
+		MipFilter = "Linear"
+		SampleModeU = "Wrap"
+		SampleModeV = "Wrap"
+		type = "2darray"
+	}
 }
 
 VertexStruct VS_OUTPUT
@@ -187,9 +187,9 @@ PixelShader =
 			float3 ColorMap = PdxTex2D( ColorTexture, float2( ColorMapCoords.x, 1.0 - ColorMapCoords.y ) ).rgb;
 			Diffuse = GetOverlay( Diffuse, ColorMap, 0.5 );
 			
-			//#if defined( ENABLE_SNOW )
-			//	ApplySnowMesh( Diffuse, Normal, Properties, WorldSpacePos, WinterMap, TerrainDiffuseArray, TerrainNormalsArray, TerrainMaterialArray );
-			//#endif
+			#if defined( ENABLE_SNOW )
+				ApplySnowMesh( Diffuse, Normal, Properties, WorldSpacePos, WinterMap, TerrainDiffuseArray, TerrainNormalsArray, TerrainMaterialArray );
+			#endif
 			
 			SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse, Normal, Properties.a, Properties.g, Properties.b );
 			SLightingProperties LightingProps = GetSunLightingProperties( WorldSpacePos, ShadowTexture );
@@ -201,7 +201,7 @@ PixelShader =
 			float3 Color = CalculateTerrainDualScenarioLighting( MaterialProps, LightingProps, CloudMask, EnvironmentMap );
 			Color = ApplyTerrainShadowTintWithClouds( Color, WorldSpacePos.xz, CloudMask, LightingProps._ShadowTerm, Normal, TerrainNormal );
 
-			Color = ApplyFogOfWar( Color, WorldSpacePos, FogOfWarAlpha );
+			Color = GH_ApplyAtmosphericEffects( Color, WorldSpacePos, FogOfWarAlpha );
 			Color = ApplyDistanceFog( Color, WorldSpacePos );
 			
 			DebugReturn( Color, MaterialProps, LightingProps, EnvironmentMap );

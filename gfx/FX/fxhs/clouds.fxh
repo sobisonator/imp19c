@@ -1,5 +1,5 @@
 Includes = {
-	"clouds_def.fxh"
+	"fxhs/clouds_def.fxh"
 }
 Code
 [[

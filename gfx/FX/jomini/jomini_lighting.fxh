@@ -3,7 +3,7 @@ Includes = {
 	"cw/shadow.fxh"
 	"jomini/jomini.fxh"
 	"constants.fxh"
-	"clouds_def.fxh"
+	"fxhs/clouds_def.fxh"
 }
 
 PixelShader = 

@@ -7,15 +7,15 @@ Includes = {
 	"cw/pdxterrain.fxh"
 	"jomini/jomini_fog.fxh"
 	"jomini/jomini_lighting.fxh"
-	"fog_of_war.fxh"
 	"jomini/jomini_water.fxh"
 	"jomini/jomini_gradient_borders.fxh"
 	"jomini/jomini_mapobject.fxh"
 	"constants.fxh"
 	"standardfuncsgfx.fxh"
 	"winter.fxh"
-	"clouds.fxh"
+	"fxhs/clouds.fxh"
 	"fxhs/terrain_tint.fxh"
+	"fxhs/gh_atmospheric.fxh"
 }
 
 PixelShader =
@@ -443,7 +443,7 @@ PixelShader =
 				Color = ApplyMapObjectsShadowTintWithClouds( Color, ColorMapCoords, CloudMask, LightingProps._ShadowTerm, Normal, TerrainNormal );
 
 				#if !defined( UNDERWATER ) && !defined( DISABLE_FOG_OF_WAR )
-					Color = ApplyFogOfWar( Color, Input.WorldSpacePos, FogOfWarAlpha );
+					Color = GH_ApplyAtmosphericEffects( Color, Input.WorldSpacePos, FogOfWarAlpha );
 					float vFogFactor = min(CalculateDistanceFogFactor( Input.WorldSpacePos ),0.6);
 					Color = ApplyDistanceFog( Color, vFogFactor );
 				#endif

@@ -10,7 +10,7 @@ Includes = {
 	"fxhs/clouds.fxh"
 	"fxhs/terrain_tint.fxh"
 	"fxhs/gh_atmospheric.fxh"
-	"winter.fxh"
+	#"winter.fxh"
 }
 
 PixelShader =
@@ -81,36 +81,36 @@ PixelShader =
 		SampleModeU = "Wrap"
 		SampleModeV = "Wrap"
 	}
-	TextureSampler TerrainDiffuseArray
-	{
-		Ref = TerrainTextureArrays0
-		MagFilter = "Linear"
-		MinFilter = "Linear"
-		MipFilter = "Linear"
-		SampleModeU = "Wrap"
-		SampleModeV = "Wrap"
-		type = "2darray"
-	}
-	TextureSampler TerrainNormalsArray
-	{
-		Ref = TerrainTextureArrays1
-		MagFilter = "Linear"
-		MinFilter = "Linear"
-		MipFilter = "Linear"
-		SampleModeU = "Wrap"
-		SampleModeV = "Wrap"
-		type = "2darray"
-	}
-	TextureSampler TerrainMaterialArray
-	{
-		Ref = TerrainTextureArrays2
-		MagFilter = "Linear"
-		MinFilter = "Linear"
-		MipFilter = "Linear"
-		SampleModeU = "Wrap"
-		SampleModeV = "Wrap"
-		type = "2darray"
-	}
+	# TextureSampler TerrainDiffuseArray
+	# {
+	# 	Ref = TerrainTextureArrays0
+	# 	MagFilter = "Linear"
+	# 	MinFilter = "Linear"
+	# 	MipFilter = "Linear"
+	# 	SampleModeU = "Wrap"
+	# 	SampleModeV = "Wrap"
+	# 	type = "2darray"
+	# }
+	# TextureSampler TerrainNormalsArray
+	# {
+	# 	Ref = TerrainTextureArrays1
+	# 	MagFilter = "Linear"
+	# 	MinFilter = "Linear"
+	# 	MipFilter = "Linear"
+	# 	SampleModeU = "Wrap"
+	# 	SampleModeV = "Wrap"
+	# 	type = "2darray"
+	# }
+	# TextureSampler TerrainMaterialArray
+	# {
+	# 	Ref = TerrainTextureArrays2
+	# 	MagFilter = "Linear"
+	# 	MinFilter = "Linear"
+	# 	MipFilter = "Linear"
+	# 	SampleModeU = "Wrap"
+	# 	SampleModeV = "Wrap"
+	# 	type = "2darray"
+	# }
 }
 
 VertexStruct VS_OUTPUT
@@ -187,9 +187,9 @@ PixelShader =
 			float3 ColorMap = PdxTex2D( ColorTexture, float2( ColorMapCoords.x, 1.0 - ColorMapCoords.y ) ).rgb;
 			Diffuse = GetOverlay( Diffuse, ColorMap, 0.5 );
 			
-			#if defined( ENABLE_SNOW )
-				ApplySnowMesh( Diffuse, Normal, Properties, WorldSpacePos, WinterMap, TerrainDiffuseArray, TerrainNormalsArray, TerrainMaterialArray );
-			#endif
+			// #if defined( ENABLE_SNOW )
+			// 	ApplySnowMesh( Diffuse, Normal, Properties, WorldSpacePos, WinterMap, TerrainDiffuseArray, TerrainNormalsArray, TerrainMaterialArray );
+			// #endif
 			
 			SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse, Normal, Properties.a, Properties.g, Properties.b );
 			SLightingProperties LightingProps = GetSunLightingProperties( WorldSpacePos, ShadowTexture );

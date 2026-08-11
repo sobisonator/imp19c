@@ -35,9 +35,7 @@ PixelShader =
 			{		
 				float4 Color = CalcRiverSurface( Input );
 				
-				// Color.rgb = ApplyFogOfWar( Color.rgb, Input.WorldSpacePos, FogOfWarAlpha );
 				Color.rgb = GH_ApplyAtmosphericEffects( Color.rgb, Input.WorldSpacePos, FogOfWarAlpha );
-
 				float vFogFactor = min(CalculateDistanceFogFactor( Input.WorldSpacePos ),0.6);
 				Color.rgb = ApplyDistanceFog( Color.rgb, vFogFactor );
 				

@@ -81,7 +81,7 @@ Code
 	// Water shadow scenario lighting parameters
 	#define WATER_OVERCAST_GLOSS_SCALE               0.1f
 	#define WATER_OVERCAST_SPECULAR_FACTOR           0.1f
-	#define WATER_OVERCAST_SUN_INTENSITY_MULTIPLIER  0.3f
+	#define WATER_OVERCAST_SUN_INTENSITY_MULTIPLIER  0.8f
 	#define WATER_OVERCAST_IBL_SCALE                 0.5f
 
 	#define ToWaterSunnySunDir                 		ToSunDir

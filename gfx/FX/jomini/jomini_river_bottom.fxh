@@ -125,7 +125,6 @@ PixelShader =
 
 			float FogOfWarAlphaValue = 1.0;
 			float CloudMask = GetCloudShadowMask( Input.WorldSpacePos.xz, FogOfWarAlphaValue );
-			float ColorDarken = 1.0f;
 
 			float ShadowTerm = 1.0;
 			

@@ -442,7 +442,7 @@ PixelShader =
 
 		void CalculateSunLight( SWaterLightingProperties Properties, float ShadowTerm, float3 ToSunDirection, float WaterSunIntensity, out float3 DiffuseLightOut, out float3 SpecularLightOut )
 		{
-			float3 sunIntensity = SunDiffuse * SunIntensity * ShadowTerm;
+			float3 sunIntensity = SunDiffuse * SunIntensity * ShadowTerm * WaterSunIntensity;
 			ImprovedBlinnPhong( sunIntensity, ToSunDirection, Properties, DiffuseLightOut, SpecularLightOut );
 		}
 

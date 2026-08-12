@@ -23,28 +23,25 @@ PixelShader = {
 
 		static const float3 GH_SNOWFALL_SNOW_COLOR = float3(0.9f, 0.95f, 1.0f);
 
-		static const float GH_SNOWFALL_MIN_WINTER_SEVERITY  = 0.05f;
+		static const float GH_SNOWFALL_MIN_WINTER_SEVERITY = 0.05f;
 		static const float GH_SNOWFALL_FULL_WINTER_SEVERITY = 0.5f;
 
-		static const float GH_SNOWFALL_MAX_CAMERA_Y  = 300.0f;
+		static const float GH_SNOWFALL_MAX_CAMERA_Y = 300.0f;
 		static const float GH_SNOWFALL_FULL_CAMERA_Y = 150.0f;
 
-		static const float GH_SNOWFALL_MAX_CAMERA_PITCH_COS  = 0.8f;
+		static const float GH_SNOWFALL_MAX_CAMERA_PITCH_COS = 0.8f;
 		static const float GH_SNOWFALL_FULL_CAMERA_PITCH_COS = 0.7f;
 
 		static const float GH_SNOWFALL_CEILING_Y = 50.0f;
-		static const float GH_SNOWFALL_FLOOR_Y   = 0.0f;
+		static const float GH_SNOWFALL_FLOOR_Y = 0.0f;
 
 		static const float GH_SNOWFALL_SOFT_CEILING_Y = 35.0f;
-		static const float GH_SNOWFALL_SOFT_FLOOR_Y   = 15.0f;
+		static const float GH_SNOWFALL_SOFT_FLOOR_Y = 15.0f;
 
 		// TODO: Add wind velocity and tile size variation between layers?
 
-		//static const float  GH_SNOWFALL_VERTICAL_SPEED = 20.0f;
-		static const float  GH_SNOWFALL_VERTICAL_SPEED = 10.0f;
-		
-		//static const float2 GH_SNOWFALL_WIND_VELOCITY  = float2(-10.0f, 2.5f);
-		static const float2 GH_SNOWFALL_WIND_VELOCITY  = float2(-4.0f, 1.0f);
+		static const float  GH_SNOWFALL_VERTICAL_SPEED = 20.0f;
+		static const float2 GH_SNOWFALL_WIND_VELOCITY  = float2(-10.0f, 2.5f);
 
 		static const float GH_SNOWFALL_LAYER_TILE_SIZE = 60.0f;
 
@@ -93,7 +90,7 @@ PixelShader = {
 
 		float3 GH_ApplySnowfall(float3 Color, float3 WorldSpacePos)
 		{
-			float WinterSeverity = GetWinterSeverityValue(WorldSpacePos.xz*WorldSpaceToTerrain0To1);
+			float WinterSeverity = GetWinterSeverityValue(WorldSpacePos.xz * WorldSpaceToTerrain0To1);
 			float CameraPitchCos = GH_GetCameraPitchCos();
 			if (WinterSeverity < GH_SNOWFALL_MIN_WINTER_SEVERITY
 				|| CameraPosition.y > GH_SNOWFALL_MAX_CAMERA_Y
@@ -102,38 +99,38 @@ PixelShader = {
 				return Color;
 			}
 
-			float3 ToCameraNorm                   = normalize(CameraPosition - WorldSpacePos);
-			float  CeilingParallaxDistance        = (GH_SNOWFALL_CEILING_Y - WorldSpacePos.y)/ToCameraNorm.y;
-			float  FloorParallaxDistance          = (GH_SNOWFALL_FLOOR_Y - WorldSpacePos.y)/ToCameraNorm.y;
+			float3 ToCameraNorm = normalize(CameraPosition - WorldSpacePos);
+			float CeilingParallaxDistance = (GH_SNOWFALL_CEILING_Y - WorldSpacePos.y)/ToCameraNorm.y;
+			float FloorParallaxDistance  = (GH_SNOWFALL_FLOOR_Y - WorldSpacePos.y)/ToCameraNorm.y;
 			float2 CeilingParallaxWorldSpacePosXZ = (WorldSpacePos + CeilingParallaxDistance*ToCameraNorm).xz;
-			float2 FloorParallaxWorldSpacePosXZ   = (WorldSpacePos + FloorParallaxDistance*ToCameraNorm).xz;
+			float2 FloorParallaxWorldSpacePosXZ = (WorldSpacePos + FloorParallaxDistance*ToCameraNorm).xz;
 
 			float SnowAlpha = 0.0f;
 
 			GH_UNROLL_EXACT(GH_SNOWFALL_LAYERS_COUNT)
 			for (int i = 0; i < GH_SNOWFALL_LAYERS_COUNT; i++)
 			{
-				float  LayerRelativeHeight            = 1.0f - frac(GH_SNOWFALL_VERTICAL_SPEED_MULTIPLIER*GlobalTime + float(i)*GH_SNOWFALL_LAYER_RELATIVE_TIME_SHIFT_STEP);
+				float LayerRelativeHeight = 1.0f - frac(GH_SNOWFALL_VERTICAL_SPEED_MULTIPLIER*GlobalTime + float(i)*GH_SNOWFALL_LAYER_RELATIVE_TIME_SHIFT_STEP);
 				float2 CurrentParallaxWorldSpacePosXZ = lerp(FloorParallaxWorldSpacePosXZ, CeilingParallaxWorldSpacePosXZ, LayerRelativeHeight);
 
 				CurrentParallaxWorldSpacePosXZ += GlobalTime*GH_SNOWFALL_WIND_VELOCITY;
 
-				float LayerHeight                 = GH_SNOWFALL_FLOOR_Y + LayerRelativeHeight*(GH_SNOWFALL_CEILING_Y - GH_SNOWFALL_FLOOR_Y);
-				float LayerAlphaFloorMultiplier   = smoothstep(GH_SNOWFALL_FLOOR_Y, GH_SNOWFALL_SOFT_FLOOR_Y, LayerHeight);
+				float LayerHeight = GH_SNOWFALL_FLOOR_Y + LayerRelativeHeight * (GH_SNOWFALL_CEILING_Y - GH_SNOWFALL_FLOOR_Y);
+				float LayerAlphaFloorMultiplier = smoothstep(GH_SNOWFALL_FLOOR_Y, GH_SNOWFALL_SOFT_FLOOR_Y, LayerHeight);
 				float LayerAlphaCeilingMultiplier = smoothstep(GH_SNOWFALL_CEILING_Y, GH_SNOWFALL_SOFT_CEILING_Y, LayerHeight);
-				float LayerAlphaMultiplier        = LayerAlphaFloorMultiplier*LayerAlphaCeilingMultiplier;
+				float LayerAlphaMultiplier = LayerAlphaFloorMultiplier * LayerAlphaCeilingMultiplier;
 
-				float2 BaseLayerUV     = mod(CurrentParallaxWorldSpacePosXZ, GH_SNOWFALL_LAYER_TILE_SIZE)/GH_SNOWFALL_LAYER_TILE_SIZE;
+				float2 BaseLayerUV = mod(CurrentParallaxWorldSpacePosXZ, GH_SNOWFALL_LAYER_TILE_SIZE)/GH_SNOWFALL_LAYER_TILE_SIZE;
 				float2 AdjustedLayerUV = BaseLayerUV + float(i)*GH_SNOWFALL_LAYER_UV_OFFSET_STEP;
 
 				SnowAlpha += LayerAlphaMultiplier*PdxTex2D(GH_SnowfallLayer, AdjustedLayerUV).a;
 			}
 
-			float SeverityAlphaMultiplier     = smoothstep(GH_SNOWFALL_MIN_WINTER_SEVERITY, GH_SNOWFALL_FULL_WINTER_SEVERITY, WinterSeverity);
+			float SeverityAlphaMultiplier = smoothstep(GH_SNOWFALL_MIN_WINTER_SEVERITY, GH_SNOWFALL_FULL_WINTER_SEVERITY, WinterSeverity);
 			float CameraHeightAlphaMultiplier = 1.0f - smoothstep(GH_SNOWFALL_FULL_CAMERA_Y, GH_SNOWFALL_MAX_CAMERA_Y, CameraPosition.y);
-			float CameraPitchAlphaMultiplier  = 1.0f - smoothstep(GH_SNOWFALL_FULL_CAMERA_PITCH_COS, GH_SNOWFALL_MAX_CAMERA_PITCH_COS, CameraPitchCos);
+			float CameraPitchAlphaMultiplier = 1.0f - smoothstep(GH_SNOWFALL_FULL_CAMERA_PITCH_COS, GH_SNOWFALL_MAX_CAMERA_PITCH_COS, CameraPitchCos);
 
-			SnowAlpha *= SeverityAlphaMultiplier*CameraHeightAlphaMultiplier*CameraPitchAlphaMultiplier;
+			SnowAlpha *= SeverityAlphaMultiplier * CameraHeightAlphaMultiplier * CameraPitchAlphaMultiplier;
 
 			return lerp(Color, GH_SNOWFALL_SNOW_COLOR, saturate(SnowAlpha));
 		}

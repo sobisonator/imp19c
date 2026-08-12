@@ -1,5 +1,4 @@
 Includes = {
-	"cw/camera.fxh"
 	"jomini/jomini_fog.fxh"
 	"standardfuncsgfx.fxh"
 	"fxhs/gh_atmospheric.fxh"

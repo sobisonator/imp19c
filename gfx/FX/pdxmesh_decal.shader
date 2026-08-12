@@ -10,7 +10,7 @@ Includes = {
 	"fxhs/clouds.fxh"
 	"fxhs/terrain_tint.fxh"
 	"fxhs/gh_atmospheric.fxh"
-	#"winter.fxh"
+	"winter.fxh"
 }
 
 PixelShader =
@@ -81,6 +81,7 @@ PixelShader =
 		SampleModeU = "Wrap"
 		SampleModeV = "Wrap"
 	}
+
 	# TextureSampler TerrainDiffuseArray
 	# {
 	# 	Ref = TerrainTextureArrays0
@@ -173,8 +174,16 @@ PixelShader =
 			float4 Properties = PdxTex2D( SpecularMap, UV );
 			float4 NormalPacked = PdxTex2D( NormalMap, UV );
 			float3 NormalSample = UnpackRRxGNormal( NormalPacked );
-			
 			float3 Normal = CalculateNormal( WorldSpacePos.xz );
+
+			float FogOfWarAlphaValue = 1.0;
+			float CloudMask = GetCloudShadowMask( WorldSpacePos.xz, FogOfWarAlphaValue );
+			float3 TerrainNormal = CalculateNormal( WorldSpacePos.xz );
+
+			float DecalNormalBoost = lerp(1.0f, 1.45f, smoothstep(0.25f, 1.0f, saturate(CloudMask)));
+			NormalSample.xy *= DecalNormalBoost;
+			NormalSample.z = sqrt( saturate(1.0f - dot(NormalSample.xy, NormalSample.xy)) );
+
 			#ifdef TANGENT_SPACE_NORMALS
 				float3 Tangent = cross( Bitangent, Normal );
 				float3x3 TBN = Create3x3( normalize( Tangent ), normalize( Bitangent ), Normal );
@@ -182,21 +191,21 @@ PixelShader =
 			#else
 				Normal = ReorientNormal( Normal, NormalSample );
 			#endif
-			
+
+			float3 DiffuseSnow = Diffuse;
+
+			#if defined( ENABLE_SNOW )
+				ApplySnowMesh( Diffuse, Normal, Properties, WorldSpacePos, ColorTexture, WinterMap, DetailTextures, NormalTextures, MaterialTextures );
+			#endif
+
+			Diffuse = lerp( DiffuseSnow, Diffuse, DiffuseSnow.g );
+
 			float2 ColorMapCoords = WorldSpacePos.xz * WorldSpaceToTerrain0To1;
 			float3 ColorMap = PdxTex2D( ColorTexture, float2( ColorMapCoords.x, 1.0 - ColorMapCoords.y ) ).rgb;
 			Diffuse = GetOverlay( Diffuse, ColorMap, 0.5 );
-			
-			// #if defined( ENABLE_SNOW )
-			// 	ApplySnowMesh( Diffuse, Normal, Properties, WorldSpacePos, WinterMap, TerrainDiffuseArray, TerrainNormalsArray, TerrainMaterialArray );
-			// #endif
-			
+
 			SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse, Normal, Properties.a, Properties.g, Properties.b );
 			SLightingProperties LightingProps = GetSunLightingProperties( WorldSpacePos, ShadowTexture );
-			
-			float FogOfWarAlphaValue = 1.0;
-			float CloudMask = GetCloudShadowMask( WorldSpacePos.xz, FogOfWarAlphaValue );
-			float3 TerrainNormal = CalculateNormal( WorldSpacePos.xz );
 
 			float3 Color = CalculateTerrainDualScenarioLighting( MaterialProps, LightingProps, CloudMask, EnvironmentMap );
 			Color = ApplyTerrainShadowTintWithClouds( Color, WorldSpacePos.xz, CloudMask, LightingProps._ShadowTerm, Normal, TerrainNormal );
@@ -302,6 +311,8 @@ Effect decal_world
 {
 	VertexShader = "VS_standard"
 	PixelShader = "PS_world"
+
+	Defines = { "ENABLE_SNOW" }
 }
 
 Effect new_decal_world
@@ -309,7 +320,7 @@ Effect new_decal_world
 	VertexShader = "VS_standard"
 	PixelShader = "PS_world"
 
-	Defines = { "NEW_CITY_DECAL" }
+	Defines = { "NEW_CITY_DECAL" "ENABLE_SNOW" }
 }
 
 Effect decal_local
@@ -317,5 +328,5 @@ Effect decal_local
 	VertexShader = "VS_standard"
 	PixelShader = "PS_local"
 	
-	Defines = { "TANGENT_SPACE_NORMALS" }
+	Defines = { "TANGENT_SPACE_NORMALS" "ENABLE_SNOW" }
 }

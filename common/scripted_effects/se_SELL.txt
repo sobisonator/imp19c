@@ -1478,8 +1478,14 @@ SELL_set_TZ_prices_by_country_governorship = {
 	var:trade_center = {
 		if = {
 			limit = {
-				NOT = {
-					has_variable = total_demand_TZ_$tradegood$
+				OR = {
+					NOT = { has_variable = total_demand_TZ_$tradegood$ }
+					trigger_if = {
+						limit = {
+							has_variable = total_demand_TZ_$tradegood$
+						}
+						var:total_demand_TZ_$tradegood$ = 0
+					}
 				}
 			}
 			set_variable = {
@@ -1489,8 +1495,14 @@ SELL_set_TZ_prices_by_country_governorship = {
 		}
 		if = {
 			limit = {
-				NOT = {
-					has_variable = total_supply_TZ_$tradegood$
+				OR = {
+					NOT = { has_variable = total_supply_TZ_$tradegood$ }
+					trigger_if = {
+						limit = {
+							has_variable = total_supply_TZ_$tradegood$
+						}
+						var:total_supply_TZ_$tradegood$ = 0
+					}
 				}
 			}
 			set_variable = {
@@ -1506,8 +1518,10 @@ SELL_set_TZ_prices_by_country_governorship = {
 
 		change_variable = {
 			name = total_supply_TZ_$tradegood$
-			add = scope:contributing_governorship.TRADE_governorship_for_export_internal_$tradegood$
+			add = scope:contributing_governorship.TRADE_governorship_for_export_internal_$tradegood$ # Div/0?
 		}
+		# Add the stockpile as well, so that if goods are being stockpiled but not sold,
+		# they become cheaper
 		change_variable = {
 			name = total_supply_TZ_$tradegood$
 			add = scope:contributing_governorship.var:$tradegood$_stockpile

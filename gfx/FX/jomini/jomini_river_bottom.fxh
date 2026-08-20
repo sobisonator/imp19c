@@ -1,5 +1,8 @@
 Includes = {
 	"jomini/jomini_river.fxh"
+	"cw/pdxterrain.fxh"
+	"fxhs/clouds.fxh"
+	"fxhs/terrain_tint.fxh"
 }
 
 PixelShader =
@@ -120,8 +123,18 @@ PixelShader =
 			SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse.rgb, Normal, Properties.a, Properties.g, Properties.b );
 			SLightingProperties LightingProps = GetSunLightingProperties( WorldSpacePos, ShadowTexture );
 
-			float3 Color = CalculateSunLighting( MaterialProps, LightingProps, EnvironmentMap );
+			float FogOfWarAlphaValue = 1.0;
+			float CloudMask = GetCloudShadowMask( Input.WorldSpacePos.xz, FogOfWarAlphaValue );
+
+			float ShadowTerm = 1.0;
 			
+			#ifdef SHADOWS_ENABLED
+			ShadowTerm = CalculateShadow( Input.ShadowProj, ShadowMap );
+			#endif
+
+			float3 Color = CalculateTerrainDualScenarioLighting( MaterialProps, LightingProps, CloudMask, EnvironmentMap );
+			Color = ApplyTerrainShadowTintWithClouds( Color, Input.WorldSpacePos.xz, CloudMask, ShadowTerm );
+
 			float FadeToConnection = saturate( ( Input.DistanceToMain - 0.6f * abs(Input.UV.y-0.5f) ) * 5.0f );
 			float EdgeFade = saturate( Depth * 13.0f );
 			float Alpha = FadeOut * FadeToConnection * EdgeFade;

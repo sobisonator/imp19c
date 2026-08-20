@@ -6,6 +6,12 @@ Includes = {
 	"standardfuncsgfx.fxh"
 	"winter.fxh"
 	"terrain.fxh"
+	"fxhs/clouds.fxh"
+}
+
+ConstantBuffer( PdxTerrainConstants )
+{
+	float2		WorldSpaceToTerrain0To1;
 }
 
 PixelShader =
@@ -84,9 +90,8 @@ PixelShader =
 		Output = "PDX_COLOR"
 		Code
 		[[
-		
 			#ifndef PDX_OSX // [ED] Note: Definitely exceeds the limit of 16 samplers on mac
-				float4 CalcIce( float3 WorldSpacePos, float Depth )
+				float4 CalcIce( float3 WorldSpacePos, float Depth, float3 GlossMap, float3 CloudShadowMask )
 				{
 					float4 Color = vec4(0.0f);
 					float Ice = GetSnowAmountForWater( float3(0,1,0), WorldSpacePos, WinterMap );
@@ -114,7 +119,11 @@ PixelShader =
 						float3 DiffuseLight = vec3(0.0);
 						float3 SpecularLight = vec3(0.0);
 						float ShadowTerm = 1.0f;
-						CalculateSunLight( lightingProperties, ShadowTerm, WaterToSunDir, DiffuseLight, SpecularLight );
+						float3 WaterToSunDir = GetWaterToSunDirection( CloudShadowMask );
+						float WaterSunIntensity = GetWaterSunIntensity( CloudShadowMask );
+						float SunIntensityMask = smoothstep( 0.05f, 0.1f, GlossMap );
+
+						CalculateSunLight( lightingProperties, ShadowTerm, WaterToSunDir, WaterSunIntensity * SunIntensityMask, DiffuseLight, SpecularLight );
 						//CalculatePointLights( lightingProperties, LightDataMap, LightIndexMap, DiffuseLight, SpecularLight );
 						SpecularLight += GetReflectiveColor( lightingProperties, ReflectionCubeMap, WaterCubemapIntensity );
 
@@ -129,11 +138,18 @@ PixelShader =
 			{
 				float Depth;
 				float4 Water = CalcWater( Input, Depth );
+				float4 WaterColorAndSpec = PdxTex2D( WaterColorTexture, Input.UV01 );
+				float GlossMap = WaterColorAndSpec.a;
+				float ShadowTerm = 1.0f;
+				// float FogOfWarAlphaValue = PdxTex2D( FogOfWarAlpha, Input.WorldSpacePos.xz * WorldSpaceToTerrain0To1 ).r;
+				float FogOfWarAlphaValue = 1.0;
+				float CloudShadowMask = GetCloudShadowMask( Input.WorldSpacePos.xz, FogOfWarAlphaValue );
+				CloudShadowMask = max( 1.0f - ShadowTerm, CloudShadowMask );
 
 				// Ice
 				#ifndef PDX_OSX // [ED] Note: Definitely exceeds the limit of 16 samplers on mac
 					#ifdef ENABLE_SNOW
-						float4 Ice = CalcIce( Input.WorldSpacePos, Depth );
+						float4 Ice = CalcIce( Input.WorldSpacePos, Depth, GlossMap, CloudShadowMask );
 						Ice.rgb *= float3( 0.6, 0.6, 1.0 );
 						Water.rgb = lerp( Water.rgb, Ice.rgb, Ice.a );
 					#endif
@@ -150,6 +166,8 @@ PixelShader =
 						ApplyTerrainColor( Water.rgb, FlatMap, BorderColor, BorderPostLightingBlend, ColorMapCoords );
 					#endif
 				#endif
+
+				// Water.rgb *= 1 - ( CloudShadowMask * 0.2 );
 
 				// FoW and Fog
 				Water.rgb = ApplyFogOfWarMultiSampled( Water.rgb, Input.WorldSpacePos, FogOfWarAlpha );

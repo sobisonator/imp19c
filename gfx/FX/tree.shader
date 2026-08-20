@@ -12,8 +12,10 @@ Includes = {
 	"jomini/jomini_lighting.fxh" #0 cb ( 1 from jomini.fxh, discarded )
 	"jomini/jomini_gradient_borders.fxh" #2 cb's (1 from jomini/jomini_colormap_constants.fxh)
 	"jomini/jomini_mapobject.fxh" #0 cb
-	"fog_of_war.fxh" #2 cb (includes jomini_fog_of_war.fxh which as 1 cb)
 	"winter.fxh" #1 cb
+	"fxhs/clouds.fxh"
+	"fxhs/terrain_tint.fxh"
+	"fxhs/gh_atmospheric.fxh"
 }
 
 PixelShader =
@@ -331,7 +333,8 @@ PixelShader =
 				
 				//only leaves (emissive 1.0) should be tinted  
 				float Emissive =  PdxTex2D( NormalMap, Input.UV0 ).b;
-				Diffuse.rgb = lerp( Diffuse.rgb, GetOverlay( Diffuse.rgb, PdxTex2DLod0( TreeTintMap, TintUV ).rgb, 1.0f - Input.UV1.y ), Emissive );
+				// Diffuse.rgb = lerp( Diffuse.rgb, GetOverlay( Diffuse.rgb, PdxTex2DLod0( TreeTintMap, TintUV ).rgb, 1.0f - Input.UV1.y ), Emissive );
+				Diffuse.rgb = lerp( Diffuse.rgb, 1.5 * GetOverlay( Diffuse.rgb, PdxTex2DLod0( TreeTintMap, TintUV ).rgb, 1.0f - Input.UV1.y ), Emissive );
 				
 				#if defined( ENABLE_SNOW )
 					ApplySnowTree( Diffuse.rgb, Normal, Properties, Input.WorldSpacePos, ColorTexture, WinterMap, DetailTextures, NormalTextures, MaterialTextures ); // included: winter.fxh
@@ -345,12 +348,30 @@ PixelShader =
 				
 				SMaterialProperties MaterialProps = GetMaterialProperties( Diffuse.rgb, Normal, Properties.a, Properties.g, Properties.b ); // included: cw/lighting.fxh
 				SLightingProperties LightingProps = GetSunLightingProperties( Input.WorldSpacePos, ShadowTexture ); // included: jomini/jomini_lighting.fxh
-	
-				float3 Color = CalculateSunLighting( MaterialProps, LightingProps, EnvironmentMap );
-			
-				Color = lerp( Color, BorderColor, BorderPostLightingBlend );
+
+				float FogOfWarAlphaValue = 1.0;
+				float CloudMask = GetCloudShadowMask( Input.WorldSpacePos.xz, FogOfWarAlphaValue );
+
+				float3 ReorientedNormal = Normal;
+				float ShadowTerm = 1.0f;
 				
-				Color = ApplyFogOfWar( Color, Input.WorldSpacePos, FogOfWarAlpha ); // included :jomini/jomini_fog_of_war.fxh
+				#ifdef SHADOWS_ENABLED
+					ShadowTerm = CalculateShadow( Input.ShadowProj, ShadowMap );
+				#endif
+
+				float2 MapCoords = Input.WorldSpacePos.xz * WorldSpaceToTerrain0To1;
+				SShadowTintData ShadowTintData = GetShadowTintData( MapCoords );
+				float3 TerrainNormal = CalculateNormal( Input.WorldSpacePos.xz );
+				float TerrainShadowTerm = GetTerrainShadowTintMask( ShadowTintData, LightingProps._ToLightDir, LightingProps._ShadowTerm, TerrainNormal );
+
+				LightingProps._ShadowTerm = LightingProps._ShadowTerm * ( 1.0f - TerrainShadowTerm );
+
+				float3 Color = CalculateTerrainDualScenarioLighting( MaterialProps, LightingProps, CloudMask, EnvironmentMap );
+				Color = ApplyTreeShadowTintWithClouds( Color, ShadowTintData, CloudMask, ShadowTerm, Normal, TerrainNormal );
+
+				Color = lerp( Color, BorderColor, BorderPostLightingBlend );
+
+				Color = GH_ApplyAtmosphericEffects( Color, Input.WorldSpacePos, FogOfWarAlpha );
 
 				float vFogFactor = min(CalculateDistanceFogFactor( Input.WorldSpacePos ),0.6);
 				Color = ApplyDistanceFog( Color, vFogFactor );

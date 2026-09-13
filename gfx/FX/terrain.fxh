@@ -129,15 +129,15 @@ PixelShader =
 		{
 			float MinValue = Value;
 			float MaxValue = MinValue + 1.0;
-			float Min = (MinValue * 100.0 / 255.0) * 0.001;
-			float Max = (MaxValue * 100.0 / 255.0) * 0.001;
+			float Min = (MinValue / 255.0) * 0.1;
+			float Max = (MaxValue / 255.0) * 0.1;
 			float Alpha = smoothstep(Min, Max, clamp(Color, Min, Max));
 			return Alpha;
 		}
 		float4 MixLayerWater(float MinValue, float MaxValue, float Color)
 		{
-			float Min = (MinValue * 100.0 / 255.0) * 0.001;
-			float Max = (MaxValue * 100.0 / 255.0) * 0.001;
+			float Min = (MinValue / 255.0) * 0.1;
+			float Max = (MaxValue / 255.0) * 0.1;
 			float Alpha = smoothstep(Min, Max, clamp(Color, Min, Max));
 			return Alpha;
 		}
@@ -177,7 +177,7 @@ PixelShader =
 			float3 BaseAlphaLayer03 = (0.0, 0.0, 0.0);
 			float3 BaseAlphaLayerFinish = GroundColor;
 
-			for (float i = StartStep; i < 60; i++ ) {
+			for (float i = StartStep; i < 64; i++ ) {
 				BaseAlphaLayer01 = MixLayer(i * Step, Color.r);
 				BaseAlphaLayer02 = MixLayer( (i * Step) + (Step * 0.5), Color.r);
 				BaseAlphaLayer03 = lerp(GroundColor * 1.75, BorderColor, BaseAlphaLayer01 - BaseAlphaLayer02);

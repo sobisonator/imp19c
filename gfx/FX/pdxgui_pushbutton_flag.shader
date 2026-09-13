@@ -2,7 +2,7 @@ Includes = {
 	"cw/pdxgui.fxh"
 	"cw/pdxgui_sprite.fxh"
 	"standardfuncsgfx.fxh"
-	"gui_flags.fxh"
+	"fxhs/gui_flags.fxh"
 }
 
 
@@ -54,8 +54,8 @@ PixelShader =
 				UV1 = CreateWaveUV( UV1, Wave );
 				float2 UV2 = SettingsUV1ToFlag( Input.UV0 );
 				UV2 = CreateWaveUV( UV2, Wave );
-				float2 UV3 = SettingsUV2ToFlag( Input.UV0 );
-				UV3 = CreateWaveUV( UV3, Wave );
+				float2 UV3 = SettingsUV0ToFlag( Input.UV0 );
+				UV3 = CreateWaveUV( UV3, Wave ) * 2.0;
 				float2 UV4 = float2((Input.UV0.x * 0.5) + 0.5, Input.UV0.y);
 				UV4 = CreateWaveUV( UV4, Wave );
 

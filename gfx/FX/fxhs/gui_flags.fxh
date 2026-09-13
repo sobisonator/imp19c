@@ -38,27 +38,6 @@ PixelShader =
 			UV.x += 0.125 * FlagShape;
 			return UV;
 		}
-		float2 SettingsUV2ToFlag( float2 UV ) {
-			float FlagShape = SpriteFramesTypeBlendMode[4].x;
-			UV *= 2.0;
-			if ( FlagShape == 2.0 )
-			{
-				UV.x *= 1.5;
-				UV.x += -0.25;
-			}
-			if ( FlagShape == 4.0 )
-			{
-				UV.y *= 1.5;
-				UV.y += -0.25;
-			}
-			if ( FlagShape == 7.0 )
-			{
-				UV.x *= 2.0;
-				UV.x += -0.5;
-			}
-
-			return UV;
-		}
 		float4 CreateStyleToFlag( float4 OutColor, float AlphaColor, float4 StyleColor, float2 UV, float Wave) {
 			OutColor = Blend( OutColor, StyleColor, 0.6, AlphaColor, 2);
 			// OutColor = Blend( OutColor, StyleColor, 0.4, AlphaColor, 1);

@@ -2,7 +2,7 @@ Includes = {
 	"cw/pdxgui.fxh"
 	"cw/pdxgui_sprite.fxh"
 	"standardfuncsgfx.fxh"
-	"gui_flags.fxh"
+	"fxhs/gui_flags.fxh"
 }
 
 
@@ -52,7 +52,7 @@ PixelShader =
 				float Wave = CreateWave(Input.UV0, GlobalTime);
 				float2 UV1 = SettingsUV0ToFlag( Input.UV0 );
 				float2 UV2 = SettingsUV1ToFlag( Input.UV0 );
-				float2 UV3 = SettingsUV2ToFlag( Input.UV0 );
+				float2 UV3 = SettingsUV0ToFlag( Input.UV0 ) * 2.0;
 
 				float4 OutColor = SampleSpriteTexture( Texture, UV1, 0 );
 

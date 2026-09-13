@@ -52,8 +52,17 @@ PixelShader =
 				float Wave = CreateWave(Input.UV0, GlobalTime);
 				float2 UV1 = SettingsUV0ToFlag( Input.UV0 );
 				float2 UV2 = SettingsUV1ToFlag( Input.UV0 );
+				float2 UV3 = SettingsUV2ToFlag( Input.UV0 );
 
 				float4 OutColor = SampleSpriteTexture( Texture, UV1, 0 );
+
+				float4 SubjectColor = SampleSpriteTexture( ModifyTexture4, UV3, 5 );
+				float4 AlphaSubjectColor = SampleSpriteTexture( ModifyTexture5, float2((Input.UV0.x * 0.5) + 0.5, Input.UV0.y), 6);
+				if ( SpriteFramesTypeBlendMode[6].x == 0.0 )
+				{
+					AlphaSubjectColor.a = 0.0;
+				}
+				OutColor = lerp(OutColor, SubjectColor, AlphaSubjectColor.a);
 
 				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV2, 1);
 				OutColor = float4(OutColor.rgb, AlphaColor.a);

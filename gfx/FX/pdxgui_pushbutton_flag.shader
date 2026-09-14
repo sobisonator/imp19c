@@ -56,7 +56,7 @@ PixelShader =
 				UV2 = CreateWaveUV( UV2, Wave );
 				float2 UV3 = SettingsUV0ToFlag( Input.UV0 );
 				UV3 = CreateWaveUV( UV3, Wave ) * 2.0;
-				float2 UV4 = float2((Input.UV0.x * 0.5) + 0.5, Input.UV0.y);
+				float2 UV4 = Input.UV0;
 				UV4 = CreateWaveUV( UV4, Wave );
 
 				float4 OutColor = SampleSpriteTexture( Texture, UV1, 0 );

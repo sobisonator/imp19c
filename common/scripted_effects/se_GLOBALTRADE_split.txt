@@ -29,8 +29,9 @@
 	# Put price calculations here
 	#####
 	#
-	GT_set_tradegood_price_all_TZs_all_tradegoods = { type = $type$ }
-	GT_split_get_global_import_unit_price_all = { type = $type$ }
+	#GT_set_tradegood_price_all_TZs_all_tradegoods = { type = $type$ }
+	#GT_split_get_global_import_unit_price_all = { type = $type$ }
+	GT_split_get_global_import_unit_price_basic = { type = $type$ }
 	GT_get_all_customs_union_for_sale_as_percentage_of_global = { type = $type$ }
 	every_country = {
 		GT_split_get_country_global_market_penetration_all = { type = $type$ }
@@ -2463,6 +2464,54 @@ GT_split_get_global_import_unit_price_all = {
 	every_tradegood_$type$_complex = {
 		APPLY = GT_split_get_global_import_unit_price_tradegood
 	}
+}
+
+GT_split_get_global_import_unit_price_basic = {
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_get_global_import_unit_price_basic_tradegood
+	}
+}
+
+GT_split_get_global_import_unit_price_basic_tradegood = {
+	# Scope: Random country
+	# Function: More efficient method of creating a global import price
+	set_global_variable = {
+		name = global_demand_$tradegood$
+		value = 0
+	}
+	set_global_variable = {
+		name = global_supply_$tradegood$
+		value = 0
+	}
+	every_country = {
+		change_global_variable = {
+			name = global_demand_$tradegood$
+			add = DEMAND_country_$tradegood$
+		}
+		change_global_variable = {
+			name = global_supply_$tradegood$
+			add = GOODS_national_production_$tradegood$
+		}
+	}
+	if = {
+		limit = {
+			global_var:global_supply_$tradegood$ > 0
+		}
+		set_global_variable = {
+			name = global_base_import_price_$tradegood$
+			value = {
+				value = global_var:global_demand_$tradegood$
+				divide = value = global_var:global_supply_$tradegood$
+			}
+		}
+	}
+	else = {
+		set_global_variable = {
+			name = global_base_import_price_$tradegood$
+			value = 0.001
+		}
+	}
+	
 }
 
 GT_split_get_global_import_unit_price_tradegood = {
@@ -5783,17 +5832,12 @@ GT_set_tradegood_price = {
 			name = local_price_$tradegood$
 			value = {
 				value = global_var:$tradezone$_total_order_size_$tradegood$
-				min = 0.001
-				if = {
-					limit = {
-						global_var:$tradezone$_stockpile_$tradegood$ > 0
-					}
-					divide = {
-						value = global_var:$tradezone$_stockpile_$tradegood$
-						min = 0.001
-					}
+				min = 10 # TODO: Make this a script value
+				divide = {
+					value = global_var:$tradezone$_stockpile_$tradegood$
+					min = 0.001
 				}
-				multiply = 0.6 # The yearly total of all trade should be loosely in the range of 15-30% of a country's GDP, thus the quarterly total about 4% - 8%
+				#multiply = 0.6 # The yearly total of all trade should be loosely in the range of 15-30% of a country's GDP, thus the quarterly total about 4% - 8%
 				if = {
 					limit = {
 						OR = {
@@ -5832,7 +5876,7 @@ GT_set_tradegood_price = {
 			PRICE_factor_raw_input_costs_$tradegood$ = yes
 
 		}
-		# Factor in elasticity
+		# Elasticity handled in DEMAND scripts
 	}
 }
 

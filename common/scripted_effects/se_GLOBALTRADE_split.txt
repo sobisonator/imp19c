@@ -1,5 +1,8 @@
 ﻿GT_split_do_global_trade_split = {
 	set_global_variable = global_trade_triggered
+	every_country = {
+		GT_split_cache_demand_country = { type = $type$ }
+	}
 	GT_split_reset_global_TZ_variables = { type = $type$ }
 	
 	# GT_split_reset_all_TZ_stockpiles = { type = $type$ } # OBSOLETE, global var $tradezone$_stockpile_$tradegood$ is used instead
@@ -31,7 +34,7 @@
 	#
 	#GT_set_tradegood_price_all_TZs_all_tradegoods = { type = $type$ }
 	#GT_split_get_global_import_unit_price_all = { type = $type$ }
-	GT_split_get_global_import_unit_price_basic = { type = $type$ }
+	GT_split_get_global_import_unit_price_basic = { type = $type$ } # every_country
 	GT_get_all_customs_union_for_sale_as_percentage_of_global = { type = $type$ }
 	every_country = {
 		GT_split_get_country_global_market_penetration_all = { type = $type$ }
@@ -79,6 +82,19 @@
 	}
 
 	# GT_split_log_trade_balance = yes # TODO: Implement a way to save previous values so that it can be charted on a graph
+}
+
+GT_split_cache_demand_country = {
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_cache_demand_country_tradegood
+	}
+}
+
+GT_split_cache_demand_country_tradegood = {
+	set_variable = {
+		name = DEMAND_country_$tradegood$_cached
+		value = DEMAND_country_$tradegood$
+	}
 }
 
 GT_split_cache_DEMAND_reserve_accumulation_basis_svalues = {
@@ -1758,7 +1774,7 @@ GT_split_get_country_global_market_penetration_tradegood = {
 	# Function: Get the penetration of the global market as a factor of the market penetration of all TZs contributing to the global stockpile for $tradegood$
 	if = {
 		limit = {
-			DEMAND_country_$tradegood$ = 0
+			var:DEMAND_country_$tradegood$_cached = 0
 		}
 		set_variable = {
 			name = country_global_market_penetration_$tradegood$
@@ -1999,7 +2015,7 @@ GT_split_get_order_size_modifier_tradegood = {
 	# Function: Check if the nationwide demand for $tradegood$ is greater than can be fulfilled by the country's global market access, and if so set the modifier for all order sizes to the appropriate percentage of the market access. All orders for $tradegood$ will be reduced by this amount
 	if = {
 		limit = {
-			DEMAND_country_$tradegood$ > 0
+			var:DEMAND_country_$tradegood$_cached > 0
 		}
 		set_variable = {
 			name = order_size_modifier_$tradegood$
@@ -2020,7 +2036,7 @@ GT_split_get_order_size_modifier_tradegood = {
 			}
 			change_variable = {
 				name = order_size_modifier_$tradegood$
-				divide = DEMAND_country_$tradegood$
+				divide = var:DEMAND_country_$tradegood$_cached
 			}
 
 			# Add a bonus to order size modifier equivalent to the % of demand satisfied  by the production of $tradegood$ in this country's customs union
@@ -2028,7 +2044,7 @@ GT_split_get_order_size_modifier_tradegood = {
 				name = order_size_modifier_bonus_CU_prod_$tradegood$
 				value = {
 					value = var:customs_union_scope.var:customs_union_$tradegood$_for_sale
-					divide = DEMAND_country_$tradegood$
+					divide = var:DEMAND_country_$tradegood$_cached
 				}
 			}
 			change_variable = {
@@ -2466,15 +2482,7 @@ GT_split_get_global_import_unit_price_all = {
 	}
 }
 
-GT_split_get_global_import_unit_price_basic = {
-	every_tradegood_$type$_complex = {
-		APPLY = GT_split_get_global_import_unit_price_basic_tradegood
-	}
-}
-
-GT_split_get_global_import_unit_price_basic_tradegood = {
-	# Scope: Random country
-	# Function: More efficient method of creating a global import price
+GT_split_set_global_demand_and_supply = {
 	set_global_variable = {
 		name = global_demand_$tradegood$
 		value = 0
@@ -2483,16 +2491,9 @@ GT_split_get_global_import_unit_price_basic_tradegood = {
 		name = global_supply_$tradegood$
 		value = 0
 	}
-	every_country = {
-		change_global_variable = {
-			name = global_demand_$tradegood$
-			add = DEMAND_country_$tradegood$
-		}
-		change_global_variable = {
-			name = global_supply_$tradegood$
-			add = GOODS_national_production_$tradegood$
-		}
-	}
+}
+
+GT_split_update_global_price_from_demand_and_supply = {
 	if = {
 		limit = {
 			global_var:global_supply_$tradegood$ > 0
@@ -2501,7 +2502,7 @@ GT_split_get_global_import_unit_price_basic_tradegood = {
 			name = global_base_import_price_$tradegood$
 			value = {
 				value = global_var:global_demand_$tradegood$
-				divide = value = global_var:global_supply_$tradegood$
+				divide = global_var:global_supply_$tradegood$
 			}
 		}
 	}
@@ -2511,7 +2512,33 @@ GT_split_get_global_import_unit_price_basic_tradegood = {
 			value = 0.001
 		}
 	}
-	
+}
+
+GT_split_get_global_import_unit_price_basic = {
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_set_global_demand_and_supply
+	}
+	every_country = {
+		every_tradegood_$type$_complex = {
+			APPLY = GT_split_get_global_import_unit_price_basic_country
+		}
+	}
+	every_tradegood_$type$_complex = {
+		APPLY = GT_split_update_global_price_from_demand_and_supply
+	}
+}
+
+GT_split_get_global_import_unit_price_basic_country = {
+	# Scope: Random country
+	# Function: More efficient method of creating a global import price
+	change_global_variable = {
+		name = global_demand_$tradegood$
+		add = var:DEMAND_country_$tradegood$_cached
+	}
+	change_global_variable = {
+		name = global_supply_$tradegood$
+		add = GOODS_national_production_$tradegood$
+	}
 }
 
 GT_split_get_global_import_unit_price_tradegood = {

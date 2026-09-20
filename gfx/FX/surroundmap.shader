@@ -4,6 +4,7 @@ Includes = {
 	"standardfuncsgfx.fxh"
 	"jomini/jomini_fog.fxh"
 	"jomini/jomini_lighting.fxh"
+	"fxhs/debug.fxh"
 }
 
 
@@ -239,7 +240,10 @@ PixelShader =
 
 				float FinalAlpha = smoothstep( MinCloudAlpha, MaxCloudAlpha, Alpha ) - saturate(1.0 - Depth);
 				FinalAlpha = lerp( FinalAlpha, ZoomedOut.a, FlatMapLerp ) * Mask;
-				// FinalAlpha = 0.0;
+				if ( DEBUG == 1.0 )
+				{
+					FinalAlpha = 0.0;
+				}
 				return float4( Color, saturate( FinalAlpha ) );
 			}
 		]]
@@ -256,7 +260,10 @@ PixelShader =
 				float2 UV = Input.uv;
 				float Mask = PdxTex2D( SurroundMask, UV ).r;
 
-				// Mask = 0.0;
+				if ( DEBUG == 1.0 )
+				{
+					Mask = 0.0;
+				}
 				return float4( ShadowColor, Mask * ( 1.0 - saturate( FlatMapLerp * 2.0 - 1.0 ) ) );
 			}
 		]]

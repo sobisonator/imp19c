@@ -748,23 +748,23 @@ vbox = {
 						spriteborder = { 180 40 }
 					}
 				}
-				icon = {
-					size = { 100% 100% }
-					using = shadow_background
-					alpha = 0.25
-					modify_texture = {
-						texture = "gfx/interface/base_parts/new_elements/gradient_black_tile.dds"
-						blend_mode = alphamultiply
-						spriteType = corneredtiled
-						spriteborder = { 21 34 }
-					}
-					modify_texture = {
-						texture = "gfx/interface/base_parts/new_elements/top_panel_border.dds"
-						blend_mode = alphamultiply
-						spriteType = corneredtiled
-						spriteborder = { 180 40 }
-					}
-				}
+				#icon = {
+				#	size = { 100% 100% }
+				#	using = shadow_background
+				#	alpha = 0.25
+				#	modify_texture = {
+				#		texture = "gfx/interface/base_parts/new_elements/gradient_black_tile.dds"
+				#		blend_mode = alphamultiply
+				#		spriteType = corneredtiled
+				#		spriteborder = { 21 34 }
+				#	}
+				#	modify_texture = {
+				#		texture = "gfx/interface/base_parts/new_elements/top_panel_border.dds"
+				#		blend_mode = alphamultiply
+				#		spriteType = corneredtiled
+				#		spriteborder = { 180 40 }
+				#	}
+				#}
 				icon = {
 					size = { 100% 100% }
 					using = gold_background
@@ -1175,23 +1175,23 @@ vbox = {
 						spriteborder = { 75 86 }
 					}
 				}
-				icon = {
-					size = { 100% 100% }
-					using = shadow_background
-					alpha = 0.25
-					modify_texture = {
-						texture = "gfx/interface/base_parts/new_elements/horizontal_gradient_black_tile.dds"
-						blend_mode = alphamultiply
-						spriteType = corneredtiled
-						spriteborder = { 40 20 }
-					}
-					modify_texture = {
-						texture = "gfx/interface/base_parts/new_elements/left_panel_border.dds"
-						blend_mode = alphamultiply
-						spriteType = corneredtiled
-						spriteborder = { 75 86 }
-					}
-				}
+				#icon = {
+				#	size = { 100% 100% }
+				#	using = shadow_background
+				#	alpha = 0.25
+				#	modify_texture = {
+				#		texture = "gfx/interface/base_parts/new_elements/horizontal_gradient_black_tile.dds"
+				#		blend_mode = alphamultiply
+				#		spriteType = corneredtiled
+				#		spriteborder = { 40 20 }
+				#	}
+				#	modify_texture = {
+				#		texture = "gfx/interface/base_parts/new_elements/left_panel_border.dds"
+				#		blend_mode = alphamultiply
+				#		spriteType = corneredtiled
+				#		spriteborder = { 75 86 }
+				#	}
+				#}
 				icon = {
 					size = { 100% 100% }
 					using = gold_background
@@ -1480,15 +1480,17 @@ vbox = {
 			background = {
 				shaderfile = "gfx/FX/pdxgui_default.shader"
 				using = black_background
-				using = border3
+				margin = { -2 -2 }
 			}
-			secondary_header = {
-				size = { 376 38 }
-				position = { 0 5 }
+			sub_header = {
+				size = { 365 32 }
+				position = { 5 5 }
 				
 				blockoverride "Title_text" { text = "MAPMODES_HEADER" }
-				blockoverride "White_buttons" 
-				{   
+				flowcontainer = {
+					parentanchor = right|vcenter
+					margin_right = 5
+					spacing = 5
 					white_button_round = {
 						size = { 22 22 }
 						name = "find_province"
@@ -1523,25 +1525,22 @@ vbox = {
 						white_button_round = {
 							name = "hideminimap"
 							size = { 22 22 }
+							visible = "[Not(GetVariableSystem.HasValue('minimap_anim', 'hide'))]"
 							blockoverride "Icon" { texture = "gfx/interface/base_parts/down_arrow.dds" }
 							blockoverride "On_click"
 							{
-								onclick = "[PdxGuiTriggerAllAnimations('hide_minimap_anim')]"
-								onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('showminimap').Show]"
-								onclick = "[PdxGuiWidget.AccessParent.AccessParent.Hide]"
+								onclick = "[GetVariableSystem.Set('minimap_anim', 'hide')]"
 								clicksound = "event:/SFX/UI/Generic/2.0/sfx_ui_button_secondary"
 							}
 						}
 						white_button_round = {
 							name = "showminimap"
 							size = { 22 22 }
-							visible = no
+							visible = "[GetVariableSystem.HasValue('minimap_anim', 'hide')]"
 							blockoverride "Icon" { texture = "gfx/interface/base_parts/up_arrow.dds" }
 							blockoverride "On_click"
 							{
-								onclick = "[PdxGuiTriggerAllAnimations('show_minimap_anim')]"
-								onclick = "[PdxGuiWidget.AccessParent.AccessParent.AccessParent.FindChild('hideminimap').Show]"
-								onclick = "[PdxGuiWidget.AccessParent.AccessParent.Hide]"
+								onclick = "[GetVariableSystem.Set('minimap_anim', 'show')]"
 								clicksound = "event:/SFX/UI/Generic/2.0/sfx_ui_button_secondary"
 							} 
 						}
@@ -1550,27 +1549,25 @@ vbox = {
 			}
 			state = {
 				name = hide_minimap_anim
-				
 				animation = {
 					position = { 3 180 }
-					bezier = { 0.1 0.25 0.4 1 }
 				}
-				
+				bezier = { 0.44 0.2 0.74 0.91 }
+				trigger_when = "[GetVariableSystem.HasValue('minimap_anim', 'hide')]"
 				duration = 0.2
 				start_sound = {
 					soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_queued_events_close"
 				}
 			}
-			
 			state = {
 				name = show_minimap_anim
 				
 				animation = {
 					position = { 3 4 }
-					bezier = { 0.1 0.25 0.4 1 }
 				}
-				
-				duration = 0.2 
+				bezier = { 0.44 0.2 0.74 0.91 }
+				trigger_when = "[GetVariableSystem.HasValue('minimap_anim', 'show')]"
+				duration = 0.2
 				start_sound = {
 					soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_queued_events_open"
 				}
@@ -1584,7 +1581,7 @@ vbox = {
 				using = minimap_view
 			}
 			container = {
-				position = { 8 42 }
+				position = { 8 40 }
 				container = {
 					name = "toolbar"
 					position = { 0 0 }
@@ -1624,20 +1621,101 @@ vbox = {
 			visible = "[IsSaving]"
 		}
 		
-		base_window_black = {
+		window = {
 			name = "event_window"
-			size = { 280 166 }
-			position = { 3 632 }
+			size = { 275 166 }
+			position = { 0 632 }
 			parentanchor = right
 			movable = no
 			allow_outside = yes
-
-			outline_header = {
-				size = { 280 38 }
-				position = { 0 3 }
-				blockoverride "Title_text" { text = "event_queue_title" }
+			widget = {
+				size = { 275 166 }
+				position = { 10 0 }
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					using = shadow_background
+					margin = { 2 2 }
+					alpha = 0.5
+					modify_texture = {
+						texture = "gfx/interface/base_parts/button_square_dropshadow_x16y16bd.dds"
+						blend_mode = alphamultiply
+						spriteType = corneredtiled
+						spriteborder = { 8 8 }
+					}
+				}
+				background = {
+					shaderfile = "gfx/FX/pdxgui_default.shader"
+					using = black_background
+					margin = { -2 -2 }
+				}
 			}
-			
+			outline_header = {
+				position = { 0 0 }
+				size = { 275 32 }
+				parentanchor = right
+				alwaystransparent = no
+				blockoverride "Title_text" { text = "event_queue_title" }
+				state = {
+					name = show_event_queue
+					size = { 275 32 }
+					bezier = { 0.44 1.11 0.74 0.91 }
+					trigger_when = "[GetVariableSystem.HasValue('event_queue', 'show')]"
+					duration = 0.2
+				}
+				state = {
+					name = hide_event_queue
+					size = { 305 32 }
+					bezier = { 0.44 0.2 0.74 0.91 }
+					trigger_when = "[GetVariableSystem.HasValue('event_queue', 'hide')]"
+					duration = 0.2
+				}
+			}
+			widget = {
+				size = { 32 32 }
+				position = { 10 5 }
+				state = {
+					name = show_event_queue
+					animation = { position = { 10 5 } }
+					bezier = { 0.44 1.11 0.74 0.91 }
+					trigger_when = "[GetVariableSystem.HasValue('event_queue', 'show')]"
+					duration = 0.2
+				}
+				state = {
+					name = hide_event_queue
+					animation = { position = { -20 5 } }
+					bezier = { 0.44 0.2 0.74 0.91 }
+					trigger_when = "[GetVariableSystem.HasValue('event_queue', 'hide')]"
+					duration = 0.2
+				}
+				button_slide_out = {
+					name = "hide_event_queue_button"
+					visible = "[Not(GetVariableSystem.HasValue('event_queue', 'hide'))]"
+					alwaystransparent = no
+					inherit_visual_state = yes
+					onclick = "[GetVariableSystem.Set('event_queue', 'hide')]"
+					### Audio ###
+					state = {
+						name = _show
+						start_sound = {
+							soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_queued_events_open"
+						}
+					}
+				}
+				button_slide_in = {
+					name = "show_event_queue_button" 
+					visible = "[GetVariableSystem.HasValue('event_queue', 'hide')]"
+					alwaystransparent = no
+					inherit_visual_state = yes
+					onclick = "[GetVariableSystem.Set('event_queue', 'show')]"
+					### Audio ###
+					state = {
+						name = _show
+						start_sound = {
+							soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_queued_events_close"
+						}
+					}
+				}
+			}
 			vbox = {	
 				vbox = {
 					layoutpolicy_vertical = expanding
@@ -1680,69 +1758,24 @@ vbox = {
 				}
 				
 			}
-			
-			
-			button_slide_out = {
-				name = "hide_event_queue_button"
-				position = { -19 11 }
-				alwaystransparent = no
-				inherit_visual_state = yes
-				onclick = "[PdxGuiTriggerAllAnimations('hide_event_queue')]"
-				onclick = "[PdxGuiWidget.Hide]"
-				onclick = "[PdxGuiWidget.AccessParent.FindChild('show_event_queue_button').Show]"
-				### Audio ###
-				state = {
-					name = _show
-					start_sound = {
-						soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_queued_events_open"
-					}
-				}
-			}
-			
-			button_slide_in = {
-				name = "show_event_queue_button" 
-				position = { -19 11 }
-				visible = no
-				alwaystransparent = no
-				inherit_visual_state = yes
-				onclick = "[PdxGuiTriggerAllAnimations('show_event_queue')]"
-				onclick = "[PdxGuiWidget.Hide]"
-				onclick = "[PdxGuiWidget.AccessParent.FindChild('hide_event_queue_button').Show]"
-				### Audio ###
-				state = {
-					name = _show
-					start_sound = {
-						soundeffect = "event:/SFX/UI/Generic/2.0/sfx_ui_window_queued_events_close"
-					}
-				}
-			}
-			
 			state = {
 				name = "hide_event_queue"
-				
 				animation = {
 					position = { 270 632 }
 				}
-				
-				duration = 0.15
-				
-				on_finish = "[PdxGuiWidget.FindChild('event_queue_hide').Hide]"
-				on_finish = "[PdxGuiWidget.FindChild('event_queue_show').Show]"
+				bezier = { 0.44 1.11 0.74 0.91 }
+				duration = 0.2
+				trigger_when = "[GetVariableSystem.HasValue('event_queue', 'hide')]"
 			
 			}
-			
 			state = {
 				name = "show_event_queue"
-				
 				animation = {
-					position = { 3 632 }
+					position = { 0 632 }
 				}
-				
-				duration = 0.15
-				
-				on_finish = "[PdxGuiWidget.FindChild('event_queue_hide').Show]"
-				on_finish = "[PdxGuiWidget.FindChild('event_queue_show').Hide]"
-			
+				bezier = { 0.44 1.11 0.74 0.91 }
+				duration = 0.2
+				trigger_when = "[GetVariableSystem.HasValue('event_queue', 'show')]"
 			}
 		}
 		### LAGGING PLAYER NOTIFICATION

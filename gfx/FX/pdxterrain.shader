@@ -193,7 +193,7 @@ PixelShader =
 				#endif
 				ApplyTerrainColor( Diffuse, FlatMap, BorderColor, BorderPostLightingBlend, ColorMapCoords );
 			#endif
-			
+
 			float ShadowTerm = 1.0;
 			
 			#ifdef SHADOWS_ENABLED

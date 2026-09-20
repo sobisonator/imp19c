@@ -2,7 +2,7 @@ Includes = {
 	"cw/pdxgui.fxh"
 	"cw/pdxgui_sprite.fxh"
 	"standardfuncsgfx.fxh"
-	"gui_flags.fxh"
+	"fxhs/gui_flags.fxh"
 }
 
 
@@ -52,8 +52,18 @@ PixelShader =
 				float Wave = CreateWave(Input.UV0, GlobalTime);
 				float2 UV1 = SettingsUV0ToFlag( Input.UV0 );
 				float2 UV2 = SettingsUV1ToFlag( Input.UV0 );
+				float2 UV3 = SettingsUV0ToFlag( Input.UV0 ) * 2.0;
+				float2 UV4 = Input.UV0;
 
 				float4 OutColor = SampleSpriteTexture( Texture, UV1, 0 );
+
+				float4 SubjectColor = SampleSpriteTexture( ModifyTexture4, UV3, 5 );
+				float4 AlphaSubjectColor = SampleSpriteTexture( ModifyTexture5, UV4, 6);
+				if ( SpriteFramesTypeBlendMode[6].x == 0.0 )
+				{
+					AlphaSubjectColor.a = 0.0;
+				}
+				OutColor = lerp(OutColor, SubjectColor, AlphaSubjectColor.a);
 
 				float4 AlphaColor = SampleSpriteTexture( ModifyTexture0, UV2, 1);
 				OutColor = float4(OutColor.rgb, AlphaColor.a);
